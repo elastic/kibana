@@ -38,7 +38,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
     return errorMessagesWrappers.map(err => err.text());
   };
 
-  const setFormInputValue = (inputTestSubject, value, isAsync = false) => {
+  const setInputValue = (inputTestSubject, value, isAsync = false) => {
     const formInput = findTestSubject(inputTestSubject);
     formInput.simulate('change', { target: { value } });
     component.update();
@@ -51,6 +51,10 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
       return;
     }
     return new Promise((resolve) => setTimeout(resolve));
+  };
+
+  const selectCheckBox = (checkboxTestSubject) => {
+    findTestSubject(checkboxTestSubject).simulate('change', { target: { checked: true } });
   };
 
   /**
@@ -83,7 +87,8 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
     getFormErrorsMessages,
     getMetadataFromEuiTable,
     form: {
-      setInputValue: setFormInputValue,
+      setInputValue,
+      selectCheckBox
     }
   };
 };

@@ -136,7 +136,7 @@ export class StepMetricsUi extends Component {
             >
               <EuiCheckbox
                 id={`${fieldName}-${type}-checkbox`}
-                data-test-subj={`rollupJobMetricCheckbox-${type}`}
+                data-test-subj={`rollupJobMetricsCheckbox-${type}`}
                 label={label}
                 checked={isSelected}
                 onChange={() => this.setMetric(fieldName, type, !isSelected)}

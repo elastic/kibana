@@ -37,6 +37,16 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+jest.mock('../../public/crud_app/services/jobs', () => ({
+  serializeJob: () => ({}),
+  deserializeJob: () => ({}),
+  deserializeJobs: () => ({}),
+}));
+
+jest.mock('../../public/crud_app/services/routing', () => ({
+  getRouter: () => ({ history: { push: () => {} } }),
+}));
+
 // axios has a $http like interface so using it to simulate $http
 setHttp(axios.create());
 
@@ -109,6 +119,10 @@ const initGoToStep = (fillFormFields, clickNextStep) => async (step) => {
   if (step > 4) {
     clickNextStep();
   }
+
+  if (step > 5) {
+    clickNextStep();
+  }
 };
 
 const initTestBed = () => {
@@ -132,6 +146,8 @@ const initTestBed = () => {
   };
 };
 
+const nextTick = async () => new Promise((resolve) => setTimeout(resolve));
+
 const mockServerResponses = server => {
   const mockIndexPatternValidityResponse = (response) => {
     const defaultResponse = {
@@ -148,11 +164,19 @@ const mockServerResponses = server => {
     ]);
   };
 
+  const mockCreateJob = () => {
+    server.respondWith(/\/api\/rollup\/create/, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify({}),
+    ]);
+  };
+
   mockIndexPatternValidityResponse();
+  mockCreateJob();
 
   return { mockIndexPatternValidityResponse };
 };
-
 
 describe('Create Rollup Job', () => {
   let server;
@@ -1119,9 +1143,9 @@ describe('Create Rollup Job', () => {
           addFieldToList('numeric');
           numericTypeMetrics.forEach(type => {
             try {
-              expect(testSubjectExists(`rollupJobMetricCheckbox-${type}`)).toBe(true);
+              expect(testSubjectExists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
             } catch(e) {
-              throw(new Error(`Test subject "rollupJobMetricCheckbox-${type}" was not found.`));
+              throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
             }
           });
 
@@ -1138,9 +1162,9 @@ describe('Create Rollup Job', () => {
 
           dateTypeMetrics.forEach(type => {
             try {
-              expect(testSubjectExists(`rollupJobMetricCheckbox-${type}`)).toBe(true);
+              expect(testSubjectExists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
             } catch(e) {
-              throw(new Error(`Test subject "rollupJobMetricCheckbox-${type}" was not found.`));
+              throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
             }
           });
 
@@ -1179,6 +1203,95 @@ describe('Create Rollup Job', () => {
           ({ rows: fieldListRows } = getMetadataFromEuiTable('rollupJobMetricsFieldList'));
           expect(fieldListRows[0].columns[0].value).toEqual('No metrics fields added');
         });
+      });
+    });
+  });
+
+  describe('Step 6: Review', () => {
+    describe('layout', () => {
+      beforeEach(async () => {
+        await goToStep(6);
+      });
+
+      it('should have the horizontal step active on "Review"', () => {
+        expect(getEuiStepsHorizontalActive()).toContain('Review');
+      });
+
+      it('should have the title set to "Review"', () => {
+        expect(testSubjectExists('rollupJobCreateReviewTitle')).toBe(true);
+      });
+
+      it('should have the "next" and "save" button visible', () => {
+        expect(testSubjectExists('rollupJobBackButton')).toBe(true);
+        expect(testSubjectExists('rollupJobNextButton')).toBe(false);
+        expect(testSubjectExists('rollupJobSaveButton')).toBe(true);
+      });
+
+      it('should go to the "Metrics" step when clicking the back button', async () => {
+        userActions.clickPreviousStep();
+        expect(getEuiStepsHorizontalActive()).toContain('Metrics');
+      });
+    });
+
+    describe('tabs', () => {
+      const getTabsText = () => findTestSubject('stepReviewTab').map(tab => tab.text());
+      const selectFirstField = (step) => {
+        findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+
+        // Select the first term field
+        getMetadataFromEuiTable(`rollupJob${step}FieldChooser-table`)
+          .rows[0]
+          .reactWrapper
+          .simulate('click');
+      };
+
+      it('should have a "Summary" & "JSON" tabs to review the Job', async () => {
+        await goToStep(6);
+        expect(getTabsText()).toEqual(['Summary', 'JSON']);
+      });
+
+      it('should have a "Summary", "Terms" & "JSON" tab if a term aggregation was added', async () => {
+        mockIndexPatternValidityResponse({ numericFields: ['my-field'] });
+        await goToStep(3);
+        selectFirstField('Terms');
+
+        userActions.clickNextStep(); // go to step 4
+        userActions.clickNextStep(); // go to step 5
+        userActions.clickNextStep(); // go to review
+
+        expect(getTabsText()).toEqual(['Summary', 'Terms', 'JSON']);
+      });
+
+      it('should have a "Summary", "Histogram" & "JSON" tab if a histogram field was added', async () => {
+        mockIndexPatternValidityResponse({ numericFields: ['a-field'] });
+        await goToStep(4);
+        selectFirstField('Histogram');
+        form.setInputValue('rollupJobCreateHistogramInterval', 3); // set an interval
+
+        userActions.clickNextStep(); // go to step 5
+        userActions.clickNextStep(); // go to review
+
+        expect(getTabsText()).toEqual(['Summary', 'Histogram', 'JSON']);
+      });
+
+      it('should have a "Summary", "Metrics" & "JSON" tab if a histogram field was added', async () => {
+        mockIndexPatternValidityResponse({ numericFields: ['a-field'], dateFields: ['b-field'] });
+        await goToStep(5);
+        selectFirstField('Metrics');
+        form.selectCheckBox('rollupJobMetricsCheckbox-avg'); // select a metric
+
+        userActions.clickNextStep(); // go to review
+
+        expect(getTabsText()).toEqual(['Summary', 'Metrics', 'JSON']);
+      });
+    });
+
+    describe('save()', () => {
+      it('should call the create Api server endpoing', async () => {
+        await goToStep(6);
+        userActions.clickSave();
+        await nextTick();
+        expect(server.lastRequest.url).toEqual('/api/rollup/create');
       });
     });
   });
