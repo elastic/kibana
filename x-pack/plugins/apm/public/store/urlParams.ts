@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import { compact, pick } from 'lodash';
-import { AnyAction } from 'redux';
 import { createSelector } from 'reselect';
 import {
   legacyDecodeURIComponent,
   toQuery
 } from '../components/shared/Links/url_helpers';
-// @ts-ignore
 import { LOCATION_UPDATE } from './location';
 import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
 import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
@@ -19,6 +18,16 @@ import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
+
+interface LocationAction {
+  type: typeof LOCATION_UPDATE;
+  location: Location;
+}
+interface TimepickerAction {
+  type: typeof TIMEPICKER_UPDATE;
+  time: { min: number; max: number };
+}
+type Action = LocationAction | TimepickerAction;
 
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
@@ -28,7 +37,7 @@ export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = {}, action: AnyAction) {
+export function urlParamsReducer(state = {}, action: Action) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
