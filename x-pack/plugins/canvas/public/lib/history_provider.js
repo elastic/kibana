@@ -5,6 +5,7 @@
  */
 
 import lzString from 'lz-string';
+import lzwcompress from 'lzwcompress';
 import { createMemoryHistory, parsePath, createPath } from 'history';
 import createHashStateHistory from 'history-extra';
 import { getWindow } from './get_window';
@@ -36,7 +37,7 @@ function wrapHistoryInstance(history) {
       history.go(idx);
     },
 
-    parse(payload) {
+    oldParse(payload) {
       try {
         const stateJSON = lzString.decompress(payload);
         return JSON.parse(stateJSON);
@@ -45,10 +46,24 @@ function wrapHistoryInstance(history) {
       }
     },
 
+    parse(payload) {
+      try {
+        const stateJSON = lzwcompress.unpack(payload);
+        return JSON.parse(stateJSON);
+      } catch (e) {
+        try {
+          // TODO: remove this in some future release
+          return this.oldParse(payload);
+        } catch (e) {
+          return null;
+        }
+      }
+    },
+
     encode(state) {
       try {
         const stateJSON = JSON.stringify(state);
-        return lzString.compress(stateJSON);
+        return lzwcompress.pack(stateJSON);
       } catch (e) {
         throw new Error('Could not encode state: ', e.message);
       }
