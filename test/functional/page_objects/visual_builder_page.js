@@ -58,15 +58,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
     }
 
     async enterMarkdown(markdown) {
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       await input.type(markdown);
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     async clearMarkdown() {
       const input = await find.byCssSelector('.ace_content');
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       // click for switching context(fix for "should render first table variable" test)
       // see _tsvb_markdown.js
       await input.click();
@@ -80,6 +82,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
     async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
@@ -106,7 +109,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       }
       const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
-      const variablesKeyValueSelectorMap = Promise.all(variables.map(async variable => {
+      const variablesKeyValueSelectorMap = await Promise.all(variables.map(async variable => {
         const subVars = await variable.findAllByCssSelector('td');
         const selector = subVars[0];
         const key = await selector.getVisibleText();

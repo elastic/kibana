@@ -21,9 +21,12 @@ import expect from 'expect.js';
 import { TestWrapper } from 'typings';
 
 // tslint:disable-next-line:no-default-export
-export default function({ getPageObjects, getService }: TestWrapper) {
-  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
-  const retry = getService('retry');
+export default function({ getPageObjects }: TestWrapper) {
+  const { visualBuilder, timePicker } = getPageObjects([
+    'visualBuilder',
+    'timePicker',
+    'visualize',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
@@ -48,10 +51,8 @@ export default function({ getPageObjects, getService }: TestWrapper) {
 
       it('should allow printing raw timestamp of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-        retry.try(async () => {
-          const text = await visualBuilder.getMarkdownText();
-          expect(text).to.be('1442901600000');
-        });
+        const text = await visualBuilder.getMarkdownText();
+        expect(text).to.be('1442901600000');
       });
 
       it('should allow printing raw value of data', async () => {
