@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, handlebars, hbs, pug}` files in provided plugins directories to a JSON file.
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html, pug}` files in provided plugins directories to a JSON file.
 
 It uses Babel to parse code and build an AST for each file or a single JS expression if whole file parsing is impossible. The tool is able to validate, extract and match IDs, default messages and descriptions only if they are defined statically and together, otherwise it will fail with detailed explanation. That means one can't define ID in one place and default message in another, or use function call to dynamically create default message etc.
 
@@ -127,15 +127,6 @@ The `description` is optional, `values` is optional too unless `defaultMessage` 
   ```
 
   * Expression in `#{...}` is parsed as a JS expression.
-
-* **Handlebars (.handlebars, .hbs)**
-
-  ```hbs
-  {{i18n 'pluginNamespace.messageId' '{"defaultMessage": "Default message string literal", "description": "Message context or description"}'}}
-  ```
-
-  * The `values` and `description` are optional.
-  * The third token (the second argument of i18n function call) should be a string literal that contains a valid JSON.
 
 ### Usage
 
