@@ -39,7 +39,9 @@ export class CodeResult extends React.PureComponent<Props> {
                 gutterSize="none"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">{RepositoryUtils.orgNameFromUri(uri)}/</EuiText>
+                  <EuiText size="s" color="subdued">
+                    {RepositoryUtils.orgNameFromUri(uri)}/
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="default">
