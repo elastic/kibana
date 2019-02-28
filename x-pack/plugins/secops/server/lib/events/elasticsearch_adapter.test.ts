@@ -21,13 +21,7 @@ describe('events elasticsearch_adapter', () => {
         '@timestamp': 'time-1',
         host: {
           name: 'hostname-1',
-        },
-        system: {
-          audit: {
-            host: {
-              ip: ['hostip-1'],
-            },
-          },
+          ip: ['hostip-1'],
         },
         suricata: {
           eve: {
