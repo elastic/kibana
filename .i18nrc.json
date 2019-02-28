@@ -47,7 +47,6 @@
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
-    "src/core/public/fatal_errors/get_error_info.ts",
     "src/legacy/ui/ui_render/ui_render_mixin.js"
   ],
   "translations": [
