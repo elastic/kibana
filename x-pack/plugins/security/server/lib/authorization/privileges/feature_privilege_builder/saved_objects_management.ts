@@ -11,22 +11,18 @@ import {
 } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
 import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-const readOperations: string[] = ['bulk_get', 'get', 'find'];
-const writeOperations: string[] = ['create', 'bulk_create', 'update', 'delete'];
-const allOperations: string[] = [...readOperations, ...writeOperations];
-
-export class FeaturePrivilegeSavedObjectBuilder extends FeaturePrivilegeBuilder {
+export class FeaturePrivilegeSavedObjectsManagementBuilder extends FeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     return uniq([
       ...flatten(
         privilegeDefinition.savedObject.all.map(type => [
-          ...allOperations.map(operation => this.actions.savedObject.get(type, operation)),
+          this.actions.ui.get('savedObjectsManagement', type, 'delete'),
+          this.actions.ui.get('savedObjectsManagement', type, 'edit'),
+          this.actions.ui.get('savedObjectsManagement', type, 'read'),
         ])
       ),
-      ...flatten(
-        privilegeDefinition.savedObject.read.map(type => [
-          ...readOperations.map(operation => this.actions.savedObject.get(type, operation)),
-        ])
+      ...privilegeDefinition.savedObject.read.map(type =>
+        this.actions.ui.get('savedObjectsManagement', type, 'read')
       ),
     ]);
   }

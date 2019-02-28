@@ -36,3 +36,23 @@ export function getInAppUrl(id, type) {
       return `/${type.toLowerCase()}/${id}`;
   }
 }
+
+export function canViewInApp(uiCapabilities, type) {
+  switch (type) {
+    case 'search':
+    case 'searches':
+      return uiCapabilities.discover.show;
+    case 'visualization':
+    case 'visualizations':
+      return uiCapabilities.visualize.show;
+    case 'index-pattern':
+    case 'index-patterns':
+    case 'indexPatterns':
+      return uiCapabilities.management.kibana.indices;
+    case 'dashboard':
+    case 'dashboards':
+      return uiCapabilities.dashboard.show;
+    default:
+      return uiCapabilities[type].show;
+  }
+}

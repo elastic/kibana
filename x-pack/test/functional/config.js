@@ -101,6 +101,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/upgrade_assistant'),
       resolve(__dirname, './apps/visualize'),
       resolve(__dirname, './apps/uptime'),
+      resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools')
     ],
 
