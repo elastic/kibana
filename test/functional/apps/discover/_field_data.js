@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
@@ -93,13 +94,14 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('a bad syntax query should show an error message', async function () {
-        const expectedError = 'Discover: Expected "*", ":", "<", "<=", ">", ">=", "\\", "\\n", ' +
-          '"\\r", "\\t", [\\ \\t\\r\\n] or end of input but "(" found.';
+        const expectedError = 'Expected "*", ":", "<", "<=", ">", ">=", "\\\\", "\\\\n", ' +
+          '"\\\\r", "\\\\t", [\\ \\t\\r\\n] or end of input but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        const toastMessage =  await PageObjects.header.getToastMessage();
-        expect(toastMessage).to.contain(expectedError);
-        await PageObjects.header.clickToastOK();
+        const { message } = await toasts.getErrorToast();
+        expect(message).to.contain(expectedError);
+        // TODO: once the notifications stay forever this needs to be uncommented
+        // await toasts.dismissToast();
       });
     });
   });

@@ -43,7 +43,7 @@ export function ErrorToast({ title, error, toastMessage }: ErrorToastProps) {
 
   return (
     <React.Fragment>
-      <p>{toastMessage}</p>
+      <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
         <EuiButton size="s" color="danger" onClick={() => setModalVisible(true)}>
           <FormattedMessage

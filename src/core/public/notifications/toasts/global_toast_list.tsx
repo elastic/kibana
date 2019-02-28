@@ -53,6 +53,7 @@ export class GlobalToastList extends React.Component<Props, State> {
   public render() {
     return (
       <EuiGlobalToastList
+        data-test-subj="globalToastList"
         toasts={this.state.toasts}
         dismissToast={this.props.dismissToast}
         toastLifeTimeMs={6000}

@@ -661,8 +661,8 @@ function discoverController(
       })
       .catch((error) => {
         toastNotifications.addError(error, {
-          title: i18n('kbn.discover.errorLoadingData', {
-            defaultMessage: 'Error loading data',
+          title: i18n('kbn.discover.discoverError', {
+            defaultMessage: 'Discover error',
           }),
         });
       });

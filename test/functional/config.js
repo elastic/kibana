@@ -55,6 +55,7 @@ import {
   EmbeddingProvider,
   RenderableProvider,
   TableProvider,
+  ToastsProvider,
   BrowserProvider,
   InspectorProvider,
   PieChartProvider,
@@ -125,6 +126,7 @@ export default async function ({ readConfigFile }) {
       inspector: InspectorProvider,
       appsMenu: AppsMenuProvider,
       globalNav: GlobalNavProvider,
+      toasts: ToastsProvider,
     },
     servers: commonConfig.get('servers'),
 
