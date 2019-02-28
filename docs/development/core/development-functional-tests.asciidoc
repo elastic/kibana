@@ -84,7 +84,7 @@ Use the `--help` flag for more options.
 
 The tests are written in https://mochajs.org[mocha] using https://github.com/Automattic/expect.js[expect] for assertions.
 
-We use https://sites.google.com/a/chromium.org/chromedriver/[chromedriver], https://theintern.github.io/leadfoot[leadfoot], and https://github.com/theintern/digdug[digdug] for automating Chrome. When the `FunctionalTestRunner` launches, digdug opens a `Tunnel` which starts chromedriver and a stripped-down instance of Chrome. It also creates an instance of https://theintern.github.io/leadfoot/module-leadfoot_Command.html[Leadfoot's `Command`] class, which is available via the `remote` service. The `remote` communicates to Chrome through the digdug `Tunnel`. See the https://theintern.github.io/leadfoot/module-leadfoot_Command.html[leadfoot/Command API] docs for all the commands you can use with `remote`.
+We use a browser automation tool to automate the launch and interact with the browser of choice (currently we support https://www.google.com/chrome/[Chrome] and https://www.mozilla.org/en-US/firefox/new/[Firefox] through their respective drivers.) We then use different services (`browser`, `find`, `testSubjects`, etc.) to perform interations with Kibana and report the results. 
 
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that Kibana source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
@@ -226,9 +226,29 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
 
 [float]
-===== Kibana Services
+===== Functional Test Runner API Docs
 
 The Kibana functional tests define the vast majority of the actual functionality used by tests.
+
+**browser**:::
+* Source {blob}/test/functional/services/browser.js
+* Handles interactions that have to do with the browser directly. 
+* Methods
+** `browser.refresh()` - Refreshes the page that we are on in the browser.
+** `browser.dragAndDrop(from, to)` - Drags an element from one point to another. 
+*** `from`
+**** {element: WebElementWrapper} 
+**** {{ x: number, y: number}, offset: { x: number, y: number }}
+*** `to`
+**** {element: WebElementWrapper} 
+**** {{ x: number, y: number}, offset: { x: number, y: number }}
+** `browser.moveMouseTo(element, xOffset, yOffset)` - Moves the remote environment's mouse cursor to the specified element or relative position.
+*** `element`
+**** Something
+*** `xOffset`
+**** Something
+*** `yOffset`
+**** Something
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
