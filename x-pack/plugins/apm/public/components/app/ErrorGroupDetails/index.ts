@@ -5,10 +5,11 @@
  */
 
 import { connect } from 'react-redux';
-import { ErrorGroupDetails } from './view';
+import { IReduxState } from '../../../store/rootReducer';
 import { getUrlParams } from '../../../store/urlParams';
+import { ErrorGroupDetailsView } from './view';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {} as IReduxState) {
   return {
     urlParams: getUrlParams(state),
     location: state.location
@@ -17,7 +18,7 @@ function mapStateToProps(state = {}) {
 
 const mapDispatchToProps = {};
 
-export default connect(
+export const ErrorGroupDetails = connect(
   mapStateToProps,
   mapDispatchToProps
-)(ErrorGroupDetails);
+)(ErrorGroupDetailsView);

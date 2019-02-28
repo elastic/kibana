@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules'; // eslint-disable-line no-unused-vars
-import chrome from 'ui/chrome';
 import React, { Fragment } from 'react';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
-import ReactDOM from 'react-dom';
-import 'ui/autoload/styles';
-import 'ui/autoload/all';
-import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
+import 'ui/autoload/all';
+import 'ui/autoload/styles';
+import chrome from 'ui/chrome';
+import { I18nContext } from 'ui/i18n';
+// @ts-ignore
+import { uiModules } from 'ui/modules';
+import 'uiExports/autocompleteProviders';
+import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
+import { Main } from './components/app/Main';
+import { GlobalProgress } from './components/app/Main/GlobalProgress';
+import { history } from './components/shared/Links/url_helpers';
+// @ts-ignore
+import configureStore from './store/config/configureStore';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-import { Main } from './components/app/Main';
+// @ts-ignore
 import { initTimepicker } from './utils/timepicker';
-import configureStore from './store/config/configureStore';
-import GlobalProgress from './components/app/Main/GlobalProgress';
-import { GlobalHelpExtension } from './components/app/GlobalHelpExtension';
-
-import { history } from './components/shared/Links/url_helpers';
-import { I18nContext } from 'ui/i18n';
 
 // render APM feedback link in global help menu
 chrome.helpExtension.set(domElement => {
@@ -33,6 +35,7 @@ chrome.helpExtension.set(domElement => {
   };
 });
 
+// @ts-ignore
 chrome.setRootTemplate(template);
 const store = configureStore();
 

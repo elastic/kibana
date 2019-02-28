@@ -10,8 +10,6 @@ import { isEmpty, last } from 'lodash';
 import React, { Fragment } from 'react';
 import { IStackframe } from '../../../../typings/es_schemas/fields/Stackframe';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-// @ts-ignore
-import { Ellipsis } from '../../shared/Icons';
 import { LibraryStackFrames } from './LibraryStackFrames';
 import { Stackframe } from './Stackframe';
 
