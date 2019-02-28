@@ -7,6 +7,7 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -51,6 +52,10 @@ export class AbstractLayer {
 
   isJoinable() {
     return this._source.isJoinable();
+  }
+
+  async supportsFitToBounds() {
+    return await this._source.supportsFitToBounds();
   }
 
   async getDisplayName() {
@@ -137,7 +142,7 @@ export class AbstractLayer {
   };
 
   getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === SOURCE_DATA_ID_ORIGIN);
   }
 
   isLayerLoading() {

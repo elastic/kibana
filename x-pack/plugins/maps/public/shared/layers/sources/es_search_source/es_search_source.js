@@ -12,22 +12,28 @@ import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
+import { ES_SEARCH } from '../../../../../common/constants';
 
 const DEFAULT_LIMIT = 2048;
 
 export class ESSearchSource extends AbstractESSource {
 
-  static type = 'ES_SEARCH';
+  static type = ES_SEARCH;
   static title = 'Documents';
   static description = 'Geospatial data from a Kibana index pattern';
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
-    const onSelect = (layerConfig) => {
-      const layerSource = new ESSearchSource({
+    const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const source = new ESSearchSource({
         id: uuid(),
-        ...layerConfig
+        ...sourceConfig
       }, inspectorAdapters);
-      onPreviewSource(layerSource);
+      onPreviewSource(source);
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
@@ -64,6 +70,10 @@ export class ESSearchSource extends AbstractESSource {
     } catch (error) {
       return [];
     }
+  }
+
+  getMetricFields() {
+    return [];
   }
 
   getFieldNames() {

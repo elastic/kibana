@@ -255,6 +255,7 @@ export const RangeDatePicker = injectI18n(
           id="QuickSelectPopover"
           button={quickSelectButton}
           isOpen={this.state.isPopoverOpen}
+          // @ts-ignore
           closePopover={this.closePopover.bind(this)}
           anchorPosition="downLeft"
           ownFocus

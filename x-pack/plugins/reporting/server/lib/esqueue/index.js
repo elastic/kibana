@@ -8,7 +8,6 @@ import { EventEmitter } from 'events';
 import { Job } from './job';
 import { Worker } from './worker';
 import { constants } from './constants';
-import { createClient } from './helpers/create_client';
 import { indexTimestamp } from './helpers/index_timestamp';
 import { omit } from 'lodash';
 
@@ -27,7 +26,7 @@ export class Esqueue extends EventEmitter {
       dateSeparator: constants.DEFAULT_SETTING_DATE_SEPARATOR,
       ...omit(options, [ 'client' ])
     };
-    this.client = createClient(options.client || {});
+    this.client = options.client;
     this._logger = options.logger || function () {};
     this._workers = [];
     this._initTasks().catch((err) => this.emit(constants.EVENT_QUEUE_ERROR, err));
@@ -35,7 +34,7 @@ export class Esqueue extends EventEmitter {
 
   _initTasks() {
     const initTasks = [
-      this.client.ping(),
+      this.client.callWithInternalUser('ping'),
     ];
 
     return Promise.all(initTasks).catch((err) => {

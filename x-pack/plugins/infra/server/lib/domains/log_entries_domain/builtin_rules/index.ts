@@ -19,6 +19,7 @@ import { filebeatSystemRules } from './filebeat_system';
 import { filebeatTraefikRules } from './filebeat_traefik';
 
 import { genericRules } from './generic';
+import { genericWebserverRules } from './generic_webserver';
 
 export const builtinRules = [
   ...filebeatApache2Rules,
@@ -34,6 +35,7 @@ export const builtinRules = [
   ...filebeatMongodbRules,
   ...filebeatOsqueryRules,
   ...filebeatTraefikRules,
+  ...genericWebserverRules,
   ...genericRules,
   {
     when: {

@@ -27,6 +27,7 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
+  new Project(resolve(REPO_ROOT, 'test/tsconfig.json')),
 
   // NOTE: using glob.sync rather than glob-all or globby
   // because it takes less than 10 ms, while the other modules
