@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import { createUserActionUri } from '../../../../../common/user_action';
 import { UA_APP_NAME } from '../../../common';
 import { getHttp } from './http_provider';
 
 export function trackUserAction(actionType) {
-  getHttp().post(chrome.addBasePath(`/api/user_action/${UA_APP_NAME}/${actionType}`));
+  const userActionUri = createUserActionUri(UA_APP_NAME, actionType);
+  getHttp().post(userActionUri);
 }
 
 export function trackUserRequest(request, actionType) {
