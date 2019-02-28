@@ -58,6 +58,10 @@
   flex: 1;
 }
 
+.monaco-editor .scroll-decoration {
+  display: none;
+}
+
 .code-mark-line-number, .code-monaco-highlight-line {
   background-color: $euiColorLightShade;
 }
