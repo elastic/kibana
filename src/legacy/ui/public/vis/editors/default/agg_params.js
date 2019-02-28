@@ -29,6 +29,7 @@ import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { editorConfigProviders } from '../config/editor_config_providers';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
+import { groupAggregationsByType } from './default_editor_utils';
 
 uiModules
   .get('app/visualize')
@@ -56,6 +57,7 @@ uiModules
           updateEditorConfig('default');
         });
 
+        $scope.groupedAggTypeOptions = groupAggregationsByType($scope.aggTypeOptions);
         $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
         $scope.isSelectValid = () => Boolean($scope.agg.type);
         $scope.onChangeAggType = (agg, aggType) => {

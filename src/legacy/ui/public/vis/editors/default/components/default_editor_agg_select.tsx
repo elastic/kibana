@@ -85,37 +85,6 @@ function DefaultEditorAggSelect({
     onChangeAggType(agg, get(options, '0.value'));
   };
 
-  const getGroupedOptions = (): ComboBoxGroupedOption[] => {
-    const groupedOptions: ComboBoxGroupedOption[] = aggTypeOptions.reduce(
-      (array: AggType[], type: AggType) => {
-        const group = array.find(element => element.label === type.subtype);
-        const option = {
-          label: type.title,
-          value: type,
-        };
-
-        if (group) {
-          group.options.push(option);
-        } else {
-          array.push({ label: type.subtype, options: [option] });
-        }
-
-        return array;
-      },
-      []
-    );
-
-    groupedOptions.sort(sortByLabel);
-
-    groupedOptions.forEach((group: ComboBoxGroupedOption) => {
-      if (Array.isArray(group.options)) {
-        group.options.sort(sortByLabel);
-      }
-    });
-
-    return groupedOptions;
-  };
-
   return (
     <EuiFormRow label={labelNode} className="form-group">
       <EuiComboBox
@@ -123,7 +92,7 @@ function DefaultEditorAggSelect({
           defaultMessage: 'Select an aggregation',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
-        options={getGroupedOptions()}
+        options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         onChange={onChange}
@@ -133,10 +102,6 @@ function DefaultEditorAggSelect({
       />
     </EuiFormRow>
   );
-}
-
-function sortByLabel(a: { label: string }, b: { label: string }) {
-  return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 
 export { DefaultEditorAggSelect };
