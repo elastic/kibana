@@ -93,27 +93,5 @@ Example terms aggregation response
 --------------------------------------------------
 
 Finally, the terms aggregation response is then joined with the vector features.
---------------------------------------------------
-{
-  geometry: {
-    coordinates: [...],
-    type: "Polygon"
-  },
-  properties: {
-    name: "Sweden",
-    iso2: "SE",
-    iso3: "SWE",
-    join_prop_count: 4,
-    join_prop_avg_of_bytes: 3177.25
-  },
-  type: "Feature"
-}
---------------------------------------------------
-
-NOTE: This example is for demonstration purposes only and the actual implemention uses different key
-names to avoid naming collisions with vector feauture properties.
-
-
-
-
-
+[role="screenshot"]
+image::maps/images/terms_join_tooltip.png[]
