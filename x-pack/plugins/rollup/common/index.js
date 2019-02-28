@@ -9,8 +9,14 @@ export const PLUGIN = {
 };
 
 export const UA_APP_NAME = 'rollup-job-wizard';
-export const UA_ROLLUP_JOB_CREATE = 'create';
+export const UA_ROLLUP_JOB_CREATE = 'job_create';
+export const UA_ROLLUP_JOB_DELETE = 'job_delete';
+export const UA_ROLLUP_JOB_START = 'job_start';
+export const UA_ROLLUP_JOB_STOP = 'job_stop';
 
 export const USER_ACTIONS = [
   UA_ROLLUP_JOB_CREATE,
+  UA_ROLLUP_JOB_DELETE,
+  UA_ROLLUP_JOB_START,
+  UA_ROLLUP_JOB_STOP,
 ];

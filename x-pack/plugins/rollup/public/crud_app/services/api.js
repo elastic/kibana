@@ -5,7 +5,12 @@
  */
 
 import chrome from 'ui/chrome';
-import { UA_ROLLUP_JOB_CREATE } from '../../../common';
+import {
+  UA_ROLLUP_JOB_CREATE,
+  UA_ROLLUP_JOB_DELETE,
+  UA_ROLLUP_JOB_START,
+  UA_ROLLUP_JOB_STOP,
+} from '../../../common';
 import { getHttp } from './http_provider';
 import { trackUserRequest } from './track_user_action';
 
@@ -18,17 +23,20 @@ export async function loadJobs() {
 
 export async function startJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/start`, body);
+  const request = getHttp().post(`${apiPrefix}/start`, body);
+  return await trackUserRequest(request, UA_ROLLUP_JOB_START);
 }
 
 export async function stopJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/stop`, body);
+  const request = getHttp().post(`${apiPrefix}/stop`, body);
+  return await trackUserRequest(request, UA_ROLLUP_JOB_STOP);
 }
 
 export async function deleteJobs(jobIds) {
   const body = { jobIds };
-  return await getHttp().post(`${apiPrefix}/delete`, body);
+  const request = getHttp().post(`${apiPrefix}/delete`, body);
+  return await trackUserRequest(request, UA_ROLLUP_JOB_DELETE);
 }
 
 export async function createJob(job) {
