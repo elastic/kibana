@@ -9,12 +9,13 @@ import React from 'react';
 import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
 export class HeatmapLayer extends AbstractLayer {
 
-  static type = "HEATMAP";
+  static type = 'HEATMAP';
 
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
@@ -48,7 +49,7 @@ export class HeatmapLayer extends AbstractLayer {
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
-    const heatmapLayerId = this.getId() + '_heatmap';
+    const mbLayerId = this.getId() + '_heatmap';
 
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
@@ -58,7 +59,7 @@ export class HeatmapLayer extends AbstractLayer {
 
 
       mbMap.addLayer({
-        id: heatmapLayerId,
+        id: mbLayerId,
         type: 'heatmap',
         source: this.getId(),
         paint: {}
@@ -86,15 +87,15 @@ export class HeatmapLayer extends AbstractLayer {
       mbSourceAfter.setData(featureCollection);
     }
 
-    mbMap.setLayoutProperty(heatmapLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
+    mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     this._style.setMBPaintProperties({
       mbMap,
-      layerId: heatmapLayerId,
+      layerId: mbLayerId,
       propertyName: SCALED_PROPERTY_NAME,
-      alpha: this.getAlpha(),
       resolution: this._source.getGridResolution()
     });
-    mbMap.setLayerZoomRange(heatmapLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    mbMap.setPaintProperty(mbLayerId, 'heatmap-opacity', this.getAlpha());
+    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   async getBounds(filters) {
@@ -150,7 +151,7 @@ export class HeatmapLayer extends AbstractLayer {
   async _fetchNewData({ startLoading, stopLoading, onLoadError, dataMeta }) {
     const { geogridPrecision, timeFilters, buffer, query } = dataMeta;
     const requestToken = Symbol(`layer-source-refresh: this.getId()`);
-    startLoading('source', requestToken, dataMeta);
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataMeta);
     try {
       const layerName = await this.getDisplayName();
       const data = await this._source.getGeoJsonPoints({ layerName }, {
@@ -159,9 +160,9 @@ export class HeatmapLayer extends AbstractLayer {
         timeFilters,
         query,
       });
-      stopLoading('source', requestToken, data);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data);
     } catch (error) {
-      onLoadError('source', requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
 

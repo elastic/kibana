@@ -21,10 +21,7 @@ import {
 import { isTimeSeriesViewDetector } from '../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
-import {
-  mlSelectSeverityService,
-  SEVERITY_OPTIONS,
-} from '../../components/controls/select_severity/select_severity';
+import { severity$ } from '../../components/controls/select_severity/select_severity';
 import { getChartContainerWidth } from '../legacy_utils';
 
 import { CHART_TYPE } from '../explorer_constants';
@@ -57,9 +54,7 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     const data = getDefaultChartsData();
 
-    const threshold = (mlSelectSeverityService.initalized)
-      ? mlSelectSeverityService.state.get('threshold')
-      : SEVERITY_OPTIONS[0];
+    const threshold = severity$.getValue();
 
     const filteredRecords = anomalyRecords.filter((record) => {
       return Number(record.record_score) >= threshold.val;

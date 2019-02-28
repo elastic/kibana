@@ -35,7 +35,7 @@
 // and also adds support for dropdown-append-to-body flag, allowing the dropdown
 // menu to be appended to be the body and for the menu to be right aligned to the dropdown
 // (by addition of the dropdown-menu-right class to the dropdown-menu)
-import 'ui-bootstrap';
+import 'ui/angular-bootstrap';
 import angular from 'angular';
 angular.module('ui.bootstrap.popover')
   .directive('popoverHtmlUnsafePopup', function ($compile) {

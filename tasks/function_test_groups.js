@@ -54,8 +54,6 @@ export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = 
           '--bail',
           '--debug',
           '--kibana-install-dir', kibanaInstallDir,
-          '--',
-          '--server.maxPayloadBytes=1648576',
         ],
       }
     }), {}),

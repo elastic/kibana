@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import stringify from 'json-stable-stringify';
+
 import { InfraLogMessageSegment } from '../../../graphql/types';
 
 export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
@@ -125,13 +127,16 @@ const compileFieldReferenceFormattingInstruction = (
   'field' in formattingInstruction
     ? {
         formattingFields: [formattingInstruction.field],
-        format: (fields: Fields) => [
-          {
-            field: formattingInstruction.field,
-            value: `${fields[formattingInstruction.field]}`,
-            highlights: [],
-          },
-        ],
+        format: (fields: Fields) => {
+          const value = fields[formattingInstruction.field];
+          return [
+            {
+              field: formattingInstruction.field,
+              value: typeof value === 'object' ? stringify(value) : `${value}`,
+              highlights: [],
+            },
+          ];
+        },
       }
     : null;
 
@@ -150,7 +155,7 @@ const compileConstantFormattingInstruction = (
     : null;
 
 interface Fields {
-  [fieldName: string]: string | number | boolean | null;
+  [fieldName: string]: string | number | object | boolean | null;
 }
 
 interface LogMessageFormattingRule {

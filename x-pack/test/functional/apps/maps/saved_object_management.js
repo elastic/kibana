@@ -80,6 +80,7 @@ export default function ({ getPageObjects, getService }) {
           const urlWithQueryInAppState = `${kibanaBaseUrl}#/map/8eabdab0-144f-11e9-809f-ad25bb78262c?${appState}`;
 
           await browser.get(urlWithQueryInAppState, true);
+          await PageObjects.maps.waitForLayersToLoad();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal('machine.os.raw : "win 8"');

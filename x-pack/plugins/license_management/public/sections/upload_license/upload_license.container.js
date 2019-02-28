@@ -5,8 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-import { uploadLicense, uploadLicenseStatus } from "../../store/actions/upload_license";
-import { addUploadErrorMessage } from "../../store/actions/add_error_message";
+import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
+import { addUploadErrorMessage } from '../../store/actions/add_error_message';
 
 import {
   getUploadErrorMessage,
@@ -15,7 +15,7 @@ import {
   isApplying,
   uploadNeedsAcknowledgement,
   uploadMessages
-} from "../../store/reducers/licenseManagement";
+} from '../../store/reducers/licenseManagement';
 import { UploadLicense as PresentationComponent } from './upload_license';
 
 

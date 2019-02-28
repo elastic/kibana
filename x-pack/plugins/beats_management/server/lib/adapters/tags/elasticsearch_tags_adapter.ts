@@ -24,7 +24,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       _source: true,
       size: 10000,
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
       body: {
         query: {
           bool: {
@@ -55,7 +54,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     const params = {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
       body: {
         query: {
           terms: { 'beat.tags': tagIds },
@@ -100,7 +98,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       body: flatten([...bulkInactiveBeatsUpdates, ...bulkTagsDelete]),
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
 
     return true;
@@ -119,7 +116,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
         ids,
       },
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
     const response = await this.database.mget(user, params);
 
@@ -143,7 +139,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       id: `tag:${tag.id}`,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     };
     const response = await this.database.index(user, params);
 
@@ -175,7 +170,6 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
       ignore: [404],
       _source: true,
       size: 10000,
-      type: '_doc',
     };
     const response = await this.database.search(user, params);
     const tags = get<any>(response, 'hits.hits', []);

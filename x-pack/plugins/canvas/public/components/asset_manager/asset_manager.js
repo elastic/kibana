@@ -241,9 +241,7 @@ export class AssetManager extends React.PureComponent {
 
     return (
       <Fragment>
-        <EuiButtonEmpty size="s" onClick={this.showModal}>
-          Manage assets
-        </EuiButtonEmpty>
+        <EuiButtonEmpty onClick={this.showModal}>Manage assets</EuiButtonEmpty>
 
         {assetModal}
 

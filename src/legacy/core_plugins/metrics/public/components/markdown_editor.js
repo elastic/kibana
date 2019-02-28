@@ -48,8 +48,8 @@ class MarkdownEditor extends Component {
 
   componentDidMount() {
     if(this.props.visData$) {
-      this.subscription = this.props.visData$.subscribe((data) => {
-        this.setState({ visData: data });
+      this.subscription = this.props.visData$.subscribe(visData => {
+        this.setState({ visData });
       });
     }
   }

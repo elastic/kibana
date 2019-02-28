@@ -253,7 +253,7 @@ describe('Worker class', function () {
     it('should use error multiplier when processPendingJobs rejects the Promise', async function () {
       worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
-      const processPendingJobsStub = sinon.stub(worker, "_processPendingJobs").returns(Promise.reject(new Error('test error')));
+      const processPendingJobsStub = sinon.stub(worker, '_processPendingJobs').returns(Promise.reject(new Error('test error')));
 
       await allowPoll(defaultWorkerOptions.interval);
       expect(processPendingJobsStub.callCount).to.be(1);
@@ -266,7 +266,7 @@ describe('Worker class', function () {
     it('should not use error multiplier when processPendingJobs resolved the Promise', async function () {
       worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
 
-      const processPendingJobsStub = sinon.stub(worker, "_processPendingJobs").callsFake(() => Promise.resolve());
+      const processPendingJobsStub = sinon.stub(worker, '_processPendingJobs').callsFake(() => Promise.resolve());
 
       await allowPoll(defaultWorkerOptions.interval);
       expect(processPendingJobsStub.callCount).to.be(1);

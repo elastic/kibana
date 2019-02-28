@@ -12,10 +12,8 @@ import ReactDOM from 'react-dom';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
-import { getStore } from '../../store/store';
-import { getMapColors } from '../../selectors/map_selectors';
 import _ from 'lodash';
 
 const EMPTY_FEATURE_COLLECTION = {
@@ -34,12 +32,11 @@ export class VectorLayer extends AbstractLayer {
 
   static tooltipContainer = document.createElement('div');
 
-  static createDescriptor(options) {
+  static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
     layerDescriptor.type = VectorLayer.type;
 
     if (!options.style) {
-      const mapColors = getMapColors(getStore().getState());
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors);
       layerDescriptor.style = VectorStyle.createDescriptor(styleProperties);
     }
@@ -52,7 +49,7 @@ export class VectorLayer extends AbstractLayer {
     this._joins =  [];
     if (options.layerDescriptor.joins) {
       options.layerDescriptor.joins.forEach((joinDescriptor) => {
-        this._joins.push(new LeftInnerJoin(joinDescriptor));
+        this._joins.push(new LeftInnerJoin(joinDescriptor, this._source.getInspectorAdapters()));
       });
     }
   }
@@ -128,7 +125,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: 'source'
+        origin: SOURCE_DATA_ID_ORIGIN
       };
     });
     const joinFields = [];
@@ -251,8 +248,7 @@ export class VectorLayer extends AbstractLayer {
         propertiesMap: propertiesMap,
       };
     } catch(e) {
-      console.error(e);
-      onLoadError(sourceDataId, requestToken, e.medium);
+      onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
         shouldJoin: false,
         join: join
@@ -286,11 +282,10 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
       const sourceDataRequest = this.getSourceDataRequest();
       return {
@@ -300,53 +295,56 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
       }, searchFilters);
-      stopLoading(sourceDataId, requestToken, data, meta);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
       };
     } catch (error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState) {
+  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
-    if (!sourceResult.featureCollection) {
+    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
       return false;
     }
-    joinState.join.joinPropertiesToFeatureCollection(
+
+    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
+
+    updateSourceData(updatedFeatureCollection);
+
     return true;
   }
 
-  async _performJoins(sourceResult, joinStates) {
-
+  async _performJoins(sourceResult, joinStates, updateSourceData) {
     const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState);
+      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
 
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
+    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
     if (shouldRefresh) {
       onRefreshStyle();
     }
@@ -476,7 +474,7 @@ export class VectorLayer extends AbstractLayer {
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
         type: 'geojson',
-        data: { 'type': 'FeatureCollection', 'features': [] }
+        data: EMPTY_FEATURE_COLLECTION
       });
     }
   }
@@ -487,8 +485,8 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor({
+  renderStyleEditor(Style, options) {
+    return Style.renderEditor({
       layer: this,
       ...options
     });
@@ -497,7 +495,6 @@ export class VectorLayer extends AbstractLayer {
   _canShowTooltips() {
     return this._source.canFormatFeatureProperties();
   }
-
 
   async _getPropertiesForTooltip(feature) {
     const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);

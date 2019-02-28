@@ -15,13 +15,15 @@ import {
   clearGoto,
   setLayerErrorStatus,
 } from '../../../actions/store_actions';
-import { getLayerList, getMapReady, getGoto } from "../../../selectors/map_selectors";
+import { getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
+import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
-    goto: getGoto(state)
+    goto: getGoto(state),
+    inspectorAdapters: getInspectorAdapters(state),
   };
 }
 

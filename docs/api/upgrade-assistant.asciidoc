@@ -1,0 +1,15 @@
+[role="xpack"]
+[[upgrade-assistant-api]]
+== Upgrade Assistant API
+
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+
+The Upgrade Assistant API allows you to check the upgrade status of your Elasticsearch cluster
+and reindex indices that were created in the previous major version. The assistant helps you prepare
+for the next major version of Elasticsearch.
+
+* <<upgrade-assistant-api-status>>
+* <<upgrade-assistant-api-reindexing>>
+
+include::upgrade-assistant/status.asciidoc[]
+include::upgrade-assistant/reindexing.asciidoc[]

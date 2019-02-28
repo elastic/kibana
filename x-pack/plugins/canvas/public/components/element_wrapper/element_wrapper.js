@@ -19,28 +19,19 @@ export class ElementWrapper extends React.PureComponent {
     createHandlers: PropTypes.func.isRequired,
   };
 
-  state = {
-    handlers: null,
-  };
-
-  componentDidMount() {
-    // create handlers when component mounts, so it only creates one instance
-    const { createHandlers } = this.props;
-    // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({ handlers: createHandlers() });
+  constructor(props) {
+    super(props);
+    this._handlers = props.createHandlers(props.selectedPage);
   }
 
-  render() {
-    // wait until the handlers have been created
-    if (!this.state.handlers) {
-      return null;
-    }
+  _handlers = null;
 
+  render() {
     const { renderable, transformMatrix, width, height, state } = this.props;
 
     return (
       <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-        <ElementContent renderable={renderable} state={state} handlers={this.state.handlers} />
+        <ElementContent renderable={renderable} state={state} handlers={this._handlers} />
       </Positionable>
     );
   }

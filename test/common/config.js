@@ -46,10 +46,10 @@ export default function () {
       buildArgs: [ '--optimize.useBundleCache=true' ],
       sourceArgs: [
         '--no-base-path',
+        '--env.name=development',
         `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
       ],
       serverArgs: [
-        '--env.name=development',
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,
@@ -60,6 +60,7 @@ export default function () {
         `--elasticsearch.username=${servers.elasticsearch.username}`,
         `--elasticsearch.password=${servers.elasticsearch.password}`,
         `--kibana.disableWelcomeScreen=true`,
+        `--server.maxPayloadBytes=1648576`,
       ],
     },
 

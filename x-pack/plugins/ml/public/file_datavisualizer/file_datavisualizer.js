@@ -14,8 +14,6 @@ export function FileDataVisualizerPage({ indexPatterns, kibanaConfig }) {
   timefilter.disableAutoRefreshSelector();
 
   return (
-    <div className="file-datavisualizer-container">
-      <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
-    </div>
+    <FileDataVisualizerView indexPatterns={indexPatterns} kibanaConfig={kibanaConfig} />
   );
 }

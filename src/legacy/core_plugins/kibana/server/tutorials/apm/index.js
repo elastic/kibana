@@ -84,16 +84,14 @@ It allows you to monitor the performance of thousands of applications in real ti
     }),
     euiIconType: 'apmApp',
     artifacts: artifacts,
-    onPrem: onPremInstructions(apmIndexPatternTitle),
+    onPrem: onPremInstructions(config),
     elasticCloud: createElasticCloudInstructions(config),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
     savedObjects: getSavedObjects(apmIndexPatternTitle),
     savedObjectsInstallMsg: i18n.translate(
       'kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg',
       {
-        defaultMessage:
-          'Load index pattern, visualizations, and pre-defined dashboards. \
-An index pattern is required for some features in the APM UI.',
+        defaultMessage: 'An APM index pattern is required for some features in the APM UI.',
       }
     ),
   };

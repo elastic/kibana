@@ -23,10 +23,9 @@ import { FilterLists } from './filter_lists';
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-filter-lists">
-    <ml-filter-lists></ml-filter-lists>
-  </div>
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="settings" />
+  <ml-filter-lists />
 `;
 
 uiRoutes

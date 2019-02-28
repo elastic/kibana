@@ -30,8 +30,6 @@ import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import { fetchFields } from '../lib/fetch_fields';
 import chrome from 'ui/chrome';
 
-const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
-
 class VisEditor extends Component {
   constructor(props) {
     super(props);
@@ -105,8 +103,8 @@ class VisEditor extends Component {
     this.setState({ autoApply: event.target.checked });
   }
 
-  onDataChange = (data) => {
-    this.visDataSubject.next(data);
+  onDataChange = ({ visData }) => {
+    this.visDataSubject.next(visData);
   }
 
   render() {
@@ -117,7 +115,6 @@ class VisEditor extends Component {
       return (
         <Visualization
           dateFormat={this.props.config.get('dateFormat')}
-          reversed={IS_DARK_THEME}
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
           uiState={this.props.vis.getUiState()}

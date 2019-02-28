@@ -23,7 +23,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       id: `beat:${id}`,
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
     const response = await this.database.get(user, params);
@@ -46,7 +45,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
   }
 
@@ -61,7 +59,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       id: `beat:${beat.id}`,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     };
     await this.database.index(user, params);
   }
@@ -74,7 +71,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
         ids,
       },
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
     const response = await this.database.mget(user, params);
 
@@ -87,7 +83,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const params = {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
       body: {
         query: {
           terms: { 'beat.tags': tagIds },
@@ -115,7 +110,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     const params = {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
       body: {
         query: {
           match: { 'beat.enrollment_token': enrollmentToken },
@@ -140,7 +134,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       index: INDEX_NAMES.BEATS,
       size: 10000,
       ignore: [404],
-      type: '_doc',
       body: {
         query: {
           bool: {
@@ -201,7 +194,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
     return _get<any>(response, 'items', []).map((item: any, resultIdx: number) => ({
       idxInRequest: removals[resultIdx].idxInRequest,
@@ -236,7 +228,6 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
     // console.log(response.items[0].update.error);
     return _get<any>(response, 'items', []).map((item: any, resultIdx: any) => ({

@@ -41,8 +41,25 @@ function cleanDisplayName(displayName) {
 export class LayerTocActions extends Component {
 
   state = {
-    isPopoverOpen: false
+    isPopoverOpen: false,
+    supportsFitToBounds: false,
   };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadSupportsFitToBounds();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _loadSupportsFitToBounds() {
+    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  }
 
   _onClick = () => {
     this.setState(prevState => ({
@@ -128,6 +145,9 @@ export class LayerTocActions extends Component {
               size="m"
             />
           ),
+          'data-test-subj': 'fitToBoundsButton',
+          toolTipContent: this.state.supportsFitToBounds ? null : 'Layer does not support fit to data',
+          disabled: !this.state.supportsFitToBounds,
           onClick: () => {
             this._closePopover();
             this.props.fitToBounds();

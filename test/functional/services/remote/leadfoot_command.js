@@ -59,8 +59,8 @@ async function attemptToCreateCommand(log, server, driverApi) {
 export async function initLeadfootCommand({ log, browserDriverApi }) {
   return await Promise.race([
     (async () => {
-      await delay(2 * MINUTE);
-      throw new Error('remote failed to start within 2 minutes');
+      await delay(6 * MINUTE);
+      throw new Error('remote failed to start within 6 minutes');
     })(),
 
     (async () => {
@@ -85,7 +85,7 @@ export async function initLeadfootCommand({ log, browserDriverApi }) {
 
       while (true) {
         const command = await Promise.race([
-          delay(30 * SECOND),
+          delay(6 * MINUTE),
           attemptToCreateCommand(log, server, browserDriverApi)
         ]);
 

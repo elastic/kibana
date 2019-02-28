@@ -3,43 +3,62 @@
 experimental[]
 
 You can build https://vega.github.io/vega/examples/[Vega] and
-https://vega.github.io/vega-lite/examples/[VegaLite] data visualizations
+https://vega.github.io/vega-lite/examples/[Vega-Lite] data visualizations
 into Kibana, either standalone, or on top of a map.  To see Vega in action,
 watch this
 https://www.youtube.com/watch?v=lQGCipY3th8[short introduction video].
+
+Currently Vega version 4.3 and Vega-Lite version 2.6 are supported.
+
+NOTE: In Vega it is possible to load data dynamically, e.g. by setting signals as data urls. This is not supported in Kibana as all data is fetched at once prior to passing it to the Vega renderer.
 
 
 [[vega-quick-demo]]
 === Getting Started with Vega
 
-Follow these steps to create your first Vega visualization.
-
-. In Kibana, choose Visualize, and add Vega visualization. You should see a default graph.
-. Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
-`square`, ... (see
-https://vega.github.io/vega-lite/docs/mark.html#mark-def[docs])
-. Try other https://vega.github.io/vega/examples/[Vega] or
-https://vega.github.io/vega-lite/examples/[VegaLite] visualizations. You
-may need to make URLs absolute, e.g. replace
+* To experiment using sample data, first click the {kib} logo in the upper left hand corner
+and then click the link next to *Sample Data*.
+* Once you have data loaded, go to *Visualize*, click *+*, and select *Vega* to see an example graph. 
+*Note*: The default graph is written in Vega-Lite, but you can build visualizations 
+in either language. See <<vega-vs-vegalite, Vega vs. Vega-Lite>> for more information. 
+* Try changing `mark` from `line` to `point`, `area`, `bar`, `circle`,
+or `square`. Check out the 
+https://vega.github.io/vega-lite/docs/mark.html#mark-def[Vega-Lite docs] for more information.
+* Explore other available https://vega.github.io/vega/examples/[Vega] or
+https://vega.github.io/vega-lite/examples/[Vega-Lite] visualizations. 
+*Note*: You might need to make URLs absolute, for example, replace
 `"url": "data/world-110m.json"` with
-`"url": "https://vega.github.io/editor/data/world-110m.json"`. (see
-link:#Using%20Vega%20and%20VegaLite%20examples[notes below])
-. Using https://www.npmjs.com/package/makelogs[makelogs util], generate
-some logstash data and try link:public/examples/logstash[logstash
-examples].  *(Do not use makelogs on a production cluster.)*
+`"url": "https://vega.github.io/editor/data/world-110m.json"`. 
+See <<vega-using-vega-and-vegalite-examples, Vega and Vega-Lite examples>>.
+* For more information on getting started, check out this https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[blog post].  
+
 
 [[vega-vs-vegalite]]
-=== Vega vs VegaLite
+=== Vega vs Vega-Lite
 
-VegaLite is a simplified version of Vega, useful to quickly get started,
-but has a number of limitations. VegaLite is automatically converted
-into Vega before rendering. Compare
-https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vega.json[logstash-simple_line-vega]
-and
-https://github.com/nyurik/kibana-vega-vis/blob/master/examples/logstash/logstash-simple_line-vegalite.json[logstash-simple_line-vegalite]
-(both use the same Elasticsearch logstash data). You may use
-https://vega.github.io/editor/[this editor] to convert VegaLite into
-Vega.
+The Vega visualization in {kib} supports both Vega and Vega-Lite. You can use the 
+`schema` value to define which language you would like to use and its minimum 
+required version.
+ 
+For example: 
+
+* Vega-Lite v2: `$schema: https://vega.github.io/schema/vega-lite/v2.json`
+* Vega v4: `$schema: https://vega.github.io/schema/vega/v4.json`
+ 
+The `schema` URL is only used for identification, and does not need to be accessible by {kib}.
+
+Vega-Lite is a simplified version of Vega; it automates some constructions and has 
+much shorter specifications than Vega. Vega-Lite is automatically converted into 
+Vega before rendering, but it has some limitations, and there are some visualizations
+that can be expressed in Vega that cannot be expressed in Vega-Lite. You can learn more
+in the https://vega.github.io/vega-lite/[Vega-Lite documentation].
+
+You can use https://vega.github.io/editor/[this editor] to convert Vega-Lite into
+Vega. 
+
+When you create a Vega visualization in {kib}, you can edit the `schema` 
+value in the dev tools to the left of the graph to define which of the two expression 
+languages you would like to use (see examples above).
 
 
 [[vega-querying-elasticsearch]]
@@ -243,12 +262,12 @@ positioning of the map.
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
 * `view` - access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
- on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
+ on how to inspect data and signals at runtime. For Vega-Lite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
  For Vega, it uses the data name as defined in your Vega spec.
 * `vega_spec` - Vega JSON graph specification after some modifications by Kibana. In case
-of VegaLite, this is the output of the VegaLite compiler.
-* `vegalite_spec` - If this is a VegaLite graph, JSON specification of the graph before
-VegaLite compilation.
+of Vega-Lite, this is the output of the Vega-Lite compiler.
+* `vegalite_spec` - If this is a Vega-Lite graph, JSON specification of the graph before
+Vega-Lite compilation.
 
 [[vega-data]]
 ==== Data
@@ -275,19 +294,28 @@ to your kibana.yml file.
 [[vega-useful-links]]
 === Useful Links
 
-* https://vega.github.io/editor/[Editor] - includes examples for Vega &
-VegaLite, but does not support any Kibana-specific features like
-Elasticsearch requests and interactive base maps.
-* VegaLite
-https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials],
-https://vega.github.io/vega-lite/docs/[docs], and
-https://vega.github.io/vega-lite/examples/[examples]
-* Vega https://vega.github.io/vega/tutorials/[Tutorial],
-https://vega.github.io/vega/docs/[docs],
-https://vega.github.io/vega/examples/[examples]
+==== Vega Editor
+The https://vega.github.io/editor/[Vega Editor] includes examples for Vega & Vega-Lite, but does not support any 
+{kib}-specific features like {es} requests and interactive base maps.
+
+==== Vega-Lite resources
+* https://vega.github.io/vega-lite/tutorials/getting_started.html[Tutorials]
+* https://vega.github.io/vega-lite/docs/[Docs]
+* https://vega.github.io/vega-lite/examples/[Examples]
+
+==== Vega resources 
+* https://vega.github.io/vega/tutorials/[Tutorials]
+* https://vega.github.io/vega/docs/[Docs]
+* https://vega.github.io/vega/examples/[Examples]
+
+==== Elastic blog posts
+* https://www.elastic.co/blog/getting-started-with-vega-visualizations-in-kibana[Getting Started with Vega Visualizations in Kibana]
+* https://www.elastic.co/blog/custom-vega-visualizations-in-kibana[Custom Vega Visualizations in Kibana]  
+* https://www.elastic.co/blog/sankey-visualization-with-vega-in-kibana[Sankey Visualization with Vega in Kibana]
+
 
 [[vega-using-vega-and-vegalite-examples]]
-==== Using Vega and VegaLite examples
+==== Using Vega and Vega-Lite examples
 
 When using https://vega.github.io/vega/examples/[Vega] and
 https://vega.github.io/vega-lite/examples/[VegaLite] examples, you may
@@ -328,16 +356,16 @@ additional configuration options.
 ==== Sizing and positioning
 
 [[vega-and-vegalite]]
-Vega and VegaLite
+===== Vega and Vega-Lite
 
 By default, Kibana Vega graphs will use
 `autosize = { type: 'fit', contains: 'padding' }` layout model for Vega
-and VegaLite graphs. The `fit` model uses all available space, ignores
+and Vega-Lite graphs. The `fit` model uses all available space, ignores
 `width` and `height` values, but respects the padding values. You may
 override this behaviour by specifying a different `autosize` value.
 
 [[vega-on-a-map]]
-Vega on a map
+===== Vega on a map
 
 All Vega graphs will ignore `autosize`, `width`, `height`, and `padding`
 values, using `fit` model with zero padding.
