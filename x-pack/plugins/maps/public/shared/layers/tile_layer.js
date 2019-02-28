@@ -43,6 +43,12 @@ export class TileLayer extends AbstractLayer {
     startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const url = await this._source.getUrlTemplate();
+      // Unparseable URLs can crash mapbox - ensure URL is valid
+      try {
+        new URL(url);
+      } catch (error) {
+        throw new Error(`"${url}" is not valid.`);
+      }
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch(error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
