@@ -34,11 +34,13 @@ export function createTimeSeriesJobData(jobs) {
 
 export function mapScopeToProps(scope) {
   return {
+    dataNotChartable: scope.dataNotChartable,
     detectorId: scope.detectorId,
     detectorIndexChanged: scope.detectorIndexChanged,
     detectors: scope.detectors,
     entities: scope.entities,
     entityFieldValueChanged: scope.entityFieldValueChanged,
+    hasResults: scope.hasResults,
     loadForForecastId: scope.loadForForecastId,
     jobs: scope.jobs,
     saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,

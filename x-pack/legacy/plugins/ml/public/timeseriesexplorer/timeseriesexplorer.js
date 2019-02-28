@@ -28,7 +28,6 @@ import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplore
 
 function getTimeseriesexplorerDefaultState() {
   return {
-    hasResults: false,
     loading: false,
   };
 }
@@ -40,6 +39,7 @@ export const TimeSeriesExplorer = injectI18n(
       detectorId: PropTypes.string,
       detectors: PropTypes.array.isRequired,
       entityFieldValueChanged: PropTypes.func.isRequired,
+      hasResults: PropTypes.bool.isRequired,
       jobs: PropTypes.array.isRequired,
       loadForForecastId: PropTypes.func.isRequired,
       saveSeriesPropertiesAndRefresh: PropTypes.func.isRequired,
@@ -52,20 +52,18 @@ export const TimeSeriesExplorer = injectI18n(
 
     render() {
       const {
+        dataNotChartable,
         detectorId,
         detectors,
         entities,
         entityFieldValueChanged,
+        hasResults,
         intl,
         jobs,
         loadForForecastId,
         saveSeriesPropertiesAndRefresh,
         selectedJob,
       } = this.props;
-
-      const {
-        hasResults,
-      } = this.state;
 
       const loading = this.props.loading || this.state.loading;
 
@@ -143,8 +141,8 @@ export const TimeSeriesExplorer = injectI18n(
             />
           )}
 
-          {(jobs.length > 0 && hasResults === false) && (
-            <TimeseriesexplorerNoResultsFound />
+          {(jobs.length > 0 && loading === false && hasResults === false) && (
+            <TimeseriesexplorerNoResultsFound dataNotChartable={dataNotChartable} entities={entities} />
           )}
         </Fragment>
       );

@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const TimeseriesexplorerNoResultsFound = () => (
+export const TimeseriesexplorerNoResultsFound = ({ dataNotChartable, entities }) => (
   <EuiEmptyPrompt
     iconType="iInCircle"
     title={
@@ -24,15 +24,29 @@ export const TimeseriesexplorerNoResultsFound = () => (
         />
       </h2>
     }
-    body={
-      <React.Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.ml.timeSeriesExplorer.tryWideningTimeSelectionLabel"
-            defaultMessage="Try widening the time selection or moving further back in time"
-          />
-        </p>
-      </React.Fragment>
+    body={dataNotChartable
+      ? (
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.dataNotChartableDescription"
+              defaultMessage="Model plot is not collected for the selected {entityCount, plural, one {entity} other {entities}} and the source data cannot be plotted for this detector"
+              values={{
+                entityCount: entities.length
+              }}
+            />
+          </p>
+        </React.Fragment>)
+      : (
+        <React.Fragment>
+          <p>
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.tryWideningTimeSelectionLabel"
+              defaultMessage="Try widening the time selection or moving further back in time"
+            />
+          </p>
+        </React.Fragment>
+      )
     }
   />
 );
