@@ -6,12 +6,10 @@
 
 import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
-import { pick, set } from 'lodash';
+import { pick } from 'lodash';
 import qs from 'querystring';
-import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
@@ -19,26 +17,6 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 
 export function fromQuery(query: APMQueryParams) {
   return qs.stringify(query);
-}
-
-function createG(values: APMQueryParams) {
-  const g: RisonDecoded['_g'] = {};
-
-  if (typeof values.rangeFrom !== 'undefined') {
-    set(g, 'time.from', encodeURIComponent(values.rangeFrom));
-  }
-  if (typeof values.rangeTo !== 'undefined') {
-    set(g, 'time.to', encodeURIComponent(values.rangeTo));
-  }
-
-  if (typeof values.refreshPaused !== 'undefined') {
-    set(g, 'refreshInterval.pause', String(values.refreshPaused));
-  }
-  if (typeof values.refreshInterval !== 'undefined') {
-    set(g, 'refreshInterval.value', String(values.refreshInterval));
-  }
-
-  return g;
 }
 
 export const PERSISTENT_APM_PARAMS = [
@@ -52,43 +30,28 @@ export const PERSISTENT_APM_PARAMS = [
 function getSearchString(
   location: Location,
   pathname: string,
-  { _g, _a, ...query }: APMQueryParams & RisonDecoded = {}
+  query: APMQueryParams = {}
 ) {
   const currentQuery = toQuery(location.search);
-  const nextQuery = {
-    ...pick(currentQuery, PERSISTENT_APM_PARAMS),
-    ...query
-  };
 
   // Preserve existing params for apm links
   const isApmLink = pathname.includes('app/apm') || pathname === '';
   if (isApmLink) {
+    const nextQuery = {
+      ...pick(currentQuery, PERSISTENT_APM_PARAMS),
+      ...query
+    };
     return fromQuery(nextQuery);
   }
 
-  // Create _g value for non-apm links
-  const g = createG(nextQuery);
-  const encodedG = rison.encode(g);
-  const encodedA = _a ? rison.encode(_a) : ''; // TODO: Do we need to url-encode the _a values before rison encoding _a?
-  const risonQuery: RisonEncoded = {
-    _g: encodedG
-  };
-
-  if (encodedA) {
-    risonQuery._a = encodedA;
-  }
-
-  // don't URI-encode the already-encoded rison
-  return qs.stringify(risonQuery, undefined, undefined, {
-    encodeURIComponent: (v: string) => v
-  });
+  return fromQuery(query);
 }
 
-export interface KibanaHrefArgs {
+export interface KibanaHrefArgs<T = APMQueryParams> {
   location: Location;
   pathname?: string;
   hash?: string;
-  query?: APMQueryParams & RisonDecoded;
+  query?: T;
 }
 
 export function getKibanaHref({
@@ -125,16 +88,6 @@ export interface APMQueryParams {
 // forces every value of T[K] to be type: string
 type StringifyAll<T> = { [K in keyof T]: string };
 type APMQueryParamsRaw = StringifyAll<APMQueryParams>;
-
-interface RisonEncoded {
-  _g?: string;
-  _a?: string;
-}
-
-export interface RisonDecoded {
-  _g?: StringMap<any>;
-  _a?: StringMap<any>;
-}
 
 // This is downright horrible 😭 💔
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
