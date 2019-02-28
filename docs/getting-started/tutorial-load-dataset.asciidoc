@@ -3,13 +3,6 @@
 
 This tutorial requires three data sets:
 
-* The complete works of William Shakespeare, suitably parsed into fields. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json[`shakespeare.json`].
-* A set of fictitious accounts with randomly generated data. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip[`accounts.zip`].
-* A set of randomly generated log files. Download
-This tutorial requires three data sets:
-
 * The complete works of William Shakespeare, suitably parsed into fields
 * A set of fictitious accounts with randomly generated data
 * A set of randomly generated log files
