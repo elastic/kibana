@@ -14,6 +14,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -44,6 +45,7 @@ function getTimeseriesexplorerDefaultState() {
 export const TimeSeriesExplorer = injectI18n(
   class TimeSeriesExplorer extends React.Component {
     static propTypes = {
+      chartDetails: PropTypes.object,
       detectorIndexChanged: PropTypes.func.isRequired,
       detectorId: PropTypes.string,
       detectors: PropTypes.array.isRequired,
@@ -52,7 +54,16 @@ export const TimeSeriesExplorer = injectI18n(
       jobs: PropTypes.array.isRequired,
       loadForForecastId: PropTypes.func.isRequired,
       saveSeriesPropertiesAndRefresh: PropTypes.func.isRequired,
+      showAnnotations: PropTypes.bool.isRequired,
+      showAnnotationsCheckbox: PropTypes.bool.isRequired,
+      showForecast: PropTypes.bool.isRequired,
+      showForecastCheckbox: PropTypes.bool.isRequired,
+      showModelBounds: PropTypes.bool.isRequired,
+      showModelBoundsCheckbox: PropTypes.bool.isRequired,
       selectedJob: PropTypes.object,
+      toggleShowAnnotations: PropTypes.func.isRequired,
+      toggleShowForecast: PropTypes.func.isRequired,
+      toggleShowModelBounds: PropTypes.func.isRequired,
     };
 
     state = getTimeseriesexplorerDefaultState();
@@ -72,7 +83,16 @@ export const TimeSeriesExplorer = injectI18n(
         jobs,
         loadForForecastId,
         saveSeriesPropertiesAndRefresh,
+        showAnnotations,
+        showAnnotationsCheckbox,
+        showForecast,
+        showForecastCheckbox,
+        showModelBounds,
+        showModelBoundsCheckbox,
         selectedJob,
+        toggleShowAnnotations,
+        toggleShowForecast,
+        toggleShowModelBounds,
       } = this.props;
 
       const loading = this.props.loading || this.state.loading;
@@ -86,6 +106,7 @@ export const TimeSeriesExplorer = injectI18n(
         text: d.detector_description
       }));
 
+      console.warn('showModelBounds', showModelBounds);
       return (
         <Fragment>
           <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
@@ -164,6 +185,7 @@ export const TimeSeriesExplorer = injectI18n(
                   values={{ functionLabel: chartDetails.functionLabel }}
                 />
               </span>&nbsp;
+
               {chartDetails.entityData.count === 1 && (
                 <span className="entity-count-text">
                   {chartDetails.entityData.entities.length > 0 && '('}
@@ -173,6 +195,7 @@ export const TimeSeriesExplorer = injectI18n(
                   {chartDetails.entityData.entities.length > 0 && ')'}
                 </span>
               )}
+
               {chartDetails.entityData.count !== 1 && (
                 <span className="entity-count-text">
                   {chartDetails.entityData.entities.map((countData, i) => {
@@ -194,6 +217,50 @@ export const TimeSeriesExplorer = injectI18n(
                   })}
                 </span>
               )}
+
+              <EuiFlexGroup style={{ float: 'right' }}>
+                {showModelBoundsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleModelBoundsCheckbox"
+                      label={intl.formatMessage({
+                        id: 'xpack.ml.timeSeriesExplorer.showModelBoundsLabel',
+                        defaultMessage: 'show model bounds',
+                      })}
+                      checked={showModelBounds}
+                      onChange={toggleShowModelBounds}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {showAnnotationsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleAnnotationsCheckbox"
+                      label={intl.formatMessage({
+                        id: 'xpack.ml.timeSeriesExplorer.annotationsLabel',
+                        defaultMessage: 'annotations',
+                      })}
+                      checked={showAnnotations}
+                      onChange={toggleShowAnnotations}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {showForecastCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleShowForecastCheckbox"
+                      label={intl.formatMessage({
+                        id: 'xpack.ml.timeSeriesExplorer.showForecastLabel',
+                        defaultMessage: 'show forecast',
+                      })}
+                      checked={showForecast}
+                      onChange={toggleShowForecast}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiText>
           )}
         </Fragment>

@@ -45,7 +45,16 @@ export function mapScopeToProps(scope) {
     loadForForecastId: scope.loadForForecastId,
     jobs: scope.jobs,
     saveSeriesPropertiesAndRefresh: scope.saveSeriesPropertiesAndRefresh,
+    showAnnotations: scope.showAnnotations,
+    showAnnotationsCheckbox: scope.showAnnotationsCheckbox,
+    showForecast: scope.showForecast,
+    showForecastCheckbox: scope.showForecastCheckbox,
+    showModelBounds: scope.showModelBounds,
+    showModelBoundsCheckbox: scope.showModelBoundsCheckbox,
     selectedJob: scope.selectedJob,
+    toggleShowAnnotations: scope.toggleShowAnnotations,
+    toggleShowForecast: scope.toggleShowForecast,
+    toggleShowModelBounds: scope.toggleShowModelBounds,
   };
 }
 

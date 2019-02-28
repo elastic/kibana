@@ -9,50 +9,6 @@
   <div ng-show="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <div class="show-model-controls">
-        <div ng-show="showModelBoundsCheckbox === true">
-          <input id="toggleShowModelBoundsCheckbox"
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="toggleShowModelBounds()"
-            ng-checked="showModelBounds === true">
-          <label
-            for="toggleShowModelBoundsCheckbox"
-            class="kuiCheckBoxLabel"
-            i18n-id="xpack.ml.timeSeriesExplorer.showModelBoundsLabel"
-            i18n-default-message="show model bounds"
-          ></label>
-        </div>
-
-        <div ng-show="showAnnotationsCheckbox === true">
-          <input id="toggleAnnotationsCheckbox"
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="toggleShowAnnotations()"
-            ng-checked="showAnnotations === true">
-          <label
-            for="toggleAnnotationsCheckbox"
-            class="kuiCheckBoxLabel"
-            i18n-id="xpack.ml.timeSeriesExplorer.annotationsLabel"
-            i18n-default-message="annotations"
-          ></label>
-        </div>
-
-        <div ng-show="showForecastCheckbox === true">
-          <input id="toggleShowForecastCheckbox"
-            type="checkbox"
-            class="kuiCheckBox"
-            ng-click="toggleShowForecast()"
-            ng-checked="showForecast === true">
-          <label
-            for="toggleShowForecastCheckbox"
-            class="kuiCheckBoxLabel"
-            i18n-id="xpack.ml.timeSeriesExplorer.showForecastLabel"
-            i18n-default-message="show forecast"
-          ></label>
-        </div>
-      </div>
-
       <div class="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
 
         <ml-timeseries-chart style="width: 1200px; height: 400px;"
