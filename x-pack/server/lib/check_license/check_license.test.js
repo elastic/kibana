@@ -6,7 +6,7 @@
 
 import { set } from 'lodash';
 import { checkLicense } from './check_license';
-import { LICENSE_STATUS } from '../../../common/constants';
+import { UNAVAILABLE, EXPIRED, VALID } from '../../../common/license_status';
 
 describe('check_license', function () {
 
@@ -19,7 +19,7 @@ describe('check_license', function () {
     beforeEach(() => mockLicenseInfo = undefined);
 
     it('should set status to unavailable', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.UNAVAILABLE);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(UNAVAILABLE);
     });
 
     it('should set a message', () => {
@@ -31,7 +31,7 @@ describe('check_license', function () {
     beforeEach(() => mockLicenseInfo.isAvailable = () => false);
 
     it('should set status to unavailable', () => {
-      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.UNAVAILABLE);
+      expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(UNAVAILABLE);
     });
 
     it('should set a message', () => {
@@ -52,7 +52,7 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set status to valid', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.VALID);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(VALID);
         });
 
         it('should not set a message', () => {
@@ -64,7 +64,7 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set status to inactive', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.EXPIRED);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(EXPIRED);
         });
 
         it('should set a message', () => {
@@ -80,7 +80,7 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => true));
 
         it('should set status to valid', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.VALID);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(VALID);
         });
 
         it('should not set a message', () => {
@@ -92,7 +92,7 @@ describe('check_license', function () {
         beforeEach(() => set(mockLicenseInfo, 'license.isActive', () => false));
 
         it('should set status to inactive', () => {
-          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(LICENSE_STATUS.EXPIRED);
+          expect(checkLicense(pluginName, minimumLicenseRequired, mockLicenseInfo).status).toBe(EXPIRED);
         });
 
         it('should set a message', () => {
