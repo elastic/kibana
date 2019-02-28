@@ -30,7 +30,13 @@ export async function createJobSearch(
   if (!searchSourceJSON || !references) {
     throw new Error('The saved search object is missing configuration fields!');
   }
-  const searchSource = JSON.parse(searchSourceJSON);
+
+  let searchSource;
+  try {
+    searchSource = JSON.parse(searchSourceJSON);
+  } catch (err) {
+    throw new Error(`Could not get search source! ${err}`);
+  }
 
   const indexPatternMeta = references.find(
     (ref: SavedObjectReference) => ref.type === 'index-pattern'
@@ -42,11 +48,21 @@ export async function createJobSearch(
     'index-pattern',
     indexPatternMeta.id
   );
-  const indexPatternSavedObject: IndexPatternSavedObject = {
-    ...indexPatternAttributes,
-    fields: JSON.parse(indexPatternAttributes.fields),
-    fieldFormatMap: JSON.parse(indexPatternAttributes.fieldFormatMap),
-  };
+
+  let indexPatternSavedObject: IndexPatternSavedObject;
+  try {
+    let fields = '[]';
+    let fieldFormatMap = '{}';
+    if (indexPatternAttributes.fields) {
+      fields = JSON.parse(indexPatternAttributes.fields);
+    }
+    if (indexPatternAttributes.fieldFormatMap) {
+      fieldFormatMap = JSON.parse(indexPatternAttributes.fieldFormatMap);
+    }
+    indexPatternSavedObject = { ...indexPatternAttributes, fields, fieldFormatMap };
+  } catch (err) {
+    throw new Error(`Could not get index pattern saved object! ${err}`);
+  }
 
   const sPanel = {
     attributes: {
