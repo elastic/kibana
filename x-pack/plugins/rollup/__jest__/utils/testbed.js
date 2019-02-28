@@ -53,12 +53,35 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
     return new Promise((resolve) => setTimeout(resolve));
   };
 
+  /**
+   * Helper to parse an EUI table and return its rows and column reactWrapper
+   *
+   * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
+   */
+  const getMetadataFromEuiTable = (tableTestSubject) => {
+    const rows = findTestSubject(tableTestSubject)
+      .find('tr')
+      .slice(1) // we remove the first row as it is the table header
+      .map(row => ({
+        reactWrapper: row,
+        columns: row.find('td').map(col => ({
+          reactWrapper: col,
+          value: col.text()
+        }))
+      }));
+
+    // Also output the raw cell values, in the following format: [[td0, td1, td2], [td0, td1, td2]]
+    const tableCellsValues = rows.map(({ columns }) => columns.map(col => col.value));
+    return { rows, tableCellsValues };
+  };
+
   return {
     component,
     testSubjectExists,
     findTestSubject,
     setProps,
     getFormErrorsMessages,
+    getMetadataFromEuiTable,
     form: {
       setInputValue: setFormInputValue,
     }

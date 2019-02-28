@@ -138,8 +138,10 @@ export class StepTermsUi extends Component {
               fields={termsFields}
               selectedFields={terms}
               onSelectField={this.onSelectField}
+              dataTestSubj="rollupJobTermsFieldChooser"
             />
           )}
+          dataTestSubj="rollupJobTermsFieldList"
         />
       </Fragment>
     );
