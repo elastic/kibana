@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+
 import { Source } from '../../graphql/types';
 import { Authentications } from '../../lib/authentications';
 import { AuthenticationsAdapter } from '../../lib/authentications/types';

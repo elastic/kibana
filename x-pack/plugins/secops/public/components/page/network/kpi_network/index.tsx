@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import numeral from '@elastic/numeral';
-import React from 'react';
-import { pure } from 'recompose';
-import { KpiNetworkData } from '../../../../graphql/types';
-import * as i18n from './translations';
-
 import {
   // @ts-ignore
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { has } from 'lodash/fp';
+import React from 'react';
+import { pure } from 'recompose';
+
+import { KpiNetworkData } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
+
+import * as i18n from './translations';
 
 interface KpiNetworkProps {
   data: KpiNetworkData;

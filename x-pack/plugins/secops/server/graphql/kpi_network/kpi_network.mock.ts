@@ -5,6 +5,7 @@
  */
 
 import { FieldNode } from 'graphql';
+
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
 import { KpiNetworkData } from '../types';

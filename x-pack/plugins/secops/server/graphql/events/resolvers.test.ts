@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+
 import { Direction, Source } from '../../graphql/types';
 import { Events } from '../../lib/events';
 import { EventsAdapter } from '../../lib/events/types';

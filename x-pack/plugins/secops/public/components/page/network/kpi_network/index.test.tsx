@@ -6,13 +6,13 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { KpiNetworkComponent } from '.';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
+
+import { KpiNetworkComponent } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {

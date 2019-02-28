@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { addMockFunctionsToSchema, IResolvers, makeExecutableSchema } from 'graphql-tools';
-import { AppBackendLibs } from './lib/types';
 
 import { createMocks, schemas } from './graphql';
 import { createAuthenticationsResolvers } from './graphql/authentications';
@@ -17,6 +16,7 @@ import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
 import { createUncommonProcessesResolvers } from './graphql/uncommon_processes';
 import { createWhoAmIResolvers } from './graphql/who_am_i';
+import { AppBackendLibs } from './lib/types';
 import { Logger } from './utils/logger';
 
 export interface Config {
