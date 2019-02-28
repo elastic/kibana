@@ -59,7 +59,9 @@ uiModules
         $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
         $scope.isSelectValid = () => Boolean($scope.agg.type);
         $scope.onChangeAggType = (agg, aggType) => {
-          agg.type = aggType;
+          if (agg.type !== aggType) {
+            agg.type = aggType;
+          }
 
           if (aggForm && aggForm.aggType) {
             aggForm.aggType.$setDirty();

@@ -41,7 +41,7 @@ export function ComboBoxProvider({ getService }) {
       try {
         await find.clickByCssSelector(`.euiComboBoxOption[title="${value}"]`);
       } catch (err) {
-        await find.clickByCssSelector(`.euiComboBoxOption`);
+        await find.clickByCssSelector('.euiComboBoxOption');
       }
 
       await this.closeOptionsList(comboBoxElement);

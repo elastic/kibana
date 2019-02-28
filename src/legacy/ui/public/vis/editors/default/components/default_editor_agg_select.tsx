@@ -74,7 +74,7 @@ function DefaultEditorAggSelect({
           <FormattedMessage
             id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
             defaultMessage="{aggTitle} help"
-            values={{ aggTitle: agg.type.title }}
+            values={{ aggTitle: agg.type && agg.type.title }}
           />
         </EuiLink>
       )}
