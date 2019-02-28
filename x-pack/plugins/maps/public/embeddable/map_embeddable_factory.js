@@ -18,7 +18,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 
   getEditPath(mapId) {
-    return chrome.addBasePath(`/app/maps#map/${mapId}`);
+    return chrome.addBasePath(`/app/maps#/map/${mapId}`);
   }
 
   async getIndexPatterns(indexPatternIds = []) {
