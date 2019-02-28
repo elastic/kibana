@@ -5,12 +5,9 @@
  */
 
 import { APMDoc } from './APMDoc';
-import { Container } from './fields/Container';
 import { Context } from './fields/Context';
 import { Host } from './fields/Host';
 import { Http } from './fields/Http';
-import { Kubernetes } from './fields/Kubernetes';
-import { Process } from './fields/Process';
 import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
 import { Url } from './fields/Url';
@@ -24,18 +21,13 @@ interface Processor {
 interface Exception {
   message?: string; // either message or type are given
   type?: string;
-  code?: string;
   module?: string;
-  attributes?: unknown;
   handled?: boolean;
   stacktrace?: IStackframe[];
 }
 
 interface Log {
   message: string;
-  param_message?: string;
-  logger_name?: string;
-  level?: string;
   stacktrace?: IStackframe[];
 }
 
@@ -45,7 +37,6 @@ export interface APMError extends APMDoc {
   transaction: {
     id: string;
     sampled?: boolean;
-    type?: string;
   };
   error: {
     id: string;
@@ -57,12 +48,9 @@ export interface APMError extends APMDoc {
   };
 
   // Shared by errors and transactions
-  container?: Container;
   context?: Context;
   host?: Host;
   http?: Http;
-  kubernetes?: Kubernetes;
-  process?: Process;
   service: Service;
   url?: Url;
   user?: User;

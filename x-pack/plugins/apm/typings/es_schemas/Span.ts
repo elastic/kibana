@@ -5,7 +5,6 @@
  */
 
 import { APMDoc } from './APMDoc';
-import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
 
 interface Processor {
@@ -15,7 +14,9 @@ interface Processor {
 
 export interface Span extends APMDoc {
   processor: Processor;
-  service: Service;
+  service: {
+    name: string;
+  };
   span: {
     action: string;
     duration: { us: number };
@@ -29,19 +30,13 @@ export interface Span extends APMDoc {
       url?: {
         original?: string;
       };
-      response?: {
-        status_code?: number;
-      };
-      method?: string;
     };
     db?: {
-      instance?: string;
       statement?: string;
       type?: string;
-      user?: {
-        name?: string;
-      };
     };
   };
-  transaction: { id: string };
+  transaction: {
+    id: string;
+  };
 }
