@@ -8,9 +8,7 @@ import { notFound } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
-import { cryptoFactory, oncePerServer } from '../../../../server/lib';
-// @ts-ignore
-import { createTaggedLogger } from '../../../../server/lib/create_tagged_logger';
+import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../../server/lib';
 import { JobDocPayload, JobParams, KbnServer, Logger } from '../../../../types';
 import {
   SavedObject,
@@ -18,17 +16,14 @@ import {
   SavedSearchObjectAttributes,
   SearchPanel,
   TimeRangeParams,
-  TsvbPanel,
-  VisObjectAttributes,
 } from '../../types';
 import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
-import { createJobVis } from './create_job_vis';
 
 interface VisData {
   title: string;
   visType: string;
-  panel: TsvbPanel | SearchPanel;
+  panel: SearchPanel;
 }
 
 function createJobFn(server: KbnServer) {
@@ -45,7 +40,7 @@ function createJobFn(server: KbnServer) {
     headers: any,
     req: Request
   ): Promise<JobDocPayload> {
-    const { savedObjectType, savedObjectId } = jobParams;
+    const { isImmediate, savedObjectType, savedObjectId } = jobParams;
     const serializedEncryptedHeaders = await crypto.encrypt(headers);
     const client = req.getSavedObjectsClient();
 
@@ -53,20 +48,13 @@ function createJobFn(server: KbnServer) {
       .then(() => client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
         const { attributes } = savedObject;
-        const { visState: visStateJSON } = attributes as VisObjectAttributes;
         const { kibanaSavedObjectMeta } = attributes as SavedSearchObjectAttributes;
 
-        let timerange: TimeRangeParams;
         // @ts-ignore
-        timerange = req.payload.timerange;
+        const timerange: TimeRangeParams = req.payload.timerange;
 
-        if (!visStateJSON && !kibanaSavedObjectMeta) {
+        if (!kibanaSavedObjectMeta) {
           throw new Error('Could not parse saved object data!');
-        }
-
-        if (visStateJSON) {
-          // visualization type
-          return await createJobVis(visStateJSON, timerange);
         }
 
         // saved search type
@@ -77,17 +65,19 @@ function createJobFn(server: KbnServer) {
         if (errPayload.statusCode === 404) {
           throw notFound(errPayload.message);
         }
-        throw new Error(`Unable to retrieve saved object! Error: ${err}`);
+        throw new Error(`Unable to create a job from saved object data! Error: ${err}`);
       });
 
     let type: string = '';
     let result: any = null;
 
-    try {
-      ({ type, result } = await generateCsv(req, server, visType, panel));
-    } catch (err) {
-      logger.error(`Generate CSV Error! ${err}`);
-      throw err;
+    if (isImmediate) {
+      try {
+        ({ type, result } = await generateCsv(req, server, visType, panel));
+      } catch (err) {
+        logger.error(`Generate CSV Error! ${err}`);
+        throw err;
+      }
     }
 
     return {

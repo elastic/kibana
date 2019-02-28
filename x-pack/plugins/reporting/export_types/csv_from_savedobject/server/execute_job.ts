@@ -7,9 +7,9 @@
 import { CONTENT_TYPE_CSV } from '../../../common/constants';
 // @ts-ignore
 import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../server/lib';
-import { JobDocPayload, KbnServer } from '../../../types';
+import { JobDocPayload, KbnServer, Logger } from '../../../types';
 import {} from '../types';
-import { generateCsv } from './lib/generate_csv';
+import { createGenerateCsv } from './lib/generate_csv';
 
 interface JobDocOutputPseudo {
   content_type: 'text/csv';
@@ -23,10 +23,13 @@ function executeJobFn(server: KbnServer) {
   const crypto = cryptoFactory(server);
   const config = server.config();
   const serverBasePath = config.get('server.basePath');
-  const logger = {
-    debug: createTaggedLogger(server, ['reporting', 'csv_from_savedobject', 'debug']),
+  const logger: Logger = {
+    debug: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'debug']),
+    warning: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'warning']),
+    error: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'error']),
   };
 
+  const generateCsv = createGenerateCsv(logger);
   return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
     const { basePath, objects, headers: serializedEncryptedHeaders, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
     const { isImmediate, panel, visType } = jobParams;
@@ -37,7 +40,9 @@ function executeJobFn(server: KbnServer) {
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
       } catch {
-        throw new Error('Failed to decrypt report job data. Please ensure that `xpack.reporting.encryptionKey` is set and re-generate this report.');
+        throw new Error(
+          'Failed to decrypt report job data. Please ensure that `xpack.reporting.encryptionKey` is set and re-generate this report.'
+        );
       }
 
       const fakeRequest = {
@@ -56,7 +61,6 @@ function executeJobFn(server: KbnServer) {
     logger.debug(`Execute job using previously-generated [${visType}] csv`);
 
     // if job was created with "immediate", just return the data in the job doc
-    // FIXME how would this work if they never had privilege to create a job
     return {
       content_type: CONTENT_TYPE_CSV,
       content: objects,

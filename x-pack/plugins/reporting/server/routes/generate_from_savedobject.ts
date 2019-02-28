@@ -12,21 +12,56 @@ import { JobDoc, JobDocOutput, JobParams, KbnServer } from '../../types';
 // @ts-ignore
 import { getDocumentPayloadFactory } from './lib/get_document_payload';
 import { getRouteConfigFactoryReportingPre } from './lib/route_config_factories';
-import { HandlerErrorFunction, HandlerFunction, HandlerResult } from './types';
+import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types';
 
 const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
+
+/*
+ * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
+ * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
+ * 3. Ensure that details for a queued job were returned
+ */
+const getJobFromRouteHandler = async (
+  handleRoute: HandlerFunction,
+  handleRouteError: HandlerErrorFunction,
+  request: Request,
+  h: ResponseToolkit,
+  options: { isImmediate: boolean }
+): Promise<QueuedJobPayload> => {
+  const { savedObjectType, savedObjectId } = request.params;
+  let result: QueuedJobPayload;
+  try {
+    const jobParams: JobParams = {
+      savedObjectType,
+      savedObjectId,
+      isImmediate: options.isImmediate,
+    };
+    result = await handleRoute(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
+  } catch (err) {
+    throw handleRouteError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
+  }
+
+  if (get(result, 'source.job') == null) {
+    throw new Error(`The Export handler is expected to return a result with job info! ${result}`);
+  }
+
+  return result;
+};
 
 /*
  * This function registers API Endpoints for queuing Reporting jobs. The API inputs are:
  * - "immediate" flag: whether to execute the job up front and make immediate download available
  * - saved object type and ID
  * - time range and time zone
- * - application state: generally, the filters and query bar state
+ * - application state:
+ *     - filters
+ *     - query bar
+ *     - local (transient) changes the user made to the saved object
  */
-export function registerGenerateCsvFromVis(
+export function registerGenerateCsvFromSavedObject(
   server: KbnServer,
-  handler: HandlerFunction,
-  handleError: HandlerErrorFunction
+  handleRoute: HandlerFunction,
+  handleRouteError: HandlerErrorFunction
 ) {
   const getRouteConfig = getRouteConfigFactoryReportingPre(server);
   const routeOptions = {
@@ -46,25 +81,7 @@ export function registerGenerateCsvFromVis(
       }),
     },
   };
-  const getResult = async (
-    request: Request,
-    h: ResponseToolkit,
-    options: { isImmediate: boolean }
-  ): Promise<HandlerResult> => {
-    const { savedObjectType, savedObjectId } = request.params;
-    let result: HandlerResult;
-    try {
-      const jobParams: JobParams = {
-        savedObjectType,
-        savedObjectId,
-        isImmediate: options.isImmediate,
-      };
-      result = await handler(CSV_FROM_SAVEDOBJECT_JOB_TYPE, jobParams, request, h);
-    } catch (err) {
-      throw handleError(CSV_FROM_SAVEDOBJECT_JOB_TYPE, err);
-    }
-    return result;
-  };
+  const getDocumentPayload = getDocumentPayloadFactory(server);
 
   // csv: immediate download
   server.route({
@@ -72,24 +89,31 @@ export function registerGenerateCsvFromVis(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      const getDocumentPayload = getDocumentPayloadFactory(server);
-      const result: HandlerResult = await getResult(request, h, { isImmediate: true });
+      /*
+       * 1. Queue a job with getJobFromRouteHandler
+       *   - `isImmediate: true` gets us the complete result data in payload.objects
+       * 2. Copy the completed data stashed in the job as output.content
+       *   - Makes the content available for download
+       * 3. Return a response with CSV content
+       */
+      const queuedJob: QueuedJobPayload = await getJobFromRouteHandler(
+        handleRoute,
+        handleRouteError,
+        request,
+        h,
+        {
+          isImmediate: true,
+        }
+      );
 
-      // FIXME this should still work if authentication does not grant job
-      // creation privilege!
-
-      const docSource: JobDoc = get(result, 'source.job');
-      if (docSource == null) {
-        throw new Error(''); // FIXME
-      }
-
-      // FIXME this is a bit ugly
+      // FIXME this is REALLY ugly
+      const jobSource: JobDoc = get(queuedJob, 'source.job');
       const output: JobDocOutput = getDocumentPayload({
         _source: {
-          ...docSource,
+          ...jobSource,
           status: 'completed',
           output: {
-            content: docSource.payload.objects,
+            content: jobSource.payload.objects,
             content_type: 'text/csv',
           },
         },
@@ -122,7 +146,9 @@ export function registerGenerateCsvFromVis(
     method: 'POST',
     options: routeOptions,
     handler: async (request: Request, h: ResponseToolkit) => {
-      return getResult(request, h, { isImmediate: false });
+      return getJobFromRouteHandler(handleRoute, handleRouteError, request, h, {
+        isImmediate: false,
+      });
     },
   });
 }

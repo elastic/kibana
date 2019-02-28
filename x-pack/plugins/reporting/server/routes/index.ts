@@ -11,7 +11,7 @@ import { KbnServer } from '../../types';
 // @ts-ignore
 import { enqueueJobFactory } from '../lib/enqueue_job';
 import { registerGenerate } from './generate';
-import { registerGenerateCsvFromVis } from './generate_from_savedobject';
+import { registerGenerateCsvFromSavedObject } from './generate_from_savedobject';
 import { registerJobs } from './jobs';
 import { registerLegacy } from './legacy';
 
@@ -21,6 +21,9 @@ export function registerRoutes(server: KbnServer) {
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
+  /*
+   * Generates enqueued job details to use in responses
+   */
   async function handler(
     exportTypeId: string,
     jobParams: any,
@@ -59,6 +62,6 @@ export function registerRoutes(server: KbnServer) {
 
   registerGenerate(server, handler, handleError);
   registerLegacy(server, handler, handleError);
-  registerGenerateCsvFromVis(server, handler, handleError);
+  registerGenerateCsvFromSavedObject(server, handler, handleError);
   registerJobs(server);
 }
