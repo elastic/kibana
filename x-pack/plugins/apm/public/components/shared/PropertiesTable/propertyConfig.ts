@@ -29,14 +29,6 @@ interface ConfigItem<T extends AllKeys> {
 
 export const PROPERTY_CONFIG = [
   {
-    key: 'url',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
-      defaultMessage: 'Url'
-    }),
-    required: false,
-    presortedKeys: []
-  } as ConfigItem<'url'>,
-  {
     key: 'http',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.httpLabel', {
       defaultMessage: 'HTTP'
@@ -69,6 +61,30 @@ export const PROPERTY_CONFIG = [
     presortedKeys: ['pid', 'title', 'args']
   } as ConfigItem<'process'>,
   {
+    key: 'agent',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.agentLabel', {
+      defaultMessage: 'Agent'
+    }),
+    required: false,
+    presortedKeys: []
+  } as ConfigItem<'agent'>,
+  {
+    key: 'url',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
+      defaultMessage: 'URL'
+    }),
+    required: false,
+    presortedKeys: []
+  } as ConfigItem<'url'>,
+  {
+    key: 'container',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.containerLabel', {
+      defaultMessage: 'Container'
+    }),
+    required: false,
+    presortedKeys: []
+  } as ConfigItem<'container'>,
+  {
     key: 'user',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.userLabel', {
       defaultMessage: 'User'
@@ -83,5 +99,14 @@ export const PROPERTY_CONFIG = [
     }),
     required: true,
     presortedKeys: []
-  } as ConfigItem<'labels'>
+  } as ConfigItem<'labels'>,
+  {
+    key:
+      'transaction.custom' /* The child field is not supported, but works when written like this */,
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.customLabel', {
+      defaultMessage: 'Custom'
+    }),
+    required: true,
+    presortedKeys: []
+  } as ConfigItem<'custom'>
 ];
