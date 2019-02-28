@@ -100,9 +100,7 @@ describe('start.add()', () => {
   it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
     const { fatalErrors, i18n } = setup();
 
-    jest.spyOn(fatalErrors, 'add').mockImplementation(() => {
-      /* noop */
-    });
+    jest.spyOn(fatalErrors, 'add').mockImplementation(() => undefined as never);
 
     expect(fatalErrors.add).not.toHaveBeenCalled();
     const { add } = fatalErrors.start({ i18n });

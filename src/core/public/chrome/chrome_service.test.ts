@@ -60,20 +60,12 @@ describe('start', () => {
     const startDeps = defaultStartDeps();
     startDeps.injectedMetadata.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
     service.start(startDeps);
-    expect(startDeps.notifications.toasts.addWarning).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "Your browser does not meet the security requirements for Kibana.",
-    ],
+    expect(startDeps.notifications.toasts.addWarning.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Your browser does not meet the security requirements for Kibana.",
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": undefined,
-    },
-  ],
-}
+]
 `);
   });
 
