@@ -5,14 +5,15 @@
  */
 
 import { getOr } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 
-import memoizeOne from 'memoize-one';
 import { Ecs, EcsEdges, GetTimelineQuery, PageInfo, SortField } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { timelineQuery } from './index.gql_query';
 
 export interface TimelineArgs {

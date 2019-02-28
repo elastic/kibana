@@ -13,7 +13,9 @@ import {
 } from '@elastic/eui';
 import { Moment } from 'moment';
 import React from 'react';
+
 import { DateType, RecentlyUsedI } from '../index';
+
 import { CommonlyUsed } from './commonly_used';
 import { QuickSelect } from './quick_select';
 import { MyRecentlyUsed } from './recently_used';

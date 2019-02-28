@@ -8,8 +8,9 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+
+import { RowRenderer } from '.';
 import { SuricataDetails } from './suricata_details';
 
 const SuricataRow = styled.div`

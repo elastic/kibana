@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+
 import { ColumnHeader } from './column_header';
 import { Filter } from './filter';
 

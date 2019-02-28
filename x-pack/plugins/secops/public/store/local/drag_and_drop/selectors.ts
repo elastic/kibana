@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
+
 import { IdToDataProvider } from './model';
 
 const selectDataProviders = (state: State): IdToDataProvider =>

@@ -9,6 +9,7 @@ import * as React from 'react';
 
 import { Direction } from '../../../../graphql/types';
 import { Sort } from '../sort';
+
 import { ColumnHeader } from './column_header';
 import {
   getNewSortDirectionOnClick,

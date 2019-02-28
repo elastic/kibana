@@ -8,12 +8,13 @@ import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext, DropResult } from 'react-beautiful-dnd';
 import { connect } from 'react-redux';
+import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 
-import { pure } from 'recompose';
 import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
+
 import {
   addProviderToTimeline,
   providerWasDroppedOnTimeline,

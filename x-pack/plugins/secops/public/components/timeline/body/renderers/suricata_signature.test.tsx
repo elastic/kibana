@@ -8,13 +8,14 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-
-import { DragDropContext } from 'react-beautiful-dnd';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
+
 import { DraggableSignatureId, GoogleLink, SuricataSignature, Tokens } from './suricata_signature';
 
 describe('SuricataSignature', () => {

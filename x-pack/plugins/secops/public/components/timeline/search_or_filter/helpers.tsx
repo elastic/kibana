@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-
 import {
   EuiSpacer,
   // @ts-ignore
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
+import * as React from 'react';
 import styled from 'styled-components';
 
 import { KqlMode } from '../../../store/local/timeline/model';
 import { AndOrBadge } from '../../and_or_badge';
+
 import * as i18n from './translations';
 
 const AndOrContainer = styled.div`

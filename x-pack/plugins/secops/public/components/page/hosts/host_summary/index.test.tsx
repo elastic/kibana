@@ -16,6 +16,7 @@ import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { DragDropContextWrapper } from '../../../drag_and_drop/drag_drop_context_wrapper';
 import { getEmptyString, getEmptyValue } from '../../../empty_value';
+
 import { createDraggable, getEuiDescriptionList, HostSummary } from './index';
 import { mockData } from './mock';
 

@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { HttpLink } from 'apollo-link-http';
+import { withClientState } from 'apollo-link-state';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import chrome from 'ui/chrome';
@@ -13,18 +18,11 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
-
+import { errorLink } from '../../containers/errors';
 import introspectionQueryResultData from '../../graphql/introspection.json';
 import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
+import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { AppFrontendLibs } from '../lib';
-
-import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { ApolloLink } from 'apollo-link';
-import { HttpLink } from 'apollo-link-http';
-import { withClientState } from 'apollo-link-state';
-import { errorLink } from '../../containers/errors';
 
 export function compose(): AppFrontendLibs {
   const cache = new InMemoryCache({

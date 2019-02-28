@@ -13,6 +13,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockEventsData, mockEventsFields } from './events.mock';
 import { createEventsResolvers, EventsResolversDeps } from './resolvers';
 

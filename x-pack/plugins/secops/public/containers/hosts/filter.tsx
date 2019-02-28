@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { convertKueryToElasticSearchQuery } from '../../lib/keury';
 import {
   hostsActions,

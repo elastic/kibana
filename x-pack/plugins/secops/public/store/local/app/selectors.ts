@@ -7,8 +7,10 @@
 import { keys } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { createSelector } from 'reselect';
+
 import { Note } from '../../../lib/note';
 import { State } from '../../reducer';
+
 import { ErrorModel, NotesById } from './model';
 
 const selectNotesById = (state: State): NotesById => state.local.app.notesById;

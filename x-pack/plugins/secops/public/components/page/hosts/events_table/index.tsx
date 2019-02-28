@@ -9,8 +9,8 @@ import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-
 import { ActionCreator } from 'typescript-fsa';
+
 import { Ecs, EcsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -18,6 +18,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+
 import * as i18n from './translations';
 
 interface OwnProps {

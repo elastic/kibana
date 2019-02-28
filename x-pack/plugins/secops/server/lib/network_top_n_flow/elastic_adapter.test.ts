@@ -5,8 +5,10 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+
 import { NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
+
 import { ElasticsearchNetworkTopNFlowAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
 

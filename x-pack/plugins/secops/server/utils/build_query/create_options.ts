@@ -6,10 +6,12 @@
 
 import { GraphQLResolveInfo } from 'graphql';
 import { getOr } from 'lodash/fp';
-import { getFields } from '.';
+
 import { PaginationInput, SortField, Source, TimerangeInput } from '../../graphql/types';
 import { RequestOptions } from '../../lib/framework';
 import { parseFilterQuery } from '../serialized_query';
+
+import { getFields } from '.';
 
 export type Configuration = Pick<Source, 'configuration'>;
 

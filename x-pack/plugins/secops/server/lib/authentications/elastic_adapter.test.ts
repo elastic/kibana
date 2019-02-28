@@ -5,6 +5,7 @@
  */
 
 import { AuthenticationsEdges } from '../../graphql/types';
+
 import { formatAuthenticationData } from './elasticsearch_adapter';
 import { auditdFieldsMap } from './query.dsl';
 import { AuthenticationHit } from './types';

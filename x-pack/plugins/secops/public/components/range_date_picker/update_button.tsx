@@ -7,7 +7,9 @@
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
+
 import { inputsModel } from '../../store';
+
 import * as i18n from './translations';
 interface Props {
   loading: boolean;

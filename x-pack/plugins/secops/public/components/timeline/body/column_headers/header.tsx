@@ -14,6 +14,7 @@ import { Direction } from '../../../../graphql/types';
 import { OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort, SortDirection } from '../sort';
 import { SortIndicator } from '../sort/sort_indicator';
+
 import { ColumnHeader } from './column_header';
 import { Filter } from './filter';
 

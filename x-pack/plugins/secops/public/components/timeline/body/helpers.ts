@@ -7,6 +7,7 @@ import { isEmpty, noop } from 'lodash/fp';
 
 import { Ecs } from '../../../graphql/types';
 import { OnPinEvent, OnUnPinEvent } from '../events';
+
 import * as i18n from './translations';
 
 export const ACTIONS_COLUMN_WIDTH = 100; // px;

@@ -11,6 +11,7 @@ import { mergeFieldsWithHit } from '../../utils/build_query';
 import { processFieldsMap, userFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { HostHits, TermAggregation } from '../types';
+
 import { buildQuery } from './query.dsl';
 import {
   UncommonProcessBucket,

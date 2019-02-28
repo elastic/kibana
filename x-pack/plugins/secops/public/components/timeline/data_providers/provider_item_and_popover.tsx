@@ -22,6 +22,7 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
+
 import { DataProvider } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { getProviderActions } from './provider_item_actions';

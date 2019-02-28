@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HostsEdges } from '../../graphql/types';
+
 import { formatHostsData } from './elasticsearch_adapter';
 import { hostsFieldsMap } from './query.dsl';
 import { HostHit } from './types';

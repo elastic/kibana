@@ -5,6 +5,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+
 import { Refetch } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/inputs');

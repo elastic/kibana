@@ -12,12 +12,13 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { Columns } from '.';
 import { mockEcsData } from '../../../../mock';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
 import { defaultHeaders } from '../column_headers/headers';
 import { columnRenderers } from '../renderers';
+
+import { Columns } from '.';
 
 describe('Columns', () => {
   const state: State = mockGlobalState;

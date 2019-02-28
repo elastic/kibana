@@ -6,6 +6,7 @@
 
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
+
 import { NetworkTopNFlowRequestOptions } from './index';
 
 const getUniDirectionalFilter = (networkTopNFlowDirection: NetworkTopNFlowDirection) =>

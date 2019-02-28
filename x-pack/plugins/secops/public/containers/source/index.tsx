@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isUndefined } from 'lodash';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { isUndefined } from 'lodash';
 import { IndexType, SourceQuery } from '../../graphql/types';
+
 import { sourceQuery } from './index.gql_query';
 
 interface WithSourceArgs {

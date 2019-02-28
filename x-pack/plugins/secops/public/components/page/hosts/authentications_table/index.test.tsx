@@ -7,13 +7,13 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { AuthenticationTable } from '.';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
+
+import { AuthenticationTable } from '.';
 import { mockData } from './mock';
 
 describe('Authentication Table Component', () => {

@@ -11,6 +11,7 @@ import { rootSchema } from '../../../common/graphql/root/schema.gql';
 import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { sourceStatusSchema } from '../source_status/schema.gql';
+
 import { sourcesSchema } from './schema.gql';
 import { getSourceQueryMock, mockSourceData } from './source.mock';
 

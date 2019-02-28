@@ -6,6 +6,7 @@
 
 import { HostsEdges } from '../../graphql/types';
 import { getOrEmptyTag } from '../empty_value';
+
 import { Columns, ItemsPerRow } from './index';
 
 export const mockData = {

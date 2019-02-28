@@ -9,6 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../../graphql/types';
+
 import * as i18n from './translations';
 
 const toggleTypeOptions = [

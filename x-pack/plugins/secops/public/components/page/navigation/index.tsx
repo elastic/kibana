@@ -6,9 +6,10 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
-import * as i18n from './translations';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
+
+import * as i18n from './translations';
 
 interface NavTab {
   id: string;

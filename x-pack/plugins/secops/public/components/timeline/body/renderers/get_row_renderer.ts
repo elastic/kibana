@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+
+import { RowRenderer } from '.';
 
 const unhandledRowRenderer = (): never => {
   throw new Error('Unhandled Row Renderer');

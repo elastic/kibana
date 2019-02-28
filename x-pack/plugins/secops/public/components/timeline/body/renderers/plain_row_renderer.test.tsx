@@ -6,13 +6,14 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { cloneDeep } from 'lodash';
-import { plainRowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
+
+import { plainRowRenderer } from '.';
 
 describe('plain_row_renderer', () => {
   let mockDatum: Ecs;

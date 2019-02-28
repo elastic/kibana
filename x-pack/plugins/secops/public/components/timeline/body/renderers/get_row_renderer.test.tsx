@@ -6,17 +6,18 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { cloneDeep } from 'lodash';
-import { rowRenderers } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
 import { createStore } from '../../../../store';
+
+import { rowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
 
 describe('get_column_renderer', () => {

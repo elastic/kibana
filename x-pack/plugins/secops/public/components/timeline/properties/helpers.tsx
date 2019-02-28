@@ -13,6 +13,7 @@ import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
 import {
   ButtonContainer,
   DescriptionField,

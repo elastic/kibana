@@ -5,7 +5,9 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+
 import { HostsType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/hosts');

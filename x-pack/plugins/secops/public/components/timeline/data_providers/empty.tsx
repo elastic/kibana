@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
+
 import * as i18n from './translations';
 
 const Text = styled(EuiText)`

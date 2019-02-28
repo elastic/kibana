@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+
 import { DEFAULT_PLACEHOLDER, TextFilter } from '.';
 
 describe('TextFilter', () => {

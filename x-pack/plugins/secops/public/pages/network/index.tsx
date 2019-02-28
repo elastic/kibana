@@ -9,6 +9,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+
 import { Network } from './network';
 
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (

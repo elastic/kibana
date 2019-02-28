@@ -13,6 +13,7 @@ import { ESQuery } from '../../../common/typed_json';
 import { Direction, GetKpiEventsQuery, KpiItem } from '../../graphql/types';
 import { inputsModel } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
+
 import { kpiEventsQuery } from './index.gql_query';
 
 export interface KpiEventsArgs {

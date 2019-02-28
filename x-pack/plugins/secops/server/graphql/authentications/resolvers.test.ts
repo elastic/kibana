@@ -13,6 +13,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockAuthenticationsData, mockAuthenticationsFields } from './authentications.mock';
 import { AuthenticationsResolversDeps, createAuthenticationsResolvers } from './resolvers';
 

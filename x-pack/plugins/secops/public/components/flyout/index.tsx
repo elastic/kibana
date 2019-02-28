@@ -15,6 +15,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { State, timelineActions, timelineSelectors } from '../../store';
 import { defaultWidth } from '../timeline/body';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+
 import { FlyoutButton } from './button';
 import { FlyoutPane } from './pane';
 

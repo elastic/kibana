@@ -12,10 +12,11 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { suricataRowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
 import { createStore } from '../../../../store';
+
+import { suricataRowRenderer } from '.';
 
 describe('suricata_row_renderer', () => {
   let nonSuricata: Ecs;

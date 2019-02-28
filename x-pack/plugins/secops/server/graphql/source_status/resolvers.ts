@@ -5,6 +5,7 @@
  */
 
 import { defaultTo } from 'lodash/fp';
+
 import { IndexType, SourceStatusResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
 import { IndexFields } from '../../lib/index_fields';

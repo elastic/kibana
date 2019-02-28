@@ -9,6 +9,7 @@ import * as React from 'react';
 
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { FormattedField } from './formatted_field';
 
 describe('Events', () => {

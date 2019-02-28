@@ -12,6 +12,7 @@ import { Dispatch } from 'redux';
 import styled from 'styled-components';
 
 import { WhoAmI } from '../containers/who_am_i';
+
 import { DragEffects, DraggableWrapper } from './drag_and_drop/draggable_wrapper';
 import { mockDataProviders } from './timeline/data_providers/mock/mock_data_providers';
 import { Provider } from './timeline/data_providers/provider';

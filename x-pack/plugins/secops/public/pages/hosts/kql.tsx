@@ -13,6 +13,7 @@ import { HostsFilter } from '../../containers/hosts';
 import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { hostsModel } from '../../store';
 import { PageHeader, PageHeaderSection } from '../styles';
+
 import * as i18n from './translations';
 
 interface HostsKqlProps {

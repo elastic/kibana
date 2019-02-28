@@ -8,6 +8,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
+
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import {

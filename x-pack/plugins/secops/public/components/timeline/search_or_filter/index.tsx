@@ -19,6 +19,7 @@ import {
 } from '../../../store';
 import { KqlMode, TimelineModel } from '../../../store/local/timeline/model';
 import { State } from '../../../store/reducer';
+
 import { SearchOrFilter } from './search_or_filter';
 
 interface OwnProps {

@@ -22,6 +22,7 @@ import styled from 'styled-components';
 import { LoadingPanel } from '../../loading';
 import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
+
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 

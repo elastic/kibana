@@ -7,10 +7,11 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { ColumnHeaders } from '.';
 import { Direction } from '../../../../graphql/types';
 import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 import { Sort } from '../sort';
+
+import { ColumnHeaders } from '.';
 import { defaultHeaders } from './headers';
 
 describe('ColumnHeaders', () => {

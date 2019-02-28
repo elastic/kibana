@@ -7,6 +7,7 @@
 import { IndexField, IndexType } from '../../graphql/types';
 import { FrameworkRequest } from '../framework';
 import { Sources } from '../sources';
+
 import { FieldsAdapter } from './types';
 export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
 

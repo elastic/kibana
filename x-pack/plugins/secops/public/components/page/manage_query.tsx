@@ -6,6 +6,7 @@
 
 import { omit } from 'lodash/fp';
 import React from 'react';
+
 import { inputsModel } from '../../store';
 
 interface OwnProps {

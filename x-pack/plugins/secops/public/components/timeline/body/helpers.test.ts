@@ -5,6 +5,7 @@
  */
 
 import { Ecs } from '../../../graphql/types';
+
 import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
 
 describe('helpers', () => {

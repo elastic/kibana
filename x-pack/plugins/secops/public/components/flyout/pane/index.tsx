@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { FlyoutHeader } from '../header';
 import { ResizeHandle } from '../resize_handle';
+
 import * as i18n from './translations';
 
 interface FlyoutPaneProps {

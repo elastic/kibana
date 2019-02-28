@@ -5,6 +5,7 @@
  */
 import { UncommonProcessesEdges } from '../../graphql/types';
 import { processFieldsMap } from '../ecs_fields';
+
 import { formatUncommonProcessesData, getHosts } from './elasticsearch_adapter';
 import { UncommonProcessBucket, UncommonProcessHit } from './types';
 

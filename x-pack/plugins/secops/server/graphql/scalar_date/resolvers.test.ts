@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { IntValueNode, StringValueNode } from 'graphql';
+
 import { dateScalar } from './resolvers';
 
 describe('Test ScalarDate Resolver', () => {

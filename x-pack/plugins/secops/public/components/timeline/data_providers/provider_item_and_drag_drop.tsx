@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -14,6 +15,7 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
+
 import { DataProvider } from './data_provider';
 import { ProviderItemAndPopover } from './provider_item_and_popover';
 

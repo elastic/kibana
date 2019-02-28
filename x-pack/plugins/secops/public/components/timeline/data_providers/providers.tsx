@@ -23,6 +23,7 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
 } from '../events';
+
 import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';

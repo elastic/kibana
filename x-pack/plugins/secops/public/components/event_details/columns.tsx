@@ -17,6 +17,7 @@ import styled from 'styled-components';
 import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 import { SelectableText } from '../selectable_text';
 import { WithHoverActions } from '../with_hover_actions';
+
 import { getIconFromType } from './helpers';
 import * as i18n from './translations';
 

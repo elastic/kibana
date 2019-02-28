@@ -5,7 +5,9 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+
 import { mockIndexPattern } from '../../mock';
+
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 

@@ -5,7 +5,6 @@
  */
 
 import { EuiBadge, EuiPanel, EuiText } from '@elastic/eui';
-
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -13,6 +12,7 @@ import styled from 'styled-components';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 import { droppableTimelineFlyoutButtonPrefix } from '../../drag_and_drop/helpers';
 import { DataProvider } from '../../timeline/data_providers/data_provider';
+
 import * as i18n from './translations';
 
 const Container = styled.div`

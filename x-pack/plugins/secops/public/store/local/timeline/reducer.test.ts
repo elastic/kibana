@@ -5,9 +5,11 @@
  */
 
 import { set } from 'lodash/fp';
-import { TimelineById } from '.';
+
 import { defaultWidth } from '../../../components/timeline/body';
 import { Direction } from '../../../graphql/types';
+
+import { TimelineById } from '.';
 import {
   addNewTimeline,
   addTimelineProvider,

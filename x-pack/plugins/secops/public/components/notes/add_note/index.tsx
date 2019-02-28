@@ -17,6 +17,7 @@ import {
   UpdateNote,
 } from '../helpers';
 import * as i18n from '../translations';
+
 import { NewNote } from './new_note';
 
 const AddNotesContainer = styled(EuiFlexGroup)`

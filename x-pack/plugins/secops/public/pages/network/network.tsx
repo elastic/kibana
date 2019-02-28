@@ -21,6 +21,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { IndexType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
+
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
 

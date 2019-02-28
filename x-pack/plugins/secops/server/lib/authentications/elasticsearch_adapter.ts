@@ -5,10 +5,12 @@
  */
 
 import { getOr } from 'lodash/fp';
+
 import { AuthenticationsData, AuthenticationsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
+
 import { auditdFieldsMap, buildQuery } from './query.dsl';
 import {
   AuthenticationBucket,

@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../../timeline/data_providers/provider';
+
 import { getBeginningTokens } from './suricata_links';
 
 const SignatureFlexItem = styled(EuiFlexItem)`

@@ -13,6 +13,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockNetworkTopNFlowData, mockNetworkTopNFlowFields } from './network_top_n_flow.mock';
 import { createNetworkTopNFlowResolvers, NetworkTopNFlowResolversDeps } from './resolvers';
 

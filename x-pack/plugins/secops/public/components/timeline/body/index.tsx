@@ -20,6 +20,7 @@ import {
   OnUnPinEvent,
 } from '../events';
 import { footerHeight } from '../footer';
+
 import { ColumnHeaders } from './column_headers';
 import { ColumnHeader } from './column_headers/column_header';
 import { Events } from './events';

@@ -14,6 +14,7 @@ import { ThemeProvider } from 'styled-components';
 import { getPopulatedMappedFields, virtualEcsSchema } from '../../../public/lib/ecs';
 import { mockEcsData } from '../../mock/mock_ecs';
 import { createStore } from '../../store';
+
 import { getExampleText, getIconFromType, getItems } from './helpers';
 
 const aField = virtualEcsSchema.event.fields['event.category'];

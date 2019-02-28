@@ -9,6 +9,7 @@ import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import * as i18n from '../translations';
+
 import { NoteCardHeader } from './note_card_header';
 
 describe('NoteCardHeader', () => {

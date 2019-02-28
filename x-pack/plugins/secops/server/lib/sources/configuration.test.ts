@@ -5,6 +5,7 @@
  */
 
 import { InmemoryConfigurationAdapter } from '../configuration/inmemory_configuration_adapter';
+
 import { ConfigurationSourcesAdapter } from './configuration';
 import { PartialSourceConfiguration } from './types';
 

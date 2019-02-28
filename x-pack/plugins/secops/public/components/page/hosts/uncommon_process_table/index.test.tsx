@@ -16,6 +16,7 @@ import { mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { DragDropContextWrapper } from '../../../drag_and_drop/drag_drop_context_wrapper';
 import { getEmptyValue } from '../../../empty_value';
+
 import { UncommonProcessTable } from './index';
 import { mockData } from './mock';
 

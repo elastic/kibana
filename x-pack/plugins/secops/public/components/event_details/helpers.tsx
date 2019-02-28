@@ -14,6 +14,7 @@ import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrappe
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { FormattedField } from '../timeline/body/renderers/formatted_field';
 import { Provider } from '../timeline/data_providers/provider';
+
 import * as i18n from './translations';
 
 /**
