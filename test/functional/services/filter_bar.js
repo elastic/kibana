@@ -135,9 +135,9 @@ export function FilterBarProvider({ getService, getPageObjects }) {
       return indexPatterns.trim().split('\n').join(',');
     }
 
-    async selectIndexPattern(indePatternTitle) {
+    async selectIndexPattern(indexPatternTitle) {
       await testSubjects.click('addFilter');
-      await comboBox.set('filterIndexPatternsSelect', indePatternTitle);
+      await comboBox.set('filterIndexPatternsSelect', indexPatternTitle);
     }
   }
 
