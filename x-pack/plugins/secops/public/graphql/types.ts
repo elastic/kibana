@@ -45,6 +45,8 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
+
+  KpiNetwork?: KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -424,6 +426,14 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface KpiNetworkData {
+  networkEvents: number;
+
+  uniqueFlowId: number;
+
+  activeAgents?: number | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -502,6 +512,13 @@ export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
 
   filterQuery?: string | null;
 }
@@ -1063,6 +1080,38 @@ export namespace GetKpiEventsQuery {
     value: string;
 
     count: number;
+  };
+}
+
+export namespace GetKpiNetworkQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    KpiNetwork: KpiNetwork;
+  };
+
+  export type KpiNetwork = {
+    __typename?: 'KpiNetworkData';
+
+    networkEvents: number;
+
+    uniqueFlowId: number;
+
+    activeAgents?: number | null;
   };
 }
 

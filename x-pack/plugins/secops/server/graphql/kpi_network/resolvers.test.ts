@@ -4,36 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
-import { Direction, Source } from '../../graphql/types';
-import { Events } from '../../lib/events';
-import { EventsAdapter } from '../../lib/events/types';
+
+import { Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
+import { KpiNetwork } from '../../lib/kpi_network';
+import { KpiNetworkAdapter } from '../../lib/kpi_network/types';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
-import { mockEventsData, mockEventsFields } from './events.mock';
-import { createEventsResolvers, EventsResolversDeps } from './resolvers';
+import { mockKpiNetworkData, mockKpiNetworkFields } from './kpi_network.mock';
+import { createKpiNetworkResolvers, KpiNetworkResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
-mockGetFields.mockResolvedValue({ fieldNodes: [mockEventsFields] });
+mockGetFields.mockResolvedValue({ fieldNodes: [mockKpiNetworkFields] });
 jest.mock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 
-const mockGetEvents = jest.fn();
-mockGetEvents.mockResolvedValue({
-  Events: {
-    ...mockEventsData.Events,
+const mockGetKpiNetwork = jest.fn();
+mockGetKpiNetwork.mockResolvedValue({
+  KpiNetwork: {
+    ...mockKpiNetworkData.KpiNetwork,
   },
 });
-const mockEventsAdapter: EventsAdapter = {
-  getEvents: mockGetEvents,
+const mockKpiNetworkAdapter: KpiNetworkAdapter = {
+  getKpiNetwork: mockGetKpiNetwork,
 };
 
-const mockEventsLibs: EventsResolversDeps = {
-  events: new Events(mockEventsAdapter),
+const mockKpiNetworkLibs: KpiNetworkResolversDeps = {
+  kpiNetwork: new KpiNetwork(mockKpiNetworkAdapter),
 };
 
 const mockSrcLibs: SourcesResolversDeps = {
@@ -59,14 +60,14 @@ const req: FrameworkRequest = {
 const context = { req };
 
 describe('Test Source Resolvers', () => {
-  test('Make sure that getEvents have been called', async () => {
+  test('Make sure that getKpiNetwork have been called', async () => {
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
       { id: 'default' },
       context,
       {} as GraphQLResolveInfo
     );
-    const data = await createEventsResolvers(mockEventsLibs).Source.Events(
+    const data = await createKpiNetworkResolvers(mockKpiNetworkLibs).Source.KpiNetwork(
       source as Source,
       {
         timerange: {
@@ -74,19 +75,11 @@ describe('Test Source Resolvers', () => {
           to: 1514782800000,
           from: 1546318799999,
         },
-        pagination: {
-          limit: 2,
-          cursor: null,
-        },
-        sortField: {
-          sortFieldId: 'timestamp',
-          direction: Direction.descending,
-        },
       },
       context,
       {} as GraphQLResolveInfo
     );
-    expect(mockEventsAdapter.getEvents).toHaveBeenCalled();
-    expect(data).toEqual(mockEventsData);
+    expect(mockKpiNetworkAdapter.getKpiNetwork).toHaveBeenCalled();
+    expect(data).toEqual(mockKpiNetworkData);
   });
 });

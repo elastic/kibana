@@ -20,7 +20,7 @@ export type FieldNodes = Pick<GraphQLResolveInfo, 'fieldNodes'>;
 // and sortField won't be optional and might support multi-sort
 export interface Args {
   timerange?: TimerangeInput | null;
-  pagination: PaginationInput;
+  pagination?: PaginationInput | null;
   filterQuery?: string | null;
   sortField?: SortField | null;
 }
@@ -34,7 +34,7 @@ export const createOptions = (
   return {
     sourceConfiguration: source.configuration,
     timerange: args.timerange!,
-    pagination: args.pagination,
+    pagination: args.pagination!,
     sortField: args.sortField!,
     filterQuery: parseFilterQuery(args.filterQuery || ''),
     fields: fields.map(field => field.replace('edges.node.', '')),

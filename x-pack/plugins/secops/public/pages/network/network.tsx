@@ -10,10 +10,12 @@ import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
+import { EuiSpacer } from '@elastic/eui';
 import { EmptyPage } from '../../components/empty_page';
 import { manageQuery } from '../../components/page/manage_query';
-import { NetworkTopNFlowTable } from '../../components/page/network';
+import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { GlobalTime } from '../../containers/global_time';
+import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
@@ -43,6 +45,16 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
               <GlobalTime>
                 {({ poll, to, from, setQuery }) => (
                   <>
+                    <KpiNetworkQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
+                      sourceId="default"
+                      startDate={from}
+                    >
+                      {({ kpiNetwork }) => <KpiNetworkComponent data={kpiNetwork} />}
+                    </KpiNetworkQuery>
+                    <EuiSpacer size="m" />
                     <NetworkTopNFlowQuery
                       endDate={to}
                       filterQuery={filterQuery}

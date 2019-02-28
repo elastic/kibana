@@ -4,5 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NetworkTopNFlowTable } from './network_top_n_flow_table';
-export { KpiNetworkComponent } from './kpi_network';
+import { KpiNetworkData } from '../../../../graphql/types';
+
+export const mockData: { KpiNetwork: KpiNetworkData } = {
+  KpiNetwork: {
+    networkEvents: 16,
+    uniqueFlowId: 10277307,
+    activeAgents: 60015,
+  },
+};

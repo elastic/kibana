@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
-import { omit } from 'lodash/fp';
-
 import { NetworkTopNFlowDirection, NetworkTopNFlowType, Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { NetworkTopNFlow } from '../../lib/network_top_n_flow';
@@ -89,6 +87,6 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockNetworkTopNFlowAdapter.getNetworkTopNFlow).toHaveBeenCalled();
-    expect(data).toEqual(omit('status', mockNetworkTopNFlowData));
+    expect(data).toEqual(mockNetworkTopNFlowData);
   });
 });

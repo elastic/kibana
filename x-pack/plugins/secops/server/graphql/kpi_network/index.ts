@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { NetworkTopNFlowTable } from './network_top_n_flow_table';
-export { KpiNetworkComponent } from './kpi_network';
+export { createKpiNetworkResolvers } from './resolvers';
+export { kpiNetworkSchema } from './schema.gql';
