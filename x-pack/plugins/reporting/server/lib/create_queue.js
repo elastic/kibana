@@ -16,7 +16,6 @@ function createQueueFn(server) {
   const queueConfig = server.config().get('xpack.reporting.queue');
   const index = server.config().get('xpack.reporting.index');
   const createWorkers = createWorkersFactory(server);
-  const { getClient } = server.plugins.elasticsearch.getCluster('admin');
 
   const logger = createTaggedLogger(server, ['reporting', 'esqueue']);
   const queueOptions = {
@@ -24,7 +23,7 @@ function createQueueFn(server) {
     interval: queueConfig.indexInterval,
     timeout: queueConfig.timeout,
     dateSeparator: dateSeparator,
-    client: getClient(),
+    client: server.plugins.elasticsearch.getCluster('admin'),
     logger,
   };
 
