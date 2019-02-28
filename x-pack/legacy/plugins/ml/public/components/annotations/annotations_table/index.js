@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AnnotationsTable } from './annotations_table';
-
-import './annotations_table_directive';
+export *  from './annotations_table';

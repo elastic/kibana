@@ -9,24 +9,6 @@
   <div ng-show="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <div ng-show="showAnnotations && focusAnnotationData.length > 0">
-        <span
-          class="panel-title euiText"
-          i18n-id="xpack.ml.timeSeriesExplorer.annotationsTitle"
-          i18n-default-message="Annotations"
-        ></span>
-
-        <ml-annotation-table
-          annotations="focusAnnotationData"
-          drill-down="false"
-          number-badge="true"
-        />
-
-        <div class="euiSpacer euiSpacer--l"></div>
-      </div>
-
-      <ml-annotation-flyout />
-
       <span
         class="panel-title euiText"
         i18n-id="xpack.ml.timeSeriesExplorer.anomaliesTitle"

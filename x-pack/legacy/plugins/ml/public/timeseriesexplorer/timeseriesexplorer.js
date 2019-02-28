@@ -22,9 +22,12 @@ import {
   EuiFormRow,
   EuiButton,
   EuiSelect,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 
+import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
+import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
@@ -298,6 +301,25 @@ export const TimeSeriesExplorer = injectI18n(
                   showModelBounds={showModelBounds}
                 />
               </div>
+
+              {showAnnotations && tsc.focusAnnotationData.length > 0 && (
+                <div>
+                  <span className="panel-title">
+                    <FormattedMessage
+                      id="xpack.ml.timeSeriesExplorer.annotationsTitle"
+                      defaultMessage="Annotations"
+                    />
+                  </span>
+                  <AnnotationsTable
+                    annotations={tsc.focusAnnotationData}
+                    drillDown={false}
+                    numberBadge={true}
+                  />
+                  <EuiSpacer size="l" />
+                </div>
+              )}
+
+              <AnnotationFlyout />
             </EuiText>
           )}
         </Fragment>
