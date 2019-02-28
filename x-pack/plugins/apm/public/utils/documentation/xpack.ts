@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { metadata } from 'ui/metadata';
 const STACK_VERSION = metadata.branch;
 
