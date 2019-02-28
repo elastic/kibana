@@ -26,7 +26,6 @@ import { Prerequisites } from './types';
 
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
-// @ts-ignore
 interface ExportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
