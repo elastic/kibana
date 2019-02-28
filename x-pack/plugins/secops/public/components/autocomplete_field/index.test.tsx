@@ -9,10 +9,9 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-
 import { ThemeProvider } from 'styled-components';
-
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+
 import { AutocompleteField } from '.';
 
 const mockAutoCompleteData: AutocompleteSuggestion[] = [

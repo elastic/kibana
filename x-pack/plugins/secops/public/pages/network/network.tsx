@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
-import { EuiSpacer } from '@elastic/eui';
 import { EmptyPage } from '../../components/empty_page';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
@@ -21,6 +21,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { IndexType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
+
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
 

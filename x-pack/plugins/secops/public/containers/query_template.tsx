@@ -5,9 +5,9 @@
  */
 
 import { ApolloQueryResult } from 'apollo-client';
-
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
+
 import { ESQuery } from '../../common/typed_json';
 
 export interface QueryTemplateProps {

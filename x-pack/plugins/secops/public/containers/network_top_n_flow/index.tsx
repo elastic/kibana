@@ -19,6 +19,7 @@ import {
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { networkTopNFlowQuery } from './index.gql_query';
 
 export interface NetworkTopNFlowArgs {

@@ -8,6 +8,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';

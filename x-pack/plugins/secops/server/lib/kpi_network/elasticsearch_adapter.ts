@@ -5,9 +5,11 @@
  */
 
 import { getOr } from 'lodash/fp';
+
 import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
+
 import { buildQuery } from './query.dsl';
 import { KpiNetworkAdapter, KpiNetworkHit } from './types';
 

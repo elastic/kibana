@@ -15,6 +15,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockHostsData, mockHostsFields } from './hosts.mock';
 import { createHostsResolvers, HostsResolversDeps } from './resolvers';
 

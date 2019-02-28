@@ -23,6 +23,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+
 import { AddToKql } from './add_to_kql';
 import * as i18n from './translations';
 

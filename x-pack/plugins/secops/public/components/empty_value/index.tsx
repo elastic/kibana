@@ -7,6 +7,7 @@
 import { get, isString } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+
 import * as i18n from './translations';
 
 const EmptyString = styled.span`

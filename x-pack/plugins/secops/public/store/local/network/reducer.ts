@@ -8,6 +8,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
+
 import {
   applyNetworkFilterQuery,
   setNetworkFilterQueryDraft,

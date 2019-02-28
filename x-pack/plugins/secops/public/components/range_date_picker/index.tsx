@@ -10,7 +10,9 @@ import moment, { Moment } from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
+
 import { inputsActions, inputsModel, State } from '../../store';
+
 import { GlobalDateButton } from './global_date_button';
 import { QuickSelectPopover } from './quick_select_popover';
 import { UpdateButton } from './update_button';

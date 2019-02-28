@@ -5,6 +5,7 @@
  */
 import { EcsEdges } from '../../graphql/types';
 import { eventFieldsMap } from '../ecs_fields';
+
 import { formatEventsData } from './elasticsearch_adapter';
 import { EventHit } from './types';
 

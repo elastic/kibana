@@ -5,8 +5,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
+
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
+
 import { NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/network');

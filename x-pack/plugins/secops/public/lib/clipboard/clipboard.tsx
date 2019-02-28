@@ -9,6 +9,7 @@ import copy from 'copy-to-clipboard';
 import * as React from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
+
 import * as i18n from './translations';
 
 export type OnCopy = (

@@ -7,11 +7,12 @@
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
-
 import { pure } from 'recompose';
+
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
+
 import { kpiNetworkQuery } from './index.gql_query';
 
 export interface KpiNetworkArgs {

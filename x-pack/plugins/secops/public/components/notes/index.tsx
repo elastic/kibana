@@ -15,6 +15,7 @@ import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
 import { NOTES_PANEL_HEIGHT, NOTES_PANEL_WIDTH } from '../timeline/properties/helpers';
+
 import { AddNote } from './add_note';
 import { columns } from './columns';
 import { AssociateNote, GetNewNoteId, NotesCount, search, UpdateNote } from './helpers';

@@ -5,6 +5,7 @@
  */
 
 import { DatabaseGetIndicesResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
+
 import { SourceStatusAdapter } from './index';
 
 export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {

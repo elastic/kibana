@@ -13,6 +13,7 @@ import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '.
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { HostSummaryQuery } from './host_summary.gql_query';
 import { HostsTableQuery } from './hosts_table.gql_query';
 

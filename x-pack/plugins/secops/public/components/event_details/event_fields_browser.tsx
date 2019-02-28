@@ -13,6 +13,7 @@ import { pure } from 'recompose';
 
 import { Ecs } from '../../graphql/types';
 import { getPopulatedMappedFields, virtualEcsSchema } from '../../lib/ecs';
+
 import { columns } from './columns';
 import { getItems, search } from './helpers';
 

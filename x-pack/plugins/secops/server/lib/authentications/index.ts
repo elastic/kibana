@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkRequest, RequestOptions } from '../framework';
-export * from './elasticsearch_adapter';
 import { AuthenticationsData } from '../../graphql/types';
+import { FrameworkRequest, RequestOptions } from '../framework';
+
 import { AuthenticationsAdapter } from './types';
 
 export class Authentications {

@@ -16,6 +16,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
+
 import { EventsTable, formatIpSafely } from './index';
 import { mockData } from './mock';
 

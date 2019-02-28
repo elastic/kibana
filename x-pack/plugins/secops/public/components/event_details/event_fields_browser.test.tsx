@@ -14,6 +14,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockEcsData } from '../../mock/mock_ecs';
 import { createStore } from '../../store';
+
 import { EventFieldsBrowser } from './event_fields_browser';
 
 describe('EventFieldsBrowser', () => {

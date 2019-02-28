@@ -28,6 +28,7 @@ import { IndexType } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { hostsModel, hostsSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
+
 import { HostsKql } from './kql';
 import * as i18n from './translations';
 

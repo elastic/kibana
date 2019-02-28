@@ -11,6 +11,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
 import { createStore } from '../../store';
+
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
 

@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort } from '../sort';
+
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';

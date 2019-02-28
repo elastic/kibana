@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+
 import { Footer } from './index';
 import { mockData } from './mock';
 

@@ -12,10 +12,11 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { Body } from '.';
 import { Direction } from '../../../graphql/types';
 import { mockEcsData } from '../../../mock';
 import { createStore } from '../../../store';
+
+import { Body } from '.';
 import { defaultHeaders } from './column_headers/headers';
 import { columnRenderers, rowRenderers } from './renderers';
 

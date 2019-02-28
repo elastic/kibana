@@ -5,8 +5,10 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
+
 import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
+
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
 

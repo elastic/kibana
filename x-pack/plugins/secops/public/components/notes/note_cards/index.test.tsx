@@ -7,8 +7,9 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { NoteCards } from '.';
 import { Note } from '../../../lib/note';
+
+import { NoteCards } from '.';
 
 describe('NoteCards', () => {
   const noteIds = ['abc', 'def'];

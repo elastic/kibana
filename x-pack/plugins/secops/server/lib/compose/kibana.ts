@@ -6,13 +6,15 @@
 
 import { Server } from 'hapi';
 
-import { Authentications, ElasticsearchAuthenticationAdapter } from '../authentications';
+import { Authentications } from '../authentications';
+import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
 import { ElasticsearchEventsAdapter, Events } from '../events';
 import { KibanaBackendFrameworkAdapter } from '../framework/kibana_framework_adapter';
 import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
-import { ElasticsearchKpiNetworkAdapter, KpiNetwork } from '../kpi_network';
+import { KpiNetwork } from '../kpi_network';
+import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkTopNFlowAdapter, NetworkTopNFlow } from '../network_top_n_flow';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';

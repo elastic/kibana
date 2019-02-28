@@ -12,6 +12,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { createStore } from '../../store';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
+
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DraggableWrapper } from './draggable_wrapper';
 

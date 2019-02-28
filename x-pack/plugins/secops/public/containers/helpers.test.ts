@@ -5,6 +5,7 @@
  */
 
 import { ESQuery } from '../../common/typed_json';
+
 import { createFilter } from './helpers';
 
 describe('Helpers', () => {

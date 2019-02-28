@@ -8,14 +8,15 @@ import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
-
 import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { TimelineQuery } from '../../containers/timeline';
 import { Direction } from '../../graphql/types';
 import { Note } from '../../lib/note';
 import { timelineModel } from '../../store';
 import { AutoSizer } from '../auto_sizer';
 import { AddNoteToEvent, UpdateNote } from '../notes/helpers';
+
 import { Body } from './body';
 import { ColumnHeader } from './body/column_headers/column_header';
 import { ColumnRenderer } from './body/renderers';

@@ -13,6 +13,7 @@ import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../g
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { authenticationsQuery } from './index.gql_query';
 
 export interface AuthenticationArgs {

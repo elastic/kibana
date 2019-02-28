@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnRenderer } from '.';
 import { getEmptyTagValue } from '../../../empty_value';
+
+import { ColumnRenderer } from '.';
 
 export const unknownColumnRenderer: ColumnRenderer = {
   isInstance: () => true,

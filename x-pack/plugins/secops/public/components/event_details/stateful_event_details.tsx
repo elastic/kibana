@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import { Ecs } from '../../graphql/types';
+
 import { EventDetails, View } from './event_details';
 
 interface Props {

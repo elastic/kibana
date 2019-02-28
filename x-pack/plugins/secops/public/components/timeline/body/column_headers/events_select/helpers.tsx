@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Pin } from '../../../../pin';
+
 import * as i18n from './translations';
 
 const InputDisplay = styled.div`

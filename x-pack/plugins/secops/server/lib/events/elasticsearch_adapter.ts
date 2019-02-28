@@ -11,6 +11,7 @@ import { mergeFieldsWithHit } from '../../utils/build_query';
 import { eventFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
+
 import { buildQuery } from './query.dsl';
 import { EventHit, EventsAdapter } from './types';
 

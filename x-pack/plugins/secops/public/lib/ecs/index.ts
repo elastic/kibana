@@ -7,6 +7,7 @@
 import { get, getOr, has, keyBy, sortBy } from 'lodash/fp';
 
 import { Ecs } from '../../graphql/types';
+
 import { EcsField } from './ecs_field';
 import { EcsSchema } from './ecs_schema';
 

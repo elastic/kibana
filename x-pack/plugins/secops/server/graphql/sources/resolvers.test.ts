@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
 import { SourceStatus, SourceStatusAdapter } from '../../lib/source_status';
 import { Sources, SourcesAdapter } from '../../lib/sources';
+
 import { createSourcesResolvers, SourcesResolversDeps } from './resolvers';
 import { mockSourceData } from './source.mock';
 

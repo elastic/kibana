@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+
+import { ColumnRenderer } from '.';
 
 const unhandledColumnRenderer = (): never => {
   throw new Error('Unhandled Column Renderer');

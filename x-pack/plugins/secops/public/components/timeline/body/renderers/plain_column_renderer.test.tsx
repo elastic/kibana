@@ -7,19 +7,20 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { cloneDeep, noop } from 'lodash/fp';
+import moment from 'moment-timezone';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import moment from 'moment-timezone';
-import { plainColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData, mockFrameworks } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 import { KibanaConfigContext } from '../../../formatted_date';
+
+import { plainColumnRenderer } from '.';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 const mockFramework = mockFrameworks.default_UTC;

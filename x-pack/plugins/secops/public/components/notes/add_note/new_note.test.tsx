@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import * as i18n from '../translations';
+
 import { NewNote } from './new_note';
 
 describe('NewNote', () => {

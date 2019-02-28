@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+
 import { getDateRange, getDates, MomentUnit } from './date_ranges';
 
 describe('dateRanges', () => {

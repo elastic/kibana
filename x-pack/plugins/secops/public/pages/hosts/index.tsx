@@ -9,6 +9,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+
 import { HostDetails } from './host_details';
 import { Hosts } from './hosts';
 

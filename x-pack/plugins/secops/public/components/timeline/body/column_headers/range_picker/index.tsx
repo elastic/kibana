@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { OnRangeSelected } from '../../../events';
+
 import { Ranges } from './ranges';
 
 interface Props {

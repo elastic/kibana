@@ -8,11 +8,12 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { emptyColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
+import { emptyColumnRenderer } from '.';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 

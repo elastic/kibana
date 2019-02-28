@@ -7,8 +7,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { RowRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
+
+import { RowRenderer } from '.';
 
 const PlainRow = styled.div`
   width: 100%;

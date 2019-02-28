@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { LoadingPanel } from '../loading';
+
 import * as i18n from './translations';
 
 export interface HorizontalBarChartData {
