@@ -224,6 +224,12 @@ describe('reindexService', () => {
       expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
 
+    it('fails if system index', async () => {
+      actions.getFlatSettings.mockResolvedValueOnce({ settings: {}, mappings: {} });
+      await expect(service.createReindexOperation('.myIndex')).rejects.toThrow();
+      expect(actions.createReindexOp).not.toHaveBeenCalled();
+    });
+
     it('deletes existing operation if it failed', async () => {
       callCluster.mockResolvedValueOnce(true); // indices.exist
       actions.findReindexOperations.mockResolvedValueOnce({
