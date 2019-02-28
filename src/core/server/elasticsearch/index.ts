@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import _ from 'lodash';
+export { ElasticsearchServiceStart } from './elasticsearch_service';
+export { CallAPIOptions, ClusterClient } from './cluster_client';
 
-export default function (originalHeaders, headersToKeep) {
-  const normalizeHeader = function (header) {
-    if (!header) {
-      return '';
-    }
-    header = header.toString();
-    return header.trim().toLowerCase();
-  };
+import { CoreContext } from '../../types';
+import { ElasticsearchService } from './elasticsearch_service';
 
-  // Normalize list of headers we want to allow in upstream request
-  const headersToKeepNormalized = headersToKeep.map(normalizeHeader);
+/** @internal */
+export class ElasticsearchModule {
+  public readonly service: ElasticsearchService;
 
-  return _.pick(originalHeaders, headersToKeepNormalized);
+  constructor(coreContext: CoreContext) {
+    this.service = new ElasticsearchService(coreContext);
+  }
 }
