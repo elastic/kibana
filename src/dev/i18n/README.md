@@ -203,3 +203,36 @@ integrating translations to has changed and some translations are not needed any
 ### Output
 
 Unless `--target` is specified, the tool generates locale files in plugin folders and few other special locations based on namespaces and corresponding mappings defined in [.i18nrc.json](../../../.i18nrc.json).
+
+
+## Validation tool
+
+### Description
+
+The tool performs a number of checks on internationalized labels and verifies whether they don't conflict with the existing translations.
+
+### Notes
+
+We don't catch every possible misuse of i18n framework, but only the most common and critical ones.
+
+To perform translations compatibility checks tool relies on existing translations referenced in `translations` section of [.i18nrc.json](../../../.i18nrc.json).
+
+Currently auto-fixer (`--fix`) can only automatically fix two types of errors, and for both of them the fix is just removing of conflicting translation entries from JSON files:
+
+* incompatible translation - this error means that the value references in internationalized label differ from the ones
+in the existing translation
+
+* unused translation - this error means that the translations file includes label that doesn't exist anymore.
+
+### Usage
+
+```bash
+node scripts/i18n_check --fix
+```
+
+* `--fix` tells the tool to try to fix as much violations as possible. All errors that tool won't be able to fix will be reported.
+* `--ignore-incompatible` specifies whether tool should ignore incompatible translations.
+* `--ignore-missing` specifies whether tool should ignore missing translations.
+* `--ignore-unused` specifies whether tool should ignore unused translations.
+* `--include-config` specifies additional paths to `.i18nrc.json` files (may be useful for 3rd-party plugins)
+
