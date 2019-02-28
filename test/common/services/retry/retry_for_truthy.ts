@@ -17,33 +17,36 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import { retryForSuccess } from './retry_for_success';
 
-export async function retryForTruthy(log, {
-  timeout,
-  methodName,
-  description,
-  block
-}) {
+interface Options {
+  timeout: number;
+  methodName: string;
+  description: string;
+  block: () => Promise<boolean>;
+}
+
+export async function retryForTruthy(
+  log: ToolingLog,
+  { timeout, methodName, description, block }: Options
+) {
   log.debug(`Waiting up to ${timeout}ms for ${description}...`);
-
-  const accept = result => Boolean(result);
-
-  const onFailure = lastError => {
-    let msg = `timed out waiting for ${description}`;
-
-    if (lastError) {
-      msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
-    }
-
-    throw new Error(msg);
-  };
 
   await retryForSuccess(log, {
     timeout,
     methodName,
     block,
-    onFailure,
-    accept
+    onFailure: lastError => {
+      let msg = `timed out waiting for ${description}`;
+
+      if (lastError) {
+        msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
+      }
+
+      throw new Error(msg);
+    },
+    accept: result => Boolean(result),
   });
 }

@@ -17,7 +17,15 @@
  * under the License.
  */
 
-export { KibanaServerProvider } from './kibana_server';
-export { EsProvider } from './es';
-export { EsArchiverProvider } from './es_archiver';
-export { RetryProvider } from './retry';
+import { EsProvider } from './es';
+import { EsArchiverProvider } from './es_archiver';
+// @ts-ignore not TS yet
+import { KibanaServerProvider } from './kibana_server';
+import { RetryProvider } from './retry';
+
+export const services = {
+  es: EsProvider,
+  esArchiver: EsArchiverProvider,
+  kibanaServer: KibanaServerProvider,
+  retry: RetryProvider,
+};
