@@ -71,7 +71,8 @@ class DatePickerComponent extends React.Component<Props> {
     );
     const parsed = {
       from: datemath.parse(rangeFrom),
-      to: datemath.parse(rangeTo)
+      // roundUp: true is required for the quick select relative date values to work properly
+      to: datemath.parse(rangeTo, { roundUp: true })
     };
     if (!parsed.from || !parsed.to) {
       return;
