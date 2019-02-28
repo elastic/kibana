@@ -19,7 +19,7 @@ export const getLinksFromSignature = (id: string): string[] => {
 const specialTokenRules = ['IPv4', 'IPv6'];
 
 export const getBeginningTokens = (signature: string): string[] => {
-  const signatureSplit = signature.split(' ');
+  const signatureSplit = signature.trim().split(' ');
   return signatureSplit.reduce<string[]>((accum, curr, index) => {
     if (
       (accum.length === index && curr === curr.toUpperCase() && curr !== '') ||

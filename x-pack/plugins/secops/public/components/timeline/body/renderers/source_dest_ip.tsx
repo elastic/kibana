@@ -88,9 +88,7 @@ export const SourceIp = pure(({ data }: { data: Ecs }) =>
               fieldName={'source.ip'}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {fieldExists({ data, fieldName: 'source.port' }) ? ':' : null}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>:</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DraggableValue data={data} fieldName={'source.port'} />
           </EuiFlexItem>
@@ -115,9 +113,7 @@ export const DestinationIp = pure(({ data }: { data: Ecs }) =>
               fieldName={'destination.ip'}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {fieldExists({ data, fieldName: 'destination.port' }) ? ':' : null}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>:</EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DraggableValue data={data} fieldName={'destination.port'} />
           </EuiFlexItem>

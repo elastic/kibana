@@ -20,20 +20,18 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
   display: inline;
 `;
 
-export const SuricataRefs = pure(
-  ({ signature, signatureId }: { signature: string; signatureId: string }) => {
-    const links = getLinksFromSignature(signatureId);
-    return (
-      <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
-        {links.map(link => (
-          <LinkEuiFlexItem key={link} grow={false}>
-            <Icon type="link" size="s" />
-            <EuiLink href={link} color="subdued" target="_blank">
-              {link}
-            </EuiLink>
-          </LinkEuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-);
+export const SuricataRefs = pure(({ signatureId }: { signatureId: string }) => {
+  const links = getLinksFromSignature(signatureId);
+  return (
+    <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
+      {links.map(link => (
+        <LinkEuiFlexItem key={link} grow={false}>
+          <Icon type="link" size="s" />
+          <EuiLink href={link} color="subdued" target="_blank">
+            {link}
+          </EuiLink>
+        </LinkEuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+});

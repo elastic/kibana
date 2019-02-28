@@ -27,7 +27,7 @@ export const SuricataDetails = pure(({ data }: { data: Ecs }) => {
     return (
       <Details>
         <SuricataSignature id={data._id} signature={signature} signatureId={signatureId} />
-        <SuricataRefs signature={signature} signatureId={signatureId} />
+        <SuricataRefs signatureId={signatureId} />
         <EuiSpacer size="s" />
         <SourceDest data={data} />
       </Details>

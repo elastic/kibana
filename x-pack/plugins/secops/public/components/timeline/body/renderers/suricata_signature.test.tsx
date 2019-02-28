@@ -76,12 +76,12 @@ describe('SuricataSignature', () => {
   });
 
   describe('Tokens', () => {
-    it('should render empty if tokens are empty', () => {
+    test('should render empty if tokens are empty', () => {
       const wrapper = mountWithIntl(<Tokens tokens={[]} />);
       expect(wrapper.text()).toEqual(null);
     });
 
-    it('should render a single if it is present', () => {
+    test('should render a single if it is present', () => {
       const wrapper = mountWithIntl(
         <div>
           <Tokens tokens={['ET']} />
@@ -90,7 +90,7 @@ describe('SuricataSignature', () => {
       expect(wrapper.text()).toEqual('ET');
     });
 
-    it('should render the multiple tokens if they are present', () => {
+    test('should render the multiple tokens if they are present', () => {
       const wrapper = mountWithIntl(
         <div>
           <Tokens tokens={['ET', 'SCAN']} />

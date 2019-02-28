@@ -75,5 +75,10 @@ describe('SuricataLinks', () => {
       const tokens = getBeginningTokens('Hello How are You?    ');
       expect(tokens).toEqual([]);
     });
+
+    test('it should return valid tags if a signature has extra spaces at the start', () => {
+      const tokens = getBeginningTokens('    HELLO HOW are You?');
+      expect(tokens).toEqual(['HELLO', 'HOW']);
+    });
   });
 });
