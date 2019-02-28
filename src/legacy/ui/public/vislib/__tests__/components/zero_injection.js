@@ -29,32 +29,16 @@ import { VislibComponentsZeroInjectionZeroFilledArrayProvider } from '../../comp
 import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from '../../components/zero_injection/zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
-  const dateHistogramRows = [
-    {
-      'label': 'html',
-      'values': [
-        { 'x': 1418410560000, 'y': 2 },
-        { 'x': 1418410620000, 'y': 4 },
-        { 'x': 1418410680000, 'y': 1 },
-        { 'x': 1418410740000, 'y': 5 },
-        { 'x': 1418410800000, 'y': 2 },
-        { 'x': 1418410860000, 'y': 3 },
-        { 'x': 1418410920000, 'y': 2 }
-      ]
-    },
-    {
-      'label': 'css',
-      'values': [
-        { 'x': 1418410560000, 'y': 1 },
-        { 'x': 1418410620000, 'y': 3 },
-        { 'x': 1418410680000, 'y': 1 },
-        { 'x': 1418410740000, 'y': 4 },
-        { 'x': 1418410800000, 'y': 2 }
-      ]
-    }
-  ];
-
   const dateHistogramRowsObj = {
+    xAxisOrderedValues: [
+      1418410560000,
+      1418410620000,
+      1418410680000,
+      1418410740000,
+      1418410800000,
+      1418410860000,
+      1418410920000,
+    ],
     series: [
       {
         'label': 'html',
@@ -80,22 +64,10 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       }
     ]
   };
-
-
-  const seriesData = [
-    {
-      label: '200',
-      values: [
-        { x: 'v1', y: 234 },
-        { x: 'v2', y: 34 },
-        { x: 'v3', y: 834 },
-        { x: 'v4', y: 1234 },
-        { x: 'v5', y: 4 }
-      ]
-    }
-  ];
+  const dateHistogramRows = dateHistogramRowsObj.series;
 
   const seriesDataObj = {
+    xAxisOrderedValues: ['v1', 'v2', 'v3', 'v4', 'v5'],
     series: [
       {
         label: '200',
@@ -109,35 +81,10 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       }
     ]
   };
-
-  const multiSeriesData = [
-    {
-      label: '200',
-      values: [
-        { x: '1', y: 234 },
-        { x: '2', y: 34 },
-        { x: '3', y: 834 },
-        { x: '4', y: 1234 },
-        { x: '5', y: 4 }
-      ]
-    },
-    {
-      label: '404',
-      values: [
-        { x: '1', y: 1234 },
-        { x: '3', y: 234 },
-        { x: '5', y: 34 }
-      ]
-    },
-    {
-      label: '503',
-      values: [
-        { x: '3', y: 834 }
-      ]
-    }
-  ];
+  const seriesData = seriesDataObj.series;
 
   const multiSeriesDataObj = {
+    xAxisOrderedValues: ['1', '2', '3', '4', '5'],
     series: [
       {
         label: '200',
@@ -165,35 +112,10 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       }
     ]
   };
-
-  const multiSeriesNumberedData = [
-    {
-      label: '200',
-      values: [
-        { x: 1, y: 234 },
-        { x: 2, y: 34 },
-        { x: 3, y: 834 },
-        { x: 4, y: 1234 },
-        { x: 5, y: 4 }
-      ]
-    },
-    {
-      label: '404',
-      values: [
-        { x: 1, y: 1234 },
-        { x: 3, y: 234 },
-        { x: 5, y: 34 }
-      ]
-    },
-    {
-      label: '503',
-      values: [
-        { x: 3, y: 834 }
-      ]
-    }
-  ];
+  const multiSeriesData = multiSeriesDataObj.series;
 
   const multiSeriesNumberedDataObj = {
+    xAxisOrderedValues: [1, 2, 3, 4, 5],
     series: [
       {
         label: '200',
@@ -221,6 +143,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       }
     ]
   };
+  const multiSeriesNumberedData = multiSeriesNumberedDataObj.series;
 
   const emptyObject = {};
   const str = 'string';
@@ -318,6 +241,37 @@ describe('Vislib Zero Injection Module Test Suite', function () {
       expect(numberedResults[2]).to.be(3);
       expect(numberedResults[3]).to.be(4);
       expect(numberedResults[4]).to.be(5);
+    });
+
+    it('should return an array of values that preserve the index from xAxisOrderedValues', function () {
+      const data = {
+        xAxisOrderedValues: ['1', '2', '3', '4', '5'],
+        series: [
+          {
+            label: '200',
+            values: [
+              { x: '2', y: 34 },
+              { x: '4', y: 1234 }
+            ]
+          },
+          {
+            label: '404',
+            values: [
+              { x: '1', y: 1234 },
+              { x: '3', y: 234 },
+              { x: '5', y: 34 }
+            ]
+          },
+          {
+            label: '503',
+            values: [
+              { x: '3', y: 834 }
+            ]
+          }
+        ]
+      };
+      const result = orderXValues(data);
+      expect(result).to.eql(['1', '2', '3', '4', '5']);
     });
 
     it('should return an array of values ordered by their sum when orderBucketsBySum is true', function () {
