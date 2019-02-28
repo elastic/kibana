@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import convert from 'color-convert';
 // (1) Desired editor features:
 import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
@@ -127,23 +127,11 @@ function getTheme() {
   }
 }
 
-function getHex(rgbString) {
+function getHex(rgbString: string) {
   const colorValues = rgbString.slice(4, -1);
   const colorArray = colorValues.split(', ');
 
-  const red = rgbToHex(colorArray[0]);
-  const green = rgbToHex(colorArray[1]);
-  const blue = rgbToHex(colorArray[2]);
-
-  return '#' + red + green + blue;
-}
-
-function rgbToHex(rgb) {
-  let hex = Number(rgb).toString(16);
-  if (hex.length < 2) {
-    hex = '0' + hex;
-  }
-  return hex;
+  return '#' + convert.rgb.hex(Number(colorArray[0]), Number(colorArray[1]), Number(colorArray[2]));
 }
 
 const syntaxTheme = {
