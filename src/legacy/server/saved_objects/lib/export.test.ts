@@ -101,7 +101,7 @@ Array [
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Promise {},
     },
   ],
@@ -211,7 +211,7 @@ Array [
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": Promise {},
     },
   ],
