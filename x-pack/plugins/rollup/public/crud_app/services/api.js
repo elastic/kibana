@@ -6,10 +6,10 @@
 
 import chrome from 'ui/chrome';
 import {
-  UA_ROLLUP_JOB_CREATE,
-  UA_ROLLUP_JOB_DELETE,
-  UA_ROLLUP_JOB_START,
-  UA_ROLLUP_JOB_STOP,
+  UA_JOB_CREATE,
+  UA_JOB_DELETE,
+  UA_JOB_START,
+  UA_JOB_STOP,
 } from '../../../common';
 import { getHttp } from './http_provider';
 import { trackUserRequest } from './track_user_action';
@@ -24,25 +24,25 @@ export async function loadJobs() {
 export async function startJobs(jobIds) {
   const body = { jobIds };
   const request = getHttp().post(`${apiPrefix}/start`, body);
-  return await trackUserRequest(request, UA_ROLLUP_JOB_START);
+  return await trackUserRequest(request, UA_JOB_START);
 }
 
 export async function stopJobs(jobIds) {
   const body = { jobIds };
   const request = getHttp().post(`${apiPrefix}/stop`, body);
-  return await trackUserRequest(request, UA_ROLLUP_JOB_STOP);
+  return await trackUserRequest(request, UA_JOB_STOP);
 }
 
 export async function deleteJobs(jobIds) {
   const body = { jobIds };
   const request = getHttp().post(`${apiPrefix}/delete`, body);
-  return await trackUserRequest(request, UA_ROLLUP_JOB_DELETE);
+  return await trackUserRequest(request, UA_JOB_DELETE);
 }
 
 export async function createJob(job) {
   const body = { job };
   const request = getHttp().put(`${apiPrefix}/create`, body);
-  return await trackUserRequest(request, UA_ROLLUP_JOB_CREATE);
+  return await trackUserRequest(request, UA_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {
