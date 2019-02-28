@@ -6,7 +6,6 @@
 
 interface IStackframeBase {
   filename: string;
-  line: object;
   function?: string;
   library_frame?: boolean;
   exclude_from_grouping?: boolean;
