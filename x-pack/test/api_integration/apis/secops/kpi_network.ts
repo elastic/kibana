@@ -35,9 +35,9 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const kpiNetwork = resp.data.source.KpiNetwork;
-            expect(kpiNetwork.networkEvents).to.be(6157);
-            expect(kpiNetwork.uniqueFlowId).to.be(712);
-            expect(kpiNetwork.activeAgents).to.equal(1);
+            expect(kpiNetwork!.networkEvents).to.be(6157);
+            expect(kpiNetwork!.uniqueFlowId).to.be(712);
+            expect(kpiNetwork!.activeAgents).to.equal(1);
           });
       });
     });
