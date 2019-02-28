@@ -11,13 +11,17 @@ export interface UserActionRecord {
   count: number;
 }
 
+export interface UserActionCountByActionType {
+  [userActionType: string]: number;
+}
+
 // This is a helper method for retrieving user action telemetry data stored via the OSS
 // user_action API.
 export function fetchUserActions(
   server: Server,
   appName: string,
   actionTypes: string[]
-): Promise<Array<UserActionRecord | undefined>> {
+): Promise<UserActionCountByActionType> {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -33,5 +37,21 @@ export function fetchUserActions(
     }
   }
 
-  return Promise.all(actionTypes.map(fetchUserAction));
+  return Promise.all(actionTypes.map(fetchUserAction)).then(
+    (userActions): UserActionCountByActionType => {
+      const userActionCountByActionType = userActions.reduce(
+        (byActionType: UserActionCountByActionType, userAction: UserActionRecord | undefined) => {
+          // User action is undefined if nobody has performed this action on the client yet.
+          if (userAction !== undefined) {
+            const { actionType, count } = userAction;
+            byActionType[actionType] = count;
+          }
+          return byActionType;
+        },
+        {}
+      );
+
+      return userActionCountByActionType;
+    }
+  );
 }

@@ -6,6 +6,6 @@
 
 import chrome from 'ui/chrome';
 
-export function createUserActionUri(appName, actionType) {
+export function createUserActionUri(appName: string, actionType: string): string {
   return chrome.addBasePath(`/api/user_action/${appName}/${actionType}`);
 }

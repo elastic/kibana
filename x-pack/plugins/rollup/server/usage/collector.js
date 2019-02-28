@@ -184,15 +184,6 @@ export function registerRollupUsageCollector(server) {
 
       const userActions = await fetchUserActions(server, UA_APP_NAME, USER_ACTIONS);
 
-      const userActionsByActionType = userActions.reduce((byActionType, userAction) => {
-        // User action is undefined if nobody has performed this action on the client yet.
-        if (userAction !== undefined) {
-          const { actionType, count } = userAction;
-          byActionType[actionType] = count;
-        }
-        return byActionType;
-      }, {});
-
       return {
         index_patterns: {
           total: rollupIndexPatterns.length,
@@ -206,7 +197,7 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
-        user_actions: userActionsByActionType,
+        user_actions: userActions,
       };
     },
   });
