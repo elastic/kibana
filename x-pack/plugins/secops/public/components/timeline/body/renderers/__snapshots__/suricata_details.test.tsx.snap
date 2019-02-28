@@ -216,7 +216,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
         >
           <styled.div>
             <div
-              className="sc-bYSBpT hHzFsd"
+              className="sc-elJkPf jtzySe"
             >
               <pure(Component)
                 id="4"
@@ -838,12 +838,12 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                             grow={false}
                           >
                             <EuiFlexItem
-                              className="sc-lhVmIH krgDqk"
+                              className="sc-bYSBpT kqevpY"
                               component="div"
                               grow={false}
                             >
                               <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
+                                className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT kqevpY"
                               >
                                 <EuiLink
                                   color="primary"

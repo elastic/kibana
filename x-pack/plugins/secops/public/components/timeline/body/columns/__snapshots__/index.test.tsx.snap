@@ -123,7 +123,7 @@ exports[`Columns it renders the expected columns 1`] = `
         >
           <EuiFlexGroup
             alignItems="stretch"
-            className="sc-dqBHgY cUVtis"
+            className="sc-gxMtzJ gYJQDW"
             component="div"
             data-test-subj="data-driven-columns"
             direction="row"
@@ -133,7 +133,7 @@ exports[`Columns it renders the expected columns 1`] = `
             wrap={false}
           >
             <div
-              className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive sc-dqBHgY cUVtis"
+              className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive sc-gxMtzJ gYJQDW"
               data-test-subj="data-driven-columns"
             >
               <EuiFlexItem
@@ -151,7 +151,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ CUFLz"
+                      className="sc-dfVpRl kAmxmB"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -577,7 +577,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ hFTLpa"
+                      className="sc-dfVpRl gLUJqQ"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -1003,7 +1003,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ CUFLz"
+                      className="sc-dfVpRl kAmxmB"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -1429,7 +1429,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ hFTLpa"
+                      className="sc-dfVpRl gLUJqQ"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -1855,7 +1855,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ CUFLz"
+                      className="sc-dfVpRl kAmxmB"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -2281,7 +2281,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ hFTLpa"
+                      className="sc-dfVpRl gLUJqQ"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)
@@ -2707,7 +2707,7 @@ exports[`Columns it renders the expected columns 1`] = `
                     minWidth="120px"
                   >
                     <div
-                      className="sc-gxMtzJ CUFLz"
+                      className="sc-dfVpRl kAmxmB"
                       data-test-subj="column"
                     >
                       <Connect(DraggableWrapperComponent)

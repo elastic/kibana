@@ -684,12 +684,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-lhVmIH krgDqk"
+                      className="sc-bYSBpT kqevpY"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT kqevpY"
                       >
                         <EuiLink
                           color="primary"
