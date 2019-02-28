@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiComboBox } from '@elastic/eui';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../../../../common/constants';
 
 export function FieldSelect({ fields, selectedField, onChange }) {
 
@@ -71,7 +72,7 @@ export function FieldSelect({ fields, selectedField, onChange }) {
 export const fieldShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  origin: PropTypes.oneOf(['join', 'source']).isRequired
+  origin: PropTypes.oneOf(['join', SOURCE_DATA_ID_ORIGIN]).isRequired
 });
 
 FieldSelect.propTypes = {
