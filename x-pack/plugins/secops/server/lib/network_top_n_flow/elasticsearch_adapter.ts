@@ -14,6 +14,7 @@ import {
 } from '../../graphql/types';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
+
 import { NetworkTopNFlowRequestOptions } from './index';
 import { buildQuery } from './query.dsl';
 import { NetworkTopNFlowAdapter, NetworkTopNFlowBuckets } from './types';

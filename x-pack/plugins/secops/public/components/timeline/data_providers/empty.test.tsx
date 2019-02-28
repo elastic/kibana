@@ -6,6 +6,7 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+
 import { Empty } from './empty';
 
 describe('Empty', () => {

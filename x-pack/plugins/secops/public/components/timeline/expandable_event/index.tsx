@@ -14,6 +14,7 @@ import { WithCopyToClipboard } from '../../../lib/clipboard/with_copy_to_clipboa
 import { StatefulEventDetails } from '../../event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
 import { WithHoverActions } from '../../with_hover_actions';
+
 import * as i18n from './translations';
 
 const EventWithHoverActions = styled.div`

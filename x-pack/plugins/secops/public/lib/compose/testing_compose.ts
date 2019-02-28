@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import { SchemaLink } from 'apollo-link-schema';
+import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import chrome from 'ui/chrome';
@@ -13,10 +17,6 @@ import uiRoutes from 'ui/routes';
 // @ts-ignore: path dynamic for kibana
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
-import { InMemoryCache } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { SchemaLink } from 'apollo-link-schema';
-import { addMockFunctionsToSchema, makeExecutableSchema } from 'graphql-tools';
 import { AppKibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';
 import { AppKibanaObservableApiAdapter } from '../adapters/observable_api/kibana_observable_api';
 import { AppFrontendLibs } from '../lib';

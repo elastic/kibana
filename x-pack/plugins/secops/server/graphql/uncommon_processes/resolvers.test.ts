@@ -15,6 +15,7 @@ import { UncommonProcessesAdapter } from '../../lib/uncommon_processes/types';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { createUncommonProcessesResolvers, UncommonProcessesResolversDeps } from './resolvers';
 import { mockUncommonProcessesData, mockUncommonProcessesFields } from './uncommon_processes.mock';
 

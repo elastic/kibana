@@ -14,6 +14,7 @@ import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
+
 import { getAuthenticationsQueryMock, mockAuthenticationsData } from './authentications.mock';
 import { authenticationsSchema } from './schema.gql';
 

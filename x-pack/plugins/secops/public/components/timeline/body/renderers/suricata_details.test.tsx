@@ -16,6 +16,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { mockEcsData } from '../../../../mock';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, State } from '../../../../store';
+
 import { SuricataDetails } from './suricata_details';
 
 describe('SuricataDetails', () => {

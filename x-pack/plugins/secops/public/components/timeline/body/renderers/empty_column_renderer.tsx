@@ -6,9 +6,10 @@
 
 import { has } from 'lodash/fp';
 
-import { ColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getEmptyValue } from '../../../empty_value';
+
+import { ColumnRenderer } from '.';
 
 export const dataNotExistsAtColumn = (columnName: string, data: Ecs): boolean =>
   !has(columnName, data);

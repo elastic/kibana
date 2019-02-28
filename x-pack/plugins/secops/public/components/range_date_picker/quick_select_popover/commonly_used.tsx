@@ -9,6 +9,7 @@ import { getOr } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
+
 import { DateType, RecentlyUsedI } from '..';
 
 export enum DatePickerOptions {

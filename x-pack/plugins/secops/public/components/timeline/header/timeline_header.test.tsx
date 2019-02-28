@@ -16,6 +16,7 @@ import { Direction } from '../../../graphql/types';
 import { mockGlobalState, mockIndexPattern } from '../../../mock';
 import { createStore, State } from '../../../store';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+
 import { TimelineHeader } from './timeline_header';
 
 describe('Header', () => {

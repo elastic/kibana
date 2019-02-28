@@ -10,13 +10,14 @@ import { set } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
-
 import { ActionCreator } from 'typescript-fsa';
-import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
+
 import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
 import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapper';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
+
+import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 import { FlyoutButton } from './button';
 import { FlyoutPane } from './pane';
 

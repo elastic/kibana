@@ -13,6 +13,7 @@ import { KueryAutocompletion } from '../../containers/kuery_autocompletion';
 import { NetworkFilter } from '../../containers/network';
 import { networkModel } from '../../store';
 import { PageHeader, PageHeaderSection } from '../styles';
+
 import * as i18n from './translations';
 
 interface NetworkKqlProps {

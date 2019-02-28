@@ -11,15 +11,16 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { DragDropContext } from 'react-beautiful-dnd';
-
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
+
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { Direction } from '../../graphql/types';
 import { mockEcsData } from '../../mock';
 import { mockGlobalState, mockIndexPattern } from '../../mock';
 import { createStore, State } from '../../store';
 import { flyoutHeaderHeight } from '../flyout';
+
 import { ColumnHeaderType } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';

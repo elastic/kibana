@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { Direction } from '../../../../graphql/types';
+
 import { getDirection, SortIndicator } from './sort_indicator';
 
 describe('SortIndicator', () => {

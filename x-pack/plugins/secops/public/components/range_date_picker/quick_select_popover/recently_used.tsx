@@ -9,7 +9,9 @@ import { getOr } from 'lodash/fp';
 import moment, { Moment } from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
+
 import { DateType, RecentlyUsedI } from '../index';
+
 import { DatePickerOptions, updateRangeDatePickerByCommonUsed } from './commonly_used';
 import { updateRangeDatePickerByQuickSelect } from './quick_select';
 

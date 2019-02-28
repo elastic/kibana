@@ -6,6 +6,7 @@
 
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { mockDataProviders } from '../../../components/timeline/data_providers/mock/mock_data_providers';
+
 import { IdToDataProvider } from './model';
 import { registerProviderHandler, unRegisterProviderHandler } from './reducer';
 

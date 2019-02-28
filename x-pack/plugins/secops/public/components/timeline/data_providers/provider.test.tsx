@@ -10,7 +10,9 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { ThemeProvider } from 'styled-components';
+
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
+
 import { mockDataProviders } from './mock/mock_data_providers';
 import { Provider } from './provider';
 

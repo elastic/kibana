@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowRequestOptions } from '.';
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
+
+import { NetworkTopNFlowRequestOptions } from '.';
 
 export const mockOptions: NetworkTopNFlowRequestOptions = {
   sourceConfiguration: {

@@ -5,6 +5,7 @@
  */
 
 import { compose } from '../lib/compose/testing_compose';
+
 import { startApp } from './start_app';
 
 startApp(compose());

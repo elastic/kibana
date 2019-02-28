@@ -5,7 +5,6 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -18,6 +17,7 @@ import {
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+
 import { getNetworkTopNFlowColumns } from './columns';
 import { SelectDirection } from './select_direction';
 import { SelectType } from './select_type';

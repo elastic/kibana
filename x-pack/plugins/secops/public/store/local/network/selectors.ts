@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 
 import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
+
 import { GenericNetworkModel, NetworkType } from './model';
 
 const selectNetwork = (state: State, networkType: NetworkType): GenericNetworkModel =>

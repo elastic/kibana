@@ -10,6 +10,7 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
 import { SortRequest, SortRequestDirection } from '../types';
+
 import { TimerangeFilter } from './types';
 
 export const buildQuery = (options: RequestOptions) => {

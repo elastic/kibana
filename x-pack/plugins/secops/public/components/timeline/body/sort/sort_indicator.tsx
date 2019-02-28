@@ -9,8 +9,9 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { SortDirection } from '.';
 import { Direction } from '../../../../graphql/types';
+
+import { SortDirection } from '.';
 
 enum SortDirectionIndicatorEnum {
   SORT_UP = 'sortUp',

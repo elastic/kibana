@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { DEFAULT_TABLE_LIMIT } from '../constants';
+
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,

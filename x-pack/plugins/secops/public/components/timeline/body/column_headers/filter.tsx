@@ -7,7 +7,9 @@
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
+
 import { OnFilterChange } from '../../events';
+
 import { ColumnHeader } from './column_header';
 import { TextFilter } from './text_filter';
 

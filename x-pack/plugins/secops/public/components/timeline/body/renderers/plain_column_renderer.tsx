@@ -8,13 +8,14 @@ import { getOr } from 'lodash/fp';
 import { has } from 'lodash/fp';
 import React from 'react';
 
-import { ColumnRenderer } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../../../lib/ecs';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../data_providers/provider';
+
+import { ColumnRenderer } from '.';
 import { FormattedField } from './formatted_field';
 
 export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean => has(columnName, data);

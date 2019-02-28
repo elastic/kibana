@@ -6,7 +6,9 @@
 
 import React from 'react';
 import { pure } from 'recompose';
+
 import { HorizontalBarChart, HorizontalBarChartData } from '../../../horizontal_bar_chart';
+
 import * as i18n from './translations';
 
 interface TypesBarProps {

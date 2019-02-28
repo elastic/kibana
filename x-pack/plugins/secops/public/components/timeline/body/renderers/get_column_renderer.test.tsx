@@ -12,12 +12,13 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 
-import { columnRenderers } from '.';
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { createStore } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
+
+import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);

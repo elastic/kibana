@@ -21,6 +21,7 @@ import {
   timelineSelectors,
 } from '../../store';
 import { AddNoteToEvent, UpdateNote } from '../notes/helpers';
+
 import { ColumnHeader } from './body/column_headers/column_header';
 import { defaultHeaders } from './body/column_headers/headers';
 import { columnRenderers, rowRenderers } from './body/renderers';

@@ -5,13 +5,13 @@
  */
 
 import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { get, isNil } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { FormattedRelative } from '@kbn/i18n/react';
 import { HostsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -19,6 +19,7 @@ import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+
 import * as i18n from './translations';
 
 interface OwnProps {

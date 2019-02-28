@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-
-import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+
 import { Ecs } from '../../../../graphql/types';
+
 import { SourceDest } from './source_dest_ip';
 import { SuricataRefs } from './suricata_refs';
 import { SuricataSignature } from './suricata_signature';

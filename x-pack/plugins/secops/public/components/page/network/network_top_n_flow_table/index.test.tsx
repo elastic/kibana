@@ -7,13 +7,13 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
-
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { NetworkTopNFlowTable } from '.';
 import { mockGlobalState } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
+
+import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {

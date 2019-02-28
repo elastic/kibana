@@ -14,6 +14,7 @@ import { ThemeProvider } from 'styled-components';
 
 import { mockEcsData } from '../../mock/mock_ecs';
 import { createStore } from '../../store';
+
 import { EventDetails } from './event_details';
 
 describe('EventDetails', () => {

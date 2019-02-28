@@ -5,8 +5,10 @@
  */
 
 import { omit } from 'lodash/fp';
+
 import { Direction } from '../../graphql/types';
 import { RequestOptions } from '../../lib/framework';
+
 import { Args, Configuration, createOptions, FieldNodes } from './create_options';
 
 describe('createOptions', () => {

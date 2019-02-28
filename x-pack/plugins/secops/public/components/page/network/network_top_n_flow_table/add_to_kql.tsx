@@ -5,11 +5,11 @@
  */
 
 import { EuiIcon, EuiPanel, EuiToolTip } from '@elastic/eui';
+import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { isEmpty } from 'lodash/fp';
 import { NetworkFilter } from '../../../../containers/network';
 import { WithSource } from '../../../../containers/source';
 import { IndexType } from '../../../../graphql/types';

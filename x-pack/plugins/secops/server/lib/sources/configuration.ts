@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ConfigurationAdapter } from '../configuration';
+
 import { SourceConfigurations, SourcesAdapter } from './index';
 import { PartialSourceConfigurations } from './types';
 

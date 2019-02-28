@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
+
 import * as i18n from './translations';
 
 /** Performs IO to update (or add a new) note */

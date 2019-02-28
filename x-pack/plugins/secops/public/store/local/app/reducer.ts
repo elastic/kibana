@@ -7,6 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Note } from '../../../lib/note';
+
 import { addError, removeError, updateNote } from './actions';
 import { AppModel, NotesById } from './model';
 

@@ -14,6 +14,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockKpiNetworkData, mockKpiNetworkFields } from './kpi_network.mock';
 import { createKpiNetworkResolvers, KpiNetworkResolversDeps } from './resolvers';
 

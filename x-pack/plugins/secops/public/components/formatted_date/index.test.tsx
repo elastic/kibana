@@ -8,9 +8,10 @@ import { mount } from 'enzyme';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
-import { KibanaConfigContext, PreferenceFormattedDate } from '.';
 import { AppTestingFrameworkAdapter } from '../../lib/adapters/framework/testing_framework_adapter';
 import { mockFrameworks } from '../../mock';
+
+import { KibanaConfigContext, PreferenceFormattedDate } from '.';
 
 describe('PreferenceFormattedDate', () => {
   describe('rendering', () => {

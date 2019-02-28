@@ -7,6 +7,7 @@
 import { createSelector } from 'reselect';
 
 import { State } from '../../reducer';
+
 import { GlobalQuery, Policy, TimeRange } from './model';
 
 const selectGlobalTimeRange = (state: State): TimeRange => state.local.inputs.global.timerange;

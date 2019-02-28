@@ -9,6 +9,7 @@ import uuid from 'uuid';
 
 import { store } from '../../store';
 import { addError } from '../../store/local/app/actions';
+
 import * as i18n from './translations';
 
 export const errorLink = onError(({ graphQLErrors, networkError }) => {

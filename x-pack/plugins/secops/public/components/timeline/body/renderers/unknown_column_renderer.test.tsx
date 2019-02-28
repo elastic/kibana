@@ -12,6 +12,7 @@ import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+
 import { unknownColumnRenderer } from './unknown_column_renderer';
 
 const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);

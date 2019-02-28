@@ -5,10 +5,12 @@
  */
 
 import { getOr, head } from 'lodash/fp';
+
 import { HostsData, HostsEdges } from '../../graphql/types';
 import { mergeFieldsWithHit } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
+
 import { buildQuery, hostsFieldsMap } from './query.dsl';
 import { HostBucket, HostData, HostHit, HostsAdapter } from './types';
 

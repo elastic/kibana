@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GenericParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Request, Server } from 'hapi';
-
-import { GenericParams } from 'elasticsearch';
 import { Legacy } from 'kibana';
+
 import {
   graphiqlHapi,
   graphqlHapi,

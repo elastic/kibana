@@ -19,6 +19,7 @@ import styled, { injectGlobal } from 'styled-components';
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+
 import {
   Description,
   HistoryButton,

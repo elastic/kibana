@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
+
 import { Source } from '../../graphql/types';
 import { Authentications } from '../../lib/authentications';
 import { AuthenticationsAdapter } from '../../lib/authentications/types';
@@ -13,6 +14,7 @@ import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
+
 import { mockAuthenticationsData, mockAuthenticationsFields } from './authentications.mock';
 import { AuthenticationsResolversDeps, createAuthenticationsResolvers } from './resolvers';
 

@@ -10,6 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
+
 import { NoteCreated } from './note_created';
 
 const Action = styled.span`

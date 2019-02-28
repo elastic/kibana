@@ -13,6 +13,7 @@ import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
+
 import { eventsQuery } from './index.gql_query';
 
 export interface EventsArgs {

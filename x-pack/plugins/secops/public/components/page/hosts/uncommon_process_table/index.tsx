@@ -23,6 +23,7 @@ import {
 } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+
 import * as i18n from './translations';
 
 interface OwnProps {

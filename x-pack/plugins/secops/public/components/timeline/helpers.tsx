@@ -8,6 +8,7 @@ import { isEmpty, isNumber } from 'lodash/fp';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
+
 import { DataProvider } from './data_providers/data_provider';
 
 const buildQueryMatch = (dataProvider: DataProvider) =>

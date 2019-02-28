@@ -8,6 +8,7 @@ import { createSelector } from 'reselect';
 
 import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
+
 import { timelineDefaults, TimelineModel } from './model';
 import { TimelineById } from './reducer';
 

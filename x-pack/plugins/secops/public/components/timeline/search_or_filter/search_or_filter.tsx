@@ -22,6 +22,7 @@ import { KueryAutocompletion } from '../../../containers/kuery_autocompletion';
 import { KueryFilterQuery } from '../../../store';
 import { KqlMode } from '../../../store/local/timeline/model';
 import { AutocompleteField } from '../../autocomplete_field';
+
 import { modes, options } from './helpers';
 import * as i18n from './translations';
 

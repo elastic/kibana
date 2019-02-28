@@ -9,9 +9,10 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { ErrorToast } from '.';
 import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
+
+import { ErrorToast } from '.';
 
 describe('Error Toast', () => {
   const state: State = mockGlobalState;

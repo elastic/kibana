@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FetchPolicy } from 'apollo-client';
 import { isString } from 'lodash/fp';
 
-import { FetchPolicy } from 'apollo-client';
 import { ESQuery } from '../../common/typed_json';
 
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>

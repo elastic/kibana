@@ -9,6 +9,7 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { createStore } from '../../store';
+
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 
 describe('DragDropContextWrapper', () => {

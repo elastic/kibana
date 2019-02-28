@@ -22,6 +22,7 @@ import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../data_providers/provider';
+
 import { FormattedField } from './formatted_field';
 import * as i18n from './translations';
 
