@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
-import { omit } from 'lodash/fp';
-
 import { Source } from '../../graphql/types';
 import { Authentications } from '../../lib/authentications';
 import { AuthenticationsAdapter } from '../../lib/authentications/types';
@@ -87,6 +85,6 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockAuthenticationsAdapter.getAuthentications).toHaveBeenCalled();
-    expect(data).toEqual(omit('status', mockAuthenticationsData));
+    expect(data).toEqual(mockAuthenticationsData);
   });
 });

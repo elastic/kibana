@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { GraphQLResolveInfo } from 'graphql';
-import { omit } from 'lodash/fp';
-
 import { Direction, Source } from '../../graphql/types';
 import { Events } from '../../lib/events';
 import { EventsAdapter } from '../../lib/events/types';
@@ -89,6 +87,6 @@ describe('Test Source Resolvers', () => {
       {} as GraphQLResolveInfo
     );
     expect(mockEventsAdapter.getEvents).toHaveBeenCalled();
-    expect(data).toEqual(omit('status', mockEventsData));
+    expect(data).toEqual(mockEventsData);
   });
 });
