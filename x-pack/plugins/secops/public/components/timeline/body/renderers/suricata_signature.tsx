@@ -26,18 +26,16 @@ const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-const Margin = styled.span`
-  margin-left: 3px;
+const LinkFlexItem = styled(EuiFlexItem)`
+  margin-left: 6px;
 `;
 
 export const GoogleLink = pure(({ link, value }: { link: string; value: string }) => (
-  <TokensFlexItem grow={false}>
-    <Margin>
-      <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
-        {value}
-      </EuiLink>
-    </Margin>
-  </TokensFlexItem>
+  <LinkFlexItem grow={false}>
+    <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
+      {value}
+    </EuiLink>
+  </LinkFlexItem>
 ));
 
 export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
