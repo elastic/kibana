@@ -110,6 +110,7 @@ export class StepTermsUi extends Component {
               href={termsDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateTermsDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepTerms.readDocsButtonLabel"

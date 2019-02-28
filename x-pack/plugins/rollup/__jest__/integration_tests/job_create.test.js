@@ -187,6 +187,10 @@ describe('Create Rollup Job', () => {
       expect(testSubjectExists('rollupJobCreateLogisticsTitle')).toBe(true);
     });
 
+    it('should have a link to the documentation', () => {
+      expect(testSubjectExists('rollupJobCreateLogisticsDocsButton')).toBe(true);
+    });
+
     it('should only have the "next" button visible', () => {
       expect(testSubjectExists('rollupJobBackButton')).toBe(false);
       expect(testSubjectExists('rollupJobNextButton')).toBe(true);
@@ -536,6 +540,10 @@ describe('Create Rollup Job', () => {
         expect(testSubjectExists('rollupJobCreateDateHistogramTitle')).toBe(true);
       });
 
+      it('should have a link to the documentation', () => {
+        expect(testSubjectExists('rollupJobCreateDateHistogramDocsButton')).toBe(true);
+      });
+
       it('should have the "next" and "back" button visible', () => {
         expect(testSubjectExists('rollupJobBackButton')).toBe(true);
         expect(testSubjectExists('rollupJobNextButton')).toBe(true);
@@ -620,6 +628,10 @@ describe('Create Rollup Job', () => {
 
       it('should have the title set to "Terms"', () => {
         expect(testSubjectExists('rollupJobCreateTermsTitle')).toBe(true);
+      });
+
+      it('should have a link to the documentation', () => {
+        expect(testSubjectExists('rollupJobCreateTermsDocsButton')).toBe(true);
       });
 
       it('should have the "next" and "back" button visible', () => {

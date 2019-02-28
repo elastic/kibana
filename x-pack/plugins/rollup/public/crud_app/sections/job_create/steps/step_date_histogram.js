@@ -211,6 +211,7 @@ export class StepDateHistogramUi extends Component {
               href={dateHistogramDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateDateHistogramDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepDateHistogram.readDocsButtonLabel"

@@ -277,6 +277,7 @@ export class StepLogisticsUi extends Component {
               href={logisticalDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateLogisticsDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.readDocsButtonLabel"
