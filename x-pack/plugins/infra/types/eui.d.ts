@@ -13,7 +13,7 @@ declare module '@elastic/eui' {
   export const EuiWrappingPopover: React.SFC<any>;
 }
 
-import { EuiToolTipPosition } from '@elastic/eui';
+import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
@@ -39,6 +39,7 @@ declare module '@elastic/eui' {
   export type EuiHeaderSectionSide = 'left' | 'right';
   type EuiHeaderSectionProps = CommonProps & {
     side?: EuiHeaderSectionSide;
+    grow?: boolean;
   };
   export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
 
@@ -94,6 +95,8 @@ declare module '@elastic/eui' {
     rel?: string;
     target?: string;
     type?: string;
+    hasActiveFilters?: boolean;
+    numFilters?: number;
   };
   export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 
@@ -167,4 +170,34 @@ declare module '@elastic/eui' {
   };
 
   export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+
+  type EuiInMemoryTableProps = CommonProps & {
+    items?: any;
+    columns?: any;
+    sorting?: any;
+    search?: any;
+    selection?: any;
+    pagination?: any;
+    itemId?: any;
+    isSelectable?: any;
+    loading?: any;
+    hasActions?: any;
+    message?: any;
+  };
+  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
+
+  type EuiButtonGroupProps = CommonProps & {
+    buttonSize?: any;
+    color?: any;
+    idToSelectedMap?: any;
+    options?: any;
+    type?: any;
+    onChange?: any;
+    isIconOnly?: any;
+    isDisabled?: any;
+    isFullWidth?: any;
+    legend?: any;
+    idSelected?: any;
+  };
+  export const EuiButtonGroup: React.SFC<EuiButtonGroupProps>;
 }

@@ -26,6 +26,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   public appState: object;
   public dateFormat?: string;
   public kbnVersion?: string;
+  public darkMode?: boolean;
   public scaledDateFormat?: string;
   public timezone?: string;
 
@@ -117,7 +118,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       template: `
         <div
           id="${ROOT_ELEMENT_ID}"
-          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0%; overflow: hidden;"
+          class="infReactRoot"
         ></div>
       `,
     }));
@@ -132,6 +133,11 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
       this.dateFormat = config.get('dateFormat');
+      try {
+        this.darkMode = config.get('theme:darkMode');
+      } catch (e) {
+        this.darkMode = false;
+      }
       this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 

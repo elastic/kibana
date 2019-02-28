@@ -27,11 +27,16 @@ export const searchProxyRoute = {
         body: Joi.object().unknown(true).default()
       }).default()
     },
-    handler(request) {
-      return callEsSearchApi({
+    async handler(request) {
+      const includeFrozen = await request.getUiSettingsService().get('search:includeFrozen');
+      return await callEsSearchApi({
         callCluster: request.pre.callCluster,
         index: request.payload.index,
-        body: request.payload.body
+        body: request.payload.body,
+        queryParams: {
+          rest_total_hits_as_int: true,
+          ignore_throttled: !includeFrozen,
+        }
       });
     }
   }

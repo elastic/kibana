@@ -6,16 +6,18 @@
 
 import React from 'react';
 import { Request, RRRRender, RRRRenderResponse } from 'react-redux-request';
+import { createSelector } from 'reselect';
 import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
 import { loadTransactionDistribution } from '../../services/rest/apm/transaction_groups';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
-// @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'transactionDistribution';
-const INITIAL_DATA = { buckets: [], totalHits: 0 };
-const withInitialData = createInitialDataSelector(INITIAL_DATA);
+const INITIAL_DATA = { buckets: [], totalHits: 0, bucketSize: 0 };
+const withInitialData = createInitialDataSelector<
+  ITransactionDistributionAPIResponse
+>(INITIAL_DATA);
 
 export function getTransactionDistribution(
   state: IReduxState
@@ -23,14 +25,16 @@ export function getTransactionDistribution(
   return withInitialData(state.reactReduxRequest[ID]);
 }
 
-export function getDefaultDistributionSample(state: IReduxState) {
-  const distribution = getTransactionDistribution(state);
-  const { defaultSample = {} } = distribution.data;
-  return {
-    traceId: defaultSample.traceId,
-    transactionId: defaultSample.transactionId
-  };
-}
+export const getDefaultDistributionSample = createSelector(
+  getTransactionDistribution,
+  distribution => {
+    const { defaultSample = {} } = distribution.data;
+    return {
+      traceId: defaultSample.traceId,
+      transactionId: defaultSample.transactionId
+    };
+  }
+);
 
 export function TransactionDistributionRequest({
   urlParams,
@@ -43,6 +47,7 @@ export function TransactionDistributionRequest({
     serviceName,
     transactionType,
     transactionId,
+    traceId,
     start,
     end,
     transactionName,
@@ -62,6 +67,7 @@ export function TransactionDistributionRequest({
           serviceName,
           transactionType,
           transactionId,
+          traceId,
           start,
           end,
           transactionName,

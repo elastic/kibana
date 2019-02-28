@@ -22,16 +22,14 @@ import { Type } from './type';
 
 export class LiteralType<T> extends Type<T> {
   constructor(value: T) {
-    super(internals.any(), {
-      // Before v13.3.0 Joi.any().value() didn't provide raw value if validation
-      // fails, so to display this value in error message we should provide
-      // custom validation function. Once we upgrade Joi, we'll be able to use
-      // `value()` with custom `any.allowOnly` error handler instead.
-      validate(valueToValidate) {
-        if (valueToValidate !== value) {
-          return `expected value to equal [${value}] but got [${valueToValidate}]`;
-        }
-      },
-    });
+    super(internals.any().valid(value));
+  }
+
+  protected handleError(type: string, { value, valids: [expectedValue] }: Record<string, any>) {
+    switch (type) {
+      case 'any.required':
+      case 'any.allowOnly':
+        return `expected value to equal [${expectedValue}] but got [${value}]`;
+    }
   }
 }

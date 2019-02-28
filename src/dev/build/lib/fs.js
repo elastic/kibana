@@ -28,7 +28,7 @@ import { promisify } from 'bluebird';
 import mkdirpCb from 'mkdirp';
 import del from 'del';
 import deleteEmpty from 'delete-empty';
-import { createPromiseFromStreams, createMapStream } from '../../../utils';
+import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils';
 
 import { Extract } from 'tar';
 
@@ -95,12 +95,14 @@ export async function copy(source, destination) {
   await chmodAsync(destination, stat.mode);
 }
 
-export async function deleteAll(log, patterns) {
+export async function deleteAll(patterns, log) {
   if (!Array.isArray(patterns)) {
     throw new TypeError('Expected patterns to be an array');
   }
 
-  log.debug('Deleting patterns:', longInspect(patterns));
+  if (log) {
+    log.debug('Deleting patterns:', longInspect(patterns));
+  }
 
   for (const pattern of patterns) {
     assertAbsolute(pattern.startsWith('!') ? pattern.slice(1) : pattern);
@@ -109,8 +111,11 @@ export async function deleteAll(log, patterns) {
   const files = await del(patterns, {
     concurrency: 4
   });
-  log.debug('Deleted %d files/directories', files.length);
-  log.verbose('Deleted:', longInspect(files));
+
+  if (log) {
+    log.debug('Deleted %d files/directories', files.length);
+    log.verbose('Deleted:', longInspect(files));
+  }
 }
 
 export async function deleteEmptyFolders(log, rootFolderPath, foldersToKeep) {

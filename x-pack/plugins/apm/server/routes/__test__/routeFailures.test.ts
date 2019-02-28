@@ -12,7 +12,6 @@ import { initServicesApi } from '../services';
 // @ts-ignore
 import { initStatusApi } from '../status_check';
 import { initTracesApi } from '../traces';
-import { initTransactionsApi } from '../transactions';
 
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
@@ -36,7 +35,10 @@ describe('route handlers should fail with a Boom error', () => {
             getCluster: () => mockCluster
           }
         }
-      }
+      },
+      getUiSettingsService: jest.fn(() => ({
+        get: jest.fn()
+      }))
     };
 
     const routes = flatten(mockServer.route.mock.calls);
@@ -75,9 +77,5 @@ describe('route handlers should fail with a Boom error', () => {
 
   describe('trace routes', async () => {
     await testRouteFailures(initTracesApi);
-  });
-
-  describe('transaction routes', async () => {
-    await testRouteFailures(initTransactionsApi);
   });
 });

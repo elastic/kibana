@@ -1,9 +1,8 @@
 [float]
-=== {component} TLS/SSL Settings
-You can configure the following TLS/SSL settings. If the settings are not configured,
-the {xpack} defaults will be used. See
-{xpack-ref}/security-settings.html[Default TLS/SSL Settings].
-//<<ssl-tls-settings, {xpack} defaults>> will be used.
+=== {component} TLS/SSL settings
+You can configure the following TLS/SSL settings. If the settings are not
+configured, the default values are used. See
+{stack-ov}/security-settings.html[Default TLS/SSL Settings].
 
 ifdef::server[]
 +{ssl-prefix}.ssl.enabled+::
@@ -41,13 +40,13 @@ Java Cryptography Architecture documentation]. Defaults to the value of
 `xpack.ssl.cipher_suites`.
 
 [float]
-==== {component} TLS/SSL Key and Trusted Certificate Settings
+==== {component} TLS/SSL key and trusted certificate settings
 
 The following settings are used to specify a private key, certificate, and the
 trusted certificates that should be used when communicating over an SSL/TLS connection.
-If none of the settings below are specified, this will default to the {xpack} defaults.
-See {xpack-ref}/security-settings.html[Default TLS/SSL Settings].
-//<<ssl-tls-settings, {xpack} defaults>>.
+If none of the settings below are specified, the default values are used.
+See {stack-ov}/security-settings.html[Default TLS/SSL settings].
+
 ifdef::server[]
 A private key and certificate must be configured.
 endif::server[]
@@ -55,12 +54,11 @@ ifndef::server[]
 A private key and certificate are optional and would be used if the server requires client authentication for PKI
 authentication.
 endif::server[]
-If none of the settings below are specified, the {xpack} defaults will be used.
-See {xpack-ref}/security-settings.html[Default TLS/SSL Settings]. 
-//<<ssl-tls-settings, {xpack} defaults>> will be used.
+If none of the settings below are specified, the defaults values are used.
+See {stack-ov}/security-settings.html[Default TLS/SSL settings]. 
 
 [float]
-===== PEM Encoded Files
+===== PEM encoded files
 
 When using PEM encoded files, use the following settings:
 
@@ -79,7 +77,7 @@ that will be presented when requested.
 List of paths to the PEM encoded certificate files that should be trusted.
 
 [float]
-===== Java Keystore Files
+===== Java keystore files
 
 When using Java keystore files (JKS), which contain the private key, certificate
 and certificates that should be trusted, use the following settings:

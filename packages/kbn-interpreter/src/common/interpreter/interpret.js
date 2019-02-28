@@ -22,12 +22,11 @@ import { each, keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
 import { getByAlias } from '../lib/get_by_alias';
-import { typesRegistry } from '../lib/types_registry';
 import { castProvider } from './cast';
 import { createError } from './create_error';
 
-export function interpretProvider(config) {
-  const { functions, onFunctionNotFound, types } = config;
+export function interpreterProvider(config) {
+  const { functions, types } = config;
   const handlers = { ...config.handlers, types };
   const cast = castProvider(types);
 
@@ -55,15 +54,8 @@ export function interpretProvider(config) {
     const { function: fnName, arguments: fnArgs } = link;
     const fnDef = getByAlias(functions, fnName);
 
-    // if the function is not found, pass the expression chain to the not found handler
-    // in this case, it will try to execute the function in another context
     if (!fnDef) {
-      chain.unshift(link);
-      try {
-        return await onFunctionNotFound({ type: 'expression', chain: chain }, context);
-      } catch (e) {
-        return createError(e);
-      }
+      return createError({ message: `Function ${fnName} could not be found.` });
     }
 
     try {
@@ -103,7 +95,7 @@ export function interpretProvider(config) {
     }
 
     // Validate the function output against the type definition's validate function
-    const type = typesRegistry.get(fnDef.type);
+    const type = handlers.types[fnDef.type];
     if (type && type.validate) {
       try {
         type.validate(fnOutput);

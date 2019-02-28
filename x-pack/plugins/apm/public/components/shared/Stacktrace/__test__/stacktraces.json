@@ -1,67 +1,416 @@
 [
   {
+    "library_frame": false,
+    "exclude_from_grouping": false,
+    "filename": "server/routes.js",
+    "abs_path": "/app/server/routes.js",
+    "line": {
+      "number": 307,
+      "context": "    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())"
+    },
     "function": "<anonymous>",
-    "libraryFrame": false,
-    "excludeFromGrouping": false,
     "context": {
-      "pre": ["", "app.get('/log-error', function (req, res) {"],
+      "pre": [
+        "    })",
+        ""
+      ],
       "post": [
-        "    if (err) {",
-        "      res.status(500).send('could not capture error: ' + err.message)"
+        "    req.body.lines.forEach(function (line) {",
+        "      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())"
       ]
-    },
-    "line": {
-      "number": 17,
-      "context": "  apm.captureError(new Error('foo'), function (err) {"
-    },
-    "filename": "server/coffee.js",
-    "absPath": "/app/server/coffee.js"
+    }
   },
   {
-    "function": "get",
-    "libraryFrame": true,
-    "excludeFromGrouping": false,
-    "context": {},
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/pg-pool/index.js",
+    "abs_path": "/app/node_modules/pg-pool/index.js",
     "line": {
-      "number": 123,
-      "context": ""
+      "number": 137
     },
-    "filename": "express/get.js",
-    "absPath": "/node_modules/express/get.js"
+    "function": "BoundPool.<anonymous>"
   },
   {
-    "function": "use",
-    "libraryFrame": true,
-    "excludeFromGrouping": false,
-    "context": {
-      "pre": ["", "app.use('/log-error', function (req, res) {"],
-      "post": [
-        "    if (err) {",
-        "      res.status(500).send('could not capture error: ' + err.message)"
-      ]
-    },
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/generic-pool/lib/generic-pool.js",
+    "abs_path": "/app/node_modules/generic-pool/lib/generic-pool.js",
     "line": {
-      "number": 234,
-      "context": "  apm.captureError(new Error('foo'), function (err) {"
+      "number": 310
     },
-    "filename": "express/use.js",
-    "absPath": "/node_modules/express/use.js"
+    "function": "dispense"
   },
   {
-    "function": "handleCoffee",
-    "libraryFrame": false,
-    "excludeFromGrouping": false,
-    "context": {
-      "pre": ["", ""],
-      "post": [
-        "    reply(getCoffee(req.id));"
-      ]
-    },
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/generic-pool/lib/generic-pool.js",
+    "abs_path": "/app/node_modules/generic-pool/lib/generic-pool.js",
     "line": {
-      "number": 45,
-      "context": "  handleCoffee(req => {"
+      "number": 391
     },
-    "filename": "server/handleCoffee.js",
-    "absPath": "/app/server/handleCoffee.js"
+    "function": "acquire"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/pg-pool/index.js",
+    "abs_path": "/app/node_modules/pg-pool/index.js",
+    "line": {
+      "number": 111
+    },
+    "function": "BoundPool.<anonymous>"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/pg-pool/index.js",
+    "abs_path": "/app/node_modules/pg-pool/index.js",
+    "line": {
+      "number": 75
+    },
+    "function": "Pool._promiseNoCallback"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/pg-pool/index.js",
+    "abs_path": "/app/node_modules/pg-pool/index.js",
+    "line": {
+      "number": 109
+    },
+    "function": "Pool.connect"
+  },
+  {
+    "library_frame": false,
+    "exclude_from_grouping": false,
+    "filename": "server/db.js",
+    "abs_path": "/app/server/db.js",
+    "line": {
+      "number": 11,
+      "context": "  pool.connect(cb)"
+    },
+    "function": "exports.client",
+    "context": {
+      "pre": [
+        "",
+        "exports.client = function (cb) {"
+      ],
+      "post": [
+        "}",
+        ""
+      ]
+    }
+  },
+  {
+    "library_frame": false,
+    "exclude_from_grouping": false,
+    "filename": "server/routes.js",
+    "abs_path": "/app/server/routes.js",
+    "line": {
+      "number": 248,
+      "context": "  db.client(function (err, client, done) {"
+    },
+    "function": "<anonymous>",
+    "context": {
+      "pre": [
+        "  }",
+        ""
+      ],
+      "post": [
+        "    if (err) return error(err, res)",
+        ""
+      ]
+    }
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/layer.js",
+    "abs_path": "/app/node_modules/express/lib/router/layer.js",
+    "line": {
+      "number": 95
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/route.js",
+    "abs_path": "/app/node_modules/express/lib/router/route.js",
+    "line": {
+      "number": 137
+    },
+    "function": "next"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/route.js",
+    "abs_path": "/app/node_modules/express/lib/router/route.js",
+    "line": {
+      "number": 112
+    },
+    "function": "dispatch"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/layer.js",
+    "abs_path": "/app/node_modules/express/lib/router/layer.js",
+    "line": {
+      "number": 95
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "filename": "node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 281
+    },
+    "function": "<anonymous>"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 335
+    },
+    "function": "process_params"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 275
+    },
+    "function": "next"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 174
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 47
+    },
+    "function": "router"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/layer.js",
+    "abs_path": "/app/node_modules/express/lib/router/layer.js",
+    "line": {
+      "number": 95
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 317
+    },
+    "function": "trim_prefix"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 284
+    },
+    "function": "<anonymous>"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "filename": "node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 335
+    },
+    "function": "process_params"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 275
+    },
+    "function": "next"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": false,
+    "filename": "server.js",
+    "abs_path": "/app/server.js",
+    "line": {
+      "number": 88,
+      "context": "    return next()"
+    },
+    "function": "<anonymous>",
+    "context": {
+      "pre": [
+        "app.use('/api', function (req, res, next) {",
+        "  if (Math.random() > opbeansRedirectProbability) {"
+      ],
+      "post": [
+        "  }",
+        ""
+      ]
+    }
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/layer.js",
+    "abs_path": "/app/node_modules/express/lib/router/layer.js",
+    "line": {
+      "number": 95
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 317
+    },
+    "function": "trim_prefix"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 284
+    },
+    "function": "<anonymous>"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 335
+    },
+    "function": "process_params"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": true,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 275
+    },
+    "function": "next"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 635
+    },
+    "function": "<anonymous>"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 260
+    },
+    "function": "next"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 174
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 47
+    },
+    "function": "router"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/layer.js",
+    "abs_path": "/app/node_modules/express/lib/router/layer.js",
+    "line": {
+      "number": 95
+    },
+    "function": "handle"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 317
+    },
+    "function": "trim_prefix"
+  },
+  {
+    "exclude_from_grouping": false,
+    "library_frame": true,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 284
+    },
+    "function": "<anonymous>"
+  },
+  {
+    "library_frame": true,
+    "exclude_from_grouping": false,
+    "filename": "node_modules/express/lib/router/index.js",
+    "abs_path": "/app/node_modules/express/lib/router/index.js",
+    "line": {
+      "number": 335
+    },
+    "function": "process_params"
   }
 ]

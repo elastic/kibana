@@ -1,0 +1,53 @@
+{
+  "took": 1,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 2,
+      "relation": "eq"
+    },
+    "max_score": 0,
+    "hits": [
+      {
+        "_index": ".ml-annotations-6",
+        "_type": "doc",
+        "_id": "T-CNvmgBQUJYQVn7TCPA",
+        "_score": 0,
+        "_source": {
+          "timestamp": 1454928364298,
+          "end_timestamp": 1455000642848,
+          "annotation": "Annotation 1",
+          "job_id": "jobIdMock",
+          "type": "annotation",
+          "create_time": 1549385157823,
+          "create_username": "usernameMock",
+          "modified_time": 1549448867514,
+          "modified_username": "usernameMock"
+        }
+      },
+      {
+        "_index": ".ml-annotations-6",
+        "_type": "doc",
+        "_id": "3lVpvmgB5xYzd3PM-MSe",
+        "_score": 0,
+        "_source": {
+          "timestamp": 1455024146013,
+          "end_timestamp": 1455048912790,
+          "annotation": "Annotation 2",
+          "job_id": "jobIdMock",
+          "type": "annotation",
+          "create_time": 1549382842522,
+          "create_username": "usernameMock",
+          "modified_time": 1549448876306,
+          "modified_username": "usernameMock"
+        }
+      }
+    ]
+  }
+}

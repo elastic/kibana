@@ -1,213 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`props iconType 1`] = `
-<a
-  className="euiLink synopsis"
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
   data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
   href="link_to_item"
->
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiIcon
-        color="primary"
-        size="xl"
-        type="logoApache"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="synopsisContent"
-      component="div"
-      grow={true}
-    >
-      <EuiTitle
-        className="synopsisTitle"
-        size="s"
-        textTransform="none"
-      >
-        <h4>
-          Great tutorial
-        </h4>
-      </EuiTitle>
-      <EuiText
-        className="synopsisBody"
-        grow={true}
-        size="m"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            this is a great tutorial about...
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</a>
+  icon={
+    <EuiIcon
+      size="l"
+      type="logoApache"
+    />
+  }
+  layout="horizontal"
+  textAlign="center"
+  title="Great tutorial"
+  titleElement="span"
+/>
 `;
 
 exports[`props iconUrl 1`] = `
-<a
-  className="euiLink synopsis"
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
   data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
   href="link_to_item"
->
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <img
-        alt=""
-        className="synopsisIcon"
-        src="icon_url"
-      />
-    </EuiFlexItem>
-    <EuiFlexItem
-      className="synopsisContent"
-      component="div"
-      grow={true}
-    >
-      <EuiTitle
-        className="synopsisTitle"
-        size="s"
-        textTransform="none"
-      >
-        <h4>
-          Great tutorial
-        </h4>
-      </EuiTitle>
-      <EuiText
-        className="synopsisBody"
-        grow={true}
-        size="m"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            this is a great tutorial about...
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</a>
+  icon={
+    <img
+      alt=""
+      className="synopsisIcon"
+      src="icon_url"
+    />
+  }
+  layout="horizontal"
+  textAlign="center"
+  title="Great tutorial"
+  titleElement="span"
+/>
 `;
 
 exports[`props isBeta 1`] = `
-<a
-  className="euiLink synopsis"
+<EuiCard
+  betaBadgeLabel="Beta"
+  className="homSynopsis__card homSynopsis__card--noPanel"
   data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
   href="link_to_item"
->
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      className="synopsisContent"
-      component="div"
-      grow={true}
-    >
-      <EuiTitle
-        className="synopsisTitle"
-        size="s"
-        textTransform="none"
-      >
-        <h4>
-          Great tutorial
-        </h4>
-      </EuiTitle>
-      <EuiText
-        className="synopsisBody"
-        grow={true}
-        size="m"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            this is a great tutorial about...
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</a>
+  layout="horizontal"
+  textAlign="center"
+  title="Great tutorial"
+  titleElement="span"
+/>
 `;
 
 exports[`render 1`] = `
-<a
-  className="euiLink synopsis"
+<EuiCard
+  betaBadgeLabel={null}
+  className="homSynopsis__card homSynopsis__card--noPanel"
   data-test-subj="homeSynopsisLinkgreat tutorial"
+  description="this is a great tutorial about..."
   href="link_to_item"
->
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      className="synopsisContent"
-      component="div"
-      grow={true}
-    >
-      <EuiTitle
-        className="synopsisTitle"
-        size="s"
-        textTransform="none"
-      >
-        <h4>
-          Great tutorial
-        </h4>
-      </EuiTitle>
-      <EuiText
-        className="synopsisBody"
-        grow={true}
-        size="m"
-      >
-        <p>
-          <EuiTextColor
-            color="subdued"
-            component="span"
-          >
-            this is a great tutorial about...
-          </EuiTextColor>
-        </p>
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</a>
+  layout="horizontal"
+  textAlign="center"
+  title="Great tutorial"
+  titleElement="span"
+/>
 `;

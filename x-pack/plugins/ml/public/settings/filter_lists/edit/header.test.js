@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { EditFilterListHeader } from './header';
@@ -18,6 +18,8 @@ describe('EditFilterListHeader', () => {
   const requiredProps = {
     updateNewFilterId,
     updateDescription,
+    canCreateFilter: true,
+    canDeleteFilter: true,
   };
 
   test('renders the header when creating a new filter list with the ID not set', () => {
@@ -28,8 +30,8 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallow(
-      <EditFilterListHeader {...props} />
+    const component = shallowWithIntl(
+      <EditFilterListHeader.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();
@@ -45,8 +47,8 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
     };
 
-    const component = shallow(
-      <EditFilterListHeader {...props} />
+    const component = shallowWithIntl(
+      <EditFilterListHeader.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();
@@ -60,8 +62,8 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallow(
-      <EditFilterListHeader {...props} />
+    const component = shallowWithIntl(
+      <EditFilterListHeader.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();
@@ -80,8 +82,8 @@ describe('EditFilterListHeader', () => {
       }
     };
 
-    const component = shallow(
-      <EditFilterListHeader {...props} />
+    const component = shallowWithIntl(
+      <EditFilterListHeader.WrappedComponent {...props} />
     );
 
     expect(component).toMatchSnapshot();

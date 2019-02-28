@@ -1,0 +1,10 @@
+<div class="alert" ng-class="['alert-' + (type || 'warning'), closeable ? 'alert-dismissable' : null]" role="alert">
+    <button ng-show="closeable" type="button" class="close" ng-click="close()">
+        <span aria-hidden="true">&times;</span>
+        <span class="euiScreenReaderOnly"
+        	i18n-id="common.ui.angularBootstrap.alert.closeButtonLabel"
+	        i18n-default-message="Close"
+        ></span>
+    </button>
+    <div ng-transclude></div>
+</div>

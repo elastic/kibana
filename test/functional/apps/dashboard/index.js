@@ -47,13 +47,17 @@ export default function ({ getService, loadTestFile, getPageObjects }) {
       after(unloadCurrentData);
 
       loadTestFile(require.resolve('./_empty_dashboard'));
-      loadTestFile(require.resolve('./_dark_theme'));
       loadTestFile(require.resolve('./_embeddable_rendering'));
       loadTestFile(require.resolve('./_create_and_add_embeddables'));
       loadTestFile(require.resolve('./_time_zones'));
       loadTestFile(require.resolve('./_dashboard_options'));
       loadTestFile(require.resolve('./_data_shared_attributes'));
       loadTestFile(require.resolve('./_embed_mode'));
+
+      // Note: This one must be last because it unloads some data for one of its tests!
+      // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
+      // to improve efficiency...
+      loadTestFile(require.resolve('./_dashboard_query_bar'));
     });
 
     describe('using current data', function () {

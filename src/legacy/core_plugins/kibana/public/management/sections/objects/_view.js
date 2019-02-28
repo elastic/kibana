@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'angular-elastic/elastic';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
@@ -26,7 +27,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../utils';
+import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 
@@ -40,7 +41,7 @@ uiRoutes
     k7Breadcrumbs: getViewBreadcrumbs
   });
 
-uiModules.get('apps/management')
+uiModules.get('apps/management', ['monospaced.elastic'])
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
@@ -125,6 +126,14 @@ uiModules.get('apps/management')
               value: '{}'
             });
           }
+
+          if (!fieldMap.references) {
+            fields.push({
+              name: 'references',
+              type: 'array',
+              value: '[]',
+            });
+          }
         };
 
         $scope.notFound = $routeParams.notFound;
@@ -136,7 +145,10 @@ uiModules.get('apps/management')
             $scope.obj = obj;
             $scope.link = service.urlFor(obj.id);
 
-            const fields =  _.reduce(obj.attributes, createField, []);
+            const fields = _.reduce(obj.attributes, createField, []);
+            // Special handling for references which isn't within "attributes"
+            createField(fields, obj.references, 'references');
+
             if (service.Class) readObjectClass(fields, service.Class);
 
             // sorts twice since we want numerical sort to prioritize over name,
@@ -234,7 +246,9 @@ uiModules.get('apps/management')
             _.set(source, field.name, value);
           });
 
-          savedObjectsClient.update(service.type, $routeParams.id, source)
+          const { references, ...attributes } = source;
+
+          savedObjectsClient.update(service.type, $routeParams.id, attributes, { references })
             .then(function () {
               return redirectHandler('updated');
             })

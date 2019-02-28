@@ -1,0 +1,21 @@
+{
+  "ml.get_model_snapshots": {
+    "url_params": {
+      "from": 0,
+      "size": 0,
+      "start": "",
+      "end": "",
+      "sort": "",
+      "desc": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/model_snapshots/{snapshot_id}",
+      "_ml/anomaly_detectors/{job_id}/model_snapshots"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-snapshot.html"
+  }
+}

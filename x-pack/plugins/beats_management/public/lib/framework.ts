@@ -13,8 +13,6 @@ export class FrameworkLib {
   public renderUIAtPath = this.adapter.renderUIAtPath.bind(this.adapter);
   public registerManagementSection = this.adapter.registerManagementSection.bind(this.adapter);
   public registerManagementUI = this.adapter.registerManagementUI.bind(this.adapter);
-  public setUISettings = this.adapter.setUISettings.bind(this.adapter);
-  public getUISetting = this.adapter.getUISetting.bind(this.adapter);
 
   constructor(private readonly adapter: FrameworkAdapter) {}
 
@@ -30,6 +28,30 @@ export class FrameworkLib {
     return (
       LICENSES.indexOf(get(this.adapter.info, 'license.type', 'oss')) >= LICENSES.indexOf(type)
     );
+  }
+
+  public versionGreaterThen(version: string) {
+    const pa = this.adapter.version.split('.');
+    const pb = version.split('.');
+    for (let i = 0; i < 3; i++) {
+      const na = Number(pa[i]);
+      const nb = Number(pb[i]);
+      // version is greater
+      if (na > nb) {
+        return true;
+      }
+      // version is less then
+      if (nb > na) {
+        return false;
+      }
+      if (!isNaN(na) && isNaN(nb)) {
+        return true;
+      }
+      if (isNaN(na) && !isNaN(nb)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public currentUserHasOneOfRoles(roles: string[]) {

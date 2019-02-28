@@ -179,7 +179,7 @@ export function deleteJobs(jobs, finish = () => {}) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
-      showResults(resp, DATAFEED_STATE.DELETED);
+      showResults(resp, JOB_STATE.DELETED);
       finish();
     })
     .catch((error) => {
@@ -249,6 +249,24 @@ export function filterJobs(jobs, clauses) {
     }
   });
   return filteredJobs;
+}
+
+// check to see if a job has been stored in mlJobService.currentJob
+// if it has, return an object with the minimum properties needed for the
+// start datafeed modal.
+export function checkForAutoStartDatafeed() {
+  const job = mlJobService.currentJob;
+  if (job !== undefined) {
+    mlJobService.currentJob = undefined;
+    const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+    const datafeedId = hasDatafeed ? job.datafeed_config.datafeed_id : '';
+    return {
+      id: job.job_id,
+      hasDatafeed,
+      latestTimestampSortValue: 0,
+      datafeedId,
+    };
+  }
 }
 
 function stringMatch(str, substr) {

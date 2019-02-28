@@ -12,7 +12,7 @@ const snapshotRegex = /-snapshot/i;
  * This provides a common structure to apply to all Kibana monitoring documents so that they can be commonly
  * searched, field-collapsed, and aggregated against.
  *
- * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
+ * @param {Object} kbnServer manager of Kibana services - see `src/legacy/server/kbn_server` in Kibana core
  * @param {Object} config Server config
  * @param {String} host Kibana host
  * @return {Object} The object containing a "kibana" field and source instance details.

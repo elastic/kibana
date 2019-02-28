@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { ApolloError } from 'apollo-client';
 import React from 'react';
 import { Query } from 'react-apollo';
 import {
@@ -12,14 +12,15 @@ import {
   InfraNodeType,
   InfraTimerangeInput,
   MetricsQuery,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 import { InfraMetricLayout } from '../../pages/metrics/layouts/types';
 import { metricsQuery } from './metrics.gql_query';
 
 interface WithMetricsArgs {
   metrics: InfraMetricData[];
-  error?: string | undefined;
+  error?: ApolloError | undefined;
   loading: boolean;
+  refetch: () => void;
 }
 
 interface WithMetricsProps {
@@ -50,6 +51,7 @@ export const WithMetrics = ({
     <Query<MetricsQuery.Query, MetricsQuery.Variables>
       query={metricsQuery}
       fetchPolicy="no-cache"
+      notifyOnNetworkStatusChange
       variables={{
         sourceId,
         metrics,
@@ -58,11 +60,12 @@ export const WithMetrics = ({
         timerange,
       }}
     >
-      {({ data, error, loading }) => {
+      {({ data, error, loading, refetch }) => {
         return children({
           metrics: filterOnlyInfraMetricData(data && data.source && data.source.metrics),
-          error: error && error.message,
+          error,
           loading,
+          refetch,
         });
       }}
     </Query>

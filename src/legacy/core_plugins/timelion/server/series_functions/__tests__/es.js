@@ -143,7 +143,7 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
-              inline: 'doc["bytes"].value',
+              source: 'doc["bytes"].value',
               lang: 'painless'
             }
           }
@@ -198,7 +198,6 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-
       let sandbox;
 
       beforeEach(() => {
@@ -222,6 +221,34 @@ describe(filename, () => {
         const request = fn(config, tlConfig, emptyScriptedFields);
 
         expect(request).to.not.have.property('timeout');
+      });
+    });
+
+    describe('frozen indices', () => {
+      let sandbox;
+
+      beforeEach(() => {
+        sandbox = sinon.createSandbox();
+      });
+
+      afterEach(() => {
+        sandbox.restore();
+      });
+
+      it('sets ignore_throttled=true on the request', () => {
+        config.index = 'beer';
+        tlConfig.settings['search:includeFrozen'] = false;
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request.ignore_throttled).to.equal(true);
+      });
+
+      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+        tlConfig.settings['search:includeFrozen'] = true;
+        config.index = 'beer';
+        const request = fn(config, tlConfig, emptyScriptedFields);
+
+        expect(request.ignore_throttled).to.equal(false);
       });
     });
 
@@ -311,14 +338,14 @@ describe(filename, () => {
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({
-          inline: 'doc["beer"].value',
+          source: 'doc["beer"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.terms.size).to.eql(5);
 
         expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
-          inline: 'doc["wine"].value',
+          source: 'doc["wine"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);

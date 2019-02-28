@@ -17,15 +17,14 @@
  * under the License.
  */
 
-const filename = require('path').basename(__filename);
-const fn = require(`../${filename}`);
+const fn = require(`../points`);
 
 import _ from 'lodash';
 import assert from 'chai';
 const expect = assert.expect;
 import invoke from './helpers/invoke_series_fn.js';
 
-describe(filename, () => {
+describe('points.js', () => {
 
   let seriesList;
   beforeEach(() => {

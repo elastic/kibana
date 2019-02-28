@@ -50,8 +50,12 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   }
 
   async setRollupIndices() {
-    this.rollupIndicesCapabilities = await getRollupIndices();
-    this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
+    try {
+      this.rollupIndicesCapabilities = await getRollupIndices();
+      this.rollupIndices = Object.keys(this.rollupIndicesCapabilities);
+    } catch (e) {
+      // Silently swallow failure responses such as expired trials
+    }
   }
 
   async getIndexPatternCreationOption(urlHandler) {
@@ -62,7 +66,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
       testSubj: `createRollupIndexPatternButton`,
       isBeta: this.isBeta,
       onClick: () => {
-        urlHandler('/management/kibana/index?type=rollup');
+        urlHandler('/management/kibana/index_pattern?type=rollup');
       },
     } : null;
   }

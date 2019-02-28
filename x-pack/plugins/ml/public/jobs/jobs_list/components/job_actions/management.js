@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { checkPermission } from 'plugins/ml/privilege/check_privilege';
-import { mlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../../../privilege/check_privilege';
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
+import { getIndexPatternNames } from '../../../../util/index_utils';
 
 import {
   stopDatafeeds,
@@ -34,7 +35,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Start datafeed'
       }),
       icon: 'play',
-      enabled: () => (canStartStopDatafeed),
+      enabled: (item) => (item.deleting !== true && canStartStopDatafeed),
       available: (item) => (isStartable([item])),
       onClick: (item) => {
         showStartDatafeedModal([item]);
@@ -48,7 +49,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Stop datafeed'
       }),
       icon: 'stop',
-      enabled: () => (canStartStopDatafeed),
+      enabled: (item) => (item.deleting !== true && canStartStopDatafeed),
       available: (item) => (isStoppable([item])),
       onClick: (item) => {
         stopDatafeeds([item], refreshJobs);
@@ -62,7 +63,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Close job'
       }),
       icon: 'cross',
-      enabled: () => (canCloseJob),
+      enabled: (item) => (item.deleting !== true && canCloseJob),
       available: (item) => (isClosable([item])),
       onClick: (item) => {
         closeJobs([item], refreshJobs);
@@ -76,7 +77,18 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Clone job'
       }),
       icon: 'copy',
-      enabled: () => (canCreateJob),
+      enabled: (item) => {
+        // We only allow cloning of a job if the user has the right permissions and can still access
+        // the indexPattern the job was created for. An indexPattern could either have been deleted
+        // since the the job was created or the current user doesn't have the required permissions to
+        // access the indexPattern.
+        const indexPatternNames = getIndexPatternNames();
+        const jobIndicesAvailable = item.datafeedIndices.every((dfiName) => {
+          return indexPatternNames.some(ipName => ipName === dfiName);
+        });
+
+        return (item.deleting !== true && canCreateJob && jobIndicesAvailable);
+      },
       onClick: (item) => {
         cloneJob(item.id);
         closeMenu(true);
@@ -89,7 +101,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
         defaultMessage: 'Edit job'
       }),
       icon: 'pencil',
-      enabled: () => (canUpdateJob && canUpdateDatafeed),
+      enabled: (item) => (item.deleting !== true && canUpdateJob && canUpdateDatafeed),
       onClick: (item) => {
         showEditJobFlyout(item);
         closeMenu();
@@ -103,7 +115,7 @@ export function actionsMenuContent(showEditJobFlyout, showDeleteJobModal, showSt
       }),
       icon: 'trash',
       color: 'danger',
-      enabled: () => (canDeleteJob),
+      enabled: () => canDeleteJob,
       onClick: (item) => {
         showDeleteJobModal([item]);
         closeMenu();

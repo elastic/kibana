@@ -23,7 +23,7 @@ import { delay } from 'bluebird';
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';
 import {

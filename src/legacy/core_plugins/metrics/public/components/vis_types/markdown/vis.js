@@ -16,28 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
-import color from 'color';
-import Markdown from 'react-markdown';
+import classNames from 'classnames';
+import uuid from 'uuid';
+import { get } from 'lodash';
+import { Markdown } from 'ui/markdown/markdown';
+
+import ErrorComponent from '../../error';
 import replaceVars from '../../lib/replace_vars';
 import convertSeriesToVars from '../../lib/convert_series_to_vars';
-import ErrorComponent from '../../error';
+import { isBackgroundInverted } from '../../../../common/set_is_reversed';
+
+const getMarkdownId = id => `markdown-${id}`;
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
-  const series = _.get(visData, `${model.id}.series`, []);
+  const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
-  const style = {};
-  let reversed = props.reversed;
+  const markdownElementId = getMarkdownId(uuid.v1());
+
   const panelBackgroundColor = model.background_color || backgroundColor;
-  if (panelBackgroundColor) {
-    style.backgroundColor = panelBackgroundColor;
-    reversed = color(panelBackgroundColor).luminosity() < 0.45;
-  }
+  const style = { backgroundColor: panelBackgroundColor };
+
   let markdown;
+  let markdownCss = '';
+
   if (model.markdown) {
     const markdownSource = replaceVars(
       model.markdown,
@@ -47,17 +51,32 @@ function MarkdownVisualization(props) {
         ...variables
       }
     );
-    let className = 'tvbMarkdown';
-    let contentClassName = `tvbMarkdown__content ${model.markdown_vertical_align}`;
-    if (model.markdown_scrollbars) contentClassName += ' scrolling';
-    if (reversed) className += ' reversed';
+
+    if (model.markdown_css) {
+      markdownCss = model.markdown_css
+        .replace(new RegExp(getMarkdownId(model.id), 'g'), markdownElementId);
+    }
+
+    const markdownClasses = classNames('kbnMarkdown__body', {
+      'kbnMarkdown__body--reversed': isBackgroundInverted(panelBackgroundColor),
+    });
+
+    const contentClasses = classNames('tvbMarkdown__content',
+      `tvbMarkdown__content--${model.markdown_vertical_align}`,
+      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars, },
+      markdownClasses,
+    );
+
     const markdownError = markdownSource instanceof Error ? markdownSource : null;
+
     markdown = (
-      <div className={className} data-test-subj="tsvbMarkdown">
+      <div className="tvbMarkdown" data-test-subj="tsvbMarkdown">
         {markdownError && <ErrorComponent error={markdownError} />}
-        <style type="text/css">{model.markdown_css}</style>
-        <div className={contentClassName}>
-          <div id={`markdown-${model.id}`}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
+        <style type="text/css">{markdownCss}</style>
+        <div className={contentClasses}>
+          <div id={markdownElementId}>
+            { !markdownError && <Markdown markdown={markdownSource} openLinksInNewTab={model.markdown_openLinksInNewTab} /> }
+          </div>
         </div>
       </div>
     );
@@ -75,9 +94,9 @@ MarkdownVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  getConfig: PropTypes.func
 };
 
 export default MarkdownVisualization;

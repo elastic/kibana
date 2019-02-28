@@ -40,6 +40,7 @@ export function getOrdinalValue(number) {
   //   defaultMessage: '{number, selectordinal, one{#st} two{#nd} few{#rd} other{#th}}',
   //   values: { number },
   // });
+  // TODO: https://github.com/elastic/kibana/issues/27136
 
   // Protects against falsey (including 0) values
   const num = number && number.toString();

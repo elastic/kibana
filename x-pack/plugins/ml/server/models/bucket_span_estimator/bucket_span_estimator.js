@@ -116,8 +116,8 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
     run() {
       return new Promise((resolve, reject) => {
         if (this.checkers.length === 0) {
-          console.log('BucketSpanEstimator: run has stopped because no checks where created');
-          reject('BucketSpanEstimator: run has stopped because no checks where created');
+          console.log('BucketSpanEstimator: run has stopped because no checks were created');
+          reject('BucketSpanEstimator: run has stopped because no checks were created');
         }
 
         this.polledDataChecker.run()
@@ -315,10 +315,6 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
 
     if (typeof formConfig.fields === 'undefined') {
       throw new Error('Invalid formConfig: Missing fields.');
-    }
-
-    if (typeof formConfig.filters === 'undefined') {
-      throw new Error('Invalid formConfig: Missing filters.');
     }
 
     if (typeof formConfig.query === 'undefined') {

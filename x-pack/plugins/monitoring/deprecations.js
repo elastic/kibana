@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, set } from 'lodash';
+import { get } from 'lodash';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
 
 /**
@@ -13,37 +13,16 @@ import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from './common/constants';
  *
  * Important: Do not remove any deprecation warning until at least the next
  * major version!
- * @param rename {Function} config rename function from Kibana
  * @return {Array} array of rename operations and callback function for rename logging
  */
-export const deprecations = ({ rename }) => {
+export const deprecations = () => {
   return [
-    rename('elasticsearch.ssl.ca', 'elasticsearch.ssl.certificateAuthorities'),
-    rename('elasticsearch.ssl.cert', 'elasticsearch.ssl.certificate'),
-    (settings, log) => {
-      if (!has(settings, 'elasticsearch.ssl.verify')) {
-        return;
-      }
-
-      const verificationMode = get(settings, 'elasticsearch.ssl.verify') ? 'full' : 'none';
-      set(settings, 'elasticsearch.ssl.verificationMode', verificationMode);
-      delete settings.elasticsearch.ssl.verify;
-
-      log('Config key "xpack.monitoring.elasticsearch.ssl.verify" is deprecated. ' +
-        'It has been replaced with "xpack.monitoring.elasticsearch.ssl.verificationMode"');
-    },
-    (settings, log) => {
-      if (has(settings, 'report_stats')) {
-        log('Config key "xpack.monitoring.report_stats" is deprecated and will be removed in 7.0. ' +
-          'Use "xpack.xpack_main.telemetry.enabled" instead.');
-      }
-    },
     (settings, log) => {
       const clusterAlertsEnabled = get(settings, 'cluster_alerts.enabled');
       const emailNotificationsEnabled = clusterAlertsEnabled && get(settings, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled && !get(settings, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
         log(`Config key "${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}" will be required for email notifications to work in 7.0."`);
       }
-    },
+    }
   ];
 };

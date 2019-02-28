@@ -1,0 +1,136 @@
+// Forms
+
+// Angular form states
+input.ng-invalid,
+textarea.ng-invalid,
+select.ng-invalid {
+  &.ng-dirty, &.ng-touched {
+    border-color: $euiColorDanger !important;
+  }
+}
+
+input[type="radio"],
+input[type="checkbox"],
+.radio,
+.radio-inline,
+.checkbox,
+.checkbox-inline {
+  &[disabled],
+  fieldset[disabled] & {
+    cursor: default;
+    opacity: .8;
+  }
+}
+
+.checkbox label {
+  display: flex;
+  align-items: center;
+  padding-left: 0 !important;
+
+  input[type="checkbox"] {
+    float: none;
+    margin: 0 $euiSizeXS;
+    position: static;
+  }
+}
+
+// Application Layout
+
+// chrome-context
+.content {
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.application,
+.app-container {
+  > * {
+    position: relative;
+  }
+
+  > config {
+    z-index: 1;
+  }
+
+  > navbar {
+    padding-bottom: $euiSizeS;
+  }
+
+  > kbn-top-nav {
+    z-index: 5;
+  }
+
+  > nav,
+  > navbar {
+    z-index: 2 !important;
+  }
+}
+
+.application {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: auto;
+  flex-direction: column;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+[fixed-scroll] {
+  overflow-x: auto;
+  padding-bottom: 0;
+
+  + .fixed-scroll-scroller {
+    position: fixed;
+    bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+
+// Too overused in many places to be moved elsewhere
+
+.page-row {
+  padding: 0 $euiSize;
+  margin: $euiSize 0;
+}
+
+.page-row-text {
+  color: $euiColorDarkShade;
+  font-size: $euiFontSizeS;
+}
+
+// EUITODO: Move to EUI to ensure this doesn't happen elsewhere
+.euiComboBox {
+  input:focus {
+    box-shadow: none;
+  }
+}
+
+// Utility classes
+
+.fullWidth {
+  width: 100% !important;
+}
+
+.small {
+  font-size: 0.9em !important;
+}
+.smaller {
+  font-size: 0.8em !important;
+}
+.smallest {
+  font-size: 0.7em !important;
+}
+
+.text-monospace {
+  font-family: $euiCodeFontFamily;
+}

@@ -52,8 +52,6 @@ include::setup/start-stop.asciidoc[]
 
 include::setup/settings.asciidoc[]
 
-include::setup/secure-settings.asciidoc[]
-
 include::setup/docker.asciidoc[]
 
 include::setup/access.asciidoc[]

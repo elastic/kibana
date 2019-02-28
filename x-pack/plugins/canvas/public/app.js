@@ -5,9 +5,11 @@
  */
 
 import 'ui/autoload/all';
-import chrome from 'ui/chrome';
 import './angular/config';
 import './angular/services';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import chrome from 'ui/chrome';
 import { CanvasRootController } from './angular/controllers';
 
 // Import the uiExports that the application uses
@@ -22,6 +24,14 @@ import 'uiExports/fieldFormats';
 // load application code
 import './lib/load_expression_types';
 import './lib/load_transitions';
+import 'uiExports/canvas';
+
+import { HelpMenu } from './components/help_menu/help_menu';
 
 // load the application
 chrome.setRootController('canvas', CanvasRootController);
+
+// add Canvas docs to help menu in global nav
+chrome.helpExtension.set(domNode => {
+  ReactDOM.render(<HelpMenu />, domNode);
+});

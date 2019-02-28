@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { isJobIdValid } from 'plugins/ml/../common/util/job_utils';
 import { ml } from 'plugins/ml/services/ml_api_service';
@@ -48,6 +49,13 @@ export function saveFilterList(filterId, description, items, loadedFilterList)  
 }
 
 export function addFilterList(filterId, description, items) {
+  const filterWithIdExistsErrorMessage = i18n.translate('xpack.ml.settings.filterLists.filterWithIdExistsErrorMessage', {
+    defaultMessage: 'A filter with id {filterId} already exists',
+    values: {
+      filterId,
+    },
+  });
+
   return new Promise((resolve, reject) => {
 
     // First check the filterId isn't already in use by loading the current list of filters.
@@ -68,8 +76,8 @@ export function addFilterList(filterId, description, items) {
               reject(error);
             });
         } else {
-          toastNotifications.addDanger(`A filter with id ${filterId} already exists`);
-          reject(new Error(`A filter with id ${filterId} already exists`));
+          toastNotifications.addDanger(filterWithIdExistsErrorMessage);
+          reject(new Error(filterWithIdExistsErrorMessage));
         }
       })
       .catch((error) => {

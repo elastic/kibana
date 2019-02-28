@@ -17,12 +17,22 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { modifyUrl } from '../../../src/core/utils';
+import Keys from 'leadfoot/keys';
+import { LeadfootElementWrapper } from './lib/leadfoot_element_wrapper';
 
 export function BrowserProvider({ getService }) {
   const leadfoot = getService('__leadfoot__');
 
-  return new class BrowserService {
+  class BrowserService {
+
+    /**
+     * Keyboard events
+     */
+    keys = Keys;
+
     /**
      * Gets the dimensions of a window.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#getWindowSize
@@ -33,7 +43,6 @@ export function BrowserProvider({ getService }) {
     async getWindowSize(...args) {
       return await leadfoot.getWindowSize(...args);
     }
-
 
     /**
      * Sets the dimensions of a window.
@@ -102,6 +111,21 @@ export function BrowserProvider({ getService }) {
     }
 
     /**
+     * Does a drag-and-drop action from one point to another
+     *
+     * @param {{element: LeadfootElementWrapper, xOffset: number, yOffset: number}} from
+     * @param {{element: LeadfootElementWrapper, xOffset: number, yOffset: number}} to
+     * @return {Promise<void>}
+     */
+    async dragAndDrop(from, to) {
+      await this.moveMouseTo(from.element, from.xOffset, from.yOffset);
+      await leadfoot.pressMouseButton();
+      await this.moveMouseTo(to.element, to.xOffset, to.yOffset);
+      await leadfoot.releaseMouseButton();
+
+    }
+
+    /**
      * Reloads the current browser window/frame.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#refresh
      *
@@ -143,28 +167,6 @@ export function BrowserProvider({ getService }) {
      */
     async clickMouseButton(...args) {
       await leadfoot.clickMouseButton(...args);
-    }
-
-    /**
-     * Depresses a mouse button without releasing it.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#pressMouseButton
-     *
-     * @param {number} button Optional
-     * @return {Promise<void>}
-     */
-    async pressMouseButton(...args) {
-      await leadfoot.pressMouseButton(...args);
-    }
-
-    /**
-     * Releases a previously depressed mouse button.
-     * https://theintern.io/leadfoot/module-leadfoot_Session.html#releaseMouseButton
-     *
-     * @param {number} button Optional
-     * @return {Promise<void>}
-     */
-    async releaseMouseButton(...args) {
-      await leadfoot.releaseMouseButton(...args);
     }
 
     /**
@@ -232,6 +234,18 @@ export function BrowserProvider({ getService }) {
     }
 
     /**
+     * Sets a value in local storage for the focused window/frame.
+     * https://theintern.io/leadfoot/module-leadfoot_Session.html#setLocalStorageItem
+     *
+     * @param {string} key
+     * @param {string} value
+     * @return {Promise<void>}
+     */
+    async setLocalStorageItem(key, value) {
+      await leadfoot.setLocalStorageItem(key, value);
+    }
+
+    /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
      * https://theintern.io/leadfoot/module-leadfoot_Session.html#closeCurrentWindow
@@ -249,8 +263,14 @@ export function BrowserProvider({ getService }) {
      * @param  {string|function} function
      * @param  {...any[]} args
      */
-    async execute(...args) {
-      return await leadfoot.execute(...args);
+    async execute(fn, ...args) {
+      return await leadfoot.execute(fn, cloneDeep(args, arg => {
+        if (arg instanceof LeadfootElementWrapper) {
+          return arg._leadfootElement;
+        }
+      }));
     }
-  };
+  }
+
+  return  new BrowserService();
 }

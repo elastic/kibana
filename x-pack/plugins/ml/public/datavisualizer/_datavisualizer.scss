@@ -3,8 +3,11 @@
   margin-right: auto;
   margin-left: auto;
   padding: $euiSizeS $euiSize;
-  background-color: $euiColorLightestShade;
   flex: 1 0 auto;
+
+  .flexGroup__filler {
+    flex: 1 1 auto;
+  }
 
   .kuiVerticalRhythm + .kuiVerticalRhythm {
     margin-top: $euiSizeL;

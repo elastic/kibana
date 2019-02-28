@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
@@ -16,5 +16,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./uptime'));
+    loadTestFile(require.resolve('./maps'));
   });
 }

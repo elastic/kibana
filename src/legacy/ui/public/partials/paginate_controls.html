@@ -1,0 +1,98 @@
+<button
+  class="kuiLink"
+  ng-if="linkToTop"
+  ng-click="paginate.goToTop()"
+  data-test-subj="paginateControlsLinkToTop"
+  i18n-id="common.ui.paginateControls.scrollTopButtonLabel"
+  i18n-default-message="Scroll to top"
+></button>
+
+<div
+  class="pagination-other-pages"
+  data-test-subj="paginationControls"
+>
+  <ul class="pagination-other-pages-list pagination-sm" ng-if="page.count > 1">
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.first">
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        ng-click="paginate.goToPage(page.prev)"
+      >
+        <span class="euiButtonEmpty__content">«</span>
+      </button>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.first">
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        ng-click="paginate.goToPage(page.prev)"
+      >
+        <span class="euiButtonEmpty__content">«</span>
+      </button>
+    </li>
+
+    <li ng-if="!otherPages.containsFirst">
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        ng-click="paginate.goToPage(1)"
+      >
+        <span class="euiButtonEmpty__content">1</span>
+      </button>
+      ...
+    </li>
+
+    <li
+      ng-repeat="other in otherPages"
+      ng-class="{ active: other.number === page.number }"
+    >
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        ng-class="{ 'euiPaginationButton-isActive': other.number === page.number }"
+        ng-click="paginate.goToPage(other)"
+      >
+        <span class="euiButtonEmpty__content">{{other.number}}</span>
+      </button>
+    </li>
+
+    <li ng-if="!otherPages.containsLast">
+      ...
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        ng-click="paginate.goToPage(page.count)"
+      >
+        <span class="euiButtonEmpty__content">{{page.count}}</span>
+      </button>
+    </li>
+
+    <li ng-style="{'visibility':'hidden'}" ng-if="page.last">
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        data-test-subj="paginateNext"
+        ng-click="paginate.goToPage(page.next)"
+      >
+        <span class="euiButtonEmpty__content">»</span>
+      </button>
+    </li>
+    <li ng-style="{'visibility':'visible'}" ng-if="!page.last">
+      <button
+        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
+        data-test-subj="paginateNext"
+        ng-click="paginate.goToPage(page.next)"
+      >
+        <span class="euiButtonEmpty__content">»</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<form class="form-inline pagination-size" ng-if="showSelector">
+  <div class="form-group">
+    <label
+      i18n-id="common.ui.paginateControls.pageSizeLabel"
+      i18n-default-message="Page Size"
+    ></label>
+    <select
+      ng-model="paginate.perPage"
+      ng-options="opt.value as opt.title for opt in paginate.sizeOptions"
+      data-test-subj="paginateControlsPageSizeSelect"
+    ></select>
+  </div>
+</form>

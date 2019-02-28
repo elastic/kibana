@@ -54,15 +54,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
     });
   };
 
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/search] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/search] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectNotSpaceAwareResults = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       page: 1,
@@ -72,10 +63,11 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'globaltype',
           id: `8121a00-8efd-21e7-1cb3-34ab966434445`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -104,10 +96,11 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          version: 1,
+          version: resp.body.saved_objects[0].version,
           attributes: {
             title: 'Count of requests',
           },
+          references: [],
         },
       ],
     });
@@ -132,7 +125,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           .expect(tests.spaceAwareType.statusCode)
           .then(tests.spaceAwareType.response));
 
-      it(`not space aware type should return ${tests.spaceAwareType.statusCode} with ${
+      it(`not space aware type should return ${tests.notSpaceAwareType.statusCode} with ${
         tests.notSpaceAwareType.description
       }`, async () =>
         await supertest
@@ -172,7 +165,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           tests.unknownSearchField.description
         }`, async () =>
           await supertest
-            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=wigwags&search_fields=a`)
+            .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find?type=url&search_fields=a`)
             .auth(user.username, user.password)
             .expect(tests.unknownSearchField.statusCode)
             .then(tests.unknownSearchField.response));
@@ -195,7 +188,6 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
 
   return {
     createExpectEmpty,
-    createExpectLegacyForbidden,
     createExpectRbacForbidden,
     createExpectVisualizationResults,
     expectNotSpaceAwareResults,

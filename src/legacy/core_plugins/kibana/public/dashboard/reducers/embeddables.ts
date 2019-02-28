@@ -39,6 +39,7 @@ const embeddableIsInitializing = (
     initialized: false,
     metadata: {},
     stagedFilter: undefined,
+    lastReloadRequestTime: 0,
   },
 });
 
@@ -88,6 +89,16 @@ const deleteEmbeddable = (embeddables: EmbeddablesMap, panelId: PanelId): Embedd
   return embeddablesCopy;
 };
 
+const setReloadRequestTime = (
+  embeddables: EmbeddablesMap,
+  lastReloadRequestTime: number
+): EmbeddablesMap => {
+  return _.mapValues<EmbeddablesMap>(embeddables, embeddable => ({
+    ...embeddable,
+    lastReloadRequestTime,
+  }));
+};
+
 export const embeddablesReducer: Reducer<EmbeddablesMap> = (
   embeddables = {},
   action
@@ -105,6 +116,8 @@ export const embeddablesReducer: Reducer<EmbeddablesMap> = (
       return embeddableError(embeddables, action.payload);
     case PanelActionTypeKeys.DELETE_PANEL:
       return deleteEmbeddable(embeddables, action.payload);
+    case EmbeddableActionTypeKeys.REQUEST_RELOAD:
+      return setReloadRequestTime(embeddables, new Date().getTime());
     default:
       return embeddables;
   }

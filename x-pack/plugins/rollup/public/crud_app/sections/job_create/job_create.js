@@ -18,8 +18,6 @@ import {
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
@@ -294,6 +292,7 @@ export class JobCreateUi extends Component {
         !this.canGoToStep(stepId)
         || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
       ),
+      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -453,7 +452,7 @@ export class JobCreateUi extends Component {
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -496,38 +495,31 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="rollupJobWizardPage"
-            >
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.createTitle"
-                      defaultMessage="Create rollup job"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle size="m">
+              <h1>
+                <FormattedMessage
+                  id="xpack.rollupJobs.createTitle"
+                  defaultMessage="Create rollup job"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeader>
 
-              {saveErrorFeedback}
+          {saveErrorFeedback}
 
-              <EuiStepsHorizontal steps={this.getSteps()} />
+          <EuiStepsHorizontal steps={this.getSteps()} />
 
-              <EuiSpacer />
+          <EuiSpacer />
 
-              {this.renderCurrentStep()}
+          {this.renderCurrentStep()}
 
-              <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
 
-              {this.renderNavigation()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
+          {this.renderNavigation()}
 
+        </EuiPageContent>
         {savingFeedback}
       </Fragment>
     );

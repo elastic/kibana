@@ -20,10 +20,13 @@ export const waffleNodesQuery = gql`
         nodes(path: $path, metric: $metric) {
           path {
             value
+            label
           }
           metric {
             name
             value
+            avg
+            max
           }
         }
       }

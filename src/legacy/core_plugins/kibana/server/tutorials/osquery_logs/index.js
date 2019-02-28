@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function osqueryLogsSpecProvider(server, context) {
   const moduleName = 'osquery';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'osqueryLogs',
@@ -46,7 +44,7 @@ export function osqueryLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '69f5ae20-eb02-11e7-8f04-51231daa5b05',
+          id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Osquery logs dashboard',
           }),
@@ -59,7 +57,7 @@ export function osqueryLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/osquery_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

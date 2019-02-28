@@ -5,49 +5,70 @@
  */
 
 import boom from 'boom';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import { omit } from 'lodash';
+import {
+  CANVAS_TYPE,
+  API_ROUTE_WORKPAD,
+  API_ROUTE_WORKPAD_ASSETS,
+  API_ROUTE_WORKPAD_STRUCTURES,
+} from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';
 
 export function workpad(server) {
   //const config = server.config();
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
+  const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
+  const routePrefixStructures = API_ROUTE_WORKPAD_STRUCTURES;
 
   function formatResponse(resp) {
-    if (resp.isBoom) return resp; // can't wrap it if it's already a boom error
+    if (resp.isBoom) {
+      return resp;
+    } // can't wrap it if it's already a boom error
 
-    if (resp instanceof esErrors['400']) return boom.badRequest(resp);
+    if (resp instanceof esErrors['400']) {
+      return boom.badRequest(resp);
+    }
 
-    if (resp instanceof esErrors['401']) return boom.unauthorized();
+    if (resp instanceof esErrors['401']) {
+      return boom.unauthorized();
+    }
 
-    if (resp instanceof esErrors['403'])
+    if (resp instanceof esErrors['403']) {
       return boom.forbidden("Sorry, you don't have access to that");
+    }
 
-    if (resp instanceof esErrors['404']) return boom.boomify(resp, { statusCode: 404 });
+    if (resp instanceof esErrors['404']) {
+      return boom.boomify(resp, { statusCode: 404 });
+    }
 
     return resp;
   }
 
-  function createWorkpad(req, id) {
+  function createWorkpad(req) {
     const savedObjectsClient = req.getSavedObjectsClient();
 
-    if (!req.payload) return Promise.resolve(boom.badRequest('A workpad payload is required'));
+    if (!req.payload) {
+      return Promise.reject(boom.badRequest('A workpad payload is required'));
+    }
 
     const now = new Date().toISOString();
+    const { id, ...payload } = req.payload;
     return savedObjectsClient.create(
       CANVAS_TYPE,
       {
-        ...req.payload,
+        ...payload,
         '@timestamp': now,
         '@created': now,
       },
-      { id: id || req.payload.id || getId('workpad') }
+      { id: id || getId('workpad') }
     );
   }
 
-  function updateWorkpad(req) {
+  function updateWorkpad(req, newPayload) {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
+    const payload = newPayload ? newPayload : req.payload;
 
     const now = new Date().toISOString();
 
@@ -56,9 +77,10 @@ export function workpad(server) {
       return savedObjectsClient.create(
         CANVAS_TYPE,
         {
-          ...req.payload,
-          '@timestamp': now,
-          '@created': workpad.attributes['@created'],
+          ...workpad.attributes,
+          ...omit(payload, 'id'), // never write the id property
+          '@timestamp': now, // always update the modified time
+          '@created': workpad.attributes['@created'], // ensure created is not modified
         },
         { overwrite: true, id }
       );
@@ -98,7 +120,7 @@ export function workpad(server) {
 
       return savedObjectsClient
         .get(CANVAS_TYPE, id)
-        .then(obj => obj.attributes)
+        .then(obj => ({ id: obj.id, ...obj.attributes }))
         .then(formatResponse)
         .catch(formatResponse);
     },
@@ -128,6 +150,31 @@ export function workpad(server) {
     },
   });
 
+  // update workpad assets
+  server.route({
+    method: 'PUT',
+    path: `${routePrefixAssets}/{id}`,
+    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
+    handler: function(request) {
+      const payload = { assets: request.payload };
+      return updateWorkpad(request, payload)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
+    },
+  });
+
+  // update workpad structures
+  server.route({
+    method: 'PUT',
+    path: `${routePrefixStructures}/{id}`,
+    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
+    handler: function(request) {
+      return updateWorkpad(request)
+        .then(() => ({ ok: true }))
+        .catch(formatResponse);
+    },
+  });
+
   // delete workpad
   server.route({
     method: 'DELETE',
@@ -149,7 +196,7 @@ export function workpad(server) {
         .then(resp => {
           return {
             total: resp.total,
-            workpads: resp.saved_objects.map(hit => hit.attributes),
+            workpads: resp.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
           };
         })
         .catch(() => {

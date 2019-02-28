@@ -5,10 +5,12 @@
  */
 
 import { timeMilliseconds } from 'd3-time';
+import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
 
+import { JsonObject } from 'x-pack/plugins/infra/common/typed_json';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import {
   LogEntriesAdapter,
@@ -26,6 +28,13 @@ import { InfraBackendFrameworkAdapter } from '../framework';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
+const TIMESTAMP_FORMAT = 'epoch_millis';
+
+interface LogItemHit {
+  _index: string;
+  _id: string;
+  _source: JsonObject;
+}
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
@@ -113,6 +122,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
           count_by_date: {
             date_range: {
               field: sourceConfiguration.fields.timestamp,
+              format: TIMESTAMP_FORMAT,
               ranges: bucketIntervalStarts.map(bucketIntervalStart => ({
                 from: bucketIntervalStart.getTime(),
                 to: bucketIntervalStart.getTime() + bucketSize,
@@ -129,6 +139,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
                   [sourceConfiguration.fields.timestamp]: {
                     gte: start,
                     lte: end,
+                    format: TIMESTAMP_FORMAT,
                   },
                 },
               },
@@ -147,6 +158,35 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     return response.aggregations && response.aggregations.count_by_date
       ? response.aggregations.count_by_date.buckets
       : [];
+  }
+
+  public async getLogItem(
+    request: InfraFrameworkRequest,
+    id: string,
+    sourceConfiguration: InfraSourceConfiguration
+  ) {
+    const search = (searchOptions: object) =>
+      this.framework.callWithRequest<LogItemHit, {}>(request, 'search', searchOptions);
+
+    const params = {
+      index: sourceConfiguration.logAlias,
+      terminate_after: 1,
+      body: {
+        size: 1,
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const response = await search(params);
+    const document = first(response.hits.hits);
+    if (!document) {
+      throw new Error('Document not found');
+    }
+    return document;
   }
 
   private async getLogEntryDocumentsBetween(
@@ -215,6 +255,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
                   [sourceConfiguration.fields.timestamp]: {
                     ...startRange,
                     ...endRange,
+                    format: TIMESTAMP_FORMAT,
                   },
                 },
               },

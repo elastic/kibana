@@ -18,7 +18,6 @@
  */
 
 import './editor/editor';
-import './wizard/wizard';
 import 'ui/draggable/draggable_container';
 import 'ui/draggable/draggable_item';
 import 'ui/draggable/draggable_handle';
@@ -54,17 +53,18 @@ uiRoutes
     resolve: {
       createNewVis: () => true,
     },
-  })
-  // Old path, will be removed in 7.0
-  .when('/visualize/step/1', {
-    redirectTo: VisualizeConstants.WIZARD_STEP_1_PAGE_PATH,
   });
 
-FeatureCatalogueRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(i18n => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+    description: i18n(
+      'kbn.visualize.visualizeDescription',
+      {
+        defaultMessage: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+      }
+    ),
     icon: 'visualizeApp',
     path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

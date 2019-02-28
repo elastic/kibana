@@ -40,11 +40,11 @@ export function uwsgiMetricsSpecProvider(server, context) {
       },
     }),
     //euiIconType: 'logouWSGI',
-    isBeta: true,
+    isBeta: false,
     artifacts: {
       dashboards: [
         {
-          id: '32fca290-f0af-11e7-b9ff-9f96241065de',
+          id: '32fca290-f0af-11e7-b9ff-9f96241065de-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.uwsgiMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'uWSGI metrics dashboard',
           }),

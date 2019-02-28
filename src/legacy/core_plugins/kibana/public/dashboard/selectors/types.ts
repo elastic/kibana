@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EmbeddableMetadata, Filters, Query, TimeRange } from 'ui/embeddable';
+import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 export interface ViewState {
@@ -26,6 +26,7 @@ export interface ViewState {
   readonly maximizedPanelId?: string;
   readonly visibleContextMenuPanelId?: string;
   readonly timeRange: TimeRange;
+  readonly refreshConfig: RefreshConfig;
   readonly hidePanelTitles: boolean;
   readonly useMargins: boolean;
   readonly query: Query;
@@ -58,6 +59,10 @@ export interface EmbeddableReduxState {
   readonly error?: string | object;
   readonly initialized: boolean;
   readonly stagedFilter?: object;
+  /**
+   * Timestamp of the last time this embeddable was requested to reload.
+   */
+  readonly lastReloadRequestTime: number;
 }
 
 export interface PanelsMap {

@@ -26,9 +26,7 @@ export default function (kibana) {
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
-      hacks: [
-        'plugins/interpreter/load_browser_plugins.js',
-      ],
+      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
     },
     init,
   });

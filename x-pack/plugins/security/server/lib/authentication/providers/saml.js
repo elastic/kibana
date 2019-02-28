@@ -22,6 +22,14 @@ import { DeauthenticationResult } from '../deauthentication_result';
  */
 
 /**
+ * Object that represents return value of internal header auth
+ * @typedef {{
+ *  authenticationResult: AuthenticationResult,
+ *  headerNotRecognized?: boolean
+ * }} HeaderAuthAttempt
+ */
+
+/**
  * Checks the error returned by Elasticsearch as the result of `authenticate` call and returns `true` if request
  * has been rejected because of expired token, otherwise returns `false`.
  * @param {Object} err Error returned from Elasticsearch.
@@ -74,7 +82,14 @@ export class SAMLAuthenticationProvider {
   async authenticate(request, state) {
     this._options.log(['debug', 'security', 'saml'], `Trying to authenticate user request to ${request.url.path}.`);
 
-    let authenticationResult = await this._authenticateViaHeader(request);
+    let {
+      authenticationResult,
+      headerNotRecognized, // eslint-disable-line prefer-const
+    } = await this._authenticateViaHeader(request);
+    if (headerNotRecognized) {
+      return authenticationResult;
+    }
+
     if (state && authenticationResult.notHandled()) {
       authenticationResult = await this._authenticateViaState(request, state);
       if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
@@ -98,7 +113,7 @@ export class SAMLAuthenticationProvider {
    * Validates whether request contains `Bearer ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
    * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<AuthenticationResult>}
+   * @returns {Promise.<HeaderAuthAttempt>}
    * @private
    */
   async _authenticateViaHeader(request) {
@@ -107,19 +122,18 @@ export class SAMLAuthenticationProvider {
     const authorization = request.headers.authorization;
     if (!authorization) {
       this._options.log(['debug', 'security', 'saml'], 'Authorization header is not presented.');
-      return AuthenticationResult.notHandled();
+      return {
+        authenticationResult: AuthenticationResult.notHandled()
+      };
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'bearer') {
       this._options.log(['debug', 'security', 'saml'], `Unsupported authentication schema: ${authenticationSchema}`);
-
-      // It's essential that we fail if non-empty, but unsupported authentication schema
-      // is provided to allow authenticator to consult other authentication providers
-      // that may support that schema.
-      return AuthenticationResult.failed(
-        Boom.badRequest(`Unsupported authentication schema: ${authenticationSchema}`)
-      );
+      return {
+        authenticationResult: AuthenticationResult.notHandled(),
+        headerNotRecognized: true
+      };
     }
 
     try {
@@ -130,10 +144,14 @@ export class SAMLAuthenticationProvider {
 
       this._options.log(['debug', 'security', 'saml'], 'Request has been authenticated via header.');
 
-      return AuthenticationResult.succeeded(user);
+      return {
+        authenticationResult: AuthenticationResult.succeeded(user)
+      };
     } catch(err) {
       this._options.log(['debug', 'security', 'saml'], `Failed to authenticate request via header: ${err.message}`);
-      return AuthenticationResult.failed(err);
+      return {
+        authenticationResult: AuthenticationResult.failed(err)
+      };
     }
   }
 
@@ -385,7 +403,7 @@ export class SAMLAuthenticationProvider {
       logoutArgs = [
         'shield.samlInvalidate',
         // Elasticsearch expects `queryString` without leading `?`, so we should strip it with `slice`.
-        { body: { queryString: request.url.search.slice(1), acs: this._getACS() } }
+        { body: { queryString: request.url.search ? request.url.search.slice(1) : '', acs: this._getACS() } }
       ];
     } else {
       this._options.log(['debug', 'security', 'saml'], 'Logout has been initiated by the user.');

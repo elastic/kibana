@@ -34,10 +34,6 @@
   .ngLegendValue {
     color: $euiTextColor;
 
-    .tab-dashboard.theme-dark & {
-      color: $euiColorLightShade;
-    }
-
     &:focus,
     &:hover {
       text-decoration: underline;
@@ -51,11 +47,8 @@
   }
 
   .flot-tick-label {
+    font-size: $euiFontSizeXS;
     color: $euiColorDarkShade;
-
-    .tab-dashboard.theme-dark & {
-      color: $euiColorMediumShade;
-    }
   }
 }
 
@@ -63,8 +56,4 @@
   color: $euiTextColor;
   white-space: nowrap;
   font-weight: $euiFontWeightBold;
-
-  .tab-dashboard.theme-dark & {
-    color: $euiColorLightShade;
-  }
 }

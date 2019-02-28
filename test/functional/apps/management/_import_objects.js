@@ -140,8 +140,8 @@ export default function ({ getService, getPageObjects }) {
 
       // Second, we need to delete the index pattern
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
 
       // Last, import a saved object connected to the saved search
@@ -176,8 +176,8 @@ export default function ({ getService, getPageObjects }) {
     it('should import saved objects with index patterns when index patterns does not exists', async () => {
       // First, we need to delete the index pattern
       await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.clickOnOnlyIndexPattern();
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
 
       // Then, import the objects

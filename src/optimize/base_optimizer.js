@@ -21,15 +21,16 @@ import { writeFile } from 'fs';
 import os from 'os';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import UglifyJsPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import webpack from 'webpack';
 import Stats from 'webpack/lib/Stats';
+import * as threadLoader from 'thread-loader';
 import webpackMerge from 'webpack-merge';
 import { DynamicDllPlugin } from './dynamic_dll_plugin';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../utils';
+import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -43,9 +44,19 @@ const STATS_WARNINGS_FILTER = new RegExp([
   '|(chunk .* \\[mini-css-extract-plugin\\]\\\nConflicting order between:)'
 ].join(''));
 
+function recursiveIssuer(m) {
+  if (m.issuer) {
+    return recursiveIssuer(m.issuer);
+  } else if (m.name) {
+    return m.name;
+  } else {
+    return false;
+  }
+}
+
 export default class BaseOptimizer {
   constructor(opts) {
-    this.log = opts.log || (() => null);
+    this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
 
@@ -63,6 +74,9 @@ export default class BaseOptimizer {
         break;
     }
 
+    // Run some pre loading in order to prevent
+    // high delay when booting thread loader workers
+    this.warmupThreadLoaderPool();
   }
 
   async init() {
@@ -100,6 +114,63 @@ export default class BaseOptimizer {
         if (err) throw err;
       });
     });
+  }
+
+  warmupThreadLoaderPool() {
+    const baseModules = [
+      'babel-loader',
+      BABEL_PRESET_PATH
+    ];
+
+    const nonDistributableOnlyModules = !IS_KIBANA_DISTRIBUTABLE
+      ? ['ts-loader']
+      : [];
+
+    threadLoader.warmup(
+      // pool options, like passed to loader options
+      // must match loader options to boot the correct pool
+      this.getThreadLoaderPoolConfig(),
+      [
+        // modules to load on the pool
+        ...baseModules,
+        ...nonDistributableOnlyModules
+      ]
+    );
+  }
+
+  getThreadPoolCpuCount() {
+    const cpus = os.cpus();
+    if (!cpus) {
+      // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022
+      return 1;
+    }
+
+    return Math.max(
+      1,
+      Math.min(
+        cpus.length - 1,
+        7
+      )
+    );
+  }
+
+  getThreadLoaderPoolConfig() {
+    // Calculate the node options from the NODE_OPTIONS env var
+    const parsedNodeOptions = process.env.NODE_OPTIONS ? process.env.NODE_OPTIONS.split(/\s/) : [];
+
+    return {
+      name: 'optimizer-thread-loader-main-pool',
+      workers: this.getThreadPoolCpuCount(),
+      workerParallelJobs: 20,
+      // This is a safe check in order to set
+      // the parent node options applied from
+      // the NODE_OPTIONS env var for every launched worker.
+      // Otherwise, if the user sets max_old_space_size, as they
+      // are used to, into NODE_OPTIONS, it won't affect the workers.
+      workerNodeArgs: parsedNodeOptions,
+      poolParallelJobs: this.getThreadPoolCpuCount() * 20,
+      poolTimeout: this.uiBundles.isDevMode() ? Infinity : 2000
+    };
   }
 
   getConfig() {
@@ -177,9 +248,16 @@ export default class BaseOptimizer {
       mode: 'development',
       node: { fs: 'empty' },
       context: fromRoot('.'),
-      parallelism: os.cpus().length - 1,
       cache: true,
-      entry: this.uiBundles.toWebpackEntries(),
+      entry: {
+        ...this.uiBundles.toWebpackEntries(),
+        light_theme: [
+          require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
+        ],
+        dark_theme: [
+          require.resolve('../legacy/ui/public/styles/bootstrap_dark.less'),
+        ],
+      },
 
       devtool: this.sourceMaps,
       profile: this.profile || false,
@@ -197,9 +275,21 @@ export default class BaseOptimizer {
           cacheGroups: {
             commons: {
               name: 'commons',
-              chunks: 'initial',
+              chunks: chunk => chunk.canBeInitial() && chunk.name !== 'light_theme' && chunk.name !== 'dark_theme',
               minChunks: 2,
               reuseExistingChunk: true
+            },
+            light_theme: {
+              name: 'light_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'light_theme',
+              chunks: 'all',
+              enforce: true
+            },
+            dark_theme: {
+              name: 'dark_theme',
+              test: m => m.constructor.name === 'CssModule' && recursiveIssuer(m) === 'dark_theme',
+              chunks: 'all',
+              enforce: true
             }
           }
         },
@@ -209,7 +299,8 @@ export default class BaseOptimizer {
       plugins: [
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
-          log: this.log
+          threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
+          logWithMetadata: this.logWithMetadata
         }),
 
         new MiniCssExtractPlugin({
@@ -265,8 +356,8 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.png$/,
-            loader: 'url-loader'
+            test: /\.(png|jpg|gif|jpeg)$/,
+            loader: ['url-loader'],
           },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
@@ -275,6 +366,10 @@ export default class BaseOptimizer {
           {
             resource: createSourceFileResourceSelector(/\.js$/),
             use: maybeAddCacheLoader('babel', [
+              {
+                loader: 'thread-loader',
+                options: this.getThreadLoaderPoolConfig()
+              },
               {
                 loader: 'babel-loader',
                 options: {
@@ -304,7 +399,10 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases()
+        alias: {
+          ...this.uiBundles.getAliases(),
+          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
+        }
       },
 
       performance: {
@@ -340,8 +438,13 @@ export default class BaseOptimizer {
               resource: createSourceFileResourceSelector(/\.tsx?$/),
               use: maybeAddCacheLoader('typescript', [
                 {
+                  loader: 'thread-loader',
+                  options: this.getThreadLoaderPoolConfig()
+                },
+                {
                   loader: 'ts-loader',
                   options: {
+                    happyPackMode: true,
                     transpileOnly: true,
                     experimentalWatchApi: true,
                     onlyCompileBundledFiles: true,
@@ -387,46 +490,17 @@ export default class BaseOptimizer {
       ]
     };
 
-    // in production we set the process.env.NODE_ENV and uglify our bundles
+    // in production we set the process.env.NODE_ENV and run
+    // the terser minimizer over our bundles
     const productionConfig = {
       mode: 'production',
       optimization: {
-        minimize: true,
         minimizer: [
-          new UglifyJsPlugin({
+          new TerserPlugin({
             parallel: true,
             sourceMap: false,
-            uglifyOptions: {
-              compress: {
-                // The following is required for dead-code the removal
-                // check in React DevTools
-                //
-                // default
-                unused: true,
-                dead_code: true,
-                conditionals: true,
-                evaluate: true,
-
-                // changed
-                keep_fnames: true,
-                keep_infinity: true,
-                comparisons: false,
-                sequences: false,
-                properties: false,
-                drop_debugger: false,
-                booleans: false,
-                loops: false,
-                toplevel: false,
-                top_retain: false,
-                hoist_funs: false,
-                if_return: false,
-                join_vars: false,
-                collapse_vars: false,
-                reduce_vars: false,
-                warnings: false,
-                negate_iife: false,
-                side_effects: false
-              },
+            terserOptions: {
+              compress: false,
               mangle: false
             }
           }),

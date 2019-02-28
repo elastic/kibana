@@ -5,7 +5,7 @@
  */
 
 import { sortBy } from 'lodash';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 export interface AgentMark {
   name: string;

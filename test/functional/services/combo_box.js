@@ -35,6 +35,7 @@ export function ComboBoxProvider({ getService }) {
     async setElement(comboBoxElement, value) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
+      await this.openOptionsList(comboBoxElement);
       await find.clickByCssSelector('.euiComboBoxOption');
       await this.closeOptionsList(comboBoxElement);
     }
@@ -49,6 +50,7 @@ export function ComboBoxProvider({ getService }) {
     async _filterOptionsList(comboBoxElement, filterValue) {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
+      await this._waitForOptionsListLoading(comboBoxElement);
       await input.type(filterValue);
       await this._waitForOptionsListLoading(comboBoxElement);
     }
@@ -60,10 +62,15 @@ export function ComboBoxProvider({ getService }) {
     async getOptionsList(comboBoxSelector) {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      await testSubjects.click(comboBoxSelector);
-      await this._waitForOptionsListLoading(comboBox);
-      const menu = await retry.try(
-        async () => await testSubjects.find('comboBoxOptionsList'));
+      const menu = await retry.try(async () => {
+        await testSubjects.click(comboBoxSelector);
+        await this._waitForOptionsListLoading(comboBox);
+        const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+        if (!isOptionsListOpen) {
+          throw new Error('Combo box options list did not open on click');
+        }
+        return await testSubjects.find('comboBoxOptionsList');
+      });
       const optionsText = await menu.getVisibleText();
       await this.closeOptionsList(comboBox);
       return optionsText;
@@ -119,8 +126,16 @@ export function ComboBoxProvider({ getService }) {
     async closeOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const closeBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await closeBtn.click();
+        const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
+        await toggleBtn.click();
+      }
+    }
+
+    async openOptionsList(comboBoxElement) {
+      const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+      if (!isOptionsListOpen) {
+        const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
+        await toggleBtn.click();
       }
     }
 

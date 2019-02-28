@@ -54,6 +54,9 @@ export default function ({ getService }) {
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+                  migrationVersion: {
+                    visualization: '7.0.0'
+                  },
                   type: 'visualization',
                   updated_at: '2017-09-21T18:51:23.794Z',
                   version: resp.body.saved_objects[0].version,
@@ -65,7 +68,15 @@ export default function ({ getService }) {
                     visState: resp.body.saved_objects[0].attributes.visState,
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
-                  }
+                  },
+                  migrationVersion: {
+                    visualization: '7.0.0',
+                  },
+                  references: [{
+                    name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                    type: 'index-pattern',
+                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                  }],
                 },
                 {
                   id: 'does not exist',
@@ -83,7 +94,8 @@ export default function ({ getService }) {
                   attributes: {
                     buildNum: 8467,
                     defaultIndex: '91200a00-9efd-11e7-acb3-3dab96693fab'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });

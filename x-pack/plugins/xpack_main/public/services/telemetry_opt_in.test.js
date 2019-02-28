@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TelemetryOptInProvider } from "./telemetry_opt_in";
+import { TelemetryOptInProvider } from './telemetry_opt_in';
 
 describe('TelemetryOptInProvider', () => {
   const setup = ({ optedIn, simulatePostError }) => {
     const mockHttp = {
       post: jest.fn(async () => {
         if (simulatePostError) {
-          return Promise.reject("Something happened");
+          return Promise.reject('Something happened');
         }
       })
     };

@@ -33,21 +33,27 @@ export class ExpressionInput extends React.Component {
   }
 
   componentDidUpdate() {
-    if (!this.ref) return;
+    if (!this.ref) {
+      return;
+    }
     const { selection } = this.state;
     const { start, end } = selection;
     this.ref.setSelectionRange(start, end);
   }
 
   undo() {
-    if (!this.undoHistory.length) return;
+    if (!this.undoHistory.length) {
+      return;
+    }
     const value = this.undoHistory.pop();
     this.redoHistory.push(this.props.value);
     this.props.onChange(value);
   }
 
   redo() {
-    if (!this.redoHistory.length) return;
+    if (!this.redoHistory.length) {
+      return;
+    }
     const value = this.redoHistory.pop();
     this.undoHistory.push(this.props.value);
     this.props.onChange(value);
@@ -66,8 +72,11 @@ export class ExpressionInput extends React.Component {
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'z') {
         e.preventDefault();
-        if (e.shiftKey) this.redo();
-        else this.undo();
+        if (e.shiftKey) {
+          this.redo();
+        } else {
+          this.undo();
+        }
       }
       if (e.key === 'y') {
         e.preventDefault();
@@ -109,7 +118,9 @@ export class ExpressionInput extends React.Component {
 
   getHeader = () => {
     const { suggestions } = this.state;
-    if (!suggestions.length) return '';
+    if (!suggestions.length) {
+      return '';
+    }
     return (
       <EuiTitle className="autocompleteType" size="xs">
         <h3>{startCase(suggestions[0].type)}</h3>
@@ -119,8 +130,12 @@ export class ExpressionInput extends React.Component {
 
   getReference = selectedItem => {
     const { fnDef, argDef } = selectedItem || {};
-    if (argDef) return <ArgumentReference argDef={argDef} />;
-    if (fnDef) return <FunctionReference fnDef={fnDef} />;
+    if (argDef) {
+      return <ArgumentReference argDef={argDef} />;
+    }
+    if (fnDef) {
+      return <FunctionReference fnDef={fnDef} />;
+    }
 
     const { fnDef: fnDefAtPosition, argDef: argDefAtPosition } = getFnArgDefAtPosition(
       this.props.functionDefinitions,
@@ -128,8 +143,12 @@ export class ExpressionInput extends React.Component {
       this.state.selection.start
     );
 
-    if (argDefAtPosition) return <ArgumentReference argDef={argDefAtPosition} />;
-    if (fnDefAtPosition) return <FunctionReference fnDef={fnDefAtPosition} />;
+    if (argDefAtPosition) {
+      return <ArgumentReference argDef={argDefAtPosition} />;
+    }
+    if (fnDefAtPosition) {
+      return <FunctionReference fnDef={fnDefAtPosition} />;
+    }
 
     return '';
   };

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header should render normally 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
     component="div"
@@ -112,7 +112,7 @@ exports[`Header should render normally 1`] = `
   />
   <EuiText
     grow={true}
-    size="m"
+    size="s"
   >
     <p>
       <EuiTextColor
@@ -130,5 +130,5 @@ exports[`Header should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-</React.Fragment>
+</Fragment>
 `;

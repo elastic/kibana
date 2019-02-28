@@ -1,21 +1,22 @@
 [role="xpack"]
 [[security-settings-kb]]
-=== Security Settings in Kibana
+=== Security settings in Kibana
 ++++
-<titleabbrev>Security Settings</titleabbrev>
+<titleabbrev>Security settings</titleabbrev>
 ++++
 
-You do not need to configure any additional settings to use {security} in {kib}.
-It is enabled by default.
+You do not need to configure any additional settings to use the
+{security-features} in {kib}. They are enabled by default.
 
 [float]
 [[general-security-settings]]
-==== General Security Settings
+==== General security settings
+
 `xpack.security.enabled`::
-Set to `true` (default) to enable {security}. +
+Set to `true` (default) to enable {security-features}. +
 +
-Do not set this to `false`. To disable {security} entirely, see
-{ref}/security-settings.html[{es} Security Settings]. +
+Do not set this to `false`. To disable {security-features} entirely, see
+{ref}/security-settings.html[{es} security settings]. +
 +
 If set to `false` in `kibana.yml`, the login form, user and role management screens, and 
 authorization using <<kibana-privileges>> are disabled. +
@@ -30,7 +31,7 @@ for more details.
 
 [float]
 [[security-ui-settings]]
-==== User Interface Security Settings
+==== User interface security settings
 
 You can configure the following settings in the `kibana.yml` file:
 
@@ -51,4 +52,5 @@ routing requests through a load balancer or proxy).
 
 `xpack.security.sessionTimeout`::
 Sets the session duration (in milliseconds). By default, sessions stay active
-until the browser is closed.
+until the browser is closed. When this is set to an explicit timeout, closing the
+browser still requires the user to log back in to {kib}.

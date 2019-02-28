@@ -42,10 +42,11 @@ export default function ({ getService }) {
                 {
                   type: 'visualization',
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  version: 1,
+                  version: 'WzIsMV0=',
                   attributes: {
                     'title': 'Count of requests'
-                  }
+                  },
+                  references: [],
                 }
               ]
             });
@@ -87,7 +88,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
@@ -178,7 +179,7 @@ export default function ({ getService }) {
       describe('unknown search field', () => {
         it('should return 200 with empty response', async () => (
           await supertest
-            .get('/api/saved_objects/_find?type=wigwags&search_fields=a')
+            .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({

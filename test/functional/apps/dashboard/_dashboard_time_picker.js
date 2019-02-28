@@ -21,8 +21,9 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
 
   describe('dashboard time picker', function describeIndexTests() {
     before(async function () {
@@ -41,10 +42,10 @@ export default function ({ getService, getPageObjects }) {
     it('Visualization updated when time picker changes', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-      await dashboardExpect.pieSliceCount(0);
+      await pieChart.expectPieSliceCount(0);
 
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
-      await dashboardExpect.pieSliceCount(10);
+      await pieChart.expectPieSliceCount(10);
     });
 
     it('Saved search updated when time picker changes', async () => {
@@ -53,7 +54,8 @@ export default function ({ getService, getPageObjects }) {
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       await dashboardExpect.docTableFieldCount(150);
 
-      await PageObjects.header.setQuickTime('Today');
+      // Set to time range with no data
+      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
       await dashboardExpect.docTableFieldCount(0);
     });
   });

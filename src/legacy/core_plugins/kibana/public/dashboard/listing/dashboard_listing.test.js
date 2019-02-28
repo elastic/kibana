@@ -26,6 +26,7 @@ jest.mock('ui/notify',
 
 jest.mock('lodash',
   () => ({
+    ...require.requireActual('lodash'),
     // mock debounce to fire immediately with no internal timer
     debounce: function (func) {
       function debounced(...args) {
@@ -59,8 +60,11 @@ const find = (num) => {
 
 test('renders empty page in before initial fetch to avoid flickering', () => {
   const component = shallowWithIntl(<DashboardListing.WrappedComponent
-    find={find.bind(null, 2)}
-    delete={() => {}}
+    findItems={find.bind(null, 2)}
+    deleteItems={() => {}}
+    createItem={() => {}}
+    editItem={() => {}}
+    getViewUrl={() => {}}
     listingLimit={1000}
     hideWriteControls={false}
   />);
@@ -70,8 +74,11 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
 describe('after fetch', () => {
   test('initialFilter', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
       initialFilter="my dashboard"
@@ -87,8 +94,11 @@ describe('after fetch', () => {
 
   test('renders table rows', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
     />);
@@ -103,8 +113,11 @@ describe('after fetch', () => {
 
   test('renders call to action when no dashboards exist', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 0)}
-      delete={() => {}}
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);
@@ -119,8 +132,11 @@ describe('after fetch', () => {
 
   test('hideWriteControls', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 0)}
-      delete={() => {}}
+      findItems={find.bind(null, 0)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
@@ -135,8 +151,11 @@ describe('after fetch', () => {
 
   test('renders warning when listingLimit is exceeded', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      find={find.bind(null, 2)}
-      delete={() => {}}
+      findItems={find.bind(null, 2)}
+      deleteItems={() => {}}
+      createItem={() => {}}
+      editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={false}
     />);

@@ -25,7 +25,7 @@ const RowParser = require('./row_parser');
 const InputMode = require('./mode/input');
 const utils = require('../utils');
 const es = require('../es');
-import chrome from 'ui/chrome';
+const chrome = require('ui/chrome');
 
 const smartResize = require('../smart_resize');
 
@@ -564,6 +564,7 @@ export default function SenseEditor($el) {
         const  esMethod = req.method;
         const  esData = req.data;
 
+        // this is the first url defined in elasticsearch.hosts
         const elasticsearchBaseUrl = chrome.getInjected('elasticsearchUrl');
         const url = es.constructESUrl(elasticsearchBaseUrl, esPath);
 

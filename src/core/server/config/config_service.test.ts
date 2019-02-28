@@ -23,7 +23,7 @@ import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 

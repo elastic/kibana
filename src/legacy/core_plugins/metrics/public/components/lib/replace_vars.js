@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 export default function replaceVars(str, args = {}, vars = {}) {
   try {
-    const template = handlebars.compile(str, { strict: true });
+    const template = handlebars.compile(str, { strict: true, knownHelpersOnly: true });
 
     const string = template(_.assign({}, vars, { args }));
 

@@ -1,0 +1,17 @@
+<div class="checkbox">
+  <label>
+    <input
+      ng-model="agg.params.min_doc_count"
+      type="checkbox"
+    >
+    <span
+      i18n-id="common.ui.aggTypes.showEmptyBucketsLabel"
+      i18n-default-message="Show empty buckets"
+    ></span>
+    &nbsp;
+    <icon-tip
+      position="'right'"
+      content="::'common.ui.aggTypes.showEmptyBucketsTooltip' | i18n: { defaultMessage: 'Show all buckets, not only the buckets with results' }"
+    ></icon-tip>
+  </label>
+</div>

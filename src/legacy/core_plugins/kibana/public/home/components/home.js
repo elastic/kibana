@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import { AddData } from './add_data';
-import { RecentlyAccessed, recentlyAccessedShape } from './recently_accessed';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButton,
@@ -46,7 +46,7 @@ export class Home extends Component {
   constructor(props) {
     super(props);
 
-    const isWelcomeEnabled = props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
+    const isWelcomeEnabled = !(chrome.getInjected('disableWelcomeScreen') || props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -116,7 +116,7 @@ export class Home extends Component {
       })
       .map(directory => {
         return (
-          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem className="homHome__synopsisItem" key={directory.id}>
             <Synopsis
               description={directory.description}
               iconType={directory.icon}
@@ -129,22 +129,11 @@ export class Home extends Component {
   };
 
   renderNormal() {
-    const { apmUiEnabled, recentlyAccessed, mlEnabled } = this.props;
-
-    let recentlyAccessedPanel;
-    if (recentlyAccessed.length > 0) {
-      recentlyAccessedPanel = (
-        <Fragment>
-          <RecentlyAccessed recentlyAccessed={recentlyAccessed} />
-          <EuiSpacer size="l" />
-        </Fragment>
-      );
-    }
+    const { apmUiEnabled, mlEnabled } = this.props;
 
     return (
-      <EuiPage className="homPage">
-        <EuiPageBody>
-          {recentlyAccessedPanel}
+      <EuiPage restrictWidth={1200}>
+        <EuiPageBody className="eui-displayBlock">
 
           <AddData
             apmUiEnabled={apmUiEnabled}
@@ -157,7 +146,7 @@ export class Home extends Component {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
+                <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
                       id="kbn.home.directories.visualize.nameTitle"
@@ -166,14 +155,14 @@ export class Home extends Component {
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="m" />
-                <EuiFlexGrid columns={2}>
+                <EuiFlexGrid columns={2} gutterSize="s">
                   {this.renderDirectories(FeatureCatalogueCategory.DATA)}
                 </EuiFlexGrid>
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel paddingSize="l">
-                <EuiTitle>
+                <EuiTitle size="s">
                   <h3>
                     <FormattedMessage
                       id="kbn.home.directories.manage.nameTitle"
@@ -192,8 +181,8 @@ export class Home extends Component {
           <EuiSpacer size="l" />
 
           <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
+            <EuiFlexItem grow={false} className="eui-textCenter">
+              <EuiText size="s" color="subdued">
                 <p>
                   <FormattedMessage
                     id="kbn.home.directories.notFound.description"
@@ -260,7 +249,6 @@ Home.propTypes = {
     })
   ),
   apmUiEnabled: PropTypes.bool.isRequired,
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
   find: PropTypes.func.isRequired,
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,

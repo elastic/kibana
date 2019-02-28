@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, {
-  Component
+  Component, Fragment
 } from 'react';
 
 import {
@@ -18,10 +18,15 @@ import {
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
+import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
+import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
 import { injectI18n } from '@kbn/i18n/react';
+
+import chrome from 'ui/chrome';
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 class JobDetailsUI extends Component {
   constructor(props) {
@@ -125,6 +130,22 @@ class JobDetailsUI extends Component {
         content: <ForecastsTable job={job} />,
       }
       ];
+
+      if (mlAnnotationsEnabled) {
+        tabs.push({
+          id: 'annotations',
+          name: intl.formatMessage({
+            id: 'xpack.ml.jobsList.jobDetails.tabs.annotationsLabel',
+            defaultMessage: 'Annotations'
+          }),
+          content: (
+            <Fragment>
+              <AnnotationsTable jobs={[job]} drillDown={true} />
+              <AnnotationFlyout />
+            </Fragment>
+          ),
+        });
+      }
 
       return (
         <div className="tab-contents">

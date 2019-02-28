@@ -6,10 +6,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiToolTip, IconColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { first, sortBy, sortByOrder, uniq } from 'lodash';
+import { sortBy, uniq } from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import { BeatTag, CMPopulatedBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { ConnectedLink } from '../navigation/connected_link';
 import { TagBadge } from '../tag';
 
@@ -52,6 +52,60 @@ export interface TableType {
   controlDefinitions(items: any[]): ControlDefinitions;
 }
 
+const dynamicStatuses = {
+  STARTING: {
+    color: 'success',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.startingStatusLabel', {
+      defaultMessage: 'Starting',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.startingTooltip', {
+      defaultMessage: 'This Beat is starting.',
+    }),
+  },
+  IN_PROGRESS: {
+    color: 'warning',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.updatingStatusLabel', {
+      defaultMessage: 'Updating',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.progressTooltip', {
+      defaultMessage: 'This Beat is currently reloading config from CM.',
+    }),
+  },
+  RUNNING: {
+    color: 'success',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.runningStatusLabel', {
+      defaultMessage: 'Running',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.runningTooltip', {
+      defaultMessage: 'This Beat is running without issues.',
+    }),
+  },
+  CONFIG: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.configErrorStatusLabel', {
+      defaultMessage: 'Config error',
+    }),
+  },
+  FAILED: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.failedStatusLabel', {
+      defaultMessage: 'Error',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
+      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+    }),
+  },
+  STOPPED: {
+    color: 'danger',
+    status: i18n.translate('xpack.beatsManagement.beatsTable.stoppedStatusLabel', {
+      defaultMessage: 'stopped',
+    }),
+    details: i18n.translate('xpack.beatsManagement.beatsTable.configStatus.errorTooltip', {
+      defaultMessage: 'There is an error on this beat, please check the logs for this host.',
+    }),
+  },
+};
+
 export const BeatsTableType: TableType = {
   itemType: 'Beats',
   columnDefinitions: [
@@ -60,7 +114,7 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.beatNameTitle', {
         defaultMessage: 'Beat name',
       }),
-      render: (name: string, beat: CMPopulatedBeat) => (
+      render: (name: string, beat: CMBeat) => (
         <ConnectedLink path={`/beat/${beat.id}/details`}>{name}</ConnectedLink>
       ),
       sortable: true,
@@ -77,9 +131,9 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.tagsTitle', {
         defaultMessage: 'Tags',
       }),
-      render: (value: string, beat: CMPopulatedBeat) => (
+      render: (value: string, beat: CMBeat & { tags: BeatTag[] }) => (
         <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-          {(sortBy(beat.full_tags, 'id') || []).map(tag => (
+          {(sortBy(beat.tags, 'id') || []).map(tag => (
             <EuiFlexItem key={tag.id} grow={false}>
               <ConnectedLink path={`/tag/edit/${tag.id}`}>
                 <TagBadge tag={tag} />
@@ -95,7 +149,7 @@ export const BeatsTableType: TableType = {
       name: i18n.translate('xpack.beatsManagement.beatsTable.configStatusTitle', {
         defaultMessage: 'Config Status',
       }),
-      render: (value: string, beat: CMPopulatedBeat) => {
+      render: (value: string, beat: CMBeat) => {
         let color: IconColor = 'success';
         let statusText = i18n.translate('xpack.beatsManagement.beatsTable.configStatus.okLabel', {
           defaultMessage: 'OK',
@@ -107,46 +161,48 @@ export const BeatsTableType: TableType = {
           }
         );
 
-        switch (beat.config_status) {
-          case 'UNKNOWN':
-            color = 'subdued';
-            statusText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
-              {
-                defaultMessage: 'Offline',
-              }
-            );
-            if (moment().diff(beat.last_checkin, 'minutes') >= 10) {
-              tooltipText = i18n.translate(
-                'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
-                {
-                  defaultMessage: 'This Beat has not connected to kibana in over 10min',
-                }
-              );
-            } else {
-              tooltipText = i18n.translate(
-                'xpack.beatsManagement.beatsTable.configStatus.notStartedTooltip',
-                {
-                  defaultMessage: 'This Beat has not yet been started.',
-                }
-              );
+        if (beat.status && moment().diff(beat.last_checkin, 'minutes') < 10) {
+          color = dynamicStatuses[beat.status.event.type].color;
+          statusText = dynamicStatuses[beat.status.event.type].status;
+          tooltipText =
+            (dynamicStatuses[beat.status.event.type] as any).details || beat.status.event.message;
+        } else if (!beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {
+          color = 'danger';
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
+            {
+              defaultMessage: 'Offline',
             }
-            break;
-          case 'ERROR':
-            color = 'danger';
-            statusText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.errorLabel',
-              {
-                defaultMessage: 'Error',
-              }
-            );
-            tooltipText = i18n.translate(
-              'xpack.beatsManagement.beatsTable.configStatus.errorTooltip',
-              {
-                defaultMessage: 'Please check the logs of this Beat for error details',
-              }
-            );
-            break;
+          );
+          tooltipText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.noConnectionTooltip',
+            {
+              defaultMessage: 'This Beat has not connected to kibana in over 10min',
+            }
+          );
+        } else if (beat.status && moment().diff(beat.last_checkin, 'minutes') >= 10) {
+          color = 'subdued';
+
+          tooltipText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.notStartedTooltip',
+            {
+              defaultMessage: 'This Beat has not yet been started.',
+            }
+          );
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.notStartedLabel',
+            {
+              defaultMessage: 'Not started',
+            }
+          );
+        } else {
+          color = 'subdued';
+          statusText = i18n.translate(
+            'xpack.beatsManagement.beatsTable.configStatus.offlineLabel',
+            {
+              defaultMessage: 'Offline',
+            }
+          );
         }
 
         return (
@@ -159,19 +215,19 @@ export const BeatsTableType: TableType = {
       },
       sortable: false,
     },
-    {
-      field: 'full_tags',
-      name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
-        defaultMessage: 'Last config update',
-      }),
-      render: (tags: BeatTag[]) =>
-        tags.length ? (
-          <span>
-            {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
-          </span>
-        ) : null,
-      sortable: true,
-    },
+    // {
+    //   field: 'full_tags',
+    //   name: i18n.translate('xpack.beatsManagement.beatsTable.lastConfigUpdateTitle', {
+    //     defaultMessage: 'Last config update',
+    //   }),
+    //   render: (tags?: BeatTag[]) =>
+    //     tags && tags.length ? (
+    //       <span>
+    //         {moment(first(sortByOrder(tags, ['last_updated'], ['desc'])).last_updated).fromNow()}
+    //       </span>
+    //     ) : null,
+    //   sortable: true,
+    // },
   ],
   controlDefinitions: (data: any[]) => ({
     actions: [
@@ -214,17 +270,6 @@ export const TagsTableType: TableType = {
     },
     {
       align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.tagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurationBlocks: ConfigurationBlock[]) => (
-        <div>{configurationBlocks.length}</div>
-      ),
-      sortable: false,
-    },
-    {
-      align: 'right',
       field: 'last_updated',
       name: i18n.translate('xpack.beatsManagement.tagsTable.lastUpdateTitle', {
         defaultMessage: 'Last update',
@@ -262,15 +307,6 @@ export const BeatDetailTagsTable: TableType = {
       ),
       sortable: true,
       width: '55%',
-    },
-    {
-      align: 'right',
-      field: 'configuration_blocks',
-      name: i18n.translate('xpack.beatsManagement.beatTagsTable.configurationsTitle', {
-        defaultMessage: 'Configurations',
-      }),
-      render: (configurations: ConfigurationBlock[]) => <span>{configurations.length}</span>,
-      sortable: true,
     },
     {
       align: 'right',

@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { InfraSourceConfiguration } from '../../sources';
 import {
   InfraBackendFrameworkAdapter,
   InfraFrameworkRequest,
-  InfraMetadataAggregationBucket,
   InfraMetadataAggregationResponse,
 } from '../framework';
-import { InfraMetadataAdapter } from './adapter_types';
+import { NAME_FIELDS } from '../nodes/constants';
+import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -22,9 +23,9 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   public async getMetricMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraMetadataAggregationBucket[]> {
+  ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const metricQuery = {
       index: sourceConfiguration.metricAlias,
@@ -32,24 +33,22 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         query: {
           bool: {
             filter: {
-              term: { [idFieldName]: nodeName },
+              term: { [idFieldName]: nodeId },
             },
           },
         },
         size: 0,
         aggs: {
+          nodeName: {
+            terms: {
+              field: NAME_FIELDS[nodeType],
+              size: 1,
+            },
+          },
           metrics: {
             terms: {
-              field: 'metricset.module',
+              field: 'event.dataset',
               size: 1000,
-            },
-            aggs: {
-              names: {
-                terms: {
-                  field: 'metricset.name',
-                  size: 1000,
-                },
-              },
             },
           },
         },
@@ -58,20 +57,27 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraMetadataAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
     >(req, 'search', metricQuery);
 
-    return response.aggregations && response.aggregations.metrics
-      ? response.aggregations.metrics.buckets
-      : [];
+    const buckets =
+      response.aggregations && response.aggregations.metrics
+        ? response.aggregations.metrics.buckets
+        : [];
+
+    return {
+      id: nodeId,
+      name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
+      buckets,
+    };
   }
 
   public async getLogMetadata(
     req: InfraFrameworkRequest,
     sourceConfiguration: InfraSourceConfiguration,
-    nodeName: string,
+    nodeId: string,
     nodeType: 'host' | 'container' | 'pod'
-  ): Promise<InfraMetadataAggregationBucket[]> {
+  ): Promise<InfraMetricsAdapterResponse> {
     const idFieldName = getIdFieldName(sourceConfiguration, nodeType);
     const logQuery = {
       index: sourceConfiguration.logAlias,
@@ -79,24 +85,22 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         query: {
           bool: {
             filter: {
-              term: { [idFieldName]: nodeName },
+              term: { [idFieldName]: nodeId },
             },
           },
         },
         size: 0,
         aggs: {
+          nodeName: {
+            terms: {
+              field: NAME_FIELDS[nodeType],
+              size: 1,
+            },
+          },
           metrics: {
             terms: {
-              field: 'fileset.module',
+              field: 'event.dataset',
               size: 1000,
-            },
-            aggs: {
-              names: {
-                terms: {
-                  field: 'fileset.name',
-                  size: 1000,
-                },
-              },
             },
           },
         },
@@ -105,12 +109,19 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
 
     const response = await this.framework.callWithRequest<
       any,
-      { metrics?: InfraMetadataAggregationResponse }
+      { metrics?: InfraMetadataAggregationResponse; nodeName?: InfraMetadataAggregationResponse }
     >(req, 'search', logQuery);
 
-    return response.aggregations && response.aggregations.metrics
-      ? response.aggregations.metrics.buckets
-      : [];
+    const buckets =
+      response.aggregations && response.aggregations.metrics
+        ? response.aggregations.metrics.buckets
+        : [];
+
+    return {
+      id: nodeId,
+      name: get(response, ['aggregations', 'nodeName', 'buckets', 0, 'key'], nodeId),
+      buckets,
+    };
   }
 }
 

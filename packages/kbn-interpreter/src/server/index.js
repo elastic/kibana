@@ -17,6 +17,14 @@
  * under the License.
  */
 
-export { populateServerRegistries, getServerRegistries } from './server_registries';
-export { getPluginPaths } from './get_plugin_paths';
-export { pluginPaths } from './plugin_paths';
+import { typeSpecs as types } from '../plugin/types';
+import { register, TypesRegistry, FunctionsRegistry } from '../common';
+
+export const registries = {
+  types: new TypesRegistry(),
+  serverFunctions: new FunctionsRegistry(),
+};
+
+register(registries, {
+  types,
+});

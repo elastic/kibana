@@ -29,7 +29,7 @@
   max-width: 170px;
 
   &.disabled {
-    opacity: 0.5;
+    opacity: .5;
   }
 
   &:first-child {
@@ -48,8 +48,8 @@
 }
 
 .tvbLegend__itemLabel {
-  flex-grow: 1;
   @include euiTextTruncate;
+  flex-grow: 1;
 
   span {
     color: $euiTextColor;
@@ -62,6 +62,7 @@
 }
 
 .tvbLegend__itemValue {
+  font-weight: $euiFontWeightSemiBold;
   color: $tvbValueColor;
   margin-left: $euiSizeXS;
 

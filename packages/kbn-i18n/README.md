@@ -33,21 +33,7 @@ For example:
 src/legacy/core_plugins/kibana/translations/fr.json
 ```
 
-When a new translation file is added, you have to register this file into
-`uiExports.translations` array of plugin constructor parameters. For example:
-```js
-export default function (kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      translations: [
-        resolve(__dirname, './translations/fr.json'),
-      ],
-      ...
-    },
-    ...
-  });
-}
-```
+The engine scans `x-pack/plugins/*/translations`, `src/core_plugins/*/translations`, `plugins/*/translations` and `src/legacy/ui/translations` folders on initialization, so there is no need to register translation files.
 
 The engine uses a `config/kibana.yml` file for locale resolution process. If locale is
 defined via `i18n.locale` option in `config/kibana.yml` then it will be used as a base
@@ -60,9 +46,13 @@ themselves, and those messages will always be in English, so we don't have to ke
 defined inline.
 
 __Note:__ locale defined in `i18n.locale` and the one used for translation files should
-match exactly, e.g. `i18n.locale: zn` and `.../translations/zh_CN.json` won't match and
-default English translations will be used, but `i18n.locale: zh_CN` and`.../translations/zh_CN.json`
-or `i18n.locale: zn` and `.../translations/zn.json` will work as expected.
+match exactly, e.g. `i18n.locale: zh` and `.../translations/zh-CN.json` won't match and
+default English translations will be used, but `i18n.locale: zh-CN` and`.../translations/zh-CN.json`
+or `i18n.locale: zh` and `.../translations/zh.json` will work as expected.
+
+__Note:__ locale should look like `zh-CN` where `zh` - lowercase two-letter or three-letter ISO-639 code
+and `CN` - uppercase two-letter ISO-3166 code (optional).
+[ISO-639](https://www.iso.org/iso-639-language-codes.html) and [ISO-3166](https://www.iso.org/iso-3166-country-codes.html) codes should be separated with `-` character.
 
 ## I18n engine
 
@@ -173,7 +163,7 @@ import { i18n } from '@kbn/i18n';
 
 export const HELLO_WORLD = i18n.translate('hello.wonderful.world', {
   defaultMessage: 'Greetings, planet Earth!',
-}),
+});
 ```
 
 One more example with a parameter:
@@ -185,7 +175,7 @@ export function getGreetingMessage(userName) {
   return i18n.translate('hello.wonderful.world', {
     defaultMessage: 'Greetings, {name}!',
     values: { name: userName },
-    context: 'This is greeting message for main screen.'
+    description: 'This is greeting message for main screen.'
   });
 }
 ```
@@ -223,7 +213,7 @@ ReactDOM.render(
 ```
 
 After that we can use `FormattedMessage` components inside `RootComponent`:
-```js
+```jsx
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -247,10 +237,10 @@ class RootComponent extends Component {
       <p>
         <FormattedMessage
           id="welcome"
-          defaultMessage={`Hello {name}, you have {unreadCount, number} {unreadCount, plural,
+          defaultMessage="Hello {name}, you have {unreadCount, number} {unreadCount, plural,
             one {message}
             other {messages}
-          }`}
+          }"
           values={{name: <b>{name}</b>, unreadCount}}
         />
         ...
@@ -264,19 +254,32 @@ Optionally we can pass `description` prop into `FormattedMessage` component.
 This prop is optional context comment that will be extracted by i18n tools
 and added as a comment next to translation message at `defaultMessages.json`
 
-In case when ReactJS component is rendered with the help of `reactDirective` AngularJS service, it's necessary to use React HOC `injectI18nProvider` to pass `intl` object to `FormattedMessage` component via context.
+**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
 
-```js
-import { injectI18nProvider } from '@kbn/i18n/react';
-import { Header } from './components/header';
+### FormattedRelative
 
-module.directive('headerGlobalNav', (reactDirective) => {
-  return reactDirective(injectI18nProvider(Header));
-});
+`FormattedRelative` expects several attributes (read more [here](https://github.com/yahoo/react-intl/wiki/Components#formattedrelative)), including
 
+- `value` that can be parsed as a date,
+- `formats` that should be one of `'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds'` (this options are configured in [`formats.ts`](./src/core/formats.ts))
+-  etc.
+
+If `formats` is not provided then it will be chosen automatically:\
+`x seconds ago` for `x < 60`, `1 minute ago` for `60 <= x < 120`, etc.
+
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+  format="seconds"
+/>
 ```
-
-**NOTE:** To minimize the chance of having multiple `I18nProvider` components in the React tree, try to use `injectI18nProvider` or `I18nProvider` only to wrap the topmost component that you render, e.g. the one that's passed to `reactDirective` or `ReactDOM.render`.
+Initial result: `90 seconds ago`
+```jsx
+<FormattedRelative
+  value={Date.now() - 90000}
+/>
+```
+Initial result: `1 minute ago`
 
 ### Attributes translation in React
 
@@ -288,7 +291,7 @@ React component as a pure function:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-const MyComponentContent = ({ intl }) => (
+export const MyComponent = injectI18n({ intl }) => (
   <input
     type="text"
     placeholder={intl.formatMessage(
@@ -301,13 +304,11 @@ const MyComponentContent = ({ intl }) => (
       { name, unreadCount }
     )}
   />
-);
+));
 
-MyComponentContent.propTypes = {
+MyComponent.WrappedComponent.propTypes = {
   intl: intlShape.isRequired,
 };
-
-export const MyComponent = injectI18n(MyComponentContent);
 ```
 
 React component as a class:
@@ -316,27 +317,27 @@ React component as a class:
 import React from 'react';
 import { injectI18n, intlShape } from '@kbn/i18n/react';
 
-class MyComponentContent extends React.Component {
-  static propTypes = {
-    intl: intlShape.isRequired,
-  };
+export const MyComponent = injectI18n(
+  class MyComponent extends React.Component {
+    static propTypes = {
+      intl: intlShape.isRequired,
+    };
 
-  render() {
-    const { intl } = this.props;
+    render() {
+      const { intl } = this.props;
 
-    return (
-      <input
-        type="text"
-        placeholder={intl.formatMessage({
-          id: 'kbn.management.objects.searchPlaceholder',
-          defaultMessage: 'Search',
-        })}
-      />
-    );
+      return (
+        <input
+          type="text"
+          placeholder={intl.formatMessage({
+            id: 'kbn.management.objects.searchPlaceholder',
+            defaultMessage: 'Search',
+          })}
+        />
+      );
+    }
   }
-}
-
-export const MyComponent = injectI18n(MyComponentContent);
+);
 ```
 
 ## AngularJS

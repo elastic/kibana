@@ -20,7 +20,8 @@
 export function createProxyBundlesRoute({ host, port }) {
   return [
     buildProxyRouteForBundles('/bundles/', host, port),
-    buildProxyRouteForBundles('/dlls/', host, port)
+    buildProxyRouteForBundles('/built_assets/dlls/', host, port),
+    buildProxyRouteForBundles('/built_assets/css/', host, port),
   ];
 }
 

@@ -1,0 +1,16 @@
+<div ng-if="!aggParam.disabled(agg)">
+  <div class="form-group regex">
+    <label
+      for="visEditorRegexInput{{agg.id}}{{aggParam.name}}"
+      i18n-id="common.ui.aggTypes.paramNamePatternLabel"
+      i18n-default-message="{aggParamName} Pattern"
+      i18n-values="{ aggParamName: (aggParam.name | label) }"
+    ></label>
+    <input
+      id="visEditorRegexInput{{agg.id}}{{aggParam.name}}"
+      type="text"
+      class="form-control"
+      ng-model="agg.params[aggParam.name].pattern"
+    >
+  </div>
+</div>

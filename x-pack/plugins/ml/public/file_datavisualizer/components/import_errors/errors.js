@@ -5,6 +5,7 @@
  */
 
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -34,17 +35,61 @@ export function ImportErrors({ errors, statuses }) {
 function title(statuses) {
   switch (IMPORT_STATUS.FAILED) {
     case statuses.readStatus:
-      return 'Error reading file';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.readingFileErrorMessage"
+          defaultMessage="Error reading file"
+        />
+      );
+    case statuses.parseJSONStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.parsingJSONErrorMessage"
+          defaultMessage="Error parsing JSON"
+        />
+      );
     case statuses.indexCreatedStatus:
-      return 'Error creating index';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.creatingIndexErrorMessage"
+          defaultMessage="Error creating index"
+        />
+      );
     case statuses.ingestPipelineCreatedStatus:
-      return 'Error creating ingest pipeline';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.creatingIngestPipelineErrorMessage"
+          defaultMessage="Error creating ingest pipeline"
+        />
+      );
     case statuses.uploadStatus:
-      return 'Error uploading data';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.uploadingDataErrorMessage"
+          defaultMessage="Error uploading data"
+        />
+      );
     case statuses.indexPatternCreatedStatus:
-      return 'Error creating index pattern';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.creatingIndexPatternErrorMessage"
+          defaultMessage="Error creating index pattern"
+        />
+      );
+    case statuses.permissionCheckStatus:
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.checkingPermissionErrorMessage"
+          defaultMessage="Import permissions error"
+        />
+      );
     default:
-      return 'Error';
+      return (
+        <FormattedMessage
+          id="xpack.ml.fileDatavisualizer.importErrors.defaultErrorMessage"
+          defaultMessage="Error"
+        />
+      );
   }
 }
 
@@ -59,7 +104,12 @@ function ImportError(error, key) {
       {errorObj.more !== undefined &&
         <EuiAccordion
           id="more"
-          buttonContent="More"
+          buttonContent={
+            <FormattedMessage
+              id="xpack.ml.fileDatavisualizer.importErrors.moreButtonLabel"
+              defaultMessage="More"
+            />
+          }
           paddingSize="m"
         >
           {errorObj.more}
@@ -87,7 +137,11 @@ function toString(error) {
             errorObj.more = error.error.response;
           }
           return errorObj;
+        }
 
+        if (error.error.message !== undefined) {
+          // this will catch javascript errors such as JSON parsing issues
+          return { msg: error.error.message };
         }
       } else {
         return { msg: error.error };
@@ -99,5 +153,12 @@ function toString(error) {
     }
   }
 
-  return { msg: 'Unknown error' };
+  return {
+    msg: (
+      <FormattedMessage
+        id="xpack.ml.fileDatavisualizer.importErrors.unknownErrorMessage"
+        defaultMessage="Unknown error"
+      />
+    ),
+  };
 }

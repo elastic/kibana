@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const { select, selectReduce } = require('./state');
+import { select, selectReduce } from './state';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
 // so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
@@ -43,34 +43,41 @@ const keyFromMouse = select(({ type, payload: { altKey, metaKey, shiftKey, ctrlK
   type === 'cursorPosition' || type === 'mouseEvent' ? { altKey, metaKey, shiftKey, ctrlKey } : {}
 )(primaryUpdate);
 
-const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
-const optionHeld = select(appleKeyboard ? e => e.altKey : e => e.ctrlKey)(keyFromMouse);
-const shiftHeld = select(e => e.shiftKey)(keyFromMouse);
+export const metaHeld = select(appleKeyboard ? e => e.metaKey : e => e.altKey)(keyFromMouse);
+export const optionHeld = select(appleKeyboard ? e => e.altKey : e => e.ctrlKey)(keyFromMouse);
+export const shiftHeld = select(e => e.shiftKey)(keyFromMouse);
 
-// retaining this for now to avoid removing dependent inactive code `keyTransformGesture` from layout.js
-// todo remove this, and `keyTransformGesture` from layout.js and do accessibility outside the layout engine
-const pressedKeys = () => ({});
+export const cursorPosition = selectReduce((previous, position) => position || previous, {
+  x: 0,
+  y: 0,
+})(rawCursorPosition);
 
-const cursorPosition = selectReduce((previous, position) => position || previous, { x: 0, y: 0 })(
-  rawCursorPosition
-);
-
-const mouseButton = selectReduce(
+export const mouseButton = selectReduce(
   (prev, next) => {
-    if (!next) return prev;
+    if (!next) {
+      return prev;
+    }
     const { event, uid } = next;
-    if (event === 'mouseDown') return { down: true, uid };
-    else return event === 'mouseUp' ? { down: false, uid } : prev;
+    if (event === 'mouseDown') {
+      return { down: true, uid };
+    } else {
+      return event === 'mouseUp' ? { down: false, uid } : prev;
+    }
   },
   { down: false, uid: null }
 )(mouseButtonEvent);
 
-const mouseIsDown = selectReduce(
+export const mouseIsDown = selectReduce(
   (previous, next) => (next ? next.event === 'mouseDown' : previous),
   false
 )(mouseButtonEvent);
 
-const gestureEnd = select(next => next && next.event === 'mouseUp')(mouseButtonEvent);
+export const gestureEnd = select(
+  action =>
+    action &&
+    (action.type === 'actionEvent' ||
+      (action.type === 'mouseEvent' && action.payload.event === 'mouseUp'))
+)(primaryUpdate);
 
 /**
  * mouseButtonStateTransitions
@@ -79,36 +86,39 @@ const gestureEnd = select(next => next && next.event === 'mouseUp')(mouseButtonE
  *    Edit: http://stable.ascii-flow.appspot.com/#567671116534197027/776257435
  *
  *
- *                             mouseIsDown
- *        initial state: 'up' +-----------> 'downed'
- *                        ^ ^                 +  +
- *                        | |  !mouseIsDown   |  |
- *           !mouseIsDown | +-----------------+  | mouseIsDown && movedAlready
- *                        |                      |
- *                        +----+ 'dragging' <----+
+ *                             mouseNowDown
+ *        initial state: 'up' +------------> 'downed'
+ *                        ^ ^                  +  +
+ *                        | |  !mouseNowDown   |  |
+ *          !mouseNowDown | +------------------+  | mouseNowDown && movedAlready
+ *                        |                       |
+ *                        +----+ 'dragging' <-----+
  *                                +      ^
  *                                |      |
  *                                +------+
- *                               mouseIsDown
+ *                               mouseNowDown
  *
  */
-const mouseButtonStateTransitions = (state, mouseIsDown, movedAlready) => {
+const mouseButtonStateTransitions = (state, mouseNowDown, movedAlready) => {
   switch (state) {
     case 'up':
-      return mouseIsDown ? 'downed' : 'up';
+      return mouseNowDown ? 'downed' : 'up';
     case 'downed':
-      if (mouseIsDown) return movedAlready ? 'dragging' : 'downed';
-      else return 'up';
+      if (mouseNowDown) {
+        return movedAlready ? 'dragging' : 'downed';
+      } else {
+        return 'up';
+      }
 
     case 'dragging':
-      return mouseIsDown ? 'dragging' : 'up';
+      return mouseNowDown ? 'dragging' : 'up';
   }
 };
 
 const mouseButtonState = selectReduce(
-  ({ buttonState, downX, downY }, mouseIsDown, { x, y }) => {
+  ({ buttonState, downX, downY }, mouseNowDown, { x, y }) => {
     const movedAlready = x !== downX || y !== downY;
-    const newButtonState = mouseButtonStateTransitions(buttonState, mouseIsDown, movedAlready);
+    const newButtonState = mouseButtonStateTransitions(buttonState, mouseNowDown, movedAlready);
     return {
       buttonState: newButtonState,
       downX: newButtonState === 'downed' ? x : downX,
@@ -118,11 +128,11 @@ const mouseButtonState = selectReduce(
   { buttonState: 'up', downX: null, downY: null }
 )(mouseIsDown, cursorPosition);
 
-const mouseDowned = select(state => state.buttonState === 'downed')(mouseButtonState);
+export const mouseDowned = select(state => state.buttonState === 'downed')(mouseButtonState);
 
-const dragging = select(state => state.buttonState === 'dragging')(mouseButtonState);
+export const dragging = select(state => state.buttonState === 'dragging')(mouseButtonState);
 
-const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
+export const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
   down: buttonState !== 'up',
   x0: downX,
   y0: downY,
@@ -130,16 +140,6 @@ const dragVector = select(({ buttonState, downX, downY }, { x, y }) => ({
   y1: y,
 }))(mouseButtonState, cursorPosition);
 
-module.exports = {
-  dragging,
-  dragVector,
-  cursorPosition,
-  gestureEnd,
-  metaHeld,
-  mouseButton,
-  mouseDowned,
-  mouseIsDown,
-  optionHeld,
-  pressedKeys,
-  shiftHeld,
-};
+export const actionEvent = select(action =>
+  action.type === 'actionEvent' ? action.payload : null
+)(primaryUpdate);

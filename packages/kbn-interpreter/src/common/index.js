@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export { functionsRegistry } from './lib/functions_registry';
-export { typesRegistry } from './lib/types_registry';
+export { FunctionsRegistry } from './lib/functions_registry';
+export { TypesRegistry } from './lib/types_registry';
 export { createError } from './interpreter/create_error';
-export { interpretProvider } from './interpreter/interpret';
+export { interpreterProvider } from './interpreter/interpret';
 export { serializeProvider } from './lib/serialize';
 export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
 export { Fn } from './lib/fn';
@@ -29,3 +29,4 @@ export { castProvider } from './interpreter/cast';
 export { parse } from './lib/grammar';
 export { getByAlias } from './lib/get_by_alias';
 export { Registry } from './lib/registry';
+export { addRegistries, register, registryFactory } from './registries';

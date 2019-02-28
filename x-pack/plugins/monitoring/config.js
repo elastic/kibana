@@ -30,23 +30,14 @@ export const config = (Joi) => {
         }).default()
       }).default()
     }).default(),
-    index_pattern: Joi.string().default('.monitoring-*-2-*,.monitoring-*-6-*'),
     kibana: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-kibana-2-*,.monitoring-kibana-6-*'),
       collection: Joi.object({
         enabled: Joi.boolean().default(true),
         interval: Joi.number().default(10000) // op status metrics get buffered at `ops.interval` and flushed to the bulk endpoint at this interval
       }).default()
     }).default(),
-    logstash: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-logstash-2-*,.monitoring-logstash-6-*')
-    }).default(),
-    beats: Joi.object({
-      index_pattern: Joi.string().default('.monitoring-beats-6-*')
-    }).default(),
     cluster_alerts: Joi.object({
       enabled: Joi.boolean().default(true),
-      index: Joi.string().default('.monitoring-alerts-6'),
       email_notifications: Joi.object({
         enabled: Joi.boolean().default(true),
         email_address: Joi.string().email(),
@@ -56,16 +47,17 @@ export const config = (Joi) => {
     max_bucket_size: Joi.number().default(10000),
     min_interval_seconds: Joi.number().default(10),
     show_license_expiration: Joi.boolean().default(true),
-    report_stats: Joi.boolean().default(true),
     agent: Joi.object({
       interval: Joi.string().regex(/[\d\.]+[yMwdhms]/).default('10s')
     }).default(),
     elasticsearch: Joi.object({
       customHeaders: Joi.object().default({}),
-      index_pattern: Joi.string().default('.monitoring-es-2-*,.monitoring-es-6-*'),
       logQueries: Joi.boolean().default(false),
       requestHeadersWhitelist: Joi.array().items().single().default(DEFAULT_REQUEST_HEADERS),
-      url: Joi.string().uri({ scheme: ['http', 'https'] }), // if empty, use Kibana's connection config
+      sniffOnStart: Joi.boolean().default(false),
+      sniffInterval: Joi.number().allow(false).default(false),
+      sniffOnConnectionFault: Joi.boolean().default(false),
+      hosts: Joi.array().items(Joi.string().uri({ scheme: ['http', 'https'] })).single(), // if empty, use Kibana's connection config
       username: Joi.string(),
       password: Joi.string(),
       requestTimeout: Joi.number().default(30000),
@@ -79,6 +71,11 @@ export const config = (Joi) => {
         alwaysPresentCertificate: Joi.boolean().default(false),
       }).default(),
       apiVersion: Joi.string().default('master')
-    }).default()
+    }).default(),
+    tests: Joi.object({
+      cloud_detector: Joi.object({
+        enabled: Joi.boolean().default(true)
+      }).default()
+    }).default(),
   }).default();
 };

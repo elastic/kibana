@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiKeyPadMenu, EuiKeyPadMenuItem } from '@elastic/eui';
+import { EuiKeyPadMenu, EuiKeyPadMenuItemButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import {
@@ -12,7 +12,7 @@ import {
   InfraMetricType,
   InfraNodeType,
   InfraPathInput,
-} from '../../../common/graphql/types';
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -25,7 +25,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
   public render() {
     return (
       <EuiKeyPadMenu>
-        <EuiKeyPadMenuItem
+        <EuiKeyPadMenuItemButton
           label={
             <FormattedMessage
               id="xpack.infra.waffle.nodeTypeSwitcher.hostsLabel"
@@ -34,14 +34,29 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
           }
           onClick={this.handleClick(InfraNodeType.host)}
         >
-          <img src="../plugins/infra/images/hosts.svg" className="euiIcon euiIcon--large" />
-        </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
-          <img src="../plugins/infra/images/k8.svg" className="euiIcon euiIcon--large" />
-        </EuiKeyPadMenuItem>
-        <EuiKeyPadMenuItem label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
-          <img src="../plugins/infra/images/docker.svg" className="euiIcon euiIcon--large" />
-        </EuiKeyPadMenuItem>
+          <img
+            src="../plugins/infra/images/hosts.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
+        </EuiKeyPadMenuItemButton>
+        <EuiKeyPadMenuItemButton label="Kubernetes" onClick={this.handleClick(InfraNodeType.pod)}>
+          <img
+            src="../plugins/infra/images/k8.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
+        </EuiKeyPadMenuItemButton>
+        <EuiKeyPadMenuItemButton label="Docker" onClick={this.handleClick(InfraNodeType.container)}>
+          <img
+            src="../plugins/infra/images/docker.svg"
+            role="presentation"
+            alt=""
+            className="euiIcon euiIcon--large"
+          />
+        </EuiKeyPadMenuItemButton>
       </EuiKeyPadMenu>
     );
   }

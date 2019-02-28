@@ -6,7 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { first, last } from 'lodash';
-import { InfraNode, InfraNodePath } from '../../../common/graphql/types';
+
+import { InfraNode, InfraNodePath } from '../../graphql/types';
 import {
   InfraWaffleMapGroup,
   InfraWaffleMapGroupOfGroups,
@@ -15,7 +16,7 @@ import {
 } from '../../lib/lib';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from './type_guards';
 
-function createId(path: InfraNodePath[]) {
+export function createId(path: InfraNodePath[]) {
   return path.map(p => p.value).join('/');
 }
 
@@ -39,6 +40,7 @@ function findOrCreateGroupWithNodes(
       }
     }
   }
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithNodes(existingGroup)) {
     return existingGroup;
@@ -50,7 +52,7 @@ function findOrCreateGroupWithNodes(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithNodes.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : (lastPath && lastPath.label) || 'Unknown Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -63,6 +65,7 @@ function findOrCreateGroupWithGroups(
   path: InfraNodePath[]
 ): InfraWaffleMapGroupOfGroups {
   const id = path.length === 0 ? '__all__' : createId(path);
+  const lastPath = last(path);
   const existingGroup = groups.find(g => g.id === id);
   if (isWaffleMapGroupWithGroups(existingGroup)) {
     return existingGroup;
@@ -74,7 +77,7 @@ function findOrCreateGroupWithGroups(
         ? i18n.translate('xpack.infra.nodesToWaffleMap.groupsWithGroups.allName', {
             defaultMessage: 'All',
           })
-        : last(path).value,
+        : (lastPath && lastPath.label) || 'Unknown Group',
     count: 0,
     width: 0,
     squareSize: 0,
@@ -82,11 +85,16 @@ function findOrCreateGroupWithGroups(
   };
 }
 
-function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+export function createWaffleMapNode(node: InfraNode): InfraWaffleMapNode {
+  const nodePathItem = last(node.path);
+  if (!nodePathItem) {
+    throw new Error('There must be at least one node path item');
+  }
   return {
-    id: node.path.map(p => p.value).join('/'),
+    pathId: node.path.map(p => p.value).join('/'),
     path: node.path,
-    name: last(node.path).value,
+    id: nodePathItem.value,
+    name: nodePathItem.label || nodePathItem.value,
     metric: node.metric,
   };
 }

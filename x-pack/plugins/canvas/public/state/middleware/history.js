@@ -31,7 +31,9 @@ export const historyMiddleware = ({ dispatch, getState }) => {
         };
       }
 
-      if (!route.action) return route;
+      if (!route.action) {
+        return route;
+      }
 
       return {
         ...route,
@@ -75,7 +77,9 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     }
 
     // execute route action on pushState and popState events
-    if (isUrlChange) return await router.parse(pathname);
+    if (isUrlChange) {
+      return await router.parse(pathname);
+    }
   };
 
   history.onChange(async (...args) => {
@@ -114,7 +118,9 @@ export const historyMiddleware = ({ dispatch, getState }) => {
     const newState = getState();
 
     // if the app is not ready, don't persist anything
-    if (!isAppReady(newState)) return;
+    if (!isAppReady(newState)) {
+      return;
+    }
 
     // if app switched from not ready to ready, replace current state
     // this allows the back button to work correctly all the way to first page load

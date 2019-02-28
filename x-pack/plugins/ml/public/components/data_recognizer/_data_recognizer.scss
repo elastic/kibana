@@ -3,3 +3,29 @@ ml-data-recognizer {
     width: $euiSizeXL;
   }
 }
+
+// Moved here from /home since it's no longer being used there
+.synopsis {
+  display: flex;
+  flex-grow: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+
+    .synopsisTitle {
+      text-decoration: underline;
+    }
+  }
+}
+
+.synopsisTitle {
+  font-size: $euiSize;
+  font-weight: normal;
+  color: $euiColorPrimary;
+}
+
+.synopsisIcon {
+  padding-top: $euiSizeS;
+}

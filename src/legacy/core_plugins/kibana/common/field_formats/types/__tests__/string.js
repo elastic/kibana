@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import { createStringFormat } from '../string';
-import { FieldFormat } from '../../../../../../../ui/field_formats/field_format';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
 
 const StringFormat = createStringFormat(FieldFormat);
 

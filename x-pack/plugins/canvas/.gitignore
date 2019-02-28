@@ -52,3 +52,9 @@ public/style/index.css
 
 # Don't commit built plugin files
 canvas_plugin/*
+
+# Don't commit the Webpack statistics
+webpack_stats.json
+
+# Don't commit storybook builds
+storybook

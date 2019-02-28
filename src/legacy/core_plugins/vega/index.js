@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 export default kibana => new kibana.Plugin({
   id: 'vega',
   require: ['elasticsearch'],
@@ -24,7 +26,7 @@ export default kibana => new kibana.Plugin({
   uiExports: {
     visTypes: ['plugins/vega/vega_type'],
     injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
-    styleSheetPaths: `${__dirname}/public/index.scss`,
+    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
   },
 
   config: (Joi) => Joi.object({

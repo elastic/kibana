@@ -27,7 +27,9 @@ export const AdvancedFailureComponent = props => {
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
 
-    if (valid) return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    if (valid) {
+      return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    }
   };
 
   const confirmReset = ev => {

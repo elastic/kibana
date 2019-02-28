@@ -4,9 +4,11 @@
     "type": "canvas-workpad",
     "updated_at": "2018-10-22T14:17:04.040Z",
     "version": 1,
+    "migrationVersion": {
+      "canvas-workpad": "7.0.0"
+    },
     "attributes": {
       "name": "[Flights] Overview",
-      "id": "workpad-a474e74b-aedc-47c3-894a-db77e62c41e0",
       "width": 1280,
       "height": 720,
       "page": 0,
@@ -185,7 +187,7 @@
                 "height": 65,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as hours\nFROM kibana_sample_data_flights\"\n| math \"hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as total_hours\nFROM kibana_sample_data_flights\"\n| math \"total_hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -220,15 +222,15 @@
                 "height": 54,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as minutes\nFROM kibana_sample_data_flights\"\n| math \"minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as total_minutes\nFROM kibana_sample_data_flights\"\n| math \"total_minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
               "id": "element-60733afe-abce-4449-b0dd-5310d8ffffce",
               "position": {
-                "left": 173.25,
+                "left": 163.75,
                 "top": 416.9379542305451,
-                "width": 81,
+                "width": 100,
                 "height": 39,
                 "angle": 0
               },

@@ -7,7 +7,11 @@
 import { cloneDeep, set } from 'lodash';
 
 import { InfraESSearchBody, InfraNodeType, InfraProcesorRequestOptions } from '../../adapter_types';
-import { NODE_REQUEST_PARTITION_FACTOR, NODE_REQUEST_PARTITION_SIZE } from '../../constants';
+import {
+  NAME_FIELDS,
+  NODE_REQUEST_PARTITION_FACTOR,
+  NODE_REQUEST_PARTITION_SIZE,
+} from '../../constants';
 
 const nodeTypeToField = (options: InfraProcesorRequestOptions): string => {
   const { fields } = options.nodeOptions.sourceConfiguration;
@@ -34,6 +38,15 @@ export const nodesProcessor = (options: InfraProcesorRequestOptions) => {
       },
       order: { _key: 'asc' },
       size: NODE_REQUEST_PARTITION_SIZE * NODE_REQUEST_PARTITION_FACTOR,
+    });
+
+    set(result, 'aggs.waffle.aggs.nodes.aggs', {
+      nodeDetails: {
+        terms: {
+          field: NAME_FIELDS[options.nodeType],
+          size: 1,
+        },
+      },
     });
     return result;
   };

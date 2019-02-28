@@ -25,7 +25,7 @@ import {
   createPromiseFromStreams,
   createConcatStream,
   createListStream
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import {
   createCreateIndexStream
@@ -113,6 +113,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
       sinon.assert.calledWith(client.indices.create, {
         method: 'PUT',
         index: 'index',
+        include_type_name: false,
         body: {
           settings: undefined,
           mappings: undefined,

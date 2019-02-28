@@ -80,14 +80,10 @@ export class PipelinesService {
    * @return Promise { numSuccesses, numErrors }
    */
   deletePipelines(pipelineIds) {
-    // $http.delete does not take the request body as the 2nd argument. Instead it expects the 2nd
-    // argument to be a request options object, one of which can be the request body (data). We also
-    // need to explicitly define the content type of the data.
-    const requestOpts = {
-      data: { pipelineIds },
-      headers: { 'Content-Type': 'application/json' }
+    const body = {
+      pipelineIds
     };
-    return this.$http.delete(`${this.basePath}/pipelines`, requestOpts)
+    return this.$http.post(`${this.basePath}/pipelines/delete`, body)
       .then(response => {
         this.addToRecentlyDeleted(...pipelineIds);
         return response.data.results;

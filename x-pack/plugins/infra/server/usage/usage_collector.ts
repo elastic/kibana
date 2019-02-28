@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../../common/graphql/types';
+import { InfraNodeType } from '../graphql/types';
 import { KbnServer } from '../kibana.index';
 
 const KIBANA_REPORTING_TYPE = 'infraops';

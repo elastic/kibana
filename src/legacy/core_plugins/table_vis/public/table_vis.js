@@ -26,7 +26,8 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { legacyTableResponseHandler } from './legacy_response_handler';
+import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { VisFiltersProvider } from 'ui/vis/vis_filters';
 
 // we need to load the css ourselves
 
@@ -39,9 +40,12 @@ import { legacyTableResponseHandler } from './legacy_response_handler';
 // register the provider with the visTypes registry
 VisTypesRegistryProvider.register(TableVisTypeProvider);
 
+const legacyTableResponseHandler = legacyResponseHandlerProvider().handler;
+
 // define the TableVisType
 function TableVisTypeProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
+  const visFilters = Private(VisFiltersProvider);
 
   // define the TableVisController which is used in the template
   // by angular's ng-controller directive
@@ -101,13 +105,17 @@ function TableVisTypeProvider(Private) {
           title: i18n.translate('tableVis.tableVisEditorConfig.schemas.splitTitle', {
             defaultMessage: 'Split Table',
           }),
+          min: 0,
+          max: 1,
           aggFilter: ['!filter']
         }
       ])
     },
     responseHandler: legacyTableResponseHandler,
-    responseHandlerConfig: {
-      asAggConfigResults: true
+    events: {
+      filterBucket: {
+        defaultAction: visFilters.filter,
+      },
     },
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMetricsAtAllLevels);

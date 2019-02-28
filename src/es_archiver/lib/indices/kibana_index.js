@@ -25,31 +25,36 @@ import { toArray } from 'rxjs/operators';
 import wreck from 'wreck';
 
 import { deleteIndex } from './delete_index';
-import { collectUiExports } from '../../../ui/ui_exports';
-import { KibanaMigrator } from '../../../server/saved_objects/migrations';
-import { findPluginSpecs } from '../../../plugin_discovery';
+import { collectUiExports } from '../../../legacy/ui/ui_exports';
+import { KibanaMigrator } from '../../../legacy/server/saved_objects/migrations';
+import { findPluginSpecs } from '../../../legacy/plugin_discovery';
 
 /**
- * This is an expensive operation, so we'll ensure it only happens once
+ * Load the uiExports for a Kibana instance, only load uiExports from xpack if
+ * it is enabled in the Kibana server.
  */
-const buildUiExports = _.once(async () => {
+const getUiExports = async (kibanaUrl) => {
+  const xpackEnabled = await getKibanaPluginEnabled({
+    kibanaUrl,
+    pluginId: 'xpack_main'
+  });
+
   const { spec$ } = await findPluginSpecs({
     plugins: {
       scanDirs: [path.resolve(__dirname, '../../../legacy/core_plugins')],
-      paths: [path.resolve(__dirname, '../../../../x-pack')],
+      paths: xpackEnabled ? [path.resolve(__dirname, '../../../../x-pack')] : [],
     },
   });
 
   const specs = await spec$.pipe(toArray()).toPromise();
   return collectUiExports(specs);
-});
+};
 
 /**
  * Deletes all indices that start with `.kibana`
  */
 export async function deleteKibanaIndices({ client, stats, log }) {
-  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
-  const indexNames = kibanaIndices.map(x => x.index);
+  const indexNames = await fetchKibanaIndices(client);
   if (!indexNames.length) {
     return;
   }
@@ -74,8 +79,8 @@ export async function deleteKibanaIndices({ client, stats, log }) {
  * builds up an object that implements just enough of the kbnMigrations interface
  * as is required by migrations.
  */
-export async function migrateKibanaIndex({ client, log }) {
-  const uiExports = await buildUiExports();
+export async function migrateKibanaIndex({ client, log, kibanaUrl }) {
+  const uiExports = await getUiExports(kibanaUrl);
   const version = await loadElasticVersion();
   const config = {
     'kibana.index': '.kibana',
@@ -113,32 +118,31 @@ async function loadElasticVersion() {
   return JSON.parse(packageJson).version;
 }
 
-const spacesEnabledCache = new Map();
 export async function isSpacesEnabled({ kibanaUrl }) {
-  if (!spacesEnabledCache.has(kibanaUrl)) {
-    const statuses = await getKibanaStatuses({ kibanaUrl });
-    spacesEnabledCache.set(kibanaUrl, !!statuses.find(({ id }) => id.startsWith('plugin:spaces@')));
-  }
-
-  return spacesEnabledCache.get(kibanaUrl);
+  return await getKibanaPluginEnabled({
+    kibanaUrl,
+    pluginId: 'spaces'
+  });
 }
 
-async function getKibanaStatuses({ kibanaUrl }) {
+async function getKibanaPluginEnabled({ pluginId, kibanaUrl }) {
   try {
     const { payload } = await wreck.get('/api/status', {
       baseUrl: kibanaUrl,
       json: true
     });
-    return payload.status.statuses;
+
+    return payload.status.statuses
+      .some(({ id }) => id.includes(`plugin:${pluginId}@`));
   } catch (error) {
-    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}`);
+    throw new Error(`Unable to fetch Kibana status API response from Kibana at ${kibanaUrl}: ${error}`);
   }
 }
 
 export async function createDefaultSpace({ index, client }) {
   await client.index({
     index,
-    type: 'doc',
+    type: '_doc',
     id: 'space:default',
     body: {
       type: 'space',
@@ -150,4 +154,51 @@ export async function createDefaultSpace({ index, client }) {
       }
     }
   });
+}
+
+/**
+ * Migrations mean that the Kibana index will look something like:
+ * .kibana, .kibana_1, .kibana_323, etc. This finds all indices starting
+ * with .kibana, then filters out any that aren't actually Kibana's core
+ * index (e.g. we don't want to remove .kibana_task_manager or the like).
+ *
+ * @param {string} index
+ */
+async function fetchKibanaIndices(client) {
+  const kibanaIndices = await client.cat.indices({ index: '.kibana*', format: 'json' });
+  const isKibanaIndex = (index) => (/^\.kibana(:?_\d*)?$/).test(index);
+  return kibanaIndices.map(x => x.index).filter(isKibanaIndex);
+}
+
+export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
+  if (!await isSpacesEnabled({ kibanaUrl })) {
+    return await deleteKibanaIndices({
+      client,
+      stats,
+      log,
+    });
+  }
+
+  await client.deleteByQuery({
+    index: `.kibana`,
+    body: {
+      query: {
+        bool: {
+          must_not: {
+            ids: {
+              type: 'doc',
+              values: ['space:default']
+            }
+          }
+        }
+      }
+    }
+  });
+
+  log.warning(
+    `since spaces are enabled, all objects other than the default space were deleted from ` +
+    `.kibana rather than deleting the whole index`
+  );
+
+  stats.deletedIndex('.kibana');
 }

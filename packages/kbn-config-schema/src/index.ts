@@ -40,6 +40,8 @@ import {
   NumberType,
   ObjectType,
   Props,
+  RecordOfOptions,
+  RecordOfType,
   StringOptions,
   StringType,
   Type,
@@ -103,6 +105,14 @@ function mapOf<K, V>(
   options?: MapOfOptions<K, V>
 ): Type<Map<K, V>> {
   return new MapOfType(keyType, valueType, options);
+}
+
+function recordOf<K extends string, V>(
+  keyType: Type<K>,
+  valueType: Type<V>,
+  options?: RecordOfOptions<K, V>
+): Type<Record<K, V>> {
+  return new RecordOfType(keyType, valueType, options);
 }
 
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
@@ -175,6 +185,7 @@ export const schema = {
   number,
   object,
   oneOf,
+  recordOf,
   siblingRef,
   string,
 };

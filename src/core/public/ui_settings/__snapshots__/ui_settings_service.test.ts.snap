@@ -5,7 +5,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
   "calls": Array [
     Array [
       Object {
-        "basePathStartContract": true,
+        "basePathStart": true,
       },
       "kibanaVersion",
     ],
@@ -59,7 +59,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
 }
 `;
 
-exports[`#start passes the uiSettings loading count to the loading count api: loadingCount.add calls 1`] = `
+exports[`#start passes the uiSettings loading count to the loading count api: http.addLoadingCount calls 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [

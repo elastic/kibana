@@ -37,8 +37,8 @@ export function registerDeleteRoute(server) {
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
-    path: '/api/logstash/pipelines',
-    method: 'DELETE',
+    path: '/api/logstash/pipelines/delete',
+    method: 'POST',
     handler: (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
 

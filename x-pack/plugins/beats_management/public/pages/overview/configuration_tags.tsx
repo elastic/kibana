@@ -8,10 +8,9 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import { BeatTag } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
-import { tagListAssignmentOptions } from '../../components/table/assignment_schema';
+import { tagListActions } from '../../components/table/action_schema';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AppPageProps } from '../../frontend_types';
 
@@ -32,10 +31,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
       tableRef: React.createRef(),
     };
 
-    if (props.urlState.tagsKBar) {
-      props.containers.tags.reload(props.urlState.tagsKBar);
-    }
-
+    props.containers.tags.reload(props.urlState.tagsKBar);
     props.renderAction(this.renderActionArea);
   }
 
@@ -74,17 +70,13 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
                 ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ tagsKBar: value });
-                  this.props.containers.tags.reload(this.props.urlState.tagsKBar);
+                  this.props.containers.tags.reload(value);
                 },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.tagsKBar || '',
               }}
-              assignmentOptions={{
-                schema: tagListAssignmentOptions,
-                type: 'primary',
-                items: [],
-                actionHandler: this.handleTagsAction,
-              }}
+              actions={tagListActions}
+              actionHandler={this.handleTagsAction}
               ref={this.state.tableRef}
               items={this.props.containers.tags.state.list}
               type={TagsTableType}
@@ -99,8 +91,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
     const { intl } = this.props;
     switch (action) {
       case AssignmentActionType.Delete:
-        const tags = this.getSelectedTags().map((tag: BeatTag) => tag.id);
-        const success = await this.props.containers.tags.delete(tags);
+        const success = await this.props.containers.tags.delete(this.getSelectedTags());
         if (!success) {
           alert(
             intl.formatMessage({

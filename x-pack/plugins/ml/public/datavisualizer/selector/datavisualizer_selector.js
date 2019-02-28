@@ -21,24 +21,38 @@ import {
 } from '@elastic/eui';
 
 import { isFullLicense } from '../../license/check_license';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { timefilter } from 'ui/timefilter';
 
 function startTrialDescription() {
   return (
     <span>
-      To experience the full Machine Learning features that a {' '}
-      <EuiLink
-        href="https://www.elastic.co/subscriptions"
-        target="_blank"
-      >
-        Platinum subscription
-      </EuiLink>{' '}
-      offers, start a 30-day trial.
+      <FormattedMessage
+        id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
+        defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
+        values={{
+          platinumSubscriptionLink: (
+            <EuiLink
+              href="https://www.elastic.co/subscriptions"
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
+                defaultMessage="Platinum subscription"
+              />
+            </EuiLink>
+          )
+        }}
+      />
     </span>
   );
 }
 
 
-export function DatavisualizerSelector() {
+export const DatavisualizerSelector = injectI18n(function (props) {
+
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
 
   const startTrialVisible = (isFullLicense() === false);
 
@@ -48,7 +62,12 @@ export function DatavisualizerSelector() {
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h2>Data Visualizer</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
+                  defaultMessage="Data Visualizer"
+                />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -56,8 +75,11 @@ export function DatavisualizerSelector() {
         <EuiFlexGroup gutterSize="xl">
           <EuiFlexItem grow={false}>
             <EuiText color="subdued">
-              The Machine Learning Data Visualizer tool helps you understand your data, by analyzing the metrics and fields in
-              a log file or an existing Elasticsearch index.
+              <FormattedMessage
+                id="xpack.ml.datavisualizer.selector.dataVisualizerDescription"
+                defaultMessage="The Machine Learning Data Visualizer tool helps you understand your data,
+                  by analyzing the metrics and fields in a log file or an existing Elasticsearch index."
+              />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -66,16 +88,37 @@ export function DatavisualizerSelector() {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type="addDataApp" />}
-              title="Import data"
-              description="Import data from a log file. You can upload files up to 100 MB."
-              betaBadgeLabel="Experimental"
-              betaBadgeTooltipContent="Experimental feature. We'd love to hear your feedback."
+              title={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.importDataTitle"
+                  defaultMessage="Import data"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.importDataDescription"
+                  defaultMessage="Import data from a log file. You can upload files up to 100 MB."
+                />
+              }
+              betaBadgeLabel={props.intl.formatMessage({
+                id: 'xpack.ml.datavisualizer.selector.experimentalBadgeLabel',
+                defaultMessage: 'Experimental'
+              })}
+              betaBadgeTooltipContent={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.experimentalBadgeTooltipLabel"
+                  defaultMessage="Experimental feature. We'd love to hear your feedback."
+                />
+              }
               footer={
                 <EuiButton
                   target="_self"
                   href="#/filedatavisualizer"
                 >
-                  Upload file
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
+                    defaultMessage="Upload file"
+                  />
                 </EuiButton>
               }
             />
@@ -83,14 +126,27 @@ export function DatavisualizerSelector() {
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type="dataVisualizer" />}
-              title="Select an index pattern"
-              description="Visualize the data in an existing Elasticsearch index."
+              title={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.selectIndexPatternTitle"
+                  defaultMessage="Select an index pattern"
+                />
+              }
+              description={
+                <FormattedMessage
+                  id="xpack.ml.datavisualizer.selector.selectIndexPatternDescription"
+                  defaultMessage="Visualize the data in an existing Elasticsearch index."
+                />
+              }
               footer={
                 <EuiButton
                   target="_self"
                   href="#datavisualizer_index_select"
                 >
-                  Select index
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
+                    defaultMessage="Select index"
+                  />
                 </EuiButton>
               }
             />
@@ -103,14 +159,22 @@ export function DatavisualizerSelector() {
             <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
               <EuiFlexItem grow={false} style={{ width: '600px' }}>
                 <EuiCard
-                  title="Start trial"
+                  title={
+                    <FormattedMessage
+                      id="xpack.ml.datavisualizer.selector.startTrialTitle"
+                      defaultMessage="Start trial"
+                    />
+                  }
                   description={startTrialDescription()}
                   footer={
                     <EuiButton
                       target="_blank"
                       href="kibana#/management/elasticsearch/license_management/home"
                     >
-                      Start trial
+                      <FormattedMessage
+                        id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
+                        defaultMessage="Start trial"
+                      />
                     </EuiButton>
                   }
                 />
@@ -121,4 +185,4 @@ export function DatavisualizerSelector() {
       </EuiPageBody>
     </EuiPage>
   );
-}
+});

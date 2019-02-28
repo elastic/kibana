@@ -1,6 +1,6 @@
 {
   "name": "@elastic/datemath",
-  "version": "5.0.1",
+  "version": "5.0.2",
   "description": "elasticsearch datemath parser, used in kibana",
   "license": "Apache-2.0",
   "main": "target/index.js",
@@ -13,10 +13,13 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-env": "^1.7.0"
+    "babel-preset-env": "^1.7.0",
+    "moment": "^2.13.0"
   },
   "dependencies": {
-    "moment": "^2.13.0",
     "tslib": "^1.9.3"
+  },
+  "peerDependencies": {
+    "moment": "^2.13.0"
   }
 }

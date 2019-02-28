@@ -5,11 +5,14 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import moment from 'moment';
 import { darken, readableColor } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
-import { InfraTimerangeInput } from 'x-pack/plugins/infra/common/graphql/types';
+
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+import { InfraTimerangeInput } from '../../graphql/types';
 import { InfraWaffleMapBounds, InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { colorFromValue } from './lib/color_from_value';
 import { NodeContextMenu } from './node_context_menu';
@@ -28,56 +31,90 @@ interface Props {
   bounds: InfraWaffleMapBounds;
   nodeType: InfraNodeType;
   timeRange: InfraTimerangeInput;
+  intl: InjectedIntl;
 }
 
-export class Node extends React.PureComponent<Props, State> {
-  public readonly state: State = initialState;
-  public render() {
-    const { nodeType, node, options, squareSize, bounds, formatter, timeRange } = this.props;
-    const { isPopoverOpen } = this.state;
-    const { metric } = node;
-    const valueMode = squareSize > 110;
-    const rawValue = (metric && metric.value) || 0;
-    const color = colorFromValue(options.legend, rawValue, bounds);
-    const value = formatter(rawValue);
-    return (
-      <NodeContextMenu
-        node={node}
-        nodeType={nodeType}
-        isPopoverOpen={isPopoverOpen}
-        closePopover={this.closePopover}
-        options={options}
-        timeRange={timeRange}
-      >
-        <EuiToolTip position="top" content={`${node.name} | ${value}`}>
-          <NodeContainer
-            style={{ width: squareSize || 0, height: squareSize || 0 }}
-            onClick={this.togglePopover}
-          >
-            <SquareOuter color={color}>
-              <SquareInner color={color}>
-                {valueMode && (
-                  <ValueInner>
-                    <Label color={color}>{node.name}</Label>
-                    <Value color={color}>{value}</Value>
-                  </ValueInner>
-                )}
-              </SquareInner>
-            </SquareOuter>
-          </NodeContainer>
-        </EuiToolTip>
-      </NodeContextMenu>
-    );
+export const Node = injectI18n(
+  class extends React.PureComponent<Props, State> {
+    public readonly state: State = initialState;
+    public render() {
+      const {
+        nodeType,
+        node,
+        options,
+        squareSize,
+        bounds,
+        formatter,
+        timeRange,
+        intl,
+      } = this.props;
+      const { isPopoverOpen } = this.state;
+      const { metric } = node;
+      const valueMode = squareSize > 70;
+      const ellipsisMode = squareSize > 30;
+      const rawValue = (metric && metric.value) || 0;
+      const color = colorFromValue(options.legend, rawValue, bounds);
+      const value = formatter(rawValue);
+      const newTimerange = {
+        ...timeRange,
+        from: moment(timeRange.to)
+          .subtract(1, 'hour')
+          .valueOf(),
+      };
+      const nodeAriaLabel = intl.formatMessage(
+        {
+          id: 'xpack.infra.node.ariaLabel',
+          defaultMessage: '{nodeName}, click to open menu',
+        },
+        { nodeName: node.name }
+      );
+      return (
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          isPopoverOpen={isPopoverOpen}
+          closePopover={this.closePopover}
+          options={options}
+          timeRange={newTimerange}
+        >
+          <EuiToolTip position="top" content={`${node.name} | ${value}`}>
+            <NodeContainer
+              style={{ width: squareSize || 0, height: squareSize || 0 }}
+              onClick={this.togglePopover}
+            >
+              <SquareOuter color={color}>
+                <SquareInner color={color}>
+                  {valueMode ? (
+                    <ValueInner aria-label={nodeAriaLabel}>
+                      <Label color={color}>{node.name}</Label>
+                      <Value color={color}>{value}</Value>
+                    </ValueInner>
+                  ) : (
+                    ellipsisMode && (
+                      <ValueInner aria-label={nodeAriaLabel}>
+                        <Label color={color}>...</Label>
+                      </ValueInner>
+                    )
+                  )}
+                </SquareInner>
+              </SquareOuter>
+            </NodeContainer>
+          </EuiToolTip>
+        </NodeContextMenu>
+      );
+    }
+
+    private togglePopover = () => {
+      this.setState(prevState => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+    };
+
+    private closePopover = () => {
+      if (this.state.isPopoverOpen) {
+        this.setState({ isPopoverOpen: false });
+      }
+    };
   }
-
-  private togglePopover = () => {
-    this.setState(prevState => ({ isPopoverOpen: !prevState.isPopoverOpen }));
-  };
-
-  private closePopover = () => {
-    this.setState({ isPopoverOpen: false });
-  };
-}
+);
 
 const NodeContainer = styled.div`
   position: relative;
@@ -109,7 +146,7 @@ const SquareInner = styled<ColorProps, 'div'>('div')`
   background-color: ${props => props.color};
 `;
 
-const ValueInner = styled.div`
+const ValueInner = styled.button`
   position: absolute;
   top: 0;
   left: 0;
@@ -122,6 +159,14 @@ const ValueInner = styled.div`
   padding: 1em;
   overflow: hidden;
   flex-wrap: wrap;
+  width: 100%;
+  border: none;
+  &:focus {
+    outline: none !important;
+    border: ${params => params.theme.eui.euiFocusRingSize} solid
+      ${params => params.theme.eui.euiFocusRingColor};
+    box-shadow: none;
+  }
 `;
 
 const Value = styled<ColorProps, 'div'>('div')`

@@ -1,0 +1,17 @@
+.visError {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  // From ML
+  .top { align-self: flex-start; }
+  .bottom { align-self: flex-end; }
+}
+
+// Prevent large request errors from overflowing the container
+.visError--request {
+  max-width: 100%;
+  max-height: 100%;
+}

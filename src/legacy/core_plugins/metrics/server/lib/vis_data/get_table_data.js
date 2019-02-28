@@ -21,14 +21,20 @@ import buildRequestBody from './table/build_request_body';
 import handleErrorResponse from './handle_error_response';
 import { get } from 'lodash';
 import processBucket from './table/process_bucket';
+import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
+import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getIndexPatternObject } from './helpers/get_index_pattern';
+
 export async function getTableData(req, panel) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
-  const params = {
-    index: panel.index_pattern,
-    body: buildRequestBody(req, panel)
-  };
+  const panelIndexPattern = panel.index_pattern;
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
+  const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
+  const esQueryConfig = await getEsQueryConfig(req);
+  const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
+  const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
+
   try {
-    const resp = await callWithRequest(req, 'search', params);
+    const [resp] = await searchRequest.search({ body });
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
     return { type: 'table', series: buckets.map(processBucket(panel)) };
   } catch (err) {
