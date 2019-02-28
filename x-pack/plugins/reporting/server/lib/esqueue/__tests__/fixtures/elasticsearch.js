@@ -16,7 +16,6 @@ ClientMock.prototype.index = function (params = {}) {
   const shardCount = 2;
   return Promise.resolve({
     _index: params.index || 'index',
-    _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || uniqueId('testDoc'),
     _seq_no: 1,
     _primary_term: 1,
@@ -52,7 +51,6 @@ ClientMock.prototype.get = function (params = {}, source = {}) {
 
   return Promise.resolve({
     _index: params.index || 'index',
-    _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || 'AVRPRLnlp7Ur1SZXfT-T',
     _seq_no: params._seq_no || 1,
     _primary_term: params._primary_term || 1,
@@ -65,7 +63,6 @@ ClientMock.prototype.search = function (params = {}, count = 5, source = {}) {
   const hits = times(count, () => {
     return {
       _index: params.index || 'index',
-      _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
       _id: uniqueId('documentId'),
       _seq_no: random(1, 5),
       _primar_term: random(1, 5),
@@ -97,7 +94,6 @@ ClientMock.prototype.update = function (params = {}) {
   const shardCount = 2;
   return Promise.resolve({
     _index: params.index || 'index',
-    _type: params.type || constants.DEFAULT_SETTING_DOCTYPE,
     _id: params.id || uniqueId('testDoc'),
     _seq_no: params.if_seq_no + 1 || 2,
     _primary_term: params.if_primary_term + 1 || 2,

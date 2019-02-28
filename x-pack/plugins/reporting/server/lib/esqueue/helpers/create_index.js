@@ -66,18 +66,14 @@ const schema = {
   }
 };
 
-export function createIndex(client, indexName,
-  doctype = constants.DEFAULT_SETTING_DOCTYPE,
-  indexSettings = { }) {
+export function createIndex(client, indexName, indexSettings = {}) {
   const body = {
     settings: {
       ...constants.DEFAULT_SETTING_INDEX_SETTINGS,
       ...indexSettings
     },
     mappings: {
-      [doctype]: {
-        properties: schema
-      }
+      properties: schema
     }
   };
 
@@ -88,7 +84,6 @@ export function createIndex(client, indexName,
       if (!exists) {
         return client.indices.create({
           index: indexName,
-          include_type_name: true,
           body: body
         })
           .then(() => true)

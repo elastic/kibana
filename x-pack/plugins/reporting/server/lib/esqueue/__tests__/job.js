@@ -83,7 +83,6 @@ describe('Job Class', function () {
         const args = createIndexMock.getCall(0).args;
         expect(args[0]).to.equal(client);
         expect(args[1]).to.equal(index);
-        expect(args[2]).to.equal(constants.DEFAULT_SETTING_DOCTYPE);
       });
     });
 
@@ -92,7 +91,6 @@ describe('Job Class', function () {
       return job.ready.then(() => {
         const indexArgs = validateDoc(client.index);
         expect(indexArgs).to.have.property('index', index);
-        expect(indexArgs).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
         expect(indexArgs).to.have.property('body');
         expect(indexArgs.body).to.have.property('payload', payload);
       });
@@ -103,7 +101,6 @@ describe('Job Class', function () {
       return job.ready.then(() => {
         const indexArgs = validateDoc(client.index);
         expect(indexArgs).to.have.property('index', index);
-        expect(indexArgs).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
         expect(indexArgs).to.have.property('body');
         expect(indexArgs.body).to.have.property('jobtype', type);
       });
@@ -134,7 +131,6 @@ describe('Job Class', function () {
         try {
           expect(jobDoc).to.have.property('id');
           expect(jobDoc).to.have.property('index');
-          expect(jobDoc).to.have.property('type');
           expect(jobDoc).to.have.property('_seq_no');
           expect(jobDoc).to.have.property('_primary_term');
           done();
@@ -351,7 +347,6 @@ describe('Job Class', function () {
         const args = createIndexMock.getCall(0).args;
         expect(args[0]).to.equal(newClient);
         expect(args[1]).to.equal(index);
-        expect(args[2]).to.equal(constants.DEFAULT_SETTING_DOCTYPE);
       });
     });
 
@@ -362,7 +357,6 @@ describe('Job Class', function () {
 
         const newDoc = newClient.index.getCall(0).args[0];
         expect(newDoc).to.have.property('index', index);
-        expect(newDoc).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
         expect(newDoc).to.have.property('body');
         expect(newDoc.body).to.have.property('payload', payload);
       });
@@ -382,7 +376,6 @@ describe('Job Class', function () {
         .then((doc) => {
           const jobDoc = job.document; // document should be resolved
           expect(doc).to.have.property('index', index);
-          expect(doc).to.have.property('type', jobDoc.type);
           expect(doc).to.have.property('id', jobDoc.id);
           expect(doc).to.have.property('_seq_no', jobDoc._seq_no);
           expect(doc).to.have.property('_primary_term', jobDoc._primary_term);
@@ -433,7 +426,6 @@ describe('Job Class', function () {
 
       const doc = job.toJSON();
       expect(doc).to.have.property('index', index);
-      expect(doc).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
       expect(doc).to.have.property('jobtype', type);
       expect(doc).to.have.property('created_by', defaultCreatedBy);
       expect(doc).to.have.property('timeout', options.timeout);
