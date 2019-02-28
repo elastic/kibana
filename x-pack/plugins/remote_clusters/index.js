@@ -47,7 +47,6 @@ export function remoteClusters(kibana) {
     isEnabled(config) {
       return (
         config.get('xpack.remote_clusters.enabled') &&
-        config.has('xpack.index_management.enabled') &&
         config.get('xpack.index_management.enabled')
       );
     },
