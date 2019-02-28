@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { Readable, Transform, Duplex, Writable, PassThrough, TransformOptions } from 'stream';
+import { Readable, Transform, Writable, TransformOptions } from 'stream';
 
-type ReadableStream = Readable | Transform | Duplex | PassThrough;
-type Stream = Readable | Transform | Duplex | Writable | PassThrough;
-
-export function concatStreamProviders(sourceProviders: ReadableStream[], options: TransformOptions): PassThrough;
+export function concatStreamProviders(sourceProviders: Readable[], options: TransformOptions): PassThrough;
 export function createIntersperseStream(intersperseChunk: string | Buffer): Transform;
 export function createSplitStream<T>(splitChunk: T): Transform;
 export function createListStream(items: any[]): Readable;
 export function createReduceStream<T>(reducer: (value: any, chunk: T, enc: string) => T): Transform;
-export function createPromiseFromStreams<T>(streams: Stream[]): Promise<T>;
+export function createPromiseFromStreams<T>([first, ...rest]: [Readable, ...Writable]): Promise<T>;
 export function createConcatStream(initial: any): Transform;
 export function createMapStream<T>(fn: (value: T, i: number) => void): Transform;
 export function createReplaceStream(toReplace: string, replacement: string | Buffer): Transform;
