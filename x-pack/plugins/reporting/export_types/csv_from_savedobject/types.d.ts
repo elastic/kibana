@@ -19,17 +19,23 @@ export interface VisObjectAttributes {
   title: string;
   visState: string;
   uiStateJSON: string;
-  description: string;
-  version: number;
 }
 
 export interface SavedSearchObjectAttributes {
   title: string;
-  uiStateJSON: string;
-  description: string;
   sort: any[];
   columns: string[];
-  version: number;
+  kibanaSavedObjectMeta: SavedObjectMeta;
+  uiState: any;
+}
+
+export interface SavedVisState {
+  title: string;
+  type: string;
+  params: any;
+  uiState: any;
+  aggs: any[];
+  sort: any[];
   kibanaSavedObjectMeta: SavedObjectMeta;
 }
 
@@ -51,18 +57,10 @@ export interface TimeRangeParams {
 }
 
 export interface VisPanel {
-  type: string; // e.g 'table' for TSVB Table,
   indexPatternSavedObject: any;
-  attributes: SavedSearchObjectAttributes;
+  attributes: SavedSearchObjectAttributes | SavedVisState;
   references: SavedObjectReference[];
   timerange: TimeRangeParams;
-}
-
-export interface VisState {
-  aggs: any[]; // unused?
-  params?: VisPanel;
-  title: string;
-  type: string; // e.g 'metrics' for TSVB
 }
 
 export interface IndexPatternSavedObject {

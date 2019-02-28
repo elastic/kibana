@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest, notImplemented } from 'boom';
+import { badRequest } from 'boom';
 import { Request } from 'hapi';
 // @ts-ignore
 import { createTaggedLogger } from '../../../../server/lib';

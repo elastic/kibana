@@ -38,6 +38,7 @@ export async function createJobSearch(
     throw new Error(`Could not get search source! ${err}`);
   }
 
+  let indexPatternSavedObject: IndexPatternSavedObject;
   const indexPatternMeta = references.find(
     (ref: SavedObjectReference) => ref.type === 'index-pattern'
   );
@@ -48,8 +49,6 @@ export async function createJobSearch(
     'index-pattern',
     indexPatternMeta.id
   );
-
-  let indexPatternSavedObject: IndexPatternSavedObject;
   try {
     let fields = '[]';
     let fieldFormatMap = '{}';

@@ -13,7 +13,7 @@ import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map'
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
 
-interface GeneratorResult {
+interface SavedSearchGeneratorResult {
   content: string;
   maxSizeReached: boolean;
   size: number;
@@ -21,7 +21,7 @@ interface GeneratorResult {
 
 interface CsvResultFromSearch {
   type: string;
-  result: GeneratorResult;
+  result: SavedSearchGeneratorResult | null;
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;

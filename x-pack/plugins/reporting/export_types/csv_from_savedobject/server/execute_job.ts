@@ -65,9 +65,10 @@ function executeJobFn(server: KbnServer) {
         server,
       };
 
+      const content = await generateCsv(fakeRequest, server, visType as string, panel);
       return {
         content_type: CONTENT_TYPE_CSV,
-        content: await generateCsv(fakeRequest, server, visType, panel),
+        content: content.result ? content.result.content : null,
       };
     }
 
