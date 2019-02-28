@@ -12,7 +12,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],
@@ -31,7 +31,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
             ],
             "results": Array [
               Object {
-                "isThrow": false,
+                "type": "return",
                 "value": Object {
                   "loadingCountObservable": true,
                 },
@@ -52,7 +52,7 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],
@@ -70,7 +70,7 @@ exports[`#start passes the uiSettings loading count to the loading count api: lo
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],

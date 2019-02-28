@@ -27,20 +27,23 @@ import { LoadingCountService } from './loading_count';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
-const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
+const MockLegacyPlatformService = jest.fn<LegacyPlatformService, any>(
   function _MockLegacyPlatformService(this: any) {
     this.start = jest.fn();
     this.stop = jest.fn();
+    return this;
   }
 );
+
 jest.mock('./legacy_platform', () => ({
   LegacyPlatformService: MockLegacyPlatformService,
 }));
 
 const mockInjectedMetadataStartContract = {};
-const MockInjectedMetadataService = jest.fn<InjectedMetadataService>(
+const MockInjectedMetadataService = jest.fn<InjectedMetadataService, any>(
   function _MockInjectedMetadataService(this: any) {
     this.start = jest.fn().mockReturnValue(mockInjectedMetadataStartContract);
+    return this;
   }
 );
 jest.mock('./injected_metadata', () => ({
@@ -48,71 +51,82 @@ jest.mock('./injected_metadata', () => ({
 }));
 
 const mockFatalErrorsStartContract = {};
-const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalErrorsService(
+const MockFatalErrorsService = jest.fn<FatalErrorsService, any>(function _MockFatalErrorsService(
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockFatalErrorsStartContract);
   this.add = jest.fn();
+  return this;
 });
 jest.mock('./fatal_errors', () => ({
   FatalErrorsService: MockFatalErrorsService,
 }));
 
 const mockI18nStartContract = {};
-const MockI18nService = jest.fn<I18nService>(function _MockI18nService(this: any) {
+const MockI18nService = jest.fn<I18nService, any>(function _MockI18nService(this: any) {
   this.start = jest.fn().mockReturnValue(mockI18nStartContract);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./i18n', () => ({
   I18nService: MockI18nService,
 }));
 
 const mockNotificationStartContract = {};
-const MockNotificationsService = jest.fn<NotificationsService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockNotificationStartContract);
-  this.add = jest.fn();
-  this.stop = jest.fn();
-});
+const MockNotificationsService = jest.fn<NotificationsService, any>(
+  function _MockNotificationsService(this: any) {
+    this.start = jest.fn().mockReturnValue(mockNotificationStartContract);
+    this.add = jest.fn();
+    this.stop = jest.fn();
+    return this;
+  }
+);
 jest.mock('./notifications', () => ({
   NotificationsService: MockNotificationsService,
 }));
 
 const mockLoadingCountContract = {};
-const MockLoadingCountService = jest.fn<LoadingCountService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
-  this.stop = jest.fn();
-});
+const MockLoadingCountService = jest.fn<LoadingCountService, any>(
+  function _MockNotificationsService(this: any) {
+    this.start = jest.fn().mockReturnValue(mockLoadingCountContract);
+    this.stop = jest.fn();
+    return this;
+  }
+);
 jest.mock('./loading_count', () => ({
   LoadingCountService: MockLoadingCountService,
 }));
 
 const mockBasePathStartContract = {};
-const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
+const MockBasePathService = jest.fn<BasePathService, any>(function _MockNotificationsService(
+  this: any
+) {
   this.start = jest.fn().mockReturnValue(mockBasePathStartContract);
+  return this;
 });
 jest.mock('./base_path', () => ({
   BasePathService: MockBasePathService,
 }));
 
 const mockUiSettingsContract = {};
-const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificationsService(
+const MockUiSettingsService = jest.fn<UiSettingsService, any>(function _MockNotificationsService(
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockUiSettingsContract);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
 }));
 
 const mockChromeStartContract = {};
-const MockChromeService = jest.fn<ChromeService>(function _MockNotificationsService(this: any) {
+const MockChromeService = jest.fn<ChromeService, any>(function _MockNotificationsService(
+  this: any
+) {
   this.start = jest.fn().mockReturnValue(mockChromeStartContract);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./chrome', () => ({
   ChromeService: MockChromeService,
