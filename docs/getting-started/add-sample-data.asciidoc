@@ -1,0 +1,21 @@
+[[add-sample-data]]
+== Add sample data
+
+{kib} has three sample data sets that you can use to explore before loading your 
+own data source.  Each set is prepackaged with a dashboard of visualizations and a {kibana-ref}/canvas-getting-started.html[Canvas workpad].
+
+* If you’re interested in business analytics, install *sample eCommerce orders*, 
+which has visualizations for product-related information, such as cost, revenue, and price. 
+* If you’re looking to analyze website traffic, check out the *sample web logs* data set. 
+* If you're interested in monitoring time- and geo-based data, you can install the 
+*sample flight data* to view and interact with a dashboard for flight routes. 
+
+*Note:* The timestamps included in the sample data sets are relative to when they are installed. If you uninstall and reinstall a data set, the timestamps will change to reflect the most recent installation.
+
+To get started, go to the home page and click the link next to *Add sample data*.
+
+Once you have loaded a data set, you can click *View data* to view visualizations in *Dashboard*
+or explore other features in {kib}.
+
+[role="screenshot"]
+image::images/add-sample-data.png[]
