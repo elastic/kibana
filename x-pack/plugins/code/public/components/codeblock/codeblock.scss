@@ -1,5 +1,8 @@
 .code-search-highlight {
-  background-color: $euiColorHighlight !important;
+	background-color: $euiColorViz5;
+	color: $euiColorViz8 !important;
+	padding: $euiSizeXS / 2;
+	border-radius: $euiSizeXS / 2;
 	font-weight: bold;
 	font-style: oblique;
 }

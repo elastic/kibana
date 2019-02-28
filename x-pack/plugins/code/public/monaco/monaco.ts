@@ -151,6 +151,9 @@ const syntaxTheme = {
   editorIndentGuide: getHex(getTheme().euiColorLightShade),
   selectionBackground: getHex(getTheme().euiColorLightShade),
   editorWidgetBackground: getHex(getTheme().euiColorLightestShade),
+  editorWidgetBorder: getHex(getTheme().euiColorLightShade),
+  findMatchBackground: getHex(getTheme().euiColorWarning),
+  findMatchHighlightBackground: getHex(getTheme().euiColorWarning),
 };
 
 monaco.editor.defineTheme('euiColors', {
@@ -177,6 +180,8 @@ monaco.editor.defineTheme('euiColors', {
     'editorLineNumber.activeForeground': syntaxTheme.lineNumbers,
     'editorIndentGuide.background': syntaxTheme.editorIndentGuide,
     'editor.selectionBackground': syntaxTheme.selectionBackground,
+    'editorWidget.border': syntaxTheme.editorWidgetBorder,
+    'editorWidget.background': syntaxTheme.editorWidgetBackground,
   },
 });
 monaco.editor.setTheme('euiColors');
