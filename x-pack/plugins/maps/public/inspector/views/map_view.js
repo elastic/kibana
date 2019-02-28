@@ -59,7 +59,7 @@ const MapView = {
     defaultMessage: 'Map details'
   }),
   order: 30,
-  help: i18n.translate('xpack.maps.inspector.helpView', {
+  help: i18n.translate('xpack.maps.inspector.viewMapState', {
     defaultMessage: 'View the map state'
   }),
   shouldShow(adapters) {
