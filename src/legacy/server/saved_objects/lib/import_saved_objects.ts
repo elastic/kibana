@@ -55,7 +55,7 @@ interface ImportSavedObjectsOptions {
   }>;
 }
 
-function extractErrors(savedObjects: SavedObject[]) {
+export function extractErrors(savedObjects: SavedObject[]) {
   const errors: Errors[] = [];
   for (const savedObject of savedObjects) {
     if (savedObject.error) {
@@ -69,7 +69,7 @@ function extractErrors(savedObjects: SavedObject[]) {
   return errors;
 }
 
-async function collectSavedObjects(
+export async function collectSavedObjects(
   readStream: Readable,
   objectLimit: number
 ): Promise<SavedObject[]> {
@@ -87,7 +87,7 @@ async function collectSavedObjects(
   ])) as SavedObject[];
 }
 
-function splitOverwrites(
+export function splitOverwrites(
   savedObjects: SavedObject[],
   overwriteAll: boolean,
   overwrites: Array<{
