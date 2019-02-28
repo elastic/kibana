@@ -15,12 +15,7 @@ export class WorkpadApp extends React.PureComponent {
   static propTypes = {
     isWriteable: PropTypes.bool.isRequired,
     deselectElement: PropTypes.func,
-    initializeWorkpad: PropTypes.func.isRequired,
   };
-
-  componentDidMount() {
-    this.props.initializeWorkpad();
-  }
 
   render() {
     const { isWriteable, deselectElement } = this.props;
