@@ -76,7 +76,7 @@ describe('Instantiate Client', () => {
   });
 
   describe('Custom Headers Configuration', () => {
-    it('Does not ad xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
+    it('Does not add xpack.monitoring.elasticsearch.customHeaders if connected to production cluster', () => {
       const server = getMockServerFromConnectionUrl(null); // pass null for URL to create the client using prod config
 
       exposeClient(server);
