@@ -20,7 +20,7 @@
 module.exports = {
   presets: [
     [
-      require.resolve('babel-preset-env'),
+      require.resolve('@babel/preset-env'),
       {
         targets: {
           // only applies the necessary transformations based on the
@@ -31,7 +31,7 @@ module.exports = {
           node: 'current',
         },
 
-        // replaces `import "babel-polyfill"` with a list of require statements
+        // replaces `import "@babel/polyfill"` with a list of require statements
         // for just the polyfills that the target versions don't already supply
         // on their own
         useBuiltIns: true,

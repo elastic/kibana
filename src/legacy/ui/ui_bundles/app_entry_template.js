@@ -33,7 +33,7 @@ import 'dll/set_csp_nonce';
 __webpack_nonce__ = window.__kbnNonce__;
 
 // import global polyfills
-import 'babel-polyfill';
+import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';

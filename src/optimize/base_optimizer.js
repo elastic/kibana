@@ -122,10 +122,6 @@ export default class BaseOptimizer {
       BABEL_PRESET_PATH
     ];
 
-    const nonDistributableOnlyModules = !IS_KIBANA_DISTRIBUTABLE
-      ? ['ts-loader']
-      : [];
-
     threadLoader.warmup(
       // pool options, like passed to loader options
       // must match loader options to boot the correct pool
@@ -133,7 +129,6 @@ export default class BaseOptimizer {
       [
         // modules to load on the pool
         ...baseModules,
-        ...nonDistributableOnlyModules
       ]
     );
   }
@@ -390,7 +385,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.json'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
@@ -423,47 +418,6 @@ export default class BaseOptimizer {
           }
         }),
       ]
-    };
-
-    // when running from source transpile TypeScript automatically
-    const getSourceConfig = () => {
-      // dev/typescript is deleted from the distributable, so only require it if we actually need the source config
-      const { Project } = require('../dev/typescript');
-      const browserProject = new Project(fromRoot('tsconfig.browser.json'));
-
-      return {
-        module: {
-          rules: [
-            {
-              resource: createSourceFileResourceSelector(/\.tsx?$/),
-              use: maybeAddCacheLoader('typescript', [
-                {
-                  loader: 'thread-loader',
-                  options: this.getThreadLoaderPoolConfig()
-                },
-                {
-                  loader: 'ts-loader',
-                  options: {
-                    happyPackMode: true,
-                    transpileOnly: true,
-                    experimentalWatchApi: true,
-                    onlyCompileBundledFiles: true,
-                    configFile: fromRoot('tsconfig.json'),
-                    compilerOptions: {
-                      ...browserProject.config.compilerOptions,
-                      sourceMap: Boolean(this.sourceMaps),
-                    }
-                  }
-                }
-              ]),
-            }
-          ]
-        },
-
-        resolve: {
-          extensions: ['.ts', '.tsx'],
-        },
-      };
     };
 
     // We need to add react-addons (and a few other bits) for enzyme to work.
@@ -512,7 +466,7 @@ export default class BaseOptimizer {
       commonConfig,
       IS_KIBANA_DISTRIBUTABLE
         ? isDistributableConfig
-        : getSourceConfig(),
+        : {},
       this.uiBundles.isDevMode()
         ? webpackMerge(watchingConfig, supportEnzymeConfig)
         : productionConfig

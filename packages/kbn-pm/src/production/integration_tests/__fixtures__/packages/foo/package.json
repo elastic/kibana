@@ -7,8 +7,8 @@
     "@elastic/bar": "link:../bar"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/cli": "^7.2.3",
+    "@babel/preset-env": "^7.3.4",
     "moment": "2.20.1"
   },
   "scripts": {

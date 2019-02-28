@@ -9,19 +9,20 @@
     "kbn:watch": "node scripts/build --dev --watch"
   },
   "dependencies": {
+    "@babel/runtime": "^7.3.4",
     "@kbn/i18n": "1.0.0",
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
     "lodash.clone": "^4.5.0",
     "uuid": "3.0.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "7.3.4",
+    "@babel/plugin-transform-runtime": "^7.3.4",
+    "@babel/polyfill": "7.2.5",
     "@kbn/babel-preset": "1.0.0",
     "@kbn/dev-utils": "1.0.0",
-    "babel-cli": "^6.26.0",
-    "babel-core": "6.26.3",
-    "babel-loader": "7.1.5",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "6.20.0",
+    "babel-loader": "8.0.5",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "1.0.0",
     "del": "^3.0.0",

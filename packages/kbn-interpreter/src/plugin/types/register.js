@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import 'babel-polyfill';
+import '@babel/polyfill';
 import { typeSpecs } from './index';
 
 // eslint-disable-next-line no-undef

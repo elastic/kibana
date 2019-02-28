@@ -19,13 +19,14 @@
 
 module.exports = {
   presets: [
-    require.resolve('babel-preset-react'),
+    require.resolve('@babel/preset-react'),
+    require.resolve('@babel/preset-typescript'),
   ],
   plugins: [
     require.resolve('babel-plugin-add-module-exports'),
     // stage 3
-    require.resolve('babel-plugin-transform-async-generator-functions'),
-    require.resolve('babel-plugin-transform-object-rest-spread'),
+    require.resolve('@babel/plugin-proposal-object-rest-spread'),
+    require.resolve('@babel/plugin-transform-async-to-generator'),
 
     // the class properties proposal was merged with the private fields proposal
     // into the "class fields" proposal. Babel doesn't support this combined
@@ -33,6 +34,6 @@ module.exports = {
     // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
     //
     // See https://github.com/babel/proposals/issues/12 for progress
-    require.resolve('babel-plugin-transform-class-properties'),
+    require.resolve('@babel/plugin-proposal-class-properties'),
   ],
 };
