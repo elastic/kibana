@@ -17212,7 +17212,7 @@ nodegit-promise@~4.0.0:
   dependencies:
     asap "~2.0.3"
 
-"nodegit@git+https://github.com/elastic/nodegit.git":
+"nodegit@git+https://github.com/elastic/nodegit.git#54173ad757bc09f155183bb27bce921b02fb8198":
   version "0.24.0-alpha.6"
   resolved "git+https://github.com/elastic/nodegit.git#54173ad757bc09f155183bb27bce921b02fb8198"
   dependencies:

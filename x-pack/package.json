@@ -253,7 +253,7 @@
     "monaco-editor": "^0.14.3",
     "ngreact": "^0.5.1",
     "node-fetch": "^2.1.2",
-    "nodegit": "git+https://github.com/elastic/nodegit.git",
+    "nodegit": "git+https://github.com/elastic/nodegit.git#54173ad757bc09f155183bb27bce921b02fb8198",
     "nodemailer": "^4.6.4",
     "object-path-immutable": "^0.5.3",
     "oppsy": "^2.0.0",
