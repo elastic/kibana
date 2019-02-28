@@ -77,7 +77,7 @@ export function sortObjects(savedObjects: SavedObject[]) {
 
       const refdObjects = object.references
         .map(ref => objectsByTypeId.get(`${ref.type}:${ref.id}`))
-        .filter(ref => !!ref) as SavedObject[];
+        .filter((ref): ref is SavedObject => !!ref)
 
       if (refdObjects.length) {
         path.add(object);
