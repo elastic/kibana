@@ -91,8 +91,7 @@ test('throws if [redirectHttpFromPort] is in use', async () => {
     } as HttpConfig)
   ).rejects.toMatchSnapshot();
 
-  // Workaround for https://github.com/DefinitelyTyped/DefinitelyTyped/issues/17605.
-  (mockListen as any).mockRestore();
+  mockListen.mockRestore();
 });
 
 test('forwards http requests to https', async () => {
