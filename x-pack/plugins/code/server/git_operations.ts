@@ -9,7 +9,7 @@ import { Blame, Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEnt
 import * as Path from 'path';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, DiffKind } from '../common/git_diff';
-import { FileTree, FileTreeItemType, RepositoryUri } from '../model';
+import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
 
@@ -69,13 +69,6 @@ function entry2Tree(entry: TreeEntry): FileTree {
 }
 
 export class GitOperations {
-  public static sortFileTreeChildren(a: FileTree, b: FileTree) {
-    if (a.type !== b.type) {
-      return b.type - a.type;
-    } else {
-      return a.name.localeCompare(b.name);
-    }
-  }
   private repoRoot: string;
 
   constructor(repoRoot: string) {
@@ -381,7 +374,7 @@ export class GitOperations {
           }
         }
       }
-      fileTree.children.sort(GitOperations.sortFileTreeChildren);
+      fileTree.children.sort(sortFileTree);
     }
     if (path) {
       const entry = await checkExists(

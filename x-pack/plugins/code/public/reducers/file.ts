@@ -6,7 +6,7 @@
 
 import produce from 'immer';
 import { Action, handleActions } from 'redux-actions';
-import { FileTree, FileTreeItemType } from '../../model';
+import { FileTree, FileTreeItemType, sortFileTree } from '../../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../../model/commit';
 import {
   closeTreePath,
@@ -44,7 +44,6 @@ export interface FileState {
   isNotFound: boolean;
   treeCommits: { [path: string]: CommitInfo[] };
   currentPath: string;
-  requestedPaths: string[];
   loadingCommits: boolean;
   commitsFullyLoaded: { [path: string]: boolean };
 }
@@ -64,10 +63,33 @@ const initialState: FileState = {
   treeCommits: {},
   isNotFound: false,
   currentPath: '',
-  requestedPaths: [],
   loadingCommits: false,
   commitsFullyLoaded: {},
 };
+
+function mergeNode(a: FileTree, b: FileTree): FileTree {
+  const childrenMap: { [name: string]: FileTree } = {};
+  if (a.children) {
+    a.children.forEach(child => {
+      childrenMap[child.name] = child;
+    });
+  }
+  if (b.children) {
+    b.children.forEach(childB => {
+      const childA = childrenMap[childB.name];
+      if (childA) {
+        childrenMap[childB.name] = mergeNode(childA, childB);
+      } else {
+        childrenMap[childB.name] = childB;
+      }
+    });
+  }
+  return {
+    ...a,
+    ...b,
+    children: Object.values(childrenMap).sort(sortFileTree),
+  };
+}
 
 function mergeTree(draft: FileState, tree: FileTree, path: string) {
   const pathSegments = path.split('/');
@@ -79,7 +101,7 @@ function mergeTree(draft: FileState, tree: FileTree, path: string) {
       const idx = current.children!.findIndex(child => child.name === p);
       if (idx >= 0) {
         if (pidx === pLastIndex) {
-          current.children![idx!] = node;
+          current.children![idx!] = mergeNode(current.children![idx!], node);
         }
         current = current.children![idx];
       }
@@ -92,7 +114,7 @@ function mergeTree(draft: FileState, tree: FileTree, path: string) {
 
 export const file = handleActions(
   {
-    [String(fetchRepoTree)]: (state: FileState, action: Action<any>) =>
+    [String(fetchRepoTree)]: (state: FileState, action: any) =>
       produce(state, draft => {
         draft.currentPath = action.payload.path;
         draft.loading = true;
@@ -102,10 +124,6 @@ export const file = handleActions(
         draft.loading = false;
         const { tree, path } = action.payload!;
         mergeTree(draft, tree, path);
-        if (draft.openedPaths.indexOf(path) < 0) {
-          draft.openedPaths.push(path);
-        }
-        draft.requestedPaths.push(path);
       }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, (draft: FileState) => {
@@ -116,19 +134,23 @@ export const file = handleActions(
       produce(state, draft => {
         draft.loading = false;
       }),
-    [String(openTreePath)]: (state: FileState, action: any) =>
+    [String(openTreePath)]: (state: FileState, action: Action<any>) =>
       produce<FileState>(state, (draft: FileState) => {
-        const path = action.payload!;
-        if (!state.openedPaths.includes(path)) {
+        let path = action.payload!;
+        const openedPaths = state.openedPaths;
+        const pathSegs = path.split('/');
+        while (!openedPaths.includes(path)) {
           draft.openedPaths.push(path);
+          pathSegs.pop();
+          if (pathSegs.length <= 0) {
+            break;
+          }
+          path = pathSegs.join('/');
         }
       }),
-    [String(closeTreePath)]: (state: FileState, action: any) =>
-      produce<FileState>(state, draft => {
-        const idx = state.openedPaths.indexOf(action.payload!);
-        if (idx >= 0) {
-          draft.openedPaths.splice(idx, 1);
-        }
+    [String(closeTreePath)]: (state: FileState, action: Action<any>) =>
+      produce<FileState>(state, (draft: FileState) => {
+        draft.openedPaths = state.openedPaths.filter(p => !p.startsWith(action.payload!));
       }),
     [String(fetchRepoCommitsSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
