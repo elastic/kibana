@@ -46,6 +46,8 @@ export const IGNORE_FILE_GLOBS = [
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
+  // Keep external library's convention
+  'api-extractor.json',
 ];
 
 
