@@ -23,7 +23,7 @@ test('set correct defaults', () => {
   const config = new ElasticsearchConfig(ElasticsearchConfig.schema.validate({}));
   expect(config).toMatchInlineSnapshot(`
 ElasticsearchConfig {
-  "apiVersion": "master",
+  "apiVersion": "7.x",
   "customHeaders": Object {},
   "healthCheckDelay": "PT2.5S",
   "hosts": Array [
