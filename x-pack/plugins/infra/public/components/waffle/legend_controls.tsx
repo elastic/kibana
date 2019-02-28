@@ -5,87 +5,167 @@
  */
 
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { SyntheticEvent, useState } from 'react';
 import styled from 'styled-components';
+import { InfraWaffleMapBounds } from '../../lib/lib';
 
 interface Props {
+  onChange: (options: { auto: boolean; bounds: InfraWaffleMapBounds }) => void;
+  bounds: InfraWaffleMapBounds;
+  autoBounds: boolean;
+  boundsOverride: InfraWaffleMapBounds;
   intl: InjectedIntl;
 }
 
-export const LegendControls = injectI18n(({ intl }: Props) => {
-  const [isPopoverOpen, setPopoverState] = useState(true);
-  const [isAuto, setAuto] = useState(true);
-  const [draftBounds, setDraftBounds] = useState({ min: 0, max: 1 }); // should come from bounds prop
-  const buttonComponent = (
-    <EuiButtonIcon
-      iconType="gear"
-      color="text"
-      aria-label={intl.formatMessage({
-        id: 'xpack.infra.legendControls.buttonLabel',
-        defaultMessage: 'configure legend',
-      })}
-      onClick={() => setPopoverState(true)}
-    />
-  );
+export const LegendControls = injectI18n(
+  ({ intl, autoBounds, boundsOverride, onChange }: Props) => {
+    const [isPopoverOpen, setPopoverState] = useState(false);
+    const [draftAuto, setDraftAuto] = useState(autoBounds);
+    const [draftBounds, setDraftBounds] = useState(boundsOverride); // should come from bounds prop
+    const buttonComponent = (
+      <EuiButtonIcon
+        iconType="gear"
+        color="text"
+        aria-label={intl.formatMessage({
+          id: 'xpack.infra.legendControls.buttonLabel',
+          defaultMessage: 'configure legend',
+        })}
+        onClick={() => setPopoverState(true)}
+      />
+    );
 
-  const handleChange = (e: SyntheticEvent<HTMLInputElement>) => {
-    setAuto(e.currentTarget.checked);
-  };
+    const handleAutoChange = (e: SyntheticEvent<HTMLInputElement>) => {
+      setDraftAuto(e.currentTarget.checked);
+    };
 
-  const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {
-    setDraftBounds({ ...draftBounds, [name]: parseFloat(e.currentTarget.value) });
-  };
+    const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {
+      const value = parseFloat(e.currentTarget.value);
+      setDraftBounds({ ...draftBounds, [name]: value });
+    };
 
-  return (
-    <ControlContainer>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={() => setPopoverState(false)}
-        id="legendControls"
-        button={buttonComponent}
-        anchorPosition="upLeft"
-        withTitle
-      >
-        <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-        <EuiFormRow label="Data Bounds">
-          <EuiSwitch name="bounds" label="Automatic" checked={isAuto} onChange={handleChange} />
-        </EuiFormRow>
-        {!isAuto && (
-          <EuiFlexGroup style={{ marginTop: 0 }}>
-            <EuiFlexItem style={{ width: 80 }}>
-              <EuiFormRow label="Lower">
-                <EuiFieldNumber
-                  value={draftBounds.min}
-                  name="legendMin"
-                  onChange={createBoundsHandler('min')}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem style={{ width: 80 }}>
-              <EuiFormRow label="Upper">
-                <EuiFieldNumber
-                  value={draftBounds.max}
-                  name="legendMax"
-                  onChange={createBoundsHandler('max')}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiPopover>
-    </ControlContainer>
-  );
-});
+    const handlePopoverClose = () => {
+      setPopoverState(false);
+    };
+
+    const handleApplyClick = () => {
+      onChange({ auto: draftAuto, bounds: draftBounds });
+    };
+
+    const commited =
+      draftAuto === autoBounds &&
+      boundsOverride.min === draftBounds.min &&
+      boundsOverride.max === draftBounds.max;
+
+    const boundsValidRange = draftBounds.min < draftBounds.max;
+
+    return (
+      <ControlContainer>
+        <EuiPopover
+          isOpen={isPopoverOpen}
+          closePopover={handlePopoverClose}
+          id="legendControls"
+          button={buttonComponent}
+          anchorPosition="upLeft"
+          withTitle
+        >
+          <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
+          <EuiForm>
+            <EuiFormRow
+              label={intl.formatMessage({
+                id: 'xpack.infra.legendControls.dataBoundsLabel',
+                defaultMessage: 'Data Bounds',
+              })}
+            >
+              <EuiSwitch
+                name="bounds"
+                label={intl.formatMessage({
+                  id: 'xpack.infra.legendControls.switchLabel',
+                  defaultMessage: 'Auto Bounds',
+                })}
+                checked={draftAuto}
+                onChange={handleAutoChange}
+              />
+            </EuiFormRow>
+            {(!boundsValidRange && (
+              <EuiText color="danger" grow={false} size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.infra.legendControls.errorMessage"
+                    defaultMessage="Min should be less than max"
+                  />
+                </p>
+              </EuiText>
+            )) ||
+              null}
+            <EuiFlexGroup style={{ marginTop: 0 }}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.infra.legendControls.minLabel',
+                    defaultMessage: 'Min',
+                  })}
+                  isInvalid={!boundsValidRange}
+                >
+                  <EuiFieldNumber
+                    disabled={draftAuto}
+                    step={0.1}
+                    value={isNaN(draftBounds.min) ? '' : draftBounds.min}
+                    isInvalid={!boundsValidRange}
+                    name="legendMin"
+                    onChange={createBoundsHandler('min')}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFormRow
+                  label={intl.formatMessage({
+                    id: 'xpack.infra.legendControls.maxLabel',
+                    defaultMessage: 'Max',
+                  })}
+                  isInvalid={!boundsValidRange}
+                >
+                  <EuiFieldNumber
+                    disabled={draftAuto}
+                    step={0.1}
+                    isInvalid={!boundsValidRange}
+                    value={isNaN(draftBounds.max) ? '' : draftBounds.max}
+                    name="legendMax"
+                    onChange={createBoundsHandler('max')}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiButton
+              type="submit"
+              size="s"
+              fill
+              disabled={commited || !boundsValidRange}
+              onClick={handleApplyClick}
+            >
+              <FormattedMessage
+                id="xpack.infra.legendControls.applyButton"
+                defaultMessage="Apply"
+              />
+            </EuiButton>
+          </EuiForm>
+        </EuiPopover>
+      </ControlContainer>
+    );
+  }
+);
 
 const ControlContainer = styled.div`
   position: absolute;

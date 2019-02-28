@@ -34,6 +34,8 @@ interface Props {
   onViewChange: (view: string) => void;
   view: string;
   intl: InjectedIntl;
+  boundsOverride: InfraWaffleMapBounds;
+  autoBounds: boolean;
 }
 
 interface MetricFormatter {
@@ -51,12 +53,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
   [InfraMetricType.cpu]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
   [InfraMetricType.memory]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
   [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
@@ -79,7 +79,18 @@ export const NodesOverview = injectI18n(
   class extends React.Component<Props, {}> {
     public static displayName = 'Waffle';
     public render() {
-      const { loading, nodes, nodeType, reload, intl, view, options, timeRange } = this.props;
+      const {
+        autoBounds,
+        boundsOverride,
+        loading,
+        nodes,
+        nodeType,
+        reload,
+        intl,
+        view,
+        options,
+        timeRange,
+      } = this.props;
       if (loading) {
         return (
           <InfraLoadingPanel
@@ -113,13 +124,7 @@ export const NodesOverview = injectI18n(
           />
         );
       }
-      const { metric } = this.props.options;
-      const metricFormatter = get(
-        METRIC_FORMATTERS,
-        metric.type,
-        METRIC_FORMATTERS[InfraMetricType.count]
-      );
-      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromNodes(nodes);
+      const bounds = autoBounds ? calculateBoundsFromNodes(nodes) : boundsOverride;
       return (
         <MainContainer>
           <ViewSwitcherContainer>

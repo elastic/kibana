@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
+import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
 import { InfraFormatter, InfraWaffleMapBounds, InfraWaffleMapLegend } from '../../lib/lib';
 import { GradientLegend } from './gradient_legend';
 import { LegendControls } from './legend_controls';
@@ -17,10 +17,27 @@ interface Props {
   formatter: InfraFormatter;
 }
 
+interface LegendControlOptions {
+  auto: boolean;
+  bounds: InfraWaffleMapBounds;
+}
+
 export const Legend: React.SFC<Props> = ({ legend, bounds, formatter }) => {
   return (
     <LegendContainer>
-      <LegendControls />
+      <WithWaffleOptions>
+        {({ changeBoundsOverride, changeAutoBounds, autoBounds, boundsOverride }) => (
+          <LegendControls
+            bounds={bounds}
+            autoBounds={autoBounds}
+            boundsOverride={boundsOverride}
+            onChange={(options: LegendControlOptions) => {
+              changeBoundsOverride(options.bounds);
+              changeAutoBounds(options.auto);
+            }}
+          />
+        )}
+      </WithWaffleOptions>
       {isInfraWaffleMapGradientLegend(legend) && (
         <GradientLegend formatter={formatter} legend={legend} bounds={bounds} />
       )}
