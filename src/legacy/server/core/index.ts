@@ -17,33 +17,14 @@
  * under the License.
  */
 
-import { Cluster } from './cluster';
+import { Server } from 'hapi';
+import KbnServer from '../kbn_server';
 
-export function createClusters(server) {
-  const clusters = new Map();
-
-  server.events.on('stop', () => {
-    for (const [name, cluster] of clusters) {
-      cluster.close();
-      clusters.delete(name);
-    }
-  });
-
-  return {
-    get(name) {
-      return clusters.get(name);
-    },
-
-    create(name, config) {
-      const cluster = new Cluster(config);
-
-      if (clusters.has(name)) {
-        throw new Error(`cluster '${name}' already exists`);
-      }
-
-      clusters.set(name, cluster);
-
-      return cluster;
-    }
-  };
+/**
+ * Exposes `kbnServer.core` through Hapi API.
+ * @param kbnServer KbnServer singleton instance.
+ * @param server Hapi server instance to expose `core` on.
+ */
+export function coreMixin(kbnServer: KbnServer, server: Server) {
+  server.decorate('server', 'core', kbnServer.core);
 }
