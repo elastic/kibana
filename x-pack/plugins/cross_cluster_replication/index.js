@@ -38,7 +38,15 @@ export function crossClusterReplication(kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-
+    isEnabled(config) {
+      return (
+        config.get('xpack.ccr.enabled') &&
+        config.has('xpack.index_management.enabled') &&
+        config.get('xpack.index_management.enabled') &&
+        config.has('xpack.remote_clusters.enabled') &&
+        config.get('xpack.remote_clusters.enabled')
+      );
+    },
     init: function initCcrPlugin(server) {
       registerLicenseChecker(server);
       registerRoutes(server);
