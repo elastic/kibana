@@ -36,6 +36,13 @@ module.exports = () => {
       //
       // See https://github.com/babel/proposals/issues/12 for progress
       require.resolve('@babel/plugin-proposal-class-properties'),
+
+      // Babel 7 don't support the namespace feature on typescript code.
+      // With namespaces only used for type declarations, we can securely
+      // strip them off for babel
+      //
+      // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
+      require.resolve('babel-plugin-typescript-strip-namespaces'),
     ],
   };
 };

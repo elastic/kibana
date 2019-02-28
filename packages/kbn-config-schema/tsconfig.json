@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "isolatedModules": false,
     "declaration": true,
     "declarationDir": "./target/types",
     "outDir": "./target/out",

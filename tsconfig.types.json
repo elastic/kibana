@@ -1,6 +1,7 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
+    "isolatedModules": false,
     "declaration": true,
     "declarationDir": "./target/types",
     "stripInternal": true,

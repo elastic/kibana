@@ -47,7 +47,9 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // Disallow features that require cross-file information for emit.
+    "isolatedModules": true
   },
   "include": [
     "kibana.d.ts",

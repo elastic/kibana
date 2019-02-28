@@ -359,7 +359,7 @@ export default class BaseOptimizer {
             loader: 'file-loader'
           },
           {
-            resource: createSourceFileResourceSelector(/\.js$/),
+            resource: createSourceFileResourceSelector(/\.(js|jsx|ts|tsx)$/),
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
@@ -370,8 +370,19 @@ export default class BaseOptimizer {
                 options: {
                   babelrc: false,
                   presets: [
-                    BABEL_PRESET_PATH,
+                    '@babel/preset-env',
+                    '@babel/preset-typescript',
+                    '@babel/preset-react'
                   ],
+                  plugins: [
+                    '@babel/plugin-proposal-object-rest-spread',
+                    'babel-plugin-add-module-exports',
+                    '@babel/plugin-transform-async-to-generator',
+                    '@babel/plugin-proposal-class-properties',
+                    'babel-plugin-typescript-strip-namespaces',
+                    '@babel/plugin-transform-modules-commonjs',
+                    '@babel/plugin-proposal-export-default-from'
+                  ]
                 },
               }
             ]),
@@ -385,7 +396,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.ts', '.tsx', '.json'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',

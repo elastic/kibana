@@ -10,6 +10,7 @@
     "target"
   ],
   "compilerOptions": {
+    "isolatedModules": false,
     "declaration": true,
     "declarationDir": "./target/types",
     "types": [
