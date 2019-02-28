@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import { EsProvider } from './es';
+import { EsArchiverProvider } from './es_archiver';
+// @ts-ignore not TS yet
+import { KibanaServerProvider } from './kibana_server';
+import { RetryProvider } from './retry';
 
-import elasticsearch from 'elasticsearch';
-
-import { DEFAULT_API_VERSION } from '../../../src/legacy/core_plugins/elasticsearch/lib/default_api_version';
-
-export function EsProvider({ getService }) {
-  const config = getService('config');
-
-  return new elasticsearch.Client({
-    apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-  });
-}
+export const services = {
+  es: EsProvider,
+  esArchiver: EsArchiverProvider,
+  kibanaServer: KibanaServerProvider,
+  retry: RetryProvider,
+};

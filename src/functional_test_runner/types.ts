@@ -17,33 +17,11 @@
  * under the License.
  */
 
-import { retryForSuccess } from './retry_for_success';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Config, Lifecycle } from './lib';
 
-export async function retryForTruthy(log, {
-  timeout,
-  methodName,
-  description,
-  block
-}) {
-  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
-
-  const accept = result => Boolean(result);
-
-  const onFailure = lastError => {
-    let msg = `timed out waiting for ${description}`;
-
-    if (lastError) {
-      msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
-    }
-
-    throw new Error(msg);
-  };
-
-  await retryForSuccess(log, {
-    timeout,
-    methodName,
-    block,
-    onFailure,
-    accept
-  });
+export interface DefaultServiceProviders {
+  config(): Config;
+  log(): ToolingLog;
+  lifecycle(): Lifecycle;
 }

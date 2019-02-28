@@ -17,20 +17,27 @@
  * under the License.
  */
 
-import { get, has, cloneDeep } from 'lodash';
+import { Schema } from 'joi';
+import { cloneDeep, get, has } from 'lodash';
+
+// @ts-ignore internal lodash module is not typed
 import toPath from 'lodash/internal/toPath';
 
 import { schema } from './schema';
 
 const $values = Symbol('values');
 
+interface Options {
+  settings?: Record<string, any>;
+  primary?: boolean;
+  path: string;
+}
+
 export class Config {
-  constructor(options = {}) {
-    const {
-      settings = {},
-      primary = false,
-      path,
-    } = options;
+  private [$values]: Record<string, any>;
+
+  constructor(options: Options) {
+    const { settings = {}, primary = false, path = null } = options || {};
 
     if (!path) {
       throw new TypeError('path is a required option');
@@ -41,38 +48,52 @@ export class Config {
       context: {
         primary: !!primary,
         path,
-      }
+      },
     });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
+
     this[$values] = value;
   }
 
-  has(key) {
-    function recursiveHasCheck(path, values, schema) {
-      if (!schema._inner) return false;
+  public has(key: string) {
+    function recursiveHasCheck(
+      remainingPath: string[],
+      values: Record<string, any>,
+      childSchema: any
+    ): boolean {
+      if (!childSchema._inner) {
+        return false;
+      }
 
       // normalize child and pattern checks so we can iterate the checks in a single loop
-      const checks = [].concat(
+      const checks: Array<{ test: (k: string) => boolean; schema: Schema }> = [
         // match children first, they have priority
-        (schema._inner.children || []).map(child => ({
-          test: key => child.key === key,
-          schema: child.schema
+        ...(childSchema._inner.children || []).map((child: { key: string; schema: Schema }) => ({
+          test: (k: string) => child.key === k,
+          schema: child.schema,
         })),
+
         // match patterns on any key that doesn't match an explicit child
-        (schema._inner.patterns || []).map(pattern => ({
-          test: key => pattern.regex.test(key) && has(values, key),
-          schema: pattern.rule
-        }))
-      );
+        ...(childSchema._inner.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
+          test: (k: string) => pattern.regex.test(k) && has(values, k),
+          schema: pattern.rule,
+        })),
+      ];
 
       for (const check of checks) {
-        if (!check.test(path[0])) {
+        if (!check.test(remainingPath[0])) {
           continue;
         }
 
-        if (path.length > 1) {
-          return recursiveHasCheck(path.slice(1), get(values, path[0]), check.schema);
+        if (remainingPath.length > 1) {
+          return recursiveHasCheck(
+            remainingPath.slice(1),
+            get(values, remainingPath[0]),
+            check.schema
+          );
         }
 
         return true;
@@ -82,16 +103,18 @@ export class Config {
     }
 
     const path = toPath(key);
-    if (!path.length) return true;
+    if (!path.length) {
+      return true;
+    }
     return recursiveHasCheck(path, this[$values], schema);
   }
 
-  get(key, defaultValue) {
+  public get(key: string, defaultValue?: any) {
     if (!this.has(key)) {
       throw new Error(`Unknown config key "${key}"`);
     }
 
-    return cloneDeep(get(this[$values], key, defaultValue), (v) => {
+    return cloneDeep(get(this[$values], key, defaultValue), v => {
       if (typeof v === 'function') {
         return v;
       }

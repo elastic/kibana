@@ -2,13 +2,13 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": [
-      "expect.js",
+      "@kbn/test/types/expect.js",
       "mocha",
       "node"
     ]
   },
   "include": [
-      "**/*",
+    "**/*"
   ],
   "exclude": [],
 }
