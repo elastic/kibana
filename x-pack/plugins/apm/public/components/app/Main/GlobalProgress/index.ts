@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get, some } from 'lodash';
 import { connect } from 'react-redux';
-import view from './view';
-import { some, get } from 'lodash';
+import { IReduxState } from 'x-pack/plugins/apm/public/store/rootReducer';
 import { STATUS } from '../../../../constants/index';
+import { GlobalProgressView } from './view';
 
-function getIsLoading(state) {
+function getIsLoading(state: IReduxState) {
   return some(
     state.reactReduxRequest,
     subState => get(subState, 'status') === STATUS.LOADING
   );
 }
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state = {} as IReduxState) {
   return {
     isLoading: getIsLoading(state)
   };
 }
 
-export default connect(mapStateToProps)(view);
+export const GlobalProgress = connect(mapStateToProps)(GlobalProgressView);

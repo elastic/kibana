@@ -4,25 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { EuiBasicTable, EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
+import { Location } from 'history';
 import moment from 'moment';
-import { toQuery, fromQuery, history } from '../../../shared/Links/url_helpers';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import React, { Component } from 'react';
 import styled from 'styled-components';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { ErrorGroupListAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_groups';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import {
-  unit,
-  px,
   fontFamilyCode,
   fontSizes,
-  truncate
+  px,
+  truncate,
+  unit
 } from '../../../../style/variables';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { i18n } from '@kbn/i18n';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 
-function paginateItems({ items, pageIndex, pageSize }) {
+function paginateItems({
+  items,
+  pageIndex,
+  pageSize
+}: {
+  items: any[];
+  pageIndex: number;
+  pageSize: number;
+}) {
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
 
@@ -44,15 +54,33 @@ const Culprit = styled.div`
   font-family: ${fontFamilyCode};
 `;
 
-export class ErrorGroupList extends Component {
-  state = {
+interface Props {
+  location: Location;
+  urlParams: IUrlParams;
+  items: ErrorGroupListAPIResponse;
+}
+
+interface ITableChange {
+  page: { index?: number; size?: number };
+  sort: {
+    field?: string;
+    direction?: string;
+  };
+}
+
+interface State {
+  page: { index?: number; size?: number };
+}
+
+export class ErrorGroupList extends Component<Props, State> {
+  public state = {
     page: {
       index: 0,
       size: 25
     }
   };
 
-  onTableChange = ({ page = {}, sort = {} }) => {
+  public onTableChange = ({ page = {}, sort = {} }: ITableChange) => {
     this.setState({ page });
 
     const { location } = this.props;
@@ -67,7 +95,7 @@ export class ErrorGroupList extends Component {
     });
   };
 
-  render() {
+  public render() {
     const { items } = this.props;
     const { serviceName, sortDirection, sortField } = this.props.urlParams;
 
@@ -85,7 +113,7 @@ export class ErrorGroupList extends Component {
         field: 'groupId',
         sortable: false,
         width: px(unit * 6),
-        render: groupId => {
+        render: (groupId: string) => {
           return (
             <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
@@ -103,7 +131,7 @@ export class ErrorGroupList extends Component {
         field: 'message',
         sortable: false,
         width: '50%',
-        render: (message, item) => {
+        render: (message: string, item: ErrorGroupListAPIResponse[0]) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip
@@ -130,7 +158,7 @@ export class ErrorGroupList extends Component {
         field: 'handled',
         sortable: false,
         align: 'right',
-        render: isUnhandled =>
+        render: (isUnhandled: boolean) =>
           isUnhandled === false && (
             <EuiBadge color="warning">
               {i18n.translate('xpack.apm.errorsTable.unhandledLabel', {
@@ -146,7 +174,7 @@ export class ErrorGroupList extends Component {
         field: 'occurrenceCount',
         sortable: true,
         dataType: 'number',
-        render: value =>
+        render: (value?: number) =>
           value ? numeral(value).format('0.[0]a') : NOT_AVAILABLE_LABEL
       },
       {
@@ -159,7 +187,8 @@ export class ErrorGroupList extends Component {
           }
         ),
         align: 'right',
-        render: value => (value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL)
+        render: (value?: number) =>
+          value ? moment(value).fromNow() : NOT_AVAILABLE_LABEL
       }
     ];
 
@@ -186,7 +215,3 @@ export class ErrorGroupList extends Component {
     );
   }
 }
-
-ErrorGroupList.propTypes = {
-  location: PropTypes.object.isRequired
-};

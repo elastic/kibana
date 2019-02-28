@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiDelayHide, EuiPortal, EuiProgress } from '@elastic/eui';
 import React from 'react';
-import { EuiPortal, EuiProgress, EuiDelayHide } from '@elastic/eui';
 
-export default ({ isLoading }) => {
+interface Props {
+  isLoading: boolean;
+}
+
+export function GlobalProgressView({ isLoading }: Props) {
   return (
     <EuiDelayHide
       hide={!isLoading}
@@ -19,4 +23,4 @@ export default ({ isLoading }) => {
       )}
     />
   );
-};
+}

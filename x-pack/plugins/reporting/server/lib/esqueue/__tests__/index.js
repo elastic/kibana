@@ -77,7 +77,6 @@ describe('Esqueue class', function () {
       const job = queue.addJob(jobType, payload);
       const options = job.getProp('options');
       expect(options).to.have.property('timeout', constants.DEFAULT_SETTING_TIMEOUT);
-      expect(options).to.have.property('doctype', constants.DEFAULT_SETTING_DOCTYPE);
     });
 
     it('should pass queue index settings', function () {
@@ -133,14 +132,12 @@ describe('Esqueue class', function () {
     it('should pass worker options', function () {
       const workerOptions = {
         size: 12,
-        doctype: 'tests'
       };
 
       queue = new Esqueue('esqueue', { client });
       const worker = queue.registerWorker('type', noop, workerOptions);
       const options = worker.getProp('options');
       expect(options.size).to.equal(workerOptions.size);
-      expect(options.doctype).to.equal(workerOptions.doctype);
     });
   });
 
