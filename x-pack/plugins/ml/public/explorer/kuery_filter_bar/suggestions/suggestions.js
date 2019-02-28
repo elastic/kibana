@@ -26,7 +26,7 @@ const List = styled.ul`
   overflow: scroll;
 `;
 
-class Suggestions extends Component {
+export class Suggestions extends Component {
   childNodes = [];
 
   scrollIntoView = () => {
@@ -83,5 +83,3 @@ Suggestions.propTypes = {
   show: PropTypes.bool,
   suggestions: PropTypes.array.isRequired
 };
-
-export { Suggestions };

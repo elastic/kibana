@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut } from '@elastic/eui';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query'; // luceneStringToDsl
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getSuggestions } from './utils';
 
 

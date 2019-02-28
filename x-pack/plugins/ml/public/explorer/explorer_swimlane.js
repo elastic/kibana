@@ -27,6 +27,7 @@ import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -324,9 +325,12 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
       .html(label => {
-        const showFilterContext = filterActive === true && label === 'Overall';
+        const showFilterContext = (filterActive === true && label === 'Overall');
         if (showFilterContext) {
-          return `${label} (unfiltered)`;
+          return i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
+            defaultMessage: '{label} (unfiltered)',
+            values: { label: mlEscape(label) }
+          });
         } else {
           return mlEscape(label);
         }

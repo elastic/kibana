@@ -127,17 +127,15 @@ export async function getFilteredTopInfluencers(
   return await loadTopInfluencers(jobIds, earliestMs, latestMs, filterInfluencers, noInfluencersConfigured, influencersFilterQuery);
 }
 
-export function selectedJobsHaveInfluencers(selectedJobs = []) {
-  let hasInfluencers = false;
-  selectedJobs.forEach((selectedJob) => {
+export function getInfluencers(selectedJobs = []) {
+  const influencers = [];
+  selectedJobs.forEach(selectedJob => {
     const job = mlJobService.getJob(selectedJob.id);
-    let influencers = [];
-    if (job !== undefined) {
-      influencers = job.analysis_config.influencers || [];
+    if (job !== undefined && job.analysis_config && job.analysis_config.influencers) {
+      influencers.push(...job.analysis_config.influencers);
     }
-    hasInfluencers = hasInfluencers || influencers.length > 0;
   });
-  return hasInfluencers;
+  return influencers;
 }
 
 export function getFieldsByJob() {
@@ -562,41 +560,6 @@ export async function loadTopInfluencers(
       });
     } else {
       resolve({});
-    }
-  });
-}
-
-// Returns an array of influencer field names as strings for all selectedJobs
-// GET _ml/anomaly_detectors/<job-id>,<job-id>
-//   response format:
-// { count: 1, jobs: [ { "analysis_config": { influencers: [ 'influencerOne', 'influencerTwo' ] } } ] }
-export async function loadInfluencerFields(
-  selectedJobIds,
-  noInfluencersConfigured,
-) {
-  return new Promise((resolve) => {
-    const influencers = [];
-    if (noInfluencersConfigured !== true) {
-      ml.getMultipleJobs(
-        selectedJobIds
-      )
-        .then((resp) => {
-          if (resp.jobs) {
-            resp.jobs.forEach((job) => {
-              if (job.analysis_config && job.analysis_config.influencers) {
-                influencers.push(...job.analysis_config.influencers);
-              }
-            });
-          }
-          console.log('Explorer - influencer fields for selected jobs', influencers);
-          resolve(influencers);
-        })
-        .catch((err) => {
-          // TODO: error handling
-          console.log('Error fetching influencers', err);
-        });
-    } else {
-      resolve(influencers);
     }
   });
 }

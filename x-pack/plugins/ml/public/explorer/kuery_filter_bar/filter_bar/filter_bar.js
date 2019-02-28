@@ -11,7 +11,7 @@ import { ClickOutside } from '../click_outside';
 import { EuiFieldSearch, EuiProgress, keyCodes } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-class FilterBar extends Component {
+export class FilterBar extends Component {
   state = {
     isSuggestionsVisible: false,
     index: null,
@@ -50,9 +50,6 @@ class FilterBar extends Component {
     const { value } = this.state;
     switch (event.keyCode) {
       case keyCodes.LEFT:
-        this.setState({ isSuggestionsVisible: true });
-        this.props.onChange(value, selectionStart);
-        break;
       case keyCodes.RIGHT:
         this.setState({ isSuggestionsVisible: true });
         this.props.onChange(value, selectionStart);
@@ -224,5 +221,3 @@ FilterBar.defaultProps = {
   placeholder: 'tag : engineering OR tag : marketing',
   suggestions: []
 };
-
-export { FilterBar };

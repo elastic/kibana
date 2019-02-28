@@ -27,12 +27,6 @@ export const ml = {
     });
   },
 
-  getMultipleJobs(jobIds) {
-    return http({
-      url: `${basePath}/anomaly_detectors/${jobIds.join(',')}`,
-    });
-  },
-
   getJobStats(obj) {
     const jobId = (obj && obj.jobId) ? `/${obj.jobId}` : '';
     return http({

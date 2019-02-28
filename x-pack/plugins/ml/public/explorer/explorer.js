@@ -59,8 +59,7 @@ import {
   loadTopInfluencers,
   processOverallResults,
   processViewByResults,
-  selectedJobsHaveInfluencers,
-  loadInfluencerFields,
+  getInfluencers,
 } from './explorer_utils';
 import {
   explorerChartsContainerServiceFactory,
@@ -229,7 +228,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           }
 
           const stateUpdate = {
-            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+            noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
             noJobsFound,
             selectedCells: currentSelectedCells,
             selectedJobs,
@@ -240,8 +239,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             Object.assign(stateUpdate, { ...filterData });
           }
 
-          const indexPattern = await this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
-          Object.assign(stateUpdate, { ...indexPattern });
+          const indexPattern = await this.getIndexPattern(selectedJobs);
+          stateUpdate.indexPattern = indexPattern;
 
           this.updateExplorer(stateUpdate, true);
         }
@@ -250,12 +249,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
           const { selectedJobs } = payload;
           const stateUpdate = {
-            noInfluencersConfigured: !selectedJobsHaveInfluencers(selectedJobs),
+            noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
             selectedJobs,
           };
 
-          const indexPattern = await this.getIndexPattern(selectedJobs, stateUpdate.noInfluencersConfigured);
-          Object.assign(stateUpdate, { ...indexPattern });
+          const indexPattern = await this.getIndexPattern(selectedJobs);
+          stateUpdate.indexPattern = indexPattern;
 
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
@@ -307,10 +306,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     // Creates index pattern in the format expected by the kuery bar/kuery autocomplete provider
     // Field objects required fields: name, type, aggregatable, searchable
-    async getIndexPattern(selectedJobs, noInfluencersConfigured) {
+    async getIndexPattern(selectedJobs) {
       const { indexPattern } = this.state;
-      const selectedJobIds = selectedJobs.map((job) => job.id);
-      const influencers = await loadInfluencerFields(selectedJobIds, noInfluencersConfigured);
+      const influencers = getInfluencers(selectedJobs);
 
       indexPattern.fields = influencers.map((influencer) => ({
         name: influencer,
@@ -319,7 +317,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         searchable: true
       }));
 
-      return { indexPattern };
+      return indexPattern;
     }
 
     getSwimlaneBucketInterval(selectedJobs) {
@@ -715,11 +713,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
       } else {
-        let tempInfluencersFilterQuery = influencersFilterQuery;
-
-        if (maskAll === true) {
-          tempInfluencersFilterQuery = undefined;
-        }
+        const tempInfluencersFilterQuery = (maskAll === true) ? undefined : influencersFilterQuery;
 
         Object.assign(
           stateUpdate,
@@ -920,14 +914,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
         const stateUpdate = {
-          ...{
-            filterActive: false,
-            filteredFields: [],
-            influencersFilterQuery: undefined,
-            isAndOperator: false,
-            maskAll: false,
-            queryString: undefined,
-          },
+          filterActive: false,
+          filteredFields: [],
+          influencersFilterQuery: undefined,
+          isAndOperator: false,
+          maskAll: false,
+          queryString: undefined,
           ...getClearedSelectedAnomaliesState()
         };
 
