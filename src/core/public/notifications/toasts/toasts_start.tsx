@@ -18,9 +18,26 @@
  */
 
 import { Toast } from '@elastic/eui';
+import React from 'react';
 import * as Rx from 'rxjs';
 
+import { ErrorToast } from './error_toast';
+
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
+
+export interface ErrorToastOptions {
+  /**
+   * The title of the toast and the dialog when expanding the message.
+   */
+  title: string;
+  /**
+   * The message to be shown in the toast. If this is not specified the error's
+   * message will be shown in the toast instead. Overwriting that message can
+   * be used to provide more user-friendly toasts. If you specify this, the error
+   * message will still be shown in the detailed error modal.
+   */
+  toastMessage?: string;
+}
 
 const normalizeToast = (toastOrTitle: ToastInput) => {
   if (typeof toastOrTitle === 'string') {
@@ -80,6 +97,17 @@ export class ToastsStart {
       color: 'danger',
       iconType: 'alert',
       ...normalizeToast(toastOrTitle),
+    });
+  }
+
+  public addError(error: Error, options: ErrorToastOptions) {
+    // TODO: Those need a different timeout than the rest of the notification
+    const message = options.toastMessage || error.message;
+    return this.add({
+      color: 'danger',
+      iconType: 'alert',
+      title: options.title,
+      text: <ErrorToast error={error} title={options.title} toastMessage={message} />,
     });
   }
 }
