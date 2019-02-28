@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { forEachRight } from 'lodash';
+import { last } from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 export default function percentile(bucket, panel, series) {
@@ -27,19 +27,20 @@ export default function percentile(bucket, panel, series) {
     const fakeResp = { aggregations: bucket };
 
     getSplits(fakeResp, panel, series).forEach(split => {
-      forEachRight(metric.percentiles, (percentile => {
-        let percentileKey = percentile.value;
-        if (!/\./.test(percentileKey)) {
-          percentileKey = `${percentileKey}.0`;
-        }
 
-        const data = split.timeseries.buckets.map(bucket => [bucket.key, bucket[metric.id].values[percentileKey]]);
+      // table allows only one percentile in a series (the last one will be chosen in case of several)
+      const percentile = last(metric.percentiles);
+      let percentileKey = percentile.value;
+      if (!/\./.test(percentileKey)) {
+        percentileKey = `${percentileKey}.0`;
+      }
 
-        results.push({
-          id: split.id,
-          data
-        });
-      }));
+      const data = split.timeseries.buckets.map(bucket => [bucket.key, bucket[metric.id].values[percentileKey]]);
+
+      results.push({
+        id: split.id,
+        data
+      });
     });
     return next(results);
   };
