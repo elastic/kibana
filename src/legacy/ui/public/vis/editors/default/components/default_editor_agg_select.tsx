@@ -27,10 +27,9 @@ import { AggConfig } from 'ui/vis/agg_config';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
-  isSubAggregation: boolean;
-  label: string;
   aggHelpLink: string;
   aggTypeOptions: AggType[];
+  isSubAggregation: boolean;
   isSelectValid: () => boolean;
   onChangeAggType: (agg: AggConfig, aggType: AggType) => void;
 }
@@ -41,26 +40,26 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
 };
 
 function DefaultEditorAggSelect({
-  agg = {},
-  isSubAggregation,
-  aggHelpLink,
-  aggTypeOptions = [],
-  onChangeAggType,
-  isSelectValid,
-}: DefaultEditorAggSelectProps) {
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
-  // we added null check for agg. It can be removed after 'agg_params' is converted to React
+  // we added default value for agg and aggTypeOptions. It can be removed after 'agg_params' is converted to React
+  agg = {},
+  aggTypeOptions = [],
+  aggHelpLink,
+  isSelectValid,
+  isSubAggregation,
+  onChangeAggType,
+}: DefaultEditorAggSelectProps) {
   const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
   const labelNode = (
     <div>
       {isSubAggregation ? (
         <FormattedMessage
-          id="common.ui.vis.editors.aggSelect.subAggregationLabel"
-          defaultMessage="Sub Aggregation"
+          id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
+          defaultMessage="Sub aggregation"
         />
       ) : (
         <FormattedMessage
-          id="common.ui.vis.editors.aggSelect.aggregationLabel"
+          id="common.ui.vis.defaultEditor.aggSelect.aggregationLabel"
           defaultMessage="Aggregation"
         />
       )}
@@ -73,7 +72,7 @@ function DefaultEditorAggSelect({
           type="button"
         >
           <FormattedMessage
-            id="common.ui.vis.editors.aggSelect.helpLinkLabel"
+            id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
             defaultMessage="{aggTitle} help"
             values={{ aggTitle: agg.type.title }}
           />
@@ -120,7 +119,7 @@ function DefaultEditorAggSelect({
   return (
     <EuiFormRow label={labelNode} className="form-group">
       <EuiComboBox
-        placeholder={i18n.translate('common.ui.vis.editors.aggSelect.selectAggPlaceholder', {
+        placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
