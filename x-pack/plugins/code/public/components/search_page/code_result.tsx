@@ -4,25 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { IPosition } from 'monaco-editor';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { history } from '../../utils/url';
 import { CodeBlock } from '../codeblock/codeblock';
-
-const OrgName = styled.span`
-  color: ${theme.euiTextColor};
-`;
-
-const RepoName = styled.span`
-  color: ${theme.euiTextColor};
-  font-weight: bold;
-`;
 
 interface Props {
   results: any[];
@@ -43,8 +32,21 @@ export class CodeResult extends React.PureComponent<Props> {
         <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
           <p style={{ marginBottom: '.5rem' }}>
             <Link to={repoLinkUrl}>
-              <OrgName>{RepositoryUtils.orgNameFromUri(uri)}</OrgName>/
-              <RepoName>{RepositoryUtils.repoNameFromUri(uri)}</RepoName>
+              <EuiFlexGroup
+                direction="row"
+                alignItems="center"
+                justifyContent="flexStart"
+                gutterSize="none"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">{RepositoryUtils.orgNameFromUri(uri)}/</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="default">
+                    <strong>{RepositoryUtils.repoNameFromUri(uri)}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </Link>
           </p>
           <EuiFlexGroup
@@ -56,10 +58,12 @@ export class CodeResult extends React.PureComponent<Props> {
             <EuiFlexItem grow={false}>
               <EuiBadge color="default">{hits}</EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>hits from</EuiFlexItem>
-            <EuiFlexItem grow={false} data-test-subj="codeSearchResultFileItem">
-              <Link to={fileLinkUrl}>{filePath}</Link>
-            </EuiFlexItem>
+            <EuiText size="s">
+              &nbsp;hits from
+              <Link to={fileLinkUrl} data-test-subj="codeSearchResultFileItem">
+                &nbsp;{filePath}
+              </Link>
+            </EuiText>
           </EuiFlexGroup>
           <CodeBlock
             key={`code${key}`}

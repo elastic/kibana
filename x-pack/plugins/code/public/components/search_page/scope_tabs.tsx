@@ -14,7 +14,6 @@ import { SearchScope } from '../../../model';
 import { history } from '../../utils/url';
 
 const ScopeTabContainer = styled.div`
-  background-color: #ffffff;
   height: 56px;
 `;
 

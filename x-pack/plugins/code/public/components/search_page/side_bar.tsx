@@ -23,14 +23,6 @@ import { RepositoryUtils } from '../../../common/repository_utils';
 import { SearchScope } from '../../../model';
 import { ScopeTabs } from './scope_tabs';
 
-const SideBarContainer = styled.div`
-  background-color: ${theme.euiColorLightestShade};
-  border-right: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
-  flex-grow: 1;
-  flex-shrink: 1;
-  overflow: auto;
-`;
-
 const FacetContainer = styled.div`
   padding: 0 1rem;
 `;
@@ -110,7 +102,7 @@ export class SideBar extends React.PureComponent<Props> {
     });
 
     return (
-      <SideBarContainer>
+      <div className="codeSidebar__container">
         <ScopeTabs query={this.props.query} scope={this.props.scope} />
         <FacetContainer>
           <FacetTitle gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
@@ -142,7 +134,7 @@ export class SideBar extends React.PureComponent<Props> {
             {langStatsComp}
           </EuiFacetGroup>
         </FacetContainer>
-      </SideBarContainer>
+      </div>
     );
   }
 }
