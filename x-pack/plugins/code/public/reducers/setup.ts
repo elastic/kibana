@@ -10,12 +10,10 @@ import { handleActions } from 'redux-actions';
 import { checkSetupFailed, checkSetupSuccess } from '../actions';
 
 export interface SetupState {
-  ok: boolean;
+  ok?: boolean;
 }
 
-const initialState: SetupState = {
-  ok: false,
-};
+const initialState: SetupState = {};
 
 export const setup = handleActions(
   {

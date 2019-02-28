@@ -15,8 +15,10 @@ import {
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { RootState } from '../../reducers';
 
 const Root = styled.div`
   padding: ${theme.euiSizeXxl} 0;
@@ -93,12 +95,12 @@ const steps = [
   },
 ];
 
-export const SetupGuide = (props: { setupFailed?: boolean }) => {
+const SetupGuidePage = (props: { setupOk?: boolean }) => {
   let setup = null;
-  if (props.setupFailed !== undefined) {
+  if (props.setupOk !== undefined) {
     setup = (
       <React.Fragment>
-        {props.setupFailed && (
+        {props.setupOk === false && (
           <EuiCallOut title="Code instance not found." color="danger" iconType="cross">
             <p>
               Please follow the guide below to configure your Kibana instance and then refresh this
@@ -106,7 +108,7 @@ export const SetupGuide = (props: { setupFailed?: boolean }) => {
             </p>
           </EuiCallOut>
         )}
-        {props.setupFailed === false && (
+        {props.setupOk === true && (
           <EuiButton iconType="sortLeft">
             <Link to="/admin">Back To Project Dashboard</Link>
           </EuiButton>
@@ -124,3 +126,8 @@ export const SetupGuide = (props: { setupFailed?: boolean }) => {
 
   return <Root>{setup}</Root>;
 };
+const mapStateToProps = (state: RootState) => ({
+  setupOk: state.setup.ok,
+});
+
+export const SetupGuide = connect(mapStateToProps)(SetupGuidePage);

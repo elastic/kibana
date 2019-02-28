@@ -7,7 +7,7 @@
 import { call, put, takeEvery } from 'redux-saga/effects';
 import { kfetch } from 'ui/kfetch';
 import { checkSetupFailed, checkSetupSuccess } from '../actions';
-import { rootRoutePattern } from './patterns';
+import { rootRoutePattern, setupRoutePattern } from './patterns';
 
 function* handleRootRoute() {
   try {
@@ -24,4 +24,5 @@ function requestSetup() {
 
 export function* watchRootRoute() {
   yield takeEvery(rootRoutePattern, handleRootRoute);
+  yield takeEvery(setupRoutePattern, handleRootRoute);
 }

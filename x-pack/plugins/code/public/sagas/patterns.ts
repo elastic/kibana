@@ -11,6 +11,7 @@ import * as ROUTES from '../components/routes';
 export const generatePattern = (path: string) => (action: Action<Match>) =>
   action.type === String(routeChange) && action.payload!.path === path;
 export const rootRoutePattern = generatePattern(ROUTES.ROOT);
+export const setupRoutePattern = generatePattern(ROUTES.SETUP);
 export const adminRoutePattern = generatePattern(ROUTES.ADMIN);
 export const repoRoutePattern = generatePattern(ROUTES.REPO);
 export const mainRoutePattern = (action: Action<Match>) =>

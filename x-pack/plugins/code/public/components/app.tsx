@@ -20,7 +20,7 @@ import { Search } from './search_page/search';
 
 const Empty = () => null;
 
-const RooComponent = (props: { setupOk: boolean }) => {
+const RooComponent = (props: { setupOk?: boolean }) => {
   if (props.setupOk) {
     return <Redirect to={'/admin'} />;
   }
@@ -44,7 +44,7 @@ export const App = () => {
         <Route path={ROUTES.ADMIN} component={Admin} />
         <Route path={ROUTES.SEARCH} component={Search} />
         <Route path={ROUTES.REPO} render={Empty} exact={true} />
-        <Route path="/setup-guide" render={() => <SetupGuide setupFailed={false} />} exact={true} />
+        <Route path={ROUTES.SETUP} component={SetupGuide} exact={true} />
         <Route path="*" component={NotFound} />
       </Switch>
     </Router>
