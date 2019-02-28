@@ -23,39 +23,36 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
   public render() {
     const { urlParams, location } = this.props;
     return (
-      <ServiceDetailsRequest
-        urlParams={urlParams}
-        render={({ data }) => {
-          return (
-            <React.Fragment>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiTitle size="l">
-                    <h1>{urlParams.serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIntegrations
-                    location={this.props.location}
-                    urlParams={urlParams}
-                    serviceTransactionTypes={data.types}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+      <React.Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>{urlParams.serviceName}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ServiceIntegrations
+              location={this.props.location}
+              urlParams={urlParams}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-              <EuiSpacer />
+        <EuiSpacer />
 
-              <FilterBar />
+        <FilterBar />
 
-              <ServiceDetailTabs
-                location={location}
-                urlParams={urlParams}
-                transactionTypes={data.types}
-              />
-            </React.Fragment>
-          );
-        }}
-      />
+        <ServiceDetailsRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <ServiceDetailTabs
+              location={location}
+              urlParams={urlParams}
+              transactionTypes={data.types}
+            />
+          )}
+        />
+      </React.Fragment>
     );
   }
 }
