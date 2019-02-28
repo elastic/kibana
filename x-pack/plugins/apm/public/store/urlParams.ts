@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
 import { createSelector } from 'reselect';
@@ -18,6 +19,27 @@ import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
+export const TIMEPICKER_DEFAULTS = {
+  rangeFrom: 'now-24h',
+  rangeTo: 'now',
+  rangePaused: 'true',
+  refreshInterval: '0'
+};
+
+function calculateTimePickerDefaults() {
+  const parsed = {
+    from: datemath.parse(TIMEPICKER_DEFAULTS.rangeFrom),
+    // roundUp: true is required for the quick select relative date values to work properly
+    to: datemath.parse(TIMEPICKER_DEFAULTS.rangeTo, { roundUp: true })
+  };
+
+  return {
+    start: parsed.from ? parsed.from.toISOString() : undefined,
+    end: parsed.to ? parsed.to.toISOString() : undefined
+  };
+}
+
+const INITIAL_STATE = calculateTimePickerDefaults();
 
 interface LocationAction {
   type: typeof LOCATION_UPDATE;
@@ -37,7 +59,7 @@ type Action = LocationAction | TimepickerAction;
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = {}, action: Action) {
+export function urlParamsReducer(state = INITIAL_STATE, action: Action) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -86,7 +108,11 @@ export function urlParamsReducer(state = {}, action: Action) {
     }
 
     case TIMEPICKER_UPDATE:
-      return { ...state, start: action.time.min, end: action.time.max };
+      return {
+        ...state,
+        start: action.time.min,
+        end: action.time.max
+      };
 
     default:
       return state;

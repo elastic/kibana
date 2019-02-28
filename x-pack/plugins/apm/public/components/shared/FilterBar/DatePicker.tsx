@@ -10,6 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
+  TIMEPICKER_DEFAULTS,
   toBoolean,
   toNumber,
   updateTimePicker
@@ -24,12 +25,10 @@ class DatePickerComponent extends React.Component<Props> {
   public refreshTimeoutId = 0;
 
   public getParamsFromSearch = (search: string) => {
-    const {
-      rangeFrom = 'now-24h',
-      rangeTo = 'now',
-      refreshPaused = 'true',
-      refreshInterval = '0'
-    } = toQuery(search);
+    const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = {
+      ...TIMEPICKER_DEFAULTS,
+      ...toQuery(search)
+    };
     return {
       rangeFrom,
       rangeTo,
