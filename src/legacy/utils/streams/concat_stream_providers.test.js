@@ -55,20 +55,12 @@ describe('concatStreamProviders() helper', () => {
     await expect(createPromiseFromStreams([dest])).rejects.toThrowErrorMatchingInlineSnapshot(
       `"foo"`
     );
-    expect(errorListener).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      [Error: foo],
-    ],
+    expect(errorListener.mock.calls).toMatchInlineSnapshot(`
+Array [
+  Array [
+    [Error: foo],
   ],
-  "results": Array [
-    Object {
-      "isThrow": false,
-      "value": undefined,
-    },
-  ],
-}
+]
 `);
   });
 });
