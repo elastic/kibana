@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CONTENT_TYPE_CSV } from '../../../common/constants';
 // @ts-ignore
 import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../server/lib';
@@ -39,9 +40,16 @@ function executeJobFn(server: KbnServer) {
       let decryptedHeaders;
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
-      } catch {
+      } catch (err) {
         throw new Error(
-          'Failed to decrypt report job data. Please ensure that `xpack.reporting.encryptionKey` is set and re-generate this report.'
+          i18n.translate(
+            'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
+            {
+              defaultMessage:
+                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
+            }
+          )
         );
       }
 
