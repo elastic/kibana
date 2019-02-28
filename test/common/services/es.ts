@@ -19,34 +19,17 @@
 
 import { format as formatUrl } from 'url';
 
-import { EsArchiver } from '../../../src/es_archiver';
-import * as KibanaServer from './kibana_server';
+import elasticsearch from 'elasticsearch';
 
-export function EsArchiverProvider({ getService, hasService }) {
+import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export function EsProvider({ getService }: FtrProviderContext): elasticsearch.Client {
   const config = getService('config');
-  const client = getService('es');
-  const log = getService('log');
 
-  if (!config.get('esArchiver')) {
-    throw new Error(`esArchiver can't be used unless you specify it's config in your config file`);
-  }
-
-  const dataDir = config.get('esArchiver.directory');
-
-  const esArchiver = new EsArchiver({
-    client,
-    dataDir,
-    log,
-    kibanaUrl: formatUrl(config.get('servers.kibana'))
+  return new elasticsearch.Client({
+    apiVersion: DEFAULT_API_VERSION,
+    host: formatUrl(config.get('servers.elasticsearch')),
+    requestTimeout: config.get('timeouts.esRequestTimeout'),
   });
-
-  if (hasService('kibanaServer')) {
-    KibanaServer.extendEsArchiver({
-      esArchiver,
-      kibanaServer: getService('kibanaServer'),
-      defaults: config.get('uiSettings.defaults'),
-    });
-  }
-
-  return esArchiver;
 }

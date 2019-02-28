@@ -17,18 +17,11 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Config, Lifecycle } from './lib';
 
-import elasticsearch from 'elasticsearch';
-
-import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
-
-export function EsProvider({ getService }) {
-  const config = getService('config');
-
-  return new elasticsearch.Client({
-    apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-  });
+export interface DefaultServiceProviders {
+  config(): Config;
+  log(): ToolingLog;
+  lifecycle(): Lifecycle;
 }

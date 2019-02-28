@@ -17,7 +17,13 @@
  * under the License.
  */
 
-export interface TestWrapper {
-  getService(service: string): any;
-  getPageObjects(pages: string[]): { [name: string]: any };
-}
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { services as CommonServiceProviders } from '../common/services';
+import { pageObjects as FunctionalPageObjectProviders } from './page_objects';
+import { services as FunctionalServiceProviders } from './services';
+
+type ServiceProviders = typeof CommonServiceProviders & typeof FunctionalServiceProviders;
+type PageObjectProviders = typeof FunctionalPageObjectProviders;
+
+export type FtrProviderContext = GenericFtrProviderContext<ServiceProviders, PageObjectProviders>;

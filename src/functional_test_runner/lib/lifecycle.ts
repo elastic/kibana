@@ -17,31 +17,34 @@
  * under the License.
  */
 
+type Listener = (...args: any[]) => Promise<void> | void;
+export type Lifecycle = ReturnType<typeof createLifecycle>;
+
 export function createLifecycle() {
   const listeners = {
-    beforeLoadTests: [],
-    beforeTests: [],
-    beforeTestSuite: [],
-    beforeEachTest: [],
-    afterTestSuite: [],
-    testFailure: [],
-    testHookFailure: [],
-    cleanup: [],
-    phaseStart: [],
-    phaseEnd: [],
+    beforeLoadTests: [] as Listener[],
+    beforeTests: [] as Listener[],
+    beforeTestSuite: [] as Listener[],
+    beforeEachTest: [] as Listener[],
+    afterTestSuite: [] as Listener[],
+    testFailure: [] as Listener[],
+    testHookFailure: [] as Listener[],
+    cleanup: [] as Listener[],
+    phaseStart: [] as Listener[],
+    phaseEnd: [] as Listener[],
   };
 
-  class Lifecycle {
-    on(name, fn) {
+  return {
+    on(name: keyof typeof listeners, fn: Listener) {
       if (!listeners[name]) {
         throw new TypeError(`invalid lifecycle event "${name}"`);
       }
 
       listeners[name].push(fn);
       return this;
-    }
+    },
 
-    async trigger(name, ...args) {
+    async trigger(name: keyof typeof listeners, ...args: any[]) {
       if (!listeners[name]) {
         throw new TypeError(`invalid lifecycle event "${name}"`);
       }
@@ -51,16 +54,12 @@ export function createLifecycle() {
           await this.trigger('phaseStart', name);
         }
 
-        await Promise.all(listeners[name].map(
-          async fn => await fn(...args)
-        ));
+        await Promise.all(listeners[name].map(async fn => await fn(...args)));
       } finally {
         if (name !== 'phaseStart' && name !== 'phaseEnd') {
           await this.trigger('phaseEnd', name);
         }
       }
-    }
-  }
-
-  return new Lifecycle();
+    },
+  };
 }
