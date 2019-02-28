@@ -21178,6 +21178,13 @@ supports-color@^6.1.0:
   dependencies:
     has-flag "^3.0.0"
 
+suricata-sid-db@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/suricata-sid-db/-/suricata-sid-db-1.0.2.tgz#96ceda4db117a9f1282c8f9d785285e5ccf342b1"
+  integrity sha512-13h9BiGWLQ2Ng5yrtVkwYudjo1yFalRIW63qsw7/awb8sJZjptmVSIg/iyfFAB/TV1Ru8Kgt9Q95CZwgUipF1w==
+  dependencies:
+    typescript "^3.3.3333"
+
 svg-tags@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/svg-tags/-/svg-tags-1.0.0.tgz#58f71cee3bd519b59d4b2a843b6c7de64ac04764"
@@ -22533,6 +22540,11 @@ typescript@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.0.3.tgz#4853b3e275ecdaa27f78fda46dc273a7eb7fc1c8"
   integrity sha512-kk80vLW9iGtjMnIv11qyxLqZm20UklzuR2tL0QAnDIygIUIemcZMxlMWudl9OOt76H3ntVzcTiddQ1/pAAJMYg==
+
+typescript@^3.3.3333:
+  version "3.3.3333"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.3333.tgz#171b2c5af66c59e9431199117a3bcadc66fdcfd6"
+  integrity sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
 
 ua-parser-js@^0.7.18, ua-parser-js@^0.7.9:
   version "0.7.18"

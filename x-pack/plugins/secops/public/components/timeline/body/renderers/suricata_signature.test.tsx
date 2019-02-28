@@ -83,18 +83,18 @@ describe('SuricataSignature', () => {
 
     it('should render a single if it is present', () => {
       const wrapper = mountWithIntl(
-        <p>
+        <div>
           <Tokens tokens={['ET']} />
-        </p>
+        </div>
       );
       expect(wrapper.text()).toEqual('ET');
     });
 
     it('should render the multiple tokens if they are present', () => {
       const wrapper = mountWithIntl(
-        <p>
+        <div>
           <Tokens tokens={['ET', 'SCAN']} />
-        </p>
+        </div>
       );
       expect(wrapper.text()).toEqual('ETSCAN');
     });

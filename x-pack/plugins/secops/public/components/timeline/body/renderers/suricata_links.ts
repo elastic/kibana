@@ -5,10 +5,10 @@
  */
 
 import { uniq } from 'lodash/fp';
-import { suricataRulesRef } from './suricata_rules_ref';
+import { db } from 'suricata-sid-db';
 
 export const getLinksFromSignature = (id: string): string[] => {
-  const refs = suricataRulesRef[id];
+  const refs = db[id];
   if (refs != null) {
     return uniq(refs);
   } else {
