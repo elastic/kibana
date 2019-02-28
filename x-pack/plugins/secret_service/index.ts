@@ -30,6 +30,9 @@ export const secretService = (kibana: any) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         secret: Joi.string().default(undefined),
+        audit: Joi.object({
+          enabled: Joi.boolean().default(false),
+        }),
       }).default();
     },
 
@@ -50,13 +53,27 @@ export const secretService = (kibana: any) => {
       }
 
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const so = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, ['secret']);
+      const repository = server.savedObjects.getSavedObjectsRepository(callWithInternalUser, [
+        'secret',
+      ]);
 
-      const auditor = new AuditLogger(server, this.id);
-      server.expose(
-        'secretService',
-        new SecretService(so, 'secret', keystore.get(configKey), auditor)
-      );
+      const auditEnabled = server.config().get('xpack.secret_service.audit.enabled');
+      let auditor;
+      if (auditEnabled) {
+        auditor = new AuditLogger(server, this.id);
+      }
+      const encryptionKey = keystore.get(configKey);
+      const service = new SecretService(repository, 'secret', encryptionKey, auditor);
+
+      // validate key used
+      if (!service.validate()) {
+        warn(
+          'Could not validate encryption key, please make sure that the right key in the keystore!'
+        );
+        throw new SecretServiceKeyError('Could not validate encryption key!');
+      }
+
+      server.expose('secretService', service);
     },
   });
 };
