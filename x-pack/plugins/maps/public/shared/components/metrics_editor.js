@@ -6,6 +6,8 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+
 
 import {
   EuiFlexGroup,
@@ -60,7 +62,9 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
         fieldSelect = (
           <EuiFlexItem>
             <SingleFieldSelect
-              placeholder="Select field"
+              placeholder={i18n.translate('xpack.maps.metricsEditor.selectField', {
+                defaultMessage: 'Select field'
+              })}
               value={metric.field}
               onChange={onFieldChange}
               filterField={filterNumberFields}
@@ -77,8 +81,8 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             <EuiButtonIcon
               iconType="trash"
               color="danger"
-              aria-label="Delete metric"
-              title="Delete metric"
+              aria-label={getDeleteMetric()}
+              title={getDeleteMetric()}
               onClick={onRemove}
             />
           </EuiFlexItem>
@@ -120,8 +124,8 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
     return (<EuiButtonIcon
       iconType="plusInCircle"
       onClick={addMetric}
-      aria-label="Add metric"
-      title="Add metric"
+      aria-label={getAddMetric()}
+      title={getAddMetric()}
     />);
   }
 
@@ -161,3 +165,16 @@ MetricsEditor.defaultProps = {
   ],
   allowMultipleMetrics: true
 };
+
+
+function getAddMetric() {
+  return i18n.translate('xpack.maps.metricsEditor.addMetric', {
+    defaultMessage: 'Add metric'
+  });
+}
+
+function getDeleteMetric() {
+  return i18n.translate('xpack.maps.metricsEditor.deleteMetric', {
+    defaultMessage: 'Delete metric'
+  });
+}
