@@ -105,7 +105,6 @@ describe('Worker class', function () {
       expect(worker).to.have.property('jobtype', jobtype);
       expect(worker).to.have.property('workerFn', workerFn);
       expect(worker).to.have.property('checkSize');
-      expect(worker).to.have.property('doctype');
     });
 
     it('should have a unique ID', function () {
@@ -320,25 +319,6 @@ describe('Worker class', function () {
       });
     });
 
-
-    describe('query parameters', function () {
-      beforeEach(() => {
-        searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
-          .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
-      });
-
-      it('should query by default doctype', function () {
-        const params = getSearchParams();
-        expect(params).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
-      });
-
-      it('should query by custom doctype', function () {
-        const doctype = 'custom_test';
-        const params = getSearchParams('type', { doctype });
-        expect(params).to.have.property('type', doctype);
-      });
-    });
-
     describe('query body', function () {
       const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';
@@ -442,7 +422,6 @@ describe('Worker class', function () {
       worker._claimJob(job);
       const query = updateSpy.firstCall.args[1];
       expect(query).to.have.property('index', job._index);
-      expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
       expect(query).to.have.property('if_seq_no', job._seq_no);
       expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -519,7 +498,6 @@ describe('Worker class', function () {
   describe('find a pending job to claim', function () {
     const getMockJobs = (status = 'pending') => ([{
       _index: 'myIndex',
-      _type: 'test',
       _id: 12345,
       _seq_no: 3,
       _primary_term: 3,
@@ -583,7 +561,6 @@ describe('Worker class', function () {
       return worker._claimPendingJobs(getMockJobs())
         .then(claimedJob => {
           expect(claimedJob._index).to.be('myIndex');
-          expect(claimedJob._type).to.be('test');
           expect(claimedJob._source.jobtype).to.be('jobtype');
           expect(claimedJob._source.status).to.be('processing');
           expect(claimedJob.test).to.be('cool');
@@ -616,7 +593,6 @@ describe('Worker class', function () {
       worker._failJob(job);
       const query = updateSpy.firstCall.args[1];
       expect(query).to.have.property('index', job._index);
-      expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
       expect(query).to.have.property('if_seq_no', job._seq_no);
       expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -744,7 +720,6 @@ describe('Worker class', function () {
             sinon.assert.calledOnce(updateSpy);
             const query = updateSpy.firstCall.args[1];
             expect(query).to.have.property('index', job._index);
-            expect(query).to.have.property('type', job._type);
             expect(query).to.have.property('id', job._id);
             expect(query).to.have.property('if_seq_no', job._seq_no);
             expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -785,7 +760,6 @@ describe('Worker class', function () {
             expect(workerJob).to.have.property('job');
             expect(workerJob.job).to.have.property('id');
             expect(workerJob.job).to.have.property('index');
-            expect(workerJob.job).to.have.property('type');
 
             expect(workerJob).to.have.property('output');
             expect(workerJob.output).to.have.property('content');
