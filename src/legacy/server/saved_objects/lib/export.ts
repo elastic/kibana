@@ -44,7 +44,14 @@ export async function getSortedObjectsForExport({
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
     ({ saved_objects: objectsToExport } = await savedObjectsClient.bulkGet(objects));
-    objectsToExport = objectsToExport.filter(obj => !obj.error);
+    const erroredObjects = objectsToExport.filter(obj => !!obj.error);
+    if (erroredObjects.length) {
+      const err = Boom.badRequest();
+      err.output.payload.attributes = {
+        objects: erroredObjects,
+      };
+      throw err;
+    }
   } else {
     const findResponse = await savedObjectsClient.find({
       type: types,

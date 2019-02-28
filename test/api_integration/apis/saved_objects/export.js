@@ -89,6 +89,39 @@ export default function ({ getService }) {
               });
             });
         });
+
+        it(`should throw error when object doesn't exist`, async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              objects: [
+                {
+                  type: 'dashboard',
+                  id: '1',
+                },
+              ],
+            })
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Bad Request',
+                attributes: {
+                  objects: [
+                    {
+                      id: '1',
+                      type: 'dashboard',
+                      error: {
+                        statusCode: 404,
+                        message: 'Not found',
+                      },
+                    },
+                  ],
+                },
+              });
+            });
+        });
       });
 
       describe('10,000 objects', () => {
