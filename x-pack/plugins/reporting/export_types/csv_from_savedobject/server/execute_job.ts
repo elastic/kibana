@@ -17,6 +17,12 @@ interface JobDocOutputPseudo {
   content: string | null;
 }
 
+interface FakeRequest {
+  headers: any;
+  getBasePath: (opts: any) => string;
+  server: KbnServer;
+}
+
 /*
  * @return {Object}: pseudo-JobDocOutput. See interface JobDocOutput
  */
@@ -53,7 +59,7 @@ function executeJobFn(server: KbnServer) {
         );
       }
 
-      const fakeRequest = {
+      const fakeRequest: FakeRequest = {
         headers: decryptedHeaders,
         getBasePath: () => basePath || serverBasePath,
         server,
@@ -61,7 +67,6 @@ function executeJobFn(server: KbnServer) {
 
       return {
         content_type: CONTENT_TYPE_CSV,
-        // @ts-ignore
         content: await generateCsv(fakeRequest, server, visType, panel),
       };
     }

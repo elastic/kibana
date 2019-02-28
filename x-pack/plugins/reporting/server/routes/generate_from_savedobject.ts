@@ -16,6 +16,10 @@ import { HandlerErrorFunction, HandlerFunction, QueuedJobPayload } from './types
 
 const BASE_GENERATE = `${API_BASE_URL_V1}/generate`;
 
+interface KibanaResponse extends ResponseObject {
+  isBoom: boolean;
+}
+
 /*
  * 1. Build `jobParams` object: job data that execution will need to reference in various parts of the lifecycle
  * 2. Pass the jobParams and other common params to `handleRoute`, a shared function to enqueue the job with the params
@@ -131,8 +135,8 @@ export function registerGenerateCsvFromSavedObject(
         });
       }
 
-      // @ts-ignore
-      if (response.isBoom == null) {
+      const { isBoom } = response as KibanaResponse;
+      if (isBoom == null) {
         response.header('accept-ranges', 'none');
       }
 

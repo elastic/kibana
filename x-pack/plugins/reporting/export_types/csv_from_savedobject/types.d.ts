@@ -40,14 +40,29 @@ export interface SavedObjectReference {
 }
 
 export interface SavedObject {
-  attributes: VisObjectAttributes | SavedSearchObjectAttributes;
-  references?: SavedObjectReference[];
+  attributes: any;
+  references: SavedObjectReference[];
 }
 
 export interface TimeRangeParams {
   timezone: string;
   min: Date;
   max: Date;
+}
+
+export interface VisPanel {
+  type: string; // e.g 'table' for TSVB Table,
+  indexPatternSavedObject: any;
+  attributes: SavedSearchObjectAttributes;
+  references: SavedObjectReference[];
+  timerange: TimeRangeParams;
+}
+
+export interface VisState {
+  aggs: any[]; // unused?
+  params?: VisPanel;
+  title: string;
+  type: string; // e.g 'metrics' for TSVB
 }
 
 export interface IndexPatternSavedObject {
@@ -61,7 +76,7 @@ export interface IndexPatternSavedObject {
 
 export interface SearchPanel {
   indexPatternSavedObject: any;
-  attributes: VisObjectAttributes | SavedSearchObjectAttributes;
+  attributes: SavedSearchObjectAttributes;
   references: SavedObjectReference[];
   timerange: TimeRangeParams;
 }

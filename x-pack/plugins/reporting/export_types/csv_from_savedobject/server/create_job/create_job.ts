@@ -47,18 +47,22 @@ function createJobFn(server: KbnServer) {
     const { panel, title, visType }: VisData = await Promise.resolve()
       .then(() => client.get(savedObjectType, savedObjectId))
       .then(async (savedObject: SavedObject) => {
-        const { attributes } = savedObject;
+        const { attributes, references } = savedObject;
         const { kibanaSavedObjectMeta } = attributes as SavedSearchObjectAttributes;
-
-        // @ts-ignore
-        const timerange: TimeRangeParams = req.payload.timerange;
+        const { timerange } = req.payload as { timerange: TimeRangeParams };
 
         if (!kibanaSavedObjectMeta) {
           throw new Error('Could not parse saved object data!');
         }
 
         // saved search type
-        return await createJobSearch(client, timerange, savedObject, kibanaSavedObjectMeta);
+        return await createJobSearch(
+          client,
+          timerange,
+          attributes,
+          references,
+          kibanaSavedObjectMeta
+        );
       })
       .catch((err: Error) => {
         const errPayload: SavedObjectServiceError = get(err, 'output.payload', { statusCode: 0 });

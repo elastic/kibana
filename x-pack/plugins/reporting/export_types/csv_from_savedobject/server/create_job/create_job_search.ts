@@ -6,9 +6,9 @@
 
 import {
   IndexPatternSavedObject,
-  SavedObject,
   SavedObjectMeta,
   SavedObjectReference,
+  SavedSearchObjectAttributes,
   SearchPanel,
   TimeRangeParams,
 } from '../../types';
@@ -22,11 +22,10 @@ interface SearchPanelData {
 export async function createJobSearch(
   savedObjectsClient: any,
   timerange: TimeRangeParams,
-  savedObject: SavedObject,
+  attributes: SavedSearchObjectAttributes,
+  references: SavedObjectReference[],
   kibanaSavedObjectMeta: SavedObjectMeta
 ): Promise<SearchPanelData> {
-  const { attributes, references } = savedObject;
-
   const { searchSourceJSON } = kibanaSavedObjectMeta;
   if (!searchSourceJSON || !references) {
     throw new Error('The saved search object is missing configuration fields!');
