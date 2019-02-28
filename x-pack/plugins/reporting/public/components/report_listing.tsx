@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// TODO: Remove once typescript definitions are in EUI
+declare module '@elastic/eui' {
+  export const EuiBasicTable: React.SFC<any>;
+}
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
@@ -18,7 +23,6 @@ import { ReportErrorButton } from './report_error_button';
 import { ReportInfoButton } from './report_info_button';
 
 import {
-  EuiBasicTable,
   EuiButtonIcon,
   EuiPageContent,
   EuiSpacer,
