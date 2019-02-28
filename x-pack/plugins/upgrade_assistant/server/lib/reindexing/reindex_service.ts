@@ -7,6 +7,7 @@
 import Boom from 'boom';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
@@ -527,6 +528,12 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string) {
+      if (isSystemIndex(indexName)) {
+        throw Boom.notImplemented(
+          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${CURRENT_MAJOR_VERSION}.x minor version.`
+        );
+      }
+
       const indexExists = await callCluster('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
@@ -672,6 +679,8 @@ export const reindexServiceFactory = (
     },
   };
 };
+
+export const isSystemIndex = (indexName: string) => indexName.startsWith('.');
 
 export const isMlIndex = (indexName: string) => {
   const sourceName = sourceNameForIndex(indexName);

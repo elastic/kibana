@@ -12,6 +12,7 @@ import {
   DeprecationAPIResponse,
   DeprecationInfo,
 } from 'src/legacy/core_plugins/elasticsearch';
+import { isSystemIndex } from './reindexing';
 
 import { getDeprecatedApmIndices } from './apm';
 
@@ -60,28 +61,33 @@ const getCombinedIndexInfos = (
 ) => {
   const apmIndices = apmIndexDeprecations.reduce((acc, dep) => acc.add(dep.index), new Set());
 
-  return Object.keys(deprecations.index_settings)
-    .reduce(
-      (indexDeprecations, indexName) => {
-        // prevent APM indices from showing up for general re-indexing
-        if (apmIndices.has(indexName)) {
-          return indexDeprecations;
-        }
+  return (
+    Object.keys(deprecations.index_settings)
+      .reduce(
+        (indexDeprecations, indexName) => {
+          // prevent APM indices from showing up for general re-indexing
+          if (apmIndices.has(indexName)) {
+            return indexDeprecations;
+          }
 
-        return indexDeprecations.concat(
-          deprecations.index_settings[indexName].map(
-            d =>
-              ({
-                ...d,
-                index: indexName,
-                reindex: /Index created before/.test(d.message),
-              } as EnrichedDeprecationInfo)
-          )
-        );
-      },
-      [] as EnrichedDeprecationInfo[]
-    )
-    .concat(apmIndexDeprecations);
+          return indexDeprecations.concat(
+            deprecations.index_settings[indexName].map(
+              d =>
+                ({
+                  ...d,
+                  index: indexName,
+                  reindex: /Index created before/.test(d.message),
+                } as EnrichedDeprecationInfo)
+            )
+          );
+        },
+        [] as EnrichedDeprecationInfo[]
+      )
+      // Filter out warnings for system indices until we know more about what changes are required for the
+      // next upgrade in a future minor version. Note, we're still including APM depercations below.
+      .filter(deprecation => !isSystemIndex(deprecation.index!))
+      .concat(apmIndexDeprecations)
+  );
 };
 
 const getClusterDeprecations = (deprecations: DeprecationAPIResponse, isCloudEnabled: boolean) => {
