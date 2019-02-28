@@ -41,11 +41,11 @@ export function zeekLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
     }),
-    //euiIconType: 'logoZeek',
+    //TODO: euiIconType: 'logoZeek',
     artifacts: {
       dashboards: [
         {
-          id: '87b0c430-1a2d-11e9-84b1-a12c578fa9e8',
+          id: '7cbb5410-3700-11e9-aa6d-ff445a78330c',
           linkLabel: i18n.translate('kbn.server.tutorials.zeekLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Zeek logs dashboard',
           }),
