@@ -55,6 +55,26 @@ export function mapScopeToProps(scope) {
     toggleShowAnnotations: scope.toggleShowAnnotations,
     toggleShowForecast: scope.toggleShowForecast,
     toggleShowModelBounds: scope.toggleShowModelBounds,
+
+    // time series chart
+    tsc: {
+      modelPlotEnabled: scope.modelPlotEnabled,
+      contextChartData: scope.contextChartData,
+      contextChartSelected: (selection) => {
+        scope.$root.$broadcast('contextChartSelected', selection);
+      },
+      contextForecastData: scope.contextForecastData,
+      contextAggregationInterval: scope.contextAggregationInterval,
+      swimlaneData: scope.swimlaneData,
+      focusAnnotationData: scope.focusAnnotationData,
+      focusChartData: scope.focusChartData,
+      focusForecastData: scope.focusForecastData,
+      focusAggregationInterval: scope.focusAggregationInterval,
+      zoomFrom: scope.zoomFrom,
+      zoomTo: scope.zoomTo,
+      autoZoomDuration: scope.autoZoomDuration,
+      svgWidth: scope.svgWidth,
+    },
   };
 }
 

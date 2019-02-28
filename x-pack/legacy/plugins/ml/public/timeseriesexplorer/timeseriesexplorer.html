@@ -9,31 +9,6 @@
   <div ng-show="jobs.length > 0 && loading === false && hasResults === true">
     <div class="results-container">
 
-      <div class="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-
-        <ml-timeseries-chart style="width: 1200px; height: 400px;"
-          annotations-enabled="showAnnotationsCheckbox"
-          selected-job="selectedJob"
-          detector-index="detectorId"
-          model-plot-enabled="modelPlotEnabled"
-          context-chart-data="contextChartData"
-          context-forecast-data="contextForecastData"
-          context-aggregation-interval="contextAggregationInterval"
-          swimlane-data="swimlaneData"
-          focus-annotation-data="focusAnnotationData"
-          focus-chart-data="focusChartData"
-          focus-forecast-data="focusForecastData"
-          focus-aggregation-interval="focusAggregationInterval"
-          show-annotations="showAnnotations"
-          show-model-bounds="showModelBounds"
-          show-forecast="showForecast"
-          zoom-from="zoomFrom"
-          zoom-to="zoomTo"
-          auto-zoom-duration="autoZoomDuration"
-        />
-
-      </div>
-
       <div ng-show="showAnnotations && focusAnnotationData.length > 0">
         <span
           class="panel-title euiText"

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './components/timeseries_chart/timeseries_chart_directive';
 import './timeseriesexplorer_react_wrapper_directive';
 import './timeseriesexplorer_controller.js';
 import './timeseries_search_service.js';

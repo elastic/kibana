@@ -19,6 +19,8 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import { timefilter } from 'ui/timefilter';
+
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -108,7 +110,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     showModelBounds: PropTypes.bool.isRequired,
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
-    timefilter: PropTypes.object.isRequired,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
   };
@@ -339,6 +340,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     drawContextElements(context, this.vizWidth, contextChartHeight, swimlaneHeight);
   }
 
+  previousFocus = {};
   drawContextChartSelection() {
     const {
       contextChartData,
@@ -379,6 +381,12 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       focusLoadTo = _.reduce(combinedData, (memo, point) => Math.max(memo, point.date.getTime()), 0);
     }
     focusLoadTo = Math.min(focusLoadTo, contextXMax);
+
+    const focus = { focusLoadFrom, focusLoadTo };
+    if (_.isEqual(this.previousFocus, focus)) {
+      return;
+    }
+    this.previousFocus = focus;
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
       setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);
@@ -766,7 +774,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     const {
       autoZoomDuration,
       modelPlotEnabled,
-      timefilter,
       intl
     } = this.props;
 
@@ -848,7 +855,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       contextChartData,
       contextForecastData,
       modelPlotEnabled,
-      timefilter
     } = this.props;
 
     const data = contextChartData;
@@ -1186,7 +1192,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     const {
       contextAggregationInterval,
       swimlaneData,
-      timefilter
     } = this.props;
     // Calculates the x axis domain for the context elements.
     // Elasticsearch aggregation returns points at start of bucket,
@@ -1222,7 +1227,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   setZoomInterval(ms) {
     const {
-      timefilter,
       zoomTo
     } = this.props;
 

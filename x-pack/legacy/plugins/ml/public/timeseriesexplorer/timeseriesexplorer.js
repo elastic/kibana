@@ -8,6 +8,8 @@
  * React component for rendering Explorer dashboard swimlanes.
  */
 
+import { isEqual } from 'lodash';
+
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -26,6 +28,7 @@ import {
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplorer_no_results_found';
 
@@ -70,6 +73,10 @@ export const TimeSeriesExplorer = injectI18n(
 
     detectorIndexChangeHandler = (e) => this.props.detectorIndexChanged(e.target.value);
 
+    previousTsc = {};
+    previousShowAnnotations = undefined;
+    previousShowForecast = undefined;
+    previousShowModelBounds = undefined;
     render() {
       const {
         dataNotChartable,
@@ -93,6 +100,7 @@ export const TimeSeriesExplorer = injectI18n(
         toggleShowAnnotations,
         toggleShowForecast,
         toggleShowModelBounds,
+        tsc,
       } = this.props;
 
       const loading = this.props.loading || this.state.loading;
@@ -106,7 +114,24 @@ export const TimeSeriesExplorer = injectI18n(
         text: d.detector_description
       }));
 
-      console.warn('showModelBounds', showModelBounds);
+      let renderFocusChartOnly = true;
+
+      if (
+        isEqual(this.previousTsc.focusForecastData, tsc.focusForecastData) &&
+        isEqual(this.previousTsc.focusChartData, tsc.focusChartData) &&
+        isEqual(this.previousTsc.focusAnnotationData, tsc.focusAnnotationData) &&
+        this.previousShowAnnotations === showAnnotations &&
+        this.previousShowForecast === showForecast &&
+        this.previousShowModelBounds === showModelBounds
+      ) {
+        renderFocusChartOnly = false;
+      }
+
+      this.previousTsc = tsc;
+      this.previousShowAnnotations = showAnnotations;
+      this.previousShowForecast = showForecast;
+      this.previousShowModelBounds = showModelBounds;
+
       return (
         <Fragment>
           <div className="series-controls" data-test-subj="mlSingleMetricViewerSeriesControls">
@@ -261,6 +286,18 @@ export const TimeSeriesExplorer = injectI18n(
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
+
+              <div className="ml-timeseries-chart" style={{ width: '1200px', height: '400px' }} data-test-subj="mlSingleMetricViewerChart">
+                <TimeseriesChart
+                  {...tsc}
+                  detectorIndex={detectorId}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                />
+              </div>
             </EuiText>
           )}
         </Fragment>

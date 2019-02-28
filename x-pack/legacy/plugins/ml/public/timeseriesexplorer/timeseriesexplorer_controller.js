@@ -23,7 +23,9 @@ import 'plugins/ml/components/controls';
 
 import { toastNotifications } from 'ui/notify';
 import uiRoutes from 'ui/routes';
+import angular from 'angular';
 import { timefilter } from 'ui/timefilter';
+import { ResizeChecker } from 'ui/resize_checker';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { checkFullLicense } from 'plugins/ml/license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from 'plugins/ml/privilege/check_privilege';
@@ -61,7 +63,6 @@ import { interval$ } from '../components/controls/select_interval/select_interva
 import { severity$ } from '../components/controls/select_severity/select_severity';
 import { setGlobalState, getSelectedJobIds } from '../components/job_selector/job_select_service_utils';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
-
 
 import chrome from 'ui/chrome';
 let mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
@@ -120,6 +121,15 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.showForecastCheckbox = false;
 
   $scope.focusAnnotationData = [];
+
+  $scope.svgWidth = angular.element('.results-container').width();
+  // Required to redraw the time series chart when the container is resized.
+  const resizeChecker = new ResizeChecker(angular.element('.ml-time-series-explorer'));
+  resizeChecker.on('resize', () => {
+    // Set the size of the components according to the width of the parent container at render time.
+    $scope.svgWidth = Math.max(angular.element('.results-container').width(), 0);
+    $scope.$applyAsync();
+  });
 
   // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
   const tzConfig = config.get('dateFormat:tz');
@@ -572,7 +582,6 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Load the data for the anomalies table.
     loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf());
-
   };
 
   $scope.saveSeriesPropertiesAndRefresh = function () {
@@ -704,6 +713,15 @@ module.controller('MlTimeSeriesExplorerController', function (
   const intervalSub = interval$.subscribe(tableControlsListener);
   const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
+
+  $scope.$on('$destroy', () => {
+    resizeChecker.destroy();
+    refreshWatcher.cancel();
+    intervalSub.unsubscribe();
+    severitySub.unsubscribe();
+    annotationsRefreshSub.unsubscribe();
+  });
+
   // Listen for changes to job selection.
   const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     // Clear the detectorIndex, entities and forecast info.
