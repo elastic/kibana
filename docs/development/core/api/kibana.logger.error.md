@@ -2,6 +2,8 @@
 
 ## Logger.error() method
 
+Logs abnormal or unexpected errors or messages that caused a failure in the application flow
+
 <b>Signature:</b>
 
 ```typescript

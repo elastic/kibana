@@ -2,6 +2,8 @@
 
 ## Logger.trace() method
 
+Log messages at the most detailed log level
+
 <b>Signature:</b>
 
 ```typescript

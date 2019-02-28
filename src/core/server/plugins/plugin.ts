@@ -26,6 +26,8 @@ import { PluginInitializerContext, PluginStartContext } from './plugin_context';
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
  * that use it as a key or value more obvious.
+ *
+ * @public
  */
 export type PluginName = string;
 
@@ -90,6 +92,7 @@ type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknow
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
  * plugin and dispatching proper context and dependencies into plugin's lifecycle hooks.
+ *
  * @internal
  */
 export class Plugin<
@@ -123,6 +126,7 @@ export class Plugin<
 
   /**
    * Instantiates plugin and calls `start` function exposed by the plugin initializer.
+   *
    * @param startContext Context that consists of various core services tailored specifically
    * for the `start` lifecycle event.
    * @param dependencies The dictionary where the key is the dependency name and the value

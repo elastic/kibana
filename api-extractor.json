@@ -9,7 +9,7 @@
   },
   "apiReviewFile": {
     "enabled": true,
-    "apiReviewFolder": "./common/core-api-review/",
+    "apiReviewFolder": "./common/core_api_review/",
     "tempFolder": "./build"
   },
   "apiJsonFile": {

@@ -28,6 +28,8 @@ import { PluginsServiceStartDeps } from './plugins_service';
 
 /**
  * Context that's available to plugins during initialization stage.
+ *
+ * @public
  */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
@@ -44,6 +46,8 @@ export interface PluginInitializerContext {
 
 /**
  * Context passed to the plugins `start` method.
+ *
+ * @public
  */
 export interface PluginStartContext {
   elasticsearch: {

@@ -2,6 +2,8 @@
 
 ## Logger.fatal() method
 
+Logs abnormal or unexpected errors or messages that caused an unrecoverable failure
+
 <b>Signature:</b>
 
 ```typescript

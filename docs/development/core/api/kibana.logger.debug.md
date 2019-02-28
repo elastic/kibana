@@ -2,6 +2,8 @@
 
 ## Logger.debug() method
 
+Log messages useful for debugging and interactive investigation
+
 <b>Signature:</b>
 
 ```typescript

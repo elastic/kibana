@@ -2,6 +2,8 @@
 
 ## Logger.info() method
 
+Logs messages related to general application flow
+
 <b>Signature:</b>
 
 ```typescript

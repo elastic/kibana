@@ -2,6 +2,8 @@
 
 ## Logger.warn() method
 
+Logs abnormal or unexpected errors or messages
+
 <b>Signature:</b>
 
 ```typescript

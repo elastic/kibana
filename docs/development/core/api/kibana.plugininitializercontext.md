@@ -2,6 +2,8 @@
 
 ## PluginInitializerContext interface
 
+Core API's exposed to plugins on initialization
+
 <b>Signature:</b>
 
 ```typescript

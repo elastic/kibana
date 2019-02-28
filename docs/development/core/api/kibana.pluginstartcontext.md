@@ -2,6 +2,8 @@
 
 ## PluginStartContext interface
 
+Core API's exposed to plugins on `start()`
+
 <b>Signature:</b>
 
 ```typescript
