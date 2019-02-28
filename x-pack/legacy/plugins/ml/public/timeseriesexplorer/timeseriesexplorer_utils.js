@@ -35,6 +35,7 @@ export function createTimeSeriesJobData(jobs) {
 export function mapScopeToProps(scope) {
   return {
     dataNotChartable: scope.dataNotChartable,
+    chartDetails: scope.chartDetails,
     detectorId: scope.detectorId,
     detectorIndexChanged: scope.detectorIndexChanged,
     detectors: scope.detectors,

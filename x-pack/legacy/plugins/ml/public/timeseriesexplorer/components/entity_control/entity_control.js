@@ -46,8 +46,8 @@ export const EntityControl = injectI18n(
       const fieldValue = entity.fieldValue;
 
       if (
-        (selectedOptions === undefined && fieldValue !== undefined) ||
-        (Array.isArray(selectedOptions) && fieldValue !== undefined && selectedOptions[0].label !== fieldValue)
+        (selectedOptions === undefined && fieldValue.length > 0) ||
+        (Array.isArray(selectedOptions) && fieldValue.length > 0 && selectedOptions[0].label !== fieldValue)
       ) {
         this.setState({
           selectedOptions: [{ label: fieldValue }]
@@ -56,10 +56,13 @@ export const EntityControl = injectI18n(
     }
 
     onChange = (selectedOptions) => {
+      const options = (selectedOptions.length > 0) ? selectedOptions : undefined;
       this.setState({
-        selectedOptions: selectedOptions,
+        selectedOptions: options,
       });
-      this.props.entityFieldValueChanged(this.props.entity, selectedOptions[0].label);
+
+      const fieldValue = (Array.isArray(options) && options[0].label.length > 0) ? options[0].label : '';
+      this.props.entityFieldValueChanged(this.props.entity, fieldValue);
     };
 
     render() {
@@ -71,6 +74,7 @@ export const EntityControl = injectI18n(
         <EuiFlexItem grow={false}>
           <EuiFormRow label={entity.fieldName}>
             <EuiComboBox
+              style={{ minWidth: '300px' }}
               placeholder={intl.formatMessage({
                 id: 'xpack.ml.timeSeriesExplorer.enterValuePlaceholder',
                 defaultMessage: 'Enter value'

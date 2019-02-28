@@ -11,6 +11,7 @@
 import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
@@ -18,6 +19,7 @@ import {
   EuiFormRow,
   EuiButton,
   EuiSelect,
+  EuiText,
 } from '@elastic/eui';
 
 import { EntityControl } from './components/entity_control';
@@ -25,6 +27,13 @@ import { ForecastingModal } from './components/forecasting_modal/forecasting_mod
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplorer_no_results_found';
+
+// Used to indicate the chart is being plotted across
+// all partition field values, where the cardinality of the field cannot be
+// obtained as it is not aggregatable e.g. 'all distinct kpi_indicator values'
+const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
+  defaultMessage: 'all',
+});
 
 function getTimeseriesexplorerDefaultState() {
   return {
@@ -53,6 +62,7 @@ export const TimeSeriesExplorer = injectI18n(
     render() {
       const {
         dataNotChartable,
+        chartDetails,
         detectorId,
         detectors,
         entities,
@@ -143,6 +153,48 @@ export const TimeSeriesExplorer = injectI18n(
 
           {(jobs.length > 0 && loading === false && hasResults === false) && (
             <TimeseriesexplorerNoResultsFound dataNotChartable={dataNotChartable} entities={entities} />
+          )}
+
+          {(jobs.length > 0 && loading === false && hasResults === true) && (
+            <EuiText className="results-container">
+              <span className="panel-title">
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle"
+                  defaultMessage="Single time series analysis of {functionLabel}"
+                  values={{ functionLabel: chartDetails.functionLabel }}
+                />
+              </span>&nbsp;
+              {chartDetails.entityData.count === 1 && (
+                <span className="entity-count-text">
+                  {chartDetails.entityData.entities.length > 0 && '('}
+                  {chartDetails.entityData.entities.map((entity) => {
+                    return `${entity.fieldName}: ${entity.fieldValue}`;
+                  }).join(', ')}
+                  {chartDetails.entityData.entities.length > 0 && ')'}
+                </span>
+              )}
+              {chartDetails.entityData.count !== 1 && (
+                <span className="entity-count-text">
+                  {chartDetails.entityData.entities.map((countData, i) => {
+                    const msg = '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}';
+                    return (
+                      <FormattedMessage
+                        key={countData.fieldName}
+                        id="xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription"
+                        defaultMessage={msg}
+                        values={{
+                          openBrace: (i === 0) ? '(' : '',
+                          closeBrace: (i === (chartDetails.entityData.entities.length - 1)) ? ')' : '',
+                          cardinalityValue: countData.cardinality === 0 ? allValuesLabel : countData.cardinality,
+                          cardinality: countData.cardinality,
+                          fieldName: countData.fieldName
+                        }}
+                      />
+                    );
+                  })}
+                </span>
+              )}
+            </EuiText>
           )}
         </Fragment>
       );
