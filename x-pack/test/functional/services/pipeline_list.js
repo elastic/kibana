@@ -160,9 +160,11 @@ export function PipelineListProvider({ getService }) {
      *  @return {Promise<undefined>}
      */
     async assertExists() {
-      await retry.waitFor('pipline list visible on screen', async () => (
-        await testSubjects.exists(SUBJ_CONTAINER)
-      ));
+      await retry.waitFor('pipline list visible on screen', async () => {
+        const container = await testSubjects.find(SUBJ_CONTAINER);
+        const found = await container.findAllByCssSelector('table tbody');
+        return found.length > 0;
+      });
     }
 
     /**
