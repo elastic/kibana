@@ -23,7 +23,7 @@ import { FatalErrorsService } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataService } from './injected_metadata';
-import { LegacyPlatformService } from './legacy_platform';
+import { LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
@@ -33,7 +33,7 @@ const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
     this.stop = jest.fn();
   }
 );
-jest.mock('./legacy_platform', () => ({
+jest.mock('./legacy', () => ({
   LegacyPlatformService: MockLegacyPlatformService,
 }));
 
