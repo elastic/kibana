@@ -46,8 +46,8 @@ test('correctly redirects server events.', () => {
       ([serverEventName]) => serverEventName === eventName
     )!;
 
-    serverListener(1, 2, 3, 4);
-    serverListener(5, 6, 7, 8);
+    (serverListener as jest.Mock)(1, 2, 3, 4);
+    (serverListener as jest.Mock)(5, 6, 7, 8);
 
     expect(listener).toHaveBeenCalledTimes(2);
     expect(listener).toHaveBeenCalledWith(1, 2, 3, 4);
