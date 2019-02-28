@@ -43,7 +43,7 @@ https://www.docker.elastic.co[www.docker.elastic.co].
 Kibana can be quickly started and connected to a local Elasticsearch container for development
 or testing use with the following command:
 --------------------------------------------
-docker run --net=host -e "ELASTICSEARCH_HOSTS=http://localhost:9200" {docker-repo}:{version}
+docker run --link {elasticsearch-container-name-or-id}:elasticsearch -p 5601:5601 {docker-repo}:{version}
 --------------------------------------------
 endif::[]
 
