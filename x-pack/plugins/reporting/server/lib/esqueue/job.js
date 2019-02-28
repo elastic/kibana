@@ -20,7 +20,7 @@ export class Job extends events.EventEmitter {
     super();
 
     this.queue = queue;
-    this.client = options.client || this.queue.client;
+    this._client = this.queue.client;
     this.id = puid.generate();
     this.index = index;
     this.jobtype = type;
@@ -75,8 +75,8 @@ export class Job extends events.EventEmitter {
       indexParams.headers = options.headers;
     }
 
-    this.ready = createIndex(this.client, this.index, this.doctype, this.indexSettings)
-      .then(() => this.client.index(indexParams))
+    this.ready = createIndex(this._client, this.index, this.doctype, this.indexSettings)
+      .then(() => this._client.callWithInternalUser('index', indexParams))
       .then((doc) => {
         this.document = {
           id: doc._id,
@@ -87,7 +87,7 @@ export class Job extends events.EventEmitter {
         };
         this.debug(`Job created in index ${this.index}`);
 
-        return this.client.indices.refresh({
+        return this._client.callWithInternalUser('indices.refresh', {
           index: this.index
         }).then(() => {
           this.debug(`Job index refreshed ${this.index}`);
@@ -108,7 +108,7 @@ export class Job extends events.EventEmitter {
   get() {
     return this.ready
       .then(() => {
-        return this.client.get({
+        return this._client.callWithInternalUser('get', {
           index: this.index,
           type: this.doctype,
           id: this.id

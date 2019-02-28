@@ -81,12 +81,12 @@ export function createIndex(client, indexName,
     }
   };
 
-  return client.indices.exists({
+  return client.callWithInternalUser('indices.exists', {
     index: indexName,
   })
     .then((exists) => {
       if (!exists) {
-        return client.indices.create({
+        return client.callWithInternalUser('indices.create', {
           index: indexName,
           include_type_name: true,
           body: body

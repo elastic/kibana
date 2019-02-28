@@ -17,33 +17,18 @@
  * under the License.
  */
 
-import { Cluster } from './cluster';
+import { isPlainObject } from 'lodash';
 
-export function createClusters(server) {
-  const clusters = new Map();
-
-  server.events.on('stop', () => {
-    for (const [name, cluster] of clusters) {
-      cluster.close();
-      clusters.delete(name);
-    }
-  });
+export function setHeaders(originalHeaders, newHeaders) {
+  if (!isPlainObject(originalHeaders)) {
+    throw new Error(`Expected originalHeaders to be an object, but ${typeof originalHeaders} given`);
+  }
+  if (!isPlainObject(newHeaders)) {
+    throw new Error(`Expected newHeaders to be an object, but ${typeof newHeaders} given`);
+  }
 
   return {
-    get(name) {
-      return clusters.get(name);
-    },
-
-    create(name, config) {
-      const cluster = new Cluster(config);
-
-      if (clusters.has(name)) {
-        throw new Error(`cluster '${name}' already exists`);
-      }
-
-      clusters.set(name, cluster);
-
-      return cluster;
-    }
+    ...originalHeaders,
+    ...newHeaders
   };
 }

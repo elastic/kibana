@@ -17,26 +17,14 @@
  * under the License.
  */
 
-import { clientLogger } from './client_logger';
+import { Server } from 'hapi';
+import KbnServer from '../kbn_server';
 
-export function createDataCluster(server) {
-  const config = server.config();
-  const ElasticsearchClientLogging = clientLogger(server);
-
-  class DataClientLogging extends ElasticsearchClientLogging {
-    tags = ['data'];
-    logQueries = getConfig().logQueries;
-  }
-
-  function getConfig() {
-    return config.get('elasticsearch');
-  }
-
-  server.plugins.elasticsearch.createCluster(
-    'data',
-    {
-      log: DataClientLogging,
-      ...getConfig()
-    }
-  );
+/**
+ * Exposes `kbnServer.core` through Hapi API.
+ * @param kbnServer KbnServer singleton instance.
+ * @param server Hapi server instance to expose `core` on.
+ */
+export function coreMixin(kbnServer: KbnServer, server: Server) {
+  server.decorate('server', 'core', kbnServer.core);
 }
