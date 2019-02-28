@@ -83,3 +83,5 @@ include::migration.asciidoc[]
 include::CHANGELOG.asciidoc[]
 
 include::redirects.asciidoc[]
+
+include::uptime/index.asciidoc[]

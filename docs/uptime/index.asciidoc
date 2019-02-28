@@ -2,15 +2,19 @@
 [[xpack-uptime]]
 = Uptime
 
+[partintro]
+--
 Use the Uptime UI to monitor the status of network endpoints via HTTP/S, TCP,
 and ICMP. You will be able to explore status over time, drill into specific monitors,
 and view a high-level snapshot of your environment at a selected point in time.
 
+[float]
 == Add monitors
 You define your monitors in Heartbeat's configuration file. Refer to the Heartbeat
 documentation for instructions on configuring monitors to begin storing Uptime information
 in your cluster.
 
+[float]
 == Begin using Uptime
 It is important that you use the corresponding versions of Heartbeat and Kibana. Kibana
 supports the equivalent version of Heartbeat, meaning version 6.7 of Kibana will expect

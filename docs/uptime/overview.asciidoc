@@ -1,19 +1,21 @@
 [role="xpack"]
 [[uptime-overview]]
 
-== Uptime Overview page
+== Overview
 
 The Overview page is intended to help you quickly identify and diagnose outages and
 other connectivity issues within your network or environment. There is a date range
 selection that is global to the Uptime UI; you can use this selection to highlight
 an absolute date range, or a relative one, similar to other areas of Kibana.
 
+[float]
 === Filter bar
 SCREENSHOT
 
 This control allows you to use automated filter options, as well as input custom filter
 text to select specific monitors by field, URL, ID, and other attributes.
 
+[float]
 === Snapshot view
 SCREENSHOT
 
@@ -25,6 +27,7 @@ for each monitor.
 Next to the counts, there is a histogram displaying the change over time throughout the
 selected date range.
 
+[float]
 === Monitor list
 SCREENSHOT
 
@@ -33,6 +36,7 @@ information like the most recent status, when the monitor was last checked, its
 ID and URL, its IP address, and a dedicated sparkline showing its check status
 over time.
 
+[float]
 === Error list
 SCREENSHOT
 
