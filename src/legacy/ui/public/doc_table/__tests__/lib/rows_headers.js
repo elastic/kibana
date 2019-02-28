@@ -22,7 +22,8 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import getFakeRow from 'fixtures/fake_row';
+import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
+import { partialFormattedCache } from 'ui/index_patterns/_format_hit';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -267,11 +268,14 @@ describe('Doc Table', function () {
       'index-pattern="indexPattern"' +
       '></tr>'
     );
+    let row;
 
     beforeEach(function () {
+      row = getFakeRow(0, mapping);
+      partialFormattedCache.set(row, getFakeRowVals('formatted', 0, mapping));
 
       init($elem, {
-        row: getFakeRow(0, mapping),
+        row,
         columns: [],
         sorting: [],
         filter: sinon.spy(),
@@ -283,6 +287,7 @@ describe('Doc Table', function () {
 
     });
     afterEach(function () {
+      partialFormattedCache.delete(row);
       destroy();
     });
 
@@ -337,11 +342,13 @@ describe('Doc Table', function () {
         '></tr>'
     );
     let $details;
+    let row;
 
     beforeEach(function () {
-      const row = getFakeRow(0, mapping);
+      row = getFakeRow(0, mapping);
       mapping._id = { indexed: true, type: 'string' };
       row._source._id = 'foo';
+      partialFormattedCache.set(row, getFakeRowVals('formatted', 0, mapping));
 
       init($elem, {
         row: row,
@@ -361,6 +368,7 @@ describe('Doc Table', function () {
 
     afterEach(function () {
       delete mapping._id;
+      partialFormattedCache.delete(row);
       destroy();
     });
 
@@ -378,6 +386,7 @@ describe('Doc Table', function () {
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;
       $root.row = getFakeRow(0, mapping);
+      partialFormattedCache.set($root.row, getFakeRowVals('formatted', 0, mapping));
       $root.columns = ['_source'];
       $root.sorting = [];
       $root.filtering = sinon.spy();
@@ -405,6 +414,7 @@ describe('Doc Table', function () {
     }));
 
     afterEach(function () {
+      partialFormattedCache.delete($root.row);
       $row.remove();
     });
 
@@ -503,7 +513,9 @@ describe('Doc Table', function () {
     });
 
     it('handles two columns with the same content', function () {
-      $root.row.$$_partialFormatted.request_body = $root.row.$$_partialFormatted.bytes;
+      const cached = partialFormattedCache.get($root.row);
+      cached.request_body = cached.bytes;
+
       $root.columns.length = 0;
       $root.columns.push('bytes');
       $root.columns.push('request_body');
