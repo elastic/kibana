@@ -17,10 +17,4 @@
  * under the License.
  */
 
-export default [
-  'std_deviation',
-  'variance',
-  'sum_of_squares'
-];
-
-
+export { LegacyPlatformService, LegacyPlatformParams } from './legacy_service';
