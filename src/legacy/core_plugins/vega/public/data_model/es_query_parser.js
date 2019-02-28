@@ -269,7 +269,7 @@ export class EsQueryParser {
    * @return {object}
    */
   _createRangeFilter(obj) {
-    obj.gte = moment(this._getTimeBound(obj, 'min')).toISOString(),
+    obj.gte = moment(this._getTimeBound(obj, 'min')).toISOString();
     obj.lte = moment(this._getTimeBound(obj, 'max')).toISOString();
     obj.format = 'strict_date_optional_time';
     delete obj[TIMEFILTER];

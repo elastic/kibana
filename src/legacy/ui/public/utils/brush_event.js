@@ -66,7 +66,7 @@ export function onBrushEvent(event, $state) {
     const min = event.range[0];
     const max = event.range[event.range.length - 1];
     let range;
-    debugger;
+
     if (isDate) {
       range = {
         gte: moment(min).toISOString(),

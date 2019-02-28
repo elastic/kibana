@@ -26,8 +26,15 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const bool = { must: [] };
 
-  const timeFilter = { range: {} };
-  timeFilter.range[config.timefield] = { gte: moment(tlConfig.time.from).toISOString(), lte: moment(tlConfig.time.to).toISOString(), format: 'strict_date_optional_time' };
+  const timeFilter = {
+    range: {
+      [config.timefield]: {
+        gte: moment(tlConfig.time.from).toISOString(),
+        lte: moment(tlConfig.time.to).toISOString(), 
+        format: 'strict_date_optional_time'
+      }
+    }
+  };
   bool.must.push(timeFilter);
 
   // Use the kibana filter bar filters
