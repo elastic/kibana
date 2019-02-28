@@ -29,7 +29,7 @@ export const extractSeriesName = () => ({
   args: {},
   fn(context) {
     return {
-      value: context.data[0].value,
+      value: context[0].value,
       type: 'string',
     };
   },

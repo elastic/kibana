@@ -29,6 +29,7 @@ import {
 import { panelActionsStore } from '../../store/panel_actions_store';
 import {
   getCustomizePanelAction,
+  getCustomizeEventActionsAction,
   getEditPanelAction,
   getInspectorPanelAction,
   getRemovePanelAction,
@@ -44,6 +45,7 @@ import {
   resetPanelTitle,
   setPanelTitle,
   setVisibleContextMenuPanelId,
+  setClickOverride,
 } from '../../actions';
 
 import { Dispatch } from 'redux';
@@ -68,6 +70,7 @@ interface PanelOptionsMenuContainerDispatchProps {
   onMaximizePanel: () => void;
   onMinimizePanel: () => void;
   onResetPanelTitle: () => void;
+  onChangeEventActions: (clickOverride: boolean) => void;
   onUpdatePanelTitle: (title: string) => void;
 }
 
@@ -83,6 +86,7 @@ interface PanelOptionsMenuContainerStateProps {
   containerState: ContainerState;
   visibleContextMenuPanelId: PanelId | undefined;
   isViewMode: boolean;
+  clickOverride: boolean;
 }
 
 const mapStateToProps = (
@@ -96,6 +100,7 @@ const mapStateToProps = (
   const visibleContextMenuPanelId = getVisibleContextMenuPanelId(dashboard);
   const viewMode = getViewMode(dashboard);
   return {
+    clickOverride: panel.embeddableConfig.clickOverride,
     panelTitle: panel.title === undefined ? embeddableTitle : panel.title,
     editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : null,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
@@ -123,6 +128,7 @@ const mapDispatchToProps = (
   onMinimizePanel: () => dispatch(minimizePanel()),
   onResetPanelTitle: () => dispatch(resetPanelTitle(panelId)),
   onUpdatePanelTitle: (newTitle: string) => dispatch(setPanelTitle({ title: newTitle, panelId })),
+  onChangeEventActions: (clickOverride: boolean) => dispatch(setClickOverride({ panelId, clickOverride })), 
 });
 
 const mergeProps = (
@@ -136,6 +142,7 @@ const mergeProps = (
     containerState,
     visibleContextMenuPanelId,
     isViewMode,
+    clickOverride,
   } = stateProps;
   const isPopoverOpen = visibleContextMenuPanelId === ownProps.panelId;
   const {
@@ -145,6 +152,7 @@ const mergeProps = (
     onResetPanelTitle,
     onUpdatePanelTitle,
     onCloseContextMenu,
+    onChangeEventActions,
     openContextMenu,
   } = dispatchProps;
   const toggleContextMenu = () => (isPopoverOpen ? onCloseContextMenu() : openContextMenu());
@@ -173,13 +181,18 @@ const mergeProps = (
       }),
       id: 'mainMenu',
     });
-
     const actions = [
       getInspectorPanelAction({
         closeContextMenu: closeMyContextMenuPanel,
         panelTitle,
       }),
       getEditPanelAction(),
+      getCustomizeEventActionsAction({
+        clickOverride,
+        title: panelTitle,
+        onReset: onResetPanelTitle,
+        onChange: onChangeEventActions
+      }),
       getCustomizePanelAction({
         onResetPanelTitle,
         onUpdatePanelTitle,

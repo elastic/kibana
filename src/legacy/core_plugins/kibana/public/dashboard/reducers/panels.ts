@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { Reducer } from 'redux';
-import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
+import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload, SetClickOverrideActionPayload } from '../actions';
 import { PanelId, PanelsMap, PanelState } from '../selectors';
 
 const deletePanel = (panels: PanelsMap, panelId: PanelId): PanelsMap => {
@@ -57,6 +57,17 @@ const setPanelTitle = (panels: PanelsMap, payload: SetPanelTitleActionPayload) =
   },
 });
 
+const setClickOverride = (panels: PanelsMap, payload: SetClickOverrideActionPayload) => ({
+  ...panels,
+  [payload.panelId]: {
+    ...panels[payload.panelId],
+    embeddableConfig: {
+      ...panels[payload.panelId].embeddableConfig,
+      clickOverride: payload.clickOverride,
+    }
+  },
+});
+
 const setPanels = (panels: PanelsMap, newPanels: PanelsMap) => _.cloneDeep(newPanels);
 
 export const panelsReducer: Reducer<PanelsMap> = (panels = {}, action): PanelsMap => {
@@ -73,6 +84,8 @@ export const panelsReducer: Reducer<PanelsMap> = (panels = {}, action): PanelsMa
       return setPanelTitle(panels, action.payload);
     case PanelActionTypeKeys.SET_PANELS:
       return setPanels(panels, action.payload);
+    case PanelActionTypeKeys.SET_CLICK_OVERRIDE:
+      return setClickOverride(panels, action.payload);
     default:
       return panels;
   }

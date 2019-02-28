@@ -114,6 +114,8 @@ export class VisualizeEmbeddable extends Embeddable {
   }
 
   public onContainerStateChanged(containerState: ContainerState) {
+    const prevClickOverride = this.customization && this.customization.clickOverride;
+
     this.transferCustomizationsToUiState(containerState);
 
     const updatedParams: VisualizeUpdateParams = {};
@@ -146,6 +148,10 @@ export class VisualizeEmbeddable extends Embeddable {
 
     if (this.handler && !_.isEmpty(updatedParams)) {
       this.handler.update(updatedParams);
+    }
+
+    if (this.handler && (prevClickOverride !== this.getClickOverride())) {
+      this.setupCustomAction();
     }
   }
 
@@ -187,16 +193,7 @@ export class VisualizeEmbeddable extends Embeddable {
       handlerParams
     );
 
-    if (containerState.embeddableCustomization.overrideClick) {
-      this.handler.disableDefaultAction('filterBucket');
-      this.handler.events$.subscribe((e) => {
-
-        runPipeline('extractSeriesName | navigateTo url="http://www.google.com/search?q=%VAR%"', e.data, {}).then(res => {
-          if (res.type !== 'action') return;
-          actionRegistry[res.as].execute(res.value);
-        });
-      });
-    }
+    this.setupCustomAction();
   }
 
   public destroy() {
@@ -212,6 +209,27 @@ export class VisualizeEmbeddable extends Embeddable {
     if (this.handler) {
       this.handler.reload();
     }
+  }
+  
+  public customClickHandler(e) {
+    runPipeline('extractSeriesName | navigateTo url="http://www.google.com/search?q=%VAR%"', e.data, {}).then(res => {
+      if (res.type !== 'action') return;
+      actionRegistry[res.as].execute(res.value);
+    });
+  }
+
+  private setupCustomAction() {
+    if (this.handler) {
+      if (this.getClickOverride()) {
+        this.handler.setCustomAction('filterBucket', this.customClickHandler);
+      } else {
+        this.handler.initDefaultActions('filterBucket');
+      }
+    }
+  }
+
+  private getClickOverride() {
+    return this.customization && this.customization.clickOverride;
   }
 
   /**

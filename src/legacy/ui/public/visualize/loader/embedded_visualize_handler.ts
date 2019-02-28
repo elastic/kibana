@@ -179,14 +179,7 @@ export class EmbeddedVisualizeHandler {
     this.vis.openInspector = this.openInspector;
     this.vis.hasInspector = this.hasInspector;
 
-    // init default actions
-    forEach(this.vis.type.events, (event, eventName) => {
-      if (event.disabled || !eventName) {
-        return;
-      } else {
-        this.actions[eventName] = event.defaultAction;
-      }
-    });
+    this.initDefaultActions();
 
     this.handlers.eventsSubject = new Rx.Subject();
     this.vis.eventsSubject = this.handlers.eventsSubject;
@@ -204,8 +197,19 @@ export class EmbeddedVisualizeHandler {
     this.render();
   }
 
-  public disableDefaultAction(eventName) {
-    delete this.actions[eventName];
+  public setCustomAction(eventName: string, eventHandler) {
+    this.actions[eventName] = eventHandler;
+  }
+
+  public initDefaultActions(initEventName?: string) {
+    // init default actions
+    forEach(this.vis.type.events, (event, eventName) => {
+      if (event.disabled || !eventName || (!!initEventName && initEventName !== eventName)) {
+        return;
+      } else {
+        this.actions[eventName] = event.defaultAction;
+      }
+    });
   }
 
   /**

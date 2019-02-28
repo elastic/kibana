@@ -28,6 +28,7 @@ export enum PanelActionTypeKeys {
   SET_PANEl_TITLE = 'SET_PANEl_TITLE',
   UPDATE_PANELS = 'UPDATE_PANELS',
   SET_PANELS = 'SET_PANELS',
+  SET_CLICK_OVERRIDE = 'CLICK_OVERRIDE',
 }
 
 export interface DeletePanelAction
@@ -46,6 +47,11 @@ export interface SetPanelTitleActionPayload {
   panelId: PanelId;
   title?: string;
 }
+export interface SetClickOverrideActionPayload {
+  panelId: PanelId;
+  clickOverride?: boolean;
+}
+
 
 export interface SetPanelTitleAction
   extends KibanaAction<PanelActionTypeKeys.SET_PANEl_TITLE, SetPanelTitleActionPayload> {}
@@ -68,3 +74,6 @@ export const setPanelTitle = createAction<SetPanelTitleActionPayload>(
 );
 export const updatePanels = createAction<PanelsMap>(PanelActionTypeKeys.UPDATE_PANELS);
 export const setPanels = createAction<PanelsMap>(PanelActionTypeKeys.SET_PANELS);
+export const setClickOverride = createAction<SetClickOverrideActionPayload>(
+  PanelActionTypeKeys.SET_CLICK_OVERRIDE
+);

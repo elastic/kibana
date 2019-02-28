@@ -26,6 +26,7 @@ import {
   EmbeddableIsInitializedActionPayload,
   PanelActionTypeKeys,
   SetStagedFilterActionPayload,
+  SetClickOverrideActionPayload,
 } from '../actions';
 import { EmbeddableReduxState, EmbeddablesMap, PanelId } from '../selectors/types';
 
@@ -40,6 +41,7 @@ const embeddableIsInitializing = (
     metadata: {},
     stagedFilter: undefined,
     lastReloadRequestTime: 0,
+    clickOverride: false,
   },
 });
 
@@ -63,6 +65,17 @@ const setStagedFilter = (
   [panelId]: {
     ...embeddables[panelId],
     stagedFilter,
+  },
+});
+
+const setClickOverride = (
+  embeddables: EmbeddablesMap,
+  { panelId, clickOverride }: SetClickOverrideActionPayload
+): EmbeddablesMap => ({
+  ...embeddables,
+  [panelId]: {
+    ...embeddables[panelId],
+    clickOverride,
   },
 });
 

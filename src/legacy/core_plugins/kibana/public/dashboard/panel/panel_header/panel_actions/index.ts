@@ -22,3 +22,4 @@ export { getRemovePanelAction } from './get_remove_panel_action';
 export { getCustomizePanelAction } from './get_customize_panel_action';
 export { getToggleExpandPanelAction } from './get_toggle_expand_panel_action';
 export { getInspectorPanelAction } from './get_inspector_panel_action';
+export { getCustomizeEventActionsAction } from './get_customize_nav_action';

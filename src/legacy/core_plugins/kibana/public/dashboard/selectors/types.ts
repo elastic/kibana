@@ -63,6 +63,7 @@ export interface EmbeddableReduxState {
    * Timestamp of the last time this embeddable was requested to reload.
    */
   readonly lastReloadRequestTime: number;
+  readonly clickOverride: boolean;
 }
 
 export interface PanelsMap {
