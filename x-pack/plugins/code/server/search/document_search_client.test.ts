@@ -95,7 +95,7 @@ function initEsClient(): EsClient {
 
   // Binding the mock search results to the stub.
   mockSearchResults.forEach((result, index) => {
-    searchStub.onCall(index).returns(result);
+    searchStub.onCall(index).returns(Promise.resolve(result));
   });
 
   return (esClient as any) as EsClient;
