@@ -21,6 +21,7 @@ import rimraf from 'rimraf';
 import path from 'path';
 import os from 'os';
 import glob from 'glob';
+import fs from 'fs';
 import { analyzeArchive, extractArchive, _isDirectory } from './zip';
 
 describe('kibana cli', function () {
@@ -69,6 +70,28 @@ describe('kibana cli', function () {
           'README.md'
         ];
         expect(files.sort()).toEqual(expected.sort());
+      });
+    });
+
+    describe('checkFilePermission', () => {
+      it('verify consistency of modes of files', async () => {
+        const archivePath = path.resolve(repliesPath, 'test_plugin.zip');
+
+        await extractArchive(archivePath, tempPath, 'kibana/libs');
+        const files = await glob.sync('**/*', { cwd: tempPath });
+
+        const expected = [
+          'executable',
+          'unexecutable'
+        ];
+        expect(files.sort()).toEqual(expected.sort());
+
+        const executableMode = '0' + (fs.statSync(path.resolve(tempPath, 'executable')).mode & parseInt('777', 8)).toString(8);
+        const unExecutableMode = '0' + (fs.statSync(path.resolve(tempPath, 'unexecutable')).mode & parseInt('777', 8)).toString(8);
+
+        expect(executableMode).toEqual('0755');
+        expect(unExecutableMode).toEqual('0644');
+
       });
     });
 
