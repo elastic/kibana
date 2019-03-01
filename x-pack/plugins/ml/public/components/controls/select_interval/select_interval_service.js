@@ -11,17 +11,8 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { subscribeAppStateToObservable } from '../../../util/app_state_utils';
-import { SelectInterval, interval$ } from './select_interval';
+import { interval$ } from './select_interval';
 
 module.service('mlSelectIntervalService', function (AppState, $rootScope) {
   subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync());
-})
-  .directive('mlSelectInterval', function ($injector) {
-    const reactDirective = $injector.get('reactDirective');
-
-    return reactDirective(
-      SelectInterval,
-      undefined,
-      { restrict: 'E' }
-    );
-  });
+});

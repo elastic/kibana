@@ -16,8 +16,6 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 
-import 'plugins/ml/components/annotations/annotations_table';
-import 'plugins/ml/components/anomalies_table';
 import 'plugins/ml/components/controls';
 
 import { toastNotifications } from 'ui/notify';
@@ -98,6 +96,7 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
+  $scope.timefilter = timefilter;
 
   const CHARTS_POINT_TARGET = 500;
   const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.

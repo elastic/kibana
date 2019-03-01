@@ -5,4 +5,4 @@
  */
 
 
-import './select_severity_directive';
+import './select_severity_service';

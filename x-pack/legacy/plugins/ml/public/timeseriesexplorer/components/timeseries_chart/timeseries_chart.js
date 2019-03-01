@@ -19,8 +19,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
-import { timefilter } from 'ui/timefilter';
-
 import {
   getSeverityWithLow,
   getMultiBucketImpactLabel,
@@ -110,6 +108,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     showModelBounds: PropTypes.bool.isRequired,
     svgWidth: PropTypes.number.isRequired,
     swimlaneData: PropTypes.array,
+    timefilter: PropTypes.object.isRequired,
     zoomFrom: PropTypes.object,
     zoomTo: PropTypes.object
   };
@@ -774,7 +773,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     const {
       autoZoomDuration,
       modelPlotEnabled,
-      intl
+      intl,
+      timefilter,
     } = this.props;
 
     const setZoomInterval = this.setZoomInterval.bind(this);
@@ -855,6 +855,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       contextChartData,
       contextForecastData,
       modelPlotEnabled,
+      timefilter,
     } = this.props;
 
     const data = contextChartData;
@@ -1192,6 +1193,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     const {
       contextAggregationInterval,
       swimlaneData,
+      timefilter,
     } = this.props;
     // Calculates the x axis domain for the context elements.
     // Elasticsearch aggregation returns points at start of bucket,
@@ -1227,7 +1229,8 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
   setZoomInterval(ms) {
     const {
-      zoomTo
+      zoomTo,
+      timefilter,
     } = this.props;
 
     const setContextBrushExtent = this.setContextBrushExtent.bind(this);

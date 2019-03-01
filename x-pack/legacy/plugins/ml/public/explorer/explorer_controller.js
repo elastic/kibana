@@ -15,8 +15,6 @@ import $ from 'jquery';
 import moment from 'moment-timezone';
 import { Subscription } from 'rxjs';
 
-import '../components/annotations/annotations_table';
-import '../components/anomalies_table';
 import '../components/controls';
 
 import template from './explorer.html';

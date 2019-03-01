@@ -5,4 +5,4 @@
  */
 
 
-import './select_interval_directive';
+import './select_interval_service';

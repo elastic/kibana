@@ -28,9 +28,12 @@ import {
 
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
+import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { EntityControl } from './components/entity_control';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
+import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoJobsFound } from './components/timeseriesexplorer_no_jobs_found';
 import { TimeseriesexplorerNoResultsFound } from './components/timeseriesexplorer_no_results_found';
@@ -56,6 +59,7 @@ export const TimeSeriesExplorer = injectI18n(
       detectorId: PropTypes.string,
       detectors: PropTypes.array.isRequired,
       entityFieldValueChanged: PropTypes.func.isRequired,
+      filter: PropTypes.func.isRequired,
       hasResults: PropTypes.bool.isRequired,
       jobs: PropTypes.array.isRequired,
       loadForForecastId: PropTypes.func.isRequired,
@@ -67,6 +71,8 @@ export const TimeSeriesExplorer = injectI18n(
       showModelBounds: PropTypes.bool.isRequired,
       showModelBoundsCheckbox: PropTypes.bool.isRequired,
       selectedJob: PropTypes.object,
+      tableData: PropTypes.object,
+      timefilter: PropTypes.object.isRequired,
       toggleShowAnnotations: PropTypes.func.isRequired,
       toggleShowForecast: PropTypes.func.isRequired,
       toggleShowModelBounds: PropTypes.func.isRequired,
@@ -88,6 +94,7 @@ export const TimeSeriesExplorer = injectI18n(
         detectors,
         entities,
         entityFieldValueChanged,
+        filter,
         hasResults,
         intl,
         jobs,
@@ -100,6 +107,8 @@ export const TimeSeriesExplorer = injectI18n(
         showModelBounds,
         showModelBoundsCheckbox,
         selectedJob,
+        tableData,
+        timefilter,
         toggleShowAnnotations,
         toggleShowForecast,
         toggleShowModelBounds,
@@ -299,6 +308,7 @@ export const TimeSeriesExplorer = injectI18n(
                   showAnnotations={showAnnotations}
                   showForecast={showForecast}
                   showModelBounds={showModelBounds}
+                  timefilter={timefilter}
                 />
               </div>
 
@@ -320,6 +330,46 @@ export const TimeSeriesExplorer = injectI18n(
               )}
 
               <AnnotationFlyout />
+
+              <span className="panel-title">
+                <FormattedMessage
+                  id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                  defaultMessage="Anomalies"
+                />
+              </span>
+
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="l"
+                responsive={true}
+                className="ml-anomalies-controls"
+              >
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.severityThresholdLabel',
+                      defaultMessage: 'Severity threshold',
+                    })}
+                  >
+                    <SelectSeverity />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ width: '170px' }}>
+                  <EuiFormRow
+                    label={intl.formatMessage({
+                      id: 'xpack.ml.explorer.intervalLabel',
+                      defaultMessage: 'Interval',
+                    })}
+                  >
+                    <SelectInterval />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+
+              <EuiSpacer size="m" />
+
+              <AnomaliesTable tableData={tableData} filter={filter} timefilter={timefilter} />
+
             </EuiText>
           )}
         </Fragment>
