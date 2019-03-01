@@ -5,26 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
 export interface Tab {
   key: string;
   label: string;
-}
-
-type AllKeys = keyof NonNullable<Transaction> | keyof NonNullable<APMError>;
-interface ConfigItem<T extends AllKeys> {
-  key: T;
-  label: string;
-  required: boolean;
-  presortedKeys: Array<
-    T extends keyof Transaction
-      ? keyof NonNullable<Transaction[T]>
-      : T extends keyof APMError
-      ? keyof NonNullable<APMError[T]>
-      : never
-  >;
 }
 
 export const PROPERTY_CONFIG = [
@@ -35,7 +19,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: []
-  } as ConfigItem<'http'>,
+  },
   {
     key: 'host',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.hostLabel', {
@@ -43,7 +27,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: ['hostname', 'architecture', 'platform']
-  } as ConfigItem<'host'>,
+  },
   {
     key: 'service',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.serviceLabel', {
@@ -51,7 +35,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: ['runtime', 'framework', 'version']
-  } as ConfigItem<'service'>,
+  },
   {
     key: 'process',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.processLabel', {
@@ -59,7 +43,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: ['pid', 'title', 'args']
-  } as ConfigItem<'process'>,
+  },
   {
     key: 'agent',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.agentLabel', {
@@ -67,7 +51,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: []
-  } as ConfigItem<'agent'>,
+  },
   {
     key: 'url',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
@@ -75,7 +59,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: []
-  } as ConfigItem<'url'>,
+  },
   {
     key: 'container',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.containerLabel', {
@@ -83,7 +67,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: false,
     presortedKeys: []
-  } as ConfigItem<'container'>,
+  },
   {
     key: 'user',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.userLabel', {
@@ -91,7 +75,7 @@ export const PROPERTY_CONFIG = [
     }),
     required: true,
     presortedKeys: ['id', 'username', 'email']
-  } as ConfigItem<'user'>,
+  },
   {
     key: 'labels',
     label: i18n.translate('xpack.apm.propertiesTable.tabs.labelsLabel', {
@@ -99,14 +83,24 @@ export const PROPERTY_CONFIG = [
     }),
     required: true,
     presortedKeys: []
-  } as ConfigItem<'labels'>,
+  },
   {
-    key:
-      'transaction.custom' /* The child field is not supported, but works when written like this */,
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.customLabel', {
+    key: 'transaction.custom',
+    label: i18n.translate(
+      'xpack.apm.propertiesTable.tabs.transactionC  ustomLabel',
+      {
+        defaultMessage: 'Custom'
+      }
+    ),
+    required: false,
+    presortedKeys: []
+  },
+  {
+    key: 'error.custom',
+    label: i18n.translate('xpack.apm.propertiesTable.tabs.errorCustomLabel', {
       defaultMessage: 'Custom'
     }),
-    required: true,
+    required: false,
     presortedKeys: []
-  } as ConfigItem<'custom'>
+  }
 ];
