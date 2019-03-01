@@ -198,27 +198,16 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-      let sandbox;
-
-      beforeEach(() => {
-        sandbox = sinon.createSandbox();
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       it('sets the timeout on the request', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
         expect(request.timeout).to.equal('30000ms');
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
         expect(request).to.not.have.property('timeout');
       });
