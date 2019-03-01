@@ -47,6 +47,7 @@ function _getValue(hasError, value, oldVal) {
 }
 
 function getContext(value, loading = false, oldVal = null) {
+  // TODO: this is no longer correct.
   const hasError = value instanceof Error;
   return {
     state: _getState(hasError, loading),
