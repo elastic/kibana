@@ -154,7 +154,7 @@ export class ExpressionInput extends React.Component {
   };
 
   render() {
-    const { value, error, isAutocompleteEnabled } = this.props;
+    const { value, error, isAutocompleteEnabled, fontSize } = this.props;
     const { suggestions } = this.state;
 
     const helpText = error
@@ -177,6 +177,7 @@ export class ExpressionInput extends React.Component {
                 onChange={this.onChange}
                 inputRef={ref => (this.ref = ref)}
                 spellCheck="false"
+                style={{ fontSize: `${fontSize}px`, resize: 'vertical' }}
               />
             </Autocomplete>
           ) : (
