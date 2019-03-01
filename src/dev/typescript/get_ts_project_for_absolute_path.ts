@@ -35,7 +35,7 @@ import { IGNORED_PATHS, PROJECTS } from './projects';
 export function getTsProjectForAbsolutePath(path: string) {
   const relPath = relative(REPO_ROOT, path);
   if (IGNORED_PATHS.some(glob => minimatch(relPath, glob, { dot: true }))) {
-    return;
+    return PROJECTS[0];
   }
 
   const projects = PROJECTS.filter(p => p.isAbsolutePathSelected(path));
