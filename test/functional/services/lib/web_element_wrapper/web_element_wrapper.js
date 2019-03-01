@@ -18,6 +18,7 @@
  */
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import { delay } from 'bluebird';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -118,15 +119,18 @@ export class WebElementWrapper {
    * key can be used to simulate common keyboard shortcuts.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
    *
-   * @param {string|string[]} ...values
+   * @param {string|string[]} value
+   * @param {charByChar: boolean} options
    * @return {Promise<void>}
    */
-  async type(...values) {
-    //leadfoot compatibility
-    if (Array.isArray(values[0])) {
-      await this._webElement.sendKeys(...values[0]);
+  async type(value, options = { charByChar: false }) {
+    if (options.charByChar) {
+      for (const char of value) {
+        await this._webElement.sendKeys(char);
+        await delay(100);
+      }
     } else {
-      await this._webElement.sendKeys(...values);
+      await this._webElement.sendKeys(...value);
     }
   }
 
