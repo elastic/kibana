@@ -70,7 +70,6 @@ export class Workpad extends React.PureComponent {
   };
 
   render() {
-    console.log('Workpad render');
     const {
       selectedPageNumber,
       getAnimation,
