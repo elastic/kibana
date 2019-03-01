@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import { UICapabilitiesService } from '../../common/services/ui_capabilities';
@@ -25,9 +26,10 @@ export default function savedObjectsManagementTests({
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
         expect(uiCapabilities.success).to.be(true);
         expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-        expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-          savedObjectsManagementBuilder.all('all')
+        const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+          savedObjectsManagementBuilder.uiCapabilities('all')
         );
+        expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
       });
     });
   });

@@ -52,23 +52,17 @@ export class SavedObjectsManagementBuilder {
     ];
   }
 
-  public all(group: keyof SavedObjectsTypeUICapabilitiesGroup) {
-    return this.allSavedObjectTypes.reduce(
-      (acc, savedObjectType) => ({
-        ...acc,
-        [savedObjectType]: savedObjectsTypeUICapabilitiesGroup[group].reduce(
-          (acc2, uiCapability) => ({
-            ...acc2,
-            [uiCapability]: true,
-          }),
-          {}
-        ),
+  public uiCapabilities(group: keyof SavedObjectsTypeUICapabilitiesGroup) {
+    return savedObjectsTypeUICapabilitiesGroup.all.reduce(
+      (acc2, uiCapability) => ({
+        ...acc2,
+        [uiCapability]: savedObjectsTypeUICapabilitiesGroup[group].includes(uiCapability),
       }),
       {}
     );
   }
 
-  public only(parameters: OnlyParameters): Record<string, boolean> {
+  public build(parameters: OnlyParameters): Record<string, boolean> {
     const readTypes = coerceToArray(parameters.read);
     const allTypes = coerceToArray(parameters.all);
     return this.allSavedObjectTypes.reduce(
