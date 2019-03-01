@@ -43,17 +43,20 @@ import { Env } from './config';
 import { getEnvOptions } from './config/__mocks__/env';
 import { loggingServiceMock } from './logging/logging_service.mock';
 
-const mockConfigService = { atPath: jest.fn(), getUnusedPaths: jest.fn().mockReturnValue([]) };
+import { configServiceMock } from './config/config_service.mock';
+
+const configService = configServiceMock.create();
 const env = new Env('.', getEnvOptions());
 const logger = loggingServiceMock.create();
 
 beforeEach(() => {
-  mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
 });
 
 afterEach(() => {
-  logger.mockClear();
-  mockConfigService.atPath.mockReset();
+  jest.clearAllMocks();
+
+  configService.atPath.mockReset();
   mockHttpService.start.mockReset();
   mockHttpService.stop.mockReset();
   mockElasticsearchService.start.mockReset();
@@ -74,7 +77,7 @@ test('starts services on "start"', async () => {
   const mockPluginsServiceStart = new Map([['some-plugin', 'some-value']]);
   mockPluginsService.start.mockReturnValue(Promise.resolve(mockPluginsServiceStart));
 
-  const server = new Server(mockConfigService as any, logger, env);
+  const server = new Server(configService as any, logger, env);
 
   expect(mockHttpService.start).not.toHaveBeenCalled();
   expect(mockElasticsearchService.start).not.toHaveBeenCalled();
@@ -100,17 +103,17 @@ test('starts services on "start"', async () => {
 });
 
 test('does not fail on "start" if there are unused paths detected', async () => {
-  mockConfigService.getUnusedPaths.mockReturnValue(['some.path', 'another.path']);
+  configService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 
-  const server = new Server(mockConfigService as any, logger, env);
+  const server = new Server(configService as any, logger, env);
   await expect(server.start()).resolves.toBeUndefined();
   expect(loggingServiceMock.collect(logger)).toMatchSnapshot('unused paths logs');
 });
 
 test('does not start http service is `autoListen:false`', async () => {
-  mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
+  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
 
-  const server = new Server(mockConfigService as any, logger, env);
+  const server = new Server(configService as any, logger, env);
 
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
@@ -123,7 +126,7 @@ test('does not start http service is `autoListen:false`', async () => {
 
 test('does not start http service if process is dev cluster master', async () => {
   const server = new Server(
-    mockConfigService as any,
+    configService as any,
     logger,
     new Env('.', getEnvOptions({ isDevClusterMaster: true }))
   );
@@ -138,7 +141,7 @@ test('does not start http service if process is dev cluster master', async () =>
 });
 
 test('stops services on "stop"', async () => {
-  const mockHttpServiceStart = { something: true };
+  const server = new Server(configService as any, logger, env);
   mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
 
   const server = new Server(mockConfigService as any, logger, env);

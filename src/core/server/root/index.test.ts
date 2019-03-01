@@ -23,9 +23,10 @@ jest.mock('../logging', () => ({
   LoggingService: jest.fn(() => logger),
 }));
 
-const mockConfigService = { atPath: jest.fn(), getConfig$: jest.fn() };
+import { configServiceMock } from '../config/config_service.mock';
+const configService = configServiceMock.create();
 jest.mock('../config/config_service', () => ({
-  ConfigService: jest.fn(() => mockConfigService),
+  ConfigService: jest.fn(() => configService),
 }));
 
 const mockServer = { start: jest.fn(), stop: jest.fn() };
@@ -34,30 +35,28 @@ jest.mock('../', () => ({ Server: jest.fn(() => mockServer) }));
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { Root } from '.';
-import { Config, Env } from '../config';
+import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 
 const env = new Env('.', getEnvOptions());
-const config$ = new BehaviorSubject({} as Config);
+const config$ = configService.getConfig$();
 
 let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
   jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
   mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
-  logger.asLoggerFactory.mockReturnValue(logger);
-  mockConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
-  mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
+  configService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
 afterEach(() => {
   jest.restoreAllMocks();
+  logger.asLoggerFactory.mockClear();
+  logger.stop.mockClear();
+  configService.getConfig$.mockClear();
 
   logger.upgrade.mockReset();
-  logger.stop.mockReset();
-  logger.asLoggerFactory.mockReset();
-  mockConfigService.atPath.mockReset();
-  mockConfigService.getConfig$.mockReset();
+  configService.atPath.mockReset();
   mockServer.start.mockReset();
   mockServer.stop.mockReset();
 });
@@ -77,7 +76,7 @@ test('starts services on "start"', async () => {
 
 test('upgrades logging configuration after start', async () => {
   const mockLoggingConfig$ = new BehaviorSubject({ someValue: 'foo' });
-  mockConfigService.atPath.mockReturnValue(mockLoggingConfig$);
+  configService.atPath.mockReturnValue(mockLoggingConfig$);
 
   const root = new Root(config$, env);
   await root.start();
@@ -173,13 +172,13 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
 test('stops services if consequent logger upgrade fails', async () => {
   const onShutdown = new BehaviorSubject<string | null>(null);
-  const mockOnShutdown = jest.fn<any, any>(() => {
+  const mockOnShutdown = jest.fn(() => {
     onShutdown.next('completed');
     onShutdown.complete();
   });
 
   const mockLoggingConfig$ = new BehaviorSubject({ someValue: 'foo' });
-  mockConfigService.atPath.mockReturnValue(mockLoggingConfig$);
+  configService.atPath.mockReturnValue(mockLoggingConfig$);
 
   const root = new Root(config$, env, mockOnShutdown);
   await root.start();
