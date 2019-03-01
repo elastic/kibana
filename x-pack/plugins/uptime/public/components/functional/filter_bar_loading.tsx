@@ -15,4 +15,8 @@ const searchBox = {
   }),
 };
 
+/**
+ * This component provides a visual placeholder while the FilterBar is loading.
+ * The onChange prop is required, so we provide an empty function to suppress the warning.
+ */
 export const FilterBarLoading = () => <EuiSearchBar box={searchBox} onChange={()=>{ /* */}}/>;
