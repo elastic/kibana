@@ -53,6 +53,7 @@ export default function savedObjectsManagementTests({
                   'dashboard',
                   'timelion-sheet',
                   'url',
+                  'infrastructure-ui-source',
                 ],
               })
             );
@@ -73,6 +74,7 @@ export default function savedObjectsManagementTests({
                   'dashboard',
                   'timelion-sheet',
                   'url',
+                  'infrastructure-ui-source',
                 ],
               })
             );
@@ -238,6 +240,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
+                all: 'infrastructure-ui-source',
                 read: 'config',
               })
             );
@@ -247,7 +250,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
-                read: 'config',
+                read: ['infrastructure-ui-source', 'config'],
               })
             );
             break;
@@ -256,6 +259,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
+                all: 'infrastructure-ui-source',
                 read: 'config',
               })
             );
@@ -265,7 +269,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.only({
-                read: 'config',
+                read: ['infrastructure-ui-source', 'config'],
               })
             );
             break;
