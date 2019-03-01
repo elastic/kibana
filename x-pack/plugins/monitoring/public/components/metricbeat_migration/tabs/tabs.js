@@ -35,47 +35,33 @@ function getProductMigrationLabel(product) {
 export class Tabs extends Component {
   state = {
     activeTabId: null,
-    tabs: [],
-    updatedProducts: [],
+    hasCheckedMigrationStatus: false,
     checkingMigrationStatus: false,
   }
 
-  componentWillMount() {
-    this.buildTabs();
-  }
-
-  findUpdatedProduct(productName) {
-    return this.state.updatedProducts.find(product => product.name === productName);
-  }
-
   buildTabs() {
-    const { products, fetchCapabilities, esMonitoringUrl, updateData } = this.props;
-    const { checkingMigrationStatus } = this.state;
+    const { products, esMonitoringUrl, updateCapabilities } = this.props;
+    const { checkingMigrationStatus, hasCheckedMigrationStatus } = this.state;
 
     const tabs = products.map(product => {
       const status = getProductStatus(product);
-      const updatedProduct = this.findUpdatedProduct(product.name);
 
       let instructions = null;
       if (status.showInstructions) {
-        const instructionSteps = getInstructionSteps(product.name, {
+        const instructionSteps = getInstructionSteps(product, {
           doneWithMigration: async () => {
+            await updateCapabilities();
             this.setState({ activeTabId: 'overview' });
-            this.props.setCapabilitiesFetchingPaused(false);
-            await updateData();
-            this.props.setCapabilitiesFetchingPaused(true);
           },
-          updatedProduct,
           kibanaUrl: '',
           esMonitoringUrl,
           checkForMigrationStatus: async () => {
             this.setState({ checkingMigrationStatus: true });
-            this.props.setCapabilitiesFetchingPaused(false);
-            const updatedProducts = await fetchCapabilities();
-            this.props.setCapabilitiesFetchingPaused(true);
-            this.setState({ checkingMigrationStatus: false, updatedProducts }, () => this.buildTabs());
+            await updateCapabilities();
+            this.setState({ checkingMigrationStatus: false, hasCheckedMigrationStatus: true });
           },
           checkingMigrationStatus,
+          hasCheckedMigrationStatus,
         });
 
         instructions = (
@@ -151,40 +137,15 @@ export class Tabs extends Component {
       )
     });
 
-    this.setState({ tabs });
+    return tabs;
   }
-
-  // componentWillReceiveProps(nextProps) {
-  //   if (nextProps.products && this.props.products) {
-  //     if (!isEqual(nextProps.products, this.props.products)) {
-  //       console.log(1);
-  //       this.setState({
-  //         tabs: buildTabs({
-  //           products: this.props.products,
-  //           updatedProducts: nextProps.updatedProducts,
-  //           changeTab: this.changeTab,
-  //           instructionOpts: nextProps.instructionOpts
-  //         })
-  //       });
-  //     } else if (nextProps.checkedMigrationStatus) {
-  //       console.log(2);
-  //       this.setState({
-  //         tabs: buildTabs({
-  //           products: this.props.products,
-  //           updatedProducts: this.props.products, // It's the same but the code will handle showing a message like "no data found yet" since this is for the Check Data call
-  //           changeTab: this.changeTab,
-  //           instructionOpts: nextProps.instructionOpts
-  //         })
-  //       });
-  //     }
-  //   }
-  // }
 
   changeTab = tabId => this.setState({ activeTabId: tabId })
 
   render() {
-    const { activeTabId, tabs } = this.state;
+    const { activeTabId } = this.state;
 
+    const tabs = this.buildTabs();
     const activeTab = tabs.find(tab => tab.id === activeTabId);
     return (
       <EuiTabbedContent

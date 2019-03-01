@@ -29,7 +29,7 @@ export class Flyout extends Component {
   }
 
   renderActiveStep() {
-    const { products, fetchCapabilities, setCapabilitiesFetchingPaused, updateData } = this.props;
+    const { products, updateCapabilities } = this.props;
     const { activeStep, esMonitoringUrl } = this.state;
 
     switch (activeStep) {
@@ -52,9 +52,7 @@ export class Flyout extends Component {
           <Tabs
             products={products}
             esMonitoringUrl={esMonitoringUrl}
-            updateData={updateData}
-            fetchCapabilities={fetchCapabilities}
-            setCapabilitiesFetchingPaused={setCapabilitiesFetchingPaused}
+            updateCapabilities={updateCapabilities}
           />
         );
     }

@@ -21,66 +21,53 @@ export class MetricbeatMigration extends Component {
 
     this.state = {
       isShowingFlyout: false,
-      // esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
-      // checkingMigrationStatus: false,
-      // checkedMigrationStatus: false,
-      // updatedProducts: null,
+      capabilities: null,
     };
   }
 
+  componentWillMount() {
+    this.updateCapabilities();
+  }
+
+  async updateCapabilities() {
+    const { fetchCapabilities } = this.props;
+
+    const capabilities = await fetchCapabilities();
+    this.setState({ capabilities });
+  }
+
   renderFlyout() {
-    const { isShowingFlyout } = this.state;
-    const { clusterCapabilities, fetchCapabilities, setCapabilitiesFetchingPaused, updateData } = this.props;
+    const { isShowingFlyout, capabilities } = this.state;
 
     if (!isShowingFlyout) {
       return null;
     }
 
-    // const instructionOpts = {
-    //   kibanaUrl: '',
-    //   esMonitoringUrl,
-    //   migrationSuccessful: true,
-    //   checkingMigrationStatus,
-    //   checkForMigrationStatus: async () => {
-    // this.setState({ checkingMigrationStatus: true });
-    // this.props.setCapabilitiesFetchingPaused(false);
-    // await fetchCapabilities();
-    // this.props.setCapabilitiesFetchingPaused(true);
-    // this.setState({ checkingMigrationStatus: false, checkedMigrationStatus: true });
-    //   }
-    // };
-
     return (
       <Flyout
         onClose={() => this.closeFlyout()}
-        products={clusterCapabilities}
-        updateData={updateData}
-        fetchCapabilities={fetchCapabilities}
-        setCapabilitiesFetchingPaused={setCapabilitiesFetchingPaused}
-        // updatedProducts={updatedProducts}
-        // checkingMigrationStatus={checkingMigrationStatus}
-        // checkedMigrationStatus={checkedMigrationStatus}
-        // instructionOpts={instructionOpts}
-        // esMonitoringUrl={esMonitoringUrl}
-        // setMonitoringUrl={esMonitoringUrl => this.setState({ esMonitoringUrl })}
+        products={capabilities}
+        updateCapabilities={() => this.updateCapabilities()}
       />
     );
   }
 
   showFlyout() {
-    this.props.setCapabilitiesFetchingPaused(true);
     this.setState({ isShowingFlyout: true });
   }
 
   closeFlyout() {
-    this.props.setCapabilitiesFetchingPaused(false);
     this.setState({ isShowingFlyout: false });
   }
 
   render() {
-    const { clusterCapabilities } = this.props;
+    const { capabilities } = this.state;
 
-    const isFullyMigrated = Object.values(clusterCapabilities).reduce((isFullyMigrated, cap) => {
+    if (!capabilities) {
+      return null;
+    }
+
+    const isFullyMigrated = Object.values(capabilities).reduce((isFullyMigrated, cap) => {
       return isFullyMigrated && cap.isFullyMigrated;
     }, true);
 
@@ -89,7 +76,7 @@ export class MetricbeatMigration extends Component {
     }
 
     let title = '';
-    if (clusterCapabilities.isInternalCollector) {
+    if (capabilities.isInternalCollector) {
       title = 'Hey! You are using internal collection. Why?';
     }
 

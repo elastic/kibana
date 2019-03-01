@@ -15,14 +15,112 @@ import {
   EuiCallOut
 } from '@elastic/eui';
 
-export function getKibanaInstructions({
-  updatedProduct,
+export function getKibanaInstructions(product, {
   doneWithMigration,
   kibanaUrl,
   esMonitoringUrl,
   checkForMigrationStatus,
-  checkingMigrationStatus
+  checkingMigrationStatus,
+  hasCheckedMigrationStatus
 }) {
+  const disableKibanaInternalCollection = {
+    title: 'Disable the default collection of Kibana monitoring metrics',
+    children: (
+      <Fragment>
+        <p>Add the following setting in the Kibana configuration file (kibana.yml):</p>
+        <EuiSpacer size="s"/>
+        <EuiCodeBlock
+          isCopyable
+          language="bash"
+        >
+          xpack.monitoring.kibana.collection.enabled: false
+        </EuiCodeBlock>
+        <EuiSpacer size="s"/>
+        <p>
+          Leave the xpack.monitoring.enabled set to its default value (true).
+        </p>
+      </Fragment>
+    )
+  };
+
+  let updateStep = null;
+  if (product.isInternalCollector || product.isPartiallyMigrated) {
+    let status = null;
+    if (hasCheckedMigrationStatus) {
+      if (product.isPartiallyMigrated) {
+        status = (
+          <Fragment>
+            <EuiSpacer size="m"/>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              title="We still see data coming from the default collection of Kibana. Make sure you disable that before moving forward."
+            />
+          </Fragment>
+        );
+      }
+      else {
+        status = (
+          <Fragment>
+            <EuiSpacer size="m"/>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              title="We have not detected any monitoring data coming from Metricbeat for Kibana"
+            />
+          </Fragment>
+        );
+      }
+
+    }
+
+    updateStep = {
+      title: 'Migration status',
+      status: 'incomplete',
+      children: (
+        <Fragment>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <p>
+                Check that data is received from the Metricbeat
+              </p>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
+                {checkingMigrationStatus ? 'Checking for data...' : 'Check data' }
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {status}
+        </Fragment>
+      )
+    };
+  }
+  else if (product.isFullyMigrated) {
+    updateStep = {
+      title: 'Migration status',
+      status: 'complete',
+      children: (
+        <Fragment>
+          <EuiCallOut
+            size="s"
+            color="success"
+            title="Congratulations! We are now seeing monitoring data shipping from Metricbeat!"
+          />
+          <EuiSpacer size="m"/>
+          <EuiButton onClick={doneWithMigration}>Done</EuiButton>
+        </Fragment>
+      )
+    };
+  }
+
+  if (product.fullyMigratedButNeedsToDisableLegacy) {
+    return [
+      disableKibanaInternalCollection,
+      updateStep
+    ];
+  }
+
   const instructions = [
     {
       title: 'Enable monitoring collection',
@@ -49,25 +147,7 @@ PUT _cluster/settings
         </Fragment>
       )
     },
-    {
-      title: 'Disable the default collection of Kibana monitoring metrics',
-      children: (
-        <Fragment>
-          <p>Add the following setting in the Kibana configuration file (kibana.yml):</p>
-          <EuiSpacer size="s"/>
-          <EuiCodeBlock
-            isCopyable
-            language="bash"
-          >
-            xpack.monitoring.kibana.collection.enabled: false
-          </EuiCodeBlock>
-          <EuiSpacer size="s"/>
-          <p>
-            Leave the xpack.monitoring.enabled set to its default value (true).
-          </p>
-        </Fragment>
-      )
-    },
+    disableKibanaInternalCollection,
     {
       title: 'Install Metricbeat on the same node as Kibana',
       children: (
@@ -137,66 +217,8 @@ output.elasticsearch:
 
       )
     },
+    updateStep
   ];
-
-  if (!updatedProduct || updatedProduct.isInternalCollector) {
-    let status = null;
-    if (updatedProduct) {
-      status = (
-        <Fragment>
-          <EuiSpacer size="m"/>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title="We have not detected any monitoring data coming from Metricbeat for Kibana"
-          />
-        </Fragment>
-      );
-    }
-
-    instructions.push(
-      {
-        title: 'Migration status',
-        status: 'incomplete',
-        children: (
-          <Fragment>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <p>
-                  Check that data is received from the Metricbeat apache module
-                </p>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={checkForMigrationStatus} isDisabled={checkingMigrationStatus}>
-                  {checkingMigrationStatus ? 'Checking for data...' : 'Check data' }
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {status}
-          </Fragment>
-        )
-      }
-    );
-  }
-  else if (updatedProduct.isFullyMigrated || updatedProduct.isPartiallyMigrated) {
-    instructions.push(
-      {
-        title: 'Migration status',
-        status: 'complete',
-        children: (
-          <Fragment>
-            <EuiCallOut
-              size="s"
-              color="success"
-              title="Congratulations! We are now seeing monitoring data shipping from Metricbeat!"
-            />
-            <EuiSpacer size="m"/>
-            <EuiButton onClick={doneWithMigration}>Done</EuiButton>
-          </Fragment>
-        )
-      }
-    );
-  }
 
   return instructions;
 }

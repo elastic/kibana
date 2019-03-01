@@ -10,7 +10,6 @@ import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_han
 const uiModule = uiModules.get('monitoring/capabilities');
 uiModule.service('capabilities', ($injector) => {
   return (clusterUuid, ccs) => {
-    console.log('fetching capabilities');
     // append clusterUuid if the parameter is given
     let url = '../api/monitoring/v1/capabilities';
     if (clusterUuid) {

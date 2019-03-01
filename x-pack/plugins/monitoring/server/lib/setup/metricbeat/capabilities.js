@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, sortByOrder, uniq } from 'lodash';
+import { get, sortByOrder, uniq, isEqual } from 'lodash';
 import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants';
 
 export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
@@ -12,7 +12,7 @@ export const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUu
     {
       range: {
         'timestamp': {
-          gte: 'now-5m',
+          gte: 'now-2m',
           lte: 'now'
         }
       }
@@ -67,6 +67,7 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
     isFullyMigrated: false,
     internalCollectorsUuids: [],
     fullyMigratedUuids: [],
+    fullyMigratedButNeedsToDisableLegacy: false
   };
 
   const PRODUCTS = [
@@ -96,10 +97,10 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       const uuidBuckets = get(buckets[0], 'uuids.buckets', []);
       if (buckets[0].key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
         capabilities.isFullyMigrated = true;
-        capabilities.fullyMigratedUuids = uuidBuckets.map(bucket => bucket.key);
+        capabilities.fullyMigratedUuids = uniq(uuidBuckets.map(bucket => bucket.key));
       } else {
         capabilities.isInternalCollector = true;
-        capabilities.internalCollectorsUuids = uuidBuckets.map(bucket => bucket.key);
+        capabilities.internalCollectorsUuids = uniq(uuidBuckets.map(bucket => bucket.key));
       }
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
@@ -107,15 +108,17 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       for (const bucket of buckets) {
         const uuidBuckets = get(bucket, 'uuids.buckets', []);
         if (bucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
-          capabilities.fullyMigratedUuids.push(...uuidBuckets.map(bucket => bucket.key));
+          capabilities.fullyMigratedUuids.push(...uniq(uuidBuckets.map(bucket => bucket.key)));
           capabilities.isPartiallyMigrated = true;
         } else {
-          capabilities.internalCollectorsUuids.push(...uuidBuckets.map(bucket => bucket.key));
+          capabilities.internalCollectorsUuids.push(...uniq(uuidBuckets.map(bucket => bucket.key)));
         }
       }
       if (!capabilities.isPartiallyMigrated) {
         // TODO: is this right? should this even happen?
         capabilities.isInternalCollector = true;
+      } else {
+        capabilities.fullyMigratedButNeedsToDisableLegacy = isEqual(product.fullyMigratedUuids, product.internalCollectorsUuids);
       }
       capabilities.totalUniqueInstanceCount = uniq([...capabilities.fullyMigratedUuids, ...capabilities.internalCollectorsUuids]).length;
     }

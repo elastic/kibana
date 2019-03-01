@@ -5,6 +5,7 @@
  */
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
+import { first } from 'rxjs/operators';
 
 export function monitoringHostsRoute(server) {
   /*
@@ -21,7 +22,14 @@ export function monitoringHostsRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        return config.get('xpack.monitoring.elasticsearch.hosts') || config.get('elasticsearch.hosts');
+
+        const monitoringHosts = config.get('xpack.monitoring.elasticsearch.hosts');
+        if (monitoringHosts) {
+          return monitoringHosts;
+        }
+
+        const legacyEsConfig = await server.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+        return legacyEsConfig.hosts;
       } catch (err) {
         throw handleError(err, req);
       }

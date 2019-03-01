@@ -24,11 +24,8 @@ export function Overview(props) {
         <AlertsPanel alerts={props.cluster.alerts} changeUrl={props.changeUrl} />
 
         <MetricbeatMigration
-          clusterCapabilities={props.clusterCapabilities}
           monitoringHosts={props.monitoringHosts}
           fetchCapabilities={props.fetchCapabilities}
-          updateData={props.updateData}
-          setCapabilitiesFetchingPaused={props.setCapabilitiesFetchingPaused}
         />
 
         { !isFromStandaloneCluster ?
