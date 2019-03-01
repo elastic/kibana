@@ -202,7 +202,6 @@ export default async function ({ readConfigFile }) {
 
     junit: {
       reportName: 'X-Pack Functional Tests',
-      rootDirectory: resolve(__dirname, '../../'),
     },
   };
 }
