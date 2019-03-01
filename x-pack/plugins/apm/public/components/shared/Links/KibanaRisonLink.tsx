@@ -23,13 +23,13 @@ interface Props extends RisonHrefArgs {
  *
  * You must remember to pass in location in that case.
  */
-export function UnconnectedKibanaRisonLink({
+const UnconnectedKibanaRisonLink: React.FunctionComponent<Props> = ({
   location,
   pathname,
   hash,
   query,
   ...props
-}: Props) {
+}) => {
   const href = getRisonHref({
     location,
     pathname,
@@ -37,11 +37,13 @@ export function UnconnectedKibanaRisonLink({
     query
   });
   return <EuiLink {...props} href={href} />;
-}
+};
 
 const withLocation = connect(
   ({ location }: { location: Location }) => ({ location }),
   {}
 );
 
-export const KibanaRisonLink = withLocation(UnconnectedKibanaRisonLink);
+const KibanaRisonLink = withLocation(UnconnectedKibanaRisonLink);
+
+export { UnconnectedKibanaRisonLink, KibanaRisonLink };
