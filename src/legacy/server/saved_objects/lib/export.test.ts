@@ -214,6 +214,8 @@ Array [
     Array [
       Object {
         "perPage": 500,
+        "sortField": "_id",
+        "sortOrder": "asc",
         "type": Array [
           "index-pattern",
           "search",
