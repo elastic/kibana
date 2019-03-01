@@ -159,7 +159,7 @@ class DatePickerComponent extends React.Component<Props> {
         refreshInterval={refreshInterval}
         onTimeChange={this.handleTimeChange}
         onRefreshChange={this.handleRefreshChange}
-        showUpdateButton={false}
+        showUpdateButton={true}
       />
     );
   }
