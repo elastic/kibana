@@ -4,15 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
-import {
-  EuiFieldText,
-  EuiFormRow,
-} from '@elastic/eui';
-
-import { AbstractTMSSource } from './tms_source';
-import { TileLayer } from '../tile_layer';
+import { AbstractTMSSource } from '../tms_source';
+import { TileLayer } from '../../tile_layer';
+import { WMSCreateSourceEditor } from './wms_create_source_editor';
 
 export class WMSSource extends AbstractTMSSource {
 
@@ -36,7 +32,7 @@ export class WMSSource extends AbstractTMSSource {
       const source = new WMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
-    return (<WMSEditor previewWMS={previewWMS} />);
+    return (<WMSCreateSourceEditor previewWMS={previewWMS} />);
   }
 
   async getImmutableProperties() {
@@ -71,72 +67,5 @@ export class WMSSource extends AbstractTMSSource {
     const styles = this._descriptor.styles ? this._descriptor.styles : '';
     // eslint-disable-next-line max-len
     return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${styles}`;
-  }
-}
-
-
-class WMSEditor extends  React.Component {
-
-  state = {
-    serviceUrl: '',
-    layers: '',
-    styles: ''
-  }
-
-  _previewIfPossible() {
-    if (this.state.serviceUrl && this.state.layers) {
-      //todo: should really debounce this so we don't get a ton of changes during typing
-      this.props.previewWMS({
-        serviceUrl: this.state.serviceUrl,
-        layers: this.state.layers,
-        styles: this.state.styles
-      });
-    }
-  }
-
-  async _handleServiceUrlChange(e) {
-    await this.setState({
-      serviceUrl: e.target.value
-    });
-    this._previewIfPossible();
-  }
-
-  async _handleLayersChange(e) {
-    await this.setState({
-      layers: e.target.value
-    });
-    this._previewIfPossible();
-  }
-
-  async _handleStylesChange(e) {
-    await this.setState({
-      styles: e.target.value
-    });
-    this._previewIfPossible();
-  }
-
-
-  render() {
-    return (
-      <Fragment>
-        <EuiFormRow label="Url">
-          <EuiFieldText
-            value={this.state.serviceUrl}
-            onChange={(e) => this._handleServiceUrlChange(e)}
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
-          <EuiFieldText
-            onChange={(e) => this._handleLayersChange(e)}
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
-          <EuiFieldText
-            onChange={(e) => this._handleStylesChange(e)}
-          />
-        </EuiFormRow>
-      </Fragment>
-
-    );
   }
 }
