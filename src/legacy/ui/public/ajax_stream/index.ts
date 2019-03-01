@@ -17,32 +17,17 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import chrome from 'ui/chrome';
+import { metadata } from 'ui/metadata';
+import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
 
-export function translate(server) {
-  /*
-    Get AST from expression
-  */
-  server.route({
-    method: 'GET',
-    path: '/api/canvas/ast',
-    handler: function (request, h) {
-      if (!request.query.expression) {
-        return h.response({ error: '"expression" query is required' }).code(400);
-      }
-      return fromExpression(request.query.expression);
-    },
-  });
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'kbn-version': metadata.version,
+};
 
-  server.route({
-    method: 'POST',
-    path: '/api/canvas/expression',
-    handler: function (request, h) {
-      try {
-        return toExpression(request.payload);
-      } catch (e) {
-        return h.response({ error: e.message }).code(400);
-      }
-    },
-  });
+export { BatchOpts } from './ajax_stream';
+
+export function ajaxStream<T>(opts: BatchOpts<T>) {
+  return ajax(chrome.getBasePath(), defaultHeaders, new XMLHttpRequest(), opts);
 }
