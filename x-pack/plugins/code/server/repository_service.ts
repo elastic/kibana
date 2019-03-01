@@ -91,6 +91,10 @@ export class RepositoryService {
                   }
                 },
               } as any,
+              certificateCheck: () => {
+                // Ignore cert check failures.
+                return 1;
+              },
             },
           },
         });
