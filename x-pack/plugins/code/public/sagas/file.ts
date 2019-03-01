@@ -45,9 +45,7 @@ function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
     const { uri, revision, path, parents, isDir } = action.payload!;
     if (path) {
-      if (isDir) {
-        yield call(fetchPath, { uri, revision, path, parents, isDir });
-      }
+      yield call(fetchPath, { uri, revision, path, parents, isDir });
     } else {
       yield call(fetchPath, action.payload!);
     }
