@@ -313,7 +313,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                         maxWidth={true}
                         onClose={[Function]}
                       >
-                        <Component
+                        <_default
                           focusTrapOptions={
                             Object {
                               "fallbackFocus": [Function],
@@ -523,7 +523,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                               </div>
                             </div>
                           </div>
-                        </Component>
+                        </_default>
                       </EuiModal>
                     </EuiConfirmModal>
                   </Portal>
