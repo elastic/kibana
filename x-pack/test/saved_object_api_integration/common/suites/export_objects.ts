@@ -9,40 +9,29 @@ import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
-interface ExportTest {
+interface ExportObjectsTest {
   statusCode: number;
   description: string;
   response: (resp: { [key: string]: any }) => void;
 }
 
-interface ExportTests {
-  spaceAwareType: ExportTest;
-  noTypeOrObjects: ExportTest;
+interface ExportObjectsTests {
+  spaceAwareType: ExportObjectsTest;
+  noTypeOrObjects: ExportObjectsTest;
 }
 
-interface ExportTestDefinition {
+interface ExportObjectsTestDefinition {
   user?: TestDefinitionAuthentication;
   spaceId?: string;
-  tests: ExportTests;
+  tests: ExportObjectsTests;
 }
 
-export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function exportObjectsTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
-    // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
-    // The best that could be done here is to have an if statement to ensure at least one of the
-    // two errors has been thrown.
-    if (resp.body.message.indexOf(`bulk_get`) !== -1) {
-      expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
-        message: `Unable to bulk_get ${type}, missing action:saved_objects/${type}/bulk_get`,
-      });
-      return;
-    }
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to find ${type}, missing action:saved_objects/${type}/find`,
+      message: `Unable to bulk_get ${type}, missing action:saved_objects/${type}/bulk_get`,
     });
   };
 
@@ -76,9 +65,9 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const makeExportTest = (describeFn: DescribeFn) => (
+  const makeExportObjectsTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: ExportTestDefinition
+    definition: ExportObjectsTestDefinition
   ) => {
     const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
@@ -88,22 +77,9 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
 
       it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
         tests.spaceAwareType.description
-      } when querying by type`, async () => {
+      }`, async () => {
         await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-          .send({
-            type: 'visualization',
-          })
-          .auth(user.username, user.password)
-          .expect(tests.spaceAwareType.statusCode)
-          .then(tests.spaceAwareType.response);
-      });
-
-      it(`space aware type should return ${tests.spaceAwareType.statusCode} with ${
-        tests.spaceAwareType.description
-      } when querying by objects`, async () => {
-        await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export_objects`)
           .send({
             objects: [
               {
@@ -117,12 +93,12 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           .then(tests.spaceAwareType.response);
       });
 
-      describe('no type or objects', () => {
+      describe('no objects', () => {
         it(`should return ${tests.noTypeOrObjects.statusCode} with ${
           tests.noTypeOrObjects.description
         }`, async () => {
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export_objects`)
             .auth(user.username, user.password)
             .expect(tests.noTypeOrObjects.statusCode)
             .then(tests.noTypeOrObjects.response);
@@ -131,14 +107,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     });
   };
 
-  const exportTest = makeExportTest(describe);
+  const exportObjectsTest = makeExportObjectsTest(describe);
   // @ts-ignore
-  exportTest.only = makeExportTest(describe.only);
+  exportObjectsTest.only = makeExportObjectsTest(describe.only);
 
   return {
     createExpectRbacForbidden,
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
-    exportTest,
+    exportObjectsTest,
   };
 }

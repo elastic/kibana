@@ -102,9 +102,9 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Routes', () => {
-    it('should create 8 routes', () => {
+    it('should create 9 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(8);
+      expect(mockServer.route).toHaveBeenCalledTimes(9);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -134,9 +134,15 @@ describe('Saved Objects Mixin', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
       expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' }));
     });
-    it('should add GET /api/saved_objects/_export', () => {
+    it('should add POST /api/saved_objects/_export_by_type/{type}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_export', method: 'POST' }));
+      expect(mockServer.route)
+        .toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_export_by_type/{type}', method: 'POST' }));
+    });
+    it('should add POST /api/saved_objects/_export_objects', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route)
+        .toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_export_objects', method: 'POST' }));
     });
   });
 

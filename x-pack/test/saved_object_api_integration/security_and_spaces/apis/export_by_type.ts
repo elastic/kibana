@@ -7,7 +7,7 @@
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
-import { exportTestSuiteFactory } from '../../common/suites/export';
+import { exportByTypeTestSuiteFactory } from '../../common/suites/export_by_type';
 
 // tslint:disable:no-default-export
 
@@ -15,13 +15,13 @@ export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  describe('export', () => {
+  describe('export_by_type', () => {
     const {
       createExpectRbacForbidden,
       expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
-      exportTest,
-    } = exportTestSuiteFactory(esArchiver, supertest);
+      exportByTypeTest,
+    } = exportByTypeTestSuiteFactory(esArchiver, supertest);
 
     [
       {
@@ -55,7 +55,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      exportTest(`user with no access within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`user with no access within the ${scenario.spaceId} space`, {
         user: scenario.users.noAccess,
         spaceId: scenario.spaceId,
         tests: {
@@ -72,7 +72,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`superuser with the ${scenario.spaceId} space`, {
+      exportByTypeTest(`superuser with the ${scenario.spaceId} space`, {
         user: scenario.users.superuser,
         spaceId: scenario.spaceId,
         tests: {
@@ -89,7 +89,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`legacy user within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`legacy user within the ${scenario.spaceId} space`, {
         user: scenario.users.legacyAll,
         spaceId: scenario.spaceId,
         tests: {
@@ -106,7 +106,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`dual-privileges user within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         user: scenario.users.dualAll,
         spaceId: scenario.spaceId,
         tests: {
@@ -123,7 +123,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`dual-privileges readonly user within the ${scenario.spaceId} space`, {
         user: scenario.users.dualRead,
         spaceId: scenario.spaceId,
         tests: {
@@ -140,7 +140,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
         user: scenario.users.allGlobally,
         spaceId: scenario.spaceId,
         tests: {
@@ -157,7 +157,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
         user: scenario.users.readGlobally,
         spaceId: scenario.spaceId,
         tests: {
@@ -174,7 +174,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`rbac user with all at the space within the ${scenario.spaceId} space`, {
         user: scenario.users.allAtSpace,
         spaceId: scenario.spaceId,
         tests: {
@@ -191,7 +191,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
+      exportByTypeTest(`rbac user with read at the space within the ${scenario.spaceId} space`, {
         user: scenario.users.readAtSpace,
         spaceId: scenario.spaceId,
         tests: {
@@ -208,7 +208,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      exportTest(`rbac user with all at the other space within ${scenario.spaceId} space`, {
+      exportByTypeTest(`rbac user with all at the other space within ${scenario.spaceId} space`, {
         user: scenario.users.allAtOtherSpace,
         spaceId: scenario.spaceId,
         tests: {

@@ -20,47 +20,49 @@
 import Boom from 'boom';
 import { SavedObject, SavedObjectsClient } from '../service/saved_objects_client';
 
-interface ObjectToExport {
-  id: string;
-  type: string;
-}
-
-interface ExportObjectsOptions {
-  types?: string[];
-  objects?: ObjectToExport[];
+export async function getExportObjectsByType({
+  types,
+  savedObjectsClient,
+  exportSizeLimit,
+}: {
+  types: string[];
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
+}) {
+  const findResponse = await savedObjectsClient.find({
+    type: types,
+    perPage: exportSizeLimit,
+  });
+  if (findResponse.total > exportSizeLimit) {
+    throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
+  }
+  const { saved_objects: objectsToExport } = findResponse;
+  return sortObjects(objectsToExport);
 }
 
-export async function getSortedObjectsForExport({
-  types,
+export async function getExportObjects({
   objects,
   savedObjectsClient,
   exportSizeLimit,
-}: ExportObjectsOptions) {
-  let objectsToExport: SavedObject[] = [];
-  if (objects) {
-    if (objects.length > exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
-    }
-    ({ saved_objects: objectsToExport } = await savedObjectsClient.bulkGet(objects));
-    const erroredObjects = objectsToExport.filter(obj => !!obj.error);
-    if (erroredObjects.length) {
-      const err = Boom.badRequest();
-      err.output.payload.attributes = {
-        objects: erroredObjects,
-      };
-      throw err;
-    }
-  } else {
-    const findResponse = await savedObjectsClient.find({
-      type: types,
-      perPage: exportSizeLimit,
-    });
-    if (findResponse.total > exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
-    }
-    ({ saved_objects: objectsToExport } = findResponse);
+}: {
+  objects: Array<{
+    type: string;
+    id: string;
+  }>;
+  savedObjectsClient: SavedObjectsClient;
+  exportSizeLimit: number;
+}) {
+  if (objects.length > exportSizeLimit) {
+    throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
+  }
+  const { saved_objects: objectsToExport } = await savedObjectsClient.bulkGet(objects);
+  const erroredObjects = objectsToExport.filter(obj => !!obj.error);
+  if (erroredObjects.length) {
+    const err = Boom.badRequest();
+    err.output.payload.attributes = {
+      objects: erroredObjects,
+    };
+    throw err;
   }
   return sortObjects(objectsToExport);
 }
@@ -97,5 +99,5 @@ export function sortObjects(savedObjects: SavedObject[]) {
   }
 
   includeObjects(savedObjects);
-  return [...sorted];
+  return [...sorted] as SavedObject[];
 }

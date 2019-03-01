@@ -19,9 +19,9 @@
 
 import Hapi from 'hapi';
 import { MockServer } from './_mock_server';
-import { createExportRoute } from './export';
+import { createExportObjectsRoute } from './export_objects';
 
-describe('POST /api/saved_objects/_export', () => {
+describe('POST /api/saved_objects/_import_objects', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
@@ -45,7 +45,7 @@ describe('POST /api/saved_objects/_export', () => {
       },
     };
 
-    server.route(createExportRoute(prereqs, server));
+    server.route(createExportObjectsRoute(prereqs, server));
   });
 
   afterEach(() => {
@@ -61,13 +61,17 @@ describe('POST /api/saved_objects/_export', () => {
   test('formats successful response', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_export',
+      url: '/api/saved_objects/_export_objects',
       payload: {
-        type: 'index-pattern',
+        objects: [
+          {
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
       },
     };
-    savedObjectsClient.find.mockResolvedValueOnce({
-      total: 1,
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
           id: '1',
@@ -90,16 +94,16 @@ Array [
   },
 ]
 `);
-    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
-      Object {
-        "perPage": 10000,
-        "type": Array [
-          "index-pattern",
-        ],
-      },
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ],
     ],
   ],
   "results": Array [

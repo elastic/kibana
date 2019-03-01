@@ -15,7 +15,8 @@ export default function({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
-    loadTestFile(require.resolve('./export'));
+    loadTestFile(require.resolve('./export_by_type'));
+    loadTestFile(require.resolve('./export_objects'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));

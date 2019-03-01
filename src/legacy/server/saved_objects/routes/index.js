@@ -24,4 +24,5 @@ export { createDeleteRoute } from './delete';
 export { createFindRoute } from './find';
 export { createGetRoute } from './get';
 export { createUpdateRoute } from './update';
-export { createExportRoute } from './export';
+export { createExportByTypeRoute } from './export_by_type';
+export { createExportObjectsRoute } from './export_objects';
