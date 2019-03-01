@@ -10,13 +10,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
+import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
 const Table = styled.table`
   font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
+  font-size: ${fontSize};
   width: 100%;
 `;
 
