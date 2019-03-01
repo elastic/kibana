@@ -190,17 +190,17 @@ const FooRead: FooRead = {
   },
 };
 
-export type UserScenarios =
-  | NoKibanaPrivileges
-  | Superuser
-  | LegacyAll
-  | DualPrivilegesAll
-  | DualPrivilegesRead
-  | All
-  | Read
-  | FooAll
-  | FooRead;
-export const UserScenarios: UserScenarios[] = [
+export const UserScenarios: [
+  NoKibanaPrivileges,
+  Superuser,
+  LegacyAll,
+  DualPrivilegesAll,
+  DualPrivilegesRead,
+  All,
+  Read,
+  FooAll,
+  FooRead
+] = [
   NoKibanaPrivileges,
   Superuser,
   LegacyAll,

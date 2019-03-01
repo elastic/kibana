@@ -419,30 +419,30 @@ const NothingSpaceReadAtNothingSpace: NothingSpaceReadAtNothingSpace = {
   space: NothingSpace,
 };
 
-export type UserAtSpaceScenarios =
-  | NoKibanaPrivilegesAtEverythingSpace
-  | NoKibanaPrivilegesAtNothingSpace
-  | SuperuserAtEverythingSpace
-  | SuperuserAtNothingSpace
-  | LegacyAllAtEverythingSpace
-  | LegacyAllAtNothingSpace
-  | DualPrivilegesAllAtEverythingSpace
-  | DualPrivilegesAllAtNothingSpace
-  | DualPrivilegesReadAtEverythingSpace
-  | DualPrivilegesReadAtNothingSpace
-  | GlobalAllAtEverythingSpace
-  | GlobalAllAtNothingSpace
-  | GlobalReadAtEverythingSpace
-  | GlobalReadAtNothingSpace
-  | EverythingSpaceAllAtEverythingSpace
-  | EverythingSpaceAllAtNothingSpace
-  | EverythingSpaceReadAtEverythingSpace
-  | EverythingSpaceReadAtNothingSpace
-  | NothingSpaceAllAtEverythingSpace
-  | NothingSpaceAllAtNothingSpace
-  | NothingSpaceReadAtEverythingSpace
-  | NothingSpaceReadAtNothingSpace;
-export const UserAtSpaceScenarios: UserAtSpaceScenarios[] = [
+export const UserAtSpaceScenarios: [
+  NoKibanaPrivilegesAtEverythingSpace,
+  NoKibanaPrivilegesAtNothingSpace,
+  SuperuserAtEverythingSpace,
+  SuperuserAtNothingSpace,
+  LegacyAllAtEverythingSpace,
+  LegacyAllAtNothingSpace,
+  DualPrivilegesAllAtEverythingSpace,
+  DualPrivilegesAllAtNothingSpace,
+  DualPrivilegesReadAtEverythingSpace,
+  DualPrivilegesReadAtNothingSpace,
+  GlobalAllAtEverythingSpace,
+  GlobalAllAtNothingSpace,
+  GlobalReadAtEverythingSpace,
+  GlobalReadAtNothingSpace,
+  EverythingSpaceAllAtEverythingSpace,
+  EverythingSpaceAllAtNothingSpace,
+  EverythingSpaceReadAtEverythingSpace,
+  EverythingSpaceReadAtNothingSpace,
+  NothingSpaceAllAtEverythingSpace,
+  NothingSpaceAllAtNothingSpace,
+  NothingSpaceReadAtEverythingSpace,
+  NothingSpaceReadAtNothingSpace
+] = [
   NoKibanaPrivilegesAtEverythingSpace,
   NoKibanaPrivilegesAtNothingSpace,
   SuperuserAtEverythingSpace,

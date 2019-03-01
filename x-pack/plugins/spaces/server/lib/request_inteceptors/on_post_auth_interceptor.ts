@@ -80,6 +80,7 @@ export function initSpacesOnPostAuthRequestInterceptor(server: KbnServer) {
       }
 
       // Verify application is available in this space
+      // The management page is always visible, so we shouldn't be restricting access to the kibana application in any situation.
       const appId = path.split('/', 3)[2];
       if (appId !== 'kibana' && space && space.disabledFeatures.length > 0) {
         server.log(['spaces', 'debug'], `Verifying application is available: "${appId}"`);

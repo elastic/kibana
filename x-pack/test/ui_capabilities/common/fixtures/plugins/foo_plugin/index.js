@@ -18,8 +18,6 @@ export default function (kibana) {
       },
     },
 
-    config() {},
-
     init(server) {
       server.plugins.xpack_main.registerFeature({
         id: 'foo',
@@ -39,7 +37,7 @@ export default function (kibana) {
           read: {
             savedObject: {
               all: [],
-              read: ['foo', 'config'],
+              read: ['foo', 'index-pattern', 'config'],
             },
             ui: ['show'],
           }

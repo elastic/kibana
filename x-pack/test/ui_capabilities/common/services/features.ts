@@ -11,11 +11,9 @@ import { LogService } from '../../../types/services';
 import { Features } from '../features';
 
 export class FeaturesService {
-  private readonly log: LogService;
   private readonly axios: AxiosInstance;
 
-  constructor(url: string, log: LogService) {
-    this.log = log;
+  constructor(url: string, private readonly log: LogService) {
     this.axios = axios.create({
       headers: { 'kbn-xsrf': 'x-pack/ftr/services/features' },
       baseURL: url,
@@ -25,7 +23,7 @@ export class FeaturesService {
   }
 
   public async get(): Promise<Features> {
-    this.log.debug(`requesting /api/features/v1 to get the fatures`);
+    this.log.debug(`requesting /api/features/v1 to get the features`);
     const response = await this.axios.get('/api/features/v1');
 
     if (response.status !== 200) {

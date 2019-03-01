@@ -12,7 +12,7 @@ import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function uiCapabilitesTests({
+export default function uiCapabilitiesTests({
   loadTestFile,
   getService,
 }: KibanaFunctionalTestDefaultProviders) {

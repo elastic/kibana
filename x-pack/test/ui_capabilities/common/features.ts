@@ -7,6 +7,7 @@
 interface Feature {
   navLinkId: string;
 }
+
 export interface Features {
   [key: string]: Feature;
 }

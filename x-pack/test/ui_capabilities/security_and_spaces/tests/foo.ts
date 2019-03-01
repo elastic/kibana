@@ -73,7 +73,7 @@ export default function fooTests({ getService }: KibanaFunctionalTestDefaultProv
             break;
           // if we don't have access at the space itself, we're
           // redirected to the space selector and the ui capabilities
-          // are lagely irrelevant because they won't be consumed
+          // are largely irrelevant because they won't be consumed
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':

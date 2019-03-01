@@ -7,7 +7,7 @@ import { Features } from './features';
 
 type buildCallback = (featureId: string) => boolean;
 export class NavLinksBuilder {
-  private features: Features;
+  private readonly features: Features;
   constructor(features: Features) {
     this.features = {
       ...features,
@@ -21,27 +21,24 @@ export class NavLinksBuilder {
   public all() {
     return this.build(() => true);
   }
-  public except(...feature: string[]): Record<string, boolean> {
+  public except(...feature: string[]) {
     return this.build(featureId => !feature.includes(featureId));
   }
   public none() {
     return this.build(() => false);
   }
-  public only(...feature: string[]): Record<string, boolean> {
+  public only(...feature: string[]) {
     return this.build(featureId => feature.includes(featureId));
   }
 
-  private build(callback: buildCallback) {
-    return Object.entries(this.features).reduce(
-      (acc, [featureId, feature]) => ({
-        ...acc,
-        ...(feature.navLinkId
-          ? {
-              [feature.navLinkId]: callback(featureId as string),
-            }
-          : {}),
-      }),
-      {}
-    );
+  private build(callback: buildCallback): Record<string, boolean> {
+    const navLinks = {} as Record<string, boolean>;
+    for (const [featureId, feature] of Object.entries(this.features)) {
+      if (feature.navLinkId) {
+        navLinks[feature.navLinkId] = callback(featureId);
+      }
+    }
+
+    return navLinks;
   }
 }

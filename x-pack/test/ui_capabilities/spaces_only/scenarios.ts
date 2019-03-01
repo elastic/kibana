@@ -37,5 +37,8 @@ const FooDisabledSpace: FooDisabledSpace = {
   disabledFeatures: ['foo'],
 };
 
-export type SpaceScenarios = EverythingSpace | NothingSpace | FooDisabledSpace;
-export const SpaceScenarios: SpaceScenarios[] = [EverythingSpace, NothingSpace, FooDisabledSpace];
+export const SpaceScenarios: [EverythingSpace, NothingSpace, FooDisabledSpace] = [
+  EverythingSpace,
+  NothingSpace,
+  FooDisabledSpace,
+];
