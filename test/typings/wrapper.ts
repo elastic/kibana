@@ -18,6 +18,6 @@
  */
 
 export interface TestWrapper {
-  getService<T>(service: string): T;
+  getService<T = any>(service: string): T;
   getPageObjects(pages: string[]): { [name: string]: any };
 }

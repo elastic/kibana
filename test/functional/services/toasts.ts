@@ -20,7 +20,7 @@
 import { TestWrapper } from 'typings';
 
 export function ToastsProvider({ getService }: TestWrapper) {
-  const testSubjects = getService<any>('testSubjects');
+  const testSubjects = getService('testSubjects');
 
   class Toasts {
     public async getErrorToast(index: number = 1) {
