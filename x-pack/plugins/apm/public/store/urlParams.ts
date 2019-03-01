@@ -22,7 +22,7 @@ export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
 export const TIMEPICKER_DEFAULTS = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
-  rangePaused: 'true',
+  refreshPaused: 'true',
   refreshInterval: '0'
 };
 
@@ -33,13 +33,17 @@ function calculateTimePickerDefaults() {
     to: datemath.parse(TIMEPICKER_DEFAULTS.rangeTo, { roundUp: true })
   };
 
-  return {
-    start: parsed.from ? parsed.from.toISOString() : undefined,
-    end: parsed.to ? parsed.to.toISOString() : undefined
-  };
+  const result: IUrlParams = {};
+  if (parsed.from) {
+    result.start = parsed.from.toISOString();
+  }
+  if (parsed.to) {
+    result.end = parsed.to.toISOString();
+  }
+  return result;
 }
 
-const INITIAL_STATE = calculateTimePickerDefaults();
+const INITIAL_STATE: IUrlParams = calculateTimePickerDefaults();
 
 interface LocationAction {
   type: typeof LOCATION_UPDATE;
@@ -208,14 +212,14 @@ export const getUrlParams = createSelector(
 
 export interface IUrlParams {
   detailTab?: string;
-  end?: number;
+  end?: string;
   errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
   serviceName?: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  start?: number;
+  start?: string;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;
