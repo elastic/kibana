@@ -31,7 +31,7 @@ const minMaxAgg = (field) => {
   const aggBody = {};
   if (field.scripted) {
     aggBody.script = {
-      inline: field.script,
+      source: field.script,
       lang: field.lang
     };
   } else {

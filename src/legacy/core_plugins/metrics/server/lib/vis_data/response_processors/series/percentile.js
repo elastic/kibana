@@ -22,12 +22,12 @@ import getAggValue from '../../helpers/get_agg_value';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-export default function percentile(resp, panel, series) {
+export default function percentile(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.type !== 'percentile') return next(results);
 
-    getSplits(resp, panel, series).forEach((split) => {
+    getSplits(resp, panel, series, meta).forEach((split) => {
       metric.percentiles.forEach(percentile => {
         const label = (split.label) + ` (${percentile.value})`;
         const data = split.timeseries.buckets.map(bucket => {
@@ -40,17 +40,17 @@ export default function percentile(resp, panel, series) {
             return [bucket.key, getAggValue(bucket, m)];
           });
           results.push({
-            id: `${percentile.id}:${split.id}`,
+            id: `${split.id}:${percentile.id}`,
             color: split.color,
             label,
             data,
             lines: { show: true, fill: percentile.shade, lineWidth: 0 },
             points: { show: false },
             legend: false,
-            fillBetween: `${percentile.id}:${split.id}:${percentile.percentile}`
+            fillBetween: `${split.id}:${percentile.id}:${percentile.percentile}`
           });
           results.push({
-            id: `${percentile.id}:${split.id}:${percentile.percentile}`,
+            id: `${split.id}:${percentile.id}:${percentile.percentile}`,
             color: split.color,
             label,
             data: fillData,
@@ -61,7 +61,7 @@ export default function percentile(resp, panel, series) {
         } else {
           const decoration = getDefaultDecoration(series);
           results.push({
-            id: `${percentile.id}:${split.id}`,
+            id: `${split.id}:${percentile.id}`,
             color: split.color,
             label,
             data,

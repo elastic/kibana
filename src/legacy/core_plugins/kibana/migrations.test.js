@@ -19,6 +19,45 @@
 
 import { migrations } from './migrations';
 
+describe('index-pattern', () => {
+  describe('6.5.0', () => {
+    const migrate = doc => migrations['index-pattern']['6.5.0'](doc);
+
+    it('adds "type" and "typeMeta" properties to object when not declared', () => {
+      expect(
+        migrate({
+          attributes: {},
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": undefined,
+    "typeMeta": undefined,
+  },
+}
+`);
+    });
+
+    it('keeps "type" and "typeMeta" properties as is when declared', () => {
+      expect(
+        migrate({
+          attributes: {
+            type: '123',
+            typeMeta: '123',
+          },
+        })
+      ).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "type": "123",
+    "typeMeta": "123",
+  },
+}
+`);
+    });
+  });
+});
+
 describe('visualization', () => {
   describe('7.0.0', () => {
     const migrate = doc => migrations.visualization['7.0.0'](doc);
@@ -305,6 +344,50 @@ Object {
       "id": "123",
       "name": "search_0",
       "type": "search",
+    },
+  ],
+  "type": "visualization",
+}
+`);
+      /* eslint-enable max-len */
+    });
+
+    it('extracts index patterns from controls', () => {
+      const doc = {
+        id: '1',
+        type: 'visualization',
+        attributes: {
+          foo: true,
+          visState: JSON.stringify({
+            bar: false,
+            params: {
+              controls: [
+                {
+                  bar: true,
+                  indexPattern: 'pattern*',
+                },
+                {
+                  foo: true,
+                },
+              ],
+            },
+          }),
+        },
+      };
+      const migratedDoc = migrate(doc);
+      /* eslint-disable max-len */
+      expect(migratedDoc).toMatchInlineSnapshot(`
+Object {
+  "attributes": Object {
+    "foo": true,
+    "visState": "{\\"bar\\":false,\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"foo\\":true}]}}",
+  },
+  "id": "1",
+  "references": Array [
+    Object {
+      "id": "pattern*",
+      "name": "control_0_index_pattern",
+      "type": "index-pattern",
     },
   ],
   "type": "visualization",
@@ -1157,7 +1240,7 @@ Object {
   "type": "search",
 }
 `);
-    /* eslint-enable max-len */
+      /* eslint-enable max-len */
     });
   });
 });

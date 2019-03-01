@@ -14,7 +14,7 @@ import { EMSFileCreateSourceEditor } from './create_source_editor';
 export class EMSFileSource extends AbstractVectorSource {
 
   static type = EMS_FILE;
-  static title = 'Elastic Maps Service vector shapes';
+  static title = 'Vector shapes';
   static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
   static icon = 'emsApp';
 
@@ -25,17 +25,13 @@ export class EMSFileSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onChange = (selectedId) => {
       const emsFileSourceDescriptor = EMSFileSource.createDescriptor(selectedId);
-      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor);
+      const emsFileSource = new EMSFileSource(emsFileSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsFileSource);
     };
     return <EMSFileCreateSourceEditor onChange={onChange}/>;
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   async _getEmsVectorFileMeta() {

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import stringify from 'json-stable-stringify';
 import { isArray, isPlainObject } from 'lodash';
-import { JsonObject } from 'x-pack/plugins/infra/common/typed_json';
+
+import { JsonObject } from '../../../../common/typed_json';
 import { InfraLogItemField } from '../../../graphql/types';
 
 const isJsonObject = (subject: any): subject is JsonObject => {
@@ -14,7 +16,7 @@ const isJsonObject = (subject: any): subject is JsonObject => {
 
 const serializeValue = (value: any): string => {
   if (isArray(value) || isPlainObject(value)) {
-    return JSON.stringify(value);
+    return stringify(value);
   }
   return `${value}`;
 };

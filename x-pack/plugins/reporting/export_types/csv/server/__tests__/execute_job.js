@@ -461,7 +461,7 @@ describe('CSV Execute Job', function () {
       const executeJob = executeJobFactory(mockServer);
       const jobParams = {
         headers: encryptedHeaders,
-        fields: [ 'one and a half', 'two', "three-and-four", "five & six" ],
+        fields: [ 'one and a half', 'two', 'three-and-four', 'five & six' ],
         searchRequest: { index: null, body: null }
       };
       const { content } = await executeJob(jobParams, cancellationToken);
@@ -473,7 +473,7 @@ describe('CSV Execute Job', function () {
       const executeJob = executeJobFactory(mockServer);
       const jobParams = {
         headers: encryptedHeaders,
-        fields: [ 'one and a half', 'two', "three-and-four", "five & six" ],
+        fields: [ 'one and a half', 'two', 'three-and-four', 'five & six' ],
         searchRequest: { index: null, body: null }
       };
       const { content } = await executeJob(jobParams, cancellationToken);

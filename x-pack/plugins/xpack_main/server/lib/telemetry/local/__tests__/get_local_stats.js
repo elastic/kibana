@@ -64,7 +64,12 @@ describe('get_local_stats', () => {
       os: {
         platform: 'rocky',
         platformRelease: 'iv',
-      }
+      },
+    },
+    localization: {
+      locale: 'en',
+      labelsCount: 0,
+      integrities: {}
     },
     sun: { chances: 5 },
     clouds: { chances: 95 },
@@ -92,6 +97,11 @@ describe('get_local_stats', () => {
         },
         versions: [{ version: '8675309', count: 1 }],
         plugins: {
+          localization: {
+            locale: 'en',
+            labelsCount: 0,
+            integrities: {}
+          },
           sun: { chances: 5 },
           clouds: { chances: 95 },
           rain: { chances: 2 },

@@ -13,14 +13,32 @@ export function queryDatatable(datatable, query) {
   }
 
   if (query.and) {
-    // Todo: figure out type of filters
     query.and.forEach(filter => {
+      // handle exact matches
       if (filter.type === 'exactly') {
         datatable.rows = datatable.rows.filter(row => {
           return row[filter.column] === filter.value;
         });
       }
-      // TODO: Handle timefilter
+
+      // handle time filters
+      if (filter.type === 'time') {
+        const columnNames = datatable.columns.map(col => col.name);
+
+        // remove row if no column match
+        if (!columnNames.includes(filter.column)) {
+          datatable.rows = [];
+          return;
+        }
+
+        datatable.rows = datatable.rows.filter(row => {
+          const fromTime = new Date(filter.from).getTime();
+          const toTime = new Date(filter.to).getTime();
+          const rowTime = new Date(row[filter.column]).getTime();
+
+          return rowTime >= fromTime && rowTime <= toTime;
+        });
+      }
     });
   }
 

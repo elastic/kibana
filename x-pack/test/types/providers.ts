@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SuperDatePickerProvider } from '../../../test/functional/services/super_date_picker';
+import { EsArchiver } from '../../../src/es_archiver';
+import { SuperDatePickerProvider } from '../../../test/functional/services/super_date_picker';
 import { UptimeProvider } from '../functional/services/uptime';
 
-export interface EsArchiverOptions {
-  skipExisting?: boolean;
-}
-
-export interface EsArchiver {
-  load(archiveName: string, options?: EsArchiverOptions): Promise<void>;
-  unload(archiveName: string): Promise<void>;
-}
 
 export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: 'esArchiver'): EsArchiver;

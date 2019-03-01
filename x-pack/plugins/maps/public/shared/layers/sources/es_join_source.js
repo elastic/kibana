@@ -10,7 +10,6 @@ import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
   SearchSource,
 } from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
@@ -74,12 +73,18 @@ export class ESJoinSource extends AbstractESSource {
     return false;
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
-  }
-
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
+  }
+
+  _formatMetricKey(metric) {
+    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
+    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+  }
+
+  _formatMetricLabel(metric) {
+    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
@@ -111,6 +116,7 @@ export class ESJoinSource extends AbstractESSource {
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
       resp = await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
         requestId: this._descriptor.id,
@@ -152,35 +158,6 @@ export class ESJoinSource extends AbstractESSource {
     joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
     joinStatement.push(`for metrics ${metrics.join(',')}`);
     return `Elasticsearch terms aggregation request for ${joinStatement.join(' ')}`;
-  }
-
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
-
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
-  }
-
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-      const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-      return {
-        ...metric,
-        propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        propertyLabel: `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`,
-      };
-    });
   }
 
   _makeAggConfigs() {

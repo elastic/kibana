@@ -70,10 +70,10 @@ export class GisMap extends Component {
     if (noFlyoutVisible) {
       currentPanel = null;
     } else if (addLayerVisible) {
-      currentPanelClassName = "mapMapLayerPanel-isVisible";
+      currentPanelClassName = 'mapMapLayerPanel-isVisible';
       currentPanel = <AddLayerPanel/>;
     } else if (layerDetailsVisible) {
-      currentPanelClassName = "mapMapLayerPanel-isVisible";
+      currentPanelClassName = 'mapMapLayerPanel-isVisible';
       currentPanel = (
         <LayerPanel/>
       );

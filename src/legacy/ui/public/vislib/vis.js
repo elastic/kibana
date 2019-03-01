@@ -47,6 +47,15 @@ export function VislibVisProvider(Private) {
     hasLegend() {
       return this.visConfigArgs.addLegend;
     }
+
+    initVisConfig(data, uiState) {
+      this.data = data;
+
+      this.uiState = uiState;
+
+      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
+    }
+
     /**
      * Renders the visualization
      *
@@ -63,11 +72,7 @@ export function VislibVisProvider(Private) {
         this._runOnHandler('destroy');
       }
 
-      this.data = data;
-
-      this.uiState = uiState;
-
-      this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
+      this.initVisConfig(data, uiState);
 
       this.handler = new Handler(this, this.visConfig);
       this._runOnHandler('render');

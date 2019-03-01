@@ -7,13 +7,29 @@ exports[`ChecklistFlyout renders 1`] = `
       color="warning"
       iconType="alert"
       size="m"
-      title="Index is unable to ingest, update, or delete documents while reindexing"
+      title={
+        <FormattedMessage
+          defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
+          values={Object {}}
+        />
+      }
     >
       <p>
-        If you can’t stop document updates or need to reindex into a new cluster, consider using a different upgrade strategy.
+        <FormattedMessage
+          defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
+                consider using a different upgrade strategy."
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
+          values={Object {}}
+        />
       </p>
       <p>
-        Reindexing will continue in the background, but if Kibana shuts down or restarts you will need to return to this page to resume reindexing.
+        <FormattedMessage
+          defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
+                need to return to this page to resume reindexing."
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+          values={Object {}}
+        />
       </p>
     </EuiCallOut>
     <EuiSpacer
@@ -24,7 +40,11 @@ exports[`ChecklistFlyout renders 1`] = `
       textTransform="none"
     >
       <h3>
-        Reindexing process
+        <FormattedMessage
+          defaultMessage="Reindexing process"
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+          values={Object {}}
+        />
       </h3>
     </EuiTitle>
     <Component
@@ -66,7 +86,11 @@ exports[`ChecklistFlyout renders 1`] = `
           onClick={[MockFunction]}
           type="button"
         >
-          Close
+          <FormattedMessage
+            defaultMessage="Close"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
@@ -82,7 +106,11 @@ exports[`ChecklistFlyout renders 1`] = `
           onClick={[MockFunction]}
           type="button"
         >
-          Run reindex
+          <FormattedMessage
+            defaultMessage="Run reindex"
+            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

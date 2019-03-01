@@ -8,13 +8,14 @@ import { buildBoolArray } from './build_bool_array';
 import { sanitizeName } from './sanitize_name';
 import { normalizeType } from './normalize_type';
 
-export const queryEsSQL = (elasticsearchClient, { count, query, filter }) =>
+export const queryEsSQL = (elasticsearchClient, { count, query, filter, timezone }) =>
   elasticsearchClient('transport.request', {
     path: '/_sql?format=json',
     method: 'POST',
     body: {
+      query,
+      time_zone: timezone,
       fetch_size: count,
-      query: query,
       client_id: 'canvas',
       filter: {
         bool: {

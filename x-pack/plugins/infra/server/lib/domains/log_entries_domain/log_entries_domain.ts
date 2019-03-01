@@ -204,12 +204,12 @@ export interface LogEntryDocumentFields {
 
 const convertLogDocumentToEntry = (
   sourceId: string,
-  formatMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
+  formatLogMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
 ) => (document: LogEntryDocument): InfraLogEntry => ({
   key: document.key,
   gid: document.gid,
   source: sourceId,
-  message: formatMessage(document.fields),
+  message: formatLogMessage(document.fields),
 });
 
 const convertDateRangeBucketToSummaryBucket = (

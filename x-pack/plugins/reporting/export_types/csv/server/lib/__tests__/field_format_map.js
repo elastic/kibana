@@ -28,7 +28,7 @@ describe('field format map', function () {
   };
   const configMock = {};
   configMock['format:defaultTypeMap'] = {
-    "number": { "id": "number", "params": {} }
+    'number': { 'id': 'number', 'params': {} }
   };
   configMock['format:number:defaultPattern'] = '0,0.[000]';
   const getConfig = (key) => configMock[key];

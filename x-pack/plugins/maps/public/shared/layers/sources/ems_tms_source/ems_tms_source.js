@@ -14,7 +14,7 @@ import { EMSTMSCreateSourceEditor } from './create_source_editor';
 export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
-  static title = 'Elastic Maps Service tiles';
+  static title = 'Tiles';
   static description = 'Map tiles from Elastic Maps Service';
   static icon = 'emsApp';
 
@@ -25,20 +25,16 @@ export class EMSTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
 
     const onChange = ({ target }) => {
       const selectedId = target.options[target.selectedIndex].value;
       const emsTMSSourceDescriptor = EMSTMSSource.createDescriptor(selectedId);
-      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor);
+      const emsTMSSource = new EMSTMSSource(emsTMSSourceDescriptor, inspectorAdapters);
       onPreviewSource(emsTMSSource);
     };
 
     return <EMSTMSCreateSourceEditor onChange={onChange}/>;
-  }
-
-  constructor(descriptor) {
-    super(descriptor);
   }
 
   async getImmutableProperties() {
