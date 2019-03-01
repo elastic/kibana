@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-const mockHttpService = { start: jest.fn(), stop: jest.fn(), registerRouter: jest.fn() };
+import { httpServiceMock } from './http/http_service.mock';
+const httpService = httpServiceMock.create();
 jest.mock('./http/http_service', () => ({
-  HttpService: jest.fn(() => mockHttpService),
+  HttpService: jest.fn(() => httpService),
 }));
 
 const mockPluginsService = { start: jest.fn(), stop: jest.fn() };
@@ -27,9 +27,10 @@ jest.mock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
-const mockElasticsearchService = { start: jest.fn(), stop: jest.fn() };
+import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
+const elasticsearchService = elasticsearchServiceMock.create();
 jest.mock('./elasticsearch/elasticsearch_service', () => ({
-  ElasticsearchService: jest.fn(() => mockElasticsearchService),
+  ElasticsearchService: jest.fn(() => elasticsearchService),
 }));
 
 const mockLegacyService = { start: jest.fn(), stop: jest.fn() };
@@ -57,10 +58,10 @@ afterEach(() => {
   jest.clearAllMocks();
 
   configService.atPath.mockReset();
-  mockHttpService.start.mockReset();
-  mockHttpService.stop.mockReset();
-  mockElasticsearchService.start.mockReset();
-  mockElasticsearchService.stop.mockReset();
+  httpService.start.mockReset();
+  httpService.stop.mockReset();
+  elasticsearchService.start.mockReset();
+  elasticsearchService.stop.mockReset();
   mockPluginsService.start.mockReset();
   mockPluginsService.stop.mockReset();
   mockLegacyService.start.mockReset();
@@ -68,36 +69,30 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const mockHttpServiceStart = { something: true };
-  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
-
-  const mockElasticsearchServiceStart = { adminClient$: {} };
-  mockElasticsearchService.start.mockResolvedValue(mockElasticsearchServiceStart);
-
   const mockPluginsServiceStart = new Map([['some-plugin', 'some-value']]);
   mockPluginsService.start.mockReturnValue(Promise.resolve(mockPluginsServiceStart));
 
   const server = new Server(configService as any, logger, env);
 
-  expect(mockHttpService.start).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.start).not.toHaveBeenCalled();
+  expect(httpService.start).not.toHaveBeenCalled();
+  expect(elasticsearchService.start).not.toHaveBeenCalled();
   expect(mockPluginsService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.start();
 
-  expect(mockHttpService.start).toHaveBeenCalledTimes(1);
-  expect(mockElasticsearchService.start).toHaveBeenCalledTimes(1);
+  expect(httpService.start).toHaveBeenCalledTimes(1);
+  expect(elasticsearchService.start).toHaveBeenCalledTimes(1);
 
   expect(mockPluginsService.start).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.start).toHaveBeenCalledWith({
-    elasticsearch: mockElasticsearchServiceStart,
+    elasticsearch: elasticsearchServiceMock.startContract,
   });
 
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith({
-    elasticsearch: mockElasticsearchServiceStart,
-    http: mockHttpServiceStart,
+    elasticsearch: elasticsearchServiceMock.startContract,
+    http: httpServiceMock.startContract,
     plugins: mockPluginsServiceStart,
   });
 });
@@ -119,7 +114,7 @@ test('does not start http service is `autoListen:false`', async () => {
 
   await server.start();
 
-  expect(mockHttpService.start).not.toHaveBeenCalled();
+  expect(httpService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith({});
 });
@@ -135,28 +130,25 @@ test('does not start http service if process is dev cluster master', async () =>
 
   await server.start();
 
-  expect(mockHttpService.start).not.toHaveBeenCalled();
+  expect(httpService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith({});
 });
 
 test('stops services on "stop"', async () => {
   const server = new Server(configService as any, logger, env);
-  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
-
-  const server = new Server(mockConfigService as any, logger, env);
 
   await server.start();
 
-  expect(mockHttpService.stop).not.toHaveBeenCalled();
-  expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
+  expect(httpService.stop).not.toHaveBeenCalled();
+  expect(elasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
-  expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
-  expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
+  expect(httpService.stop).toHaveBeenCalledTimes(1);
+  expect(elasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
 });
