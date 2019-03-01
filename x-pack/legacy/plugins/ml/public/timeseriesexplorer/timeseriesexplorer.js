@@ -48,6 +48,9 @@ const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionV
 function getTimeseriesexplorerDefaultState() {
   return {
     loading: false,
+
+    // Toggles display of model bounds in the focus chart
+    showModelBounds: true,
   };
 }
 
@@ -68,19 +71,23 @@ export const TimeSeriesExplorer = injectI18n(
       showAnnotationsCheckbox: PropTypes.bool.isRequired,
       showForecast: PropTypes.bool.isRequired,
       showForecastCheckbox: PropTypes.bool.isRequired,
-      showModelBounds: PropTypes.bool.isRequired,
       showModelBoundsCheckbox: PropTypes.bool.isRequired,
       selectedJob: PropTypes.object,
       tableData: PropTypes.object,
       timefilter: PropTypes.object.isRequired,
       toggleShowAnnotations: PropTypes.func.isRequired,
       toggleShowForecast: PropTypes.func.isRequired,
-      toggleShowModelBounds: PropTypes.func.isRequired,
     };
 
     state = getTimeseriesexplorerDefaultState();
 
     detectorIndexChangeHandler = (e) => this.props.detectorIndexChanged(e.target.value);
+
+    toggleShowModelBoundsHandler = () => {
+      this.setState({
+        showModelBounds: !this.state.showModelBounds,
+      });
+    }
 
     previousTsc = {};
     previousShowAnnotations = undefined;
@@ -104,16 +111,18 @@ export const TimeSeriesExplorer = injectI18n(
         showAnnotationsCheckbox,
         showForecast,
         showForecastCheckbox,
-        showModelBounds,
         showModelBoundsCheckbox,
         selectedJob,
         tableData,
         timefilter,
         toggleShowAnnotations,
         toggleShowForecast,
-        toggleShowModelBounds,
         tsc,
       } = this.props;
+
+      const {
+        showModelBounds,
+      } = this.state;
 
       const loading = this.props.loading || this.state.loading;
 
@@ -265,7 +274,7 @@ export const TimeSeriesExplorer = injectI18n(
                         defaultMessage: 'show model bounds',
                       })}
                       checked={showModelBounds}
-                      onChange={toggleShowModelBounds}
+                      onChange={this.toggleShowModelBoundsHandler}
                     />
                   </EuiFlexItem>
                 )}

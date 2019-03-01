@@ -50,14 +50,12 @@ export function mapScopeToProps(scope) {
     showAnnotationsCheckbox: scope.showAnnotationsCheckbox,
     showForecast: scope.showForecast,
     showForecastCheckbox: scope.showForecastCheckbox,
-    showModelBounds: scope.showModelBounds,
     showModelBoundsCheckbox: scope.showModelBoundsCheckbox,
     selectedJob: scope.selectedJob,
     tableData: scope.tableData,
     timefilter: scope.timefilter,
     toggleShowAnnotations: scope.toggleShowAnnotations,
     toggleShowForecast: scope.toggleShowForecast,
-    toggleShowModelBounds: scope.toggleShowModelBounds,
 
     // time series chart
     tsc: {

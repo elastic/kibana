@@ -80,6 +80,8 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+const timeFieldName = 'timestamp';
+
 module.controller('MlTimeSeriesExplorerController', function (
   $injector,
   $scope,
@@ -93,7 +95,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $injector.get('mlSelectSeverityService');
   const mlJobSelectService = $injector.get('mlJobSelectService');
 
-  $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
   $scope.timefilter = timefilter;
@@ -111,7 +112,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   $scope.anomalyRecords = [];
 
   $scope.modelPlotEnabled = false;
-  $scope.showModelBounds = true;            // Toggles display of model bounds in the focus chart
   $scope.showModelBoundsCheckbox = false;
   $scope.showAnnotations = mlAnnotationsEnabled;// Toggles display of annotations in the focus chart
   $scope.showAnnotationsCheckbox = mlAnnotationsEnabled;
@@ -431,7 +431,7 @@ module.controller('MlTimeSeriesExplorerController', function (
         refreshFocusData.focusChartData = processDataForFocusAnomalies(
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
-          $scope.timeFieldName,
+          timeFieldName,
           $scope.focusAggregationInterval,
           $scope.modelPlotEnabled);
 
@@ -496,7 +496,7 @@ module.controller('MlTimeSeriesExplorerController', function (
     ).then((resp) => {
       // Sort in descending time order before storing in scope.
       refreshFocusData.anomalyRecords = _.chain(resp.records)
-        .sortBy(record => record[$scope.timeFieldName])
+        .sortBy(record => record[timeFieldName])
         .reverse()
         .value();
       console.log('Time series explorer anomalies:', refreshFocusData.anomalyRecords);
@@ -671,12 +671,6 @@ module.controller('MlTimeSeriesExplorerController', function (
       return scopeEntity;
     });
     $scope.$applyAsync();
-  };
-
-  $scope.toggleShowModelBounds = function () {
-    $timeout(() => {
-      $scope.showModelBounds = !$scope.showModelBounds;
-    }, 0);
   };
 
   if (mlAnnotationsEnabled) {
