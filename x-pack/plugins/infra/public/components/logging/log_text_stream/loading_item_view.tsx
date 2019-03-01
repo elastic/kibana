@@ -120,6 +120,7 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
 
     return (
       <ProgressEntryWrapper className={className}>
+        {/* @ts-ignore -- style components .attrs seems to make all underlying props required */}
         <AlignedProgress
           alignment={alignment}
           color={color}
