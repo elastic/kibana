@@ -50,7 +50,7 @@ export const PROPERTY_CONFIG = [
       defaultMessage: 'Service'
     }),
     required: false,
-    presortedKeys: ['runtime', 'framework', 'agent', 'version']
+    presortedKeys: ['runtime', 'framework', 'version']
   } as ConfigItem<'service'>,
   {
     key: 'process',
