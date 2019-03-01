@@ -41,7 +41,7 @@ const Cell = styled.td`
   }
 
   &:first-child {
-    width: ${px(units.unit * 20)};
+    width: ${px(units.unit * 12)};
     font-weight: bold;
   }
 `;
