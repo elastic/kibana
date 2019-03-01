@@ -17,7 +17,7 @@ The response body will have a format of newline delimited JSON. The order of the
 
 ==== Examples
 
-The following example attempts to export index patterns and visualizations
+The following example exports all index pattern and visualization saved objects.
 
 [source,js]
 --------------------------------------------------
