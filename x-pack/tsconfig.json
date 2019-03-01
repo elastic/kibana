@@ -11,6 +11,7 @@
     "test/**/*"
   ],
   "compilerOptions": {
+    "outDir": ".",
     "paths": {
       "ui/*": [
         "src/legacy/ui/public/*"
