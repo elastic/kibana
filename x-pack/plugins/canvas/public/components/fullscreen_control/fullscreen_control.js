@@ -10,7 +10,10 @@ import { Shortcuts } from 'react-shortcuts';
 
 export class FullscreenControl extends React.PureComponent {
   keyHandler = action => {
-    if (action === 'FULLSCREEN' || (this.props.isFullscreen && action === 'FULLSCREEN_EXIT')) {
+    const enterFullscreen = action === 'FULLSCREEN';
+    const exitFullscreen = this.props.isFullscreen && action === 'FULLSCREEN_EXIT';
+
+    if (enterFullscreen || exitFullscreen) {
       this.toggleFullscreen();
     }
   };
