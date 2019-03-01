@@ -105,8 +105,7 @@ export const getTimeFilters = ({ map }) => map.mapState.timeFilters ?
 
 export const getQuery = ({ map }) => map.mapState.query;
 
-export const getFilters = ({ map }) => map.mapState.filters ?
-  map.mapState.filters : [];
+export const getFilters = ({ map }) => map.mapState.filters;
 
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {
