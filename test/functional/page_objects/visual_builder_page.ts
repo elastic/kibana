@@ -118,10 +118,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
           const value = await subVars[1].getVisibleText();
+          log.debug(`markdown table variables table is: ${key} ${value}`);
           return { key, value, selector };
         })
       );
-      log.debug(`markdown variables table is: ${variablesKeyValueSelectorMap}`);
       return variablesKeyValueSelectorMap;
     }
 
