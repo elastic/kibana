@@ -106,6 +106,10 @@ export class MapEmbeddable extends Embeddable {
   }
 
   reload() {
-    this.dispatchSetQuery();
+    this.dispatchSetQuery({
+      query: this.prevQuery,
+      timeRange: this.prevTimeRange,
+      filters: this.prevFilters
+    });
   }
 }

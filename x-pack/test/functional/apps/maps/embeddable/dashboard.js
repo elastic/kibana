@@ -13,7 +13,7 @@ export default function ({ getPageObjects, getService }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
 
-  describe('embedded in dashboard', () => {
+  describe('embed in dashboard', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a'
@@ -21,6 +21,14 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
     });
+
+    async function getRequestTimestamp() {
+      await inspector.openInspectorRequestsView();
+      const requestStats = await inspector.getTableData();
+      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+      await inspector.close();
+      return requestTimestamp;
+    }
 
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
@@ -55,6 +63,25 @@ export default function ({ getPageObjects, getService }) {
       const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
       await inspector.close();
       expect(totalHits).to.equal('1');
+    });
+
+    it('should re-fetch query when "refresh" is clicked', async () => {
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const beforeQueryRefreshTimestamp = await getRequestTimestamp();
+      await PageObjects.maps.refreshQuery();
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const afterQueryRefreshTimestamp = await getRequestTimestamp();
+      expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
+    });
+
+    it('should re-fetch documents with refresh timer', async () => {
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const beforeRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp.length).to.be(24);
+      await PageObjects.maps.triggerSingleRefresh(1000);
+      await dashboardPanelActions.openInspectorByTitle('geo grid vector grid example');
+      const afterRefreshTimerTimestamp = await getRequestTimestamp();
+      expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
   });
 }
