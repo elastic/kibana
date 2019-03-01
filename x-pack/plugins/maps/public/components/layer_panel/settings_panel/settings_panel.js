@@ -13,10 +13,11 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
-  EuiRange,
   EuiSpacer,
   EuiCallOut,
+  EuiDualRange
 } from '@elastic/eui';
+
 import { ValidatedRange } from '../../../shared/components/validated_range';
 
 export function SettingsPanel(props) {
@@ -26,14 +27,11 @@ export function SettingsPanel(props) {
     props.updateLabel(props.layerId, label);
   };
 
-  const onMinZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMinZoom(props.layerId, zoom);
-  };
-
-  const onMaxZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMaxZoom(props.layerId, zoom);
+  const onZoomChange = (event) => {
+    const minZoom = parseInt(event[0], 10);
+    props.updateMinZoom(props.layerId, minZoom);
+    const maxZoom = parseInt(event[1], 10);
+    props.updateMaxZoom(props.layerId, maxZoom);
   };
 
   const onAlphaChange = (alpha) => {
@@ -71,30 +69,18 @@ export function SettingsPanel(props) {
       >
         <EuiFlexGroup>
           <EuiFlexItem>
+
             <EuiFormRow
-              label="Min zoom"
+              label={'Min and max zoom'}
             >
-              <EuiRange
+              <EuiDualRange
+                id={'foobar'}
                 min={0}
                 max={24}
-                value={props.minZoom.toString()}
-                onChange={onMinZoomChange}
+                step={1}
+                value={[props.minZoom, props.maxZoom]}
                 showInput
-                showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Max zoom"
-            >
-              <EuiRange
-                min={0}
-                max={24}
-                value={props.maxZoom.toString()}
-                onChange={onMaxZoomChange}
-                showInput
-                showRange
+                onChange={onZoomChange}
               />
             </EuiFormRow>
           </EuiFlexItem>
