@@ -246,7 +246,9 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.3.4",
     "@babel/parser": "^7.3.4",
+    "@babel/polyfill": "^7.2.5",
     "@babel/types": "^7.3.4",
     "@elastic/eslint-config-kibana": "0.15.0",
     "@elastic/eslint-plugin-kibana-custom": "1.1.0",
@@ -316,7 +318,7 @@
     "angular-mocks": "1.4.7",
     "archiver": "^3.0.0",
     "babel-eslint": "^9.0.0",
-    "babel-jest": "^23.6.0",
+    "babel-jest": "^24.1.0",
     "backport": "4.4.1",
     "chai": "3.5.0",
     "chance": "1.0.10",
