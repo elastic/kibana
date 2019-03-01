@@ -172,27 +172,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return elements.length;
     }
 
-    /**
-     * switch sub-tab for visualization
-     *
-     * @param {'Data' | 'Panel options'| 'Annotations' | 'Markdown' | 'Columns'} subTab
-     * @memberof VisualBuilderPage
-     */
-    public async switchSubTab(
-      subTab: 'Data' | 'Panel options' | 'Annotations' | 'Markdown' | 'Columns'
-    ) {
-      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
-      const tabsSelector = `button[role="tab"] span`;
-
-      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
-
-      elements.forEach(async (tab: any) => {
-        if ((await tab.getVisibleText()) === subTab) {
-          tab.click();
-        }
-      });
-    }
-
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
