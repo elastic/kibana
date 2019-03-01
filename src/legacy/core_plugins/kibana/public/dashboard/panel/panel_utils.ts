@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { GridData, PanelId, PanelState } from '../selectors';
+import { GridData, PanelState } from '../selectors';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -29,9 +29,8 @@ const PANEL_WIDTH_SCALE_FACTOR = 4;
 
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
-  // Earlier versions allowed panelIndex to be a number, explicity casting panelIndex to type string for compatibility
   public static convertPanelDataPre_6_1(panel: {
-    panelIndex: PanelId;
+    panelIndex: any; // earlier versions allowed panelIndex to be a number or a string
     gridData: GridData;
     col: number;
     row: number;

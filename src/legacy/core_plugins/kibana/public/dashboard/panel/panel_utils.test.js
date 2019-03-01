@@ -26,8 +26,8 @@ jest.mock(
 );
 
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { createPanelState } from './panel_state';
 import { PanelUtils } from './panel_utils';
+import { createPanelState } from './panel_state';
 
 test('parseVersion', () => {
   const { major, minor } = PanelUtils.parseVersion('6.2.0');
