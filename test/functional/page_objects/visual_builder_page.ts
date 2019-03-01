@@ -186,8 +186,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
       const elements = await rootSelector.findAllByCssSelector(tabsSelector);
 
-      elements.forEach((tab: any) => {
-        if (tab.getVisibleText() === subTab) {
+      elements.forEach(async (tab: any) => {
+        if ((await tab.getVisibleText()) === subTab) {
           tab.click();
         }
       });
