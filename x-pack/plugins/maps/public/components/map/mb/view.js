@@ -149,19 +149,9 @@ export class MBMapContainer extends React.Component {
   }
 
   _initResizerChecker() {
-    let animationFrameTimeout;
     this._checker = new ResizeChecker(this.refs.mapContainer);
     this._checker.on('resize', () => {
-      if (animationFrameTimeout) {
-        cancelAnimationFrame(animationFrameTimeout);
-      }
-
-      animationFrameTimeout = requestAnimationFrame(() => {
-        if (!this._isMounted) {
-          return;
-        }
-        this._mbMap.resize();
-      });
+      this._mbMap.resize();
     });
   }
 
