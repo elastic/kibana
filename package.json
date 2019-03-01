@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "10.12.12"
+    "**/@types/node": "10.12.27"
   },
   "workspaces": {
     "packages": [
@@ -292,7 +292,7 @@
     "@types/mocha": "^5.2.6",
     "@types/moment-timezone": "^0.5.8",
     "@types/mustache": "^0.8.31",
-    "@types/node": "^10.12.12",
+    "@types/node": "^10.12.27",
     "@types/opn": "^5.1.0",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",
