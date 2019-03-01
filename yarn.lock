@@ -1692,7 +1692,7 @@
   resolved "https://registry.yarnpkg.com/@types/cmd-shim/-/cmd-shim-2.0.0.tgz#c3d81d3c2a51af3c65c19b4f1d493a75abf07a5c"
   integrity sha512-WuV5bOQTGxqzewPnJbrDe51I5mnX2wTRYy+PduRuIvSuBWZlxDYD6Qt/f1m5sezxx1yyE9+1wHJ/0sRuNIoFaQ==
 
-"@types/color-convert@*":
+"@types/color-convert@*", "@types/color-convert@^1.9.0":
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/@types/color-convert/-/color-convert-1.9.0.tgz#bfa8203e41e7c65471e9841d7e306a7cd8b5172d"
   integrity sha512-OKGEfULrvSL2VRbkl/gnjjgbbF7ycIlpSsX7Nkab4MOWi5XxmgBYvuiQ7lcCFY5cPDz7MUNaKgxte2VRmtr4Fg==

@@ -131,6 +131,7 @@ function getHex(rgbString: string) {
   const colorValues = rgbString.slice(4, -1);
   const colorArray = colorValues.split(', ');
 
+  // @ts-ignore
   return '#' + convert.rgb.hex(Number(colorArray[0]), Number(colorArray[1]), Number(colorArray[2]));
 }
 
