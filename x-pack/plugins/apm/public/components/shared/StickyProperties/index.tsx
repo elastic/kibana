@@ -56,6 +56,7 @@ PropertyValue.displayName = 'PropertyValue';
 const PropertyValueTruncated = styled.span`
   display: inline-block;
   line-height: ${px(unit)};
+  padding-bottom: ${px(units.eighth)};
   ${truncate('100%')};
 `;
 
