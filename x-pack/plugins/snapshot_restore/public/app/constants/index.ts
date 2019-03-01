@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'snapshot_restore',
-  NAME: 'Snapshot and Restore',
-  MINIMUM_LICENSE_REQUIRED: 'basic',
-};
+export const BASE_PATH = '/management/elasticsearch/snapshot_restore';

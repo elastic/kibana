@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { unmountComponentAtNode } from 'react-dom';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
-import { management } from 'ui/management';
+
+import chrome from 'ui/chrome';
+import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { fatalError } from 'ui/notify';
 import routes from 'ui/routes';
+
+import { unmountComponentAtNode } from 'react-dom';
+import { HashRouter } from 'react-router-dom';
 
 export function createShim() {
   // This is an Angular service, which is why we use this provider pattern
@@ -19,18 +25,29 @@ export function createShim() {
   // https://docs.angularjs.org/api/ng/service/$q#the-deferred-api
   let $q;
 
+  let reactRouter;
+
   return {
     core: {
       i18n: {
         ...i18n,
         Context: I18nContext,
+        FormattedMessage,
       },
-      routes: {
-        when: routes.when,
+      routing: {
+        registerAngularRoute: (path: string, config: object): void => {
+          routes.when(path, config);
+        },
         unmountReactApp: (elem: Element | undefined): void => {
           if (elem) {
             unmountComponentAtNode(elem);
           }
+        },
+        registerRouter: (router: HashRouter): void => {
+          reactRouter = router;
+        },
+        getRouter: (): HashRouter => {
+          return reactRouter;
         },
       },
       http: {
@@ -40,9 +57,18 @@ export function createShim() {
         },
         getClient: (): any => httpClient,
       },
+      chrome,
+      notification: {
+        fatalError,
+      },
     },
     plugins: {
-      management,
+      management: {
+        sections: management,
+        constants: {
+          BREADCRUMB: MANAGEMENT_BREADCRUMB,
+        },
+      },
     },
   };
 }

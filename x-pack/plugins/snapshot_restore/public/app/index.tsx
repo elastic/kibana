@@ -3,19 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Component } from 'react';
 import { render } from 'react-dom';
+import { AppContext } from './services/app_context';
+
 // import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 
-// import { App } from './app';
+import { App } from './app';
 // import { srStore } from './store';
 
-export const renderReact = async (elem: Element, I18nContext: any): void => {
+export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
+
+export const renderReact = async (elem: Element, core: object, plugins: object): void => {
+  const {
+    i18n: { Context: I18nContext },
+  } = core;
+
   render(
     <I18nContext>
       {/*<Provider store={srStore}>*/}
-      <HashRouter>{/*<App />*/}</HashRouter>
+      <HashRouter>
+        <AppContext.Provider value={{ core, plugins }}>
+          <App />
+        </AppContext.Provider>
+      </HashRouter>
     </I18nContext>,
     elem
   );

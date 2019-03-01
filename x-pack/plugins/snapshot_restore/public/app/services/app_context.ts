@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'snapshot_restore',
-  NAME: 'Snapshot and Restore',
-  MINIMUM_LICENSE_REQUIRED: 'basic',
-};
+import React from 'react';
+
+export const AppContext = React.createContext({});

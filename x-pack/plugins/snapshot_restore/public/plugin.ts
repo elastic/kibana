@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { PLUGIN } from '../common/constants';
-import { renderReact } from './app';
+import { CLIENT_BASE_PATH, renderReact } from './app';
 import template from './index.html';
 import { createShim } from './shim';
 
@@ -12,24 +12,25 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(): void {
+    const shim = createShim();
     const {
-      core: { i18n, routes, http },
+      core: { i18n, routing, http },
       plugins: { management },
-    } = createShim();
+    } = shim;
 
     // Register management section
-    const esSection = management.getSection('elasticsearch');
+    const esSection = management.sections.getSection('elasticsearch');
     esSection.register(PLUGIN.ID, {
       visible: true,
       display: i18n.translate('xpack.snapshotRestore.appName', {
         defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
-      url: `#${PLUGIN.CLIENT_BASE_PATH}/repositories`,
+      url: `#${CLIENT_BASE_PATH}/repositories`,
     });
 
     // Register react root
-    routes.when(`${PLUGIN.CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id`, {
+    routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id`, {
       template,
       controller: ($scope, $route, $http, $q) => {
         let elem;
@@ -38,7 +39,7 @@ export class Plugin {
         // to re-execute without the $destroy handler being called. This means that the app will be mounted twice
         // creating a memory leak when leaving (only 1 app will be unmounted).
         // To avoid this, we unmount the React app each time we enter the controller.
-        routes.unmountReactApp(elem);
+        routing.unmountReactApp(elem);
 
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
@@ -46,7 +47,7 @@ export class Plugin {
 
         $scope.$$postDigest(() => {
           elem = document.getElementById(REACT_ROOT_ID);
-          renderReact(elem, i18n.Context);
+          renderReact(elem, shim.core, shim.plugins);
 
           // Angular Lifecycle
           const appRoute = $route.current;
@@ -65,7 +66,7 @@ export class Plugin {
               if (stopListeningForLocationChange) {
                 stopListeningForLocationChange();
               }
-              routes.unmountReactApp(elem);
+              routing.unmountReactApp(elem);
             });
           });
         });
