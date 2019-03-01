@@ -21,7 +21,7 @@ import Hapi from 'hapi';
 import { MockServer } from './_mock_server';
 import { createExportByTypeRoute } from './export_by_type';
 
-describe('POST /api/saved_objects/_import_by_type', () => {
+describe('POST /api/saved_objects/_export_by_type', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
