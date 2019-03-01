@@ -5,7 +5,6 @@
  */
 
 import {
-  IndexPatternSavedObject,
   SavedObjectMeta,
   SavedObjectReference,
   SavedSearchObjectAttributes,
@@ -38,29 +37,11 @@ export async function createJobSearch(
     throw new Error(`Could not get search source! ${err}`);
   }
 
-  let indexPatternSavedObject: IndexPatternSavedObject;
   const indexPatternMeta = references.find(
     (ref: SavedObjectReference) => ref.type === 'index-pattern'
   );
   if (!indexPatternMeta) {
     throw new Error('Could not find index pattern for the saved search!');
-  }
-  const { attributes: indexPatternAttributes } = await savedObjectsClient.get(
-    'index-pattern',
-    indexPatternMeta.id
-  );
-  try {
-    let fields = '[]';
-    let fieldFormatMap = '{}';
-    if (indexPatternAttributes.fields) {
-      fields = JSON.parse(indexPatternAttributes.fields);
-    }
-    if (indexPatternAttributes.fieldFormatMap) {
-      fieldFormatMap = JSON.parse(indexPatternAttributes.fieldFormatMap);
-    }
-    indexPatternSavedObject = { ...indexPatternAttributes, fields, fieldFormatMap };
-  } catch (err) {
-    throw new Error(`Could not get index pattern saved object! ${err}`);
   }
 
   const sPanel = {
@@ -68,9 +49,8 @@ export async function createJobSearch(
       ...attributes,
       kibanaSavedObjectMeta: { searchSource },
     },
-    indexPatternSavedObject,
+    indexPatternSavedObjectId: indexPatternMeta.id,
     timerange,
-    references,
   };
 
   return { panel: sPanel, title: attributes.title, visType: 'search' };

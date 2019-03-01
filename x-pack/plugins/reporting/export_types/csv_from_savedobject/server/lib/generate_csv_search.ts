@@ -12,6 +12,7 @@ import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map'
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
 import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
+import { getIndexPatternById } from './get_index_pattern_by_id';
 
 interface SavedSearchGeneratorResult {
   content: string;
@@ -54,7 +55,12 @@ export async function generateCsvSearch(
 
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
   const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
-  const { indexPatternSavedObject, timerange } = searchPanel;
+  const { indexPatternSavedObjectId, timerange } = searchPanel;
+
+  const indexPatternSavedObject = await getIndexPatternById(
+    savedObjectsClient,
+    indexPatternSavedObjectId
+  );
 
   const [formatsMap, uiSettings] = await Promise.all([
     (async () => {
