@@ -20,6 +20,9 @@ import {
 
 import { ValidatedRange } from '../../../shared/components/validated_range';
 
+const MIN_ZOOM = 0;
+const MAX_ZOOM = 24;
+
 export function SettingsPanel(props) {
 
   const onLabelChange = (event) => {
@@ -28,9 +31,9 @@ export function SettingsPanel(props) {
   };
 
   const onZoomChange = (event) => {
-    const minZoom = parseInt(event[0], 10);
+    const minZoom = Math.max(MIN_ZOOM, parseInt(event[0], 10));
     props.updateMinZoom(props.layerId, minZoom);
-    const maxZoom = parseInt(event[1], 10);
+    const maxZoom = Math.min(MAX_ZOOM, parseInt(event[1], 10));
     props.updateMaxZoom(props.layerId, maxZoom);
   };
 
@@ -74,8 +77,8 @@ export function SettingsPanel(props) {
               label={'Min and max zoom'}
             >
               <EuiDualRange
-                min={0}
-                max={24}
+                min={MIN_ZOOM}
+                max={MAX_ZOOM}
                 step={1}
                 value={[props.minZoom, props.maxZoom]}
                 showInput
