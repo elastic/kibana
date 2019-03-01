@@ -17,7 +17,6 @@ import { IconType, ToolTipPositions } from '@elastic/eui';
 import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
-import { ReactDatePickerProps } from 'react-datepicker';
 import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
@@ -45,25 +44,6 @@ declare module '@elastic/eui' {
 
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
-  type EuiFilterGroupProps = CommonProps;
-  export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
-
-  type EuiFilterButtonProps = CommonProps & {
-    color?: ButtonColor;
-    href?: string;
-    iconSide?: ButtonIconSide;
-    iconType?: IconType;
-    isDisabled?: boolean;
-    isSelected?: boolean;
-    onClick: MouseEventHandler<HTMLElement>;
-    rel?: string;
-    target?: string;
-    type?: string;
-    hasActiveFilters?: boolean;
-    numFilters?: number;
-  };
-  export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 
   interface EuiOutsideClickDetectorProps {
     children: React.ReactNode;
@@ -138,19 +118,4 @@ declare module '@elastic/eui' {
     message?: any;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
-
-  type EuiButtonGroupProps = CommonProps & {
-    buttonSize?: any;
-    color?: any;
-    idToSelectedMap?: any;
-    options?: any;
-    type?: any;
-    onChange?: any;
-    isIconOnly?: any;
-    isDisabled?: any;
-    isFullWidth?: any;
-    legend?: any;
-    idSelected?: any;
-  };
-  export const EuiButtonGroup: React.SFC<EuiButtonGroupProps>;
 }
