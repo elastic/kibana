@@ -30,6 +30,7 @@ import { getTime } from '../../timefilter/get_time';
 configureSentinels({
   mutationHandler: mutation => {
     console.error(mutation); // eslint-disable-line
+    window.location.href = 'https://elastic.co';
     throw new Error(`Mutation Detected: ${JSON.stringify(mutation)}`);
   }
 });
