@@ -36,10 +36,6 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await timePicker.setAbsoluteRange('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
       });
 
-      afterEach(async () => {
-        await visualBuilder.clearMarkdown();
-      });
-
       it('should render subtabs and table variables markdown components', async () => {
         const tabs = await visualBuilder.getSubTabs();
         expect(tabs).to.have.length(3);
@@ -76,20 +72,6 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.enterMarkdown(list);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
-      });
-
-      it.skip('should render first table variable', async () => {
-        await visualBuilder.clearMarkdown();
-        const variables = await visualBuilder.getMarkdownTableVariables();
-        const beforeClickText = await visualBuilder.getMarkdownText();
-
-        expect(variables).not.to.be.empty();
-        expect(beforeClickText).to.be.empty();
-
-        await variables[0].selector.click();
-
-        const text = await visualBuilder.getMarkdownText();
-        expect(text).to.be('46');
       });
     });
   });
