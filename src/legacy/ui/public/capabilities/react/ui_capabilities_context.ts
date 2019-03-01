@@ -17,22 +17,11 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
-import { uiCapabilities } from '../ui_capabilities';
-import { UICapabilitiesContext } from './ui_capabilities_context';
+import React from 'react';
+import { UICapabilities } from '../ui_capabilities';
 
-interface Props {
-  children: ReactNode;
-}
-
-export class UICapabilitiesProvider extends React.Component<Props, {}> {
-  public static displayName: string = 'UICapabilitiesProvider';
-
-  public render() {
-    return (
-      <UICapabilitiesContext.Provider value={uiCapabilities}>
-        {this.props.children}
-      </UICapabilitiesContext.Provider>
-    );
-  }
-}
+export const UICapabilitiesContext = React.createContext<UICapabilities>({
+  navLinks: {},
+  catalogue: {},
+  management: {},
+});
