@@ -120,12 +120,13 @@ module.controller('MlTimeSeriesExplorerController', function (
 
   $scope.focusAnnotationData = [];
 
-  $scope.svgWidth = angular.element('.results-container').width();
+  const containerPadding = 24;
+  $scope.svgWidth = angular.element('.ml-time-series-explorer').width() - containerPadding;
   // Required to redraw the time series chart when the container is resized.
   const resizeChecker = new ResizeChecker(angular.element('.ml-time-series-explorer'));
   resizeChecker.on('resize', () => {
     // Set the size of the components according to the width of the parent container at render time.
-    $scope.svgWidth = Math.max(angular.element('.results-container').width(), 0);
+    $scope.svgWidth = Math.max(angular.element('.ml-time-series-explorer').width() - containerPadding, 0);
     $scope.$applyAsync();
   });
 

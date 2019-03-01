@@ -339,7 +339,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     drawContextElements(context, this.vizWidth, contextChartHeight, swimlaneHeight);
   }
 
-  previousFocus = {};
   drawContextChartSelection() {
     const {
       contextChartData,
@@ -380,12 +379,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       focusLoadTo = _.reduce(combinedData, (memo, point) => Math.max(memo, point.date.getTime()), 0);
     }
     focusLoadTo = Math.min(focusLoadTo, contextXMax);
-
-    const focus = { focusLoadFrom, focusLoadTo };
-    if (_.isEqual(this.previousFocus, focus)) {
-      return;
-    }
-    this.previousFocus = focus;
 
     if ((focusLoadFrom !== contextXMin) || (focusLoadTo !== contextXMax)) {
       setContextBrushExtent(new Date(focusLoadFrom), new Date(focusLoadTo), true);

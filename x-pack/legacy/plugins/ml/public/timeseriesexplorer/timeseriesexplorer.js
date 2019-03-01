@@ -299,7 +299,7 @@ export const TimeSeriesExplorer = injectI18n(
                 )}
               </EuiFlexGroup>
 
-              <div className="ml-timeseries-chart" style={{ width: '1200px', height: '400px' }} data-test-subj="mlSingleMetricViewerChart">
+              <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
                 <TimeseriesChart
                   {...tsc}
                   detectorIndex={detectorId}
