@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { ElasticsearchServiceStart } from '../elasticsearch';
-
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
@@ -32,6 +30,7 @@ import { BehaviorSubject, from } from 'rxjs';
 
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { Plugin } from './plugin';
@@ -44,7 +43,7 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-let startDeps: { elasticsearch: ElasticsearchServiceStart };
+const startDeps = { elasticsearch: elasticsearchServiceMock.startContract };
 const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockPackage.raw = {
@@ -58,7 +57,6 @@ beforeEach(() => {
   };
 
   env = Env.createDefault(getEnvOptions());
-  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),

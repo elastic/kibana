@@ -48,9 +48,11 @@ let startDeps: {
   plugins: PluginsServiceStart;
 };
 const logger = loggingServiceMock.create();
-const configService = configServiceMock.create();
+let configService: ReturnType<typeof configServiceMock.create>;
+
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
+  configService = configServiceMock.create();
 
   MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
 
@@ -71,7 +73,6 @@ beforeEach(() => {
   );
 
   configService.getConfig$.mockReturnValue(config$);
-  configService.atPath.mockReturnValue(new BehaviorSubject({}));
   configService.getUsedPaths.mockResolvedValue(['foo.bar']);
 
   legacyService = new LegacyService({ env, logger, configService: configService as any });
