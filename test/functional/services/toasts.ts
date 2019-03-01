@@ -23,6 +23,14 @@ export function ToastsProvider({ getService }: TestWrapper) {
   const testSubjects = getService('testSubjects');
 
   class Toasts {
+    /**
+     * Returns the title and message of a specific error toast.
+     * This method is specific to toasts created via `.addError` since they contain
+     * an additional button, that should not be part of the message.
+     *
+     * @param index The index of the toast (1-based, NOT 0-based!) of the toast. Use first by default.
+     * @returns The title and message of the specified error toast.https://github.com/elastic/kibana/issues/17087
+     */
     public async getErrorToast(index: number = 1) {
       const toast = await this.getToastElement(index);
       const titleElement = await testSubjects.findDescendant('euiToastHeader', toast);
@@ -32,6 +40,12 @@ export function ToastsProvider({ getService }: TestWrapper) {
       return { title, message };
     }
 
+    /**
+     * Dismiss a specific toast from the toast list. Since toasts usually should time out themselves,
+     * you only need to call this for permanent toasts (e.g. error toasts).
+     *
+     * @param index The 1-based index of the toast to dismiss. Use first by default.
+     */
     public async dismissToast(index: number = 1) {
       const toast = await this.getToastElement(index);
       const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
