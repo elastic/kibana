@@ -28,17 +28,6 @@ describe('fromQuery', () => {
       } as any)
     ).toEqual('foo=bar&name=john%20doe');
   });
-
-  it('should not encode _a and _g', () => {
-    expect(
-      fromQuery({
-        g: 'john doe:',
-        _g: 'john doe:',
-        a: 'john doe:',
-        _a: 'john doe:'
-      } as any)
-    ).toEqual('g=john%20doe%3A&_g=john%20doe:&a=john%20doe%3A&_a=john%20doe:');
-  });
 });
 
 describe('getKibanaHref', () => {
@@ -46,77 +35,76 @@ describe('getKibanaHref', () => {
     const location = {} as Location;
     const pathname = '/app/kibana';
     const hash = '/discover';
-    const href = getKibanaHref({ location, pathname, hash });
-    expect(href).toBe(
-      '/app/kibana#/discover?_g=(time:(from:now-24h,mode:quick,to:now))'
-    );
+    const query = { transactionId: 'something' };
+    const href = getKibanaHref({ location, pathname, hash, query });
+    expect(href).toBe('/app/kibana#/discover?transactionId=something');
   });
 
-  it('should rison encode _a', () => {
-    const location = {} as Location;
-    const pathname = '/app/kibana';
-    const hash = '/discover';
-    const query = {
-      _a: {
-        interval: 'auto',
-        query: {
-          language: 'lucene',
-          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
-        },
-        sort: { '@timestamp': 'desc' }
-      }
-    };
-    const href = getKibanaHref({ query, location, pathname, hash });
-    const { _a } = getUrlQuery(href);
-    expect(_a).toEqual(
-      `(interval:auto,query:(language:lucene,query:'context.service.name:\"myServiceName\" AND error.grouping_key:\"myGroupId\"'),sort:('@timestamp':desc))`
-    );
-  });
+  // it('should rison encode _a', () => {
+  //   const location = {} as Location;
+  //   const pathname = '/app/kibana';
+  //   const hash = '/discover';
+  //   const query = {
+  //     _a: {
+  //       interval: 'auto',
+  //       query: {
+  //         language: 'lucene',
+  //         query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
+  //       },
+  //       sort: { '@timestamp': 'desc' }
+  //     }
+  //   };
+  //   const href = getKibanaHref({ query, location, pathname, hash });
+  //   const { _a } = getUrlQuery(href);
+  //   expect(_a).toEqual(
+  //     `(interval:auto,query:(language:lucene,query:'context.service.name:\"myServiceName\" AND error.grouping_key:\"myGroupId\"'),sort:('@timestamp':desc))`
+  //   );
+  // });
 
-  describe('_g', () => {
-    it('should preserve _g from location', () => {
-      const location = {
-        search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-      } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-7d,mode:relative,to:now-1d))');
-    });
+  // describe('_g', () => {
+  //   it('should preserve _g from location', () => {
+  //     const location = {
+  //       search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
+  //     } as Location;
+  //     const pathname = '/app/kibana';
+  //     const hash = '/discover';
+  //     const href = getKibanaHref({ location, pathname, hash });
+  //     const { _g } = getUrlQuery(href);
+  //     expect(_g).toBe('(time:(from:now-7d,mode:relative,to:now-1d))');
+  //   });
 
-    it('should use default time range when _g is empty', () => {
-      const location = {} as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-    });
+  //   it('should use default time range when _g is empty', () => {
+  //     const location = {} as Location;
+  //     const pathname = '/app/kibana';
+  //     const hash = '/discover';
+  //     const href = getKibanaHref({ location, pathname, hash });
+  //     const { _g } = getUrlQuery(href);
+  //     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
+  //   });
 
-    it('should use default value when given invalid input', () => {
-      const location = { search: '?_g=H@whatever' } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-    });
+  //   it('should use default value when given invalid input', () => {
+  //     const location = { search: '?_g=H@whatever' } as Location;
+  //     const pathname = '/app/kibana';
+  //     const hash = '/discover';
+  //     const href = getKibanaHref({ location, pathname, hash });
+  //     const { _g } = getUrlQuery(href);
+  //     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
+  //   });
 
-    it('should merge in _g query values', () => {
-      const location = {
-        search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-      } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const query = { _g: { ml: { jobIds: [1337] } } };
-      const href = getKibanaHref({ location, query, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe(
-        '(ml:(jobIds:!(1337)),time:(from:now-7d,mode:relative,to:now-1d))'
-      );
-    });
-  });
+  //   it('should merge in _g query values', () => {
+  //     const location = {
+  //       search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
+  //     } as Location;
+  //     const pathname = '/app/kibana';
+  //     const hash = '/discover';
+  //     const query = { _g: { ml: { jobIds: [1337] } } };
+  //     const href = getKibanaHref({ location, query, pathname, hash });
+  //     const { _g } = getUrlQuery(href);
+  //     expect(_g).toBe(
+  //       '(ml:(jobIds:!(1337)),time:(from:now-7d,mode:relative,to:now-1d))'
+  //     );
+  //   });
+  // });
 
   describe('when location contains kuery', () => {
     const location = {
