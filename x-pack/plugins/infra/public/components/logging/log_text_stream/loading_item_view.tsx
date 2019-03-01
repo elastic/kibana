@@ -137,7 +137,7 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
 const ProgressEntryWrapper = styled.div`
   align-items: center;
   display: flex;
-  min-height: ${props => props.theme.eui.euiSizeXxl};
+  min-height: ${props => props.theme.eui.euiSizeXXL};
   position: relative;
 `;
 

@@ -50,7 +50,7 @@ const SuggestionItemContainer = styled.div<{
   display: flex;
   flex-direction: row;
   font-size: ${props => props.theme.eui.default.euiFontSizeS};
-  height: ${props => props.theme.eui.default.euiSizeXl};
+  height: ${props => props.theme.eui.default.euiSizeXL};
   white-space: nowrap;
   background-color: ${props =>
     props.isSelected ? props.theme.eui.default.euiColorLightestShade : 'transparent'};
@@ -61,8 +61,8 @@ const SuggestionItemField = styled.div`
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.default.euiSizeXl};
-  padding: ${props => props.theme.eui.default.euiSizeXs};
+  height: ${props => props.theme.eui.default.euiSizeXL};
+  padding: ${props => props.theme.eui.default.euiSizeXS};
 `;
 
 const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
@@ -74,7 +74,7 @@ const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: str
   }};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.default.euiSizeXl};
+  width: ${props => props.theme.eui.default.euiSizeXL};
 `;
 
 const SuggestionItemTextField = SuggestionItemField.extend`
