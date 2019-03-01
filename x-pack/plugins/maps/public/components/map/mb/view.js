@@ -93,8 +93,7 @@ export class MBMapContainer extends React.Component {
       originalMbBoxRemoveLayerFunc.apply(this._mbMap, [id]);
     };
 
-    this.assignSizeWatch();
-
+    this._initResizerChecker();
 
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
@@ -149,20 +148,21 @@ export class MBMapContainer extends React.Component {
     }
   }
 
-  assignSizeWatch() {
+  _initResizerChecker() {
+    let animationFrameTimeout;
     this._checker = new ResizeChecker(this.refs.mapContainer);
-    this._checker.on('resize', (() => {
-      let lastWidth = window.innerWidth;
-      let lastHeight = window.innerHeight;
-      return () => {
-        if (lastWidth === window.innerWidth
-          && lastHeight === window.innerHeight && this._mbMap) {
-          this._mbMap.resize();
+    this._checker.on('resize', () => {
+      if (animationFrameTimeout) {
+        cancelAnimationFrame(animationFrameTimeout);
+      }
+
+      animationFrameTimeout = requestAnimationFrame(() => {
+        if (!this._isMounted) {
+          return;
         }
-        lastWidth = window.innerWidth;
-        lastHeight = window.innerHeight;
-      };
-    })());
+        this._mbMap.resize();
+      });
+    });
   }
 
   _syncMbMapWithMapState = () => {
