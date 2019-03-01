@@ -27,23 +27,21 @@ export class GoLauncher implements ILanguageServerLauncher {
 
     const log = this.loggerFactory.getLogger(['code', `go@${this.targetHost}:${port}`]);
     const proxy = new LanguageServerProxy(port, this.targetHost, log);
-    proxy.awaitServerConnection();
-    // detach mode
+
+    log.info('Detach mode, expected langserver launch externally');
     proxy.onConnected(() => {
       this.isRunning = true;
     });
     proxy.onDisconnected(() => {
       this.isRunning = false;
       if (!proxy.isClosed) {
-        proxy.awaitServerConnection();
+        log.warn('language server disconnected, reconnecting');
+        setTimeout(() => proxy.connect(), 1000);
       }
     });
 
     proxy.listen();
-    return new Promise<RequestExpander>(resolve => {
-      proxy.onConnected(() => {
-        resolve(new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options));
-      });
-    });
+    await proxy.connect();
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
   }
 }
