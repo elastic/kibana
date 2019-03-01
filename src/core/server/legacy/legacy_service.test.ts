@@ -18,7 +18,6 @@
  */
 
 import { BehaviorSubject, Subject, throwError } from 'rxjs';
-import { mocked } from 'ts-jest/utils';
 
 jest.mock('./legacy_platform_proxy');
 jest.mock('../../../legacy/server/kbn_server');
@@ -38,7 +37,6 @@ import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 const MockLegacyPlatformProxy: jest.Mock<LegacyPlatformProxy> = LegacyPlatformProxy as any;
-const MockedClusterManager = mocked(MockClusterManager, true);
 
 let legacyService: LegacyService;
 let configService: jest.Mocked<ConfigService>;
@@ -81,7 +79,7 @@ beforeEach(() => {
 afterEach(() => {
   MockLegacyPlatformProxy.mockClear();
   MockKbnServer.mockClear();
-  MockedClusterManager.create.mockClear();
+  MockClusterManager.create.mockClear();
   logger.mockClear();
 });
 
@@ -216,7 +214,7 @@ describe('once LegacyService is started with connection info', () => {
     await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingSnapshot();
 
     expect(MockKbnServer).not.toHaveBeenCalled();
-    expect(MockedClusterManager).not.toHaveBeenCalled();
+    expect(MockClusterManager).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -347,7 +345,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
       plugins: new Map(),
     });
 
-    expect(MockedClusterManager.create.mock.calls).toMatchSnapshot(
+    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
       'cluster manager without base path proxy'
     );
   });
@@ -369,7 +367,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
       plugins: new Map(),
     });
 
-    expect(MockedClusterManager.create.mock.calls).toMatchSnapshot(
+    expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
       'cluster manager with base path proxy'
     );
   });

@@ -14,7 +14,7 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     component="div"
     grow={false}
   >
-    <Component
+    <SpaceAvatar
       announceSpaceName={true}
       space={
         Object {

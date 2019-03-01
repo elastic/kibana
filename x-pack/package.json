@@ -74,7 +74,7 @@
     "babel-jest": "^24.1.0",
     "babel-plugin-inline-react-svg": "^1.0.1",
     "babel-plugin-mock-imports": "^1.0.1",
-    "babel-plugin-require-context-hook-babel7": "^1.0.0",
+    "babel-plugin-require-context-hook": "npm:babel-plugin-require-context-hook-babel7@^1.0.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "chalk": "^2.4.1",
     "chance": "1.0.10",

@@ -32,11 +32,6 @@ export default {
   coverageReporters: [
     'html',
   ],
-  globals: {
-    'ts-jest': {
-      skipBabel: true,
-    },
-  },
   moduleFileExtensions: [
     'js',
     'json',
@@ -56,8 +51,7 @@ export default {
     'integration_tests/'
   ],
   transform: {
-    '^.+\\.js$': '<rootDir>/../src/dev/jest/babel_transform.js',
-    '^.+\\.tsx?$': '<rootDir>/../src/dev/jest/ts_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/../src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

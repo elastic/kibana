@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Readable } from 'stream';
+import { Readable as mockReadable } from 'stream';
 
 jest.mock('fs', () => ({
-  createReadStream(filepath: string): Readable {
+  createReadStream(filepath: string): mockReadable {
     if (filepath === 'ERROR') {
       throw new Error('MOCK ERROR - Invalid Path');
     }
-    const readableStream = new Readable();
+    const readableStream = new mockReadable();
     const streamData = filepath.split('');
     let cursor = 0;
 
