@@ -520,6 +520,7 @@ module.controller('MlNewJob',
                 values: { jobId: $scope.job.job_id }
               });
               changeTab({ index: 0 });
+              $scope.$applyAsync();
             } else {
               checkInfluencers();
             }
