@@ -105,7 +105,7 @@ const testCaseSource = {
       cursor: null,
     },
     sortField: {
-      sortFieldId: 'timestamp',
+      sortFieldId: '@timestamp',
       direction: 'descending',
     },
   },

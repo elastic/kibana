@@ -6,7 +6,15 @@
 
 import { Ecs } from '../../../graphql/types';
 
-import { eventHasNotes, eventIsPinned, getPinTooltip, stringifyEvent } from './helpers';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  eventHasNotes,
+  eventIsPinned,
+  getColumnWidthFromType,
+  getPinTooltip,
+  stringifyEvent,
+} from './helpers';
 
 describe('helpers', () => {
   describe('stringifyEvent', () => {
@@ -233,6 +241,16 @@ describe('helpers', () => {
       const pinnedEventIds = { 'thumb-tack': true };
 
       expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(false);
+    });
+  });
+
+  describe('getColumnWidthFromType', () => {
+    test('it returns the expected width for a non-date column', () => {
+      expect(getColumnWidthFromType('keyword')).toEqual(DEFAULT_COLUMN_MIN_WIDTH);
+    });
+
+    test('it returns the expected width for a date column', () => {
+      expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
     });
   });
 });

@@ -17,6 +17,7 @@ import styled, { injectGlobal } from 'styled-components';
 import { getEventsSelectOptions } from './helpers';
 
 export type CheckState = 'checked' | 'indeterminate' | 'unchecked';
+export const EVENTS_SELECT_WIDTH = 60; // px
 
 // SIDE EFFECT: the following `injectGlobal` overrides
 // the style of the select items
@@ -31,7 +32,7 @@ injectGlobal`
   }
 
   .eventsSelectDropdown {
-    width: 60px;
+    width: ${EVENTS_SELECT_WIDTH}px;
   }
 `;
 

@@ -21,6 +21,7 @@ import {
 } from '../../../store';
 import { UpdateNote } from '../../notes/helpers';
 import { defaultWidth } from '../../timeline/body';
+import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
 
 interface OwnProps {
@@ -169,7 +170,7 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
     );
   },
   createTimeline: ({ id, show }: { id: string; show?: boolean }) => {
-    dispatch(timelineActions.createTimeline({ id, show }));
+    dispatch(timelineActions.createTimeline({ id, columns: defaultHeaders, show }));
   },
   updateDescription: ({ id, description }: { id: string; description: string }) => {
     dispatch(timelineActions.updateDescription({ id, description }));

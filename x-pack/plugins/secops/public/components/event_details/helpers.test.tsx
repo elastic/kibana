@@ -5,7 +5,6 @@
  */
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -158,7 +157,7 @@ describe('helpers', () => {
           const wrapper = mount(
             <ReduxStoreProvider store={store}>
               <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
+                <DragDropContext onDragEnd={jest.fn()}>
                   <>{field.value}</>
                 </DragDropContext>
               </ThemeProvider>
@@ -176,7 +175,7 @@ describe('helpers', () => {
           const wrapper = mount(
             <ReduxStoreProvider store={store}>
               <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
+                <DragDropContext onDragEnd={jest.fn()}>
                   <>{field.value}</>
                 </DragDropContext>
               </ThemeProvider>

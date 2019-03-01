@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { MarkdownHint } from '../../markdown/markdown_hint';
 import {
   AssociateNote,
   GetNewNoteId,
@@ -46,13 +47,16 @@ export const AddNote = pure<{
 }>(({ associateNote, getNewNoteId, newNote, onCancelAddNote, updateNewNote, updateNote }) => (
   <AddNotesContainer alignItems="flexEnd" direction="column" gutterSize="none">
     <NewNote note={newNote} noteInputHeight={200} updateNewNote={updateNewNote} />
+    <EuiFlexItem grow={true}>
+      <MarkdownHint show={newNote.trim().length > 0} />
+    </EuiFlexItem>
     <ButtonsContainer gutterSize="none">
       {onCancelAddNote != null ? (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <CancelButton onCancelAddNote={onCancelAddNote} />
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="add-note"
           isDisabled={newNote.trim().length === 0}

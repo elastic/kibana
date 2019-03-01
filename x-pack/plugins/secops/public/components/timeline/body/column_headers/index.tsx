@@ -4,78 +4,101 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { OnColumnSorted, OnFilterChange } from '../../events';
+import { OnColumnRemoved, OnColumnResized, OnColumnSorted, OnFilterChange } from '../../events';
 import { Sort } from '../sort';
 
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';
 
-const SettingsContainer = styled.div`
-  height: 24px;
-  width: 24px;
-`;
-
-const EventsSelectAndSettingsContainer = styled.div<{ actionsColumnWidth: number }>`
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  margin-right: 5px;
-  padding-right: 5px;
+const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
+  overflow: hidden;
   width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
 `;
 
 interface Props {
   actionsColumnWidth: number;
   columnHeaders: ColumnHeader[];
-  onColumnSorted?: OnColumnSorted;
+  isLoading: boolean;
+  onColumnRemoved: OnColumnRemoved;
+  onColumnResized: OnColumnResized;
+  onColumnSorted: OnColumnSorted;
   onFilterChange?: OnFilterChange;
   sort: Sort;
   timelineId: string;
+  minWidth: number;
 }
+
+const ColumnHeadersContainer = styled.div<{
+  minWidth: number;
+}>`
+  display: block;
+  overflow: hidden;
+  min-width: ${({ minWidth }) => `${minWidth}px`};
+  margin-bottom: 2px;
+`;
+
+const EventsSelectContainer = styled(EuiFlexItem)`
+  margin-right: 4px;
+`;
 
 /** Renders the timeline header columns */
 export const ColumnHeaders = pure<Props>(
   ({
     actionsColumnWidth,
     columnHeaders,
-    onColumnSorted = noop,
+    isLoading,
+    onColumnRemoved,
+    onColumnResized,
+    onColumnSorted,
     onFilterChange = noop,
     sort,
     timelineId,
+    minWidth,
   }) => (
-    <EuiFlexGroup data-test-subj="column-headers" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <EventsSelectAndSettingsContainer
-          actionsColumnWidth={actionsColumnWidth}
-          data-test-subj="events-select-and-settings-container"
-        >
-          <EventsSelect checkState="unchecked" timelineId={timelineId} />
-          <SettingsContainer data-test-subj="settings-container">
-            <EuiIcon data-test-subj="gear" type="gear" size="l" onClick={noop} />
-          </SettingsContainer>
-        </EventsSelectAndSettingsContainer>
-      </EuiFlexItem>
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup gutterSize="none">
-          {columnHeaders.map(header => (
-            <EuiFlexItem key={header.id}>
-              <Header
-                header={header}
-                onColumnSorted={onColumnSorted}
-                onFilterChange={onFilterChange}
-                sort={sort}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
+      <EuiFlexGroup data-test-subj="column-headers-group" gutterSize="none">
+        <EuiFlexItem data-test-subj="actions-item" grow={false}>
+          <ActionsContainer
+            actionsColumnWidth={actionsColumnWidth}
+            data-test-subj="actions-container"
+          >
+            <EuiFlexGroup gutterSize="none">
+              <EventsSelectContainer grow={false}>
+                <EventsSelect checkState="unchecked" timelineId={timelineId} />
+              </EventsSelectContainer>
+              <EuiFlexItem grow={true}>
+                <EuiSuperSelect data-test-subj="field-browser" isLoading={false} onChange={noop} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </ActionsContainer>
+        </EuiFlexItem>
+
+        <EuiFlexItem data-test-subj="headers-item" grow={false}>
+          <EuiFlexGroup data-test-subj="headers-group" gutterSize="none">
+            {columnHeaders.map(header => (
+              <EuiFlexItem grow={false} key={header.id}>
+                <Header
+                  timelineId={timelineId}
+                  header={header}
+                  isLoading={isLoading}
+                  onColumnRemoved={onColumnRemoved}
+                  onColumnResized={onColumnResized}
+                  onColumnSorted={onColumnSorted}
+                  onFilterChange={onFilterChange}
+                  sort={sort}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </ColumnHeadersContainer>
   )
 );

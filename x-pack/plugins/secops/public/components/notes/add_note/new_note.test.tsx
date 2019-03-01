@@ -37,7 +37,7 @@ describe('NewNote', () => {
   });
 
   test('it renders the expected placeholder when a note is NOT provided', () => {
-    const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);
+    const wrapper = mount(<NewNote noteInputHeight={200} note={''} updateNewNote={jest.fn()} />);
 
     expect(wrapper.find(`textarea[placeholder="${i18n.ADD_A_NOTE}"]`).exists()).toEqual(true);
   });

@@ -5,6 +5,7 @@
  */
 
 import { mount } from 'enzyme';
+import 'jest-styled-components';
 import * as React from 'react';
 
 import { AddNote } from '.';
@@ -191,5 +192,41 @@ describe('AddNote', () => {
       .simulate('click');
 
     expect(updateNote).toBeCalled();
+  });
+
+  test('it does NOT display the markdown formatting hint when a note has NOT been entered', () => {
+    const wrapper = mount(
+      <AddNote
+        associateNote={jest.fn()}
+        getNewNoteId={jest.fn()}
+        newNote={''}
+        onCancelAddNote={jest.fn()}
+        updateNewNote={jest.fn()}
+        updateNote={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
+      'visibility',
+      'hidden'
+    );
+  });
+
+  test('it displays the markdown formatting hint when a note has been entered', () => {
+    const wrapper = mount(
+      <AddNote
+        associateNote={jest.fn()}
+        getNewNoteId={jest.fn()}
+        newNote={'We should see a formatting hint now'}
+        onCancelAddNote={jest.fn()}
+        updateNewNote={jest.fn()}
+        updateNote={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="markdown-hint"]').first()).toHaveStyleRule(
+      'visibility',
+      'inline'
+    );
   });
 });

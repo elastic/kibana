@@ -9,5 +9,17 @@ import { EcsField } from '../../../../lib/ecs';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: Ecs) => boolean;
-  renderColumn: (columnName: string, data: Ecs, field?: EcsField) => React.ReactNode;
+  renderColumn: (
+    {
+      columnName,
+      data,
+      field,
+      width,
+    }: {
+      columnName: string;
+      data: Ecs;
+      field?: EcsField;
+      width?: string;
+    }
+  ) => React.ReactNode;
 }

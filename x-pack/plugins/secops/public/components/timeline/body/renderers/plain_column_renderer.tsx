@@ -9,7 +9,12 @@ import { has } from 'lodash/fp';
 import React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
-import { EcsField, getMappedEcsValue, mappedEcsSchemaFieldNames } from '../../../../lib/ecs';
+import {
+  EcsField,
+  getMappedEcsValue,
+  getMappedFieldName,
+  mappedEcsSchemaFieldNames,
+} from '../../../../lib/ecs';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
@@ -18,12 +23,23 @@ import { Provider } from '../../data_providers/provider';
 import { ColumnRenderer } from '.';
 import { FormattedField } from './formatted_field';
 
-export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean => has(columnName, data);
+export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean =>
+  has(getMappedFieldName(columnName), data);
 
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, ecs: Ecs) => dataExistsAtColumn(columnName, ecs),
 
-  renderColumn: (columnName: string, data: Ecs, field?: EcsField) => {
+  renderColumn: ({
+    columnName,
+    data,
+    field,
+    width,
+  }: {
+    columnName: string;
+    data: Ecs;
+    field?: EcsField;
+    width?: string;
+  }) => {
     const itemDataProvider = {
       enabled: true,
       id: escapeDataProviderId(`id-timeline-column-${columnName}-for-event-${data._id}`),
@@ -60,6 +76,7 @@ export const plainColumnRenderer: ColumnRenderer = {
             <FormattedField data={data} fieldName={columnName} fieldType={fieldType} />
           )
         }
+        width={width}
       />
     );
   },

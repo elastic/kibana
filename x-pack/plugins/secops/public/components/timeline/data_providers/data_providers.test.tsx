@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { ThemeProvider } from 'styled-components';
+
+import { TestProviders } from '../../../mock/test_providers';
 
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
@@ -23,20 +21,18 @@ describe('DataProviders', () => {
       const dataProviders: DataProvider[] = [];
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DataProviders
-              id="foo"
-              dataProviders={dataProviders}
-              onChangeDataProviderKqlQuery={noop}
-              onChangeDroppableAndProvider={noop}
-              onDataProviderRemoved={noop}
-              onToggleDataProviderEnabled={noop}
-              onToggleDataProviderExcluded={noop}
-              show={true}
-            />
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DataProviders
+            id="foo"
+            dataProviders={dataProviders}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
+            show={true}
+          />
+        </TestProviders>
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -44,20 +40,18 @@ describe('DataProviders', () => {
 
     test('it should STILL render a placeholder given a non-empty collection of data providers', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DataProviders
-              id="foo"
-              dataProviders={mockDataProviders}
-              onChangeDataProviderKqlQuery={noop}
-              onChangeDroppableAndProvider={noop}
-              onDataProviderRemoved={noop}
-              onToggleDataProviderEnabled={noop}
-              onToggleDataProviderExcluded={noop}
-              show={true}
-            />
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
+            show={true}
+          />
+        </TestProviders>
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -65,20 +59,18 @@ describe('DataProviders', () => {
 
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DataProviders
-              id="foo"
-              dataProviders={mockDataProviders}
-              onChangeDataProviderKqlQuery={noop}
-              onChangeDroppableAndProvider={noop}
-              onDataProviderRemoved={noop}
-              onToggleDataProviderEnabled={noop}
-              onToggleDataProviderExcluded={noop}
-              show={true}
-            />
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DataProviders
+            id="foo"
+            dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
+            show={true}
+          />
+        </TestProviders>
       );
 
       mockDataProviders.forEach(dataProvider =>

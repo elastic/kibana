@@ -4,40 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import toJson from 'enzyme-to-json';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
 import { mockEcsData } from '../../../../mock';
-import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
 
 import { SourceDest } from './source_dest_ip';
 
 describe('SuricataDestIp', () => {
-  const state: State = mockGlobalState;
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-  let store = createStore(state);
-
-  beforeEach(() => {
-    store = createStore(state);
-  });
-
   describe('rendering', () => {
     test('it renders the default SuricataDestIp', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <SourceDest data={mockEcsData[2]} />
-            </DragDropContext>
-          </Provider>
-        </ThemeProvider>
+        <TestProviders>
+          <SourceDest data={mockEcsData[2]} />
+        </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

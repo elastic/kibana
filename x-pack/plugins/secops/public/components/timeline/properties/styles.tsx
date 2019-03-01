@@ -53,6 +53,7 @@ export const PositionedNotesIcon = styled.div<{ size: 'l' | 's' }>`
 
 export const SmallNotesButtonContainer = styled.div`
   cursor: pointer;
+  width: 35px;
 `;
 
 export const ButtonContainer = styled.div<{ animate: boolean }>`

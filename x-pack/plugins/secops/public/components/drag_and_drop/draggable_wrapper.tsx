@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiText } from '@elastic/eui';
 import { defaultTo } from 'lodash/fp';
 import * as React from 'react';
 import {
@@ -21,6 +22,7 @@ import { IdToDataProvider } from '../../store/local/drag_and_drop/model';
 import { dataProvidersSelector } from '../../store/local/drag_and_drop/selectors';
 import { State } from '../../store/reducer';
 import { DataProvider } from '../timeline/data_providers/data_provider';
+import { TruncatableText } from '../truncatable_text';
 
 import { getDraggableId, getDroppableId } from './helpers';
 
@@ -56,6 +58,7 @@ interface OwnProps {
     provided: DraggableProvided,
     state: DraggableStateSnapshot
   ) => React.ReactNode;
+  width?: string;
 }
 
 interface StateReduxProps {
@@ -87,7 +90,7 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
   }
 
   public render() {
-    const { dataProvider, render } = this.props;
+    const { dataProvider, render, width } = this.props;
 
     return (
       <div data-test-subj="draggableWrapperDiv">
@@ -110,7 +113,19 @@ class DraggableWrapperComponent extends React.PureComponent<Props> {
                       zIndex: 9000, // EuiFlyout has a z-index of 8000
                     }}
                   >
-                    {render(dataProvider, provided, snapshot)}
+                    {width != null && !snapshot.isDragging ? (
+                      <TruncatableText
+                        data-test-subj="draggable-truncatable-content"
+                        size="s"
+                        width={width}
+                      >
+                        {render(dataProvider, provided, snapshot)}
+                      </TruncatableText>
+                    ) : (
+                      <EuiText data-test-subj="draggable-content" size="s">
+                        {render(dataProvider, provided, snapshot)}
+                      </EuiText>
+                    )}
                   </ProviderContainer>
                 )}
               </Draggable>

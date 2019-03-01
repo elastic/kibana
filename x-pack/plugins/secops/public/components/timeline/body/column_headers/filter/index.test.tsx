@@ -7,20 +7,23 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { ColumnHeader } from './column_header';
-import { Filter } from './filter';
+import { ColumnHeaderType } from '../column_header';
+import { defaultHeaders } from '../default_headers';
+
+import { Filter } from '.';
+
+const textFilter: ColumnHeaderType = 'text-filter';
+const notFiltered: ColumnHeaderType = 'not-filtered';
 
 describe('Filter', () => {
   describe('rendering', () => {
     test('it renders a text filter when the columnHeaderType is "text-filter"', () => {
-      const columnHeader: ColumnHeader = {
-        columnHeaderType: 'text-filter',
-        id: 'foobar',
-        minWidth: 100,
-        text: 'Foobar',
+      const textFilterColumnHeader = {
+        ...defaultHeaders[0],
+        columnHeaderType: textFilter,
       };
 
-      const wrapper = mount(<Filter header={columnHeader} />);
+      const wrapper = mount(<Filter header={textFilterColumnHeader} />);
 
       expect(
         wrapper
@@ -31,11 +34,9 @@ describe('Filter', () => {
     });
 
     test('it does NOT render a filter when the columnHeaderType is "not-filtered"', () => {
-      const notFilteredHeader: ColumnHeader = {
-        columnHeaderType: 'not-filtered',
-        id: 'foobar',
-        minWidth: 100,
-        text: 'Foobar',
+      const notFilteredHeader = {
+        ...defaultHeaders[0],
+        columnHeaderType: notFiltered,
       };
 
       const wrapper = mount(<Filter header={notFilteredHeader} />);

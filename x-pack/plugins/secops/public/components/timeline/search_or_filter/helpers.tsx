@@ -88,3 +88,6 @@ export const options = [
     ),
   },
 ];
+
+export const getPlaceholderText = (kqlMode: KqlMode): string =>
+  kqlMode === 'filter' ? i18n.FILTER_KQL_PLACEHOLDER : i18n.SEARCH_KQL_PLACEHOLDER;
