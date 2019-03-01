@@ -10,45 +10,33 @@ import { UICapabilitiesService } from '../../common/services/ui_capabilities';
 import { SpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function advancedSettingsTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('logs', () => {
+  describe('foo', () => {
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
         switch (scenario.id) {
-          case 'advanced_settings_disabled_space':
           case 'everything_space':
-          case 'apm_disabled_space':
-          case 'dashboard_disabled_space':
-          case 'canvas_disabled_space':
-          case 'dev_tools_disabled_space':
-          case 'discover_disabled_space':
-          case 'graph_disabled_space':
-          case 'infrastructure_disabled_space':
-          case 'maps_disabled_space':
-          case 'ml_disabled_space':
-          case 'monitoring_disabled_space':
-          case 'timelion_disabled_space':
-          case 'uptime_disabled_space':
-          case 'visualize_disabled_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('logs');
-            expect(uiCapabilities.value!.logs).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: true,
+              edit: true,
+              delete: true,
               show: true,
-              configureSource: true,
             });
             break;
           case 'nothing_space':
-          case 'logs_disabled_space':
+          case 'foo_disabled_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('logs');
-            expect(uiCapabilities.value!.logs).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
               show: false,
-              configureSource: false,
             });
             break;
           default:

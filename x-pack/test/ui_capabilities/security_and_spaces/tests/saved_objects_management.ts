@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import {
@@ -35,9 +35,10 @@ export default function savedObjectsManagementTests({
           case 'superuser at nothing_space':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.all('all')
+            const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('all')
             );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
           case 'global_all at everything_space':
           case 'dual_privileges_all at everything_space':
@@ -48,7 +49,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
+              savedObjectsManagementBuilder.build({
                 all: [
                   'config',
                   'graph-workspace',
@@ -74,7 +75,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
+              savedObjectsManagementBuilder.build({
                 read: [
                   'config',
                   'graph-workspace',
