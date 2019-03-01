@@ -29,7 +29,7 @@ const { log: defaultLog, cache } = require('../utils');
 
 // pin TEST_ES_SNAPSHOT_VERSION until https://github.com/elastic/elasticsearch/pull/39582 is merged and snapshots have updated
 if (!process.env.TEST_ES_SNAPSHOT_VERSION) {
-  process.env.TEST_ES_SNAPSHOT_VERSION = 'c0419e58';
+  process.env.TEST_ES_SNAPSHOT_VERSION = '7.1.0-c0419e58';
 }
 
 /**
