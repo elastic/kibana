@@ -217,6 +217,7 @@
     "lodash.pickby": "^4.6.0",
     "lodash.topath": "^4.5.2",
     "lodash.uniqby": "^4.7.0",
+    "lodash.uniqwith": "^4.5.0",
     "lz-string": "^1.4.4",
     "mapbox-gl": "0.52.0",
     "markdown-it": "^8.4.1",

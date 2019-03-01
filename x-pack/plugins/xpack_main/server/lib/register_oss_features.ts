@@ -116,7 +116,11 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: ['config'],
         },
-        ui: ['show'],
+        // the save ui capability isn't being consumed presently, but we need a way
+        // to differentiate which privilege in the future will have elevated privileges
+        // so that we know which one to display in the UI in some situations, and to allow
+        // the user to choose the Dev Tools all privilege when they have global read.
+        ui: ['show', 'save'],
       },
       read: {
         api: ['console/execute'],

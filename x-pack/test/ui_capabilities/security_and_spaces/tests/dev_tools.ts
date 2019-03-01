@@ -34,6 +34,7 @@ export default function devToolsTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dev_tools');
             expect(uiCapabilities.value!.dev_tools).to.eql({
+              save: true,
               show: true,
             });
             break;
@@ -45,6 +46,7 @@ export default function devToolsTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dev_tools');
             expect(uiCapabilities.value!.dev_tools).to.eql({
+              save: false,
               show: true,
             });
             break;
@@ -60,6 +62,7 @@ export default function devToolsTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('dev_tools');
             expect(uiCapabilities.value!.dev_tools).to.eql({
+              save: false,
               show: false,
             });
             break;

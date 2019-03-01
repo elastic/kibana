@@ -42,7 +42,11 @@ export const initServerWithKibana = (server: KibanaServer) => {
           all: [],
           read: ['config'],
         },
-        ui: [],
+        // the save ui capability isn't being consumed presently, but we need a way
+        // to differentiate which privilege in the future will have elevated privileges
+        // so that we know which one to display in the UI in some situations, and to allow
+        // the user to choose the Uptime all privilege when they have global read.
+        ui: ['save'],
       },
       read: {
         savedObject: {

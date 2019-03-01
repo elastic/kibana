@@ -104,7 +104,7 @@ describe('FeatureRegistry', () => {
     });
   });
 
-  it('prevents features from being registered with invalid privileges', () => {
+  it('prevents features from being registered with invalid privilege names', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
@@ -125,6 +125,39 @@ describe('FeatureRegistry', () => {
     const featureRegistry = new FeatureRegistry();
     expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
       `"child \\"privileges\\" fails because [\\"foo\\" is not allowed]"`
+    );
+  });
+
+  it('prevents features from registering two privileges with the same actions', () => {
+    const feature: Feature = {
+      id: 'test-feature',
+      name: 'Test Feature',
+      app: ['app1', 'app2'],
+      privileges: {
+        all: {
+          app: ['app1', 'app2'],
+          savedObject: {
+            all: ['config', 'space', 'etc'],
+            read: ['canvas'],
+          },
+          api: ['someApiEndpointTag', 'anotherEndpointTag'],
+          ui: ['allowsFoo', 'showBar', 'showBaz'],
+        },
+        read: {
+          app: ['app1', 'app2'],
+          savedObject: {
+            all: ['config', 'space', 'etc'],
+            read: ['canvas'],
+          },
+          api: ['someApiEndpointTag', 'anotherEndpointTag'],
+          ui: ['allowsFoo', 'showBar', 'showBaz'],
+        },
+      },
+    };
+
+    const featureRegistry = new FeatureRegistry();
+    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
+      `"Multiple privileges with the same definition have been registered for test-feature this isn't supported"`
     );
   });
 
