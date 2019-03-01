@@ -9,6 +9,7 @@ exports[`renders without crashing 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={true}
+    labelType="label"
   >
     <EuiLink
       color="primary"
