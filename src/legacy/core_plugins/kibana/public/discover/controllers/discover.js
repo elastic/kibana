@@ -66,6 +66,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { getFirstSortableField } from '../../context/api/utils/sorting';
 
 const app = uiModules.get('apps/discover', [
   'kibana/notify',
@@ -434,13 +435,16 @@ function discoverController(
 
   $scope.uiState = $state.makeStateful('uiState');
 
+  const tiebreakerField = getFirstSortableField($scope.indexPattern, config.get('context:tieBreakerFields'));
+  const defaultSortOrder = config.get('discover:sort:defaultOrder');
+
   function getStateDefaults() {
     return {
       query: $scope.searchSource.getField('query') || {
         query: '',
         language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
       },
-      sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern, defaultSortOrder),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',
@@ -449,7 +453,7 @@ function discoverController(
   }
 
   $state.index = $scope.indexPattern.id;
-  $state.sort = getSort.array($state.sort, $scope.indexPattern);
+  $state.sort = getSort.array($state.sort, $scope.indexPattern, defaultSortOrder);
 
   $scope.getBucketIntervalToolTipText = () => {
     return (
@@ -886,7 +890,12 @@ function discoverController(
   $scope.updateDataSource = Promise.method(function updateDataSource() {
     $scope.searchSource
       .setField('size', $scope.opts.sampleSize)
-      .setField('sort', getSort($state.sort, $scope.indexPattern))
+      .setField('sort', [
+        getSort($state.sort, $scope.indexPattern),
+        {
+          [tiebreakerField]: defaultSortOrder,
+        }
+      ])
       .setField('query', !$state.query ? null : $state.query)
       .setField('filter', queryFilter.getFilters());
   });
