@@ -15,7 +15,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  uiText,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component, ReactElement } from 'react';
