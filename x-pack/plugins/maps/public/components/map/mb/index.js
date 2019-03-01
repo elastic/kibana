@@ -49,8 +49,13 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setLayerErrorStatus: (id, msg) =>
-      dispatch(setLayerErrorStatus(id, msg))
+    setLayerErrorStatus: (id, msg) => {
+      dispatch(setLayerErrorStatus(id, msg));
+    },
+    setTooltipState() {
+      //todo
+    }
+
   };
 }
 

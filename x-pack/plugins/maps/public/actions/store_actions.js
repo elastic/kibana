@@ -49,6 +49,7 @@ export const CLEAR_GOTO = 'CLEAR_GOTO';
 export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
+export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -286,6 +287,13 @@ export function mapExtentChanged(newMapConstants) {
     });
     const newDataFilters =  { ...dataFilters, ...newMapConstants };
     await syncDataForAllLayers(getState, dispatch, newDataFilters);
+  };
+}
+
+export function setTooltipState(tooltipState) {
+  return {
+    type: 'SET_TOOLTIP_STATE',
+    tooltipState: tooltipState
   };
 }
 
