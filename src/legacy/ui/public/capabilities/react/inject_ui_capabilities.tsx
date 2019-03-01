@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import PropTypes from 'prop-types';
 import React, { Component, ComponentClass, ComponentType } from 'react';
 import { UICapabilities } from '../ui_capabilities';
-import { UICapabilitiesContext } from './ui_capabilities_context';
 
 function getDisplayName(component: ComponentType<any>) {
   return component.displayName || component.name || 'Component';
@@ -39,14 +39,18 @@ export function injectUICapabilities<P>(
 
     public static WrappedComponent: ComponentType<P & InjectedProps> = WrappedComponent;
 
-    public static contextType = UICapabilitiesContext;
+    public static contextTypes = {
+      uiCapabilities: PropTypes.object.isRequired,
+    };
 
     constructor(props: any, context: any) {
       super(props, context);
     }
 
     public render() {
-      return <WrappedComponent {...this.props} {...{ uiCapabilities: this.context }} />;
+      return (
+        <WrappedComponent {...this.props} {...{ uiCapabilities: this.context.uiCapabilities }} />
+      );
     }
   }
   return InjectUICapabilities;
