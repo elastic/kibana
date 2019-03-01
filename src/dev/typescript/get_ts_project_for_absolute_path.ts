@@ -18,10 +18,9 @@
  */
 
 import { relative } from 'path';
-
-import minimatch from 'minimatch';
 import { REPO_ROOT } from '../constants';
-import { IGNORED_PATHS, PROJECTS } from './projects';
+import { Project } from './project';
+import { PROJECTS } from './projects';
 
 /**
  * Finds the `tsconfig.json` Project object for a specific path by looking through
@@ -32,11 +31,8 @@ import { IGNORED_PATHS, PROJECTS } from './projects';
  *
  * @param path Absolute path to a .ts file
  */
-export function getTsProjectForAbsolutePath(path: string) {
+export function getTsProjectForAbsolutePath(path: string): Project {
   const relPath = relative(REPO_ROOT, path);
-  if (IGNORED_PATHS.some(glob => minimatch(relPath, glob, { dot: true }))) {
-    return PROJECTS[0];
-  }
 
   const projects = PROJECTS.filter(p => p.isAbsolutePathSelected(path));
 

@@ -37,8 +37,6 @@ export const PROJECTS = [
     .map(path => new Project(resolve(REPO_ROOT, path))),
 ];
 
-export const IGNORED_PATHS = ['common/core_api_review/kibana.api.ts'];
-
 export function filterProjectsByFlag(projectFlag?: string) {
   if (!projectFlag) {
     return PROJECTS;

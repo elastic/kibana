@@ -18,9 +18,17 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
+import minimatch from 'minimatch';
 
 import { File } from '../file';
 
+export const IGNORED_PATHS = ['common/core_api_review/kibana.api.ts'];
+
 export function pickFilesToLint(log: ToolingLog, files: File[]) {
-  return files.filter(file => file.isTypescript() && !file.isFixture());
+  return files.filter(
+    file =>
+      file.isTypescript() &&
+      !file.isFixture() &&
+      IGNORED_PATHS.some(glob => minimatch(file.getRelativePath(), glob, { dot: true }))
+  );
 }
