@@ -60,6 +60,7 @@ export default function savedObjectsManagementTests({
                   'dashboard',
                   'timelion-sheet',
                   'url',
+                  'infrastructure-ui-source',
                 ],
               })
             );
@@ -85,6 +86,7 @@ export default function savedObjectsManagementTests({
                   'dashboard',
                   'timelion-sheet',
                   'url',
+                  'infrastructure-ui-source',
                 ],
               })
             );
