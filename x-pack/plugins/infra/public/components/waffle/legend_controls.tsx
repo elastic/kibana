@@ -25,13 +25,14 @@ import { InfraWaffleMapBounds } from '../../lib/lib';
 interface Props {
   onChange: (options: { auto: boolean; bounds: InfraWaffleMapBounds }) => void;
   bounds: InfraWaffleMapBounds;
+  dataBounds: InfraWaffleMapBounds;
   autoBounds: boolean;
   boundsOverride: InfraWaffleMapBounds;
   intl: InjectedIntl;
 }
 
 export const LegendControls = injectI18n(
-  ({ intl, autoBounds, boundsOverride, onChange }: Props) => {
+  ({ intl, autoBounds, boundsOverride, onChange, dataBounds }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const [draftAuto, setDraftAuto] = useState(autoBounds);
     const [draftBounds, setDraftBounds] = useState(boundsOverride); // should come from bounds prop
@@ -49,6 +50,7 @@ export const LegendControls = injectI18n(
 
     const handleAutoChange = (e: SyntheticEvent<HTMLInputElement>) => {
       setDraftAuto(e.currentTarget.checked);
+      setDraftBounds(dataBounds);
     };
 
     const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {
@@ -78,22 +80,16 @@ export const LegendControls = injectI18n(
           closePopover={handlePopoverClose}
           id="legendControls"
           button={buttonComponent}
-          anchorPosition="upLeft"
           withTitle
         >
           <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
           <EuiForm>
-            <EuiFormRow
-              label={intl.formatMessage({
-                id: 'xpack.infra.legendControls.dataBoundsLabel',
-                defaultMessage: 'Data Bounds',
-              })}
-            >
+            <EuiFormRow>
               <EuiSwitch
                 name="bounds"
                 label={intl.formatMessage({
                   id: 'xpack.infra.legendControls.switchLabel',
-                  defaultMessage: 'Auto Bounds',
+                  defaultMessage: 'Auto calculate range',
                 })}
                 checked={draftAuto}
                 onChange={handleAutoChange}
@@ -115,7 +111,7 @@ export const LegendControls = injectI18n(
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.infra.legendControls.minLabel',
-                    defaultMessage: 'Min',
+                    defaultMessage: 'Legend Min',
                   })}
                   isInvalid={!boundsValidRange}
                 >
@@ -133,7 +129,7 @@ export const LegendControls = injectI18n(
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.infra.legendControls.maxLabel',
-                    defaultMessage: 'Max',
+                    defaultMessage: 'Legend Max',
                   })}
                   isInvalid={!boundsValidRange}
                 >
@@ -170,6 +166,6 @@ export const LegendControls = injectI18n(
 const ControlContainer = styled.div`
   position: absolute;
   top: -20px;
-  left: 6px;
+  right: 6px;
   bottom: 0;
 `;

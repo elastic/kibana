@@ -67,12 +67,16 @@ const METRIC_FORMATTERS: MetricFormatters = {
 };
 
 const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
-  const values = nodes.map(node => node.metric.value);
+  const maxValues = nodes.map(node => node.metric.max);
+  const minValues = nodes.map(node => node.metric.value);
   // if there is only one value then we need to set the bottom range to zero
-  if (values.length === 1) {
-    values.unshift(0);
+  if (maxValues.length === 1) {
+    maxValues.unshift(0);
   }
-  return { min: min(values) || 0, max: max(values) || 0 };
+  if (minValues.length === 1) {
+    minValues.unshift(0);
+  }
+  return { min: min(minValues) || 0, max: max(maxValues) || 0 };
 };
 
 export const NodesOverview = injectI18n(
@@ -124,7 +128,8 @@ export const NodesOverview = injectI18n(
           />
         );
       }
-      const bounds = autoBounds ? calculateBoundsFromNodes(nodes) : boundsOverride;
+      const dataBounds = calculateBoundsFromNodes(nodes);
+      const bounds = autoBounds ? dataBounds : boundsOverride;
       return (
         <MainContainer>
           <ViewSwitcherContainer>
@@ -151,6 +156,7 @@ export const NodesOverview = injectI18n(
                 timeRange={timeRange}
                 onFilter={this.handleDrilldown}
                 bounds={bounds}
+                dataBounds={dataBounds}
               />
             </MapContainer>
           )}

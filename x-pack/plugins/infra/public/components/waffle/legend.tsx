@@ -14,6 +14,7 @@ import { StepLegend } from './steps_legend';
 interface Props {
   legend: InfraWaffleMapLegend;
   bounds: InfraWaffleMapBounds;
+  dataBounds: InfraWaffleMapBounds;
   formatter: InfraFormatter;
 }
 
@@ -22,12 +23,13 @@ interface LegendControlOptions {
   bounds: InfraWaffleMapBounds;
 }
 
-export const Legend: React.SFC<Props> = ({ legend, bounds, formatter }) => {
+export const Legend: React.SFC<Props> = ({ dataBounds, legend, bounds, formatter }) => {
   return (
     <LegendContainer>
       <WithWaffleOptions>
         {({ changeBoundsOverride, changeAutoBounds, autoBounds, boundsOverride }) => (
           <LegendControls
+            dataBounds={dataBounds}
             bounds={bounds}
             autoBounds={autoBounds}
             boundsOverride={boundsOverride}
