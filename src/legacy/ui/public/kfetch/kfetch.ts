@@ -35,6 +35,7 @@ export interface KFetchOptions extends RequestInit {
 
 export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
+  parseJson?: boolean;
 }
 
 export interface Interceptor {
@@ -50,7 +51,7 @@ export const addInterceptor = (interceptor: Interceptor) => interceptors.push(in
 
 export async function kfetch(
   options: KFetchOptions,
-  { prependBasePath = true }: KFetchKibanaOptions = {}
+  { prependBasePath = true, parseJson = true }: KFetchKibanaOptions = {}
 ) {
   const combinedOptions = withDefaultOptions(options);
   const promise = requestInterceptors(combinedOptions).then(
@@ -61,10 +62,14 @@ export async function kfetch(
       });
 
       return window.fetch(fullUrl, restOptions).then(async res => {
-        const body = await getBodyAsJson(res);
+        const body = parseJson ? await getBodyAsJson(res) : null;
         if (res.ok) {
-          return body;
+          if (parseJson) {
+            return body;
+          }
+          return res;
         }
+
         throw new KFetchError(res, body);
       });
     }
