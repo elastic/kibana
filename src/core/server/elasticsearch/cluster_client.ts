@@ -31,6 +31,8 @@ import { ScopedClusterClient } from './scoped_cluster_client';
 /**
  * The set of options that defines how API call should be made and result be
  * processed.
+ *
+ * @public
  */
 export interface CallAPIOptions {
   /**
@@ -84,6 +86,8 @@ async function callAPI(
  * Represents an Elasticsearch cluster API client and allows to call API on behalf
  * of the internal Kibana user and the actual user that is derived from the request
  * headers (via `asScoped(...)`).
+ *
+ * @public
  */
 export class ClusterClient {
   /**
