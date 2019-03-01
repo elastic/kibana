@@ -14,14 +14,10 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
   constructor(gisMapSavedObjectLoader) {
     super({ name: 'map' });
-    this.savedObjectLoader = gisMapSavedObjectLoader;
+    this._savedObjectLoader = gisMapSavedObjectLoader;
   }
 
-  getEditPath(mapId) {
-    return chrome.addBasePath(`/app/maps#/map/${mapId}`);
-  }
-
-  async getIndexPatterns(indexPatternIds = []) {
+  async _getIndexPatterns(indexPatternIds = []) {
     const promises = indexPatternIds.map(async (indexPatternId) => {
       try {
         return await indexPatternService.get(indexPatternId);
@@ -36,16 +32,13 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
   }
 
   async create(panelMetadata, onEmbeddableStateChanged) {
-    const mapId = panelMetadata.id;
-    const editUrl = this.getEditPath(mapId);
-
-    const savedMap = await this.savedObjectLoader.get(mapId);
-    const indexPatterns = await this.getIndexPatterns(savedMap.indexPatternIds);
+    const savedMap = await this._savedObjectLoader.get(panelMetadata.id);
+    const indexPatterns = await this._getIndexPatterns(savedMap.indexPatternIds);
 
     return new MapEmbeddable({
       onEmbeddableStateChanged,
       savedMap,
-      editUrl,
+      editUrl: chrome.addBasePath(`/app/maps#/map/${panelMetadata.id}`),
       indexPatterns,
     });
   }
