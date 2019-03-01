@@ -31,7 +31,7 @@ import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { ElasticsearchServiceStart } from '../elasticsearch';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginsServiceStart } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
@@ -47,6 +47,7 @@ let startDeps: {
   http: any;
   plugins: PluginsServiceStart;
 };
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -235,7 +236,7 @@ describe('once LegacyService is started with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances as Array<jest.Mocked<KbnServer>>;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(logger.mockCollect().error).toEqual([]);
+    expect(loggingServiceMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     mockKbnServer.applyLoggingConfiguration.mockImplementation(() => {
@@ -244,7 +245,7 @@ describe('once LegacyService is started with connection info', () => {
 
     config$.next(new ObjectToConfigAdapter({ logging: { verbose: true } }));
 
-    expect(logger.mockCollect().error).toEqual([[configError]]);
+    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
   });
 
   test('logs error if config service fails.', async () => {
@@ -252,13 +253,13 @@ describe('once LegacyService is started with connection info', () => {
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(logger.mockCollect().error).toEqual([]);
+    expect(loggingServiceMock.collect(logger).error).toEqual([]);
 
     const configError = new Error('something went wrong');
     config$.error(configError);
 
     expect(mockKbnServer.applyLoggingConfiguration).not.toHaveBeenCalled();
-    expect(logger.mockCollect().error).toEqual([[configError]]);
+    expect(loggingServiceMock.collect(logger).error).toEqual([[configError]]);
   });
 
   test('proxy route abandons request processing and forwards it to the legacy Kibana', async () => {

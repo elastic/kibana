@@ -28,10 +28,11 @@ import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { ElasticsearchServiceStart } from '../elasticsearch';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { Plugin, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
 
+const logger = loggingServiceMock.create();
 function createPlugin(
   id: string,
   {

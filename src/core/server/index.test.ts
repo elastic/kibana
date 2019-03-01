@@ -41,10 +41,11 @@ import { BehaviorSubject } from 'rxjs';
 import { Server } from '.';
 import { Env } from './config';
 import { getEnvOptions } from './config/__mocks__/env';
-import { logger } from './logging/__mocks__';
+import { loggingServiceMock } from './logging/logging_service.mock';
 
 const mockConfigService = { atPath: jest.fn(), getUnusedPaths: jest.fn().mockReturnValue([]) };
 const env = new Env('.', getEnvOptions());
+const logger = loggingServiceMock.create();
 
 beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
@@ -103,7 +104,7 @@ test('does not fail on "start" if there are unused paths detected', async () => 
 
   const server = new Server(mockConfigService as any, logger, env);
   await expect(server.start()).resolves.toBeUndefined();
-  expect(logger.mockCollect()).toMatchSnapshot('unused paths logs');
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot('unused paths logs');
 });
 
 test('does not start http service is `autoListen:false`', async () => {
