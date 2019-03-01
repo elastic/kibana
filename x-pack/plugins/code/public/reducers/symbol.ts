@@ -44,6 +44,15 @@ const initialState: SymbolState = {
   closedPaths: [],
 };
 
+const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
+  const lineDiff = a.location.range.start.line - b.location.range.start.line;
+  if (lineDiff === 0) {
+    return a.location.range.start.character - b.location.range.start.character;
+  } else {
+    return lineDiff;
+  }
+};
+
 const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => {
   const structureTree: SymbolWithMembers[] = [];
 
@@ -51,7 +60,10 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
     tree: SymbolWithMembers[],
     containerName: string
   ): SymbolInformation | undefined {
-    const result = tree.find((s: SymbolInformation) => s.name === containerName);
+    const regex = new RegExp(`^${containerName}[<(]?.*[>)]?$`);
+    const result = tree.find((s: SymbolInformation) => {
+      return regex.test(s.name);
+    });
     if (result) {
       return result;
     } else {
@@ -67,33 +79,35 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
     }
   }
 
-  symbols.forEach((s: SymbolInformation, index: number, arr: SymbolInformation[]) => {
-    let container: Container;
-    /**
-     * For Enum class in Java, the container name and symbol name that LSP gives are special.
-     * For more information, see https://github.com/elastic/codesearch/issues/580
-     */
-    if (s.containerName === SPECIAL_CONTAINER_NAME) {
-      container = _.findLast(
-        arr.slice(0, index),
-        (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
-      );
-    } else {
-      container = findContainer(structureTree, s.containerName || '');
-    }
-    if (container) {
-      if (!container.path) {
-        container.path = container.name;
-      }
-      if (container.members) {
-        container.members.push({ ...s, path: `${container.path}/${s.name}` });
+  symbols
+    .sort(sortSymbol)
+    .forEach((s: SymbolInformation, index: number, arr: SymbolInformation[]) => {
+      let container: Container;
+      /**
+       * For Enum class in Java, the container name and symbol name that LSP gives are special.
+       * For more information, see https://github.com/elastic/codesearch/issues/580
+       */
+      if (s.containerName === SPECIAL_CONTAINER_NAME) {
+        container = _.findLast(
+          arr.slice(0, index),
+          (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
+        );
       } else {
-        container.members = [{ ...s, path: `${container.path}/${s.name}` }];
+        container = findContainer(structureTree, s.containerName || '');
       }
-    } else {
-      structureTree.push(s);
-    }
-  });
+      if (container) {
+        if (!container.path) {
+          container.path = container.name;
+        }
+        if (container.members) {
+          container.members.push({ ...s, path: `${container.path}/${s.name}` });
+        } else {
+          container.members = [{ ...s, path: `${container.path}/${s.name}` }];
+        }
+      } else {
+        structureTree.push(s);
+      }
+    });
 
   return structureTree;
 };
