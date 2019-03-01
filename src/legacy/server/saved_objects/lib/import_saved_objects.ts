@@ -38,7 +38,13 @@ interface Errors {
 interface ImportSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
-  overwriteAll: boolean;
+  overwrite: boolean;
+  savedObjectsClient: SavedObjectsClient;
+}
+
+interface ResolveImportConflictsOptions {
+  readStream: Readable;
+  objectLimit: number;
   savedObjectsClient: SavedObjectsClient;
   overwrites: Array<{
     type: string;
@@ -89,7 +95,6 @@ export async function collectSavedObjects(
 
 export function splitOverwrites(
   savedObjects: SavedObject[],
-  overwriteAll: boolean,
   overwrites: Array<{
     type: string;
     id: string;
@@ -105,10 +110,7 @@ export function splitOverwrites(
     if (skips.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
       continue;
     }
-    if (
-      overwriteAll === true ||
-      overwrites.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)
-    ) {
+    if (overwrites.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
       objectsToOverwrite.push(savedObject);
     } else {
       objectsToNotOverwrite.push(savedObject);
@@ -120,12 +122,36 @@ export function splitOverwrites(
 export async function importSavedObjects({
   readStream,
   objectLimit,
+  overwrite,
+  savedObjectsClient,
+}: ImportSavedObjectsOptions) {
+  const errors: Errors[] = [];
+  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+
+  if (overwrite) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
+      overwrite: true,
+    });
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
+  } else {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport);
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
+  }
+
+  return {
+    errors,
+    success: errors.length === 0,
+  };
+}
+
+export async function resolveImportConflicts({
+  readStream,
+  objectLimit,
   skips,
   overwrites,
-  overwriteAll,
   savedObjectsClient,
   replaceReferences,
-}: ImportSavedObjectsOptions) {
+}: ResolveImportConflictsOptions) {
   const errors: Errors[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
@@ -145,7 +171,6 @@ export async function importSavedObjects({
 
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
     objectsToImport,
-    overwriteAll,
     overwrites,
     skips
   );

@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { importSavedObjects } from './import_saved_objects';
+export { importSavedObjects, resolveImportConflicts } from './import_saved_objects';

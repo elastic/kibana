@@ -54,53 +54,6 @@ export default function ({ getService }) {
               });
             });
         });
-
-        it('should return 200 when replacing references', async () => {
-          const objToInsert = {
-            id: '1',
-            type: 'visualization',
-            attributes: {
-              title: 'My favorite vis',
-            },
-            references: [
-              {
-                name: 'ref_0',
-                type: 'search',
-                id: '1',
-              },
-            ]
-          };
-          await supertest
-            .post('/api/saved_objects/_import')
-            .field('replaceReferences', JSON.stringify(
-              [
-                {
-                  type: 'search',
-                  from: '1',
-                  to: '2',
-                }
-              ]
-            ))
-            .attach('file', Buffer.from(JSON.stringify(objToInsert), 'utf8'), 'export.ndjson')
-            .expect(200)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                success: true,
-              });
-            });
-          await supertest
-            .get('/api/saved_objects/visualization/1')
-            .expect(200)
-            .then((resp) => {
-              expect(resp.body.references).to.eql([
-                {
-                  name: 'ref_0',
-                  type: 'search',
-                  id: '2',
-                },
-              ]);
-            });
-        });
       });
 
       describe('with basic data existing', () => {
@@ -138,99 +91,13 @@ export default function ({ getService }) {
         it('should return 200 when conflicts exist but overwrite is passed in', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .field('overwriteAll', true)
+            .query({
+              overwrite: true,
+            })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
               expect(resp.body).to.eql({ success: true });
-            });
-        });
-
-        it('should return 200 when skipping all the records', async () => {
-          await supertest
-            .post('/api/saved_objects/_import')
-            .field('skips', JSON.stringify(
-              [
-                {
-                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  type: 'index-pattern',
-                },
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  type: 'visualization',
-                },
-                {
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  type: 'dashboard',
-                },
-              ]
-            ))
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(200)
-            .then((resp) => {
-              expect(resp.body).to.eql({ success: true });
-            });
-        });
-
-        it('should return 200 when manually overwriting each object', async () => {
-          await supertest
-            .post('/api/saved_objects/_import')
-            .field('overwrites', JSON.stringify(
-              [
-                {
-                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  type: 'index-pattern',
-                },
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  type: 'visualization',
-                },
-                {
-                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                  type: 'dashboard',
-                },
-              ]
-            ))
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(200)
-            .then((resp) => {
-              expect(resp.body).to.eql({ success: true });
-            });
-        });
-
-        it('should return 409 with only one record when overwriting 1 and skipping 1', async () => {
-          await supertest
-            .post('/api/saved_objects/_import')
-            .field('overwrites', JSON.stringify(
-              [
-                {
-                  id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  type: 'visualization',
-                },
-              ]
-            ))
-            .field('skips', JSON.stringify(
-              [
-                {
-                  id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                  type: 'index-pattern',
-                },
-              ]
-            ))
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(409)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                message: 'Conflict',
-                statusCode: 409,
-                error: 'Conflict',
-                objects: [
-                  {
-                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                    type: 'dashboard',
-                  },
-                ],
-              });
             });
         });
       });

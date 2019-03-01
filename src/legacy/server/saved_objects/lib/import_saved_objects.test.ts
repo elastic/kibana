@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 import { SavedObject } from '../service';
-import { extractErrors, collectSavedObjects } from './import_saved_objects';
+import { collectSavedObjects, extractErrors, splitOverwrites } from './import_saved_objects';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -120,13 +120,161 @@ Array [
   });
 });
 
-describe('splitOverwrites', () => {
-  it('overwriteAll puts all objects into objectsToOverwrite', () => {
-    const savedObjects: SavedObject[] = [
-      {
+describe('splitOverwrites()', () => {
+  const savedObjects: SavedObject[] = [
+    {
+      id: '1',
+      type: 'index-pattern',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '2',
+      type: 'search',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '3',
+      type: 'visualization',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '4',
+      type: 'dashboard',
+      attributes: {},
+      references: [],
+    },
+  ];
 
-      },
-    ];
-
+  it('empty skips and overwrites puts all objects into objectsToNotOverwrite', () => {
+    const result = splitOverwrites(savedObjects, [], []);
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "objectsToNotOverwrite": Array [
+    Object {
+      "attributes": Object {},
+      "id": "1",
+      "references": Array [],
+      "type": "index-pattern",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "2",
+      "references": Array [],
+      "type": "search",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "3",
+      "references": Array [],
+      "type": "visualization",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "4",
+      "references": Array [],
+      "type": "dashboard",
+    },
+  ],
+  "objectsToOverwrite": Array [],
+}
+`);
   });
+
+  it('all objects in skips returns empty arrays', () => {
+    const result = splitOverwrites(
+      savedObjects,
+      [],
+      [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+        {
+          type: 'visualization',
+          id: '3',
+        },
+        {
+          type: 'dashboard',
+          id: '4',
+        },
+      ]
+    );
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "objectsToNotOverwrite": Array [],
+  "objectsToOverwrite": Array [],
+}
+`);
+  });
+
+  it('all objects in overwrites puts all objects into objectsToOverwrite', () => {
+    const result = splitOverwrites(
+      savedObjects,
+      [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+        {
+          type: 'visualization',
+          id: '3',
+        },
+        {
+          type: 'dashboard',
+          id: '4',
+        },
+      ],
+      []
+    );
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "objectsToNotOverwrite": Array [],
+  "objectsToOverwrite": Array [
+    Object {
+      "attributes": Object {},
+      "id": "1",
+      "references": Array [],
+      "type": "index-pattern",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "2",
+      "references": Array [],
+      "type": "search",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "3",
+      "references": Array [],
+      "type": "visualization",
+    },
+    Object {
+      "attributes": Object {},
+      "id": "4",
+      "references": Array [],
+      "type": "dashboard",
+    },
+  ],
+}
+`);
+  });
+});
+
+describe('importSavedObjects()', () => {
+  // TODO
+});
+
+describe('resolveImportConflicts()', () => {
+  // TODO
 });
