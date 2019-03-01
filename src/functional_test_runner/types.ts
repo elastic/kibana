@@ -17,34 +17,11 @@
  * under the License.
  */
 
-import { deepFreeze } from '../../deep_freeze';
+import { ToolingLog } from '@kbn/dev-utils';
+import { Config, Lifecycle } from './lib';
 
-deepFreeze(
-  {
-    foo: {
-      bar: {
-        baz: 1,
-      },
-    },
-  }
-).foo.bar.baz = 2;
-
-deepFreeze(
-  {
-    foo: [
-      {
-        bar: 1,
-      },
-    ],
-  }
-).foo[0].bar = 2;
-
-deepFreeze(
-  {
-    foo: [1],
-  }
-).foo[0] = 2;
-
-deepFreeze({
-  foo: [1],
-}).foo.push(2);
+export interface DefaultServiceProviders {
+  config(): Config;
+  log(): ToolingLog;
+  lifecycle(): Lifecycle;
+}
