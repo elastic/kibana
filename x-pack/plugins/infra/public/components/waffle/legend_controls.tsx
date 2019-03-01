@@ -111,7 +111,7 @@ export const LegendControls = injectI18n(
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.infra.legendControls.minLabel',
-                    defaultMessage: 'Legend Min',
+                    defaultMessage: 'Min',
                   })}
                   isInvalid={!boundsValidRange}
                 >
@@ -129,7 +129,7 @@ export const LegendControls = injectI18n(
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.infra.legendControls.maxLabel',
-                    defaultMessage: 'Legend Max',
+                    defaultMessage: 'Max',
                   })}
                   isInvalid={!boundsValidRange}
                 >
