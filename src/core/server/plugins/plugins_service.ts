@@ -20,6 +20,7 @@
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { Plugin, PluginName } from './plugin';
@@ -27,10 +28,15 @@ import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export type PluginsServiceStartContract = Map<PluginName, unknown>;
+export type PluginsServiceStart = Map<PluginName, unknown>;
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceStartContract> {
+export interface PluginsServiceStartDeps {
+  elasticsearch: ElasticsearchServiceStart;
+}
+
+/** @internal */
+export class PluginsService implements CoreService<PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -39,7 +45,7 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
     this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
-  public async start() {
+  public async start(deps: PluginsServiceStartDeps) {
     this.log.debug('Starting plugins service');
 
     const config = await this.coreContext.configService
@@ -56,7 +62,7 @@ export class PluginsService implements CoreService<PluginsServiceStartContract> 
       return new Map();
     }
 
-    return await this.pluginsSystem.startPlugins();
+    return await this.pluginsSystem.startPlugins(deps);
   }
 
   public async stop() {

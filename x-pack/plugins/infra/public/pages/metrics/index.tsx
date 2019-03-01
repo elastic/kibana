@@ -20,6 +20,7 @@ import styled, { withTheme } from 'styled-components';
 
 import { InfraMetricsErrorCodes } from '../../../common/errors';
 import { AutoSizer } from '../../components/auto_sizer';
+import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
 import { Metrics } from '../../components/metrics';
 import { InvalidNodeError } from '../../components/metrics/invalid_node';
@@ -119,6 +120,17 @@ export const MetricDetail = withTheme(
                           <Header breadcrumbs={breadcrumbs} />
                           <SourceConfigurationFlyout />
                           <WithMetricsTimeUrlState />
+                          <DocumentTitle
+                            title={intl.formatMessage(
+                              {
+                                id: 'xpack.infra.metricDetailPage.documentTitle',
+                                defaultMessage: 'Infrastructure | Metrics | {name}',
+                              },
+                              {
+                                name,
+                              }
+                            )}
+                          />
                           <DetailPageContent>
                             <WithMetrics
                               layouts={filteredLayouts}
@@ -134,11 +146,28 @@ export const MetricDetail = withTheme(
                                       err.code === InfraMetricsErrorCodes.invalid_node
                                   );
 
-                                  if (invalidNodeError) {
-                                    return <InvalidNodeError nodeName={name} />;
-                                  }
-
-                                  return <ErrorPageBody message={error.message} />;
+                                  return (
+                                    <>
+                                      <DocumentTitle
+                                        title={(previousTitle: string) =>
+                                          intl.formatMessage(
+                                            {
+                                              id: 'xpack.infra.metricDetailPage.documentTitleError',
+                                              defaultMessage: '{previousTitle} | Uh oh',
+                                            },
+                                            {
+                                              previousTitle,
+                                            }
+                                          )
+                                        }
+                                      />
+                                      {invalidNodeError ? (
+                                        <InvalidNodeError nodeName={name} />
+                                      ) : (
+                                        <ErrorPageBody message={error.message} />
+                                      )}
+                                    </>
+                                  );
                                 }
                                 return (
                                   <EuiPage style={{ flex: '1 0 auto' }}>

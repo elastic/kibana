@@ -13,7 +13,7 @@ import { tintOrShade } from '../../../utils/styles';
 import { LogTextStreamItemField } from './item_field';
 
 interface LogTextStreamItemDateFieldProps {
-  children: string;
+  children: React.ReactNode;
   hasHighlights: boolean;
   isHovered: boolean;
   scale: TextScale;

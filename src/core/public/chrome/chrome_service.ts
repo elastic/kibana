@@ -22,8 +22,8 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import { InjectedMetadataStartContract } from '../injected_metadata';
-import { NotificationsStartContract } from '../notifications';
+import { InjectedMetadataStart } from '../injected_metadata';
+import { NotificationsStart } from '../notifications';
 
 const IS_COLLAPSED_KEY = 'core.chrome.isCollapsed';
 
@@ -50,8 +50,8 @@ interface ConstructorParams {
 }
 
 interface StartDeps {
-  injectedMetadata: InjectedMetadataStartContract;
-  notifications: NotificationsStartContract;
+  injectedMetadata: InjectedMetadataStart;
+  notifications: NotificationsStart;
 }
 
 export class ChromeService {
@@ -202,4 +202,4 @@ export class ChromeService {
   }
 }
 
-export type ChromeStartContract = ReturnType<ChromeService['start']>;
+export type ChromeStart = ReturnType<ChromeService['start']>;

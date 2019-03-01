@@ -178,10 +178,10 @@ export const reporting = (kibana) => {
 
     deprecations: function ({ unused }) {
       return [
-        unused("capture.concurrency"),
-        unused("capture.timeout"),
-        unused("capture.settleTime"),
-        unused("kibanaApp"),
+        unused('capture.concurrency'),
+        unused('capture.timeout'),
+        unused('capture.settleTime'),
+        unused('kibanaApp'),
       ];
     },
   });

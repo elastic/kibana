@@ -38,14 +38,14 @@ export const validateName = (name = '') => {
     if (name[0] === '_') {
       errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorUnderscore',
-        { defaultMessage: "Name can't begin with an underscore." }
+        { defaultMessage: `Name can't begin with an underscore.` }
       );
     }
 
     if (name.includes(',')) {
       errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPattern.nameValidation.errorComma',
-        { defaultMessage: "Commas are not allowed in the name." }
+        { defaultMessage: 'Commas are not allowed in the name.' }
       );
     }
   }

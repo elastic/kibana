@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function logstashLogsSpecProvider(server, context) {
   const moduleName = 'logstash';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'logstashLogs',
@@ -59,7 +57,7 @@ export function logstashLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/logstash_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

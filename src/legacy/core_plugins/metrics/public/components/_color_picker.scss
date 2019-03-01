@@ -10,6 +10,8 @@
 
 .tvbColorPicker__swatch-empty,
 .tvbColorPicker__swatch {
+  // SASSTODO: Replace with EUI component
+  // sass-lint:disable-block placeholder-in-extend
   @extend .euiColorPicker__swatch;
 }
 
@@ -37,8 +39,8 @@
 
 .tvbColorPicker__cover {
   position: fixed;
-  top: 0px;
-  right: 0px;
-  left: 0px;
-  bottom: 0px;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
 }

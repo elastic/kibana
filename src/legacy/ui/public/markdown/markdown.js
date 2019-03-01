@@ -22,6 +22,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
+import { getSecureRelForTarget } from '@elastic/eui';
 
 /**
  * Return a memoized markdown rendering function that use the specified
@@ -53,9 +54,13 @@ export const markdownFactory = memoize((whiteListedRules = [], openLinksInNewTab
       return self.renderToken(tokens, idx, options);
     };
     markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
-      tokens[idx].attrPush(['target', '_blank']);
+      const href = tokens[idx].attrGet('href');
+      const target = '_blank';
+      const rel = getSecureRelForTarget({ href, target });
+
       // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
-      tokens[idx].attrPush(['rel', 'noopener noreferrer']);
+      tokens[idx].attrPush(['target', target]);
+      tokens[idx].attrPush(['rel', rel]);
       return originalLinkRender(tokens, idx, options, env, self);
     };
   }

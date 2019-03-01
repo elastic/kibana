@@ -112,7 +112,7 @@ function createTimeseriesAggs(pipelineId, pipelineHash, maxBucketSize, timeserie
         vertices: nestedVertices(maxBucketSize),
         total_processor_duration_stats: {
           stats: {
-            field: "logstash_stats.pipelines.events.duration_in_millis"
+            field: 'logstash_stats.pipelines.events.duration_in_millis'
           }
         }
       })

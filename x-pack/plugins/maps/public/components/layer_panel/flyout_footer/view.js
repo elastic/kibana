@@ -14,21 +14,19 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
-  isNewLayer }) => {
-  const removeBtn = isNewLayer
-    ? null
-    : (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          color="danger"
-          onClick={removeLayer}
-          flush="right"
-          data-test-subj="mapRemoveLayerButton"
-        >
-          Remove layer
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    );
+  hasStateChanged }) => {
+  const removeBtn = (
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        color="danger"
+        onClick={removeLayer}
+        flush="right"
+        data-test-subj="mapRemoveLayerButton"
+      >
+        Remove layer
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  );
 
   return (
     <EuiFlexGroup responsive={false}>
@@ -37,7 +35,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={cancelLayerPanel}
           flush="left"
         >
-          Cancel
+          {hasStateChanged ? 'Cancel' : 'Close'}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -46,8 +44,9 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
       {removeBtn}
       <EuiFlexItem grow={false}>
         <EuiButton
+          disabled={!hasStateChanged}
           iconType="check"
-          onClick={() => saveLayerEdits(isNewLayer)}
+          onClick={saveLayerEdits}
           fill
         >
           Save &amp; close

@@ -27,12 +27,11 @@ export default function ({ getService, getPageObjects }) {
   describe('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.clickScriptedFieldsTab();
       await PageObjects.settings.clickAddScriptedField();
       await PageObjects.settings.setScriptedFieldName(SCRIPTED_FIELD_NAME);
@@ -41,6 +40,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
+      await PageObjects.settings.clickIndexPatternLogstash();
       await PageObjects.settings.removeIndexPattern();
     });
 

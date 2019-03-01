@@ -11,6 +11,7 @@ import React from 'react';
 import { HomePageContent } from './page_content';
 import { HomeToolbar } from './toolbar';
 
+import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
 import { ColumnarPage } from '../../components/page';
@@ -36,6 +37,12 @@ export const HomePage = injectI18n(
 
       return (
         <ColumnarPage>
+          <DocumentTitle
+            title={intl.formatMessage({
+              id: 'xpack.infra.homePage.documentTitle',
+              defaultMessage: 'Infrastructure',
+            })}
+          />
           <Header
             breadcrumbs={[
               {
