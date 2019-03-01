@@ -87,13 +87,14 @@ export function NestedValue({
   parentKey?: string;
   keySorter?: KeySorter;
 }): JSX.Element {
-  if (depth > 0 && isObject(value)) {
+  const MAX_LEVEL = 3;
+  if (depth < MAX_LEVEL && isObject(value)) {
     return (
       <NestedKeyValueTable
         data={value as StringMap}
         parentKey={parentKey}
         keySorter={keySorter}
-        depth={depth - 1}
+        depth={depth + 1}
       />
     );
   }
@@ -105,12 +106,12 @@ export function NestedKeyValueTable({
   data,
   parentKey,
   keySorter = Object.keys,
-  depth = 0
+  depth
 }: {
   data: StringMap;
   parentKey?: string;
   keySorter?: KeySorter;
-  depth?: number;
+  depth: number;
 }): JSX.Element {
   return (
     <Table>
