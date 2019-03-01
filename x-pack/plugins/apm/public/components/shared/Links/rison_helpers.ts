@@ -9,6 +9,7 @@ import qs from 'querystring';
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import url from 'url';
+import { TIMEPICKER_DEFAULTS } from 'x-pack/plugins/apm/public/store/urlParams';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import {
   APMQueryParams,
@@ -59,6 +60,7 @@ export function getRisonHref({
 }: RisonHrefArgs) {
   const currentQuery = toQuery(location.search);
   const nextQuery = {
+    ...TIMEPICKER_DEFAULTS,
     ...pick(currentQuery, PERSISTENT_APM_PARAMS),
     ...query
   };
