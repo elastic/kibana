@@ -35,12 +35,17 @@ import {
 import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils';
 import { getSingleMetricViewerBreadcrumbs } from './breadcrumbs';
 import {
+  CHARTS_POINT_TARGET,
+  timeFieldName,
+} from './timeseriesexplorer_constants';
+import {
+  calculateAggregationInterval,
   createTimeSeriesJobData,
+  getFocusData,
   processForecastResults,
-  processDataForFocusAnomalies,
   processMetricPlotResults,
   processRecordScoreResults,
-  processScheduledEventsForChart } from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
+} from 'plugins/ml/timeseriesexplorer/timeseriesexplorer_utils';
 import { refreshIntervalWatcher } from 'plugins/ml/util/refresh_interval_watcher';
 import { MlTimeBuckets, getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { mlResultsService } from 'plugins/ml/services/results_service';
@@ -52,7 +57,6 @@ import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlForecastService } from 'plugins/ml/services/forecast_service';
 import { mlTimeSeriesSearchService } from 'plugins/ml/timeseriesexplorer/timeseries_search_service';
 import {
-  ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
 import { annotationsRefresh$ } from '../services/annotations_service';
@@ -62,7 +66,7 @@ import { setGlobalState, getSelectedJobIds } from '../components/job_selector/jo
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 
 import chrome from 'ui/chrome';
-let mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -80,8 +84,6 @@ uiRoutes
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-const timeFieldName = 'timestamp';
-
 module.controller('MlTimeSeriesExplorerController', function (
   $injector,
   $scope,
@@ -98,9 +100,6 @@ module.controller('MlTimeSeriesExplorerController', function (
   timefilter.enableTimeRangeSelector();
   timefilter.enableAutoRefreshSelector();
   $scope.timefilter = timefilter;
-
-  const CHARTS_POINT_TARGET = 500;
-  const MAX_SCHEDULED_EVENTS = 10;          // Max number of scheduled events displayed per bucket.
 
   $scope.jobPickerSelections = [];
   $scope.selectedJob;
@@ -319,7 +318,11 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     // Calculate the aggregation interval for the context chart.
     // Context chart swimlane will display bucket anomaly score at the same interval.
-    $scope.contextAggregationInterval = calculateAggregationInterval(bounds, CHARTS_POINT_TARGET, CHARTS_POINT_TARGET);
+    $scope.contextAggregationInterval = calculateAggregationInterval(
+      bounds,
+      CHARTS_POINT_TARGET,
+      $scope,
+    );
     console.log('aggregationInterval for context data (s):', $scope.contextAggregationInterval.asSeconds());
 
     // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
@@ -409,178 +412,6 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
 
     loadEntityValues();
-  };
-
-  $scope.refreshFocusData = function (fromDate, toDate) {
-
-    // Counter to keep track of the queries to populate the chart.
-    let awaitingCount = 4;
-
-    // This object is used to store the results of individual remote requests
-    // before we transform it into the final data and apply it to $scope. Otherwise
-    // we might trigger multiple $digest cycles and depending on how deep $watches
-    // listen for changes we could miss updates.
-    const refreshFocusData = {};
-
-    // finish() function, called after each data set has been loaded and processed.
-    // The last one to call it will trigger the page render.
-    function finish() {
-      awaitingCount--;
-      if (awaitingCount === 0) {
-        // Tell the results container directives to render the focus chart.
-        refreshFocusData.focusChartData = processDataForFocusAnomalies(
-          refreshFocusData.focusChartData,
-          refreshFocusData.anomalyRecords,
-          timeFieldName,
-          $scope.focusAggregationInterval,
-          $scope.modelPlotEnabled);
-
-        refreshFocusData.focusChartData = processScheduledEventsForChart(
-          refreshFocusData.focusChartData,
-          refreshFocusData.scheduledEvents);
-
-        // All the data is ready now for a scope update.
-        // Use $evalAsync to ensure the update happens after the child scope is updated with the new data.
-        $scope.$evalAsync(() => {
-          $scope = Object.assign($scope, refreshFocusData);
-          console.log('Time series explorer focus chart data set:', $scope.focusChartData);
-
-          $scope.loading = false;
-
-          // If the annotations failed to load and the feature flag is set to `false`,
-          // make sure the checkbox toggle gets hidden.
-          if (mlAnnotationsEnabled === false) {
-            $scope.showAnnotationsCheckbox = false;
-          }
-        });
-      }
-    }
-
-    const detectorIndex = +$scope.detectorId;
-    const nonBlankEntities = _.filter($scope.entities, entity => entity.fieldValue.length > 0);
-
-    // Calculate the aggregation interval for the focus chart.
-    const bounds = { min: moment(fromDate), max: moment(toDate) };
-    $scope.focusAggregationInterval = calculateAggregationInterval(bounds, CHARTS_POINT_TARGET, CHARTS_POINT_TARGET);
-
-    // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
-    // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
-    // to some extent with all detector functions if not searching complete buckets.
-    const searchBounds = getBoundsRoundedToInterval(bounds, $scope.focusAggregationInterval, false);
-
-    // Query 1 - load metric data across selected time range.
-    mlTimeSeriesSearchService.getMetricData(
-      $scope.selectedJob,
-      detectorIndex,
-      nonBlankEntities,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      $scope.focusAggregationInterval.expression
-    ).then((resp) => {
-      refreshFocusData.focusChartData = processMetricPlotResults(resp.results, $scope.modelPlotEnabled);
-      $scope.showModelBoundsCheckbox = ($scope.modelPlotEnabled === true) &&
-        (refreshFocusData.focusChartData.length > 0);
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
-    });
-
-    // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsService.getRecordsForCriteria(
-      [$scope.selectedJob.job_id],
-      $scope.criteriaFields,
-      0,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-    ).then((resp) => {
-      // Sort in descending time order before storing in scope.
-      refreshFocusData.anomalyRecords = _.chain(resp.records)
-        .sortBy(record => record[timeFieldName])
-        .reverse()
-        .value();
-      console.log('Time series explorer anomalies:', refreshFocusData.anomalyRecords);
-      finish();
-    });
-
-    // Query 3 - load any scheduled events for the selected job.
-    mlResultsService.getScheduledEventsByBucket(
-      [$scope.selectedJob.job_id],
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      $scope.focusAggregationInterval.expression,
-      1,
-      MAX_SCHEDULED_EVENTS
-    ).then((resp) => {
-      refreshFocusData.scheduledEvents = resp.events[$scope.selectedJob.job_id];
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
-    });
-
-    // Query 4 - load any annotations for the selected job.
-    if (mlAnnotationsEnabled) {
-      ml.annotations.getAnnotations({
-        jobIds: [$scope.selectedJob.job_id],
-        earliestMs: searchBounds.min.valueOf(),
-        latestMs: searchBounds.max.valueOf(),
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).then((resp) => {
-        refreshFocusData.focusAnnotationData = [];
-
-        if (Array.isArray(resp.annotations[$scope.selectedJob.job_id])) {
-          refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
-            .sort((a, b) => {
-              return a.timestamp - b.timestamp;
-            })
-            .map((d, i) => {
-              d.key = String.fromCharCode(65 + i);
-              return d;
-            });
-        }
-
-        finish();
-      }).catch(() => {
-        // silently fail and disable annotations feature if loading annotations fails.
-        refreshFocusData.focusAnnotationData = [];
-        mlAnnotationsEnabled = false;
-        finish();
-      });
-    } else {
-      finish();
-    }
-
-    // Plus query for forecast data if there is a forecastId stored in the appState.
-    const forecastId = _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId');
-    if (forecastId !== undefined) {
-      awaitingCount++;
-      let aggType = undefined;
-      const detector = $scope.selectedJob.analysis_config.detectors[detectorIndex];
-      const esAgg = mlFunctionToESAggregation(detector.function);
-      if ($scope.modelPlotEnabled === false && (esAgg === 'sum' || esAgg === 'count')) {
-        aggType = { avg: 'sum', max: 'sum', min: 'sum' };
-      }
-
-      mlForecastService.getForecastData(
-        $scope.selectedJob,
-        detectorIndex,
-        forecastId,
-        nonBlankEntities,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        $scope.focusAggregationInterval.expression,
-        aggType)
-        .then((resp) => {
-          refreshFocusData.focusForecastData = processForecastResults(resp.results);
-          refreshFocusData.showForecastCheckbox = (refreshFocusData.focusForecastData.length > 0);
-          finish();
-        }).catch((resp) => {
-          console.log(`Time series explorer - error loading data for forecast ID ${forecastId}`, resp);
-        });
-    }
-
-    // Load the data for the anomalies table.
-    loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf());
   };
 
   $scope.saveSeriesPropertiesAndRefresh = function () {
@@ -758,10 +589,49 @@ module.controller('MlTimeSeriesExplorerController', function (
     }
     $scope.appState.save();
 
-    if ($scope.focusChartData === undefined ||
+    if (
+      $scope.focusChartData === undefined ||
       ($scope.zoomFrom.getTime() !== selection.from.getTime()) ||
-      ($scope.zoomTo.getTime() !== selection.to.getTime())) {
-      $scope.refreshFocusData(selection.from, selection.to);
+      ($scope.zoomTo.getTime() !== selection.to.getTime())
+    ) {
+      // Calculate the aggregation interval for the focus chart.
+      const bounds = { min: moment(selection.from), max: moment(selection.to) };
+      $scope.focusAggregationInterval = calculateAggregationInterval(
+        bounds,
+        CHARTS_POINT_TARGET,
+        $scope,
+      );
+
+      // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
+      // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
+      // to some extent with all detector functions if not searching complete buckets.
+      const searchBounds = getBoundsRoundedToInterval(bounds, $scope.focusAggregationInterval, false);
+
+      getFocusData(
+        $scope.criteriaFields,
+        +$scope.detectorId,
+        $scope.focusAggregationInterval,
+        _.get($scope, 'appState.mlTimeSeriesExplorer.forecastId'),
+        $scope.modelPlotEnabled,
+        _.filter($scope.entities, entity => entity.fieldValue.length > 0),
+        searchBounds,
+        $scope.selectedJob,
+        timeFieldName,
+      ).then((refreshFocusData) => {
+        // All the data is ready now for a scope update.
+        // Use $evalAsync to ensure the update happens after the child scope is updated with the new data.
+        $scope.$evalAsync(() => {
+          $scope = Object.assign($scope, refreshFocusData);
+          console.log('Time series explorer focus chart data set:', $scope.focusChartData);
+
+          $scope.showModelBoundsCheckbox = ($scope.modelPlotEnabled === true) && (refreshFocusData.focusChartData.length > 0);
+
+          $scope.loading = false;
+        });
+      });
+
+      // Load the data for the anomalies table.
+      loadAnomaliesTableData(searchBounds.min.valueOf(), searchBounds.max.valueOf());
     }
 
     $scope.zoomFrom = selection.from;
@@ -1005,36 +875,6 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     return [new Date(rangeEarliestMs), new Date(rangeLatestMs)];
 
-  }
-
-  function calculateAggregationInterval(bounds, bucketsTarget) {
-    // Aggregation interval used in queries should be a function of the time span of the chart
-    // and the bucket span of the selected job(s).
-    const barTarget = (bucketsTarget !== undefined ? bucketsTarget : 100);
-    // Use a maxBars of 10% greater than the target.
-    const maxBars = Math.floor(1.1 * barTarget);
-    const buckets = new MlTimeBuckets();
-    buckets.setInterval('auto');
-    buckets.setBounds(bounds);
-    buckets.setBarTarget(Math.floor(barTarget));
-    buckets.setMaxBars(maxBars);
-
-    // Ensure the aggregation interval is always a multiple of the bucket span to avoid strange
-    // behaviour such as adjacent chart buckets holding different numbers of job results.
-    const bucketSpanSeconds =  _.find($scope.jobs, { 'id': $scope.selectedJob.job_id }).bucketSpanSeconds;
-    let aggInterval = buckets.getIntervalToNearestMultiple(bucketSpanSeconds);
-
-    // Set the interval back to the job bucket span if the auto interval is smaller.
-    const secs = aggInterval.asSeconds();
-    if (secs < bucketSpanSeconds) {
-      buckets.setInterval(bucketSpanSeconds + 's');
-      aggInterval = buckets.getInterval();
-    }
-
-    console.log('calculateAggregationInterval() barTarget,maxBars,returning:', bucketsTarget, maxBars,
-      (bounds.max.diff(bounds.min)) / aggInterval.asMilliseconds());
-
-    return aggInterval;
   }
 
   function getAutoZoomDuration() {
