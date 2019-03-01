@@ -25,7 +25,7 @@ import { FatalErrorsService } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
-import { LegacyPlatformParams, LegacyPlatformService } from './legacy_platform';
+import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 

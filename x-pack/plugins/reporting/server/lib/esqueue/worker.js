@@ -17,7 +17,6 @@ const puid = new Puid();
 function formatJobObject(job) {
   return {
     index: job._index,
-    type: job._type,
     id: job._id,
   };
 }
@@ -52,11 +51,10 @@ export class Worker extends events.EventEmitter {
     this.kibanaId = opts.kibanaId;
     this.kibanaName = opts.kibanaName;
     this.queue = queue;
-    this.client = opts.client || this.queue.client;
+    this._client = this.queue.client;
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
-    this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warn');
@@ -86,7 +84,6 @@ export class Worker extends events.EventEmitter {
       id: this.id,
       index: this.queue.index,
       jobType: this.jobType,
-      doctype: this.doctype,
     };
   }
 
@@ -126,9 +123,8 @@ export class Worker extends events.EventEmitter {
       kibana_name: this.kibanaName,
     };
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
       if_seq_no: job._seq_no,
       if_primary_term: job._primary_term,
@@ -164,9 +160,8 @@ export class Worker extends events.EventEmitter {
       output: docOutput,
     });
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
       if_seq_no: job._seq_no,
       if_primary_term: job._primary_term,
@@ -242,9 +237,8 @@ export class Worker extends events.EventEmitter {
         output: docOutput
       };
 
-      return this.client.update({
+      return this._client.callWithInternalUser('update', {
         index: job._index,
-        type: job._type,
         id: job._id,
         if_seq_no: job._seq_no,
         if_primary_term: job._primary_term,
@@ -386,9 +380,8 @@ export class Worker extends events.EventEmitter {
       size: this.checkSize
     };
 
-    return this.client.search({
+    return this._client.callWithInternalUser('search', {
       index: `${this.queue.index}-*`,
-      type: this.doctype,
       body: query
     })
       .then((results) => {
