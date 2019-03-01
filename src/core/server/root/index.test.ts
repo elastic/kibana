@@ -40,23 +40,18 @@ import { logger } from '../logging/__mocks__';
 const env = new Env('.', getEnvOptions());
 const config$ = new BehaviorSubject({} as Config);
 
-const mockProcessExit = jest.spyOn(global.process, 'exit').mockImplementation(() => {
-  // noop
-});
-
-const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {
-  // noop
-});
+let mockConsoleError: jest.SpyInstance;
 
 beforeEach(() => {
+  jest.spyOn(global.process, 'exit').mockReturnValue(undefined as never);
+  mockConsoleError = jest.spyOn(console, 'error').mockReturnValue(undefined);
   mockLoggingService.asLoggerFactory.mockReturnValue(logger);
   mockConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ someValue: 'foo' }));
 });
 
 afterEach(() => {
-  mockProcessExit.mockReset();
-  mockConsoleError.mockReset();
+  jest.restoreAllMocks();
 
   mockLoggingService.upgrade.mockReset();
   mockLoggingService.stop.mockReset();
@@ -178,7 +173,7 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
 test('stops services if consequent logger upgrade fails', async () => {
   const onShutdown = new BehaviorSubject<string | null>(null);
-  const mockOnShutdown = jest.fn(() => {
+  const mockOnShutdown = jest.fn<any, any>(() => {
     onShutdown.next('completed');
     onShutdown.complete();
   });
