@@ -56,13 +56,6 @@ export interface TimeRangeParams {
   max: Date;
 }
 
-export interface VisPanel {
-  indexPatternSavedObject: any;
-  attributes: SavedSearchObjectAttributes | SavedVisState;
-  references: SavedObjectReference[];
-  timerange: TimeRangeParams;
-}
-
 export interface IndexPatternSavedObject {
   title: string;
   timeFieldName: string;
@@ -72,10 +65,16 @@ export interface IndexPatternSavedObject {
   };
 }
 
-export interface SearchPanel {
+export interface VisPanel {
   indexPatternSavedObject: any;
-  attributes: SavedSearchObjectAttributes;
+  attributes: SavedSearchObjectAttributes | SavedVisState;
   references: SavedObjectReference[];
+  timerange: TimeRangeParams;
+}
+
+export interface SearchPanel {
+  indexPatternSavedObjectId: string;
+  attributes: SavedSearchObjectAttributes | SavedVisState;
   timerange: TimeRangeParams;
 }
 
