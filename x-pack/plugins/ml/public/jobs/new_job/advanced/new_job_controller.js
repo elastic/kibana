@@ -474,6 +474,7 @@ module.controller('MlNewJob',
               tab.checks.jobId.valid = false;
               tab.checks.jobId.message = '\'' + $scope.job.job_id + '\' already exists, please choose a different name';
               changeTab({ index: 0 });
+              $scope.$applyAsync();
             } else {
               checkInfluencers();
             }
