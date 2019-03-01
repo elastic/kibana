@@ -199,10 +199,7 @@ export class MBMapContainer extends React.Component {
     }
 
     const layer = this._getLayer(mbLayerId);
-    const properties = await layer._getPropertiesForTooltip(feature);
-    // const properties = {
-    //   'foo': 'bar'
-    // };
+    const properties = await layer.getPropertiesForTooltip(feature.properties);
 
     ReactDOM.render(
       React.createElement(

@@ -475,10 +475,6 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _canShowTooltips() {
-    return this._source.canFormatFeatureProperties();
-  }
-
   _getMbPointLayerId() {
     return this.getId() +  '_circle';
   }
@@ -495,12 +491,12 @@ export class VectorLayer extends AbstractLayer {
     return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
 
-  async _getPropertiesForTooltip(feature) {
-    const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
+  async getPropertiesForTooltip(properties) {
+    const tooltipsFromSource =  await this._source.filterAndFormatProperties(properties);
 
     //add tooltips from joins
     return this._joins.reduce((acc, join) => {
-      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(feature.properties);
+      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(properties);
       return {
         ...propsFromJoin,
         ...acc,
@@ -509,7 +505,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   canShowTooltip() {
-    return this._canShowTooltips();
+    return this._source.canFormatFeatureProperties();
   }
 
 }
