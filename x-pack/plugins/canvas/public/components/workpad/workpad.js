@@ -11,6 +11,8 @@ import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
 
+const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
+
 export class Workpad extends React.PureComponent {
   static propTypes = {
     selectedPageNumber: PropTypes.number.isRequired,
@@ -84,8 +86,8 @@ export class Workpad extends React.PureComponent {
     } = this.props;
 
     const bufferStyle = {
-      height: isFullscreen ? height : height + 32,
-      width: isFullscreen ? width : width + 32,
+      height: isFullscreen ? height : height + WORKPAD_CANVAS_BUFFER,
+      width: isFullscreen ? width : width + WORKPAD_CANVAS_BUFFER,
     };
 
     return (
