@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { map } from 'rxjs/operators';
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from '../../../../';
+import { map, mergeMap } from 'rxjs/operators';
+
+import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from 'kibana';
 import { TestBedConfig } from './config';
 
 class Plugin {
@@ -41,6 +42,9 @@ class Plugin {
           this.log.debug(`I've got value from my config: ${config.secret}`);
           return `Some exposed data derived from config: ${config.secret}`;
         })
+      ),
+      pingElasticsearch$: startContext.elasticsearch.adminClient$.pipe(
+        mergeMap(client => client.callAsInternalUser('ping'))
       ),
     };
   }
