@@ -867,8 +867,8 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
         }
       });
     }
-    // TODO: might have to do some extra work around this query
-    if (influencersFilterQuery !== undefined) { // influencersFilterQuery
+
+    if (influencersFilterQuery !== undefined) {
       boolCriteria.push(influencersFilterQuery);
     }
 

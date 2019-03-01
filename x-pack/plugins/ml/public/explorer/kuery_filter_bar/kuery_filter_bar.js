@@ -10,6 +10,7 @@ import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut } from '@elastic/eui';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { getSuggestions } from './utils';
 
 
@@ -49,12 +50,15 @@ export class KueryFilterBar extends Component {
       this.setState({ suggestions, isLoadingSuggestions: false });
     } catch (e) {
       console.error('Error while fetching suggestions', e);
-      this.setState({ isLoadingSuggestions: false, error: (e.message ? e.message : 'Error while fetching suggestions') });
+      const errorMessage = i18n.translate('xpack.ml.explorer.fetchingSuggestionsErrorMessage', {
+        defaultMessage: 'Error while fetching suggestions'
+      });
+      this.setState({ isLoadingSuggestions: false, error: (e.message ? e.message : errorMessage) });
     }
   };
 
   onSubmit = inputValue => {
-    const { indexPattern } = this.state;
+    const { indexPattern } = this.props;
     const { onSubmit } = this.props;
     const filteredFields = [];
 
@@ -93,7 +97,10 @@ export class KueryFilterBar extends Component {
       });
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
-      this.setState({ error: (e.message ? e.message : 'Invalid query syntax') });
+      const errorMessage = i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessage', {
+        defaultMessage: 'Invalid kuery syntax'
+      });
+      this.setState({ error: (e.message ? e.message : errorMessage) });
     }
   };
 

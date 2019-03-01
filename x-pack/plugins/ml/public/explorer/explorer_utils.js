@@ -289,9 +289,13 @@ export function getViewBySwimlaneOptions({
 
   // filter View by options to relevant filter fields
   if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
-    viewBySwimlaneOptions = viewBySwimlaneOptions.filter(option => {
+    const filteredOptions = viewBySwimlaneOptions.filter(option => {
       return (filteredFields.includes(option) || option === 'job ID');
     });
+    // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
+    if (filteredOptions.length > 1) {
+      viewBySwimlaneOptions = filteredOptions;
+    }
   }
 
   return {

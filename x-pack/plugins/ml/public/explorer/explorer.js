@@ -609,7 +609,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const {
         filterActive,
         filteredFields,
-        maskAll,
         influencersFilterQuery,
         noInfluencersConfigured,
         noJobsFound,
@@ -713,8 +712,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
       } else {
-        const tempInfluencersFilterQuery = (maskAll === true) ? undefined : influencersFilterQuery;
-
         Object.assign(
           stateUpdate,
           viewBySwimlaneOptions,
@@ -723,7 +720,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             overallSwimlaneData,
             selectedJobs,
             viewBySwimlaneOptions.swimlaneViewByFieldName,
-            tempInfluencersFilterQuery
+            influencersFilterQuery
           ),
         );
       }
