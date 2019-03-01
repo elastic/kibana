@@ -17,33 +17,13 @@
  * under the License.
  */
 
-import { retryForSuccess } from './retry_for_success';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-export async function retryForTruthy(log, {
-  timeout,
-  methodName,
-  description,
-  block
-}) {
-  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
+import { services as CommonServiceProviders } from '../common/services';
+import { pageObjects as FunctionalPageObjectProviders } from './page_objects';
+import { services as FunctionalServiceProviders } from './services';
 
-  const accept = result => Boolean(result);
+type ServiceProviders = typeof CommonServiceProviders & typeof FunctionalServiceProviders;
+type PageObjectProviders = typeof FunctionalPageObjectProviders;
 
-  const onFailure = lastError => {
-    let msg = `timed out waiting for ${description}`;
-
-    if (lastError) {
-      msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
-    }
-
-    throw new Error(msg);
-  };
-
-  await retryForSuccess(log, {
-    timeout,
-    methodName,
-    block,
-    onFailure,
-    accept
-  });
-}
+export type FtrProviderContext = GenericFtrProviderContext<ServiceProviders, PageObjectProviders>;

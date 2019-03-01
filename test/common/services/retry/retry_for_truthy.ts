@@ -17,18 +17,36 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import { ToolingLog } from '@kbn/dev-utils';
 
-import elasticsearch from 'elasticsearch';
+import { retryForSuccess } from './retry_for_success';
 
-import { DEFAULT_API_VERSION } from '../../../src/core/server/elasticsearch/elasticsearch_config';
+interface Options {
+  timeout: number;
+  methodName: string;
+  description: string;
+  block: () => Promise<boolean>;
+}
 
-export function EsProvider({ getService }) {
-  const config = getService('config');
+export async function retryForTruthy(
+  log: ToolingLog,
+  { timeout, methodName, description, block }: Options
+) {
+  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
 
-  return new elasticsearch.Client({
-    apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
+  await retryForSuccess(log, {
+    timeout,
+    methodName,
+    block,
+    onFailure: lastError => {
+      let msg = `timed out waiting for ${description}`;
+
+      if (lastError) {
+        msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
+      }
+
+      throw new Error(msg);
+    },
+    accept: result => Boolean(result),
   });
 }
