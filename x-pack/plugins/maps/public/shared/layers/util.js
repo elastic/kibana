@@ -7,13 +7,19 @@
 export function filterPropertiesForTooltip(metricFields, properties) {
   const tooltipProps = {};
   metricFields.forEach((field) => {
+    let value;
     for (const key in properties) {
       if (properties.hasOwnProperty(key)) {
         if (field.propertyKey === key) {
-          tooltipProps[field.propertyLabel] = properties[key];
+          value = properties[key];
+          break;
         }
       }
     }
+    if (!value) {
+      value = '-';
+    }
+    tooltipProps[field.propertyLabel] = value;
   });
   return tooltipProps;
 }

@@ -53,6 +53,7 @@ import {
   UpdateLicenseFileTask,
   VerifyEnvTask,
   VerifyExistingNodeBuildsTask,
+  PathLengthTask,
   WriteShaSumsTask,
 } from './tasks';
 
@@ -135,6 +136,8 @@ export async function buildDistributables(options) {
   await run(CleanExtraBinScriptsTask);
   await run(CleanExtraBrowsersTask);
   await run(CleanNodeBuildsTask);
+
+  await run(PathLengthTask);
 
   /**
    * package platform-specific builds into archives

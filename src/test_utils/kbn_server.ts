@@ -33,7 +33,7 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 import { Env } from '../core/server/config';
-import { LegacyObjectToConfigAdapter } from '../core/server/legacy_compat';
+import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 
 type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';

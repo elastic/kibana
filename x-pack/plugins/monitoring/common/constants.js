@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 /**
  * Helper string to add as a tag in every logging call
  */
-export const LOGGING_TAG = 'monitoring-ui';
+export const LOGGING_TAG = 'monitoring';
 /**
  * Helper string to add as a tag in every logging call related to Kibana monitoring
  */

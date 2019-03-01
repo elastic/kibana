@@ -17,9 +17,13 @@
  * under the License.
  */
 
+import { uniq } from 'lodash';
 
-export function initXAxis(chart) {
+export function initXAxis(chart, table) {
   const x = chart.aspects.x[0];
+  chart.xAxisOrderedValues = x.accessor === -1
+    ? [x.params.defaultValue]
+    : uniq(table.rows.map(r => r[x.accessor]));
   chart.xAxisFormat = x.format;
   chart.xAxisLabel = x.title;
   if (x.params.date) {
