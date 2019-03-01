@@ -8,7 +8,7 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first, get } from 'lodash';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import {
   fromQuery,
@@ -55,6 +55,28 @@ interface TransactionPropertiesTableProps {
   waterfall: IWaterfall;
 }
 
+const HeightRetainer: React.SFC = props => {
+  const containerElement = useRef<HTMLDivElement>(null);
+  const minHeight = useRef<number>(0);
+
+  useEffect(() => {
+    if (containerElement.current) {
+      const currentHeight = containerElement.current.clientHeight;
+      if (minHeight.current < currentHeight) {
+        minHeight.current = currentHeight;
+      }
+    }
+  });
+
+  return (
+    <div
+      {...props}
+      ref={containerElement}
+      style={{ minHeight: minHeight.current }}
+    />
+  );
+};
+
 export function TransactionPropertiesTable({
   location,
   transaction,
@@ -67,7 +89,7 @@ export function TransactionPropertiesTable({
   const isTimelineTab = currentTab.key === timelineTab.key;
 
   return (
-    <div>
+    <HeightRetainer>
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
@@ -108,6 +130,6 @@ export function TransactionPropertiesTable({
           />
         </TableContainer>
       )}
-    </div>
+    </HeightRetainer>
   );
 }
