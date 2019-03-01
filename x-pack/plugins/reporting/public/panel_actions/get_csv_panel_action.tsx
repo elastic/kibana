@@ -3,23 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
-import { SearchEmbeddable } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { jobCompletionNotifications } from '../lib/job_completion_notifications';
+import { SearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
+
+const API_BASE_URL = '/api/reporting/v1/generate/immediate/csv/saved-object/';
 
 class GetCsvReportPanelAction extends ContextMenuAction {
   constructor() {
     super(
       {
-        displayName: i18n.translate('kbn.dashboard.panel.reportPanel.displayName', {
-          defaultMessage: 'Export to CSV',
+        displayName: i18n.translate('xpack.reporting.dashboard.downloadCsvPanelTitle', {
+          defaultMessage: 'Download CSV',
         }),
-        id: 'openReport',
+        id: 'downloadCsvReport',
         parentPanelId: 'mainMenu',
       },
       {
@@ -29,79 +31,86 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   }
 
   public async generateJobParams({ searchEmbeddable }: { searchEmbeddable: any }) {
-    // const adapters = searchEmbeddable.getInspectorAdapters();
-    // if (!adapters) {
-    //   return '';
-    // }
-    // if (adapters.requests.requests.length === 0) {
-    //   return '';
-    // }
-    // const body = await searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
-    // const timeFieldName = searchEmbeddable.metadata.indexPattern.timeFieldName;
-    // const fields = timeFieldName
-    //   ? [timeFieldName, ...searchEmbeddable.savedSearch.columns]
-    //   : searchEmbeddable.savedSearch.columns;
-    // const jobParams = rison.encode({
-    //   conflictedTypesFields: [],
-    //   fields,
-    //   indexPatternId: searchEmbeddable.metadata.indexPattern.id,
-    //   metaFields: searchEmbeddable.metadata.indexPattern.metaFields,
-    //   searchRequest: { body },
-    //   title: searchEmbeddable.savedSearch.title,
-    //   type: 'search',
-    // });
-    // return jobParams;
-    return 'todo://do-this.com';
+    const adapters = searchEmbeddable.getInspectorAdapters();
+    if (!adapters) {
+      return {};
+    }
+
+    if (adapters.requests.requests.length === 0) {
+      return {};
+    }
+
+    return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
   }
 
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
     const { embeddable } = panelActionAPI;
 
-    if (!embeddable) {
-      return false;
+    if (embeddable && embeddable instanceof SearchEmbeddable) {
+      return true;
     }
 
-    // Likely will have to change this check for TSVB
-    if (!(embeddable instanceof SearchEmbeddable)) {
-      return false;
-    }
-
-    return true;
+    return false;
   };
 
-  // TODO: Move this to Tim's Dank API
   public onClick = async (panelActionAPI: PanelActionAPI) => {
-    const { embeddable } = panelActionAPI;
+    const { embeddable } = panelActionAPI as any;
+    const {
+      timeRange: { from, to },
+    } = embeddable;
 
     if (!embeddable) {
       return;
     }
-    if (!(embeddable instanceof SearchEmbeddable)) {
-      return;
-    }
+
     const searchEmbeddable = embeddable as SearchEmbeddable;
+    const state = await this.generateJobParams({ searchEmbeddable });
 
-    const jobParams = await this.generateJobParams({ searchEmbeddable });
+    const id = `search:${embeddable.savedSearch.id}`;
+    const filename = embeddable.savedSearch.title;
+    const fromTime = dateMath.parse(from);
+    const toTime = dateMath.parse(to);
 
-    if (jobParams === '') {
-      return;
+    if (!fromTime || !toTime) {
+      return this.onGenerationFail(
+        new Error(`Invalid time range: From: ${fromTime}, To: ${toTime}`)
+      );
     }
-    const query = {
-      jobParams,
-    };
 
-    const API_BASE_URL = '/api/reporting/generate';
-
-    toastNotifications.addSuccess({
-      title: `Queued report for CSV`,
-      text: 'Track its progress in Management',
-      'data-test-subj': 'queueReportSuccess',
+    const body = JSON.stringify({
+      timerange: {
+        min: fromTime.valueOf(),
+        max: toTime.valueOf(),
+        timezone: 'PST',
+      },
+      state,
     });
 
-    const resp = await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/csv`, query });
-
-    jobCompletionNotifications.add(resp.job.id);
+    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}${id}`, body }, { parseJson: false })
+      .then(r => r.text())
+      .then(csv => {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = window.document.createElement('a');
+        const downloadObject = window.URL.createObjectURL(blob);
+        a.href = downloadObject;
+        a.download = `${filename}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(downloadObject);
+      })
+      .catch(this.onGenerationFail);
   };
+
+  private onGenerationFail(error: Error) {
+    toastNotifications.addDanger({
+      title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
+        defaultMessage: `CSV download failed`,
+      }),
+      text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
+        defaultMessage: `We couldn't download your CSV at this time.`,
+      }),
+      'data-test-subj': 'downloadCsvFail',
+    });
+  }
 }
 
 ContextMenuActionsRegistryProvider.register(() => new GetCsvReportPanelAction());
