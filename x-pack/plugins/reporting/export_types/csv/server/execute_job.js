@@ -36,14 +36,14 @@ function executeJobFn(server) {
     let decryptedHeaders;
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
-    } catch (err) {
+    } catch (e) {
       throw new Error(
         i18n.translate(
           'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
           {
             defaultMessage:
-              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-            values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
+              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report.',
+            values: { encryptionKey: 'xpack.reporting.encryptionKey' },
           }
         )
       );
@@ -79,9 +79,7 @@ function executeJobFn(server) {
         ]);
 
         if (timezone === 'Browser') {
-          logger.warn(
-            `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-          );
+          logger.warn(`Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`);
         }
 
         return {

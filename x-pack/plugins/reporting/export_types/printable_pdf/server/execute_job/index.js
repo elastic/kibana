@@ -10,13 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePdfObservableFactory } from '../lib/generate_pdf';
 import { compatibilityShimFactory } from './compatibility_shim';
-import {
-  decryptJobHeaders,
-  omitBlacklistedHeaders,
-  getConditionalHeaders,
-  addForceNowQuerystring,
-  getCustomLogo,
-} from '../../../common/execute_job/';
+import { decryptJobHeaders, omitBlacklistedHeaders, getConditionalHeaders,
+  addForceNowQuerystring, getCustomLogo } from '../../../common/execute_job/';
+
 
 function executeJobFn(server) {
   const generatePdfObservable = generatePdfObservableFactory(server);
@@ -25,31 +21,16 @@ function executeJobFn(server) {
   return compatibilityShim(function executeJob(jobToExecute, cancellationToken) {
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(err =>
-        Rx.throwError(
-          i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage',
-            {
-              defaultMessage:
-                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
-            }
-          )
-        )
-      ),
+      catchError(() => Rx.throwError(
+        i18n.translate('xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage', {
+          defaultMessage: 'Failed to decrypt report job data. Please re-generate this report.'
+        }))),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(getCustomLogo),
       mergeMap(addForceNowQuerystring),
       mergeMap(({ job, conditionalHeaders, logo, urls }) => {
-        return generatePdfObservable(
-          job.title,
-          urls,
-          job.browserTimezone,
-          conditionalHeaders,
-          job.layout,
-          logo
-        );
+        return generatePdfObservable(job.title, urls, job.browserTimezone, conditionalHeaders, job.layout, logo);
       }),
       map(buffer => ({
         content_type: 'application/pdf',
@@ -60,7 +41,9 @@ function executeJobFn(server) {
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    return process$.pipe(takeUntil(stop$)).toPromise();
+    return process$.pipe(
+      takeUntil(stop$)
+    ).toPromise();
   });
 }
 
