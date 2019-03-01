@@ -27,20 +27,23 @@ import { LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { UiSettingsService } from './ui_settings';
 
-const MockLegacyPlatformService = jest.fn<LegacyPlatformService>(
+const MockLegacyPlatformService = jest.fn<LegacyPlatformService, any>(
   function _MockLegacyPlatformService(this: any) {
     this.start = jest.fn();
     this.stop = jest.fn();
+    return this;
   }
 );
+
 jest.mock('./legacy', () => ({
   LegacyPlatformService: MockLegacyPlatformService,
 }));
 
 const mockInjectedMetadataStart = {};
-const MockInjectedMetadataService = jest.fn<InjectedMetadataService>(
+const MockInjectedMetadataService = jest.fn<InjectedMetadataService, any>(
   function _MockInjectedMetadataService(this: any) {
     this.start = jest.fn().mockReturnValue(mockInjectedMetadataStart);
+    return this;
   }
 );
 jest.mock('./injected_metadata', () => ({
@@ -48,69 +51,81 @@ jest.mock('./injected_metadata', () => ({
 }));
 
 const mockFatalErrorsStart = {};
-const MockFatalErrorsService = jest.fn<FatalErrorsService>(function _MockFatalErrorsService(
+const MockFatalErrorsService = jest.fn<FatalErrorsService, any>(function _MockFatalErrorsService(
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockFatalErrorsStart);
   this.add = jest.fn();
+  return this;
 });
 jest.mock('./fatal_errors', () => ({
   FatalErrorsService: MockFatalErrorsService,
 }));
 
 const mockI18nStart = {};
-const MockI18nService = jest.fn<I18nService>(function _MockI18nService(this: any) {
+const MockI18nService = jest.fn<I18nService, any>(function _MockI18nService(this: any) {
   this.start = jest.fn().mockReturnValue(mockI18nStart);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./i18n', () => ({
   I18nService: MockI18nService,
 }));
 
 const mockNotificationStart = {};
-const MockNotificationsService = jest.fn<NotificationsService>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockNotificationStart);
-  this.add = jest.fn();
-  this.stop = jest.fn();
-});
+const MockNotificationsService = jest.fn<NotificationsService, any>(
+  function _MockNotificationsService(this: any) {
+    this.start = jest.fn().mockReturnValue(mockNotificationStart);
+    this.add = jest.fn();
+    this.stop = jest.fn();
+    return this;
+  }
+);
+
 jest.mock('./notifications', () => ({
   NotificationsService: MockNotificationsService,
 }));
 
 const mockHttp = {};
-const MockHttpService = jest.fn<HttpService>(function _MockNotificationsService(this: any) {
+const MockHttpService = jest.fn<HttpService, any>(function _MockNotificationsService(this: any) {
   this.start = jest.fn().mockReturnValue(mockHttp);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./http', () => ({
   HttpService: MockHttpService,
 }));
 
 const mockBasePathStart = {};
-const MockBasePathService = jest.fn<BasePathService>(function _MockNotificationsService(this: any) {
+const MockBasePathService = jest.fn<BasePathService, any>(function _MockNotificationsService(
+  this: any
+) {
   this.start = jest.fn().mockReturnValue(mockBasePathStart);
+  return this;
 });
 jest.mock('./base_path', () => ({
   BasePathService: MockBasePathService,
 }));
 
 const mockUiSettings = {};
-const MockUiSettingsService = jest.fn<UiSettingsService>(function _MockNotificationsService(
+const MockUiSettingsService = jest.fn<UiSettingsService, any>(function _MockNotificationsService(
   this: any
 ) {
   this.start = jest.fn().mockReturnValue(mockUiSettings);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./ui_settings', () => ({
   UiSettingsService: MockUiSettingsService,
 }));
 
 const mockChromeStart = {};
-const MockChromeService = jest.fn<ChromeService>(function _MockNotificationsService(this: any) {
+const MockChromeService = jest.fn<ChromeService, any>(function _MockNotificationsService(
+  this: any
+) {
   this.start = jest.fn().mockReturnValue(mockChromeStart);
   this.stop = jest.fn();
+  return this;
 });
 jest.mock('./chrome', () => ({
   ChromeService: MockChromeService,

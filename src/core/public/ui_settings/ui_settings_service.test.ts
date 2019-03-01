@@ -22,7 +22,7 @@ function mockClass<T>(
   Class: { new (...args: any[]): T },
   setup: (instance: any, args: any[]) => void
 ) {
-  const MockClass = jest.fn<T>(function(this: any, ...args: any[]) {
+  const MockClass = jest.fn(function(this: any, ...args: any[]) {
     setup(this, args);
   });
 
@@ -34,7 +34,7 @@ function mockClass<T>(
     value: `Mock${Class.name}`,
   });
 
-  jest.mock(module, () => ({
+  jest.doMock(module, () => ({
     [Class.name]: MockClass,
   }));
 

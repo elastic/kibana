@@ -60,7 +60,7 @@ export default {
   ],
   globals: {
     'ts-jest': {
-      skipBabel: true,
+      babelConfig: true,
     },
   },
   moduleFileExtensions: [

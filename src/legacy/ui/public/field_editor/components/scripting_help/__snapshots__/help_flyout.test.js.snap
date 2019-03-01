@@ -14,7 +14,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
     <EuiTabbedContent
       initialSelectedTab={
         Object {
-          "content": <Unknown />,
+          "content": <ScriptingSyntax />,
           "data-test-subj": "syntaxTab",
           "id": "syntax",
           "name": "Syntax",
@@ -23,7 +23,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
       tabs={
         Array [
           Object {
-            "content": <Unknown />,
+            "content": <ScriptingSyntax />,
             "data-test-subj": "syntaxTab",
             "id": "syntax",
             "name": "Syntax",

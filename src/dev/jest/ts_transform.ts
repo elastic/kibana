@@ -31,11 +31,11 @@ function extendJestConfigJSON(jestConfigJSON: string, filePath: string) {
 }
 
 function extendJestConfig(jestConfig: jest.ProjectConfig, filePath: string) {
-  let tsConfigFile = getTsProjectForAbsolutePath(filePath).tsConfigPath;
+  let tsConfig = getTsProjectForAbsolutePath(filePath).tsConfigPath;
 
   // swap ts config file for jest tests
-  if (tsConfigFile === DEFAULT_BROWSER_TS_CONFIG_PATH) {
-    tsConfigFile = DEFAULT_TS_CONFIG_PATH;
+  if (tsConfig === DEFAULT_BROWSER_TS_CONFIG_PATH) {
+    tsConfig = DEFAULT_TS_CONFIG_PATH;
   }
 
   return {
@@ -43,8 +43,8 @@ function extendJestConfig(jestConfig: jest.ProjectConfig, filePath: string) {
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
-        skipBabel: true,
-        tsConfigFile,
+        babelConfig: true,
+        tsConfig,
       },
     },
   };
@@ -59,7 +59,7 @@ module.exports = {
     jestConfig: jest.ProjectConfig,
     transformOptions: jest.TransformOptions
   ) {
-    const extendedConfig = extendJestConfig(jestConfig, filePath);
+    const extendedConfig = extendJestConfig(jestConfig, filePath as string);
     return process(src, filePath, extendedConfig, transformOptions);
   },
 
