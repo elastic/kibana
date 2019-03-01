@@ -195,9 +195,9 @@ export class JavaLauncher implements ILanguageServerLauncher {
         {},
         (error, stdout, stderr) => {
           const javaVersion = this.parseMajorVersion(stderr);
-          if (javaVersion < 8){
+          if (javaVersion < 8) {
             resolve(false);
-          } else{
+          } else {
             resolve(true);
           }
         }
