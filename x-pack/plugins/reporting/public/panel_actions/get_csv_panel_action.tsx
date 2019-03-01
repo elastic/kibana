@@ -6,11 +6,11 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
+import { SearchEmbeddable } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { SearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 
 const API_BASE_URL = '/api/reporting/v1/generate/immediate/csv/saved-object/';
 
@@ -54,7 +54,13 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   };
 
   public onClick = async (panelActionAPI: PanelActionAPI) => {
-    const { embeddable } = panelActionAPI as any;
+    const {
+      embeddable,
+      embeddable: {
+        $rootScope: { chrome },
+      },
+    } = panelActionAPI as any;
+
     const {
       timeRange: { from, to },
     } = embeddable;
@@ -63,9 +69,10 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       return;
     }
 
+    const config = chrome.getUiSettingsClient();
+    const timezone = config.get('dateFormat:tz');
     const searchEmbeddable = embeddable as SearchEmbeddable;
     const state = await this.generateJobParams({ searchEmbeddable });
-
     const id = `search:${embeddable.savedSearch.id}`;
     const filename = embeddable.savedSearch.title;
     const fromTime = dateMath.parse(from);
@@ -81,7 +88,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       timerange: {
         min: fromTime.valueOf(),
         max: toTime.valueOf(),
-        timezone: 'PST',
+        timezone,
       },
       state,
     });
