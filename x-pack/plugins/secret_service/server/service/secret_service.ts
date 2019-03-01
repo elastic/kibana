@@ -7,19 +7,21 @@
 // @ts-ignores
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { isConflictError } from 'src/legacy/server/saved_objects/service/lib/errors';
 // @ts-ignore
-import { AuditLogger } from '../../../server/lib/audit_logger';
+import { AuditLogger } from '../../../../../src/legacy/server/lib/audit_logger';
+import { SavedObjectsClient } from '../../../../../src/legacy/server/saved_objects';
+import { isConflictError } from '../../../../../src/legacy/server/saved_objects/service/lib/errors';
 
-type SSEvents = 'secret_object_created' | 'secret_object_accessed';
+type SSEvents = 'secret_object_created' | 'secret_object_accessed' | 'secret_object_decrypt_failed';
+type SecretId = Promise<string>;
 
 export class SecretService {
-  public readonly hideAttribute: (deets: any, secretKey: string) => any;
+  public readonly hideAttribute: (deets: any) => SecretId;
   public readonly unhideAttribute: (deets: any) => any;
   public readonly validateKey: () => Promise<boolean>;
   private readonly type: string;
   private readonly auditor?: AuditLogger;
+  private readonly hideAttributeWithId: (id: string, toEncrypt: any) => SecretId;
 
   constructor(
     savedObjectsClient: SavedObjectsClient,
@@ -37,9 +39,12 @@ export class SecretService {
         this.auditor.log(event, message);
       }
     };
-    this.hideAttribute = async (toEncrypt: any) => {
-      const id = crypto.randomBytes(32).toString('base64');
 
+    this.hideAttribute = async (toEncrypt: any) => {
+      return this.hideAttributeWithId(crypto.randomBytes(32).toString('base64'), toEncrypt);
+    };
+
+    this.hideAttributeWithId = async (id: string, toEncrypt: any) => {
       // now encrypt
       const secret = await crypt.encrypt(toEncrypt);
 
@@ -51,7 +56,7 @@ export class SecretService {
         `Secret object id:${saved.id} was created at ${new Date()}`
       );
 
-      return saved;
+      return saved.id;
     };
 
     this.unhideAttribute = async (id: string) => {
@@ -88,20 +93,30 @@ export class SecretService {
     };
 
     this.validateKey = async () => {
+      const id = '1.0.0:dummy';
+      const secret = 'Secret Service v1.0.0';
+      let objToValidate;
       try {
-        const dummyObject = await savedObjectsClient.create(
-          this.type,
-          {
-            secret: 'Secret Service v1.0.0',
-          },
-          { id: 'secret:1.0.0:dummy' }
-        );
+        objToValidate = await this.hideAttributeWithId(id, secret);
       } catch (e) {
-        if (isConflictError(e)) {
-          return false;
+        if (!isConflictError(e)) {
+          throw e;
         }
       }
-      return false;
+
+      try {
+        objToValidate = await this.unhideAttribute(id);
+      } catch (e) {
+        logEvent(
+          'secret_object_decrypt_failed',
+          "Kibana's encryption key is invalid, please ensure that this instance has the right keystore!"
+        );
+        throw e;
+      }
+
+      return objToValidate.attributes
+        ? objToValidate.attributes.secret === 'Secret Service v1.0.0'
+        : false;
     };
   }
 }
