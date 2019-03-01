@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import { connect } from 'react-redux';
 import {
   compose,
@@ -16,6 +15,7 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
+import { Storage } from 'ui/storage';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { getFunctionDefinitions } from '../../lib/function_definitions';

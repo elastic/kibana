@@ -45,7 +45,7 @@ const termsAgg = ({ field, size, direction, query }) => {
 
   if (field.scripted) {
     terms.script = {
-      inline: field.script,
+      source: field.script,
       lang: field.lang
     };
     terms.valueType = field.type === 'number' ? 'float' : field.type;

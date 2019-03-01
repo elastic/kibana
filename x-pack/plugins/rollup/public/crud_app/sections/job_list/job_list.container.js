@@ -7,9 +7,9 @@
 import { connect } from 'react-redux';
 
 import {
-  getPageOfJobs,
   isLoading,
-  jobLoadError
+  jobLoadError,
+  getJobsList,
 } from '../../store/selectors';
 
 import {
@@ -23,7 +23,7 @@ import { JobList as JobListView } from './job_list';
 
 const mapStateToProps = (state) => {
   return {
-    jobs: getPageOfJobs(state),
+    hasJobs: Boolean(getJobsList(state).length),
     isLoading: isLoading(state),
     jobLoadError: jobLoadError(state),
   };
