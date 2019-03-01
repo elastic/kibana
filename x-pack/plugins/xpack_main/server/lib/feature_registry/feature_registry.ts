@@ -6,8 +6,7 @@
 
 import { IconType } from '@elastic/eui';
 import Joi from 'joi';
-import { cloneDeep, compact, difference, isEqual } from 'lodash';
-import uniqWith from 'lodash.uniqwith';
+import { cloneDeep, difference, isEqual } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
@@ -183,8 +182,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
     );
   });
 
-  const privilegeDefinitions = compact(Object.values(feature.privileges));
-  if (areDuplicatePrivilegeDefinitions(privilegeDefinitions)) {
+  if (areDuplicatePrivilegeDefinitions(feature.privileges)) {
     throw new Error(
       `Multiple privileges with the same definition have been registered for ${
         feature.id
@@ -193,7 +191,39 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
   }
 }
 
-function areDuplicatePrivilegeDefinitions(definitions: FeatureKibanaPrivileges[]): boolean {
-  const unique = uniqWith(definitions, isEqual);
-  return unique.length < definitions.length;
+function isEquivalent(
+  privilegeDefinition1: FeatureKibanaPrivileges,
+  privilegeDefinition2: FeatureKibanaPrivileges
+) {
+  return isEqual(privilegeDefinition1, privilegeDefinition2, (value: any, other: any) => {
+    if (Array.isArray(value) && Array.isArray(other)) {
+      // Array.sort() is in-place, and we don't want to be modifying the actual order
+      // of the arrays permanently, and there's potential they're frozen, so we're copying
+      // before comparing.
+      return isEqual([...value].sort(), [...other].sort());
+    }
+
+    // the type defs for lodash are incorrect, you can return undefined
+    // https://lodash.com/docs/3.10.1#isEqual
+    return undefined as any;
+  });
+}
+
+function areDuplicatePrivilegeDefinitions(privilegeSet: Partial<PrivilegesSet>) {
+  const privileges = Object.values(privilegeSet);
+  for (let i = 0; i < privileges.length; ++i) {
+    for (let ii = 0; ii < privileges.length; ++ii) {
+      const privilegeDefinition1 = privileges[i];
+      const privilegeDefinition2 = privileges[ii];
+      if (
+        i !== ii &&
+        privilegeDefinition1 &&
+        privilegeDefinition2 &&
+        isEquivalent(privilegeDefinition1, privilegeDefinition2)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

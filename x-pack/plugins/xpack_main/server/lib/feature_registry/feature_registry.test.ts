@@ -135,7 +135,7 @@ describe('FeatureRegistry', () => {
       app: ['app1', 'app2'],
       privileges: {
         all: {
-          app: ['app1', 'app2'],
+          app: ['app2', 'app1'],
           savedObject: {
             all: ['config', 'space', 'etc'],
             read: ['canvas'],
@@ -144,12 +144,12 @@ describe('FeatureRegistry', () => {
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
         read: {
+          api: ['someApiEndpointTag', 'anotherEndpointTag'],
           app: ['app1', 'app2'],
           savedObject: {
             all: ['config', 'space', 'etc'],
             read: ['canvas'],
           },
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
           ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
       },
