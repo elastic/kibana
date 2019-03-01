@@ -7,6 +7,7 @@
 import { PathTypes } from '../common/types';
 
 export const ROOT = '/';
+export const SETUP = '/setup-guide';
 const pathTypes = `:pathType(${PathTypes.blob}|${PathTypes.tree}|${PathTypes.blame}|${
   PathTypes.commits
 })`;
