@@ -27,16 +27,10 @@ exports[`LayerPanel is rendered 1`] = `
         component="div"
         grow={false}
       >
-        <EuiButtonIcon
-          aria-label="Fit to bounds"
-          color="primary"
-          iconSize="m"
-          iconType="vector"
-          onClick={[Function]}
-          type="button"
-        >
-          Fit
-        </EuiButtonIcon>
+        <EuiIcon
+          size="m"
+          type="vector"
+        />
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
