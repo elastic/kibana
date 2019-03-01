@@ -74,7 +74,6 @@ export function SettingsPanel(props) {
               label={'Min and max zoom'}
             >
               <EuiDualRange
-                id={'foobar'}
                 min={0}
                 max={24}
                 step={1}
