@@ -69,10 +69,9 @@ const METRIC_FORMATTERS: MetricFormatters = {
 const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
   const maxValues = nodes.map(node => node.metric.max);
   const minValues = nodes.map(node => node.metric.value);
-  // if there is only one value then we need to set the bottom range to zero
-  if (maxValues.length === 1) {
-    maxValues.unshift(0);
-  }
+  // if there is only one value then we need to set the bottom range to zero for min
+  // otherwise the legend will look silly since both values are the same for top and
+  // bottom.
   if (minValues.length === 1) {
     minValues.unshift(0);
   }
