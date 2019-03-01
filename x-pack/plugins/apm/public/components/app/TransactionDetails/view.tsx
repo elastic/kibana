@@ -16,7 +16,7 @@ import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 // @ts-ignore
 import { KueryBar } from '../../shared/KueryBar';
-import { Distribution } from './Distribution';
+import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
@@ -54,7 +54,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       <TransactionDistributionRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <Distribution
+          <TransactionDistribution
             distribution={data}
             urlParams={urlParams}
             location={location}
