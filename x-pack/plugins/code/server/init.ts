@@ -136,7 +136,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
   // @ts-ignore
-  const esClient: EsClient = adminCluster.getClient();
+  const esClient: EsClient = adminCluster.clusterClient.client;
   const repoConfigController = new RepositoryConfigController(esClient);
 
   // Enable the developing language servers in development mode.
