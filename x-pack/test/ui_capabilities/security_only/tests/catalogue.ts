@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   GetUICapabilitiesFailureReason,
@@ -13,10 +14,10 @@ import {
 import { UserScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function canvasTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('canvas', () => {
+  describe('catalogue', () => {
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.get({
@@ -24,39 +25,38 @@ export default function canvasTests({ getService }: KibanaFunctionalTestDefaultP
           password: scenario.password,
         });
         switch (scenario.username) {
-          // these users have a read/write view of Canvas
           case 'superuser':
           case 'all':
+          case 'read':
           case 'dual_privileges_all':
-          case 'canvas_all':
+          case 'dual_privileges_read': {
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('canvas');
-            expect(uiCapabilities.value!.canvas).to.eql({
-              save: true,
-            });
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
-          // these users have a read-only view of Canvas
-          case 'dual_privileges_read':
-          case 'canvas_read':
+          }
+          case 'foo_all':
+          case 'foo_read': {
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('canvas');
-            expect(uiCapabilities.value!.canvas).to.eql({
-              save: false,
-            });
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // only foo is enabled
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (value, catalogueId) => catalogueId === 'foo'
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
           // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;
-          // all other users can't do anything with Canvas
           default:
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('canvas');
-            expect(uiCapabilities.value!.canvas).to.eql({
-              save: false,
-            });
+            throw new UnreachableError(scenario);
         }
       });
     });

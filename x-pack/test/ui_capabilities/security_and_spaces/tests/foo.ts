@@ -13,10 +13,10 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function visualizeTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function fooTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('visualize', () => {
+  describe('foo', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -26,28 +26,31 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           space.id
         );
         switch (scenario.id) {
-          // these users have a read/write view of Visualize
+          // these users have a read/write view
           case 'superuser at everything_space':
           case 'global_all at everything_space':
-
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('visualize');
-            expect(uiCapabilities.value!.visualize).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: true,
+              edit: true,
+              delete: true,
               show: true,
-              save: true,
             });
             break;
-          // these users have a read only view of Visualize
+          // these users have a read only view
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('visualize');
-            expect(uiCapabilities.value!.visualize).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
               show: true,
-              save: false,
             });
             break;
           // the nothing_space has no features enabled, so even if we have
@@ -60,15 +63,17 @@ export default function visualizeTests({ getService }: KibanaFunctionalTestDefau
           case 'nothing_space_all at nothing_space':
           case 'nothing_space_read at nothing_space':
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('visualize');
-            expect(uiCapabilities.value!.visualize).to.eql({
+            expect(uiCapabilities.value).to.have.property('foo');
+            expect(uiCapabilities.value!.foo).to.eql({
+              create: false,
+              edit: false,
+              delete: false,
               show: false,
-              save: false,
             });
             break;
           // if we don't have access at the space itself, we're
           // redirected to the space selector and the ui capabilities
-          // are lagely irrelevant because they won't be consumed
+          // are largely irrelevant because they won't be consumed
           case 'no_kibana_privileges at everything_space':
           case 'no_kibana_privileges at nothing_space':
           case 'legacy_all at everything_space':

@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import { SavedObjectsManagementBuilder } from '../../common/saved_objects_management_builder';
 import {
@@ -32,16 +33,17 @@ export default function savedObjectsManagementTests({
           case 'superuser':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.all('all')
+            const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>
+              savedObjectsManagementBuilder.uiCapabilities('all')
             );
+            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(expected);
             break;
           case 'all':
           case 'dual_privileges_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
+              savedObjectsManagementBuilder.build({
                 all: [
                   'config',
                   'graph-workspace',
@@ -57,11 +59,12 @@ export default function savedObjectsManagementTests({
               })
             );
             break;
+          case 'read':
           case 'dual_privileges_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
+              savedObjectsManagementBuilder.build({
                 read: [
                   'config',
                   'graph-workspace',
@@ -77,269 +80,22 @@ export default function savedObjectsManagementTests({
               })
             );
             break;
-          case 'apm_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'advancedSettings_all':
+          case 'foo_all':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'config',
+              savedObjectsManagementBuilder.build({
+                all: ['foo'],
+                read: ['index-pattern', 'config'],
               })
             );
             break;
-          case 'advancedSettings_read':
+          case 'foo_read':
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'canvas_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['config', 'index-pattern'],
-                all: 'canvas-workpad',
-              })
-            );
-            break;
-          case 'canvas_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['canvas-workpad', 'config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'dashboard_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'dashboard',
-                read: [
-                  'visualize',
-                  'search',
-                  'config',
-                  'index-pattern',
-                  'canvas-workpad',
-                  'timelion-sheet',
-                  'visualization',
-                ],
-              })
-            );
-            break;
-          case 'dashboard_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: [
-                  'dashboard',
-                  'visualize',
-                  'search',
-                  'config',
-                  'index-pattern',
-                  'canvas-workpad',
-                  'timelion-sheet',
-                  'visualization',
-                ],
-              })
-            );
-            break;
-          case 'dev_tools_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'dev_tools_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'discover_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: ['search', 'url'],
-                read: ['config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'discover_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['search', 'config', 'index-pattern', 'url'],
-              })
-            );
-            break;
-          case 'graph_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'graph-workspace',
-                read: ['config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'graph_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['config', 'index-pattern', 'graph-workspace'],
-              })
-            );
-            break;
-          case 'maps_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'map',
-                read: ['config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'maps_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['map', 'config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'infrastructure_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'infrastructure_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'logs_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'logs_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'ml_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'monitoring_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'timelion_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'timelion-sheet',
-                read: ['config', 'index-pattern'],
-              })
-            );
-            break;
-          case 'timelion_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['config', 'index-pattern', 'timelion-sheet'],
-              })
-            );
-            break;
-          case 'uptime_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'uptime_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: 'config',
-              })
-            );
-            break;
-          case 'visualize_all':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                all: 'visualization',
-                read: ['config', 'index-pattern', 'search'],
-              })
-            );
-            break;
-          case 'visualize_read':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
-            expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
-              savedObjectsManagementBuilder.only({
-                read: ['config', 'index-pattern', 'search', 'visualization'],
+              savedObjectsManagementBuilder.build({
+                read: ['foo', 'index-pattern', 'config'],
               })
             );
             break;

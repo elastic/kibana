@@ -3,11 +3,3 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-interface Feature {
-  navLinkId: string;
-}
-
-export interface Features {
-  [key: string]: Feature;
-}

@@ -178,7 +178,6 @@ export default function (kibana) {
               visualize: true,
               console: true,
               advanced_settings: true,
-              saved_objects: true,
               index_patterns: true,
             },
             advancedSettings: {

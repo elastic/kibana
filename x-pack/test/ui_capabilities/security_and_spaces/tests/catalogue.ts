@@ -5,6 +5,7 @@
  */
 
 import expect from 'expect.js';
+import { mapValues } from 'lodash';
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 import {
   GetUICapabilitiesFailureReason,
@@ -13,12 +14,10 @@ import {
 import { UserAtSpaceScenarios } from '../scenarios';
 
 // tslint:disable:no-default-export
-export default function advancedSettingsTests({
-  getService,
-}: KibanaFunctionalTestDefaultProviders) {
+export default function catalogueTests({ getService }: KibanaFunctionalTestDefaultProviders) {
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
 
-  describe('advancedSettings', () => {
+  describe('catalogue', () => {
     UserAtSpaceScenarios.forEach(scenario => {
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
@@ -28,28 +27,20 @@ export default function advancedSettingsTests({
           space.id
         );
         switch (scenario.id) {
-          // these users have a read/write view of Advanced Settings
           case 'superuser at everything_space':
           case 'global_all at everything_space':
-
           case 'dual_privileges_all at everything_space':
           case 'everything_space_all at everything_space':
-            expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: true,
-            });
-            break;
-          // these users have a read only view of Advanced Settings
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
-          case 'everything_space_read at everything_space':
+          case 'everything_space_read at everything_space': {
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
-            });
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is enabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => true);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
           // the nothing_space has no features enabled, so even if we have
           // privileges to perform these actions, we won't be able to
           case 'superuser at nothing_space':
@@ -58,13 +49,14 @@ export default function advancedSettingsTests({
           case 'dual_privileges_all at nothing_space':
           case 'dual_privileges_read at nothing_space':
           case 'nothing_space_all at nothing_space':
-          case 'nothing_space_read at nothing_space':
+          case 'nothing_space_read at nothing_space': {
             expect(uiCapabilities.success).to.be(true);
-            expect(uiCapabilities.value).to.have.property('advancedSettings');
-            expect(uiCapabilities.value!.advancedSettings).to.eql({
-              save: false,
-            });
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything is disabled
+            const expected = mapValues(uiCapabilities.value!.catalogue, () => false);
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
+          }
           // if we don't have access at the space itself, we're
           // redirected to the space selector and the ui capabilities
           // are lagely irrelevant because they won't be consumed
