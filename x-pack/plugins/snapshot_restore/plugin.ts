@@ -5,6 +5,7 @@
  */
 import { Legacy } from 'kibana';
 import { PLUGIN } from './common/constants';
+import { registerRoutes } from './server/routes/api/register_routes';
 import { createShim } from './shim';
 
 export class Plugin {
@@ -17,16 +18,17 @@ export class Plugin {
   public start(): void {
     const server = this.server;
     const { core, plugins } = createShim(server, PLUGIN.ID);
-    const router = core.http.createRouter('/api/snapshot/');
+    const router = core.http.createRouter('/api/snapshot_restore/');
 
+    // Register license checker
     plugins.license.registerLicenseChecker(
       server,
       PLUGIN.ID,
       PLUGIN.NAME,
       PLUGIN.MINIMUM_LICENSE_REQUIRED
     );
-    router.get('test', async (req, callWithRequest, responseToolkit) => {
-      return responseToolkit.response('hello world');
-    });
+
+    // Register routes
+    registerRoutes(router);
   }
 }
