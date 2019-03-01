@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The export saved objects by type API enables you to retrieve a set of Kibana saved objects into a newline delimited JSON format.
+The export saved objects by type API enables you to retrieve a set of saved objects that can later be imported into Kibana.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
