@@ -21,7 +21,7 @@ function scan(pattern) {
   });
 }
 
-const pattern = resolve(__dirname, '../../export_types/*/server/index.js');
+const pattern = resolve(__dirname, '../../export_types/*/server/index.[jt]s');
 async function exportTypesRegistryFn(server) {
   const exportTypesRegistry = new ExportTypesRegistry();
   const files = await scan(pattern);
