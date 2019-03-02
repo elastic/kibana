@@ -23,25 +23,23 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
-import { partialFormattedCache } from 'ui/index_patterns/_format_hit';
 import $ from 'jquery';
 import 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-
 
 const SORTABLE_FIELDS = ['bytes', '@timestamp'];
 const UNSORTABLE_FIELDS = ['request_body'];
 
 describe('Doc Table', function () {
-
   let $parentScope;
-
   let $scope;
-
   let config;
 
   // Stub out a minimal mapping of 4 fields
   let mapping;
+
+  let fakeRowVals;
+  let stubFieldFormatConverter;
 
   beforeEach(ngMock.module('kibana', 'apps/discover'));
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
@@ -49,6 +47,19 @@ describe('Doc Table', function () {
     $parentScope = $rootScope;
     $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     mapping = $parentScope.indexPattern.fields.byName;
+
+    // Stub `getConverterFor` for a field in the indexPattern to return mock data.
+    // Returns `val` if provided, otherwise generates fake data for the field.
+    fakeRowVals = getFakeRowVals('formatted', 0, mapping);
+    stubFieldFormatConverter = function ($root, field, val = null) {
+      $root.indexPattern.fields.byName[field].format.getConverterFor = () => (...args) => {
+        if (val) {
+          return val;
+        }
+        const fieldName = _.get(args, '[1].name', null);
+        return fakeRowVals[fieldName] || '';
+      };
+    };
   }));
 
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
@@ -67,9 +78,7 @@ describe('Doc Table', function () {
   };
 
   // For testing column removing/adding for the header and the rows
-  //
   const columnTests = function (elemType, parentElem) {
-
     it('should create a time column if the timefield is defined', function () {
       const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(1);
@@ -77,6 +86,10 @@ describe('Doc Table', function () {
 
     it('should be able to add and remove columns', function () {
       let childElems;
+
+      stubFieldFormatConverter($parentScope, 'bytes');
+      stubFieldFormatConverter($parentScope, 'request_body');
+
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
       parentElem.scope().$digest();
@@ -104,12 +117,9 @@ describe('Doc Table', function () {
       const childElems = parentElem.find(elemType);
       expect(childElems.length).to.be(0);
     });
-
   };
 
-
   describe('kbnTableHeader', function () {
-
     const $elem = angular.element(`
       <thead
         kbn-table-header
@@ -141,7 +151,6 @@ describe('Doc Table', function () {
     });
 
     describe('sorting button', function () {
-
       beforeEach(function () {
         $parentScope.columns = ['bytes', '_source'];
         $elem.scope().$digest();
@@ -272,7 +281,6 @@ describe('Doc Table', function () {
 
     beforeEach(function () {
       row = getFakeRow(0, mapping);
-      partialFormattedCache.set(row, getFakeRowVals('formatted', 0, mapping));
 
       init($elem, {
         row,
@@ -287,7 +295,6 @@ describe('Doc Table', function () {
 
     });
     afterEach(function () {
-      partialFormattedCache.delete(row);
       destroy();
     });
 
@@ -332,7 +339,6 @@ describe('Doc Table', function () {
   });
 
   describe('kbnTableRow meta', function () {
-
     const $elem = angular.element(
       '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
@@ -346,9 +352,6 @@ describe('Doc Table', function () {
 
     beforeEach(function () {
       row = getFakeRow(0, mapping);
-      mapping._id = { indexed: true, type: 'string' };
-      row._source._id = 'foo';
-      partialFormattedCache.set(row, getFakeRowVals('formatted', 0, mapping));
 
       init($elem, {
         row: row,
@@ -367,8 +370,6 @@ describe('Doc Table', function () {
     });
 
     afterEach(function () {
-      delete mapping._id;
-      partialFormattedCache.delete(row);
       destroy();
     });
 
@@ -386,13 +387,15 @@ describe('Doc Table', function () {
     beforeEach(ngMock.inject(function ($rootScope, $compile, Private) {
       $root = $rootScope;
       $root.row = getFakeRow(0, mapping);
-      partialFormattedCache.set($root.row, getFakeRowVals('formatted', 0, mapping));
       $root.columns = ['_source'];
       $root.sorting = [];
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
       $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+
+      // Stub field format converters for every field in the indexPattern
+      Object.keys($root.indexPattern.fields.byName).forEach(f => stubFieldFormatConverter($root, f));
 
       $row = $('<tr>')
         .attr({
@@ -414,7 +417,6 @@ describe('Doc Table', function () {
     }));
 
     afterEach(function () {
-      partialFormattedCache.delete($root.row);
       $row.remove();
     });
 
@@ -513,8 +515,7 @@ describe('Doc Table', function () {
     });
 
     it('handles two columns with the same content', function () {
-      const cached = partialFormattedCache.get($root.row);
-      cached.request_body = cached.bytes;
+      stubFieldFormatConverter($root, 'request_body', fakeRowVals.bytes);
 
       $root.columns.length = 0;
       $root.columns.push('bytes');

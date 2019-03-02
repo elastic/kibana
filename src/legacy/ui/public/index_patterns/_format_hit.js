@@ -21,7 +21,7 @@ import _ from 'lodash';
 import chrome from '../chrome';
 
 const formattedCache = new WeakMap();
-export const partialFormattedCache = new WeakMap();
+const partialFormattedCache = new WeakMap();
 
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a formatted version
