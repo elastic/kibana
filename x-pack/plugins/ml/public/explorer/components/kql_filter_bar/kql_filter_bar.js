@@ -18,7 +18,7 @@ function convertKueryToEsQuery(kuery, indexPattern) {
   const ast = fromKueryExpression(kuery);
   return toElasticsearchQuery(ast, indexPattern);
 }
-export class KueryFilterBar extends Component {
+export class KqlFilterBar extends Component {
   state = {
     error: null,
     suggestions: [],
@@ -128,7 +128,7 @@ export class KueryFilterBar extends Component {
   }
 }
 
-KueryFilterBar.propTypes = {
+KqlFilterBar.propTypes = {
   indexPattern: PropTypes.object.isRequired,
   initialValue: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,

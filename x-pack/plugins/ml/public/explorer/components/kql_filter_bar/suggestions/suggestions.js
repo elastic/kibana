@@ -7,7 +7,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash';
 import { Suggestion } from '../suggestion';
 import { rgba } from 'polished';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -52,12 +51,12 @@ export class Suggestions extends Component {
   }
 
   render() {
-    if (!this.props.show || isEmpty(this.props.suggestions)) {
+    if (!this.props.show || this.props.suggestions.length === 0) {
       return null;
     }
 
     const suggestions = this.props.suggestions.map((suggestion, index) => {
-      const key = suggestion + '_' + index;
+      const key = `${suggestion}_${index}`;
       return (
         <Suggestion
           innerRef={node => (this.childNodes[index] = node)}

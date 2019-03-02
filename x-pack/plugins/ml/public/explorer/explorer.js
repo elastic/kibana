@@ -33,7 +33,7 @@ import {
   ExplorerNoResultsFound,
 } from './components';
 import { ExplorerSwimlane } from './explorer_swimlane';
-import { KueryFilterBar } from './kuery_filter_bar';
+import { KqlFilterBar } from './components/kql_filter_bar';
 import { formatHumanReadableDateTime } from '../util/date_utils';
 import { getBoundsRoundedToInterval } from 'plugins/ml/util/ml_time_buckets';
 import { InfluencersList } from '../components/influencers_list';
@@ -1020,7 +1020,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           {noInfluencersConfigured === false &&
             influencers !== undefined &&
             <div className="mlAnomalyExplorer__filterBar">
-              <KueryFilterBar
+              <KqlFilterBar
                 indexPattern={indexPattern}
                 onSubmit={this.applyInfluencersFilterQuery}
                 initialValue={filterBarInitialValue}

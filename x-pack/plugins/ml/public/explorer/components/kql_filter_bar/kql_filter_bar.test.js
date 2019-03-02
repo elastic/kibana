@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { KueryFilterBar } from './kuery_filter_bar';
+import { KqlFilterBar } from './kql_filter_bar';
 
 
 const defaultProps = {
@@ -32,15 +32,15 @@ const defaultProps = {
   placeholder: undefined
 };
 
-describe('KueryFilterBar', () => {
+describe('KqlFilterBar', () => {
 
   test('snapshot', () => {
-    const wrapper = shallow(<KueryFilterBar {...defaultProps}/>);
+    const wrapper = shallow(<KqlFilterBar {...defaultProps}/>);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('error message callout when error is present', () => {
-    const wrapper = shallow(<KueryFilterBar {...defaultProps} />);
+    const wrapper = shallow(<KqlFilterBar {...defaultProps} />);
     wrapper.setState({ error: 'Invalid syntax' });
     wrapper.update();
     const callout = wrapper.find('EuiCallOut');
@@ -49,7 +49,7 @@ describe('KueryFilterBar', () => {
   });
 
   test('suggestions loading when typing into search bar', () => {
-    const wrapper = shallow(<KueryFilterBar {...defaultProps} />);
+    const wrapper = shallow(<KqlFilterBar {...defaultProps} />);
     expect(wrapper.state('isLoadingSuggestions')).toBe(false);
     // Simulate typing in by triggering change with inputValue and selectionStart
     const filterBar = wrapper.find('FilterBar');

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KueryFilterBar snapshot 1`] = `
+exports[`KqlFilterBar snapshot 1`] = `
 <Fragment>
   <FilterBar
     disabled={false}
