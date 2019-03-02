@@ -32,8 +32,8 @@ export const OverviewTab: StatelessComponent<UpgradeAssistantTabProps> = props =
       <p>
         <FormattedMessage
           id="xpack.upgradeAssistant.overviewTab.tabDetail"
-          defaultMessage="This assistant checks your cluster and indices and identifies the changes
-             you need to make before upgrading to Elasticsearch {nextEsVersion}."
+          defaultMessage="This assistant helps you prepare your cluster and indices for Elasticsearch
+           {nextEsVersion} For other issues that need your attention, see the Elasticsearch logs."
           values={{
             nextEsVersion: `${NEXT_MAJOR_VERSION}.x`,
           }}

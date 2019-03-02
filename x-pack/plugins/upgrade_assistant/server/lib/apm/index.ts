@@ -94,9 +94,13 @@ export const apmReindexScript = `
   HashMap context = ctx._source.remove("context");
   if (context != null) {
       // context.process -> process
-      if (context.containsKey("process")) {
-          ctx._source.process = context.remove("process");
-          ctx._source.process.args = ctx._source.process.remove("argv");
+      def process = context.remove("process");
+      if (process != null) {
+          def args = process.remove("argv");
+          if (args != null) {
+              process.args = args;
+          }
+          ctx._source.process = process;
       }
 
       // context.response -> http.response
@@ -121,8 +125,25 @@ export const apmReindexScript = `
             ctx._source.http.version = http_version;
           }
 
-          ctx._source.http.request = new HashMap();
-
+          // context.request.socket -> request.socket
+          def socket = request.remove("socket");
+          if (socket != null) {
+              def add_socket = false;
+              def new_socket = new HashMap();
+              def remote_address = socket.remove("remote_address");
+              if (remote_address != null) {
+                  add_socket = true;
+                  new_socket.remote_address = remote_address;
+              }
+              def encrypted = socket.remove("encrypted");
+              if (encrypted != null) {
+                  add_socket = true;
+                  new_socket.encrypted = encrypted;
+              }
+              if (add_socket) {
+                  request.socket = new_socket;
+              }
+          }
 
           // context.request.url -> url
           HashMap url = request.remove("url");
@@ -180,6 +201,19 @@ export const apmReindexScript = `
 
       }
 
+      // bump timestamp.us by span.start.us for spans
+      // shouldn't @timestamp this already be a Date?
+      if (ctx._source.processor.event == "span" && context.service.agent.name == "js-base"){
+        def ts = ctx._source.get("@timestamp");
+        if (ts != null && !ctx._source.containsKey("timestamp") && ctx._source.span.start.containsKey("us")) {
+           // add span.start to @timestamp for rum documents v1
+            ctx._source.timestamp = new HashMap();
+            def tsms = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(ts).getTime();
+            ctx._source['@timestamp'] = Instant.ofEpochMilli(tsms + (ctx._source.span.start.us/1000));
+            ctx._source.timestamp.us = (tsms*1000) + ctx._source.span.start.us;
+        }
+      }
+
       // context.service.agent -> agent
       HashMap service = context.remove("service");
       ctx._source.agent = service.remove("agent");
@@ -211,16 +245,18 @@ export const apmReindexScript = `
           }
 
           // context.user.ip -> client.ip
-          if (user.containsKey("ip")) {
+          def userip = user.remove("ip");
+          if (userip != null) {
               ctx._source.client = new HashMap();
-              ctx._source.client.ip = user.remove("ip");
+              ctx._source.client.ip = userip;
           }
 
+          // move user-agent info
           def ua = user.remove("user-agent");
           if (ua != null) {
             ctx._source.user_agent = new HashMap();
             // setting original and original.text is not possible in painless
-            // as original is a keyword in ES template we cannot set it to a HashMap here, 
+            // as original is a keyword in ES template we cannot set it to a HashMap here,
             // so the following is the only possible solution:
             ctx._source.user_agent.original = ua.substring(0, Integer.min(1024, ua.length()));
           }
@@ -234,12 +270,18 @@ export const apmReindexScript = `
             def osminor = pua.remove("os_minor");
             def osmajor = pua.remove("os_major");
             def osname = pua.remove("os_name");
-            if (osminor != null || osmajor != null || osname != null){
-              ctx._source.user_agent.os = new HashMap();
-              ctx._source.user_agent.os.full = os;
-              ctx._source.user_agent.os.version = osmajor + "." + osminor;
-              ctx._source.user_agent.os.name = osname;
+
+            def newos = new HashMap();
+            if (os != null){
+              newos.full = os;
             }
+            if (osmajor != null || osminor != null){
+              newos.version = osmajor + "." + osminor;
+            }
+            if (osname != null){
+              newos.name = osname;
+            }
+            ctx._source.user_agent.os = newos;
 
             def device = pua.remove("device");
             if (device != null){
@@ -247,15 +289,42 @@ export const apmReindexScript = `
               ctx._source.user_agent.device.name = device;
             }
             // not exactly reflecting 7.0, but the closes we can get
-            def patch = pua.remove("patch");
-            def minor = pua.remove("minor");
             def major = pua.remove("major");
-            if (patch != null || minor != null || major != null){
-              ctx._source.user_agent.version = major + "." + minor + "." + patch;
+            if (major != null){
+              def version = major;
+              def minor = pua.remove("minor");
+              if (minor != null){
+                version += "." + minor;
+                def patch = pua.remove("patch");
+                if (patch != null){
+                  version += "." + patch
+                }
+              }
+              ctx._source.user_agent.version = version;
             }
           }
 
-          ctx._source.user = user;
+          // remove unknown fields from user, like is_authenticated
+          def add_user = false;
+          def new_user = new HashMap();
+          def email = user.remove("email");
+          if (email != null) {
+              add_user = true;
+              new_user.email = email;
+          }
+          def id = user.remove("id");
+          if (id != null) {
+              add_user = true;
+              new_user.id = String.valueOf(id);
+          }
+          def name = user.remove("name");
+          if (name != null) {
+              add_user = true;
+              new_user.name = name;
+          }
+          if (add_user) {
+              ctx._source.user = new_user;
+          }
       }
 
       // context.custom -> error,transaction,span.custom
@@ -270,9 +339,23 @@ export const apmReindexScript = `
           }
       }
 
+      // context.page -> error.page,transaction.page
+      def page = context.remove("page");
+      if (page != null) {
+          if (ctx._source.processor.event == "transaction") {
+              ctx._source.transaction.page = page;
+          } else if (ctx._source.processor.event == "error") {
+              ctx._source.error.page = page;
+          }
+      }
+
       // context.db -> span.db
       def db = context.remove("db");
       if (db != null) {
+          def db_user = db.remove("user");
+          if (db_user != null) {
+              db.user = ["name": db_user];
+          }
           ctx._source.span.db = db;
       }
 
@@ -289,26 +372,25 @@ export const apmReindexScript = `
           if (status_code != null) {
               http.response = ["status_code": status_code];
           }
+          // lowercase span.http.method
+          if (http.containsKey("method")) {
+              http.method = http.method.toLowerCase();
+          }
           ctx._source.span.http = http;
       }
   }
 
   if (ctx._source.processor.event == "span") {
-      // bump timestamp.us by span.start.us for spans
-      // shouldn't @timestamp this already be a Date?
-      def ts = ctx._source.get("@timestamp");
-      if (ts != null && !ctx._source.containsKey("timestamp")) {
-          // add span.start to @timestamp for rum documents v1
-          if (ctx._source.context.service.agent.name == "js-base" && ctx._source.span.start.containsKey("us")) {
-            ts += ctx._source.span.start.us/1000;
-          }
-      }
-      if (ctx._source.span.containsKey("hex_id")) {
-        ctx._source.span.id = ctx._source.span.remove("hex_id");
+      def hex_id = ctx._source.span.remove("hex_id");
+      def span_id = ctx._source.span.remove("id");
+      if (hex_id != null) {
+        ctx._source.span.id = hex_id;
+      } else if (span_id != null){
+        ctx._source.span.id = span_id.toString();
       }
       def parent = ctx._source.span.remove("parent");
       if (parent != null && ctx._source.parent == null) {
-        ctx._source.parent = ["id": parent];
+        ctx._source.parent = ["id": parent.toString()];
       }
   }
 
@@ -329,7 +411,7 @@ export const apmReindexScript = `
     if (ts != null && !ctx._source.containsKey("timestamp")) {
       //set timestamp.microseconds to @timestamp
       ctx._source.timestamp = new HashMap();
-      ctx._source.timestamp.us = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(ts).getTime()*1000;
+      ctx._source.timestamp.us = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").parse(ts).getTime()*1000;
     }
 
   }

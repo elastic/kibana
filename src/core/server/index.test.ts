@@ -27,8 +27,13 @@ jest.mock('./plugins/plugins_service', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 
+const mockElasticsearchService = { start: jest.fn(), stop: jest.fn() };
+jest.mock('./elasticsearch/elasticsearch_service', () => ({
+  ElasticsearchService: jest.fn(() => mockElasticsearchService),
+}));
+
 const mockLegacyService = { start: jest.fn(), stop: jest.fn() };
-jest.mock('./legacy_compat/legacy_service', () => ({
+jest.mock('./legacy/legacy_service', () => ({
   LegacyService: jest.fn(() => mockLegacyService),
 }));
 
@@ -50,6 +55,8 @@ afterEach(() => {
   mockConfigService.atPath.mockReset();
   mockHttpService.start.mockReset();
   mockHttpService.stop.mockReset();
+  mockElasticsearchService.start.mockReset();
+  mockElasticsearchService.stop.mockReset();
   mockPluginsService.start.mockReset();
   mockPluginsService.stop.mockReset();
   mockLegacyService.start.mockReset();
@@ -57,26 +64,37 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const mockHttpServiceStartContract = { something: true };
-  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStartContract));
+  const mockHttpServiceStart = { something: true };
+  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
 
-  const mockPluginsServiceStartContract = new Map([['some-plugin', 'some-value']]);
-  mockPluginsService.start.mockReturnValue(Promise.resolve(mockPluginsServiceStartContract));
+  const mockElasticsearchServiceStart = { adminClient$: {} };
+  mockElasticsearchService.start.mockResolvedValue(mockElasticsearchServiceStart);
+
+  const mockPluginsServiceStart = new Map([['some-plugin', 'some-value']]);
+  mockPluginsService.start.mockReturnValue(Promise.resolve(mockPluginsServiceStart));
 
   const server = new Server(mockConfigService as any, logger, env);
 
   expect(mockHttpService.start).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.start).not.toHaveBeenCalled();
   expect(mockPluginsService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.start).toHaveBeenCalledTimes(1);
+
   expect(mockPluginsService.start).toHaveBeenCalledTimes(1);
+  expect(mockPluginsService.start).toHaveBeenCalledWith({
+    elasticsearch: mockElasticsearchServiceStart,
+  });
+
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.start).toHaveBeenCalledWith({
-    http: mockHttpServiceStartContract,
-    plugins: mockPluginsServiceStartContract,
+    elasticsearch: mockElasticsearchServiceStart,
+    http: mockHttpServiceStart,
+    plugins: mockPluginsServiceStart,
   });
 });
 
@@ -119,20 +137,22 @@ test('does not start http service if process is dev cluster master', async () =>
 });
 
 test('stops services on "stop"', async () => {
-  const mockHttpServiceStartContract = { something: true };
-  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStartContract));
+  const mockHttpServiceStart = { something: true };
+  mockHttpService.start.mockReturnValue(Promise.resolve(mockHttpServiceStart));
 
   const server = new Server(mockConfigService as any, logger, env);
 
   await server.start();
 
   expect(mockHttpService.stop).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.stop).not.toHaveBeenCalled();
   expect(mockPluginsService.stop).not.toHaveBeenCalled();
   expect(mockLegacyService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
   expect(mockHttpService.stop).toHaveBeenCalledTimes(1);
+  expect(mockElasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
 });

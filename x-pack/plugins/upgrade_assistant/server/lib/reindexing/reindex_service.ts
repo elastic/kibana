@@ -7,6 +7,7 @@
 import Boom from 'boom';
 
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
 import {
   IndexGroup,
@@ -17,10 +18,17 @@ import {
 } from '../../../common/types';
 import { apmReindexScript, isLegacyApmIndex } from '../apm';
 import apmMappings from '../apm/mapping.json';
-import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
+import {
+  generateNewIndexName,
+  getReindexWarnings,
+  sourceNameForIndex,
+  transformFlatSettings,
+} from './index_settings';
 import { ReindexActions } from './reindex_actions';
 
 const VERSION_REGEX = new RegExp(/^([1-9]+)\.([0-9]+)\.([0-9]+)/);
+const ML_INDICES = ['.ml-state', '.ml-anomalies', '.ml-config'];
+const WATCHER_INDICES = ['.watches', '.triggered-watches'];
 
 export interface ReindexService {
   /**
@@ -461,13 +469,13 @@ export const reindexServiceFactory = (
         return true;
       }
 
-      const index = parseIndexName(indexName);
-      const names = [indexName, index.newIndexName];
+      const names = [indexName, generateNewIndexName(indexName)];
+      const sourceName = sourceNameForIndex(indexName);
 
       // if we have re-indexed this in the past, there will be an
       // underlying alias we will also need to update.
-      if (index.cleanIndexName !== indexName) {
-        names.push(index.cleanIndexName);
+      if (sourceName !== indexName) {
+        names.push(sourceName);
       }
 
       // Otherwise, query for required privileges for this index.
@@ -520,6 +528,12 @@ export const reindexServiceFactory = (
     },
 
     async createReindexOperation(indexName: string) {
+      if (isSystemIndex(indexName)) {
+        throw Boom.notImplemented(
+          `Reindexing system indices are not yet supported within this major version. Upgrade to the latest ${CURRENT_MAJOR_VERSION}.x minor version.`
+        );
+      }
+
       const indexExists = await callCluster('indices.exists', { index: indexName });
       if (!indexExists) {
         throw Boom.notFound(`Index ${indexName} does not exist in this cluster.`);
@@ -666,8 +680,14 @@ export const reindexServiceFactory = (
   };
 };
 
-const isMlIndex = (indexName: string) =>
-  indexName.startsWith('.ml-state') || indexName.startsWith('.ml-anomalies');
+export const isSystemIndex = (indexName: string) => indexName.startsWith('.');
 
-const isWatcherIndex = (indexName: string) =>
-  indexName.startsWith('.watches') || indexName.startsWith('.triggered-watches');
+export const isMlIndex = (indexName: string) => {
+  const sourceName = sourceNameForIndex(indexName);
+  return ML_INDICES.indexOf(sourceName) >= 0;
+};
+
+export const isWatcherIndex = (indexName: string) => {
+  const sourceName = sourceNameForIndex(indexName);
+  return WATCHER_INDICES.indexOf(sourceName) >= 0;
+};

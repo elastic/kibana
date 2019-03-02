@@ -7,7 +7,7 @@
 import { History, Location } from 'history';
 import throttle from 'lodash/fp/throttle';
 import React from 'react';
-import { Route, RouteProps } from 'react-router';
+import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
 
 import { QueryString } from 'ui/utils/query_string';
