@@ -10,7 +10,6 @@ import { Request } from 'hapi';
 import { createTaggedLogger } from '../../../../server/lib';
 import { KbnServer, Logger } from '../../../../types';
 import { SearchPanel, VisPanel } from '../../types';
-import { generateCsvAggTable } from './generate_csv_agg_table';
 import { generateCsvSearch } from './generate_csv_search';
 
 interface FakeRequest {
