@@ -11,9 +11,11 @@ export type NetworkComponentProps = RouteComponentProps<{
   ip: string;
 }>;
 
-export const RedirectToNetworkPage = () => {
-  return <Redirect to={'/network'} />;
-};
+export const RedirectToNetworkPage = ({
+  match: {
+    params: { ip },
+  },
+}: NetworkComponentProps) => <Redirect to={ip ? `/network/ip/${ip}` : '/network'} />; // TODO: Validate IP?
 
 export const getNetworkUrl = () => {
   return '#/link-to/network';

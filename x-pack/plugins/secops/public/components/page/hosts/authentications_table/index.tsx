@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { get, has, isNil } from 'lodash/fp';
 import React from 'react';
@@ -17,6 +17,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -205,7 +206,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                sourceIp
+                <NetworkDetailsLink ip={sourceIp} />
               )
             }
           />
@@ -250,11 +251,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               ) : isNil(get('lastFailure.host.id', node)) ? (
                 <>{hostName}</>
               ) : (
-                <EuiLink
-                  href={`#/link-to/hosts/${encodeURIComponent(node.lastFailure!.host!.id!)}`}
-                >
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={node.lastFailure!.host!.id!}>{hostName}</HostDetailsLink>
               )
             }
           />
@@ -314,7 +311,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                sourceIp
+                <NetworkDetailsLink ip={sourceIp} />
               )
             }
           />
@@ -359,11 +356,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               ) : isNil(get('lastSuccess.host.id', node)) ? (
                 <>{hostName}</>
               ) : (
-                <EuiLink
-                  href={`#/link-to/hosts/${encodeURIComponent(node.lastSuccess!.host!.id!)}`}
-                >
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={node.lastSuccess!.host!.id!}>{hostName}</HostDetailsLink>
               )
             }
           />

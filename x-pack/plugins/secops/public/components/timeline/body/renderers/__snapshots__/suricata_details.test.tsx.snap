@@ -1633,7 +1633,26 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                       fieldName="source.ip"
                                                                                       fieldType="ip"
                                                                                     >
-                                                                                      192.168.0.3
+                                                                                      <pure(Component)
+                                                                                        ip="192.168.0.3"
+                                                                                      >
+                                                                                        <Component
+                                                                                          ip="192.168.0.3"
+                                                                                        >
+                                                                                          <EuiLink
+                                                                                            color="primary"
+                                                                                            href="#/link-to/network/ip/192.168.0.3"
+                                                                                            type="button"
+                                                                                          >
+                                                                                            <a
+                                                                                              className="euiLink euiLink--primary"
+                                                                                              href="#/link-to/network/ip/192.168.0.3"
+                                                                                            >
+                                                                                              192.168.0.3
+                                                                                            </a>
+                                                                                          </EuiLink>
+                                                                                        </Component>
+                                                                                      </pure(Component)>
                                                                                     </Component>
                                                                                   </pure(Component)>
                                                                                 </div>
@@ -2809,7 +2828,26 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                       fieldName="destination.ip"
                                                                                       fieldType="ip"
                                                                                     >
-                                                                                      192.168.0.3
+                                                                                      <pure(Component)
+                                                                                        ip="192.168.0.3"
+                                                                                      >
+                                                                                        <Component
+                                                                                          ip="192.168.0.3"
+                                                                                        >
+                                                                                          <EuiLink
+                                                                                            color="primary"
+                                                                                            href="#/link-to/network/ip/192.168.0.3"
+                                                                                            type="button"
+                                                                                          >
+                                                                                            <a
+                                                                                              className="euiLink euiLink--primary"
+                                                                                              href="#/link-to/network/ip/192.168.0.3"
+                                                                                            >
+                                                                                              192.168.0.3
+                                                                                            </a>
+                                                                                          </EuiLink>
+                                                                                        </Component>
+                                                                                      </pure(Component)>
                                                                                     </Component>
                                                                                   </pure(Component)>
                                                                                 </div>

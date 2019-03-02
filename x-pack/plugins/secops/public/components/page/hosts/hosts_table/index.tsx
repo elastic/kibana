@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { get, isNil } from 'lodash/fp';
 import React from 'react';
@@ -17,6 +17,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -149,9 +150,7 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
               ) : isNil(get('host.id', node)) ? (
                 <>{hostName}</>
               ) : (
-                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(node.host!.id!)}`}>
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={node.host!.id!}>{hostName}</HostDetailsLink>
               )
             }
           />
