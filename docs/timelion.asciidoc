@@ -3,6 +3,12 @@
 
 [partintro]
 --
+
+WARNING: The Timelion application will be deprecated in 8.0 and removed from 
+the {kib} side navigation. {kib} will still support Timelion charts in 
+<<createvis,Visualize>>. When you upgrade from {kib} 7.x to 8.0, your 
+Timelion sheets will be migrated to Timelion visualization objects.
+
 Timelion is a time series data visualizer that enables you to combine totally
 independent data sources within a single visualization. It's driven by a simple
 expression language you use to retrieve time series data, perform calculations
