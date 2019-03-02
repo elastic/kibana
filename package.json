@@ -74,7 +74,8 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "10.12.12"
+    "**/@types/node": "10.12.12",
+    "**/typescript": "^3.3.3333"
   },
   "workspaces": {
     "packages": [
