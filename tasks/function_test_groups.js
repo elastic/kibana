@@ -25,18 +25,30 @@ import grunt from 'grunt';
  * and to the list of jobs in .ci/jobs.yml
  */
 const TEST_TAGS = [
-  'ciGroup1',
-  'ciGroup2',
-  'ciGroup3',
-  'ciGroup4',
-  'ciGroup5',
-  'ciGroup6',
-  'ciGroup7',
-  'ciGroup8',
-  'ciGroup9',
-  'ciGroup10',
-  'ciGroup11',
-  'ciGroup12'
+  'ciGroup1-1',
+  'ciGroup2-1',
+  'ciGroup3-1',
+  'ciGroup4-1',
+  'ciGroup5-1',
+  'ciGroup6-1',
+  'ciGroup7-1',
+  'ciGroup8-1',
+  'ciGroup9-1',
+  'ciGroup10-1',
+  'ciGroup11-1',
+  'ciGroup12-1',
+  'ciGroup1-2',
+  'ciGroup2-2',
+  'ciGroup3-2',
+  'ciGroup4-2',
+  'ciGroup5-2',
+  'ciGroup6-2',
+  'ciGroup7-2',
+  'ciGroup8-2',
+  'ciGroup9-2',
+  'ciGroup10-2',
+  'ciGroup11-2',
+  'ciGroup12-2',
 ];
 
 export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = {}) {
