@@ -17,34 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { functionWrapper } from '../../test_helpers';
+import { kibanaMarkdown } from './markdown';
 
-export const kibanaMarkdown = () => ({
-  name: 'kibana_markdown',
-  type: 'render',
-  context: {
-    types: [],
-  },
-  help: i18n.translate('interpreter.functions.markdown.help', {
-    defaultMessage: 'Markdown visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string'],
-      default: '"{}"',
-    }
-  },
-  fn(context, args) {
-    const params = JSON.parse(args.visConfig);
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visType: 'markdown',
-        visConfig: {
-          ...params,
-        },
-      }
-    };
-  }
+describe('interpreter/functions#markdown', () => {
+  const fn = functionWrapper(kibanaMarkdown);
+  const visConfig = {
+    fontSize: 12,
+    openLinksInNewTab: true,
+    markdown: '## hello _markdown_',
+  };
+
+  it('returns an object with the correct structure', () => {
+    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
+    expect(actual).toMatchSnapshot();
+  });
 });
