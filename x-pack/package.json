@@ -22,7 +22,7 @@
     }
   },
   "resolutions": {
-    "**/@types/node": "10.12.12"
+    "**/@types/node": "10.12.27"
   },
   "devDependencies": {
     "@kbn/dev-utils": "1.0.0",
