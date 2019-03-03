@@ -87,7 +87,7 @@ export const PROPERTY_CONFIG = [
   {
     key: 'transaction.custom',
     label: i18n.translate(
-      'xpack.apm.propertiesTable.tabs.transactionC  ustomLabel',
+      'xpack.apm.propertiesTable.tabs.transactionCustomLabel',
       {
         defaultMessage: 'Custom'
       }
