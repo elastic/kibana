@@ -207,7 +207,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
                 data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
                 label={
                   <FormattedMessage
-                    id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
                     defaultMessage="Grant read privileges to specific documents"
                   />
                 }
