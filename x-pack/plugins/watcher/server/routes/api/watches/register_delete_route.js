@@ -19,12 +19,19 @@ function deleteWatches(callWithRequest, watchIds) {
 
   return Promise.all(deletePromises)
     .then(results => {
-      const successes = results.filter(result => Boolean(result.success));
-      const errors = results.filter(result => Boolean(result.error));
+      const errors = [];
+      const successes = [];
+      results.forEach(({ success, error }) => {
+        if (success) {
+          successes.push(success._id);
+        } else if(error) {
+          errors.push(error._id);
+        }
+      });
 
       return {
-        numSuccesses: successes.length,
-        numErrors: errors.length
+        successes,
+        errors
       };
     });
 }

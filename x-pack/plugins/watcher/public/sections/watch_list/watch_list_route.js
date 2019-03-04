@@ -3,15 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 import { management } from 'ui/management';
-import { toastNotifications } from 'ui/notify';
 import template from './watch_list_route.html';
-import './components/watch_list';
 import 'plugins/watcher/services/license';
 import { getWatchListBreadcrumbs } from '../../lib/breadcrumbs';
+import { WatchList } from './components/watch_list';
+import { setHttpClient } from '../../lib/api';
+import { I18nContext } from 'ui/i18n';
+import { manageAngularLifecycle } from '../../lib/manage_angular_lifecycle';
 
+let elem;
+const renderReact = async (elem, urlService) => {
+  render(
+    <I18nContext>
+      <WatchList urlService={urlService} />
+    </I18nContext>,
+    elem
+  );
+};
 routes
   .when('/management/elasticsearch/watcher/', {
     redirectTo: '/management/elasticsearch/watcher/watches/'
@@ -21,38 +33,31 @@ routes
   .when('/management/elasticsearch/watcher/watches/', {
     template: template,
     controller: class WatchListRouteController {
-      constructor($injector) {
+      constructor($injector, $scope, $http, $rootScope, kbnUrl) {
         const $route = $injector.get('$route');
         this.watches = $route.current.locals.watches;
+        // clean up previously rendered React app if one exists
+        // this happens because of React Router redirects
+        elem && unmountComponentAtNode(elem);
+        // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
+        // e.g. to check license status per request.
+        setHttpClient($http);
+        const urlService = {
+          change(url) {
+            kbnUrl.change(url);
+            $rootScope.$digest();
+          }
+        };
+        $scope.$$postDigest(() => {
+          elem = document.getElementById('watchListReactRoot');
+          renderReact(elem, urlService);
+          manageAngularLifecycle($scope, $route, elem);
+        });
       }
+
     },
     controllerAs: 'watchListRoute',
     k7Breadcrumbs: getWatchListBreadcrumbs,
-    resolve: {
-      watches: ($injector) => {
-        const watchesService = $injector.get('xpackWatcherWatchesService');
-        const licenseService = $injector.get('xpackWatcherLicenseService');
-        const kbnUrl = $injector.get('kbnUrl');
-
-        return watchesService.getWatchList()
-          .catch(err => {
-            return licenseService.checkValidity()
-              .then(() => {
-                if (err.status === 403) {
-                  return null;
-                }
-
-                toastNotifications.addDanger(err.data.message);
-                kbnUrl.redirect('/management');
-                return Promise.reject();
-              });
-          });
-      },
-      checkLicense: ($injector) => {
-        const licenseService = $injector.get('xpackWatcherLicenseService');
-        return licenseService.checkValidity();
-      }
-    }
   });
 
 routes.defaults(/\/management/, {
