@@ -183,11 +183,7 @@
                 "defaultValue": null
               }
             ],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": { "kind": "OBJECT", "name": "MonitorChartEntry", "ofType": null }
-            },
+            "type": { "kind": "OBJECT", "name": "MonitorChart", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1575,11 +1571,11 @@
       {
         "kind": "OBJECT",
         "name": "LatestMonitor",
-        "description": "",
+        "description": "Represents the latest recorded information about a monitor.",
         "fields": [
           {
             "name": "id",
-            "description": "",
+            "description": "The ID of the monitor represented by this data.",
             "args": [],
             "type": {
               "kind": "NON_NULL",
@@ -1591,7 +1587,7 @@
           },
           {
             "name": "ping",
-            "description": "",
+            "description": "Information from the latest document.",
             "args": [],
             "type": { "kind": "OBJECT", "name": "Ping", "ofType": null },
             "isDeprecated": false,
@@ -1599,7 +1595,7 @@
           },
           {
             "name": "upSeries",
-            "description": "",
+            "description": "Buckets of recent up count status data.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -1611,7 +1607,7 @@
           },
           {
             "name": "downSeries",
-            "description": "",
+            "description": "Buckets of recent down count status data.",
             "args": [],
             "type": {
               "kind": "LIST",
@@ -1793,86 +1789,94 @@
       },
       {
         "kind": "OBJECT",
-        "name": "MonitorChartEntry",
-        "description": "",
+        "name": "MonitorChart",
+        "description": "The data used to populate the monitor charts.",
         "fields": [
           {
-            "name": "maxContent",
-            "description": "",
+            "name": "durationArea",
+            "description": "The max and min values for the monitor duration.",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "MonitorDurationAreaPoint", "ofType": null }
+                }
+              }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "maxResponse",
-            "description": "",
+            "name": "durationLine",
+            "description": "The average values for the monitor duration.",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "maxValidate",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "maxTotal",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "maxWriteRequest",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "maxTcpRtt",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "maxDuration",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "minDuration",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "avgDuration",
-            "description": "",
-            "args": [],
-            "type": { "kind": "OBJECT", "name": "DataPoint", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "MonitorDurationAveragePoint",
+                    "ofType": null
+                  }
+                }
+              }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "status",
-            "description": "",
+            "description": "The counts of up/down checks for the monitor.",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "StatusData", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "OBJECT", "name": "StatusData", "ofType": null }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "statusMaxCount",
+            "description": "The maximum status doc count in this chart.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "durationMaxValue",
+            "description": "The maximum duration value in this chart.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "Int", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -1884,20 +1888,32 @@
       },
       {
         "kind": "OBJECT",
-        "name": "DataPoint",
-        "description": "",
+        "name": "MonitorDurationAreaPoint",
+        "description": "Represents a monitor's duration performance in microseconds at a point in time.",
         "fields": [
           {
             "name": "x",
-            "description": "",
+            "description": "The timeseries value for this point in time.",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
-            "name": "y",
-            "description": "",
+            "name": "yMin",
+            "description": "The min duration value in microseconds at this time.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "yMax",
+            "description": "The max duration value in microseconds at this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
@@ -1921,20 +1937,55 @@
       },
       {
         "kind": "OBJECT",
-        "name": "StatusData",
-        "description": "",
+        "name": "MonitorDurationAveragePoint",
+        "description": "Represents the average monitor duration ms at a point in time.",
         "fields": [
           {
             "name": "x",
-            "description": "",
+            "description": "The timeseries value for this point.",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "y",
+            "description": "The average duration ms for the monitor.",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "StatusData",
+        "description": "Represents a bucket of monitor status information.",
+        "fields": [
+          {
+            "name": "x",
+            "description": "The timeseries point for this status data.",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
           {
             "name": "up",
-            "description": "",
+            "description": "The value of up counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
@@ -1942,7 +1993,7 @@
           },
           {
             "name": "down",
-            "description": "",
+            "description": "The value for down counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
@@ -1950,7 +2001,7 @@
           },
           {
             "name": "total",
-            "description": "",
+            "description": "The total down counts for this point.",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
             "isDeprecated": false,
@@ -2853,6 +2904,33 @@
             "deprecationReason": null
           }
         ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "DataPoint",
+        "description": "",
+        "fields": [
+          {
+            "name": "x",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "UnsignedInteger", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "y",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
         "possibleTypes": null
       }
     ],

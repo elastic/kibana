@@ -56,7 +56,7 @@ interface Props {
   urlParams: IUrlParams;
 }
 
-export class Distribution extends Component<Props> {
+export class TransactionDistribution extends Component<Props> {
   public formatYShort = (t: number) => {
     return i18n.translate(
       'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
