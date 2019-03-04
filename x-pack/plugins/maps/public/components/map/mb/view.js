@@ -20,7 +20,6 @@ export class MBMapContainer extends React.Component {
     this._mbMap = null;
     this._tooltipContainer = document.createElement('div');
     this._listeners = new Map(); // key is mbLayerId, value eventHandlers map
-    this._activeTooltipFeature = null;
     this._mbPopup = new mapboxgl.Popup({
       closeButton: false,
       closeOnClick: false,
@@ -31,6 +30,7 @@ export class MBMapContainer extends React.Component {
     if (this._isMounted) {
       this._syncMbMapWithLayerList();
       this._syncMbMapWithInspector();
+      this._syncTooltipState();//consider not debouncing
     }
   }, 256);
 
@@ -42,25 +42,23 @@ export class MBMapContainer extends React.Component {
      });
 
      if (!features.length) {
-       if (this._activeTooltipFeature) {
-         this._mbPopup.remove();
-         ReactDOM.unmountComponentAtNode(this._tooltipContainer);
-         this._activeTooltipFeature = null;
-       }
+       this.props.setTooltipState(null);
        return;
      }
 
      const targetFeature = features[0];
-     if (this._activeTooltipFeature) {
-       const propertiesUnchanged = _.isEqual(this._activeTooltipFeature.properties, targetFeature.properties);
-       const geometryUnchanged = _.isEqual(this._activeTooltipFeature.geometry, targetFeature.geometry);
+     if (this.props.tooltipState) {
+       const propertiesUnchanged = _.isEqual(this.props.tooltipState.activeFeature.properties, targetFeature.properties);
+       const geometryUnchanged = _.isEqual(this.props.tooltipState.activeFeature.geometry, targetFeature.geometry);
        if(propertiesUnchanged && geometryUnchanged) {
          return;
        }
      }
 
-     this._activeTooltipFeature = targetFeature;
-     this._showTooltip(this._activeTooltipFeature, e.lngLat, targetFeature.layer.id);
+     this.props.setTooltipState({
+       activeFeature: targetFeature,
+       lngLat: e.lngLat
+     });
 
    }, 100);
 
@@ -219,6 +217,7 @@ export class MBMapContainer extends React.Component {
 
    async _showTooltip(feature, eventLngLat, mbLayerId)  {
 
+     //todo: can still be optimized. No need to rerender if content remains identical
      let popupAnchorLocation = eventLngLat; // default popup location to mouse location
      if (feature.geometry.type === 'Point') {
        const coordinates = feature.geometry.coordinates.slice();
@@ -251,7 +250,20 @@ export class MBMapContainer extends React.Component {
    }
 
    _syncTooltipState() {
-     //todo
+
+     if (!this.props.tooltipState) {
+       if (this._mbPopup.isOpen()) {
+         this._mbPopup.remove();
+         ReactDOM.unmountComponentAtNode(this._tooltipContainer);
+       }
+       return;
+     }
+
+     this._showTooltip(
+       this.props.tooltipState.activeFeature,
+       this.props.tooltipState.lngLat,
+       this.props.tooltipState.activeFeature.layer.id
+     );
    }
 
   _syncMbMapWithMapState = () => {
@@ -326,7 +338,6 @@ export class MBMapContainer extends React.Component {
 
   render() {
     // do not debounce syncing of tooltips and map-state
-    this._syncTooltipState();
     this._syncMbMapWithMapState();
 
     this._debouncedSync();

@@ -61,6 +61,10 @@ function createStyleInstance(styleDescriptor) {
   }
 }
 
+export const getTooltipState = ({ map }) => {
+  return map.tooltipState;
+};
+
 export const getMapReady = ({ map }) => map && map.ready;
 
 export const getGoto = ({ map }) => map && map.goto;
