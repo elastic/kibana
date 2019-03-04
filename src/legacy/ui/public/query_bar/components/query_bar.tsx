@@ -706,14 +706,14 @@ export class QueryBarUI extends Component<Props, State> {
     ) {
       const toast = toastNotifications.addWarning({
         title: intl.formatMessage({
-          id: 'kbn.kql.luceneSyntaxWarningTitle',
+          id: 'common.ui.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
         text: (
           <div>
             <p>
               <FormattedMessage
-                id="kbn.kql.luceneSyntaxWarningMessage"
+                id="common.ui.queryBar.luceneSyntaxWarningMessage"
                 defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
                have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
