@@ -65,7 +65,7 @@ export const DeleteWatchesModal = ({
           }
 
           if (numErrors > 0) {
-            toastNotifications.addError(
+            toastNotifications.addDanger(
               i18n.translate(
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText',
                 {

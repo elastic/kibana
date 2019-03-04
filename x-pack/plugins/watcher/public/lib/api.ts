@@ -7,8 +7,8 @@
 import { Watch } from 'plugins/watcher/models/watch';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
-let httpClient;
-export const setHttpClient = anHttpClient => {
+let httpClient: ng.IHttpService;
+export const setHttpClient = (anHttpClient: ng.IHttpService) => {
   httpClient = anHttpClient;
 };
 export const getHttpClient = () => {
