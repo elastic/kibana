@@ -33,7 +33,7 @@ import {
 
 import { VisResponseData } from './types';
 
-import { decorateVisObject } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+import { getVisParams } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 
 function getHandler<T extends RequestHandler | ResponseHandler>(
   from: Array<{ name: string; handler: T }>,
@@ -68,13 +68,13 @@ export class VisualizeDataLoader {
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
     // add necessary params to vis object (dimensions, bucket, metric, etc)
-    decorateVisObject(this.vis, { timeRange: params.timeRange });
+    const visParams = getVisParams(this.vis, { timeRange: params.timeRange });
 
     // searchSource is only there for courier request handler
     const requestHandlerResponse = await this.requestHandler({
       partialRows: this.vis.params.partialRows || this.vis.type.requiresPartialRows,
       isHierarchical: this.vis.isHierarchical(),
-      visParams: this.vis.params,
+      visParams,
       ...params,
       filters: params.filters ? params.filters.filter(filter => !filter.meta.disabled) : undefined,
     });
@@ -92,7 +92,7 @@ export class VisualizeDataLoader {
 
     if (!canSkipResponseHandler) {
       this.visData = await Promise.resolve(
-        this.responseHandler(requestHandlerResponse, this.vis.params.dimensions)
+        this.responseHandler(requestHandlerResponse, visParams.dimensions)
       );
     }
 
@@ -101,7 +101,7 @@ export class VisualizeDataLoader {
       value: {
         visType: this.vis.type.name,
         visData: this.visData,
-        visConfig: this.vis.params,
+        visConfig: visParams,
         params: {},
       },
     };

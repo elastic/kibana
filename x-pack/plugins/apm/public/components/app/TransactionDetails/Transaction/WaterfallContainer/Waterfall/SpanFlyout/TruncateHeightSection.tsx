@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { px, units } from '../../../../../../../style/variables';
-// @ts-ignore
 import { Ellipsis } from '../../../../../../shared/Icons';
 
 const ToggleButtonContainer = styled.div`
@@ -59,10 +58,7 @@ export const TruncateHeightSection: React.SFC<Props> = ({
               setIsOpen(!isOpen);
             }}
           >
-            <Ellipsis
-              horizontal={!isOpen}
-              style={{ marginRight: units.half }}
-            />{' '}
+            <Ellipsis horizontal={!isOpen} />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showMoreButtonLabel', {
                   defaultMessage: 'Show more lines'
