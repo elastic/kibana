@@ -56,15 +56,6 @@ class VisEditor extends Component {
     this.props.vis.uiStateVal(field, value);
   };
 
-  setDefaultIndexPattern = async () => {
-    const savedObjectsClient = chrome.getSavedObjectsClient();
-    const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
-
-    this.handleChange({
-      default_index_pattern: indexPattern.attributes.title
-    });
-  }
-
   handleChange = async (partialModel) => {
     const nextModel = { ...this.state.model, ...partialModel };
     this.props.vis.params = nextModel;

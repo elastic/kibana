@@ -33,13 +33,9 @@ function ReactEditorControllerProvider(Private, config) {
     }
 
     setDefaultIndexPattern = async () => {
-      if (this.vis.params.index_pattern === '') {
-        // set the default index pattern if none is defined.
-        const savedObjectsClient = chrome.getSavedObjectsClient();
-        const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
-        const defaultIndexPattern = indexPattern.attributes.title;
-        this.vis.params.index_pattern = defaultIndexPattern;
-      }
+      const savedObjectsClient = chrome.getSavedObjectsClient();
+      const indexPattern = await savedObjectsClient.get('index-pattern', config.get('defaultIndex'));
+      this.vis.params.default_index_pattern = indexPattern.attributes.title;
     };
 
     async render(params) {
