@@ -82,6 +82,10 @@ export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
+}
+
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
