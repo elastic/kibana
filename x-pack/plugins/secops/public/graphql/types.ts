@@ -715,11 +715,13 @@ export interface SayMyName {
 }
 
 export interface KpiNetworkData {
-  networkEvents: number;
+  networkEvents?: number | null;
 
-  uniqueFlowId: number;
+  uniqueFlowId?: number | null;
 
   activeAgents?: number | null;
+
+  uniquePrivateIps?: number | null;
 }
 
 // ====================================================
@@ -1435,11 +1437,13 @@ export namespace GetKpiNetworkQuery {
   export type KpiNetwork = {
     __typename?: 'KpiNetworkData';
 
-    networkEvents: number;
+    networkEvents?: number | null;
 
-    uniqueFlowId: number;
+    uniqueFlowId?: number | null;
 
     activeAgents?: number | null;
+
+    uniquePrivateIps?: number | null;
   };
 }
 

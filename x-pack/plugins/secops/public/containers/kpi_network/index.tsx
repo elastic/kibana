@@ -18,6 +18,7 @@ import { kpiNetworkQuery } from './index.gql_query';
 export interface KpiNetworkArgs {
   id: string;
   kpiNetwork: KpiNetworkData;
+  loading: boolean;
 }
 
 export interface KpiNetworkProps extends QueryTemplateProps {
@@ -40,11 +41,12 @@ export const KpiNetworkQuery = pure<KpiNetworkProps>(
         filterQuery: createFilter(filterQuery),
       }}
     >
-      {({ data }) => {
+      {({ data, loading }) => {
         const kpiNetwork = getOr({}, `source.KpiNetwork`, data);
         return children({
           id,
           kpiNetwork,
+          loading,
         });
       }}
     </Query>

@@ -24,6 +24,10 @@ export const mockOptions: RequestBasicOptions = {
   filterQuery: {},
 };
 
+export const mockMsearchOptions = {
+  body: [],
+};
+
 export const mockRequest = {
   params: {},
   payload: {
@@ -34,21 +38,35 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n     KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n       networkEvents\n       uniqueFlowId\n       activeAgents\n     }\n   }\n }',
+      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n     KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n       networkEvents\n       uniqueFlowId\n       activeAgents\n       uniquePrivateIps\n     }\n   }\n }',
   },
   query: {},
 };
 
 export const mockResponse = {
-  took: 89,
-  timed_out: false,
-  _shards: { total: 18, successful: 18, skipped: 0, failed: 0 },
-  hits: { total: { value: 950867, relation: 'eq' }, max_score: null, hits: [] },
-  aggregations: { unique_flow_id: { value: 50243 }, active_agents: { value: 15 } },
+  responses: [
+    {
+      took: 258,
+      timed_out: false,
+      _shards: { total: 26, successful: 26, skipped: 0, failed: 0 },
+      hits: { total: { value: 950867, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: { unique_flow_id: { value: 50243 }, active_agents: { value: 15 } },
+      status: 200,
+    },
+    {
+      took: 323,
+      timed_out: false,
+      _shards: { total: 26, successful: 26, skipped: 0, failed: 0 },
+      hits: { total: { value: 406839, relation: 'eq' }, max_score: null, hits: [] },
+      aggregations: { unique_private_ips: { value: 383 } },
+      status: 200,
+    },
+  ],
 };
 
 export const mockResult = {
   networkEvents: 950867,
   uniqueFlowId: 50243,
   activeAgents: 15,
+  uniquePrivateIps: 383,
 };

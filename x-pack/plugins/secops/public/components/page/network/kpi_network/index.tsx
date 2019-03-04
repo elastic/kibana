@@ -17,11 +17,13 @@ import { pure } from 'recompose';
 
 import { KpiNetworkData } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
+import { LoadingPanel } from '../../../loading';
 
 import * as i18n from './translations';
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
+  loading: boolean;
 }
 
 const kpiNetworkCards = (data: KpiNetworkData) => [
@@ -46,13 +48,29 @@ const kpiNetworkCards = (data: KpiNetworkData) => [
         : getEmptyTagValue(),
     description: i18n.ACTIVE_AGENTS,
   },
+  {
+    title:
+      has('uniquePrivateIps', data) && data.uniquePrivateIps !== null
+        ? numeral(data.uniquePrivateIps).format('0,0')
+        : getEmptyTagValue(),
+    description: i18n.UNIQUE_PRIVATE_IP,
+  },
 ];
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data }) => (
-  <EuiFlexGroup>
-    {kpiNetworkCards(data).map(item => (
-      <EuiFlexItem key={item.description}>
-        <EuiCard title={item.title} description={item.description} />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
-));
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) =>
+  loading ? (
+    <LoadingPanel
+      height="auto"
+      width="100%"
+      text={i18n.LOADING}
+      data-test-subj="InitialLoadingUniquePrivateIps"
+    />
+  ) : (
+    <EuiFlexGroup>
+      {kpiNetworkCards(data).map(item => (
+        <EuiFlexItem key={item.description}>
+          <EuiCard title={item.title} description={item.description} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  )
+);
