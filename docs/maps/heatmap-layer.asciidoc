@@ -1,5 +1,5 @@
 [[heatmap-layer]]
-== Heatmap layer
+== Heat map layer
 
 Cluster point data to show locations with higher densities.
 
