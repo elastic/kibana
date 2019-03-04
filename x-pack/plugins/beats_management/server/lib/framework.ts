@@ -28,7 +28,6 @@ export class BackendFrameworkLib {
   >(route: {
     path: string;
     method: string | string[];
-    vhost?: string;
     licenseRequired?: string[];
     requiredRoles?: string[];
     handler: (request: FrameworkRequest<RouteRequest>) => Promise<BaseReturnType>;

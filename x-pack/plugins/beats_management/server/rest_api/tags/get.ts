@@ -9,9 +9,8 @@ import { BeatTag } from '../../../common/domain_types';
 import { ReturnTypeBulkGet } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
-export const createGetTagsWithIdsRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
+export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags/{tagIds}',
   requiredRoles: ['beats_admin'],

@@ -9,9 +9,8 @@ import { ConfigurationBlock } from '../../../common/domain_types';
 import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
-import { FrameworkRouteOptions } from './../../lib/adapters/framework/adapter_types';
 
-export const createGetConfigurationBlocksRoute = (libs: CMServerLibs): FrameworkRouteOptions => ({
+export const createGetConfigurationBlocksRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/configurations/{tagIds}/{page?}',
   requiredRoles: ['beats_admin'],
