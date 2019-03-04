@@ -65,7 +65,7 @@ export function toElasticsearchQuery(node, indexPattern) {
 export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
   try {
     fromExpression(expression, { errorOnLuceneSyntax: true }, parseKuery);
-    return null;
+    return false;
   } catch (e) {
     return (e.message.startsWith('Lucene'));
   }

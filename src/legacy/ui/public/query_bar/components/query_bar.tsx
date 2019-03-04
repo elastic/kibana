@@ -53,7 +53,7 @@ import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
-import { toastNotifications } from 'ui/notify';
+import { Toast, toastNotifications } from 'ui/notify';
 
 const KEY_CODES = {
   LEFT: 37,
@@ -730,7 +730,7 @@ export class QueryBarUI extends Component<Props, State> {
             </p>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={onOptOut}>
+                <EuiButton size="s" onClick={() => this.onLuceneSyntaxWarningOptOut(toast)}>
                   Don't show again
                 </EuiButton>
               </EuiFlexItem>
@@ -738,12 +738,12 @@ export class QueryBarUI extends Component<Props, State> {
           </div>
         ),
       });
-
-      function onOptOut() {
-        store.set('kibana.luceneSyntaxWarningOptOut', true);
-        toastNotifications.remove(toast);
-      }
     }
+  }
+
+  private onLuceneSyntaxWarningOptOut(toast: Toast) {
+    this.props.store.set('kibana.luceneSyntaxWarningOptOut', true);
+    toastNotifications.remove(toast);
   }
 }
 
