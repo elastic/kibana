@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import open from 'opn';
 import * as Chrome from 'puppeteer-core';
 import { parse as parseUrl } from 'url';
 import {
@@ -19,6 +20,7 @@ import {
 
 export interface ChromiumDriverOptions {
   logger: Logger;
+  inspect: boolean;
 }
 
 interface WaitForSelectorOpts {
@@ -30,10 +32,12 @@ const WAIT_FOR_DELAY_MS: number = 100;
 export class HeadlessChromiumDriver {
   private readonly page: Chrome.Page;
   private readonly logger: Logger;
+  private readonly inspect: boolean;
 
-  constructor(page: Chrome.Page, { logger }: ChromiumDriverOptions) {
+  constructor(page: Chrome.Page, { logger, inspect }: ChromiumDriverOptions) {
     this.page = page;
     this.logger = logger.clone(['headless-chromium-driver']);
+    this.inspect = inspect;
   }
 
   public async open(
@@ -41,7 +45,8 @@ export class HeadlessChromiumDriver {
     {
       conditionalHeaders,
       waitForSelector,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
+      pauseOnStart = false,
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string; pauseOnStart: boolean }
   ) {
     this.logger.debug(`opening url ${url}`);
     await this.page.setRequestInterception(true);
@@ -61,6 +66,11 @@ export class HeadlessChromiumDriver {
     });
 
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    if (this.inspect) {
+      await this.launchDebugger();
+    }
+
     await this.waitForSelector(waitForSelector);
   }
 
@@ -133,6 +143,24 @@ export class HeadlessChromiumDriver {
       deviceScaleFactor: zoom,
       isMobile: false,
     });
+  }
+
+  private async launchDebugger() {
+    // HACKY: Puppeteer doesn't expose a top-level API to set debug statements and get
+    // identifiers like a page's ID. These are required in order to have an effective debugging experience.
+
+    // @ts-ignore: _client is private, but the only way to interact with the low-level debugger API
+    await this.page._client.send('Debugger.enable');
+    // @ts-ignore: _client is private, but the only way to interact with the low-level debugger API
+    await this.page._client.send('Debugger.pause');
+    // @ts-ignore: _target is private
+    const targetId = this.page._target._targetId;
+    const wsEndpoint = this.page.browser().wsEndpoint();
+    const { port } = parseUrl(wsEndpoint);
+
+    open(
+      `http://localhost:${port}/devtools/inspector.html?ws=localhost:${port}/devtools/page/${targetId}`
+    );
   }
 
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
