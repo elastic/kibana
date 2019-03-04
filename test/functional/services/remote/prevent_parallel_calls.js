@@ -17,32 +17,39 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+export function preventParallelCalls(fn, filter) {
+  const execQueue = [];
 
-export function translate(server) {
-  /*
-    Get AST from expression
-  */
-  server.route({
-    method: 'GET',
-    path: '/api/canvas/ast',
-    handler: function (request, h) {
-      if (!request.query.expression) {
-        return h.response({ error: '"expression" query is required' }).code(400);
-      }
-      return fromExpression(request.query.expression);
-    },
-  });
+  return async function (arg) {
+    if (filter(arg)) {
+      return await fn.call(this, arg);
+    }
 
-  server.route({
-    method: 'POST',
-    path: '/api/canvas/expression',
-    handler: function (request, h) {
-      try {
-        return toExpression(request.payload);
-      } catch (e) {
-        return h.response({ error: e.message }).code(400);
+    const task = {
+      exec: async () => {
+        try {
+          task.resolve(await fn.call(this, arg));
+        } catch (error) {
+          task.reject(error);
+        } finally {
+          execQueue.shift();
+          if (execQueue.length) {
+            execQueue[0].exec();
+          }
+        }
       }
-    },
-  });
+    };
+
+    task.promise = new Promise((resolve, reject) => {
+      task.resolve = resolve;
+      task.reject = reject;
+    });
+
+    if (execQueue.push(task) === 1) {
+      // only item in the queue, kick it off
+      task.exec();
+    }
+
+    return task.promise;
+  };
 }

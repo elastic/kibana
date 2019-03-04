@@ -17,15 +17,4 @@
  * under the License.
  */
 
-import { BrowserDriverApi } from './browser_driver_api';
-
-export function createRemoteBrowserDriverApi(log, url) {
-  return new BrowserDriverApi({
-    url,
-
-    start() {
-      log.info(`Reusing instance at %j`, url);
-    }
-
-  });
-}
+export { WebElementWrapper } from './web_element_wrapper';
