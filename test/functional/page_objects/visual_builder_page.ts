@@ -85,6 +85,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
+
     public async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
       const text = await el.getVisibleText();
