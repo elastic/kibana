@@ -145,7 +145,7 @@ export default {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
     let percents = bucket.percentiles
       .filter(p => p.value != null)
-      .map(p => p.value);
+      .map(p => Number(p.value));
     if (bucket.percentiles.some(p => p.mode === 'band')) {
       percents = percents.concat(
         bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
