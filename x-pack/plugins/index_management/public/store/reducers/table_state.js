@@ -38,7 +38,6 @@ export const tableState = handleActions({
     return {
       ...state,
       showSystemIndices,
-      toggleNameToVisibleMap: {}
     };
   },
   [toggleChanged](state, action) {

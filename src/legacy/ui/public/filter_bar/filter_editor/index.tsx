@@ -213,6 +213,7 @@ class FilterEditorUI extends Component<Props, State> {
               onChange={this.onIndexPatternChange}
               singleSelection={{ asPlainText: true }}
               isClearable={false}
+              data-test-subj="filterIndexPatternsSelect"
             />
           </EuiFormRow>
         </EuiFlexItem>
