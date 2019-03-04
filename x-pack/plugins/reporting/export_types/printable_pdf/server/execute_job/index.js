@@ -32,7 +32,7 @@ function executeJobFn(server) {
             {
               defaultMessage:
                 'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
             }
           )
         )

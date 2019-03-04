@@ -25,11 +25,11 @@ function executeJobFn(server) {
       catchError(err =>
         Rx.throwError(
           i18n.translate(
-            'xpack.reporting.exportTypes.printablePdf.compShim.failedToDecryptReportJobDataErrorMessage',
+            'xpack.reporting.exportTypes.png.compShim.failedToDecryptReportJobDataErrorMessage',
             {
               defaultMessage:
                 'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
-              values: { encryptionKey: 'xpack.reporting.encryptionKey', err },
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
             }
           )
         )
