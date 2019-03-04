@@ -29,6 +29,6 @@ export function pickFilesToLint(log: ToolingLog, files: File[]) {
     file =>
       file.isTypescript() &&
       !file.isFixture() &&
-      IGNORED_PATHS.some(glob => minimatch(file.getRelativePath(), glob, { dot: true }))
+      !IGNORED_PATHS.some(glob => minimatch(file.getRelativePath(), glob, { dot: true }))
   );
 }
