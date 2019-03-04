@@ -1,11 +1,8 @@
 [[terms-join]]
 === Terms join
 
-*Terms joins* combine the result of an Elasticsearch terms aggregation and vector features based on a shared key.
-
-Use *Terms joins* to augment vector features with additional properties.
-You can then use these additional property values to symbolize features
-and provide richer tooltip context.
+Terms joins use a shared key to combine the results of an Elasticsearch terms aggregation and vector features.
+You can augment vector features with property values that symbolize features and provide richer tooltip content.
 
 [role="screenshot"]
 image::maps/images/terms_join.png[]
