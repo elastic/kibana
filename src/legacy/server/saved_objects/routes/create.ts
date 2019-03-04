@@ -19,12 +19,10 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
-import { Prerequisites, SavedObjectReference } from './types';
+import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 
-// @ts-ignore - Hapi.Request "query" doesn't allow non string types
-// but Hapi allows types to change in "validate" using Joi (boolean in this scenario).
-interface CreateRequest extends Hapi.Request {
+interface CreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
@@ -36,7 +34,7 @@ interface CreateRequest extends Hapi.Request {
     id?: string;
   };
   payload: {
-    attributes: { [key: string]: any };
+    attributes: SavedObjectAttributes;
     migrationVersion?: { [key: string]: string };
     references: SavedObjectReference[];
   };

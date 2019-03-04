@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
+import { SavedObjectAttributes, SavedObjectsClient } from '../';
 import { Prerequisites, SavedObjectReference } from './types';
 
 interface UpdateRequest extends Hapi.Request {
@@ -31,7 +31,7 @@ interface UpdateRequest extends Hapi.Request {
     id: string;
   };
   payload: {
-    attributes: { [key: string]: any };
+    attributes: SavedObjectAttributes;
     version?: string;
     references: SavedObjectReference[];
   };

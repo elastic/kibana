@@ -19,21 +19,19 @@
 
 import Hapi from 'hapi';
 import Joi from 'joi';
-import { SavedObjectsClient } from '../';
-import { Prerequisites, SavedObjectReference } from './types';
+import { SavedObjectAttributes, SavedObjectsClient } from '../';
+import { Prerequisites, SavedObjectReference, WithoutQueryAndParams } from './types';
 
 interface SavedObject {
   type: string;
   id?: string;
-  attributes: { [key: string]: any };
+  attributes: SavedObjectAttributes;
   version?: string;
   migrationVersion?: { [key: string]: string };
   references: SavedObjectReference[];
 }
 
-// @ts-ignore - Hapi.Request "query" doesn't allow non string types
-// but Hapi allows it to be changed in "validate" (boolean in this scenario).
-interface BulkCreateRequest extends Hapi.Request {
+interface BulkCreateRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };

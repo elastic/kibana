@@ -20,12 +20,9 @@
 import Hapi from 'hapi';
 import Joi from 'joi';
 import { SavedObjectsClient } from '../';
-import { keysToCamelCaseShallow } from '../../../utils/case_conversion';
-import { Prerequisites } from './types';
+import { Prerequisites, WithoutQueryAndParams } from './types';
 
-// @ts-ignore - Hapi.Request "query" doesn't allow non string types
-// but Hapi allows types to change in "validate" using Joi (boolean, number, etc in this scenario).
-interface FindRequest extends Hapi.Request {
+interface FindRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
@@ -34,13 +31,13 @@ interface FindRequest extends Hapi.Request {
     page: number;
     type: string[];
     search?: string;
-    default_search_operator: string;
+    default_search_operator: 'AND' | 'OR';
     search_fields?: string[];
-    sort_field?: string[];
-    has_reference?: Array<{
+    sort_field?: string;
+    has_reference?: {
       type: string;
       id: string;
-    }>;
+    };
     fields?: string[];
   };
 }
@@ -72,9 +69,7 @@ export const createFindRoute = (prereqs: Prerequisites) => ({
           search_fields: Joi.array()
             .items(Joi.string())
             .single(),
-          sort_field: Joi.array()
-            .items(Joi.string())
-            .single(),
+          sort_field: Joi.string(),
           has_reference: Joi.object()
             .keys({
               type: Joi.string().required(),
@@ -88,8 +83,18 @@ export const createFindRoute = (prereqs: Prerequisites) => ({
         .default(),
     },
     handler(request: FindRequest) {
-      const options = keysToCamelCaseShallow(request.query);
-      return request.pre.savedObjectsClient.find(options);
+      const query = request.query;
+      return request.pre.savedObjectsClient.find({
+        perPage: query.per_page,
+        page: query.page,
+        type: query.type,
+        search: query.search,
+        defaultSearchOperator: query.default_search_operator,
+        searchFields: query.search_fields,
+        sortField: query.sort_field,
+        hasReference: query.has_reference,
+        fields: query.fields,
+      });
     },
   },
 });
