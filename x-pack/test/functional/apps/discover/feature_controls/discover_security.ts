@@ -93,7 +93,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
 
-      it('shows create short-url button', async () => {
+      it('Permalins shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
       });
@@ -155,7 +155,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
       });
 
-      it(`doesn't show create short-url button`, async () => {
+      it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlMissingOrFail();
       });

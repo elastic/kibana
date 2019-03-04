@@ -45,10 +45,10 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['visualization'],
+          all: ['visualization', 'url'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {

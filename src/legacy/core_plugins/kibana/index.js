@@ -166,7 +166,8 @@ export default function (kibana) {
             },
             visualize: {
               show: true,
-              save: true
+              createShortUrl: true,
+              save: true,
             },
             dashboard: {
               createNew: true,
