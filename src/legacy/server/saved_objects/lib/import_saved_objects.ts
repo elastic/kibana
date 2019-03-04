@@ -28,7 +28,7 @@ import {
 } from '../../../utils/streams';
 import { SavedObject, SavedObjectsClient } from '../service';
 
-interface Errors {
+interface CustomError {
   message: string;
   statusCode: number;
   id: string;
@@ -62,7 +62,7 @@ interface ResolveImportConflictsOptions {
 }
 
 export function extractErrors(savedObjects: SavedObject[]) {
-  const errors: Errors[] = [];
+  const errors: CustomError[] = [];
   for (const savedObject of savedObjects) {
     if (savedObject.error) {
       errors.push({
@@ -124,8 +124,8 @@ export async function importSavedObjects({
   objectLimit,
   overwrite,
   savedObjectsClient,
-}: ImportSavedObjectsOptions) {
-  const errors: Errors[] = [];
+}: ImportSavedObjectsOptions): Promise<{ success: boolean; errors?: CustomError[] }> {
+  const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   if (overwrite) {
@@ -151,8 +151,8 @@ export async function resolveImportConflicts({
   overwrites,
   savedObjectsClient,
   replaceReferences,
-}: ResolveImportConflictsOptions) {
-  const errors: Errors[] = [];
+}: ResolveImportConflictsOptions): Promise<{ success: boolean; errors?: CustomError[] }> {
+  const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   // Replace references

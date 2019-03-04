@@ -109,7 +109,7 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
       overwrites: request.payload.overwrites,
       replaceReferences: request.payload.replaceReferences,
     });
-    if (importResult.success === false) {
+    if (importResult.errors) {
       // Throw non 409 errors first
       for (const error of importResult.errors) {
         if (error.statusCode !== 409) {

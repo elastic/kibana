@@ -24,7 +24,7 @@ import { extname } from 'path';
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../';
 import { importSavedObjects } from '../lib';
-import { Prerequisites } from './types';
+import { Prerequisites, WithoutQueryAndParams } from './types';
 
 interface HapiReadableStream extends Readable {
   hapi: {
@@ -32,8 +32,7 @@ interface HapiReadableStream extends Readable {
   };
 }
 
-// @ts-ignore
-interface ImportRequest extends Hapi.Request {
+interface ImportRequest extends WithoutQueryAndParams<Hapi.Request> {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
@@ -76,12 +75,9 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
-      skips: [],
-      overwrites: [],
-      replaceReferences: [],
-      overwriteAll: request.query.overwrite,
+      overwrite: request.query.overwrite,
     });
-    if (importResult.success === false) {
+    if (importResult.errors) {
       // Throw non 409 errors first
       for (const error of importResult.errors) {
         if (error.statusCode !== 409) {
