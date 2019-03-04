@@ -73,17 +73,6 @@ function getUuidBucketName(productName) {
 }
 
 export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
-  const capabilitiesModel = {
-    totalUniqueInstanceCount: 0,
-    isInternalCollector: false,
-    isNetNewUser: false,
-    isPartiallyMigrated: false,
-    isFullyMigrated: false,
-    internalCollectorsUuids: [],
-    fullyMigratedUuids: [],
-    fullyMigratedButNeedsToDisableLegacy: false
-  };
-
   const PRODUCTS = [
     { name: 'kibana' },
     { name: 'beats' },
@@ -100,7 +89,16 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
     const buckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
 
-    const capabilities = { ...capabilitiesModel };
+    const capabilities = {
+      totalUniqueInstanceCount: 0,
+      isInternalCollector: false,
+      isNetNewUser: false,
+      isPartiallyMigrated: false,
+      isFullyMigrated: false,
+      internalCollectorsUuids: [],
+      fullyMigratedUuids: [],
+      fullyMigratedButNeedsToDisableLegacy: false
+    };
 
     // If there is no data, then they are a net new user
     if (!buckets || buckets.length === 0) {
