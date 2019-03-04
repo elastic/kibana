@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
+import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
 import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
@@ -11,8 +13,8 @@ import { KbnServer, Logger } from '../../../../types';
 import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map';
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
-import { getIndexPatternById } from './get_index_pattern_by_id';
+import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../types';
+import { getDataSource } from './get_data_source';
 
 interface SavedSearchGeneratorResult {
   content: string;
@@ -45,6 +47,22 @@ interface GenerateCsvParams {
   };
 }
 
+const getEsQueryConfig = async (config: any) => {
+  const configs = await Promise.all([
+    config.get('query:allowLeadingWildcards'),
+    config.get('query:queryString:options'),
+    config.get('courier:ignoreFilterIfFieldNotInIndex'),
+  ]);
+  const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
+  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
+};
+
+const getUiSettings = async (config: any) => {
+  const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
+  const [separator, quoteValues] = configs;
+  return { separator, quoteValues };
+};
+
 export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
@@ -52,39 +70,30 @@ export async function generateCsvSearch(
   searchPanel: SearchPanel
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory, fieldFormatServiceFactory } = server;
-
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
-  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
   const { indexPatternSavedObjectId, timerange } = searchPanel;
-
-  const indexPatternSavedObject = await getIndexPatternById(
+  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const { indexPatternSavedObject } = await getDataSource(
     savedObjectsClient,
     indexPatternSavedObjectId
   );
+  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
 
-  const [formatsMap, uiSettings] = await Promise.all([
-    (async () => {
-      const fieldFormats = await fieldFormatServiceFactory(uiConfig);
-      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
-    })(),
-    (async () => {
-      const [separator, quoteValues] = await Promise.all([
-        uiConfig.get('csv:separator'),
-        uiConfig.get('csv:quoteValues'),
-      ]);
-
-      return {
-        quoteValues: !!quoteValues,
-        separator,
-      };
-    })(),
-  ]);
-
-  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const timeFilter = {
+    range: {
+      [indexPatternSavedObject.timeFieldName]: {
+        format: 'epoch_millis',
+        gte: moment(timerange.min).valueOf(),
+        lte: moment(timerange.max).valueOf(),
+      },
+    },
+  };
+  const kibanaSavedObjectMeta = savedSearchObjectAttr.kibanaSavedObjectMeta;
+  const { searchSource } = kibanaSavedObjectMeta as { searchSource: SearchSource };
+  const { filter: searchSourceFilter, query: searchSourceQuery } = searchSource;
+  const esQueryConfig = await getEsQueryConfig(uiConfig);
+  const combinedFilter = [timeFilter].concat(searchSourceFilter);
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
-  const config = server.config();
   const searchRequest: SearchRequest = {
     index: indexPatternSavedObject.title,
     body: {
@@ -92,29 +101,27 @@ export async function generateCsvSearch(
         includes: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
       },
       docvalue_fields: [],
-      query: {
-        bool: {
-          filter: [],
-          must_not: [],
-          should: [],
-          must: [
-            { match_all: {} },
-            {
-              range: {
-                [indexPatternSavedObject.timeFieldName]: {
-                  format: 'epoch_millis',
-                  gte: moment(timerange.min).valueOf(),
-                  lte: moment(timerange.max).valueOf(),
-                },
-              },
-            },
-          ],
-        },
-      },
+      query: buildEsQuery(
+        indexPatternSavedObject,
+        searchSourceQuery,
+        combinedFilter,
+        esQueryConfig
+      ),
       script_fields: {},
       sort: [{ [sortField]: { order: sortOrder } }],
     },
   };
+
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
+  const config = server.config();
+  const [formatsMap, uiSettings] = await Promise.all([
+    fieldFormatServiceFactory(uiConfig).then((fieldFormats: any) =>
+      fieldFormatMapFactory(indexPatternSavedObject, fieldFormats)
+    ),
+    getUiSettings(uiConfig),
+  ]);
+
   const generateCsvParams: GenerateCsvParams = {
     searchRequest,
     callEndpoint: callCluster,

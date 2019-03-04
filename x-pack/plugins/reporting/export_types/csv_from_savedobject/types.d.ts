@@ -10,15 +10,20 @@ export interface SavedObjectServiceError {
   message?: string;
 }
 
-export interface SavedObjectMeta {
-  searchSourceJSON?: string;
-  searchSource?: any;
+export interface SavedObjectMetaJSON {
+  searchSourceJSON: string;
 }
 
-export interface VisObjectAttributes {
+export interface SavedObjectMeta {
+  searchSource: SearchSource;
+}
+
+export interface SavedSearchObjectAttributesJSON {
   title: string;
-  visState: string;
-  uiStateJSON: string;
+  sort: any[];
+  columns: string[];
+  kibanaSavedObjectMeta: SavedObjectMetaJSON;
+  uiState: any;
 }
 
 export interface SavedSearchObjectAttributes {
@@ -29,11 +34,32 @@ export interface SavedSearchObjectAttributes {
   uiState: any;
 }
 
-export interface SavedVisState {
+export interface VisObjectAttributesJSON {
   title: string;
+  visState: string; // JSON string
   type: string;
   params: any;
-  uiState: any;
+  uiStateJSON: string; // also JSON string
+  aggs: any[];
+  sort: any[];
+  kibanaSavedObjectMeta: SavedObjectMeta;
+}
+
+export interface VisObjectAttributes {
+  title: string;
+  visState: string; // JSON string
+  type: string;
+  params: any;
+  uiState: {
+    vis: {
+      params: {
+        sort: {
+          columnIndex: string;
+          direction: string;
+        };
+      };
+    };
+  };
   aggs: any[];
   sort: any[];
   kibanaSavedObjectMeta: SavedObjectMeta;
@@ -50,12 +76,6 @@ export interface SavedObject {
   references: SavedObjectReference[];
 }
 
-export interface TimeRangeParams {
-  timezone: string;
-  min: Date;
-  max: Date;
-}
-
 export interface IndexPatternSavedObject {
   title: string;
   timeFieldName: string;
@@ -65,17 +85,28 @@ export interface IndexPatternSavedObject {
   };
 }
 
+export interface TimeRangeParams {
+  timezone: string;
+  min: Date;
+  max: Date;
+}
+
 export interface VisPanel {
-  indexPatternSavedObject: any;
-  attributes: SavedSearchObjectAttributes | SavedVisState;
-  references: SavedObjectReference[];
+  indexPatternSavedObjectId?: string;
+  savedSearchObjectId?: string;
+  attributes: VisObjectAttributes;
   timerange: TimeRangeParams;
 }
 
 export interface SearchPanel {
   indexPatternSavedObjectId: string;
-  attributes: SavedSearchObjectAttributes | SavedVisState;
+  attributes: SavedSearchObjectAttributes;
   timerange: TimeRangeParams;
+}
+
+export interface SearchSource {
+  query: any;
+  filter: any[];
 }
 
 export interface SearchRequest {
