@@ -379,7 +379,7 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
+export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
