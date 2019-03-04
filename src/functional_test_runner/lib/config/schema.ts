@@ -135,7 +135,6 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI),
         reportName: Joi.string(),
-        rootDirectory: Joi.string(),
       })
       .default(),
 

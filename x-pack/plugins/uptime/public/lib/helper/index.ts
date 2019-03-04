@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-declare module 'leadfoot/keys' {
-  type LeadfootKeys = 'BACKSPACE' | 'ENTER' | 'RETURN';
-
-  const keys: { [key in LeadfootKeys]: string };
-  export default keys;
-}
+export { convertMicrosecondsToMilliseconds } from './convert_measurements';

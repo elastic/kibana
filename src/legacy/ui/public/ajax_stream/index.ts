@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import request from 'request';
-import { fromNode as fcb } from 'bluebird';
+import chrome from 'ui/chrome';
+import { metadata } from 'ui/metadata';
+import { ajaxStream as ajax, BatchOpts } from './ajax_stream';
 
-export async function ping(url) {
-  try {
-    await Promise.race([
-      fcb(cb => request(url, cb)),
-      new Promise((resolve, reject) => {
-        setTimeout(() => reject(new Error('timeout')), 1000);
-      })
-    ]);
-    return true;
-  } catch (err) {
-    return false;
-  }
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'kbn-version': metadata.version,
+};
+
+export { BatchOpts } from './ajax_stream';
+
+export function ajaxStream<T>(opts: BatchOpts<T>) {
+  return ajax(chrome.getBasePath(), defaultHeaders, new XMLHttpRequest(), opts);
 }
