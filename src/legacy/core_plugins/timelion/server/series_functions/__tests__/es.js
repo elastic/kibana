@@ -198,27 +198,16 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-      let sandbox;
-
-      beforeEach(() => {
-        sandbox = sinon.createSandbox();
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       it('sets the timeout on the request', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
         expect(request.timeout).to.equal('30000ms');
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
         expect(request).to.not.have.property('timeout');
       });
@@ -291,9 +280,9 @@ describe(filename, () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({ range: { '@timestamp': {
-          lte: 5,
-          gte: 1,
-          format: 'epoch_millis'
+          format: 'strict_date_optional_time',
+          gte: '1970-01-01T00:00:00.001Z',
+          lte: '1970-01-01T00:00:00.005Z'
         } } });
 
         config.kibana = true;

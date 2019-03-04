@@ -20,7 +20,7 @@ export function InfraHomePageProvider({ getService }: KibanaFunctionalTestDefaul
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
 
-      await datePickerInput.type(Array(30).fill(browser.keys.BACKSPACE));
+      await datePickerInput.type(Array(30).fill(browser.keys.BACK_SPACE));
       await datePickerInput.type([moment(time).format('L LTS'), browser.keys.RETURN]);
     },
 

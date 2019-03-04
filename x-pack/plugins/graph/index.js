@@ -45,8 +45,6 @@ export function graph(kibana) {
       server.injectUiAppVars('graph', () => {
         const config = server.config();
         return {
-          esApiVersion: config.get('elasticsearch.apiVersion'),
-          esShardTimeout: config.get('elasticsearch.shardTimeout'),
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
           canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };
