@@ -17,42 +17,9 @@
  * under the License.
  */
 
-import { map, mergeMap } from 'rxjs/operators';
+import { PluginInitializerContext } from 'kibana';
+import { Plugin } from './plugin';
 
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from 'kibana';
-import { TestBedConfig } from './config';
-
-class Plugin {
-  private readonly log: Logger;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
-  }
-
-  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
-    this.log.debug(
-      `Starting TestBed with core contract [${Object.keys(startContext)}] and deps [${Object.keys(
-        deps
-      )}]`
-    );
-
-    return {
-      data$: this.initializerContext.config.create(TestBedConfig).pipe(
-        map(config => {
-          this.log.debug(`I've got value from my config: ${config.secret}`);
-          return `Some exposed data derived from config: ${config.secret}`;
-        })
-      ),
-      pingElasticsearch$: startContext.elasticsearch.adminClient$.pipe(
-        mergeMap(client => client.callAsInternalUser('ping'))
-      ),
-    };
-  }
-
-  public stop() {
-    this.log.debug(`Stopping TestBed`);
-  }
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new Plugin(initializerContext);
 }
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
