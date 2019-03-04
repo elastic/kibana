@@ -4,24 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import React, { Fragment } from 'react';
-import { parseString } from 'xml2js';
+import React, { Component, Fragment } from 'react';
 
 import {
+  EuiButton,
+  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
+  EuiForm,
 } from '@elastic/eui';
+import { WmsClient } from './wms_client';
 
-export class WMSCreateSourceEditor extends  React.Component {
+export class WMSCreateSourceEditor extends Component {
 
   state = {
     serviceUrl: '',
     layers: '',
     styles: '',
     isLoadingCapabilities: false,
-    layers: null,
     getCapabilitiesError: null,
+    hasAttemptedToLoadCapabilities: false,
   }
 
   componentDidMount() {
@@ -42,23 +44,22 @@ export class WMSCreateSourceEditor extends  React.Component {
     }
   }
 
-  _loadCapabilities = _.debounce(async () => {
+  _loadCapabilities = async () => {
     if (!this.state.serviceUrl) {
       return;
     }
 
     this.setState({
+      hasAttemptedToLoadCapabilities: true,
       isLoadingCapabilities: true,
       getCapabilitiesError: null
     });
 
-    let body;
+    const wmsClient = new WmsClient({ serviceUrl: this.state.serviceUrl });
+
+    let layers;
     try {
-      const resp = await fetch(`${this.state.serviceUrl}?version=1.1.1&request=GetCapabilities&service=WMS`);
-      if (resp.status >= 400) {
-        throw new Error(`Unable to access ${this.state.serviceUrl}`);
-      }
-      body = await resp.text();
+      layers = await wmsClient.getLayers();
     } catch (error) {
       if (this._isMounted) {
         this.setState({
@@ -69,43 +70,17 @@ export class WMSCreateSourceEditor extends  React.Component {
       return;
     }
 
-    let capabilities;
-    try {
-      const parsePromise = new Promise((resolve, reject) => {
-        parseString(body, (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result);
-          }
-        });
-      });
-      capabilities = await parsePromise;
-    } catch (error) {
-      if (this._isMounted) {
-        this.setState({
-          isLoadingCapabilities: false,
-          getCapabilitiesError: 'Unable to parse "GetCapabilities" response.'
-        });
-      }
-      return;
-    }
-
-    console.log('capabilities', capabilities);
-
     if (!this._isMounted) {
       return;
     }
+
     this.setState({
       isLoadingCapabilities: false,
     });
-  }, 300);
+  }
 
   _handleServiceUrlChange(e) {
-    this.setState({ serviceUrl: e.target.value }, () => {
-      this._loadCapabilities();
-      this._previewIfPossible();
-    });
+    this.setState({ serviceUrl: e.target.value }, this._previewIfPossible);
   }
 
   _handleLayersChange(e) {
@@ -116,32 +91,65 @@ export class WMSCreateSourceEditor extends  React.Component {
     this.setState({ styles: e.target.value }, this._previewIfPossible);
   }
 
+  _renderLayerAndStyleInputs() {
+    if (!this.state.hasAttemptedToLoadCapabilities || this.state.isLoadingCapabilities) {
+      return null;
+    }
+
+    if (this.state.getCapabilitiesError) {
+      return (
+        <Fragment>
+          <EuiCallOut
+            title="Unable to load service metadata"
+            color="warning"
+          >
+            <p>{this.state.getCapabilitiesError}</p>
+            <EuiButton href="#" color="warning">Link button</EuiButton>
+          </EuiCallOut>
+
+          <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
+            <EuiFieldText
+              onChange={(e) => this._handleLayersChange(e)}
+            />
+          </EuiFormRow>
+
+          <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
+            <EuiFieldText
+              onChange={(e) => this._handleStylesChange(e)}
+            />
+          </EuiFormRow>
+        </Fragment>
+      );
+    }
+
+    return (
+      <div>layers and styles drop down placeholder</div>
+    );
+  }
+
   render() {
     return (
-      <Fragment>
+      <EuiForm>
         <EuiFormRow
           label="Url"
-          isInvalid={this.state.getCapabilitiesError}
-          error={this.state.getCapabilitiesError}
         >
           <EuiFieldText
             value={this.state.serviceUrl}
             onChange={(e) => this._handleServiceUrlChange(e)}
-            isLoading={this.state.isLoadingCapabilities}
           />
         </EuiFormRow>
-        <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
-          <EuiFieldText
-            onChange={(e) => this._handleLayersChange(e)}
-          />
-        </EuiFormRow>
-        <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
-          <EuiFieldText
-            onChange={(e) => this._handleStylesChange(e)}
-          />
-        </EuiFormRow>
-      </Fragment>
 
+        <EuiButton
+          onClick={this._loadCapabilities}
+          isDisabled={!this.state.serviceUrl}
+          isLoading={this.state.isLoadingCapabilities}
+        >
+          Load capabilities
+        </EuiButton>
+
+        {this._renderLayerAndStyleInputs()}
+
+      </EuiForm>
     );
   }
 }
