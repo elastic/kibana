@@ -28,7 +28,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiTitle,
-  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 const SEARCH_OBJECT_TYPE = 'search';
@@ -37,7 +37,9 @@ export class OpenSearchPanel extends React.Component {
 
   renderMangageSearchesButton() {
     return (
-      <EuiButton
+      <EuiButtonEmpty
+        iconSide="left"
+        iconType="gear"
         onClick={this.props.onClose}
         href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
       >
@@ -45,7 +47,7 @@ export class OpenSearchPanel extends React.Component {
           id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
           defaultMessage="Manage searches"
         />
-      </EuiButton>
+      </EuiButtonEmpty>
     );
   }
 
@@ -76,8 +78,14 @@ export class OpenSearchPanel extends React.Component {
                 defaultMessage="No matching searches found."
               />
             }
-            savedObjectType={SEARCH_OBJECT_TYPE}
-            makeUrl={this.props.makeUrl}
+            savedObjectMetaData={[
+              {
+                type: SEARCH_OBJECT_TYPE,
+                showSavedObject: () => true,
+                getIconForSavedObject: () => 'search',
+                name: 'Search',
+              },
+            ]}
             onChoose={this.props.onClose}
             callToActionButton={this.renderMangageSearchesButton()}
           />
