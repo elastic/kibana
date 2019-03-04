@@ -39,4 +39,5 @@ test('extract source by ranges', () => {
   const expectedLineNumbers = ['1', '2', '3', '...', '8', '9', '10', '11'];
   expect(lineMappings.toStringArray('...')).toEqual(expectedLineNumbers);
   expect(lineMappings.lineNumber(7)).toBe(5);
+  expect(lineMappings.lineNumber(0)).toBe(1);
 });
