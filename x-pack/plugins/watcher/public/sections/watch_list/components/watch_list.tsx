@@ -34,22 +34,16 @@ const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
 };
 
-const WatchListUi = ({
-  intl,
-  urlService,
-}: {
-  intl: InjectedIntl;
-  urlService: { change: () => void };
-}) => {
+const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   // hooks
-  const [watchesLoading, setWatchesLoading] = useState<boolean>(true);
+  const [isWatchesLoading, setIsWatchesLoading] = useState<boolean>(true);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [watches, setWatches] = useState([]);
   const [selection, setSelection] = useState([]);
   const loadWatches = async () => {
     const loadedWatches = await fetchWatches();
     setWatches(loadedWatches);
-    setWatchesLoading(false);
+    setIsWatchesLoading(false);
   };
   useEffect(() => {
     loadWatches();
@@ -71,9 +65,7 @@ const WatchListUi = ({
           <EuiLink
             className="indTable__link euiTableCellContent"
             data-test-subj="indexTableIndexNameLink"
-            onClick={() => {
-              urlService.change(`/management/elasticsearch/watcher/watches/watch/${id}/status`);
-            }}
+            href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
           >
             {id}
           </EuiLink>
@@ -96,10 +88,12 @@ const WatchListUi = ({
       sortable: true,
       render: (state: string) => {
         return (
-          <Fragment>
-            {stateToIcon[state]}
-            {` ${state}`}
-          </Fragment>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>{stateToIcon[state]}</EuiFlexItem>
+            <EuiFlexItem grow={false} className="watchState__message">
+              <EuiText>{state}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         );
       },
     },
@@ -146,11 +140,7 @@ const WatchListUi = ({
                   id: 'xpack.watcher.sections.watchList.watchTable.menuEditButtonDescription',
                   defaultMessage: 'Edit watch',
                 })}
-                onClick={() => {
-                  urlService.change(
-                    `/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`
-                  );
-                }}
+                href={`#/management/elasticsearch/watcher/watches/watch/${watch.id}/edit`}
               >
                 <FormattedMessage
                   id="xpack.watcher.sections.watchList.watchTable.menuEditButtonTitle"
@@ -227,28 +217,31 @@ const WatchListUi = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <EuiButton
-        data-test-subj="createThresholdAlertButton"
-        onClick={() => {
-          urlService.change('/management/elasticsearch/watcher/watches/new-watch/threshold');
-        }}
-      >
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
-          defaultMessage="Create threshold alert"
-        />
-      </EuiButton>{' '}
-      <EuiButton
-        data-test-subj="createAdvancedWatchButton"
-        onClick={() => {
-          urlService.change('/management/elasticsearch/watcher/watches/new-watch/json');
-        }}
-      >
-        <FormattedMessage
-          id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
-          defaultMessage="Create advanced watch"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="createThresholdAlertButton"
+            href="#/management/elasticsearch/watcher/watches/new-watch/threshold"
+          >
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
+              defaultMessage="Create threshold alert"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="createAdvancedWatchButton"
+            href="#/management/elasticsearch/watcher/watches/new-watch/json"
+          >
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
+              defaultMessage="Create advanced watch"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
       <EuiInMemoryTable
         items={watches}
@@ -259,7 +252,7 @@ const WatchListUi = ({
         sorting={true}
         selection={selectionConfig}
         isSelectable={true}
-        loading={watchesLoading}
+        loading={isWatchesLoading}
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"

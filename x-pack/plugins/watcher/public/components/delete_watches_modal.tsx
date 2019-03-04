@@ -45,9 +45,8 @@ export const DeleteWatchesModal = ({
     <EuiOverlayMask>
       <EuiConfirmModal
         title={confirmButtonText}
-        onCancel={callback}
+        onCancel={() => callback()}
         onConfirm={async () => {
-          const numTotal = watchesToDelete.length;
           const { successes, errors } = await deleteWatches(watchesToDelete);
           const numSuccesses = successes.length;
           const numErrors = errors.length;
@@ -58,8 +57,8 @@ export const DeleteWatchesModal = ({
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesSuccessNotification.descriptionText',
                 {
                   defaultMessage:
-                    'Deleted {numSuccesses} {numTotal, plural, one {watch} other {out of # selected watches}} ',
-                  values: { numSuccesses, numTotal, numWatchesToDelete },
+                    'Deleted{numWatchesToDelete, plural, one {watch} other {{numSuccesses} out of # selected watches}} ',
+                  values: { numSuccesses, numWatchesToDelete },
                 }
               )
             );
@@ -71,8 +70,8 @@ export const DeleteWatchesModal = ({
                 'xpack.watcher.sections.watchList.deleteSelectedWatchesErrorNotification.descriptionText',
                 {
                   defaultMessage:
-                    "Couldn't delete {numTotal, plural, one {watch} other {{numErrors} out of # selected watches}}",
-                  values: { numErrors, numTotal, numWatchesToDelete },
+                    "Couldn't delete {numWatchesToDelete, plural, one {watch} other {{numErrors} out of # selected watches}}",
+                  values: { numErrors, numWatchesToDelete },
                 }
               )
             );
