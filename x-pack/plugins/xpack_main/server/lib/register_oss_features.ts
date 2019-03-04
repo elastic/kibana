@@ -22,7 +22,7 @@ const kibanaFeatures: Feature[] = [
           all: ['search', 'url'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {

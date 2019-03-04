@@ -291,6 +291,7 @@ function discoverController(
         showShareContextMenu({
           anchorElement,
           allowEmbed: false,
+          allowShortUrl: uiCapabilities.discover.createShortUrl,
           getUnhashableStates,
           objectId: savedSearch.id,
           objectType: 'search',
