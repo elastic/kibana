@@ -1,48 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`DetailView should render Discover button 1`] = `
-<DiscoverErrorLink
-  error={
-    Object {
-      "@timestamp": "myTimestamp",
-      "error": Object {
-        "exception": Object {
-          "handled": true,
-        },
-      },
-      "http": Object {
-        "request": Object {
-          "method": "GET",
-        },
-      },
-      "service": Object {
-        "name": "myService",
-      },
-      "transaction": Object {
-        "id": "myTransactionId",
-        "sampled": true,
-      },
-      "url": Object {
-        "full": "myUrl",
-      },
-      "user": Object {
-        "id": "myUserId",
-      },
-    }
-  }
->
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="discoverApp"
-    type="button"
-  >
-    View 10 occurrences in Discover
-  </EuiButtonEmpty>
-</DiscoverErrorLink>
-`;
-
-exports[`DetailView should render StickyProperties 1`] = `
+exports[`DetailView StickyProperties should render correctly with data 1`] = `
 <StickyProperties
   stickyProperties={
     Array [
@@ -143,6 +101,48 @@ exports[`DetailView should render StickyProperties 1`] = `
     ]
   }
 />
+`;
+
+exports[`DetailView should render Discover button 1`] = `
+<DiscoverErrorLink
+  error={
+    Object {
+      "@timestamp": "myTimestamp",
+      "error": Object {
+        "exception": Object {
+          "handled": true,
+        },
+      },
+      "http": Object {
+        "request": Object {
+          "method": "GET",
+        },
+      },
+      "service": Object {
+        "name": "myService",
+      },
+      "transaction": Object {
+        "id": "myTransactionId",
+        "sampled": true,
+      },
+      "url": Object {
+        "full": "myUrl",
+      },
+      "user": Object {
+        "id": "myUserId",
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="discoverApp"
+    type="button"
+  >
+    View 10 occurrences in Discover
+  </EuiButtonEmpty>
+</DiscoverErrorLink>
 `;
 
 exports[`DetailView should render TabContent 1`] = `

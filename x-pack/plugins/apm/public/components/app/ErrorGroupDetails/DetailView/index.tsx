@@ -132,9 +132,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
         defaultMessage: 'Handled'
       }),
-      val:
-        String(idx(error, _ => _.error.exception[0].handled)) ||
-        NOT_AVAILABLE_LABEL,
+      val: String(
+        idx(error, _ => _.error.exception[0].handled) || NOT_AVAILABLE_LABEL
+      ),
       width: '25%'
     },
     {

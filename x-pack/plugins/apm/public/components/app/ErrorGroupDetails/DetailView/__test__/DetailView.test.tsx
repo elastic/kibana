@@ -13,6 +13,7 @@ import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 // @ts-ignore
 import { mockMoment } from '../../../../../utils/testHelpers';
+import { IStickyProperty } from '../../../../shared/StickyProperties';
 import { DetailView } from '../index';
 
 describe('DetailView', () => {
@@ -34,7 +35,6 @@ describe('DetailView', () => {
 
   it('should render Discover button', () => {
     const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
@@ -61,50 +61,8 @@ describe('DetailView', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('should render StickyProperties', () => {
-    const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
-      status: 'SUCCESS',
-      data: {
-        occurrencesCount: 10,
-        transaction: {
-          http: { request: { method: 'GET' } },
-          url: { full: 'myUrl' },
-          trace: { id: 'traceId' },
-          transaction: {
-            type: 'myTransactionType',
-            name: 'myTransactionName',
-            id: 'myTransactionName'
-          },
-          service: { name: 'myService' },
-          user: { id: 'myUserId' }
-        } as Transaction,
-        error: {
-          '@timestamp': 'myTimestamp',
-          http: { request: { method: 'GET' } },
-          url: { full: 'myUrl' },
-          service: { name: 'myService' },
-          user: { id: 'myUserId' },
-          error: { exception: [{ handled: true }] },
-          transaction: { id: 'myTransactionId', sampled: true }
-        } as APMError
-      }
-    };
-    const wrapper = shallow(
-      <DetailView
-        errorGroup={errorGroup}
-        urlParams={{}}
-        location={{} as Location}
-      />
-    ).find('StickyProperties');
-
-    expect(wrapper.exists()).toBe(true);
-    expect(wrapper).toMatchSnapshot();
-  });
-
   it('should render tabs', () => {
     const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
@@ -129,7 +87,6 @@ describe('DetailView', () => {
 
   it('should render TabContent', () => {
     const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
@@ -149,5 +106,71 @@ describe('DetailView', () => {
 
     expect(wrapper.exists()).toBe(true);
     expect(wrapper).toMatchSnapshot();
+  });
+
+  describe('StickyProperties', () => {
+    it('should render correctly with data', () => {
+      const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
+        status: 'SUCCESS',
+        data: {
+          occurrencesCount: 10,
+          transaction: {
+            http: { request: { method: 'GET' } },
+            url: { full: 'myUrl' },
+            trace: { id: 'traceId' },
+            transaction: {
+              type: 'myTransactionType',
+              name: 'myTransactionName',
+              id: 'myTransactionName'
+            },
+            service: { name: 'myService' },
+            user: { id: 'myUserId' }
+          } as Transaction,
+          error: {
+            '@timestamp': 'myTimestamp',
+            http: { request: { method: 'GET' } },
+            url: { full: 'myUrl' },
+            service: { name: 'myService' },
+            user: { id: 'myUserId' },
+            error: { exception: [{ handled: true }] },
+            transaction: { id: 'myTransactionId', sampled: true }
+          } as APMError
+        }
+      };
+      const wrapper = shallow(
+        <DetailView
+          errorGroup={errorGroup}
+          urlParams={{}}
+          location={{} as Location}
+        />
+      ).find('StickyProperties');
+
+      expect(wrapper.exists()).toBe(true);
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('should render handled as `N/A` if it is `undefined`', () => {
+      const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
+        status: 'SUCCESS',
+        data: {
+          occurrencesCount: 10,
+          error: {} as APMError
+        }
+      };
+      const wrapper = shallow(
+        <DetailView
+          errorGroup={errorGroup}
+          urlParams={{}}
+          location={{} as Location}
+        />
+      ).find('StickyProperties');
+
+      const stickyProps = wrapper.prop('stickyProperties') as IStickyProperty[];
+      const handledProp = stickyProps.find(
+        prop => prop.fieldName === 'error.exception.handled'
+      ) as IStickyProperty;
+
+      expect(handledProp.val).toBe('N/A');
+    });
   });
 });
