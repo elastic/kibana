@@ -68,11 +68,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async clearMarkdown() {
-      const input = await find.byCssSelector('.ace_content');
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       // click for switching context(fix for "should render first table variable" test)
       // see _tsvb_markdown.js
-      await input.click();
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
