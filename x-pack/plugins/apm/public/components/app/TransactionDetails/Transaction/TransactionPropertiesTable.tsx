@@ -8,7 +8,7 @@ import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first, get } from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import {
   fromQuery,
@@ -18,6 +18,7 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
+import { HeightRetainer } from '../../../shared/HeightRetainer';
 import {
   getPropertyTabNames,
   PropertiesTable
@@ -54,28 +55,6 @@ interface TransactionPropertiesTableProps {
   urlParams: IUrlParams;
   waterfall: IWaterfall;
 }
-
-const HeightRetainer: React.SFC = props => {
-  const containerElement = useRef<HTMLDivElement>(null);
-  const minHeight = useRef<number>(0);
-
-  useEffect(() => {
-    if (containerElement.current) {
-      const currentHeight = containerElement.current.clientHeight;
-      if (minHeight.current < currentHeight) {
-        minHeight.current = currentHeight;
-      }
-    }
-  });
-
-  return (
-    <div
-      {...props}
-      ref={containerElement}
-      style={{ minHeight: minHeight.current }}
-    />
-  );
-};
 
 export function TransactionPropertiesTable({
   location,
