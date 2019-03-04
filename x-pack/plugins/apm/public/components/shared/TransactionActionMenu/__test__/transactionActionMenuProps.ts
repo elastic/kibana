@@ -50,45 +50,6 @@ const transaction: Transaction = {
     ],
     ppid: 0
   },
-  context: {
-    request: {
-      headers: {
-        Accept: '*/*',
-        'User-Agent': 'Python/3.7 aiohttp/3.3.2',
-        'Accept-Encoding': 'gzip, deflate'
-      },
-      method: 'GET',
-      http_version: '1.1',
-      socket: {
-        remote_address: '172.18.0.12'
-      },
-      url: {
-        protocol: 'http',
-        hostname: '172.18.0.7',
-        port: '3000',
-        full: 'http://172.18.0.7:3000/api/products/3/customers',
-        pathname: '/api/products/3/customers'
-      }
-    },
-
-    system: {
-      hostname: '8acb9c1a71f3',
-      ip: '172.18.0.7',
-      platform: 'linux',
-      architecture: 'amd64'
-    },
-    response: {
-      headers: {
-        'X-Frame-Options': 'SAMEORIGIN',
-        Server: 'gunicorn/19.9.0',
-        Vary: 'Cookie',
-        'Content-Length': '31646',
-        Date: 'Tue, 18 Dec 2018 00:14:45 GMT',
-        'Content-Type': 'application/json; charset=utf-8'
-      },
-      status_code: 200
-    }
-  },
   transaction: {
     result: 'HTTP 2xx',
     duration: {

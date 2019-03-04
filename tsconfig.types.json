@@ -5,11 +5,7 @@
     "declarationDir": "./target/types",
     "stripInternal": true,
     "emitDeclarationOnly": true,
-    "declarationMap": true,
-    "types": [
-      "node",
-      "jest"
-    ]
+    "declarationMap": true
   },
   "include": [
     "./src/type_exports.ts"
