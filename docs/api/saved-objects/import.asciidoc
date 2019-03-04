@@ -1,9 +1,9 @@
 [[saved-objects-api-import]]
-=== Import objects
+=== Import Objects
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The import saved object API enables you to create a set of Kibana saved objects.
+The import saved objects API enables you to create a set of Kibana saved objects.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -11,18 +11,17 @@ Note: You cannot access this endpoint via the Console in Kibana.
 
 `POST /api/saved_objects/_import`
 
-==== Request Body
-`overwriteAll` (optional)::
-  (boolean) Overwrite all saved objects in the scenario there's a conflict
+==== Query Parameters
 
-`overwrites` (optional)::
-  (array) A list of objects allows to be overwritten
+`overwrite` (optional)::
+  (boolean) Overwrite saved objects when they exist already
 
-`replaceReferences` (optional)::
-  (array) A list of { type, from, to } to replace references in saved objects.
+==== Request body
 
-`skips` (optional)::
-  (array) A list of objects to skip importing
+The request body must be of type multipart/form-data.
+
+`file`::
+  (ndjson) New line delimited JSON objects to import.
 
 ==== Response body
 
@@ -36,7 +35,7 @@ The following example attemps to import an index pattern and dashboard.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_bojects/_import
+POST api/saved_objects/_import
 Content-Type: multipart/form-data; boundary=EXAMPLE
 --EXAMPLE
 Content-Disposition: form-data; name="file"; filename="export.ndjson"

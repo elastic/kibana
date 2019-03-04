@@ -128,6 +128,10 @@ export async function importSavedObjects({
   const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
+  if (objectsToImport.length === 0) {
+    return { success: true };
+  }
+
   if (overwrite) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
       overwrite: true,
