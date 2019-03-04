@@ -160,16 +160,18 @@ class SpaceSelectorUI extends Component<Props, State> {
     }
     return (
       <EuiFlexItem className="spcSpaceSelector__searchHolder">
-        <EuiFieldSearch
-          className="spcSpaceSelector__searchField"
-          placeholder={intl.formatMessage({
-            id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
-            defaultMessage: 'Find a space',
-          })}
-          incremental={true}
-          // @ts-ignore
-          onSearch={this.onSearch}
-        />
+        {
+          // @ts-ignore onSearch doesn't exist on EuiFieldSearch
+          <EuiFieldSearch
+            className="spcSpaceSelector__searchField"
+            placeholder={intl.formatMessage({
+              id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
+              defaultMessage: 'Find a space',
+            })}
+            incremental={true}
+            onSearch={this.onSearch}
+          />
+        }
       </EuiFlexItem>
     );
   };

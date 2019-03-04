@@ -41,7 +41,7 @@ export default function ({ getPageObjects }) {
 
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
     });
 
@@ -55,7 +55,7 @@ export default function ({ getPageObjects }) {
     it('Saves on confirm duplicate title warning', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName);
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName, { waitDialogIsClosed: false });
 
       await PageObjects.dashboard.clickSave();
 
@@ -96,7 +96,7 @@ export default function ({ getPageObjects }) {
 
     it('Warns when case is different', async function () {
       await PageObjects.dashboard.switchToEditMode();
-      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase());
+      await PageObjects.dashboard.enterDashboardTitleAndClickSave(dashboardName.toUpperCase(), { waitDialogIsClosed: false });
 
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
 
