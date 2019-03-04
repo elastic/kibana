@@ -3,10 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Watch } from 'plugins/watcher/models/watch';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
-import { Watch } from '../models/watch';
 let httpClient: ng.IHttpService;
 export const setHttpClient = (anHttpClient: ng.IHttpService) => {
   httpClient = anHttpClient;
