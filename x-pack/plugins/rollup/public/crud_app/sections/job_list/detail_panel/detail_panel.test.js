@@ -266,7 +266,7 @@ describe('<DetailPanel />', () => {
       );
       it('should list the Job terms fields', () => {
         const rowsText = getRowsText();
-        const expected = defaultJob.terms.map(term => term.name);
+        const expected = defaultJob.terms.map(term => `Field${term.name}`);
         expect(rowsText).toEqual(expected);
       });
     });
@@ -285,7 +285,7 @@ describe('<DetailPanel />', () => {
 
       it('should list the Job histogram fields', () => {
         const rowsText = getRowsText();
-        const expected = defaultJob.histogram.map(h => h.name);
+        const expected = defaultJob.histogram.map(h => `Field${h.name}`);
         expect(rowsText).toEqual(expected);
       });
     });
@@ -309,10 +309,10 @@ describe('<DetailPanel />', () => {
           row.find('td').forEach((cell, j) => {
             if (j === 0) {
               // field
-              expect(cell.text()).toEqual(metric.name);
+              expect(cell.text()).toEqual(`Field${metric.name}`);
             } else if (j === 1) {
               // types
-              expect(cell.text()).toEqual(metric.types.join(', '));
+              expect(cell.text()).toEqual(`Types${metric.types.join(', ')}`);
             }
           });
         });
