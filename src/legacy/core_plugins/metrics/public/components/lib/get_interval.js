@@ -17,12 +17,11 @@
  * under the License.
  */
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { pluck, get, clone } from 'lodash';
+import { pluck, get, clone, isString } from 'lodash';
 import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
 
-const INTERVAL_STRING_RE = new RegExp('^([0-9\\.]*)\\s*(' + dateMath.units.join('|') + ')$');
+import { GTE_INTERVAL_RE, INTERVAL_STRING_RE } from '../../../common/interval_regexp';
 
 export const unitLookup = {
   s: i18n.translate('tsvb.getInterval.secondsLabel', { defaultMessage: 'seconds' }),
@@ -51,19 +50,20 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
   }
 };
 
-export const convertStringIntervalIntoUnit = (stringInterval, hasTranslateUnitString = true) => {
-  const matches = stringInterval && stringInterval.match(INTERVAL_STRING_RE);
-
-  if (matches && unitLookup[matches[2]]) {
-    return {
-      unitValue: Number(matches[1]),
-      unitString: hasTranslateUnitString ? unitLookup[matches[2]] : matches[2]
-    };
-  }
+export const isIntervalValid = (interval) => {
+  return isString(interval) &&
+    (interval === 'auto' || INTERVAL_STRING_RE.test(interval) || GTE_INTERVAL_RE.test(interval));
 };
 
 export const getInterval = (visData, model) => {
-  const series = get(visData, `${model.id}.series`, []);
+  let series;
+
+  if (model && model.type === 'table') {
+    series = get(visData, `series[0].series`, []);
+  } else {
+    series = get(visData, `${model.id}.series`, []);
+  }
+
   return series.reduce((currentInterval, item) => {
     if (item.data.length > 1) {
       const seriesInterval = item.data[1][0] - item.data[0][0];

@@ -18,10 +18,11 @@
  */
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval, convertIntervalIntoUnit, convertStringIntervalIntoUnit } from './lib/get_interval';
+import { getInterval, convertIntervalIntoUnit, isIntervalValid } from './lib/get_interval';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -146,21 +147,29 @@ class VisEditorVisualization extends Component {
   }
 
   hasShowPanelIntervalValue() {
+    const type = get(this.props, 'model.type', '');
+
     return [
       'metric',
       'top_n',
       'gauge',
-      'markdown'
-    ].includes(this.props.model.type);
+      'markdown',
+      'table',
+    ].includes(type);
   }
 
   getFormattedPanelInterval() {
-    const interval = this.props.model && this.props.model.interval;
+    const interval = get(this.props, 'model.interval') || 'auto';
+    const isValid = isIntervalValid(interval);
 
-    if (this.hasShowPanelIntervalValue() && interval) {
-      return interval === 'auto'
-        ? convertIntervalIntoUnit(this.state.panelInterval, false)
-        : convertStringIntervalIntoUnit(interval, false);
+    if (interval === 'auto' || !isValid) {
+      const autoInterval = convertIntervalIntoUnit(this.state.panelInterval, false);
+
+      if (autoInterval) {
+        return `${autoInterval.unitValue}${autoInterval.unitString}`;
+      }
+    } else {
+      return interval;
     }
   }
 
@@ -171,7 +180,7 @@ class VisEditorVisualization extends Component {
       style.userSelect = 'none';
     }
 
-    const formattedPavelIntervalValue = this.getFormattedPanelInterval();
+    const panelInterval = this.hasShowPanelIntervalValue() && this.getFormattedPanelInterval();
 
     let applyMessage = (<FormattedMessage
       id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
@@ -203,17 +212,18 @@ class VisEditorVisualization extends Component {
           />
         </EuiFlexItem>
 
-        {formattedPavelIntervalValue &&
+        {panelInterval &&
         <EuiFlexItem grow={false}>
           <EuiText color="default" size="xs">
-            <FormattedMessage
-              id="tsvb.visEditorVisualization.panelInterval"
-              defaultMessage="Interval: last {unitValue}{unitString}"
-              values={{
-                unitValue: formattedPavelIntervalValue.unitValue,
-                unitString: formattedPavelIntervalValue.unitString
-              }}
-            />
+            <p>
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.panelInterval"
+                defaultMessage="Interval: {panelInterval}"
+                values={{
+                  panelInterval: panelInterval,
+                }}
+              />
+            </p>
           </EuiText>
         </EuiFlexItem>
         }
