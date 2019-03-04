@@ -162,7 +162,13 @@ export class ExpressionInput extends React.Component {
       : 'This is the coded expression that backs this element. You better know what you are doing here.';
     return (
       <div className="expressionInput">
-        <EuiFormRow fullWidth isInvalid={Boolean(error)} error={error} helpText={helpText}>
+        <EuiFormRow
+          className="expressionInput--inner"
+          fullWidth
+          isInvalid={Boolean(error)}
+          error={error}
+          helpText={helpText}
+        >
           {isAutocompleteEnabled ? (
             <Autocomplete
               header={this.getHeader()}
@@ -177,7 +183,8 @@ export class ExpressionInput extends React.Component {
                 onChange={this.onChange}
                 inputRef={ref => (this.ref = ref)}
                 spellCheck="false"
-                style={{ fontSize: `${fontSize}px`, resize: 'vertical' }}
+                style={{ fontSize: `${fontSize}px` }}
+                resize="none"
               />
             </Autocomplete>
           ) : (
@@ -188,6 +195,8 @@ export class ExpressionInput extends React.Component {
               onChange={this.onChange}
               inputRef={ref => (this.ref = ref)}
               spellCheck="false"
+              style={{ fontSize: `${fontSize}px` }}
+              resize="none"
             />
           )}
         </EuiFormRow>

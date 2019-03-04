@@ -2,6 +2,48 @@
   max-height: 400px;
 }
 
+.canvasExpression--controls {
+  position: absolute;
+  right: $euiSizeXL;
+  top: $euiSizeL;
+}
+
 .canvasExpression--fullSize {
-  height: 100vh - 144px;
+  height: calc(100vh - 200px); // space for global nav and autocomplete popup
+  display: flex;
+  flex-direction: column;
+
+  .expressionInput {
+    flex-grow: 1;
+  }
+
+  .expressionInput--inner {
+    height: 100%;
+  }
+
+  .canvasExpression--settings {
+    flex-grow: 0;
+  }
+
+  .canvasTextArea--code {
+    height: 100%;
+    padding-right: $euiSizeXXL;
+  }
+
+  .autocomplete {
+    flex-grow: 1;
+
+    .canvasAutocomplete--inner {
+      height: 100%;
+    }
+  }
+
+  .autocompletePopup {
+    top: -102px;
+    height: 100px;
+  }
+
+  .autocompleteItems, .autocompleteReference {
+    height: 98px;
+  }
 }

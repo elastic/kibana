@@ -10,11 +10,13 @@ import {
   EuiPanel,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiSelect,
   EuiRange,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
 import { fontSizes } from '../text_style_picker/font_sizes';
@@ -49,7 +51,23 @@ export const Expression = ({
         onChange={updateValue}
         isAutocompleteEnabled={isAutocompleteEnabled}
       />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+      <div className="canvasExpression--controls">
+        <EuiToolTip content={isCompact ? 'Maximize' : 'Minimize'}>
+          <EuiButtonIcon
+            size="s"
+            onClick={toggleCompactView}
+            iconType="expand"
+            color="subdued"
+            aria-label="Toggle expression window height"
+          />
+        </EuiToolTip>
+      </div>
+      <EuiFlexGroup
+        className="canvasExpression--settings"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="l"
+      >
         <EuiFlexItem grow={false}>
           <EuiSwitch
             id="autocompleteOptIn"
@@ -91,24 +109,27 @@ export const Expression = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={toggleCompactView} iconType="expand">
-            {isCompact ? 'expand' : 'shrink'}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
-              {formState.dirty ? 'Cancel' : 'Close'}
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
-              disabled={!!error}
-              onClick={() => setExpression(formState.expression)}
-              size="s"
-            >
-              Run
-            </EuiButton>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color={formState.dirty ? 'danger' : 'primary'}
+                onClick={done}
+              >
+                {formState.dirty ? 'Cancel' : 'Close'}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                disabled={!!error}
+                onClick={() => setExpression(formState.expression)}
+                size="s"
+              >
+                Run
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
