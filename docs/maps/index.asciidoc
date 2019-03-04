@@ -6,7 +6,7 @@
 
 beta[]
 
-The Maps application enables you to parse through your geographical data, at scale, with speed and in real time. With features like multiple layers and indices in a map, plotting raw documents, dynamic client side styling and the ability to search globally across multiple layers you will truly be able to understand and monitor your data with ease.
+The **Maps** application enables you to parse through your geographical data at scale, with speed, and in real time. With features like multiple layers and indices in a map, plotting of raw documents, dynamic client-side styling, and global search across multiple layers, you can understand and monitor your data with ease.
 
 [role="screenshot"]
 image::maps/images/sample_data_ecommerce.png[]
