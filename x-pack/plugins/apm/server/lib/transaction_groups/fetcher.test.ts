@@ -17,7 +17,7 @@ describe('transactionGroupsFetcher', () => {
       end: 1528977600000,
       client: clientSpy,
       config: {
-        get: jest.fn((key: string) => {
+        get: jest.fn<any, string[]>((key: string) => {
           switch (key) {
             case 'apm_oss.transactionIndices':
               return 'myIndex';
