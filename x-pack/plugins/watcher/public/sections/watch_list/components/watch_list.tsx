@@ -47,9 +47,9 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   };
   useEffect(() => {
     loadWatches();
-    const loadInterval = setInterval(loadWatches, REFRESH_INTERVALS.WATCH_LIST);
+    const refreshIntervalId = setInterval(loadWatches, REFRESH_INTERVALS.WATCH_LIST);
     return () => {
-      clearInterval(loadInterval);
+      clearInterval(refreshIntervalId);
     };
   }, []);
   const columns = [
