@@ -18,7 +18,7 @@ export const fetchWatches = async () => {
   const {
     data: { watches },
   } = await getHttpClient().get(`${basePath}/watches`);
-  return watches.map(watch => {
+  return watches.map((watch: any) => {
     return Watch.fromUpstreamJson(watch);
   });
 };

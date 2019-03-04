@@ -168,7 +168,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       <EuiButton
         data-test-subj="btnDeleteWatches"
         onClick={() => {
-          setWatchesToDelete(selection.map(selected => selected.id));
+          setWatchesToDelete(selection.map((selected: any) => selected.id));
         }}
         color="danger"
         disabled={!selection.length}
@@ -186,7 +186,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
         callback={(deleted?: string[]) => {
           if (deleted) {
             setWatches(
-              watches.filter(watch => {
+              watches.filter((watch: any) => {
                 return !deleted.includes(watch.id);
               })
             );
