@@ -139,7 +139,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       <I18nContext>
         <Router basename={routerBasename}>
           <ApolloProvider client={graphQLClient}>
-            <EuiPage className="app-wrapper-panel">
+            <EuiPage className="app-wrapper-panel" data-test-subj="uptimeApp">
               <EuiHeader>
                 {/*
               // @ts-ignore TODO no typings for grow prop */}

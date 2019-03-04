@@ -11,6 +11,7 @@ export default ({ loadTestFile }: KibanaFunctionalTestDefaultProviders) => {
   describe('Uptime app', function() {
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./overview'));
   });
 };
