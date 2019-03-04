@@ -50,6 +50,7 @@ function ReactEditorControllerProvider(Private, config) {
             config={config}
             vis={this.vis}
             visFields={visFields}
+            visParams={this.vis.params}
             savedObj={this.savedObj}
             timeRange={params.timeRange}
             renderComplete={() => {}}
@@ -60,11 +61,7 @@ function ReactEditorControllerProvider(Private, config) {
         this.el);
     }
 
-    resize() {
-      if (this.visData) {
-        this.render(this.visData);
-      }
-    }
+    resize() {}
 
     destroy() {
       unmountComponentAtNode(this.el);

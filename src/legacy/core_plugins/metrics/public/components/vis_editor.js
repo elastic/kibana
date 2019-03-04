@@ -34,7 +34,7 @@ class VisEditor extends Component {
     const { vis } = props;
     this.appState = vis.API.getAppState();
     this.state = {
-      model: props.vis.params,
+      model: props.visParams,
       dirty: false,
       autoApply: true,
       visFields: props.visFields
@@ -87,7 +87,7 @@ class VisEditor extends Component {
 
   render() {
     if (!this.props.isEditorMode) {
-      if (!this.props.vis.params || !this.props.visData) {
+      if (!this.props.visParams || !this.props.visData) {
         return null;
       }
       return (
@@ -96,7 +96,7 @@ class VisEditor extends Component {
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
           uiState={this.uiState}
-          model={this.props.vis.params}
+          model={this.props.visParams}
           visData={this.props.visData}
           getConfig={this.getConfig}
         />
