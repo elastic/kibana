@@ -17,80 +17,63 @@
  * under the License.
  */
 
-import { createUpdateRoute } from './update';
-import { MockServer } from './_mock_server';
+import Hapi from 'hapi';
+import { createMockServer } from './_mock_server';
+import { createDeleteRoute } from './delete';
 
-describe('PUT /api/saved_objects/{type}/{id?}', () => {
-
-  const savedObjectsClient = { update: jest.fn() };
-  let server;
+describe('DELETE /api/saved_objects/{type}/{id}', () => {
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
 
   beforeEach(() => {
-    server = new MockServer();
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(true));
+    savedObjectsClient.delete.mockImplementation(() => Promise.resolve('{}'));
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
-    server.route(createUpdateRoute(prereqs));
+    server.route(createDeleteRoute(prereqs));
   });
 
   afterEach(() => {
-    savedObjectsClient.update.mockReset();
+    savedObjectsClient.delete.mockReset();
   });
 
   it('formats successful response', async () => {
     const request = {
-      method: 'PUT',
+      method: 'DELETE',
       url: '/api/saved_objects/index-pattern/logstash-*',
-      payload: {
-        attributes: {
-          title: 'Testing'
-        },
-        references: [],
-      }
     };
-
-    const clientResponse = {
-      id: 'logstash-*',
-      title: 'logstash-*',
-      timeFieldName: '@timestamp',
-      notExpandable: true,
-      references: [],
-    };
-
-    savedObjectsClient.update.mockImplementation(() => Promise.resolve(clientResponse));
 
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
 
     expect(statusCode).toBe(200);
-    expect(response).toEqual(clientResponse);
+    expect(response).toEqual({});
   });
 
-  it('calls upon savedObjectClient.update', async () => {
+  it('calls upon savedObjectClient.delete', async () => {
     const request = {
-      method: 'PUT',
+      method: 'DELETE',
       url: '/api/saved_objects/index-pattern/logstash-*',
-      payload: {
-        attributes: { title: 'Testing' },
-        version: 'foo',
-      }
     };
 
     await server.inject(request);
-
-    expect(savedObjectsClient.update).toHaveBeenCalledWith(
-      'index-pattern',
-      'logstash-*',
-      { title: 'Testing' },
-      { version: 'foo', references: [] }
-    );
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
   });
 });

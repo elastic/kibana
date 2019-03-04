@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
+import { createMockServer } from './_mock_server';
 import { createBulkCreateRoute } from './bulk_create';
-import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/_bulk_create', () => {
-  const savedObjectsClient = { bulkCreate: jest.fn() };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
 
   beforeEach(() => {
     savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(''));
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -48,23 +58,27 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/_bulk_create',
-      payload: [{
-        id: 'abc123',
-        type: 'index-pattern',
-        attributes: {
-          title: 'my_title',
+      payload: [
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+          attributes: {
+            title: 'my_title',
+          },
         },
-      }]
+      ],
     };
 
     const clientResponse = {
-      saved_objects: [{
-        id: 'abc123',
-        type: 'index-pattern',
-        title: 'logstash-*',
-        version: 2,
-        references: [],
-      }]
+      saved_objects: [
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+          title: 'logstash-*',
+          version: 2,
+          references: [],
+        },
+      ],
     };
 
     savedObjectsClient.bulkCreate.mockImplementation(() => Promise.resolve(clientResponse));
@@ -77,21 +91,24 @@ describe('POST /api/saved_objects/_bulk_create', () => {
   });
 
   it('calls upon savedObjectClient.bulkCreate', async () => {
-    const docs = [{
-      id: 'abc123',
-      type: 'index-pattern',
-      attributes: {
-        title: 'foo',
+    const docs = [
+      {
+        id: 'abc123',
+        type: 'index-pattern',
+        attributes: {
+          title: 'foo',
+        },
+        references: [],
       },
-      references: [],
-    }, {
-      id: 'abc1234',
-      type: 'index-pattern',
-      attributes: {
-        title: 'bar',
+      {
+        id: 'abc1234',
+        type: 'index-pattern',
+        attributes: {
+          title: 'bar',
+        },
+        references: [],
       },
-      references: [],
-    }];
+    ];
 
     const request = {
       method: 'POST',
@@ -110,14 +127,16 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     await server.inject({
       method: 'POST',
       url: '/api/saved_objects/_bulk_create?overwrite=true',
-      payload: [{
-        id: 'abc1234',
-        type: 'index-pattern',
-        attributes: {
-          title: 'foo',
+      payload: [
+        {
+          id: 'abc1234',
+          type: 'index-pattern',
+          attributes: {
+            title: 'foo',
+          },
+          references: [],
         },
-        references: [],
-      }]
+      ],
     });
 
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalled();

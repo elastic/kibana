@@ -17,23 +17,29 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Hapi from 'hapi';
+import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
-export const createBulkGetRoute = (prereqs) => ({
-  path: '/api/saved_objects/_bulk_get',
-  method: 'POST',
-  config: {
-    pre: [prereqs.getSavedObjectsClient],
-    validate: {
-      payload: Joi.array().items(Joi.object({
-        type: Joi.string().required(),
-        id: Joi.string().required(),
-      }).required())
+const defaultConfig = {
+  'kibana.index': '.kibana',
+};
+
+export function createMockServer(config: { [key: string]: any } = defaultConfig) {
+  const server = new Hapi.Server({
+    port: 0,
+    routes: {
+      validate: {
+        failAction: defaultValidationErrorHandler,
+      },
     },
-    handler(request) {
-      const { savedObjectsClient } = request.pre;
+  });
+  server.config = () => {
+    return {
+      get(key: string) {
+        return config[key];
+      },
+    };
+  };
 
-      return savedObjectsClient.bulkGet(request.payload);
-    }
-  }
-});
+  return server;
+}

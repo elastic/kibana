@@ -17,24 +17,20 @@
  * under the License.
  */
 
-import Joi from 'joi';
+import Hapi from 'hapi';
+import { SavedObjectsClient } from '../';
 
-export const createGetRoute = (prereqs) => ({
-  path: '/api/saved_objects/{type}/{id}',
-  method: 'GET',
-  config: {
-    pre: [prereqs.getSavedObjectsClient],
-    validate: {
-      params: Joi.object().keys({
-        type: Joi.string().required(),
-        id: Joi.string().required(),
-      }).required()
-    },
-    handler(request) {
-      const { savedObjectsClient } = request.pre;
-      const { type, id } = request.params;
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
 
-      return savedObjectsClient.get(type, id);
-    }
-  }
-});
+export interface Prerequisites {
+  getSavedObjectsClient: {
+    assign: string;
+    method: (req: Hapi.Request) => SavedObjectsClient;
+  };
+}
+
+export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
