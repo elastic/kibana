@@ -117,9 +117,9 @@ describe('buildRequestBody(req)', () => {
             {
               range: {
                 '@timestamp': {
-                  gte: 1485463055881,
-                  lte: 1485463955881,
-                  format: 'epoch_millis'
+                  gte: '2017-01-26T20:37:35.881Z',
+                  lte: '2017-01-26T20:52:35.881Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             },
