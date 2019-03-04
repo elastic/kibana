@@ -17,6 +17,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
 import { ReindexState } from '../polling_service';
@@ -25,15 +27,40 @@ import { ReindexProgress } from './progress';
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
     case ReindexStatus.failed:
-      return 'Try again';
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.tryAgainLabel"
+          defaultMessage="Try again"
+        />
+      );
     case ReindexStatus.inProgress:
-      return 'Reindexing…';
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.reindexingLabel"
+          defaultMessage="Reindexing…"
+        />
+      );
     case ReindexStatus.completed:
-      return 'Done!';
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.doneLabel"
+          defaultMessage="Done!"
+        />
+      );
     case ReindexStatus.paused:
-      return 'Resume';
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.resumeLabel"
+          defaultMessage="Resume"
+        />
+      );
     default:
-      return 'Run reindex';
+      return (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexButton.runReindexLabel"
+          defaultMessage="Run reindex"
+        />
+      );
   }
 };
 
@@ -53,24 +80,40 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
     <Fragment>
       <EuiFlyoutBody>
         <EuiCallOut
-          title="Index is unable to ingest, update, or delete documents while reindexing"
+          title={
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.calloutTitle"
+              defaultMessage="Index is unable to ingest, update, or delete documents while reindexing"
+            />
+          }
           color="warning"
           iconType="alert"
         >
           <p>
-            If you can’t stop document updates or need to reindex into a new cluster, consider using
-            a different upgrade strategy.
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.cantStopDetail"
+              defaultMessage="If you can’t stop document updates or need to reindex into a new cluster,
+                consider using a different upgrade strategy."
+            />
           </p>
           <p>
-            Reindexing will continue in the background, but if Kibana shuts down or restarts you
-            will need to return to this page to resume reindexing.
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              defaultMessage="Reindexing will continue in the background, but if Kibana shuts down or restarts you will
+                need to return to this page to resume reindexing."
+            />
           </p>
         </EuiCallOut>
         {!hasRequiredPrivileges && (
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
-              title="You do not have sufficient privileges to reindex this index"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  defaultMessage="You do not have sufficient privileges to reindex this index"
+                />
+              }
               color="danger"
               iconType="alert"
             />
@@ -78,7 +121,12 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
         )}
         <EuiSpacer />
         <EuiTitle size="xs">
-          <h3>Reindexing process</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklistTitle"
+              defaultMessage="Reindexing process"
+            />
+          </h3>
         </EuiTitle>
         <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
       </EuiFlyoutBody>
@@ -86,7 +134,10 @@ export const ChecklistFlyoutStep: React.StatelessComponent<{
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
-              Close
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

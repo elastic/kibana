@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
 
@@ -28,7 +27,7 @@ describe('DocumentMigrator', () => {
       kibanaVersion: '25.2.3',
       migrations: {},
       validateDoc: _.noop,
-      log: sinon.spy(),
+      log: jest.fn(),
     };
   }
 
@@ -107,6 +106,29 @@ describe('DocumentMigrator', () => {
       attributes: { name: 'Chris' },
       migrationVersion: { user: '1.2.3' },
     });
+  });
+
+  it(`doesn't mutate the original document`, () => {
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      migrations: {
+        user: {
+          '1.2.3': (doc: RawSavedObjectDoc) => {
+            _.set(doc, 'attributes.name', 'Mike');
+            return doc;
+          },
+        },
+      },
+    });
+    const originalDoc = {
+      id: 'me',
+      type: 'user',
+      attributes: {},
+      migrationVersion: {},
+    };
+    const migratedDoc = migrator.migrate(originalDoc);
+    expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
+    expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
   });
 
   it('migrates meta properties', () => {
@@ -452,7 +474,7 @@ describe('DocumentMigrator', () => {
   });
 
   it('logs the document and transform that failed', () => {
-    const log = sinon.spy();
+    const log = jest.fn();
     const migrator = new DocumentMigrator({
       ...testOpts(),
       migrations: {
@@ -475,7 +497,7 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.args.filter(([[level]]) => level === 'warning')[0][1];
+      const warning = log.mock.calls.filter(([[level]]) => level === 'warning')[0][1];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }

@@ -21,8 +21,8 @@ jest.mock('ui/kfetch', () => ({}));
 
 import * as sinon from 'sinon';
 import { FindOptions } from '../../../server/saved_objects/service';
-import { SavedObject } from './saved_object';
 import { SavedObjectsClient } from './saved_objects_client';
+import { SimpleSavedObject } from './simple_saved_object';
 
 describe('SavedObjectsClient', () => {
   const doc = {
@@ -78,7 +78,7 @@ describe('SavedObjectsClient', () => {
 
     test('resolves with instantiated SavedObject', async () => {
       const response = await savedObjectsClient.get(doc.type, doc.id);
-      expect(response).toBeInstanceOf(SavedObject);
+      expect(response).toBeInstanceOf(SimpleSavedObject);
       expect(response.type).toBe('config');
       expect(response.get('title')).toBe('Example title');
     });
@@ -292,7 +292,7 @@ describe('SavedObjectsClient', () => {
       const response = await savedObjectsClient.bulkCreate([doc], {});
       expect(response).toHaveProperty('savedObjects');
       expect(response.savedObjects.length).toBe(1);
-      expect(response.savedObjects[0]).toBeInstanceOf(SavedObject);
+      expect(response.savedObjects[0]).toBeInstanceOf(SimpleSavedObject);
     });
 
     test('makes HTTP call', async () => {

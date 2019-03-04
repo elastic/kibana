@@ -14,6 +14,7 @@ import {
   EuiProgress,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { IndexGroup, ReindexStatus, ReindexStep } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../../types';
@@ -50,19 +51,40 @@ const ReindexProgressBar: React.StatelessComponent<{
     <EuiProgress size="s" />
   );
 
-  let cancelText: string;
+  let cancelText: React.ReactNode;
   switch (cancelLoadingState) {
     case LoadingState.Loading:
-      cancelText = 'Cancelling…';
+      cancelText = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancellingLabel"
+          defaultMessage="Cancelling…"
+        />
+      );
       break;
     case LoadingState.Success:
-      cancelText = 'Cancelled';
+      cancelText = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelledLabel"
+          defaultMessage="Cancelled"
+        />
+      );
       break;
     case LoadingState.Error:
       cancelText = 'Could not cancel';
+      cancelText = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.errorLabel"
+          defaultMessage="Could not cancel"
+        />
+      );
       break;
     default:
-      cancelText = 'Cancel';
+      cancelText = (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.cancelButton.cancelLabel"
+          defaultMessage="Cancel"
+        />
+      );
   }
 
   return (
@@ -130,7 +152,15 @@ export const ReindexProgress: React.StatelessComponent<{
 
   // The reindexing step is special because it combines the starting and complete statuses into a single UI
   // with a progress bar.
-  const reindexingDocsStep = { title: 'Reindexing documents' } as StepProgressStep;
+  const reindexingDocsStep = {
+    title: (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.reindexingDocumentsStepTitle"
+        defaultMessage="Reindexing documents"
+      />
+    ),
+  } as StepProgressStep;
+
   if (
     status === ReindexStatus.failed &&
     (lastCompletedStep === ReindexStep.newIndexCreated ||
@@ -165,16 +195,31 @@ export const ReindexProgress: React.StatelessComponent<{
 
   const steps = [
     {
-      title: 'Setting old index to read-only',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.readonlyStepTitle"
+          defaultMessage="Setting old index to read-only"
+        />
+      ),
       ...stepDetails(ReindexStep.readonly),
     },
     {
-      title: 'Creating new index',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+          defaultMessage="Creating new index"
+        />
+      ),
       ...stepDetails(ReindexStep.newIndexCreated),
     },
     reindexingDocsStep,
     {
-      title: 'Swapping original index with alias',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+          defaultMessage="Swapping original index with alias"
+        />
+      ),
       ...stepDetails(ReindexStep.aliasCreated),
     },
   ];
@@ -182,20 +227,40 @@ export const ReindexProgress: React.StatelessComponent<{
   // If this index is part of an index group, add the approriate group services steps.
   if (indexGroup === IndexGroup.ml) {
     steps.unshift({
-      title: 'Pausing Machine Learning jobs',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.pauseMlStepTitle"
+          defaultMessage="Pausing Machine Learning jobs"
+        />
+      ),
       ...stepDetails(ReindexStep.indexGroupServicesStopped),
     });
     steps.push({
-      title: 'Resuming Machine Learning jobs',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeMlStepTitle"
+          defaultMessage="Resuming Machine Learning jobs"
+        />
+      ),
       ...stepDetails(ReindexStep.indexGroupServicesStarted),
     });
   } else if (indexGroup === IndexGroup.watcher) {
     steps.unshift({
-      title: 'Stopping Watcher',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.stopWatcherStepTitle"
+          defaultMessage="Stopping Watcher"
+        />
+      ),
       ...stepDetails(ReindexStep.indexGroupServicesStopped),
     });
     steps.push({
-      title: 'Resuming Watcher',
+      title: (
+        <FormattedMessage
+          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.resumeWatcherStepTitle"
+          defaultMessage="Resuming Watcher"
+        />
+      ),
       ...stepDetails(ReindexStep.indexGroupServicesStarted),
     });
   }

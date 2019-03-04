@@ -13,6 +13,7 @@ import {
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
+import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
 import {
   xpackInfoRoute,
   telemetryRoute,
@@ -125,6 +126,7 @@ export const xpackMain = (kibana) => {
       xpackInfoRoute(server);
       telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
+      server.usage.collectorSet.register(getLocalizationUsageCollector(server));
     }
   });
 };

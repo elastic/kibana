@@ -25,6 +25,7 @@ const clusterPrivileges = [
   'manage_rollup',
   'manage_token',
   'manage_saml',
+  'create_snapshot',
 ];
 const indexPrivileges = [
   'all',

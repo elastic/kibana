@@ -1,0 +1,59 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-es-6-2019.02.04",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-alerts-6",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-kibana-6-2019.02.04",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "index": ".monitoring-beats-6-2019.02.04",
+    "settings": {
+      "index": {
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

@@ -353,5 +353,57 @@ describe('AggConfigs', function () {
         }
       }(topLevelDsl));
     });
+
+    it('adds the parent aggs of nested metrics at every level if the vis is hierarchical', function () {
+      const vis = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [
+          {
+            id: '1',
+            type: 'avg_bucket',
+            schema: 'metric',
+            params: {
+              customBucket: {
+                id: '1-bucket',
+                type: 'date_histogram',
+                schema: 'bucketAgg',
+                params: {
+                  field: '@timestamp'
+                }
+              },
+              customMetric: {
+                id: '1-metric',
+                type: 'count',
+                schema: 'metricAgg',
+                params: {}
+              }
+            }
+          },
+          {
+            id: '2',
+            type: 'terms',
+            schema: 'bucket',
+            params: {
+              field: 'geo.src',
+            }
+          },
+          {
+            id: '3',
+            type: 'terms',
+            schema: 'bucket',
+            params: {
+              field: 'machine.os',
+            }
+          }
+        ]
+      });
+      vis.isHierarchical = _.constant(true);
+
+      const topLevelDsl = vis.aggs.toDsl(vis.isHierarchical())['2'];
+      expect(topLevelDsl.aggs).to.have.keys(['1', '1-bucket']);
+      expect(topLevelDsl.aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
+      expect(topLevelDsl.aggs['3'].aggs).to.have.keys(['1', '1-bucket']);
+      expect(topLevelDsl.aggs['3'].aggs['1'].avg_bucket).to.have.property('buckets_path', '1-bucket>_count');
+    });
   });
 });

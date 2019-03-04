@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 
 import { EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -13,7 +13,7 @@ import { NEXT_MAJOR_VERSION } from '../common/version';
 import { UpgradeAssistantTabs } from './components/tabs';
 
 export const RootComponent: React.StatelessComponent = () => (
-  <Fragment>
+  <div data-test-subj="upgradeAssistantRoot">
     <EuiPageHeader>
       <EuiPageHeaderSection>
         <EuiTitle size="l">
@@ -28,5 +28,5 @@ export const RootComponent: React.StatelessComponent = () => (
       </EuiPageHeaderSection>
     </EuiPageHeader>
     <UpgradeAssistantTabs />
-  </Fragment>
+  </div>
 );

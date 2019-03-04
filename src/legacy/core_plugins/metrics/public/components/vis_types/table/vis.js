@@ -41,6 +41,12 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
+const getPercentileLabel = (metric, item) => {
+  const { value } = _.last(metric.percentiles);
+  const label = calculateLabel(metric, item.metrics);
+  return `${label}, ${value || 0}`;
+};
+
 class TableVis extends Component {
 
   constructor(props) {
@@ -95,7 +101,9 @@ class TableVis extends Component {
     });
     const columns  = model.series.map(item => {
       const metric = _.last(item.metrics);
-      const label = item.label || calculateLabel(metric, item.metrics);
+      const label = metric.type === 'percentile' ?
+        getPercentileLabel(metric, item) :
+        item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -175,11 +183,6 @@ class TableVis extends Component {
     const { visData, model } = this.props;
     const header = this.renderHeader();
     let rows;
-    let reversedClass = '';
-
-    if (this.props.reversed) {
-      reversedClass = 'reversed';
-    }
 
     if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
@@ -204,7 +207,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
+      <div className="tvbVis" data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}
@@ -231,7 +234,6 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  reversed: PropTypes.bool,
   getConfig: PropTypes.func
 };
 

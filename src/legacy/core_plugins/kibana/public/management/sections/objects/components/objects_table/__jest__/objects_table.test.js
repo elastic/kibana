@@ -396,8 +396,8 @@ describe('ObjectsTable', () => {
       );
 
       const mockSelectedSavedObjects = [
-        { id: '1', type: 'index-pattern' },
-        { id: '3', type: 'dashboard' }
+        { id: '1', type: 'index-pattern', title: 'Title 1' },
+        { id: '3', type: 'dashboard', title: 'Title 2' }
       ];
 
       // Ensure all promises resolve

@@ -12,24 +12,11 @@ interface Processor {
   event: 'span';
 }
 
-interface SpanContext {
-  db?: {
-    instance?: string;
-    statement?: string;
-    type?: string;
-    user?: string;
-  };
-  http?: {
-    method?: string;
-    status_code?: number;
-    url?: string;
-  };
-}
-
 export interface Span extends APMDoc {
   processor: Processor;
-  context?: SpanContext;
-  service: { name: string };
+  service: {
+    name: string;
+  };
   span: {
     action: string;
     duration: { us: number };
@@ -39,6 +26,17 @@ export interface Span extends APMDoc {
     subtype: string;
     sync: boolean;
     type: string;
+    http?: {
+      url?: {
+        original?: string;
+      };
+    };
+    db?: {
+      statement?: string;
+      type?: string;
+    };
   };
-  transaction: { id: string };
+  transaction: {
+    id: string;
+  };
 }

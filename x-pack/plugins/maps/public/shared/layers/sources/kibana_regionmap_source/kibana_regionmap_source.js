@@ -17,10 +17,6 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   static description = 'Vector shapes from static files configured in kibana.yml';
   static icon = 'logoKibana';
 
-  constructor(descriptor) {
-    super(descriptor);
-  }
-
   static createDescriptor(options) {
     return {
       type: KibanaRegionmapSource.type,
@@ -28,10 +24,10 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  static renderEditor = ({ onPreviewSource }) => {
+  static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
     const onSelect = (layerConfig) => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(layerConfig);
-      const source = new KibanaRegionmapSource(sourceDescriptor);
+      const source = new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 

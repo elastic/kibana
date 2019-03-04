@@ -22,10 +22,10 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor = ({ onPreviewSource }) => {
+  static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
     const previewTilemap = () => {
       const sourceDescriptor = KibanaTilemapSource.createDescriptor();
-      const source = new KibanaTilemapSource(sourceDescriptor);
+      const source = new KibanaTilemapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
     return (<CreateSourceEditor previewTilemap={previewTilemap}/>);

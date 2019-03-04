@@ -105,7 +105,7 @@ function MetricVisProvider(Private, i18n) {
           title: i18n('metricVis.schemas.splitGroupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     }

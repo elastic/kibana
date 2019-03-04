@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
     after(async () => {
       // turn off collection
       const disableCollection = {
-        "persistent":
+        'persistent':
         {
           xpack: {
             monitoring: {

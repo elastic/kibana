@@ -5,6 +5,8 @@
  */
 
 import { Server } from 'hapi';
+
+jest.mock('../lib/es_version_precheck');
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 
 /**

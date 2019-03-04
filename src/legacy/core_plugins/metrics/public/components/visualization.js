@@ -27,7 +27,7 @@ import topN from './vis_types/top_n/vis';
 import table from './vis_types/table/vis';
 import gauge from './vis_types/gauge/vis';
 import markdown from './vis_types/markdown/vis';
-import Error from './error';
+import ErrorComponent from './error';
 import NoData from './no_data';
 
 const types = {
@@ -46,7 +46,7 @@ function Visualization(props) {
   if (error) {
     return (
       <div className={props.className}>
-        <Error error={error} />
+        <ErrorComponent error={error} />
       </div>
     );
   }
@@ -66,7 +66,6 @@ function Visualization(props) {
     return (
       React.createElement(component, {
         dateFormat: props.dateFormat,
-        reversed: props.reversed,
         backgroundColor: props.backgroundColor,
         model: props.model,
         onBrush: props.onBrush,
@@ -89,7 +88,6 @@ Visualization.propTypes = {
   onChange: PropTypes.func,
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func

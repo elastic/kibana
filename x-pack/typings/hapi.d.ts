@@ -11,7 +11,7 @@ import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 
 declare module 'hapi' {
   interface PluginProperties {
-    cloud: CloudPlugin;
+    cloud?: CloudPlugin;
     xpack_main: XPackMainPlugin;
   }
 }
