@@ -14,7 +14,7 @@ interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;
   hostFieldProps: InputFieldProps;
   isLoading: boolean;
-  disabled: boolean;
+  readOnly: boolean;
   podFieldProps: InputFieldProps;
   tiebreakerFieldProps: InputFieldProps;
   timestampFieldProps: InputFieldProps;
@@ -24,7 +24,7 @@ export const FieldsConfigurationPanel = ({
   containerFieldProps,
   hostFieldProps,
   isLoading,
-  disabled,
+  readOnly,
   podFieldProps,
   tiebreakerFieldProps,
   timestampFieldProps,
@@ -61,7 +61,8 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...timestampFieldProps}
       />
@@ -88,7 +89,8 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...tiebreakerFieldProps}
       />
@@ -115,7 +117,8 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...containerFieldProps}
       />
@@ -142,7 +145,8 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...hostFieldProps}
       />
@@ -169,7 +173,8 @@ export const FieldsConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...podFieldProps}
       />

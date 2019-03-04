@@ -82,7 +82,7 @@ export const SourceConfigurationFlyout = injectI18n(
                             ) : (
                               <FormattedMessage
                                 id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
-                                defaultMessage="View source"
+                                defaultMessage="View source configuration"
                               />
                             )}
                           </h2>
@@ -91,13 +91,13 @@ export const SourceConfigurationFlyout = injectI18n(
                       <EuiFlyoutBody>
                         <NameConfigurationPanel
                           isLoading={isLoading}
-                          disabled={!shouldAllowEdit}
+                          readOnly={!shouldAllowEdit}
                           nameFieldProps={getNameFieldProps()}
                         />
                         <EuiSpacer />
                         <IndicesConfigurationPanel
                           isLoading={isLoading}
-                          disabled={!shouldAllowEdit}
+                          readOnly={!shouldAllowEdit}
                           logAliasFieldProps={getLogAliasFieldProps()}
                           metricAliasFieldProps={getMetricAliasFieldProps()}
                         />
@@ -106,7 +106,7 @@ export const SourceConfigurationFlyout = injectI18n(
                           containerFieldProps={getFieldFieldProps('container')}
                           hostFieldProps={getFieldFieldProps('host')}
                           isLoading={isLoading}
-                          disabled={!shouldAllowEdit}
+                          readOnly={!shouldAllowEdit}
                           podFieldProps={getFieldFieldProps('pod')}
                           tiebreakerFieldProps={getFieldFieldProps('tiebreaker')}
                           timestampFieldProps={getFieldFieldProps('timestamp')}

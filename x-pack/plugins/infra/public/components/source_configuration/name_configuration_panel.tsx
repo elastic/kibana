@@ -12,13 +12,13 @@ import { InputFieldProps } from './source_configuration_form_state';
 
 interface NameConfigurationPanelProps {
   isLoading: boolean;
-  disabled: boolean;
+  readOnly: boolean;
   nameFieldProps: InputFieldProps;
 }
 
 export const NameConfigurationPanel = ({
   isLoading,
-  disabled,
+  readOnly,
   nameFieldProps,
 }: NameConfigurationPanelProps) => (
   <EuiForm>
@@ -41,7 +41,8 @@ export const NameConfigurationPanel = ({
     >
       <EuiFieldText
         fullWidth
-        disabled={isLoading || disabled}
+        disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...nameFieldProps}
       />
