@@ -112,6 +112,7 @@ class CodeProjectItem extends React.PureComponent<{
           <EuiFlexItem grow={false}>
             <div
               className="code-project-button"
+              data-test-subj="settingsRepositoryButton"
               onClick={onClickSettings}
               role="button"
               style={{ visibility: settingsVisibility }}
@@ -125,6 +126,7 @@ class CodeProjectItem extends React.PureComponent<{
           <EuiFlexItem grow={false}>
             <div
               className="code-project-button"
+              data-test-subj="indexRepositoryButton"
               onClick={onClickIndex}
               role="button"
               style={{ visibility: indexVisibility }}
