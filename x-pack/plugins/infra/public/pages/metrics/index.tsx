@@ -62,8 +62,8 @@ interface Props {
   uiCapabilities: UICapabilities;
 }
 
-export const MetricDetail = withTheme(
-  injectUICapabilities(
+export const MetricDetail = injectUICapabilities(
+  withTheme(
     injectI18n(
       class extends React.PureComponent<Props> {
         public static displayName = 'MetricDetailPage';

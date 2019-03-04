@@ -17,32 +17,22 @@
  * under the License.
  */
 
-import PropTypes from 'prop-types';
 import React, { ReactNode } from 'react';
-import { uiCapabilities, UICapabilities } from '../ui_capabilities';
+import { uiCapabilities } from '../ui_capabilities';
+import { UICapabilitiesContext } from './ui_capabilities_context';
 
 interface Props {
   children: ReactNode;
 }
 
-interface ProviderContext {
-  uiCapabilities: UICapabilities;
-}
-
 export class UICapabilitiesProvider extends React.Component<Props, {}> {
   public static displayName: string = 'UICapabilitiesProvider';
 
-  public static childContextTypes = {
-    uiCapabilities: PropTypes.object.isRequired,
-  };
-
-  public getChildContext(): ProviderContext {
-    return {
-      uiCapabilities,
-    };
-  }
-
   public render() {
-    return React.Children.only(this.props.children);
+    return (
+      <UICapabilitiesContext.Provider value={uiCapabilities}>
+        {this.props.children}
+      </UICapabilitiesContext.Provider>
+    );
   }
 }
