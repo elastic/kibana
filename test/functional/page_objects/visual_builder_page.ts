@@ -158,20 +158,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await element.click();
     }
 
-    /**
-     * get all sub-tabs count for `time series`, `metric`, `top n`, `gauge`, `markdown` or `table` tab.
-     *
-     * @returns {Promise<number>}
-     * @memberof VisualBuilderPage
-     */
-    public async getSubTabsCount() {
-      const rootSelector = await find.byCssSelector('.euiTabs.euiTabs--small');
-      const tabsSelector = 'button[role="tab"]';
-      const elements = await rootSelector.findAllByCssSelector(tabsSelector);
-
-      return elements.length;
-    }
-
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();

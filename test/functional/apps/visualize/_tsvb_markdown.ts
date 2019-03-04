@@ -66,9 +66,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
       it('should render mustache list', async () => {
         const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
-
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
-
         await visualBuilder.enterMarkdown(list);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
