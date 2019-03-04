@@ -1,0 +1,47 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as Joi from 'joi';
+import { Legacy } from 'kibana';
+import { resolve } from 'path';
+import { API_PREFIX, PLUGIN_ID } from './common';
+
+export function vizEditor(kibana: any) {
+  return new kibana.Plugin({
+    id: PLUGIN_ID,
+    configPrefix: `xpack.${PLUGIN_ID}`,
+    publicDir: resolve(__dirname, 'public'),
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
+    uiExports: {
+      app: {
+        title: 'Viz Editor',
+        description: 'Explore and visualize data.',
+        main: `plugins/${PLUGIN_ID}/app`,
+        icon: 'plugins/kibana/assets/visualize.svg',
+        euiIconType: 'visualizeApp',
+      },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
+
+    config(joi: Joi.Root) {
+      return joi
+        .object({
+          enabled: joi.boolean().default(true),
+        })
+        .default();
+    },
+
+    init(server: Legacy.Server) {
+      server.route({
+        path: `${API_PREFIX}/example`,
+        method: 'GET',
+        handler: () => {
+          return { time: new Date() };
+        },
+      });
+    },
+  });
+}
