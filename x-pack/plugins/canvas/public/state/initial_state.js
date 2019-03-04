@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiCapabilities } from 'ui/capabilities';
 import { get } from 'lodash';
+import { uiCapabilities } from 'ui/capabilities';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
