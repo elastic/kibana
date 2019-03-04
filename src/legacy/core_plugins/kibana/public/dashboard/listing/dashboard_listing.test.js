@@ -155,6 +155,7 @@ describe('after fetch', () => {
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}
+      getViewUrl={() => {}}
       listingLimit={1}
       hideWriteControls={true}
     />);
