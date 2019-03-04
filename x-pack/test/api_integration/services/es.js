@@ -8,7 +8,7 @@ import { format as formatUrl } from 'url';
 
 import elasticsearch from 'elasticsearch';
 import shieldPlugin from '../../../server/lib/esjs_shield_plugin';
-import { DEFAULT_API_VERSION } from '../../../../src/legacy/core_plugins/elasticsearch/lib/default_api_version';
+import { DEFAULT_API_VERSION } from '../../../../src/core/server/elasticsearch/elasticsearch_config';
 
 export function EsProvider({ getService }) {
   const config = getService('config');

@@ -78,6 +78,7 @@ export default function ({ getService, getPageObjects }) {
     describe('cancel button', () => {
       it('discards the pipeline and redirects to the list', async () => {
         await PageObjects.logstash.gotoPipelineList();
+        await pipelineList.assertExists();
         const originalRows = await pipelineList.readRows();
 
         await PageObjects.logstash.gotoNewPipelineEditor();
