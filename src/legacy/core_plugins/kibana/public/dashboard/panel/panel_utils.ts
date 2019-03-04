@@ -27,6 +27,11 @@ const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
 const PANEL_WIDTH_SCALE_FACTOR = 4;
 
+export interface SemanticVersion {
+  major: number;
+  minor: number;
+}
+
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
   public static convertPanelDataPre_6_1(panel: {
@@ -38,7 +43,6 @@ export class PanelUtils {
     size_y: number;
     version: string;
   }): Partial<PanelState> {
-    // eslint-disable-line camelcase
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
         throw new Error(
@@ -79,7 +83,6 @@ export class PanelUtils {
     },
     useMargins: boolean
   ) {
-    // eslint-disable-line camelcase
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
         throw new Error(
@@ -109,7 +112,7 @@ export class PanelUtils {
     return panel;
   }
 
-  public static parseVersion(version = '6.0.0') {
+  public static parseVersion(version = '6.0.0'): SemanticVersion {
     const versionSplit = version.split('.');
     if (versionSplit.length < 3) {
       throw new Error(
@@ -128,7 +131,7 @@ export class PanelUtils {
     };
   }
 
-  public static initPanelIndexes(panels: PanelState[]) {
+  public static initPanelIndexes(panels: PanelState[]): void {
     // find the largest panelIndex in all the panels
     let maxIndex = this.getMaxPanelIndex(panels);
 
@@ -140,7 +143,7 @@ export class PanelUtils {
     });
   }
 
-  public static getMaxPanelIndex(panels: PanelState[]) {
+  public static getMaxPanelIndex(panels: PanelState[]): number {
     let maxId = panels.reduce((id, panel) => {
       return Math.max(id, Number(panel.panelIndex || id));
     }, 0);
