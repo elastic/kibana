@@ -25,6 +25,7 @@ export const getProductStatus = product => {
     status.color = 'danger';
     status.stepStatus = 'danger';
     status.showInstructions = true;
+    status.showInstanceList = true;
   }
   else if (product.isNetNewUser) {
     status.label = 'Product not found.';
@@ -33,12 +34,14 @@ export const getProductStatus = product => {
     status.stepStatus = 'incomplete';
   }
   else if (product.isPartiallyMigrated) {
+    status.showInstructions = true;
+    status.showInstanceList = true;
+
     if (product.fullyMigratedButNeedsToDisableLegacy) {
       status.label = `We see migrated data, but we also see legacy data. Make sure to disable legacy collection on all instances!`;
       status.icon = 'branch';
       status.color = 'warning';
       status.stepStatus = 'warning';
-      status.showInstructions = true;
     } else {
       status.label = `Found ${product.fullyMigratedUuids.length} migrated
       instances and ${product.internalCollectorsUuids.length} unmigrated instance`;

@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, Component } from 'react';
+import { uniq } from 'lodash';
 import {
   EuiTabbedContent,
   EuiSpacer,
@@ -13,7 +14,9 @@ import {
   EuiSteps,
   EuiButton,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiIcon
 } from '@elastic/eui';
 import { getProductStatus } from './get_product_status';
 import { getInstructionSteps } from '../instruction_steps';
@@ -75,6 +78,53 @@ export class Tabs extends Component {
         );
       }
 
+      let instanceList = null;
+      if (status.showInstanceList) {
+        const instances = [
+          ...uniq(product.internalCollectorsUuids || []).map(uuid => ({
+            uuid,
+            status: 'unmigrated'
+          })),
+          ...uniq(product.fullyMigratedUuids || []).map(uuid => ({
+            uuid,
+            status: 'migrated'
+          }))
+        ];
+
+        if (instances.length) {
+          instanceList = (
+            <Fragment>
+              <EuiSpacer size="m"/>
+              <EuiInMemoryTable
+                items={instances}
+                columns={[
+                  {
+                    field: 'status',
+                    name: 'Status',
+                    width: '100px',
+                    sortable: true,
+                    render: status => {
+                      if (status === 'unmigrated') {
+                        return <EuiIcon type="cross" color="danger"/>;
+                      }
+                      return <EuiIcon type="check" color="secondary"/>;
+                    }
+                  },
+                  {
+                    field: 'uuid',
+                    name: 'UUID',
+                    sortable: true,
+                  },
+                ]}
+                sorting={true}
+                pagination={true}
+              />
+              <EuiSpacer size="m"/>
+            </Fragment>
+          );
+        }
+      }
+
       return {
         id: product.name,
         name: getProductLabel(product.name),
@@ -86,6 +136,7 @@ export class Tabs extends Component {
               color={status.color}
               iconType={status.icon}
             />
+            {instanceList}
             {instructions}
           </Fragment>
         )
