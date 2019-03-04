@@ -17,23 +17,33 @@
  * under the License.
  */
 
+import Hapi from 'hapi';
+import { createMockServer } from './_mock_server';
 import { createCreateRoute } from './create';
-import { MockServer } from './_mock_server';
 
 describe('POST /api/saved_objects/{type}', () => {
-  const savedObjectsClient = { create: jest.fn() };
-  let server;
+  let server: Hapi.Server;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
 
   beforeEach(() => {
     savedObjectsClient.create.mockImplementation(() => Promise.resolve(''));
-    server = new MockServer();
+    server = createMockServer();
 
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
         method() {
           return savedObjectsClient;
-        }
+        },
       },
     };
 
@@ -50,9 +60,9 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
 
     const clientResponse = {
@@ -75,7 +85,7 @@ describe('POST /api/saved_objects/{type}', () => {
     const request = {
       method: 'POST',
       url: '/api/saved_objects/index-pattern',
-      payload: {}
+      payload: {},
     };
 
     const { statusCode, payload } = await server.inject(request);
@@ -93,9 +103,9 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
 
     await server.inject(request);
@@ -114,9 +124,9 @@ describe('POST /api/saved_objects/{type}', () => {
       url: '/api/saved_objects/index-pattern/logstash-*',
       payload: {
         attributes: {
-          title: 'Testing'
-        }
-      }
+          title: 'Testing',
+        },
+      },
     };
 
     await server.inject(request);
