@@ -24,42 +24,54 @@ const SIGFIGS_IF_ROUNDING = 3;  // Number of sigfigs to use for values < 10
 // Formats the value of an actual or typical field from a machine learning anomaly record.
 // mlFunction is the 'function' field from the ML record containing what the user entered e.g. 'high_count',
 // (as opposed to the 'function_description' field which holds an ML-built display hint for the function e.g. 'count'.
-export function formatValue(value, mlFunction, fieldFormat) {
+// If a Kibana fieldFormat is not supplied, will fall back to default
+// formatting depending on the magnitude of the value.
+// For time_of_day or time_of_week functions the anomaly record
+// containing the timestamp of the anomaly should be supplied in
+// order to correctly format the day or week offset to the time of the anomaly.
+export function formatValue(value, mlFunction, fieldFormat, record) {
   // actual and typical values in anomaly record results will be arrays.
   // Unless the array is multi-valued (as it will be for multi-variate analyses such as lat_long),
   // simply return the formatted single value.
   if (Array.isArray(value)) {
     if (value.length === 1) {
-      return formatSingleValue(value[0], mlFunction, fieldFormat);
+      return formatSingleValue(value[0], mlFunction, fieldFormat, record);
     } else {
       // Return with array style formatting.
-      const values = value.map(val => formatSingleValue(val, mlFunction, fieldFormat));
+      const values = value.map(val => formatSingleValue(val, mlFunction, fieldFormat, record));
       return `[${values}]`;
     }
   } else {
-    return formatSingleValue(value, mlFunction, fieldFormat);
+    return formatSingleValue(value, mlFunction, fieldFormat, record);
   }
 }
 
 // Formats a single value according to the specified ML function.
 // If a Kibana fieldFormat is not supplied, will fall back to default
 // formatting depending on the magnitude of the value.
-function formatSingleValue(value, mlFunction, fieldFormat) {
+// For time_of_day or time_of_week functions the anomaly record
+// containing the timestamp of the anomaly should be supplied in
+// order to correctly format the day or week offset to the time of the anomaly.
+function formatSingleValue(value, mlFunction, fieldFormat, record) {
   if (value === undefined || value === null) {
     return '';
   }
 
   // If the analysis function is time_of_week/day, format as day/time.
+  // For time_of_week / day, actual / typical is the UTC offset in seconds from the
+  // start of the week / day, so need to manipulate to UTC moment of the start of the week / day
+  // that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
+  // revert back to configured timezone for formatting.
   if (mlFunction === 'time_of_week') {
-    const d = new Date();
+    const d = ((record !== undefined && record.timestamp !== undefined) ? new Date(record.timestamp) : new Date());
     const i = parseInt(value);
-    d.setTime(i * 1000);
-    return moment(d).format('ddd hh:mm');
+    const utcMoment = moment.utc(d).startOf('week').add(i, 's');
+    return moment(utcMoment.valueOf()).format('ddd HH:mm');
   } else if (mlFunction === 'time_of_day') {
-    const d = new Date();
+    const d = ((record !== undefined && record.timestamp !== undefined) ? new Date(record.timestamp) : new Date());
     const i = parseInt(value);
-    d.setTime(i * 1000);
-    return moment(d).format('hh:mm');
+    const utcMoment = moment.utc(d).startOf('day').add(i, 's');
+    return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {
       return fieldFormat.convert(value, 'text');
