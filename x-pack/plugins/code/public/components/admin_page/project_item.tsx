@@ -53,7 +53,7 @@ class CodeProjectItem extends React.PureComponent<{
 }> {
   public render() {
     const { project, status, enableManagement } = this.props;
-    const { name, org, nextUpdateTimestamp, uri, url } = project;
+    const { name, org, uri, url } = project;
     const onClickDelete = () => this.props.deleteRepo && this.props.deleteRepo(uri);
     const onClickIndex = () => this.props.indexRepo && this.props.indexRepo(uri);
     const onClickSettings = () => this.props.openSettings && this.props.openSettings(uri, url);
@@ -65,7 +65,7 @@ class CodeProjectItem extends React.PureComponent<{
     } else if (status.state === RepoState.READY) {
       footer = (
         <Footer data-test-subj="repositoryIndexDone">
-          LAST UPDATED: {moment(nextUpdateTimestamp).fromNow()}
+          LAST UPDATED: {moment(status.timestamp).fromNow()}
         </Footer>
       );
     } else if (status.state === RepoState.DELETING) {

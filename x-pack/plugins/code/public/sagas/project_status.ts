@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { Action } from 'redux-actions';
 import { delay } from 'redux-saga';
 import { all, call, put, takeEvery, takeLatest } from 'redux-saga/effects';
@@ -156,10 +157,11 @@ const handleRepoCloneStatusPolling = createRepoStatusPollingHandler(
     }
 
     if (status.gitStatus) {
-      const { progress, cloneProgress } = status.gitStatus;
+      const { progress, cloneProgress, timestamp } = status.gitStatus;
       yield put(
         updateCloneProgress({
           progress,
+          timestamp: moment(timestamp).toDate(),
           repoUri,
           cloneProgress,
         })
@@ -204,6 +206,7 @@ const handleRepoIndexStatusPolling = createRepoStatusPollingHandler(
       yield put(
         updateIndexProgress({
           progress: status.indexStatus.progress,
+          timestamp: moment(status.indexStatus.timestamp).toDate(),
           repoUri,
         })
       );
@@ -249,6 +252,7 @@ const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
       yield put(
         updateDeleteProgress({
           progress: status.deleteStatus.progress,
+          timestamp: moment(status.deleteStatus.timestamp).toDate(),
           repoUri,
         })
       );
