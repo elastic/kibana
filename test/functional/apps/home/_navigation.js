@@ -37,18 +37,37 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('detect navigate back issues', async ()=> {
-      // Detect bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
+      let currUrl;
+      // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
+      // Navigate to home app
       await PageObjects.common.navigateToApp('home');
-      const prevUrl = await browser.getCurrentUrl();
+      const homeUrl = await browser.getCurrentUrl();
+
+      // Navigate to discover app
       await appsMenu.clickLink('Discover');
+      const discoverUrl = await browser.getCurrentUrl();
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
+
+      // Navigate to dashboard app
       await appsMenu.clickLink('Dashboard');
-      await browser.goBack(); // go back to discover
+
+      // Navigating back to discover
+      await browser.goBack();
+      currUrl = await browser.getCurrentUrl();
+      expect(currUrl).to.be(modifiedTimeDiscoverUrl);
+
+      // Navigating back from time settings
       await browser.goBack(); // undo time settings
       await browser.goBack(); // undo automatically set config, should it be in the history stack? (separate issue!)
-      await browser.goBack(); // go home
-      const url = await browser.getCurrentUrl();
-      expect(url).to.be(prevUrl);
+      currUrl = await browser.getCurrentUrl();
+      // Discover view also keeps adds some default arguments into the _a URL parameter, so we can only check that the url starts the same.
+      expect(currUrl.startsWith(discoverUrl)).to.be(true);
+
+      // Navigate back home
+      await browser.goBack();
+      currUrl = await browser.getCurrentUrl();
+      expect(currUrl).to.be(homeUrl);
     });
   });
 
