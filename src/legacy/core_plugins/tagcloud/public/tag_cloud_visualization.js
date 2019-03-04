@@ -76,9 +76,6 @@ export class TagCloudVisualization {
 
     if (status.params || status.data) {
       this._updateParams(visParams);
-    }
-
-    if (status.data || status.params) {
       this._updateData(data);
     }
 
