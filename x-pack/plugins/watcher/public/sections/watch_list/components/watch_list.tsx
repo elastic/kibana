@@ -130,8 +130,8 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
     {
       actions: [
         {
-          render: watch => {
-            const disabled = watch.isSystemWatch || watch.isBeingDeleted;
+          render: (watch: any) => {
+            const disabled = watch.isSystemWatch;
             return (
               <EuiButtonEmpty
                 iconType="pencil"
