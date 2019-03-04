@@ -20,9 +20,17 @@
 import Hapi from 'hapi';
 import { SavedObjectsClient } from '../';
 
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
 export interface Prerequisites {
   getSavedObjectsClient: {
     assign: string;
     method: (req: Hapi.Request) => SavedObjectsClient;
   };
 }
+
+export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
