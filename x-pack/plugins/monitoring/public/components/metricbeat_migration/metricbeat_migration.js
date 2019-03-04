@@ -86,6 +86,9 @@ export class MetricbeatMigration extends Component {
           title={title}
           color="warning"
         >
+          <p>
+            Hey! You should be using Metricbeat to ship this data! Want help migrating?
+          </p>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton fill={true} onClick={() => this.showFlyout()}>
