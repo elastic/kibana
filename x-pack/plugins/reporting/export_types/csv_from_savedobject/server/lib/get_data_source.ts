@@ -41,6 +41,7 @@ export async function getDataSource(
       throw new Error(`Could not get saved search info! ${err}`);
     }
   }
+
   try {
     const { attributes: indexPatternAttributes } = await savedObjectsClient.get(
       'index-pattern',
@@ -58,5 +59,6 @@ export async function getDataSource(
   } catch (err) {
     throw new Error(`Could not get index pattern saved object! ${err}`);
   }
+
   return { indexPatternSavedObject, searchSource };
 }

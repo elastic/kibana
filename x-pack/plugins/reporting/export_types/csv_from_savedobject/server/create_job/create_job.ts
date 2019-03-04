@@ -70,7 +70,6 @@ function createJobFn(server: KbnServer) {
 
         // saved search type
         return await createJobSearch(
-          client,
           timerange,
           attributes,
           references,

@@ -19,7 +19,6 @@ interface SearchPanelData {
 }
 
 export async function createJobSearch(
-  savedObjectsClient: any,
   timerange: TimeRangeParams,
   attributes: SavedSearchObjectAttributes,
   references: SavedObjectReference[],
