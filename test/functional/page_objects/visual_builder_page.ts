@@ -69,7 +69,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async clearMarkdown() {
       const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
       // click for switching context(fix for "should render first table variable" test)
       // see _tsvb_markdown.js
       // Since we use ACE editor and that isn't really storing its value inside
@@ -82,7 +81,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async getMarkdownText() {
