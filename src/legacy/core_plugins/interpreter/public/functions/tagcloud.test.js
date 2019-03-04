@@ -17,39 +17,34 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { functionWrapper } from '../../test_helpers';
+import { tagcloud } from './tagcloud';
 
-export const tagcloud = () => ({
-  name: 'tagcloud',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.tagcloud.help', {
-    defaultMessage: 'Tagcloud visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'tagcloud',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
+describe('interpreter/functions#tagcloud', () => {
+  const fn = functionWrapper(tagcloud);
+  const context = {
+    type: 'kibana_datatable',
+    rows: [{ 'col-0-1': 0 }],
+    columns: [{ id: 'col-0-1', name: 'Count' }],
+  };
+  const visConfig = {
+    scale: 'linear',
+    orientation: 'single',
+    minFontSize: 18,
+    maxFontSize: 72,
+    showLabel: true,
+    metric: {
+      accessor: 0,
+      format: {
+        id: 'number',
       },
-    };
-  },
+      params: {},
+      aggType: 'count',
+    },
+  };
+
+  it('returns an object with the correct structure', () => {
+    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    expect(actual).toMatchSnapshot();
+  });
 });
