@@ -17,32 +17,20 @@
  * under the License.
  */
 
-import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { resolve } from 'path';
 
-export function translate(server) {
-  /*
-    Get AST from expression
-  */
-  server.route({
-    method: 'GET',
-    path: '/api/canvas/ast',
-    handler: function (request, h) {
-      if (!request.query.expression) {
-        return h.response({ error: '"expression" query is required' }).code(400);
-      }
-      return fromExpression(request.query.expression);
-    },
-  });
+import execa from 'execa';
 
-  server.route({
-    method: 'POST',
-    path: '/api/canvas/expression',
-    handler: function (request, h) {
-      try {
-        return toExpression(request.payload);
-      } catch (e) {
-        return h.response({ error: e.message }).code(400);
-      }
-    },
-  });
-}
+it('types return values to prevent mutations in typescript', async () => {
+  await expect(
+    execa.stdout('tsc', ['--noEmit'], {
+      cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
+    })
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`
+"Command failed: tsc --noEmit
+
+index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a constant or a read-only property.
+index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a constant or a read-only property.
+"
+`);
+});

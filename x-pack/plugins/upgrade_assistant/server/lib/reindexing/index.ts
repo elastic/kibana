@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { reindexServiceFactory } from './reindex_service';
+export { reindexServiceFactory, isSystemIndex } from './reindex_service';
 export { ReindexWorker } from './worker';
