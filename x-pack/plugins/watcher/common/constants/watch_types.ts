@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const TIME_UNITS = {
-  SECOND: 's',
-  MINUTE: 'm',
-  HOUR: 'h',
-  DAY: 'd'
+export const WATCH_TYPES: { [key: string]: string } = {
+  JSON: 'json',
+
+  THRESHOLD: 'threshold',
+
+  MONITORING: 'monitoring',
 };

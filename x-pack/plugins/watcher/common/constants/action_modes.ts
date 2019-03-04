@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ACTION_MODES = {
-
+export const ACTION_MODES: { [key: string]: string } = {
   // The action execution will be simulated. For example, The email action will create the email that would have been sent but will not actually send it. In this mode, the action may be throttled if the current state of the watch indicates it should be.
   SIMULATE: 'simulate',
 
@@ -19,6 +18,5 @@ export const ACTION_MODES = {
   FORCE_EXECUTE: 'force_execute',
 
   // The action will be skipped and won’t be executed nor simulated. Effectively forcing the action to be throttled.
-  SKIP: 'skip'
-
+  SKIP: 'skip',
 };

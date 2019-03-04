@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// In milliseconds
-const SIXTY_SECONDS = 60 * 1000;
-
-export const REFRESH_INTERVALS = {
-  WATCH_LIST: SIXTY_SECONDS,
-  WATCH_HISTORY: SIXTY_SECONDS,
-  WATCH_VISUALIZATION: SIXTY_SECONDS
+// Durations are in ms
+export const LISTS: { [key: string]: number } = {
+  NEW_ITEMS_HIGHLIGHT_DURATION: 1 * 1000,
 };

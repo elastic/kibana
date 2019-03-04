@@ -4,12 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const WATCH_TYPES = {
-
-  JSON: 'json',
-
-  THRESHOLD: 'threshold',
-
-  MONITORING: 'monitoring'
-
+export const ROUTES: { [key: string]: string } = {
+  API_ROOT: '/api/watcher',
 };

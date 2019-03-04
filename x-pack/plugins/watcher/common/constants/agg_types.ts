@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_SCROLL_SETTINGS = {
+export const AGG_TYPES: { [key: string]: string } = {
+  COUNT: 'count',
 
-  // How long to keep a scroll alive
-  KEEPALIVE: '30s',
+  AVERAGE: 'avg',
 
-  // How many results to return per scroll response
-  PAGE_SIZE: 100
+  SUM: 'sum',
+
+  MIN: 'min',
+
+  MAX: 'max',
 };

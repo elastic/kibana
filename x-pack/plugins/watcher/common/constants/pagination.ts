@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INDEX_NAMES = {
-  WATCHES: '.watches',
-  WATCHER_HISTORY: '.watcher-history-*',
+export const PAGINATION: { [key: string]: number } = {
+  PAGE_SIZE: 20,
 };

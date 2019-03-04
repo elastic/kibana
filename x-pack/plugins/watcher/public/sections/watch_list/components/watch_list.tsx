@@ -34,7 +34,13 @@ const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
 };
 
-const WatchListUi = ({ intl, urlService }: { intl: InjectedIntl; urlService: object }) => {
+const WatchListUi = ({
+  intl,
+  urlService,
+}: {
+  intl: InjectedIntl;
+  urlService: { change: () => void };
+}) => {
   // hooks
   const [watchesLoading, setWatchesLoading] = useState<boolean>(true);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);

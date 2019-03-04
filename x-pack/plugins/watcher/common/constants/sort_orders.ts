@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ROUTES = {
-  API_ROOT: '/api/watcher',
+export const SORT_ORDERS: { [key: string]: string } = {
+  ASCENDING: 'asc',
+  DESCENDING: 'desc',
 };

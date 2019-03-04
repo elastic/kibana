@@ -6,36 +6,34 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ACTION_STATES = {
-
+export const ACTION_STATES: { [key: string]: string } = {
   // Action is not being executed because conditions haven't been met
   OK: i18n.translate('xpack.watcher.constants.actionStates.okStateText', {
-    defaultMessage: 'OK'
+    defaultMessage: 'OK',
   }),
 
   // Action has been acknowledged by user
   ACKNOWLEDGED: i18n.translate('xpack.watcher.constants.actionStates.acknowledgedStateText', {
-    defaultMessage: 'Acked'
+    defaultMessage: 'Acked',
   }),
 
   // Action has been throttled (time-based) by the system
   THROTTLED: i18n.translate('xpack.watcher.constants.actionStates.throttledStateText', {
-    defaultMessage: 'Throttled'
+    defaultMessage: 'Throttled',
   }),
 
   // Action has been completed
   FIRING: i18n.translate('xpack.watcher.constants.actionStates.firingStateText', {
-    defaultMessage: 'Firing'
+    defaultMessage: 'Firing',
   }),
 
   // Action has failed
   ERROR: i18n.translate('xpack.watcher.constants.actionStates.errorStateText', {
-    defaultMessage: 'Error'
+    defaultMessage: 'Error',
   }),
 
   // Action has a configuration error
   CONFIG_ERROR: i18n.translate('xpack.watcher.constants.actionStates.configErrorStateText', {
-    defaultMessage: 'Config error'
+    defaultMessage: 'Config error',
   }),
-
 };
