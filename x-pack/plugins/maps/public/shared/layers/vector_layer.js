@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import { FeatureTooltip } from '../../components/map/feature_tooltip';
 import { getStore } from '../../store/store';
 import { getMapColors } from '../../selectors/map_selectors';
@@ -128,7 +128,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: 'source'
+        origin: SOURCE_DATA_ID_ORIGIN
       };
     });
     const joinFields = [];
@@ -285,11 +285,10 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
       const sourceDataRequest = this.getSourceDataRequest();
       return {
@@ -299,25 +298,25 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
       const { data, meta } = await this._source.getGeoJsonWithMeta({
         layerName,
       }, searchFilters);
-      stopLoading(sourceDataId, requestToken, data, meta);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
       };
     } catch (error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState) {
+  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
@@ -325,27 +324,30 @@ export class VectorLayer extends AbstractLayer {
       return false;
     }
 
-    joinState.join.joinPropertiesToFeatureCollection(
+    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
+
+    updateSourceData(updatedFeatureCollection);
+
     return true;
   }
 
-  async _performJoins(sourceResult, joinStates) {
+  async _performJoins(sourceResult, joinStates, updateSourceData) {
     const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState);
+      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
 
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
+    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
     if (shouldRefresh) {
       onRefreshStyle();
     }

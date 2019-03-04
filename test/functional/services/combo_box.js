@@ -60,10 +60,15 @@ export function ComboBoxProvider({ getService }) {
     async getOptionsList(comboBoxSelector) {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      await testSubjects.click(comboBoxSelector);
-      await this._waitForOptionsListLoading(comboBox);
-      const menu = await retry.try(
-        async () => await testSubjects.find('comboBoxOptionsList'));
+      const menu = await retry.try(async () => {
+        await testSubjects.click(comboBoxSelector);
+        await this._waitForOptionsListLoading(comboBox);
+        const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
+        if (!isOptionsListOpen) {
+          throw new Error('Combo box options list did not open on click');
+        }
+        return await testSubjects.find('comboBoxOptionsList');
+      });
       const optionsText = await menu.getVisibleText();
       await this.closeOptionsList(comboBox);
       return optionsText;

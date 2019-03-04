@@ -16,7 +16,7 @@ import { LayerTOC } from './layer_toc';
 
 export function LayerControl(props) {
   const addLayer = (
-    <EuiButtonEmpty size="xs" flush="right" onClick={props.showAddLayerWizard}>
+    <EuiButtonEmpty size="xs" flush="right" data-test-subj="addLayerButton" onClick={props.showAddLayerWizard}>
       Add layer
     </EuiButtonEmpty>);
 

@@ -8,7 +8,6 @@ export class DataRequest {
   constructor(descriptor) {
     this._descriptor = descriptor;
   }
-
   getData() {
     return this._descriptor.data;
   }

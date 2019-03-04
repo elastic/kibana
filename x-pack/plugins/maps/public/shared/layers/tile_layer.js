@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 export class TileLayer extends AbstractLayer {
 
@@ -38,14 +39,13 @@ export class TileLayer extends AbstractLayer {
     if (sourceDataRequest) {//data is immmutable
       return;
     }
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-    startLoading(sourceDataId, requestToken, dataFilters);
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const url = await this._source.getUrlTemplate();
-      stopLoading(sourceDataId, requestToken, url, {});
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch(error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
 

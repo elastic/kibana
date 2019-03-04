@@ -7,6 +7,7 @@
 import { flow, omit } from 'lodash';
 import {
   CURRENT_MAJOR_VERSION,
+  NEXT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
@@ -18,6 +19,14 @@ export interface ParsedIndexName {
   newIndexName: string;
   cleanBaseName: string;
 }
+
+// the security indices must be whitelisted and follow the pattern set forth in v5
+const SECURITY_MATCHER = new RegExp(`^.security(-[67])?$`);
+const SECURITY_SOURCE = '.security';
+
+// in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
+// avoid conflicts with index patterns/templates/etc
+const REINDEXED_MATCHER = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
 
 /**
  * Validates, and updates deprecated settings and mappings to be applied to the
@@ -31,28 +40,47 @@ export const transformFlatSettings = (flatSettings: FlatSettings) => {
 };
 
 /**
- * Parses an index name
+ * Provides the assumed source of the index name stripping any prefixing
+ * introduced by the upgrade assistant
+ *
+ * Examples:
+ *   .reindex-v7-foo => .foo
+ *   reindex-v7-foo => foo
+ *
  * @param indexName
  */
-export const parseIndexName = (indexName: string): ParsedIndexName => {
+export const sourceNameForIndex = (indexName: string): string => {
   const matches = indexName.match(/^([\.])?(.*)$/) || [];
   const internal = matches[1] || '';
   const baseName = matches[2];
 
+  // special handling for security index
+  if (indexName.match(SECURITY_MATCHER)) {
+    return SECURITY_SOURCE;
+  }
+
+  const cleanBaseName = baseName.replace(REINDEXED_MATCHER, '');
+
+  return `${internal}${cleanBaseName}`;
+};
+
+/**
+ * Provides the index name to re-index into
+ *
+ * .foo -> .reindexed-v7-foo
+ * foo => reindexed-v7-foo
+ */
+export const generateNewIndexName = (indexName: string): string => {
+  const sourceName = sourceNameForIndex(indexName);
   const currentVersion = `reindexed-v${CURRENT_MAJOR_VERSION}`;
 
-  // in 5.6 the upgrade assistant appended to the index, in 6.7+ we prepend to
-  // avoid conflicts with index patterns/templates/etc
-  const reindexedMatcher = new RegExp(`(-reindexed-v5$|reindexed-v${PREV_MAJOR_VERSION}-)`, 'g');
+  if (sourceName === SECURITY_SOURCE) {
+    return `${SECURITY_SOURCE}-${NEXT_MAJOR_VERSION}`;
+  }
 
-  const cleanBaseName = baseName.replace(reindexedMatcher, '');
-
-  return {
-    cleanIndexName: `${internal}${cleanBaseName}`,
-    baseName,
-    cleanBaseName,
-    newIndexName: `${internal}${currentVersion}-${cleanBaseName}`,
-  };
+  return indexName.startsWith('.')
+    ? `.${currentVersion}-${sourceName.substr(1)}`
+    : `${currentVersion}-${sourceName}`;
 };
 
 /**
