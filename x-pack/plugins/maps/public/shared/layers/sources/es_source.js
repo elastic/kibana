@@ -40,6 +40,43 @@ export class AbstractESSource extends AbstractVectorSource {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
 
+  _getValidMetrics() {
+    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
+      if (type === 'count') {
+        return true;
+      }
+
+      if (field) {
+        return true;
+      }
+      return false;
+    });
+    if (metrics.length === 0) {
+      metrics.push({ type: 'count' });
+    }
+    return metrics;
+  }
+
+  _formatMetricKey() {
+    throw new Error('should implement');
+  }
+
+  _formatMetricLabel() {
+    throw new Error('should implement');
+  }
+
+  getMetricFields() {
+    return this._getValidMetrics().map(metric => {
+      const metricKey = this._formatMetricKey(metric);
+      const metricLabel = this._formatMetricLabel(metric);
+      return {
+        ...metric,
+        propertyKey: metricKey,
+        propertyLabel: metricLabel
+      };
+    });
+  }
+
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
@@ -54,7 +91,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource({ buffer, query, timeFilters }, limit) {
+  async _makeSearchSource({ buffer, query, timeFilters, filters }, limit) {
     const indexPattern = await this._getIndexPattern();
     const geoField = await this._getGeoField();
     const isTimeAware = await this.isTimeAware();
@@ -62,22 +99,22 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', () => {
-      const filters = [];
+      const allFilters = [...filters];
       if (this.isFilterByMapBounds() && buffer) {//buffer can be empty
-        filters.push(createExtentFilter(buffer, geoField.name, geoField.type));
+        allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
       }
       if (isTimeAware) {
-        filters.push(timefilter.createFilter(indexPattern, timeFilters));
+        allFilters.push(timefilter.createFilter(indexPattern, timeFilters));
       }
-      return filters;
+      return allFilters;
     });
     searchSource.setField('query', query);
     return searchSource;
   }
 
-  async getBoundsForFilters({ query, timeFilters }) {
+  async getBoundsForFilters({ query, timeFilters, filters }) {
 
-    const searchSource = await this._makeSearchSource({ query, timeFilters }, 0);
+    const searchSource = await this._makeSearchSource({ query, timeFilters, filters }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 

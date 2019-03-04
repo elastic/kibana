@@ -16,7 +16,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     async function getRequestTimestamp() {
-      await PageObjects.maps.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
       const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
@@ -24,7 +25,8 @@ export default function ({ getPageObjects, getService }) {
     }
 
     async function getHits() {
-      await PageObjects.maps.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
       const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
       await inspector.close();
@@ -56,7 +58,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should apply query to search request', async () => {
-        await PageObjects.maps.openInspectorRequestsView();
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
         const requestStats = await inspector.getTableData();
         const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         await inspector.close();

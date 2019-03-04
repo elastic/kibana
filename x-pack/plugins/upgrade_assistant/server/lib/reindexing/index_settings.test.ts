@@ -8,7 +8,12 @@ import {
   CURRENT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
 } from 'x-pack/plugins/upgrade_assistant/common/version';
-import { getReindexWarnings, parseIndexName, transformFlatSettings } from './index_settings';
+import {
+  generateNewIndexName,
+  getReindexWarnings,
+  sourceNameForIndex,
+  transformFlatSettings,
+} from './index_settings';
 
 describe('transformFlatSettings', () => {
   it('does not blow up for empty mappings', () => {
@@ -53,45 +58,57 @@ describe('transformFlatSettings', () => {
   });
 });
 
-describe('parseIndexName', () => {
+describe('sourceNameForIndex', () => {
   it('parses internal indices', () => {
-    expect(parseIndexName('.watches').baseName).toBe('watches');
+    expect(sourceNameForIndex('.myInternalIndex')).toEqual('.myInternalIndex');
   });
 
   it('parses non-internal indices', () => {
-    expect(parseIndexName('myIndex').baseName).toBe('myIndex');
+    expect(sourceNameForIndex('myIndex')).toEqual('myIndex');
   });
 
   it('excludes appended v5 reindexing string from newIndexName', () => {
-    expect(parseIndexName('myIndex-reindexed-v5')).toEqual({
-      baseName: 'myIndex-reindexed-v5',
-      cleanBaseName: 'myIndex',
-      cleanIndexName: 'myIndex',
-      newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-    });
-
-    expect(parseIndexName('.myInternalIndex-reindexed-v5')).toEqual({
-      baseName: 'myInternalIndex-reindexed-v5',
-      cleanBaseName: 'myInternalIndex',
-      cleanIndexName: '.myInternalIndex',
-      newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
-    });
+    expect(sourceNameForIndex('myIndex-reindexed-v5')).toEqual('myIndex');
+    expect(sourceNameForIndex('.myInternalIndex-reindexed-v5')).toEqual('.myInternalIndex');
   });
 
   it('replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION} in newIndexName', () => {
-    expect(parseIndexName(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`)).toEqual({
-      baseName: `reindexed-v${PREV_MAJOR_VERSION}-myIndex`,
-      cleanBaseName: 'myIndex',
-      cleanIndexName: 'myIndex',
-      newIndexName: `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`,
-    });
+    expect(sourceNameForIndex(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`)).toEqual('myIndex');
+    expect(sourceNameForIndex(`.reindexed-v${PREV_MAJOR_VERSION}-myInternalIndex`)).toEqual(
+      '.myInternalIndex'
+    );
+  });
+});
 
-    expect(parseIndexName(`.reindexed-v${PREV_MAJOR_VERSION}-myInternalIndex`)).toEqual({
-      baseName: `reindexed-v${PREV_MAJOR_VERSION}-myInternalIndex`,
-      cleanBaseName: 'myInternalIndex',
-      cleanIndexName: '.myInternalIndex',
-      newIndexName: `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`,
-    });
+describe('generateNewIndexName', () => {
+  it('parses internal indices', () => {
+    expect(generateNewIndexName('.myInternalIndex')).toEqual(
+      `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`
+    );
+  });
+
+  it('parses non-internal indices', () => {
+    expect(generateNewIndexName('myIndex')).toEqual(`reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`);
+  });
+
+  it('excludes appended v5 reindexing string from generateNewIndexName', () => {
+    expect(generateNewIndexName('myIndex-reindexed-v5')).toEqual(
+      `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`
+    );
+
+    expect(generateNewIndexName('.myInternalIndex-reindexed-v5')).toEqual(
+      `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`
+    );
+  });
+
+  it('replaces reindexed-v${PREV_MAJOR_VERSION} with reindexed-v${CURRENT_MAJOR_VERSION} in generateNewIndexName', () => {
+    expect(generateNewIndexName(`reindexed-v${PREV_MAJOR_VERSION}-myIndex`)).toEqual(
+      `reindexed-v${CURRENT_MAJOR_VERSION}-myIndex`
+    );
+
+    expect(generateNewIndexName(`.reindexed-v${PREV_MAJOR_VERSION}-myInternalIndex`)).toEqual(
+      `.reindexed-v${CURRENT_MAJOR_VERSION}-myInternalIndex`
+    );
   });
 });
 
