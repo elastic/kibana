@@ -19,7 +19,13 @@
 
 import { Readable } from 'stream';
 import { SavedObject } from '../service';
-import { collectSavedObjects, extractErrors, splitOverwrites } from './import_saved_objects';
+import {
+  collectSavedObjects,
+  extractErrors,
+  importSavedObjects,
+  resolveImportConflicts,
+  splitOverwrites,
+} from './import_saved_objects';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -272,9 +278,653 @@ Object {
 });
 
 describe('importSavedObjects()', () => {
-  // TODO
+  const savedObjects: SavedObject[] = [
+    {
+      id: '1',
+      type: 'index-pattern',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '2',
+      type: 'search',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '3',
+      type: 'visualization',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '4',
+      type: 'dashboard',
+      attributes: {},
+      references: [],
+    },
+  ];
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+
+  beforeEach(() => {
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
+  });
+
+  test('calls bulkCreate without overwrite', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 4,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [],
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('calls bulkCreate with overwrite', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 4,
+      overwrite: true,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [],
+          "type": "dashboard",
+        },
+      ],
+      Object {
+        "overwrite": true,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('extracts errors', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects.map(savedObject => ({
+        type: savedObject.type,
+        id: savedObject.id,
+        error: {
+          statusCode: 409,
+          message: 'conflict',
+        },
+      })),
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 4,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "id": "1",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "2",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "search",
+    },
+    Object {
+      "id": "3",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "visualization",
+    },
+    Object {
+      "id": "4",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "dashboard",
+    },
+  ],
+  "success": false,
+}
+`);
+  });
 });
 
 describe('resolveImportConflicts()', () => {
-  // TODO
+  const savedObjects: SavedObject[] = [
+    {
+      id: '1',
+      type: 'index-pattern',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '2',
+      type: 'search',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '3',
+      type: 'visualization',
+      attributes: {},
+      references: [],
+    },
+    {
+      id: '4',
+      type: 'dashboard',
+      attributes: {},
+      references: [
+        {
+          name: 'panel_0',
+          type: 'visualization',
+          id: '3',
+        },
+      ],
+    },
+  ];
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+
+  beforeEach(() => {
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
+  });
+
+  test('works with empty parameters', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await resolveImportConflicts({
+      readStream,
+      objectLimit: 4,
+      skips: [],
+      overwrites: [],
+      savedObjectsClient,
+      replaceReferences: [],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('works with skips', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await resolveImportConflicts({
+      readStream,
+      objectLimit: 4,
+      skips: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+      ],
+      overwrites: [],
+      savedObjectsClient,
+      replaceReferences: [],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('works with overwrites', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await resolveImportConflicts({
+      readStream,
+      objectLimit: 4,
+      skips: [],
+      overwrites: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+      ],
+      savedObjectsClient,
+      replaceReferences: [],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+      ],
+      Object {
+        "overwrite": true,
+      },
+    ],
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "3",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('works wtih replaceReferences', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects,
+    });
+    const result = await resolveImportConflicts({
+      readStream,
+      objectLimit: 4,
+      skips: [],
+      overwrites: [],
+      savedObjectsClient,
+      replaceReferences: [
+        {
+          type: 'visualization',
+          from: '3',
+          to: '13',
+        },
+      ],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [],
+          "type": "search",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "3",
+          "references": Array [],
+          "type": "visualization",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "4",
+          "references": Array [
+            Object {
+              "id": "13",
+              "name": "panel_0",
+              "type": "visualization",
+            },
+          ],
+          "type": "dashboard",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('extracts errors', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects.map(savedObject => ({
+        type: savedObject.type,
+        id: savedObject.id,
+        error: {
+          statusCode: 409,
+          message: 'conflict',
+        },
+      })),
+    });
+    const result = await resolveImportConflicts({
+      readStream,
+      objectLimit: 4,
+      skips: [],
+      overwrites: [],
+      savedObjectsClient,
+      replaceReferences: [],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "id": "1",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "index-pattern",
+    },
+    Object {
+      "id": "2",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "search",
+    },
+    Object {
+      "id": "3",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "visualization",
+    },
+    Object {
+      "id": "4",
+      "message": "conflict",
+      "statusCode": 409,
+      "type": "dashboard",
+    },
+  ],
+  "success": false,
+}
+`);
+  });
 });

@@ -19,7 +19,7 @@
 
 import Hapi from 'hapi';
 import { SavedObjectsClient } from '../';
-import { MockServer } from './_mock_server';
+import { createMockServer } from './_mock_server';
 import { createResolveImportConflictsRoute } from './resolve_import_conflicts';
 
 describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
@@ -27,7 +27,7 @@ describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
   let savedObjectsClient: SavedObjectsClient;
 
   beforeEach(() => {
-    server = MockServer();
+    server = createMockServer();
     savedObjectsClient = {
       errors: {} as any,
       bulkCreate: jest.fn(),
