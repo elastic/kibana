@@ -135,7 +135,7 @@ describe('usingPrivileges', () => {
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],
@@ -218,7 +218,7 @@ describe('usingPrivileges', () => {
   ],
   "results": Array [
     Object {
-      "isThrow": false,
+      "type": "return",
       "value": undefined,
     },
   ],

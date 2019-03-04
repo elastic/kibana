@@ -173,7 +173,7 @@ export default function ({ getService }) {
         'version'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(expected.every(m => actual.includes(m))).to.be.ok();
     });
 
   });

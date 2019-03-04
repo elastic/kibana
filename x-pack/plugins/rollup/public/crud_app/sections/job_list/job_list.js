@@ -44,7 +44,7 @@ export class JobListUi extends Component {
     loadJobs: PropTypes.func,
     refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
-    jobs: PropTypes.array,
+    hasJobs: PropTypes.bool,
     isLoading: PropTypes.bool,
   }
 
@@ -92,7 +92,7 @@ export class JobListUi extends Component {
 
   getHeaderSection() {
     return (
-      <EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection data-test-subj="jobListPageHeader">
         <EuiTitle size="l">
           <h1>
             <FormattedMessage
@@ -116,6 +116,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListNoPermission"
           title={title}
           color="warning"
           iconType="help"
@@ -147,6 +148,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListError"
           title={title}
           color="danger"
           iconType="alert"
@@ -160,6 +162,7 @@ export class JobListUi extends Component {
   renderEmpty() {
     return (
       <EuiEmptyPrompt
+        data-test-subj="jobListEmptyPrompt"
         iconType="indexRollupApp"
         title={(
           <h1>
@@ -208,7 +211,7 @@ export class JobListUi extends Component {
           <EuiLoadingSpinner size="m" />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="jobListLoading">
           <EuiText>
             <EuiTextColor color="subdued">
               <FormattedMessage
@@ -248,7 +251,7 @@ export class JobListUi extends Component {
   }
 
   render() {
-    const { isLoading, jobs, jobLoadError } = this.props;
+    const { isLoading, hasJobs, jobLoadError } = this.props;
 
     let content;
 
@@ -258,7 +261,7 @@ export class JobListUi extends Component {
       } else {
         content = this.renderError(jobLoadError);
       }
-    } else if (!isLoading && !jobs.length) {
+    } else if (!isLoading && !hasJobs) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();
@@ -267,6 +270,7 @@ export class JobListUi extends Component {
     return (
       <EuiPageContent
         horizontalPosition="center"
+        className="rollupJobsListPanel"
       >
         {content}
       </EuiPageContent>

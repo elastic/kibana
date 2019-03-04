@@ -37,8 +37,8 @@ export const GlobalHelpExtension: React.SFC = () => {
             hash: '/management/elasticsearch/upgrade_assistant'
           })}
         >
-          {i18n.translate('xpack.apm.helpMenu.migrationAssistantLink', {
-            defaultMessage: 'Migration assistant'
+          {i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
+            defaultMessage: 'Upgrade assistant'
           })}
         </EuiLink>
       </Container>

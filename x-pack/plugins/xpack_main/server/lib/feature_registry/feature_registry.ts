@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IconType } from '@elastic/eui';
 import Joi from 'joi';
 import _ from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
@@ -35,7 +34,7 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
   id: string;
   name: string;
   validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum'>;
-  icon?: IconType;
+  icon?: string;
   description?: string;
   navLinkId?: string;
   app: string[];
