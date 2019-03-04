@@ -18,7 +18,7 @@
  */
 
 import Hapi from 'hapi';
-import { MockServer } from './_mock_server';
+import { createMockServer } from './_mock_server';
 import { createExportByTypeRoute } from './export_by_type';
 
 describe('POST /api/saved_objects/_export_by_type', () => {
@@ -35,7 +35,7 @@ describe('POST /api/saved_objects/_export_by_type', () => {
   };
 
   beforeEach(() => {
-    server = MockServer();
+    server = createMockServer();
     const prereqs = {
       getSavedObjectsClient: {
         assign: 'savedObjectsClient',
