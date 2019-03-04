@@ -10,19 +10,19 @@ import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
-interface ImportTest {
+interface ResolveImportConflictsTest {
   statusCode: number;
   response: (resp: { [key: string]: any }) => void;
 }
 
-interface ImportTests {
-  default: ImportTest;
+interface ResolveImportConflictsTests {
+  default: ResolveImportConflictsTest;
 }
 
-interface ImportTestDefinition {
+interface ResolveImportConflictsTestDefinition {
   user?: TestDefinitionAuthentication;
   spaceId?: string;
-  tests: ImportTests;
+  tests: ResolveImportConflictsTests;
 }
 
 const createImportData = (spaceId: string) => [
@@ -42,13 +42,16 @@ const createImportData = (spaceId: string) => [
   },
 ];
 
-export function importTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function resolveImportConflictsTestSuiteFactory(
+  es: any,
+  esArchiver: any,
+  supertest: SuperTest<any>
+) {
   const createExpectResults = (spaceId = DEFAULT_SPACE_ID) => async (resp: {
     [key: string]: any;
   }) => {
     expect(resp.body).to.eql({
       success: true,
-      successCount: 2,
     });
   };
 
@@ -56,13 +59,13 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create`,
+      message: `Unable to bulk_create dashboard, missing action:saved_objects/dashboard/bulk_create`,
     });
   };
 
-  const makeImportTest = (describeFn: DescribeFn) => (
+  const makeResolveImportConflictsTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: ImportTestDefinition
+    definition: ResolveImportConflictsTestDefinition
   ) => {
     const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
@@ -73,21 +76,34 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       it(`should return ${tests.default.statusCode}`, async () => {
         const data = createImportData(spaceId);
         await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_conflicts`)
           .auth(user.username, user.password)
-          .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+          .field(
+            'overwrites',
+            JSON.stringify([
+              {
+                type: 'dashboard',
+                id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+              },
+            ])
+          )
+          .attach(
+            'file',
+            Buffer.from(data.map(obj => JSON.stringify(obj)).join('\n'), 'utf8'),
+            'export.ndjson'
+          )
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
     });
   };
 
-  const importTest = makeImportTest(describe);
+  const resolveImportConflictsTest = makeResolveImportConflictsTest(describe);
   // @ts-ignore
-  importTest.only = makeImportTest(describe.only);
+  resolveImportConflictsTest.only = makeResolveImportConflictsTest(describe.only);
 
   return {
-    importTest,
+    resolveImportConflictsTest,
     createExpectResults,
     expectRbacForbidden,
   };

@@ -55,10 +55,6 @@ interface ResolveImportConflictsOptions {
     from: string;
     to: string;
   }>;
-  skips: Array<{
-    type: string;
-    id: string;
-  }>;
 }
 
 export function extractErrors(savedObjects: SavedObject[]) {
@@ -77,7 +73,8 @@ export function extractErrors(savedObjects: SavedObject[]) {
 
 export async function collectSavedObjects(
   readStream: Readable,
-  objectLimit: number
+  objectLimit: number,
+  filter?: (obj: SavedObject) => boolean
 ): Promise<SavedObject[]> {
   return (await createPromiseFromStreams([
     readStream,
@@ -87,7 +84,15 @@ export async function collectSavedObjects(
         return JSON.parse(str);
       }
     }),
-    createFilterStream<SavedObject>(obj => !!obj),
+    createFilterStream<SavedObject>(obj => {
+      if (!obj) {
+        return false;
+      }
+      if (filter) {
+        return filter(obj);
+      }
+      return true;
+    }),
     createLimitStream(objectLimit),
     createConcatStream([]),
   ])) as SavedObject[];
@@ -98,18 +103,11 @@ export function splitOverwrites(
   overwrites: Array<{
     type: string;
     id: string;
-  }>,
-  skips: Array<{
-    type: string;
-    id: string;
   }>
 ) {
   const objectsToOverwrite: SavedObject[] = [];
   const objectsToNotOverwrite: SavedObject[] = [];
   for (const savedObject of savedObjects) {
-    if (skips.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
-      continue;
-    }
     if (overwrites.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
       objectsToOverwrite.push(savedObject);
     } else {
@@ -159,7 +157,6 @@ export async function importSavedObjects({
 export async function resolveImportConflicts({
   readStream,
   objectLimit,
-  skips,
   overwrites,
   savedObjectsClient,
   replaceReferences,
@@ -168,7 +165,24 @@ export async function resolveImportConflicts({
   errors?: CustomError[];
 }> {
   const errors: CustomError[] = [];
-  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+  // Create a filter to reduce memory consumption
+  const filter = (obj: SavedObject) => {
+    if (overwrites.some(overwrite => overwrite.type === obj.type && overwrite.id === obj.id)) {
+      return true;
+    }
+    for (const referenceToReplace of replaceReferences) {
+      for (const reference of obj.references) {
+        if (
+          reference.type === referenceToReplace.type &&
+          reference.id === referenceToReplace.from
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  const objectsToImport = await collectSavedObjects(readStream, objectLimit, filter);
 
   // Replace references
   for (const referenceToReplace of replaceReferences) {
@@ -186,8 +200,7 @@ export async function resolveImportConflicts({
 
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
     objectsToImport,
-    overwrites,
-    skips
+    overwrites
   );
 
   // Overwrite objects

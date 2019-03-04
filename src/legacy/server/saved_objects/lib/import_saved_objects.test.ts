@@ -154,8 +154,8 @@ describe('splitOverwrites()', () => {
     },
   ];
 
-  it('empty skips and overwrites puts all objects into objectsToNotOverwrite', () => {
-    const result = splitOverwrites(savedObjects, [], []);
+  it('empty overwrites puts all objects into objectsToNotOverwrite', () => {
+    const result = splitOverwrites(savedObjects, []);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "objectsToNotOverwrite": Array [
@@ -189,60 +189,25 @@ Object {
 `);
   });
 
-  it('all objects in skips returns empty arrays', () => {
-    const result = splitOverwrites(
-      savedObjects,
-      [],
-      [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-        {
-          type: 'visualization',
-          id: '3',
-        },
-        {
-          type: 'dashboard',
-          id: '4',
-        },
-      ]
-    );
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "objectsToNotOverwrite": Array [],
-  "objectsToOverwrite": Array [],
-}
-`);
-  });
-
   it('all objects in overwrites puts all objects into objectsToOverwrite', () => {
-    const result = splitOverwrites(
-      savedObjects,
-      [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-        {
-          type: 'visualization',
-          id: '3',
-        },
-        {
-          type: 'dashboard',
-          id: '4',
-        },
-      ],
-      []
-    );
+    const result = splitOverwrites(savedObjects, [
+      {
+        type: 'index-pattern',
+        id: '1',
+      },
+      {
+        type: 'search',
+        id: '2',
+      },
+      {
+        type: 'visualization',
+        id: '3',
+      },
+      {
+        type: 'dashboard',
+        id: '4',
+      },
+    ]);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "objectsToNotOverwrite": Array [],
@@ -581,7 +546,6 @@ describe('resolveImportConflicts()', () => {
     const result = await resolveImportConflicts({
       readStream,
       objectLimit: 4,
-      skips: [],
       overwrites: [],
       savedObjectsClient,
       replaceReferences: [],
@@ -639,76 +603,6 @@ Object {
 `);
   });
 
-  test('works with skips', async () => {
-    const readStream = new Readable({
-      read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
-        this.push(null);
-      },
-    });
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects,
-    });
-    const result = await resolveImportConflicts({
-      readStream,
-      objectLimit: 4,
-      skips: [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-      ],
-      overwrites: [],
-      savedObjectsClient,
-      replaceReferences: [],
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "success": true,
-}
-`);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-  });
-
   test('works with overwrites', async () => {
     const readStream = new Readable({
       read() {
@@ -722,7 +616,6 @@ Object {
     const result = await resolveImportConflicts({
       readStream,
       objectLimit: 4,
-      skips: [],
       overwrites: [
         {
           type: 'index-pattern',
@@ -809,7 +702,6 @@ Object {
     const result = await resolveImportConflicts({
       readStream,
       objectLimit: 4,
-      skips: [],
       overwrites: [],
       savedObjectsClient,
       replaceReferences: [
@@ -893,7 +785,6 @@ Object {
     const result = await resolveImportConflicts({
       readStream,
       objectLimit: 4,
-      skips: [],
       overwrites: [],
       savedObjectsClient,
       replaceReferences: [],
