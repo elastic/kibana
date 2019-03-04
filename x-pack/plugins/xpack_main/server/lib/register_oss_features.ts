@@ -71,7 +71,7 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['dashboard'],
+          all: ['dashboard', 'url'],
           read: [
             'config',
             'index-pattern',
