@@ -5,6 +5,7 @@ bower_components
 /.es
 /plugins
 /built_assets
+/html_docs
 /src/fixtures/vislib/mock_data
 /src/legacy/ui/public/angular-bootstrap
 /src/legacy/ui/public/flot-charts
