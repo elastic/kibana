@@ -38,6 +38,7 @@ exports[`renders RangeControl 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
+    labelType="label"
   >
     <EuiFlexGroup
       alignItems="center"
