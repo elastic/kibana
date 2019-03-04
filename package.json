@@ -14,6 +14,7 @@
   "version": "8.0.0",
   "branch": "master",
   "types": "./kibana.d.ts",
+  "tsdocMetadata": "./build/tsdoc-metadata.json",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
@@ -258,7 +259,7 @@
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
     "@microsoft/api-documenter": "7.0.24",
-    "@microsoft/api-extractor": "7.0.17",
+    "@microsoft/api-extractor": "7.0.21",
     "@octokit/rest": "^15.10.0",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",
