@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { memoize } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { nodesToWaffleMap } from '../../containers/waffle/nodes_to_wafflemap';
@@ -11,7 +12,7 @@ import {
   isWaffleMapGroupWithNodes,
 } from '../../containers/waffle/type_guards';
 import { InfraNode, InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
-import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../lib/lib';
+import { InfraWaffleMapBounds, InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 import { AutoSizer } from '../auto_sizer';
 import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
@@ -28,6 +29,19 @@ interface Props {
   bounds: InfraWaffleMapBounds;
 }
 
+// We really only want to calculate the map when the first width and height
+// measurement is taken because subsequent measurements will recursively get bigger
+// as the items are rendered.
+const createMap = memoize(
+  applyWaffleMapLayout,
+  (map: InfraWaffleMapGroup[], width: number, height: number) => {
+    if (width && height) {
+      return [map];
+    }
+    return [map, width, height];
+  }
+);
+
 export const Map: React.SFC<Props> = ({
   nodes,
   options,
@@ -41,7 +55,7 @@ export const Map: React.SFC<Props> = ({
   return (
     <AutoSizer content>
       {({ measureRef, content: { width = 0, height = 0 } }) => {
-        const groupsWithLayout = applyWaffleMapLayout(map, width, height);
+        const groupsWithLayout = createMap(map, width, height);
         return (
           <WaffleMapOuterContainer
             innerRef={(el: any) => measureRef(el)}
