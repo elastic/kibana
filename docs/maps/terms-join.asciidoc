@@ -10,11 +10,11 @@ and provide richer tooltip context.
 [role="screenshot"]
 image::maps/images/terms_join.png[]
 
-Follow the example below to understand how *Terms joins* augments vector features with additional properties.
-This example will use Elastic Maps Service(EMS) World Countries as the vector source and
-the Kibana sample data set "Sample web logs" as the elasticsearch index.
+Follow the example below to understand how *Terms joins* work.
+This example uses Elastic Maps Service(EMS) World Countries as the vector source and
+the Kibana sample data set "Sample web logs" as the Elasticsearch index.
 
-Example feature from World Countries
+Example feature from World Countries:
 --------------------------------------------------
 {
   geometry: {
@@ -30,7 +30,7 @@ Example feature from World Countries
 }
 --------------------------------------------------
 
-Example documents from Sample web logs
+Example documents from Sample web logs:
 --------------------------------------------------
 {
   bytes: 1837,
@@ -62,18 +62,18 @@ Example documents from Sample web logs
 }
 --------------------------------------------------
 
-The JOIN configuration links the vector source "World Countries" to the elasticsearch index "kibana_sample_data_logs"
+The JOIN configuration links the vector source "World Countries" to the Elasticsearch index "kibana_sample_data_logs"
 on the shared key *iso2 = geo.src*.
 [role="screenshot"]
 image::maps/images/terms_join_shared_key_config.png[]
 
-The METRICS configuration defines two metric aggregations;
+The METRICS configuration defines two metric aggregations:
 the count of all documents in the terms bucket and
 the average of the field "bytes" for all documents in the terms bucket.
 [role="screenshot"]
 image::maps/images/terms_join_metric_config.png[]
 
-Example terms aggregation response
+Example terms aggregation response:
 --------------------------------------------------
 {
   aggregations: {
@@ -92,6 +92,6 @@ Example terms aggregation response
 }
 --------------------------------------------------
 
-Finally, the terms aggregation response is then joined with the vector features.
+Finally, the terms aggregation response is joined with the vector features.
 [role="screenshot"]
 image::maps/images/terms_join_tooltip.png[]

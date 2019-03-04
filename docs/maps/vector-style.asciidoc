@@ -9,7 +9,7 @@
 
 *Symbol size*:: Defines the symbol size of point features.
 
-Click the *link* button to toggle between static styling and data driven styling.
+Click the *link* button to toggle between static styling and data-driven styling.
 
 [role="screenshot"]
 image::maps/images/vector_style_static.png[]

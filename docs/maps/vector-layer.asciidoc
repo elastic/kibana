@@ -1,15 +1,15 @@
 [[vector-layer]]
 == Vector layer
 
-Display points, lines, and polygons.
+The vector layer displays points, lines, and polygons.
 
 [role="screenshot"]
 image::maps/images/vector_layer.png[]
 
-Vector layers can be created from the following sources
+You can create a vector layer from the following sources:
 
 *Custom vector shapes*:: Vector shapes from static files configured in kibana.yml.
-See *map.regionmap.&#42;* in <<settings>> for more details.
+See map.regionmap.* in <<settings>> for details.
 
 *Documents*:: Geospatial data from a Kibana index pattern.
 The index must contain at least one field mapped as {ref}/geo-point.html[geo_point] or {ref}/geo-shape.html[geo_shape].

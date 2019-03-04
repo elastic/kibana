@@ -1,15 +1,15 @@
 [[tile-layer]]
 == Tile layer
 
-Display image tiles served from a tile server.
+The tile layer displays image tiles served from a tile server.
 
 [role="screenshot"]
 image::maps/images/tile_layer.png[]
 
-Tile layers can be created from the following sources
+You can create a tile layer from the following data sources:
 
 *Custom Tile Map Service*:: Map tiles configured in kibana.yml.
-See *map.tilemap.url* in <<settings>> for more details.
+See map.tilemap.url in <<settings>> for details.
 
 *Tiles*:: Map tiles from https://www.elastic.co/elastic-maps-service[Elastic Maps Service].
 
