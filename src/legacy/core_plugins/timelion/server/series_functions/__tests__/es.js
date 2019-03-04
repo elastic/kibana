@@ -280,9 +280,9 @@ describe(filename, () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({ range: { '@timestamp': {
-          lte: 5,
-          gte: 1,
-          format: 'epoch_millis'
+          format: 'strict_date_optional_time',
+          gte: '1970-01-01T00:00:00.001Z',
+          lte: '1970-01-01T00:00:00.005Z'
         } } });
 
         config.kibana = true;
