@@ -5,11 +5,11 @@
  */
 
 import 'ui/autoload/all';
-import chrome from 'ui/chrome';
 import './angular/config';
 import './angular/services';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import chrome from 'ui/chrome';
 import { CanvasRootController } from './angular/controllers';
 
 // Import the uiExports that the application uses

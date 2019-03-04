@@ -72,8 +72,11 @@ uiRoutes
       $scope.find = (search) => {
         return services.dashboards.find(search, $scope.listingLimit);
       };
-      $scope.edit = ({ id }) => {
-        kbnUrl.redirect(createDashboardEditUrl(id));
+      $scope.editItem = ({ id }) => {
+        kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+      };
+      $scope.getViewUrl = ({ id }) => {
+        return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);
@@ -129,7 +132,7 @@ uiRoutes
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
+      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)

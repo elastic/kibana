@@ -5,5 +5,7 @@
  */
 
 export interface CloudPlugin {
-  isCloudEnabled: boolean;
+  config: {
+    isCloudEnabled: boolean;
+  };
 }

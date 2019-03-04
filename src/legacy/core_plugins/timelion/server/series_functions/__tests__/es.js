@@ -143,7 +143,7 @@ describe(filename, () => {
         expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
           avg: {
             script: {
-              inline: 'doc["bytes"].value',
+              source: 'doc["bytes"].value',
               lang: 'painless'
             }
           }
@@ -198,27 +198,16 @@ describe(filename, () => {
     });
 
     describe('timeouts', () => {
-      let sandbox;
-
-      beforeEach(() => {
-        sandbox = sinon.createSandbox();
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-      });
-
       it('sets the timeout on the request', () => {
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
         expect(request.timeout).to.equal('30000ms');
       });
 
       it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
-        sandbox.stub(tlConfig.server.config(), 'get').withArgs('elasticsearch.shardTimeout').returns(0);
         config.index = 'beer';
-        const request = fn(config, tlConfig, emptyScriptedFields);
+        const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
         expect(request).to.not.have.property('timeout');
       });
@@ -338,14 +327,14 @@ describe(filename, () => {
 
         expect(aggs.scriptedBeer.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.terms.script).to.eql({
-          inline: 'doc["beer"].value',
+          source: 'doc["beer"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.terms.size).to.eql(5);
 
         expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
-          inline: 'doc["wine"].value',
+          source: 'doc["wine"].value',
           lang: 'painless'
         });
         expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);

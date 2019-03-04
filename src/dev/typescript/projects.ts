@@ -25,6 +25,7 @@ import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), 'kibana/test'),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),
 
