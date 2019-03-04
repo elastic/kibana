@@ -45,6 +45,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <ClusterPrivileges
         onChange={[Function]}
@@ -106,6 +107,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}

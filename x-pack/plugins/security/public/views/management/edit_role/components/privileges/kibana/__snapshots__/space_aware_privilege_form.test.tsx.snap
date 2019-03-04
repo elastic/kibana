@@ -214,6 +214,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={true}
       helpText="No access to spaces"
+      labelType="label"
     >
       <PrivilegeSelector
         allowNone={true}

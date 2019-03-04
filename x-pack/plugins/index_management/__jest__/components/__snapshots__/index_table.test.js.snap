@@ -1,32 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`index table clear cache button works from context menu 1`] = `"clearing cache..."`;
+exports[`index table clear cache button works from context menu 1`] = `"statusclearing cache..."`;
 
-exports[`index table clear cache button works from context menu 2`] = `"open"`;
+exports[`index table clear cache button works from context menu 2`] = `"statusopen"`;
 
-exports[`index table close index button works from context menu 1`] = `"closing..."`;
+exports[`index table close index button works from context menu 1`] = `"statusclosing..."`;
 
-exports[`index table close index button works from context menu 2`] = `"closed"`;
+exports[`index table close index button works from context menu 2`] = `"statusclosed"`;
 
 exports[`index table edit index button works from context menu 1`] = `"Edit settings"`;
 
-exports[`index table flush button works from context menu 1`] = `"flushing..."`;
+exports[`index table flush button works from context menu 1`] = `"statusflushing..."`;
 
-exports[`index table flush button works from context menu 2`] = `"open"`;
+exports[`index table flush button works from context menu 2`] = `"statusopen"`;
 
-exports[`index table force merge button works from context menu 1`] = `"open"`;
+exports[`index table force merge button works from context menu 1`] = `"statusopen"`;
 
-exports[`index table force merge button works from context menu 2`] = `"forcing merge..."`;
+exports[`index table force merge button works from context menu 2`] = `"statusforcing merge..."`;
 
-exports[`index table force merge button works from context menu 3`] = `"open"`;
+exports[`index table force merge button works from context menu 3`] = `"statusopen"`;
 
-exports[`index table open index button works from context menu 1`] = `"opening..."`;
+exports[`index table open index button works from context menu 1`] = `"statusopening..."`;
 
-exports[`index table open index button works from context menu 2`] = `"open"`;
+exports[`index table open index button works from context menu 2`] = `"statusopen"`;
 
-exports[`index table refresh button works from context menu 1`] = `"refreshing..."`;
+exports[`index table refresh button works from context menu 1`] = `"statusrefreshing..."`;
 
-exports[`index table refresh button works from context menu 2`] = `"open"`;
+exports[`index table refresh button works from context menu 2`] = `"statusopen"`;
 
 exports[`index table should change pages when a pagination link is clicked on 1`] = `
 Array [
