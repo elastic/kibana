@@ -34,7 +34,6 @@ import { SourceFiltersTable } from './source_filters_table';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
@@ -164,21 +163,9 @@ uiRoutes
       indexPattern: function ($route, redirectWhenMissing, indexPatterns) {
         return indexPatterns
           .get($route.current.params.indexPatternId)
-          .catch(redirectWhenMissing('/management/kibana/index_pattern'));
+          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }
     },
-  });
-
-uiRoutes
-  .when('/management/kibana/index_patterns', {
-    redirectTo() {
-      const defaultIndex = chrome.getUiSettingsClient().get('defaultIndex');
-      if (defaultIndex) {
-        return `/management/kibana/index_patterns/${defaultIndex}`;
-      }
-
-      return '/management/kibana/index_pattern';
-    }
   });
 
 uiModules.get('apps/management')

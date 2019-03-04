@@ -83,7 +83,7 @@ export default function HistogramVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split Slices' }),
           min: 0,
           max: Infinity,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -93,7 +93,7 @@ export default function HistogramVisType(Private, i18n) {
           mustBeFirst: true,
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     },

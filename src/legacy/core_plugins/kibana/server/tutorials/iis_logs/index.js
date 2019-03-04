@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function iisLogsSpecProvider(server, context) {
   const moduleName = 'iis';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['WINDOWS'];
   return {
     id: 'iisLogs',
@@ -59,7 +57,7 @@ export function iisLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

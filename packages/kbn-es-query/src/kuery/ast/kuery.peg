@@ -256,7 +256,7 @@ OptionalSpace
 
 EscapedWhitespace
   = '\\t' { return '\t'; }
-  / '\\r' { return '\t'; }
+  / '\\r' { return '\r'; }
   / '\\n' { return '\n'; }
 
 EscapedSpecialCharacter

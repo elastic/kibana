@@ -372,6 +372,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onIndexNameChange}
+        testSubj="ccrFollowerIndexFormFollowerIndexInput"
       />
     );
 
@@ -505,6 +506,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onFieldsChange}
+        testSubj="ccrFollowerIndexFormLeaderIndexInput"
       />
     );
 
@@ -546,6 +548,7 @@ export class FollowerIndexForm extends PureComponent {
                   )}
                   checked={areAdvancedSettingsVisible}
                   onChange={this.toggleAdvancedSettings}
+                  data-test-subj="ccrFollowerIndexFormCustomAdvancedSettingsToggle"
                 />
               </Fragment>
             )}
@@ -558,7 +561,7 @@ export class FollowerIndexForm extends PureComponent {
             <Fragment>
               <EuiSpacer size="s"/>
               {advancedSettingsFields.map((advancedSetting) => {
-                const { field, title, description, label, helpText, defaultValue, type } = advancedSetting;
+                const { field, testSubject, title, description, label, helpText, defaultValue, type } = advancedSetting;
                 return (
                   <FormEntryRow
                     key={field}
@@ -577,6 +580,7 @@ export class FollowerIndexForm extends PureComponent {
                     type={type}
                     areErrorsVisible={areErrorsVisible}
                     onValueUpdate={this.onFieldsChange}
+                    testSubj={testSubject}
                   />
                 );
               })}
@@ -653,6 +657,7 @@ export class FollowerIndexForm extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
+              data-test-subj="ccrFollowerIndexFormSubmitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -662,6 +667,7 @@ export class FollowerIndexForm extends PureComponent {
             <EuiButtonEmpty
               color="primary"
               onClick={this.cancelForm}
+              data-test-subj="ccrFollowerIndexFormCancelButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"

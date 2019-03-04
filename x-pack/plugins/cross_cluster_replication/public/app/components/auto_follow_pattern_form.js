@@ -289,6 +289,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={e => this.onFieldsChange({ name: e.target.value })}
               fullWidth
               disabled={!isNew}
+              data-test-subj="ccrAutoFollowPatternFormNameInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -447,6 +448,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
               fullWidth
+              data-test-subj="ccrAutoFollowPatternFormIndexPatternInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -501,6 +503,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternPrefix}
                   onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
                   fullWidth
+                  data-test-subj="ccrAutoFollowPatternFormPrefixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -523,6 +526,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternSuffix}
                   onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
                   fullWidth
+                  data-test-subj="ccrAutoFollowPatternFormSuffixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -615,6 +619,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
+              data-test-subj="ccrAutoFollowPatternFormSubmitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -628,6 +633,7 @@ export class AutoFollowPatternForm extends PureComponent {
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
                 defaultMessage="Cancel"
+                data-test-subj="ccrAutoFollowPatternFormCancelButton"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

@@ -18,7 +18,7 @@ declare module 'react-redux-request' {
 
   export type RRRRender<T, P = any[]> = (
     res: RRRRenderResponse<T, P>
-  ) => JSX.Element | null;
+  ) => React.ReactNode;
 
   export interface RequestProps<T, P> {
     id: string;

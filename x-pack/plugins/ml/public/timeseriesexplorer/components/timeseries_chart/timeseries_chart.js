@@ -116,12 +116,19 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     zoomTo: PropTypes.object
   };
 
+  rowMouseenterSubscriber = null;
+  rowMouseleaveSubscriber = null;
+
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
     element.html('');
 
-    mlTableService.rowMouseenter.unwatch(this.tableRecordMousenterListener);
-    mlTableService.rowMouseleave.unwatch(this.tableRecordMouseleaveListener);
+    if (this.rowMouseenterSubscriber !== null) {
+      this.rowMouseenterSubscriber.unsubscribe();
+    }
+    if (this.rowMouseleaveSubscriber !== null) {
+      this.rowMouseleaveSubscriber.unsubscribe();
+    }
   }
 
   componentDidMount() {
@@ -171,26 +178,26 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
     // to highlight the corresponding anomaly mark in the focus chart.
     const highlightFocusChartAnomaly = this.highlightFocusChartAnomaly.bind(this);
     const boundHighlightFocusChartAnnotation = highlightFocusChartAnnotation.bind(this);
-    this.tableRecordMousenterListener = function (record, type = 'anomaly') {
+    function tableRecordMousenterListener({ record, type = 'anomaly' }) {
       if (type === 'anomaly') {
         highlightFocusChartAnomaly(record);
       } else if (type === 'annotation') {
         boundHighlightFocusChartAnnotation(record);
       }
-    };
+    }
 
     const unhighlightFocusChartAnomaly = this.unhighlightFocusChartAnomaly.bind(this);
     const boundUnhighlightFocusChartAnnotation = unhighlightFocusChartAnnotation.bind(this);
-    this.tableRecordMouseleaveListener = function (record, type = 'anomaly') {
+    function tableRecordMouseleaveListener({ record, type = 'anomaly' }) {
       if (type === 'anomaly') {
         unhighlightFocusChartAnomaly(record);
       } else {
         boundUnhighlightFocusChartAnnotation(record);
       }
-    };
+    }
 
-    mlTableService.rowMouseenter.watch(this.tableRecordMousenterListener);
-    mlTableService.rowMouseleave.watch(this.tableRecordMouseleaveListener);
+    this.rowMouseenterSubscriber = mlTableService.rowMouseenter$.subscribe(tableRecordMousenterListener);
+    this.rowMouseleaveSubscriber = mlTableService.rowMouseleave$.subscribe(tableRecordMouseleaveListener);
 
     this.renderChart();
     this.drawContextChartSelection();

@@ -75,11 +75,6 @@ describe('Span', () => {
     service: {
       name: 'service name'
     },
-    context: {
-      db: {
-        statement: 'db statement'
-      }
-    },
     parent: {
       id: 'parentId'
     },
@@ -90,7 +85,10 @@ describe('Span', () => {
       name: 'span name',
       subtype: 'my subtype',
       sync: false,
-      type: 'span type'
+      type: 'span type',
+      db: {
+        statement: 'db statement'
+      }
     },
     transaction: {
       id: 'transaction id'
@@ -140,7 +138,6 @@ describe('Error', () => {
         version: 'v1337'
       }
     },
-    context: {},
     parent: {
       id: 'parentId'
     },

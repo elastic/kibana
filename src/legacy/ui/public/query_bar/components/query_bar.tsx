@@ -573,10 +573,9 @@ export class QueryBarUI extends Component<Props, State> {
                 <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
-                      className="kuiLocalSearchAssistedInput__input"
                       placeholder={this.props.intl.formatMessage({
                         id: 'common.ui.queryBar.searchInputPlaceholder',
-                        defaultMessage: 'Search… (e.g. status:200 AND extension:PHP)',
+                        defaultMessage: 'Search',
                       })}
                       value={this.state.query.query}
                       onKeyDown={this.onKeyDown}
@@ -592,7 +591,6 @@ export class QueryBarUI extends Component<Props, State> {
                       }}
                       autoComplete="off"
                       spellCheck={false}
-                      icon="console"
                       aria-label={this.props.intl.formatMessage({
                         id: 'common.ui.queryBar.searchInputAriaLabel',
                         defaultMessage: 'Search input',
@@ -606,13 +604,13 @@ export class QueryBarUI extends Component<Props, State> {
                       }
                       role="textbox"
                       prepend={this.props.prepend}
+                      append={
+                        <QueryLanguageSwitcher
+                          language={this.state.query.language}
+                          onSelectLanguage={this.onSelectLanguage}
+                        />
+                      }
                     />
-                    <div className="kuiLocalSearchAssistedInput__assistance">
-                      <QueryLanguageSwitcher
-                        language={this.state.query.language}
-                        onSelectLanguage={this.onSelectLanguage}
-                      />
-                    </div>
                   </div>
                 </div>
               </form>

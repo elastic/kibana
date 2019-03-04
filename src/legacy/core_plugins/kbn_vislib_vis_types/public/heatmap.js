@@ -98,7 +98,7 @@ export default function HeatmapVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.heatmap.segmentTitle', { defaultMessage: 'X-Axis' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -106,7 +106,7 @@ export default function HeatmapVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.heatmap.groupTitle', { defaultMessage: 'Y-Axis' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -114,7 +114,7 @@ export default function HeatmapVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.heatmap.splitTitle', { defaultMessage: 'Split Chart' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     }

@@ -6,6 +6,7 @@
 
 export const filebeatMySQLRules = [
   {
+    // pre-ECS
     when: {
       exists: ['mysql.error.message'],
     },
@@ -19,6 +20,48 @@ export const filebeatMySQLRules = [
     ],
   },
   {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'mysql.slowlog.query'],
+    },
+    format: [
+      {
+        constant: '[MySQL][slowlog] ',
+      },
+      {
+        field: 'user.name',
+      },
+      {
+        constant: '@',
+      },
+      {
+        field: 'source.domain',
+      },
+      {
+        constant: ' [',
+      },
+      {
+        field: 'source.ip',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        constant: ' - ',
+      },
+      {
+        field: 'event.duration',
+      },
+      {
+        constant: ' ns - ',
+      },
+      {
+        field: 'mysql.slowlog.query',
+      },
+    ],
+  },
+  {
+    // pre-ECS
     when: {
       exists: ['mysql.slowlog.user', 'mysql.slowlog.query_time.sec', 'mysql.slowlog.query'],
     },
@@ -51,7 +94,7 @@ export const filebeatMySQLRules = [
         field: 'mysql.slowlog.query_time.sec',
       },
       {
-        constant: 'sec - ',
+        constant: ' s - ',
       },
       {
         field: 'mysql.slowlog.query',

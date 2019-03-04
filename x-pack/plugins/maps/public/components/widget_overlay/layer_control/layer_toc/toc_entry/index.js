@@ -7,13 +7,19 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
-import { fitToLayerExtent, setSelectedLayer, toggleLayerVisible } from '../../../../../actions/store_actions';
+import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import {
+  fitToLayerExtent,
+  setSelectedLayer,
+  toggleLayerVisible,
+  removeTransientLayer
+} from '../../../../../actions/store_actions';
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
+    isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
     getSelectedLayerSelector: () => {
       return getSelectedLayer(state);
@@ -26,8 +32,9 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return ({
-    openLayerPanel: layerId => {
-      dispatch(setSelectedLayer(layerId));
+    openLayerPanel: async layerId => {
+      await dispatch(removeTransientLayer());
+      await dispatch(setSelectedLayer(layerId));
       dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     toggleVisible: layerId => {
