@@ -131,16 +131,9 @@ export const createProxyRoute = ({
           .type('text/plain')
           .header('warning', esResponse.headers.warning);
       };
-      if (method === 'DELETE') {
-        let data = Buffer.alloc(0);
-        while (true) {
-          const datum = payload.read();
-          if (datum) {
-            data = Buffer.concat([data, datum]);
-          } else {
-            return await makeRequest(data);
-          }
-        }
+      if (method.toUpperCase() === 'DELETE') {
+        const data = await Wreck.read(payload);
+        return await makeRequest(data);
       } else {
         return await makeRequest(payload);
       }
