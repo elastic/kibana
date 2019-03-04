@@ -17,38 +17,28 @@
  * under the License.
  */
 
-import React from 'react';
+// TODO: remove this when EUI supports types for this.
+// @ts-ignore: implicit any for JS file
+import { takeMountedSnapshot } from '@elastic/eui/lib/test';
 import _ from 'lodash';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardPanel } from './dashboard_panel';
-import { DashboardViewMode } from '../dashboard_view_mode';
-import { PanelError } from '../panel/panel_error';
-import { store } from '../../store';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
-
-import {
-  updateViewMode,
-  setPanels,
-  updateTimeRange,
-  embeddableIsInitialized,
-} from '../actions';
+import React from 'react';
 import { Provider } from 'react-redux';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { store } from '../../store';
+// @ts-ignore: implicit any for JS file
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+import { embeddableIsInitialized, setPanels, updateTimeRange, updateViewMode } from '../actions';
+import { DashboardViewMode } from '../dashboard_view_mode';
+import { DashboardPanel, DashboardPanelUiProps } from './dashboard_panel';
 
-import {
-  takeMountedSnapshot,
-} from '@elastic/eui/lib/test';
+import { PanelError } from './panel_error';
 
-function getProps(props = {}) {
+function getProps(props = {}): DashboardPanelUiProps {
   const defaultTestProps = {
     panel: { panelIndex: 'foo1' },
     viewOnlyMode: false,
-    destroy: () => {},
     initialized: true,
     lastReloadRequestTime: 0,
-    embeddableIsInitialized: () => {},
-    embeddableIsInitializing: () => {},
-    embeddableStateChanged: () => {},
-    embeddableError: () => {},
     embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
@@ -57,22 +47,47 @@ function getProps(props = {}) {
 beforeAll(() => {
   store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
-  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  store.dispatch(
+    setPanels({
+      foo1: {
+        panelIndex: 'foo1',
+        id: 'hi',
+        version: '123',
+        type: 'viz',
+        embeddableConfig: {},
+        gridData: {
+          x: 1,
+          y: 1,
+          w: 1,
+          h: 1,
+          i: 'hi',
+        },
+      },
+    })
+  );
   const metadata = { title: 'my embeddable title', editUrl: 'editme' };
   store.dispatch(embeddableIsInitialized({ metadata, panelId: 'foo1' }));
 });
 
 test('DashboardPanel matches snapshot', () => {
-  const component = mountWithIntl(<Provider store={store}><DashboardPanel.WrappedComponent {...getProps()} /></Provider>);
+  const component = mountWithIntl(
+    <Provider store={store}>
+      <DashboardPanel.WrappedComponent {...getProps()} />
+    </Provider>
+  );
   expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
 test('renders an error when error prop is passed', () => {
   const props = getProps({
-    error: 'Simulated error'
+    error: 'Simulated error',
   });
 
-  const component = mountWithIntl(<Provider store={store}><DashboardPanel.WrappedComponent {...props} /></Provider>);
+  const component = mountWithIntl(
+    <Provider store={store}>
+      <DashboardPanel.WrappedComponent {...props} />
+    </Provider>
+  );
   const panelError = component.find(PanelError);
   expect(panelError.length).toBe(1);
 });
