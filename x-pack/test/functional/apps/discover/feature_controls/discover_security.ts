@@ -16,6 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     'discover',
     'timePicker',
     'security',
+    'share',
     'spaceSelector',
   ]);
   const testSubjects = getService('testSubjects');
@@ -91,6 +92,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
+
+      it('shows create short-url button', async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
+      });
     });
 
     describe('global discover read-only privileges', () => {
@@ -147,6 +153,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await setDiscoverTimeRange();
         await PageObjects.discover.clickFieldListItem('bytes');
         await PageObjects.discover.expectMissingFieldListItemVisualize('bytes');
+      });
+
+      it(`doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
     });
 

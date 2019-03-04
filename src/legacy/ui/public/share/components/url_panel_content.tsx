@@ -391,7 +391,7 @@ class UrlPanelContentUI extends Component<Props, State> {
     );
 
     return (
-      <EuiFormRow helpText={this.state.shortUrlErrorMsg}>
+      <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );
