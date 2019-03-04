@@ -124,12 +124,19 @@ export async function importSavedObjects({
   objectLimit,
   overwrite,
   savedObjectsClient,
-}: ImportSavedObjectsOptions): Promise<{ success: boolean; errors?: CustomError[] }> {
+}: ImportSavedObjectsOptions): Promise<{
+  success: boolean;
+  errors?: CustomError[];
+  successCount: number;
+}> {
   const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   if (objectsToImport.length === 0) {
-    return { success: true };
+    return {
+      success: true,
+      successCount: 0,
+    };
   }
 
   if (overwrite) {
@@ -144,6 +151,7 @@ export async function importSavedObjects({
 
   return {
     success: errors.length === 0,
+    successCount: objectsToImport.length - errors.length,
     ...(errors.length ? { errors } : []),
   };
 }
@@ -155,7 +163,10 @@ export async function resolveImportConflicts({
   overwrites,
   savedObjectsClient,
   replaceReferences,
-}: ResolveImportConflictsOptions): Promise<{ success: boolean; errors?: CustomError[] }> {
+}: ResolveImportConflictsOptions): Promise<{
+  success: boolean;
+  errors?: CustomError[];
+}> {
   const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 

@@ -70,7 +70,10 @@ describe('POST /api/saved_objects/_import', () => {
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
     expect(statusCode).toBe(200);
-    expect(response).toEqual({ success: true });
+    expect(response).toEqual({
+      success: true,
+      successCount: 0,
+    });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 });

@@ -26,8 +26,8 @@ The request body must be of type multipart/form-data.
 ==== Response body
 
 The response body will have a top level `success` property that indicates
-if the import was successful or not. In the scenario the import wasn't successful
-a top level `errors` array will contain the objects that failed to import.
+if the import was successful or not as well as a `successCount` indicating how many records are successfully imported.
+In the scenario the import wasn't successful a top level `errors` array will contain the objects that failed to import.
 
 ==== Examples
 
@@ -53,6 +53,7 @@ containing a JSON structure similar to the following example:
 [source,js]
 --------------------------------------------------
 {
-  "success": true
+  "success": true,
+  "successCount": 2
 }
 --------------------------------------------------

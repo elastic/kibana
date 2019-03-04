@@ -344,6 +344,7 @@ describe('importSavedObjects()', () => {
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 4,
 }
 `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
@@ -407,6 +408,7 @@ Object {
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 4,
 }
 `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
@@ -506,6 +508,7 @@ Object {
     },
   ],
   "success": false,
+  "successCount": 0,
 }
 `);
   });

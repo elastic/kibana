@@ -128,6 +128,6 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
         })
         .code(409);
     }
-    return { success: importResult.success };
+    return importResult;
   },
 });

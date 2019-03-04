@@ -38,6 +38,7 @@ export default function ({ getService }) {
             .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
+                successCount: 3,
               });
             });
         });
@@ -97,7 +98,10 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true });
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
+              });
             });
         });
       });

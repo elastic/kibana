@@ -96,6 +96,6 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
         })
         .code(409);
     }
-    return { success: importResult.success };
+    return importResult;
   },
 });
