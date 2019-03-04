@@ -460,7 +460,7 @@ describe('kuery AST API', function () {
     });
 
     it('should return true for Lucene proximity', function () {
-      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: ba~2');
+      const result = ast.doesKueryExpressionHaveLuceneSyntaxError('bar: "ba"~2');
       expect(result).to.eql(true);
     });
 

@@ -40,6 +40,7 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
 import {
+  EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -696,32 +697,52 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private handleLuceneSyntaxWarning() {
-    const { intl } = this.props;
+    const { intl, store } = this.props;
     const { query, language } = this.state.query;
-    if (language === 'kuery' && doesKueryExpressionHaveLuceneSyntaxError(query)) {
-      toastNotifications.addWarning({
+    if (
+      language === 'kuery' &&
+      !store.get('kibana.luceneSyntaxWarningOptOut') &&
+      doesKueryExpressionHaveLuceneSyntaxError(query)
+    ) {
+      const toast = toastNotifications.addWarning({
         title: intl.formatMessage({
           id: 'kbn.kql.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
         text: (
-          <FormattedMessage
-            id="kbn.kql.luceneSyntaxWarningMessage"
-            defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
-             have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
-            values={{
-              link: (
-                <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
-                  <FormattedMessage
-                    id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
-                    defaultMessage="here"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          <div>
+            <p>
+              <FormattedMessage
+                id="kbn.kql.luceneSyntaxWarningMessage"
+                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
+               have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
+                values={{
+                  link: (
+                    <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
+                      <FormattedMessage
+                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                        defaultMessage="here"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" onClick={onOptOut}>
+                  Don't show again
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </div>
         ),
       });
+
+      function onOptOut() {
+        store.set('kibana.luceneSyntaxWarningOptOut', true);
+        toastNotifications.remove(toast);
+      }
     }
   }
 }
