@@ -186,7 +186,6 @@ export const fetchAllRenderables = createThunk(
       fetchElementsOnPages([currentPage]).then(() => dispatch(args.inFlightComplete()));
     } else {
       fetchElementsOnPages([currentPage])
-        // .then(() => fetchElementsOnPages(otherPages))
         .then(() => {
           return otherPages.reduce((chain, page) => {
             return chain.then(() => fetchElementsOnPages([page]));
