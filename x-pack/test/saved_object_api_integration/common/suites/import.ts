@@ -48,6 +48,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   }) => {
     expect(resp.body).to.eql({
       success: true,
+      successCount: 2,
     });
   };
 
