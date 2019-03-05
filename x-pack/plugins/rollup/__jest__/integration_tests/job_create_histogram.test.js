@@ -201,7 +201,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       addHistogramFieldToList();
     });
 
-    describe('--> invalid', () => {
+    describe('input validation', () => {
       afterEach(() => {
         expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
       });

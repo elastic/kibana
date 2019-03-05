@@ -116,7 +116,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
     });
 
-    describe('when no terms are availalbe', () => {
+    describe('when no terms are available', () => {
       it('should indicate it to the user', async () => {
         mockIndexPatternValidityResponse({ numericFields: [], keywordFields: [] });
         await goToStepAndOpenFieldChooser();
