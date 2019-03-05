@@ -16,7 +16,6 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName, showFilterMessage = false }) => (
   <EuiEmptyPrompt
-    iconType="alert"
     titleSize="xs"
     title={
       <h2>
