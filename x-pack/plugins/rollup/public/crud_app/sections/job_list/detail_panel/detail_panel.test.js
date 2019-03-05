@@ -261,12 +261,12 @@ describe('<DetailPanel />', () => {
       const getRowsText = () => (
         tabContent
           .find('tr')
-          .map(row => row.text())
+          .map(row => row.find('.euiTableCellContent').text())
           .slice(1) // we remove the first row as it is the table header
       );
       it('should list the Job terms fields', () => {
         const rowsText = getRowsText();
-        const expected = defaultJob.terms.map(term => `Field${term.name}`);
+        const expected = defaultJob.terms.map(term => term.name);
         expect(rowsText).toEqual(expected);
       });
     });
@@ -279,13 +279,13 @@ describe('<DetailPanel />', () => {
       const getRowsText = () => (
         tabContent
           .find('tr')
-          .map(row => row.text())
+          .map(row => row.find('.euiTableCellContent').text())
           .slice(1) // we remove the first row as it is the table header
       );
 
       it('should list the Job histogram fields', () => {
         const rowsText = getRowsText();
-        const expected = defaultJob.histogram.map(h => `Field${h.name}`);
+        const expected = defaultJob.histogram.map(h => h.name);
         expect(rowsText).toEqual(expected);
       });
     });
@@ -309,10 +309,10 @@ describe('<DetailPanel />', () => {
           row.find('td').forEach((cell, j) => {
             if (j === 0) {
               // field
-              expect(cell.text()).toEqual(`Field${metric.name}`);
+              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.name);
             } else if (j === 1) {
               // types
-              expect(cell.text()).toEqual(`Types${metric.types.join(', ')}`);
+              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.types.join(', '));
             }
           });
         });
