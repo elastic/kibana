@@ -236,24 +236,36 @@ The Kibana functional tests define the vast majority of the actual functionality
 * Methods
 ** `browser.refresh()` - Refreshes the page that we are on in the browser.
 ** `browser.dragAndDrop(from, to)` - Drags an element from one point to another. 
-*** `from`
-**** {element: WebElementWrapper} 
-**** {{ x: number, y: number}, offset: { x: number, y: number }}
-*** `to`
-**** {element: WebElementWrapper} 
-**** {{ x: number, y: number}, offset: { x: number, y: number }}
+*** args
+**** `from`
+***** {element: WebElementWrapper} 
+***** {{ x: number, y: number}, offset: { x: number, y: number }}
+**** `to`
+***** {element: WebElementWrapper} 
+***** {{ x: number, y: number}, offset: { x: number, y: number }}
 ** `browser.moveMouseTo(element, xOffset, yOffset)` - Moves the remote environment's mouse cursor to the specified element or relative position.
-*** `element`
-**** {element: WebElementWrapper} 
-*** `xOffset`
-**** number
-*** `yOffset`
-**** number
+*** args
+**** `element`
+***** {element: WebElementWrapper} 
+**** `xOffset`
+***** number: number of pixels from the left to offset mouse
+**** `yOffset`
+***** number: number of pixels from the top to offset mouse
+** `browser.getWindowSize()` - Retrieves the a rect describing the current top-level window's size and position.
+*** returns
+**** {height: number, width: number, x: number, y: number}
+** `browser.setWindowSize(...args)` - Sets the dimensions of a window.
+*** args
+**** args[0] : number : width
+**** args[1] : number : height
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
-* Helpers for retrying operations
-* Popular methods:
+* **A Last Resort For Retrying Operations**
+* Up until recently, `retry` was our go-to operation for waiting for a condition to be true before continuing.
+* This has been replaced by the waiting mechanism within the `find` service. Within this waiting mechanism, retries are 
+* already included. Calling `retry` directly should be avoided unless it's the only option.
+* Methods
 ** `retry.try(fn)` - execute `fn` in a loop until it succeeds or the default try timeout elapses
 ** `retry.tryForTime(ms, fn)` execute fn in a loop until it succeeds or `ms` milliseconds elapses
 
