@@ -17,11 +17,6 @@
  * under the License.
  */
 
-export { createBulkCreateRoute } from './bulk_create';
-export { createBulkGetRoute } from './bulk_get';
-export { createCreateRoute } from './create';
-export { createDeleteRoute } from './delete';
-export { createFindRoute } from './find';
-export { createGetRoute } from './get';
-export { createUpdateRoute } from './update';
-export { createExportRoute } from './export';
+import Hapi from 'hapi';
+
+export function MockServer(config?: { [key: string]: any }): Hapi.Server;
