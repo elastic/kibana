@@ -646,7 +646,7 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
       // disable brushing (creation of annotations) when annotations aren't shown
       focusChart.select('.mlAnnotationBrush')
-        .style('pointer-events', (showAnnotations) ? 'all' : 'none');
+        .style('display', (showAnnotations) ? null : 'none');
     }
 
     focusChart.select('.values-line')
