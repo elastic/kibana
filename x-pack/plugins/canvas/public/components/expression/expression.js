@@ -14,12 +14,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
-  EuiSelect,
   EuiRange,
   EuiToolTip,
 } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
-import { fontSizes } from '../text_style_picker/font_sizes';
 
 const minFontSize = 12;
 const maxFontSize = 32;
@@ -76,19 +74,6 @@ export const Expression = ({
             checked={isAutocompleteEnabled}
             onChange={toggleAutocompleteEnabled}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                compressed
-                value={fontSize}
-                options={fontSizes.map(size => ({ text: `${size}`, value: size }))}
-                onChange={e => setFontSize(e.target.value)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>Font size</EuiFlexItem>
-          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="xs">

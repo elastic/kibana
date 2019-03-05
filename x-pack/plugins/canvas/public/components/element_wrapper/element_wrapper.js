@@ -24,10 +24,6 @@ export class ElementWrapper extends React.PureComponent {
     this._handlers = props.createHandlers(props.selectedPage);
   }
 
-  componentDidUpdate(prevProps) {
-    console.log(this.props.renderable, prevProps.renderable);
-  }
-
   _handlers = null;
 
   render() {

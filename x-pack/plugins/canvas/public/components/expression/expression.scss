@@ -1,5 +1,5 @@
 .canvasExpression--compactSize {
-  max-height: 400px;
+  max-height: 480px;
 }
 
 .canvasExpression--controls {
@@ -43,7 +43,8 @@
     height: 100px;
   }
 
-  .autocompleteItems, .autocompleteReference {
+  .autocompleteItems,
+  .autocompleteReference {
     height: 98px;
   }
 }
