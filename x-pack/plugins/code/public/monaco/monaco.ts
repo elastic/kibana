@@ -127,6 +127,8 @@ function getTheme() {
   }
 }
 
+const themeName = getTheme();
+
 function getHex(rgbString: string) {
   const colorValues = rgbString.slice(4, -1);
   const colorArray = colorValues.split(', ');
@@ -136,25 +138,25 @@ function getHex(rgbString: string) {
 }
 
 const syntaxTheme = {
-  keyword: getHex(getTheme().euiColorAccent),
-  comment: getHex(getTheme().euiColorMediumShade),
-  delimiter: getHex(getTheme().euiColorSecondary),
-  string: getHex(getTheme().euiColorPrimary),
-  number: getHex(getTheme().euiColorWarning),
-  regexp: getHex(getTheme().euiColorPrimary),
-  types: `${IS_DARK_THEME ? getHex(getTheme().euiColorVis5) : getHex(getTheme().euiColorVis9)}`,
-  annotation: getHex(getTheme().euiColorLightShade),
-  tag: getHex(getTheme().euiColorAccent),
-  symbol: getHex(getTheme().euiColorDanger),
-  foreground: getHex(getTheme().euiColorDarkestShade),
-  editorBackground: getHex(getTheme().euiColorLightestShade),
-  lineNumbers: getHex(getTheme().euiColorDarkShade),
-  editorIndentGuide: getHex(getTheme().euiColorLightShade),
-  selectionBackground: getHex(getTheme().euiColorLightShade),
-  editorWidgetBackground: getHex(getTheme().euiColorLightestShade),
-  editorWidgetBorder: getHex(getTheme().euiColorLightShade),
-  findMatchBackground: getHex(getTheme().euiColorWarning),
-  findMatchHighlightBackground: getHex(getTheme().euiColorWarning),
+  keyword: getHex(themeName.euiColorAccent),
+  comment: getHex(themeName.euiColorMediumShade),
+  delimiter: getHex(themeName.euiColorSecondary),
+  string: getHex(themeName.euiColorPrimary),
+  number: getHex(themeName.euiColorWarning),
+  regexp: getHex(themeName.euiColorPrimary),
+  types: `${IS_DARK_THEME ? getHex(themeName.euiColorVis5) : getHex(themeName.euiColorVis9)}`,
+  annotation: getHex(themeName.euiColorLightShade),
+  tag: getHex(themeName.euiColorAccent),
+  symbol: getHex(themeName.euiColorDanger),
+  foreground: getHex(themeName.euiColorDarkestShade),
+  editorBackground: getHex(themeName.euiColorLightestShade),
+  lineNumbers: getHex(themeName.euiColorDarkShade),
+  editorIndentGuide: getHex(themeName.euiColorLightShade),
+  selectionBackground: getHex(themeName.euiColorLightShade),
+  editorWidgetBackground: getHex(themeName.euiColorLightestShade),
+  editorWidgetBorder: getHex(themeName.euiColorLightShade),
+  findMatchBackground: getHex(themeName.euiColorWarning),
+  findMatchHighlightBackground: getHex(themeName.euiColorWarning),
 };
 
 monaco.editor.defineTheme('euiColors', {

@@ -237,3 +237,11 @@
     box-shadow: none;
   }
 }
+
+.codeBlame__item {
+  padding: $euiSizeXS $euiSizeS;
+  border-top: $euiBorderThin;
+  &.codeBlame__item--first{
+    border-top: none;
+  }
+}

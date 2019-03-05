@@ -23,32 +23,31 @@ const Avatar = styled(EuiAvatar)`
   margin: auto ${theme.euiSizeS} auto 0;
 `;
 
-const Root = styled(EuiFlexGroup)<{ isFirstLine: boolean }>`
-  padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.s};
-  border-top: ${props => (props.isFirstLine ? 'none' : theme.euiBorderThick)};
-`;
-
 export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: boolean }> {
   public render(): React.ReactNode {
     const { blame, isFirstLine } = this.props;
     return (
-      <Root gutterSize="none" justifyContent="spaceBetween" isFirstLine={isFirstLine}>
+      <EuiFlexGroup
+        className={isFirstLine ? 'codeBlame__item codeBlame__item--first ' : 'codeBlame__item'}
+        gutterSize="none"
+        justifyContent="spaceBetween"
+      >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem grow={false}>
               <Avatar size="s" type="space" name={blame.committer.name} initialsLength={1} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <BlameMessage>{blame.commit.message}</BlameMessage>
+              <BlameMessage size="xs">{blame.commit.message}</BlameMessage>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText size="xs">
             <EuiTextColor color="subdued">{moment(blame.commit.date).fromNow()}</EuiTextColor>
           </EuiText>
         </EuiFlexItem>
-      </Root>
+      </EuiFlexGroup>
     );
   }
 }
