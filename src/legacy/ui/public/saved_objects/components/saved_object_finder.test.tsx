@@ -121,7 +121,7 @@ describe('SavedObjectsFinder', () => {
       .find(EuiListGroupItem)
       .first()
       .simulate('click');
-    expect(chooseStub.calledWith('1', 'search', 'Search')).toEqual(true);
+    expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`)).toEqual(true);
   });
 
   describe('sorting', () => {

@@ -23,39 +23,16 @@ exports[`render 1`] = `
         />
       </h1>
     </EuiTitle>
-    <EuiTabs
-      expand={false}
-      size="m"
-    >
-      <EuiTab
-        data-test-subj="addVisualizationTab"
-        disabled={false}
-        isSelected={true}
-        key="vis"
-        onClick={[Function]}
-      >
-        Visualization
-      </EuiTab>
-      <EuiTab
-        data-test-subj="addSavedSearchTab"
-        disabled={false}
-        isSelected={false}
-        key="search"
-        onClick={[Function]}
-      >
-        Saved Search
-      </EuiTab>
-    </EuiTabs>
     <EuiSpacer
       size="s"
     />
     <SavedObjectFinder
       callToActionButton={
-        <EuiButton
+        <EuiButtonEmpty
           color="primary"
           data-test-subj="addNewSavedObjectLink"
-          fill={false}
           iconSide="left"
+          iconType="plusInCircle"
           onClick={[Function]}
           type="button"
         >
@@ -64,13 +41,12 @@ exports[`render 1`] = `
             id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
             values={Object {}}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       }
-      key="visSavedObjectFinder"
-      noItemsMessage="No matching visualizations found."
+      noItemsMessage="No matching objects found."
       onChoose={[Function]}
-      savedObjectType="visualization"
-      visTypes={Object {}}
+      savedObjectMetaData={Array []}
+      showFilter={true}
     />
   </EuiFlyoutBody>
 </EuiFlyout>

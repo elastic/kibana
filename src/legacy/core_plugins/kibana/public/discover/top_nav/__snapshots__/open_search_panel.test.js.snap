@@ -28,11 +28,11 @@ exports[`render 1`] = `
     />
     <SavedObjectFinder
       callToActionButton={
-        <EuiButton
+        <EuiButtonEmpty
           color="primary"
-          fill={false}
           href="#/management/kibana/objects?_a=(tab:search)"
           iconSide="left"
+          iconType="gear"
           onClick={[Function]}
           type="button"
         >
@@ -41,9 +41,8 @@ exports[`render 1`] = `
             id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
             values={Object {}}
           />
-        </EuiButton>
+        </EuiButtonEmpty>
       }
-      makeUrl={[Function]}
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
@@ -52,7 +51,16 @@ exports[`render 1`] = `
         />
       }
       onChoose={[Function]}
-      savedObjectType="search"
+      savedObjectMetaData={
+        Array [
+          Object {
+            "getIconForSavedObject": [Function],
+            "name": "Search",
+            "showSavedObject": [Function],
+            "type": "search",
+          },
+        ]
+      }
     />
   </EuiFlyoutBody>
 </EuiFlyout>

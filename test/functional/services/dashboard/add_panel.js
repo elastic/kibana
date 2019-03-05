@@ -42,9 +42,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async toggleFilter(type) {
       log.debug(`DashboardAddPanel.addToFilter(${type})`);
-      await this.toggleFilterPopover();
-      await testSubjects.click(`savedObjectFinderFilter-${type}`);
-      await this.toggleFilterPopover();
+      const filterButtonExists = await testSubjects.exists('savedObjectFinderFilterButton');
+      if (filterButtonExists) {
+        await this.toggleFilterPopover();
+        await testSubjects.click(`savedObjectFinderFilter-${type}`);
+        await this.toggleFilterPopover();
+      }
     }
 
     async addEveryEmbeddableOnCurrentPage() {
