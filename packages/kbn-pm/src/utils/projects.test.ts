@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { symlink, unlink } from 'fs';
+import { mkdir, symlink } from 'fs';
 import { join, resolve } from 'path';
+import rmdir from 'rimraf';
 import { promisify } from 'util';
 
 import { getProjectPaths } from '../config';
@@ -33,13 +34,19 @@ import {
 } from './projects';
 
 const rootPath = resolve(`${__dirname}/__fixtures__/kibana`);
-const symlinkSourcePath = join(__dirname, '__fixtures__/symlinked-plugins/corge');
-const symlinkDestinationPath = join(rootPath, 'plugins/corge');
+const rootPlugins = join(rootPath, 'plugins');
 
 describe('#getProjects', () => {
-  beforeAll(() => promisify(symlink)(symlinkSourcePath, symlinkDestinationPath));
+  beforeAll(async () => {
+    await promisify(mkdir)(rootPlugins);
 
-  afterAll(() => promisify(unlink)(symlinkDestinationPath));
+    return promisify(symlink)(
+      join(__dirname, '__fixtures__/symlinked-plugins/corge'),
+      join(rootPlugins, 'corge')
+    );
+  });
+
+  afterAll(() => promisify(rmdir)(rootPlugins));
 
   test('find all packages in the packages directory', async () => {
     const projects = await getProjects(rootPath, ['packages/*']);
