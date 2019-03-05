@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+echo "************* HELLO HELLO HELLO"
 
 # move to Kibana root
 cd "$(dirname "$0")/.."
