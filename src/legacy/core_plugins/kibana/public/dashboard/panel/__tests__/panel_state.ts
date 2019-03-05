@@ -18,19 +18,29 @@
  */
 
 import expect from 'expect.js';
-
+import { PanelState } from '../../selectors';
 import { createPanelState } from '../panel_state';
 
-function createPanelWithDimensions(x, y, w, h) {
+function createPanelWithDimensions(x: number, y: number, w: number, h: number): PanelState {
   return {
+    id: 'foo',
+    version: '6.3.0',
+    type: 'bar',
+    panelIndex: 'test',
+    title: 'test title',
     gridData: {
-      x, y, w, h
-    }
+      x,
+      y,
+      w,
+      h,
+      i: 'an id',
+    },
+    embeddableConfig: {},
   };
 }
 
-describe('Panel state', function () {
-  it('finds a spot on the right', function () {
+describe('Panel state', () => {
+  it('finds a spot on the right', () => {
     // Default setup after a single panel, of default size, is on the grid
     const panels = [createPanelWithDimensions(0, 0, 24, 30)];
 
@@ -39,7 +49,7 @@ describe('Panel state', function () {
     expect(panel.gridData.y).to.equal(0);
   });
 
-  it('finds a spot on the right when the panel is taller than any other panel on the grid', function () {
+  it('finds a spot on the right when the panel is taller than any other panel on the grid', () => {
     // Should be a little empty spot on the right.
     const panels = [
       createPanelWithDimensions(0, 0, 24, 45),
@@ -51,7 +61,7 @@ describe('Panel state', function () {
     expect(panel.gridData.y).to.equal(30);
   });
 
-  it('finds an empty spot in the middle of the grid', function () {
+  it('finds an empty spot in the middle of the grid', () => {
     const panels = [
       createPanelWithDimensions(0, 0, 48, 5),
       createPanelWithDimensions(0, 5, 4, 30),

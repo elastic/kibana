@@ -17,21 +17,22 @@
  * under the License.
  */
 
-import React from 'react';
 import _ from 'lodash';
+import React from 'react';
+import { Provider } from 'react-redux';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardPanelContainer } from './dashboard_panel_container';
+import { store } from '../../store';
+// @ts-ignore: implicit for any JS file
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+import { setPanels, updateTimeRange, updateViewMode } from '../actions';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
-import { store } from '../../store';
 import {
-  updateViewMode,
-  setPanels, updateTimeRange,
-} from '../actions';
-import { Provider } from 'react-redux';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
+  DashboardPanelContainer,
+  DashboardPanelContainerOwnProps,
+} from './dashboard_panel_container';
 
-function getProps(props = {}) {
+function getProps(props = {}): DashboardPanelContainerOwnProps {
   const defaultTestProps = {
     panelId: 'foo1',
     embeddableFactory: getEmbeddableFactoryMock(),
@@ -42,17 +43,38 @@ function getProps(props = {}) {
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
   store.dispatch(updateTimeRange({ to: 'now', from: 'now-15m' }));
-  store.dispatch(setPanels({ 'foo1': { panelIndex: 'foo1' } }));
+  store.dispatch(
+    setPanels({
+      foo1: {
+        panelIndex: 'foo1',
+        id: 'hi',
+        version: '123',
+        type: 'viz',
+        embeddableConfig: {},
+        gridData: {
+          x: 1,
+          y: 1,
+          w: 1,
+          h: 1,
+          i: 'hi',
+        },
+      },
+    })
+  );
 });
 
-test('renders an error when embeddableFactory.create throws an error', (done) => {
+test('renders an error when embeddableFactory.create throws an error', done => {
   const props = getProps();
   props.embeddableFactory.create = () => {
     return new Promise(() => {
       throw new Error('simulated error');
     });
   };
-  const component = mountWithIntl(<Provider store={store}><DashboardPanelContainer {...props} /></Provider>);
+  const component = mountWithIntl(
+    <Provider store={store}>
+      <DashboardPanelContainer {...props} />
+    </Provider>
+  );
   setTimeout(() => {
     component.update();
     const panelError = component.find(PanelError);
@@ -60,4 +82,3 @@ test('renders an error when embeddableFactory.create throws an error', (done) =>
     done();
   }, 0);
 });
-
