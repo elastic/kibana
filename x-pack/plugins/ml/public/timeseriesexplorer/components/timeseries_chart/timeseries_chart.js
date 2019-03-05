@@ -1428,12 +1428,13 @@ export class TimeseriesChart extends React.Component {
   }
 
   render() {
+    const { annotationsEnabled } = this.props;
     const { annotation, isDeleteModalVisible, isFlyoutVisible } = this.state;
 
     return (
       <React.Fragment>
         <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
-        {mlAnnotationsEnabled && isFlyoutVisible &&
+        {annotationsEnabled && isFlyoutVisible &&
           <React.Fragment>
             <AnnotationFlyout
               annotation={annotation}
