@@ -15,8 +15,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-
-
 export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
   hasStateChanged }) => {
   const removeBtn = (

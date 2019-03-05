@@ -132,7 +132,6 @@ export class JoinExpression extends Component {
     );
   }
 
-
   _renderRightFieldSelect() {
     if (!this.props.rightFields || !this.props.leftValue) {
       return null;
@@ -246,7 +245,6 @@ JoinExpression.propTypes = {
   rightFields: PropTypes.object, // indexPattern.fields IndexedArray object
   onRightFieldChange: PropTypes.func.isRequired,
 };
-
 
 function getSelectField() {
   i18n.translate('xpack.maps.layerPanel.joinExpression.selectField', {

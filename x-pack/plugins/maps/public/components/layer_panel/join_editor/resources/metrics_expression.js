@@ -74,6 +74,11 @@ export class MetricsExpression extends Component {
         return `${type} ${field}`;
       });
 
+    const useMetricDescription = metricExpressions.length > 1 ? i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetrics', {
+      defaultMessage: 'and use metrics'
+    }) : i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetric', {
+      defaultMessage: 'and use metric'
+    });
     return (
       <EuiPopover
         id="metricsPopover"
@@ -86,11 +91,7 @@ export class MetricsExpression extends Component {
         button={
           <EuiExpression
             onClick={this._togglePopover}
-            description={metricExpressions.length > 1 ? i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetrics', {
-              defaultMessage: 'and use metrics'
-            }) : i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetric', {
-              defaultMessage: 'and use metric'
-            })}
+            description={useMetricDescription}
             uppercase={false}
             value={metricExpressions.length > 0 ? metricExpressions.join(', ') : 'count'}
           />

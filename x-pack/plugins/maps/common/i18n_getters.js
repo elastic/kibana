@@ -14,13 +14,13 @@ export function getAppTitle() {
 
 
 export function getDataSourceLabel() {
-  return i18n.translate('xpack.maps.source.common.dataSourceLabel', {
+  return i18n.translate('xpack.maps.source.dataSourceLabel', {
     defaultMessage: 'Data source'
   });
 }
 
 export function getUrlLabel() {
-  return i18n.translate('xpack.maps.source.common.urlLabel', {
+  return i18n.translate('xpack.maps.source.urlLabel', {
     defaultMessage: 'Url'
   });
 }
