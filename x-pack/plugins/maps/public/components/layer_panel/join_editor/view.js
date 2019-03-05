@@ -16,9 +16,10 @@ import {
 } from '@elastic/eui';
 
 import { Join } from './resources/join';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-export const JoinEditor = injectI18n(({ joins, layer, onChange, intl }) => {
+export function JoinEditor({ joins, layer, onChange }) {
 
   const renderJoins = () => {
     return joins.map((joinDescriptor, index) => {
@@ -86,8 +87,7 @@ export const JoinEditor = injectI18n(({ joins, layer, onChange, intl }) => {
             onClick={addJoin}
             aria-label="Add join"
             title={
-              intl.formatMessage({
-                id: 'xpack.maps.layerPanel.joinEditor.addJoin',
+              i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButtonLabel', {
                 defaultMessage: 'Add join'
               })
             }
@@ -98,4 +98,4 @@ export const JoinEditor = injectI18n(({ joins, layer, onChange, intl }) => {
       {renderJoins()}
     </div>
   );
-});
+}
