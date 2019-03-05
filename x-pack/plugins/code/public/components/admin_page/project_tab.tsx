@@ -25,12 +25,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import moment from 'moment';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { Repository } from '../../../model';
 import { importRepo } from '../../actions';
-import { RootState } from '../../reducers';
+import { RepoStatus, RootState } from '../../reducers';
 import { CallOutType } from '../../reducers/repository';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
@@ -47,14 +48,21 @@ enum SortOptionsValue {
   recently_added = 'recently_added',
 }
 
-const sortFunctions: { [k: string]: (a: Repository, b: Repository) => number } = {
-  [SortOptionsValue.alphabetical_asc]: (a: Repository, b: Repository) =>
-    a.name!.localeCompare(b.name!),
-  [SortOptionsValue.alphabetical_desc]: (a: Repository, b: Repository) =>
-    b.name!.localeCompare(a.name!),
-  [SortOptionsValue.updated_asc]: () => -1,
-  [SortOptionsValue.updated_desc]: () => -1,
-  [SortOptionsValue.recently_added]: () => -1,
+const sortFunctionsFactory = (status: { [key: string]: RepoStatus }) => {
+  const sortFunctions: { [k: string]: (a: Repository, b: Repository) => number } = {
+    [SortOptionsValue.alphabetical_asc]: (a: Repository, b: Repository) =>
+      a.name!.localeCompare(b.name!),
+    [SortOptionsValue.alphabetical_desc]: (a: Repository, b: Repository) =>
+      b.name!.localeCompare(a.name!),
+    [SortOptionsValue.updated_asc]: (a: Repository, b: Repository) =>
+      moment(status[b.uri].timestamp).diff(moment(status[a.uri].timestamp)),
+    [SortOptionsValue.updated_desc]: (a: Repository, b: Repository) =>
+      moment(status[a.uri].timestamp).diff(moment(status[b.uri].timestamp)),
+    [SortOptionsValue.recently_added]: () => {
+      return -1;
+    },
+  };
+  return sortFunctions;
 };
 
 const sortOptions = [
@@ -62,12 +70,12 @@ const sortOptions = [
   { value: SortOptionsValue.alphabetical_desc, inputDisplay: 'Z to A' },
   { value: SortOptionsValue.updated_asc, inputDisplay: 'Last Updated ASC' },
   { value: SortOptionsValue.updated_desc, inputDisplay: 'Last Updated DESC' },
-  { value: SortOptionsValue.recently_added, inputDisplay: 'Recently Added' },
+  // { value: SortOptionsValue.recently_added, inputDisplay: 'Recently Added' },
 ];
 
 interface Props {
   projects: Repository[];
-  status: any;
+  status: { [key: string]: RepoStatus };
   isAdmin: boolean;
   importRepo: (repoUrl: string) => void;
   importLoading: boolean;
@@ -173,7 +181,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
-    const sortedProjects = projects.sort(sortFunctions[this.state.sortOption]);
+    const sortedProjects = projects.sort(sortFunctionsFactory(status)[this.state.sortOption]);
 
     const repoList = sortedProjects.map((repo: Repository) => (
       <ProjectItem
