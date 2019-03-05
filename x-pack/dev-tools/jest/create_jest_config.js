@@ -49,7 +49,6 @@ export function createJestConfig({
       "default",
       [`${kibanaDirectory}/src/dev/jest/junit_reporter.js`, {
         reportName: 'X-Pack Jest Tests',
-        rootDirectory: xPackKibanaDirectory,
       }]
     ],
   };
