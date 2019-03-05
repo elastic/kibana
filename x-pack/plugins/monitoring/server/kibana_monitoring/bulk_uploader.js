@@ -144,7 +144,9 @@ export class BulkUploader {
    * After:
    *    [
    *      {
-   *        "index": {}
+   *        "index": {
+   *          "_type": "kibana_stats"
+   *        }
    *      },
    *      {
    *        "kibana": {
@@ -179,7 +181,7 @@ export class BulkUploader {
     const flat = Object.keys(typesNested).reduce((accum, type) => {
       return [
         ...accum,
-        { index: {} },
+        { index: { _type: type } },
         {
           kibana: this._getKibanaInfoForStats(),
           ...typesNested[type],
