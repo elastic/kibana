@@ -505,6 +505,15 @@ multiple split tables will now see those tables rendered differently.
 
 *Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
 
+[float]
+==== Timelion no longer appears in the side navigation
+*Details:* Timelion sheets will continue to work in *Visualize*, but the 
+Timelion application no longer appears by default in the {kib} side navigation. 
+
+*Impact:* To create a Timelion visualization, go to *Visualize* and select 
+*Timelion* from the visualization types. If you have a lot of existing Timelion 
+visualizations and want to add Timelion back in the side
+navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
 
 
 
