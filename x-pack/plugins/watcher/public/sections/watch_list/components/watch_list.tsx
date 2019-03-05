@@ -64,7 +64,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
         return (
           <EuiLink
             className="indTable__link euiTableCellContent"
-            data-test-subj="indexTableIndexNameLink"
+            data-test-subj={`watchIdColumn-${id}`}
             href={`#/management/elasticsearch/watcher/watches/watch/${id}/status`}
           >
             {id}
@@ -77,6 +77,13 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       name: i18n.translate('xpack.watcher.sections.watchList.watchTable.nameHeader', {
         defaultMessage: 'Name',
       }),
+      render: (name: string, item: any) => {
+        return (
+          <span data-test-subj={`watchNameColumn-${item.id}`}>
+            {name}
+          </span>
+        )
+      }
       sortable: true,
       truncateText: true,
     },

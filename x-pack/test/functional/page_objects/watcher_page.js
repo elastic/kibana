@@ -31,12 +31,13 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async getWatch(watchID) {
-      const watchRow = await testSubjects.find(`watchRow-${watchID}`);
-      const text =  await watchRow.getVisibleText();
-      const columns = text.split('\n');
+      const watchIdColumn = await testSubjects.find(`watchIDColumn-${watchID}`);
+      const watchNameColumn = await testSubjects.find(`watchNameColumn-${watchID}`);
+      const id =  await watchIdColumn.getVisibleText();
+      const name =  await watchNameColumn.getVisibleText();
       return {
-        id: columns[0],
-        name: columns[1]
+        id,
+        name
       };
     }
 
