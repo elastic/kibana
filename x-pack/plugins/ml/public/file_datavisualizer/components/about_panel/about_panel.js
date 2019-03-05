@@ -19,6 +19,7 @@ import {
   EuiFilePicker,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 
 import { WelcomeContent } from './welcome_content';
@@ -73,6 +74,14 @@ export function LoadingPanel() {
                 />
               </h3>
             </EuiTitle>
+            <EuiScreenReaderOnly>
+              <p role="alert">
+                <FormattedMessage
+                  id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitleScreenReader"
+                  defaultMessage="Analyzing data"
+                />
+              </p>
+            </EuiScreenReaderOnly>
 
             <EuiSpacer size="l" />
 
