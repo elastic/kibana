@@ -13,10 +13,6 @@ cd "x-pack";
 yarn gulp prepare;
 cd -;
 
-# # cache the chromedriver bin
-# mkdir -p ".chromedriver/master"
-# cp node_modules/chromedriver/bin/chromedriver .chromedriver/master/
-
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
@@ -26,5 +22,4 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   x-pack/plugins/*/node_modules \
   x-pack/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
-  .es \
-  .chromedriver;
+  .es;

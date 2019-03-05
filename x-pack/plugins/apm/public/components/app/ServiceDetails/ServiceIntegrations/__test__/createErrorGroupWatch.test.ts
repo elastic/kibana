@@ -22,7 +22,7 @@ describe('createErrorGroupWatch', () => {
   let tmpl: any;
   beforeEach(async () => {
     chrome.getInjected = jest.fn().mockReturnValue('myIndexPattern');
-    jest.spyOn(uuid, 'v4').mockReturnValue('mocked-uuid');
+    jest.spyOn(uuid, 'v4').mockReturnValue(new Buffer('mocked-uuid'));
     jest.spyOn(rest, 'createWatch').mockReturnValue(undefined);
 
     createWatchResponse = await createErrorGroupWatch({

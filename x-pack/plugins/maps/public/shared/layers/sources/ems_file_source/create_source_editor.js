@@ -74,6 +74,7 @@ export class EMSFileCreateSourceEditor extends React.Component {
           isClearable={false}
           singleSelection={true}
           isDisabled={this.state.emsFileOptionsRaw.length === 0}
+          data-test-subj="emsVectorComboBox"
         />
       </EuiFormRow>
     );

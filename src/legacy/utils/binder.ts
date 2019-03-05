@@ -18,8 +18,8 @@
  */
 
 export interface Emitter {
-  on: (args: any[]) => void;
-  off: (args: any[]) => void;
+  on: (...args: any[]) => void;
+  off: (...args: any[]) => void;
   addListener: Emitter['on'];
   removeListener: Emitter['off'];
 }

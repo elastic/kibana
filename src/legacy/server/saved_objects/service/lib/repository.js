@@ -37,6 +37,7 @@ export class SavedObjectsRepository {
       schema,
       serializer,
       migrator,
+      allowedTypes = [],
       onBeforeWrite = () => { },
     } = options;
 
@@ -51,9 +52,11 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
+    if(allowedTypes.length === 0) {
+      throw new Error('Empty or missing types for saved object repository!');
+    }
+    this._allowedTypes = allowedTypes;
 
-    // ES7 and up expects the root type to be _doc
-    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
@@ -85,6 +88,10 @@ export class SavedObjectsRepository {
       references = [],
     } = options;
 
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createUnsupportedTypeError(type);
+    }
+
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
@@ -103,7 +110,6 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        type: this._type,
         index: this._index,
         refresh: 'wait_for',
         body: raw._source,
@@ -139,38 +145,62 @@ export class SavedObjectsRepository {
     } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
-    const rawObjectsToCreate = objects.map((object) => {
+
+    let requestIndexCounter = 0;
+    const expectedResults = objects.map((object) => {
+      if(!this._isTypeAllowed(object.type)) {
+        return {
+          response: {
+            id: object.id,
+            type: object.type,
+            error: errors.createUnsupportedTypeError(object.type).output.payload,
+          }
+        };
+      }
+
       const method = object.id && !overwrite ? 'create' : 'index';
-      const migrated = this._migrator.migrateDocument({
-        id: object.id,
-        type: object.type,
-        attributes: object.attributes,
-        migrationVersion: object.migrationVersion,
-        namespace,
-        updated_at: time,
-        references: object.references || [],
-      });
-      const raw = this._serializer.savedObjectToRaw(migrated);
+      const expectedResult = {
+        esRequestIndex: requestIndexCounter++,
+        requestedId: object.id,
+        rawMigratedDoc: this._serializer.savedObjectToRaw(
+          this._migrator.migrateDocument({
+            id: object.id,
+            type: object.type,
+            attributes: object.attributes,
+            migrationVersion: object.migrationVersion,
+            namespace,
+            updated_at: time,
+            references: object.references || [],
+          })
+        ),
+      };
+
       bulkCreateParams.push(
         {
           [method]: {
-            _id: raw._id,
-            _type: this._type,
+            _id: expectedResult.rawMigratedDoc._id,
           },
         },
-        raw._source,
+        expectedResult.rawMigratedDoc._source,
       );
-      return raw;
+
+      return expectedResult;
     });
 
-    const { items } = await this._writeToCluster('bulk', {
+    const esResponse = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
       body: bulkCreateParams,
     });
 
     return {
-      saved_objects: items.map((response, i) => {
+      saved_objects: expectedResults.map(expectedResult => {
+        if(expectedResult.response) {
+          return expectedResult.response;
+        }
+
+        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult;
+        const response = esResponse.items[esRequestIndex];
         const {
           error,
           _id: responseId,
@@ -179,16 +209,14 @@ export class SavedObjectsRepository {
         } = Object.values(response)[0];
 
         const {
-          id = responseId,
-        } = objects[i];
-        const {
           _source: {
             type,
             [type]: attributes,
             references = [],
           },
-        } = rawObjectsToCreate[i];
+        } = rawMigratedDoc;
 
+        const id = requestedId || responseId;
         if (error) {
           if (error.type === 'version_conflict_engine_exception') {
             return {
@@ -214,7 +242,7 @@ export class SavedObjectsRepository {
           attributes,
           references,
         };
-      })
+      }),
     };
   }
 
@@ -228,13 +256,16 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createGenericNotFoundError();
+    }
+
     const {
       namespace
     } = options;
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       ignore: [404],
@@ -306,7 +337,6 @@ export class SavedObjectsRepository {
    */
   async find(options = {}) {
     const {
-      type,
       search,
       defaultSearchOperator = 'OR',
       searchFields,
@@ -318,9 +348,31 @@ export class SavedObjectsRepository {
       fields,
       namespace,
     } = options;
+    let { type } = options;
 
     if (!type) {
       throw new TypeError(`options.type must be a string or an array of strings`);
+    }
+
+    if(Array.isArray(type)) {
+      type = type.filter(type => this._isTypeAllowed(type));
+      if(type.length === 0) {
+        return {
+          page,
+          per_page: perPage,
+          total: 0,
+          saved_objects: []
+        };
+      }
+    }else{
+      if(!this._isTypeAllowed(type)) {
+        return {
+          page,
+          per_page: perPage,
+          total: 0,
+          saved_objects: []
+        };
+      }
     }
 
     if (searchFields && !Array.isArray(searchFields)) {
@@ -397,13 +449,20 @@ export class SavedObjectsRepository {
       return { saved_objects: [] };
     }
 
+    const unsupportedTypes = [];
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.map(object => ({
-          _id: this._serializer.generateRawId(namespace, object.type, object.id),
-          _type: this._type,
-        }))
+        docs: objects.reduce((acc, { type, id }) => {
+          if(this._isTypeAllowed(type)) {
+            acc.push({
+              _id: this._serializer.generateRawId(namespace, type, id),
+            });
+          }else{
+            unsupportedTypes.push({ id, type, error: errors.createUnsupportedTypeError(type).output.payload });
+          }
+          return acc;
+        }, [])
       }
     });
 
@@ -429,7 +488,7 @@ export class SavedObjectsRepository {
           references: doc._source.references || [],
           migrationVersion: doc._source.migrationVersion,
         };
-      })
+      }).concat(unsupportedTypes)
     };
   }
 
@@ -443,13 +502,16 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createGenericNotFoundError(type, id);
+    }
+
     const {
       namespace
     } = options;
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       ignore: [404]
     });
@@ -486,6 +548,10 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createGenericNotFoundError(type, id);
+    }
+
     const {
       version,
       namespace,
@@ -495,7 +561,6 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
@@ -541,6 +606,9 @@ export class SavedObjectsRepository {
     if (typeof counterFieldName !== 'string') {
       throw new Error('"counterFieldName" argument must be a string');
     }
+    if(!this._isTypeAllowed(type)) {
+      throw errors.createUnsupportedTypeError(type);
+    }
 
     const {
       migrationVersion,
@@ -562,7 +630,6 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       _source: true,
@@ -629,5 +696,15 @@ export class SavedObjectsRepository {
   _rawToSavedObject(raw) {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  _isTypeAllowed(types) {
+    const toCheck = [].concat(types);
+    for(const type of toCheck) {
+      if(!this._allowedTypes.includes(type)) {
+        return false;
+      }
+    }
+    return true;
   }
 }

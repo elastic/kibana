@@ -15,8 +15,6 @@ import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
-import { mlSelectIntervalService } from '../components/controls/select_interval/select_interval';
-import { mlSelectSeverityService } from '../components/controls/select_severity/select_severity';
 
 import {
   MAX_CATEGORY_EXAMPLES,
@@ -381,7 +379,7 @@ export function processViewByResults(
   return dataset;
 }
 
-export async function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
+export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, bounds) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const timeRange = getSelectionTimeRange(selectedCells, interval, bounds);
@@ -390,34 +388,46 @@ export async function loadAnnotationsTableData(selectedCells, selectedJobs, inte
     return Promise.resolve([]);
   }
 
-  const resp = await ml.annotations.getAnnotations({
-    jobIds,
-    earliestMs: timeRange.earliestMs,
-    latestMs: timeRange.latestMs,
-    maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-  });
+  return new Promise((resolve) => {
+    ml.annotations.getAnnotations({
+      jobIds,
+      earliestMs: timeRange.earliestMs,
+      latestMs: timeRange.latestMs,
+      maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
+    }).then((resp) => {
+      if (resp.error !== undefined || resp.annotations === undefined) {
+        return resolve([]);
+      }
 
-  const annotationsData = [];
-  jobIds.forEach((jobId) => {
-    const jobAnnotations = resp.annotations[jobId];
-    if (jobAnnotations !== undefined) {
-      annotationsData.push(...jobAnnotations);
-    }
-  });
+      const annotationsData = [];
+      jobIds.forEach((jobId) => {
+        const jobAnnotations = resp.annotations[jobId];
+        if (jobAnnotations !== undefined) {
+          annotationsData.push(...jobAnnotations);
+        }
+      });
 
-  return Promise.resolve(
-    annotationsData
-      .sort((a, b) => {
-        return a.timestamp - b.timestamp;
-      })
-      .map((d, i) => {
-        d.key = String.fromCharCode(65 + i);
-        return d;
-      })
-  );
+      return resolve(
+        annotationsData
+          .sort((a, b) => {
+            return a.timestamp - b.timestamp;
+          })
+          .map((d, i) => {
+            d.key = String.fromCharCode(65 + i);
+            return d;
+          })
+      );
+    }).catch((resp) => {
+      console.log('Error loading list of annotations for jobs list:', resp);
+      // Silently fail and just return an empty array for annotations to not break the UI.
+      return resolve([]);
+    });
+  });
 }
 
-export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName) {
+export async function loadAnomaliesTableData(
+  selectedCells, selectedJobs, dateFormatTz, interval, bounds, fieldName, tableInterval, tableSeverity
+) {
   const jobIds = (selectedCells !== null && selectedCells.viewByFieldName === VIEW_BY_JOB_LABEL) ?
     selectedCells.lanes : selectedJobs.map(d => d.id);
   const influencers = getSelectionInfluencers(selectedCells, fieldName);
@@ -428,8 +438,8 @@ export async function loadAnomaliesTableData(selectedCells, selectedJobs, dateFo
       jobIds,
       [],
       influencers,
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      tableInterval,
+      tableSeverity,
       timeRange.earliestMs,
       timeRange.latestMs,
       dateFormatTz,

@@ -65,6 +65,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_shared_item'));
       loadTestFile(require.resolve('./_lab_mode'));
       loadTestFile(require.resolve('./_linked_saved_searches'));
+      loadTestFile(require.resolve('./_visualize_listing'));
     });
 
     describe('', function () {
@@ -75,6 +76,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_vertical_bar_chart'));
       loadTestFile(require.resolve('./_vertical_bar_chart_nontimeindex'));
       loadTestFile(require.resolve('./_tsvb_chart'));
+      loadTestFile(require.resolve('./_tsvb_markdown'));
       loadTestFile(require.resolve('./_vega_chart'));
     });
   });
