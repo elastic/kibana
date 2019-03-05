@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { ValidatedRange } from '../../../shared/components/validated_range';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function SettingsPanel(props) {
 
@@ -81,7 +82,9 @@ export function SettingsPanel(props) {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
-              label="Min zoom"
+              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.minZoomLabel', {
+                defaultMessage: 'Min zoom'
+              })}
             >
               <EuiRange
                 min={0}
@@ -95,7 +98,9 @@ export function SettingsPanel(props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFormRow
-              label="Max zoom"
+              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.maxZoomLabel', {
+                defaultMessage: 'Max zoom'
+              })}
             >
               <EuiRange
                 min={0}
@@ -162,7 +167,14 @@ export function SettingsPanel(props) {
       <EuiPanel>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
+            <EuiTitle size="xs">
+              <h5>
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.settingsPanel.settingsTitle"
+                  defaultMessage="Settings"
+                />
+              </h5>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
 
