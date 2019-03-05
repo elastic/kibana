@@ -92,7 +92,7 @@ export class AbstractVectorSource extends AbstractSource {
     //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
     const props = {};
     for (const key in properties) {
-      if (key.startsWith('__kbn')) {//these are system proeprties and should be ignored
+      if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
       props[key] = properties[key];
