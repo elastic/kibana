@@ -18,10 +18,12 @@
  */
 
 import { resolve } from 'path';
-import init from './init';
+import { Legacy } from '../../../../kibana';
+import { init } from './init';
 
-export default function (kibana) {
-  return new kibana.Plugin({
+// tslint:disable-next-line
+export default function InterpreterPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
     id: 'interpreter',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
@@ -29,6 +31,7 @@ export default function (kibana) {
       injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
     },
     init,
-  });
-}
+  };
 
+  return new kibana.Plugin(config);
+}
