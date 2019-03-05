@@ -935,7 +935,6 @@
     "kbn.advancedSettings.suggestFilterValuesTitle": "筛选编辑器建议值",
     "kbn.advancedSettings.timepicker.monthToDate": "本月迄今为止",
     "kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText": "接受的格式",
-    "kbn.advancedSettings.timepicker.quickRangesText": "要在时间选取器的“速选”部分中显示的范围列表。这应该是对象数组，每个对象包含“from”、“to”（请参阅{acceptedFormatsLink}）、“display”（要显示的标题）以及“section”（要放置选项的列）。",
     "kbn.advancedSettings.timepicker.quickRangesTitle": "时间选取器的速选范围",
     "kbn.advancedSettings.timepicker.refreshIntervalDefaultsText": "时间筛选的默认刷新时间间隔",
     "kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle": "时间选取器刷新时间间隔",
