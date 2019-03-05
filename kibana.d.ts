@@ -41,11 +41,8 @@ export namespace Legacy {
   export type SavedObjectsService = LegacyKibanaServer.SavedObjectsService;
   export type Server = LegacyKibanaServer.Server;
 
-  export type InitPluginFunction = (server: Server) => void;
-  export interface UiExports {
-    injectDefaultVars: (server: Server) => { [key: string]: any };
-  }
-
+  export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;
+  export type UiExports = LegacyKibanaPluginSpec.UiExports;
   export type PluginSpecOptions = LegacyKibanaPluginSpec.PluginSpecOptions;
 
   export namespace Plugins {

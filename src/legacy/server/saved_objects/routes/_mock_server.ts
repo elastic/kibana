@@ -38,6 +38,9 @@ export function createMockServer(config: { [key: string]: any } = defaultConfig)
       get(key: string) {
         return config[key];
       },
+      has(key: string) {
+        return config.hasOwnProperty(key);
+      },
     };
   };
 
