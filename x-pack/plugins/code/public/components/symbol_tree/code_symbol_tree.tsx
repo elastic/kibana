@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -13,16 +13,21 @@ import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem } from '../../common/types';
 import { SymbolWithMembers } from '../../reducers/symbol';
-import { FolderClosedTriangle, FolderOpenTriangle } from '../shared';
 
-const Root = styled(EuiSideNav)`
+const Root = styled.div`
   padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
-  overflow: auto;
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+  height: 100%;
 `;
 
-const Symbol = styled(EuiFlexGroup)`
-  margin-bottom: ${theme.euiSizeS};
+const Symbol = styled.div<{ isContainer: boolean }>`
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  height: 1.5rem;
+  margin-left: ${props => (props.isContainer ? '0.75rem' : '2rem')};
 `;
 
 const Token = styled(EuiToken)`
@@ -44,7 +49,13 @@ const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
     return lineDiff;
   }
 };
-export class CodeSymbolTree extends React.PureComponent<Props> {
+
+export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: string }> {
+  public state = { activePath: undefined };
+
+  public getClickHandler = (path: string) => () => {
+    this.setState({ activePath: path });
+  };
   public getStructureTreeItemRenderer = (
     location: Location,
     name: string,
@@ -58,27 +69,50 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
       // @ts-ignore
       tokenType = `token${Object.keys(SymbolKind).find(k => SymbolKind[k] === kind)}`;
     }
+    let bg = null;
+    if (this.state.activePath === path) {
+      bg = <div className="code-full-width-node" />;
+    }
     return (
-      <Symbol gutterSize="none" alignItems="center">
-        {isContainer &&
-          (forceOpen ? (
-            <FolderOpenTriangle onClick={() => this.props.closeSymbolPath(path)} />
-          ) : (
-            <FolderClosedTriangle onClick={() => this.props.openSymbolPath(path)} />
-          ))}
-        <EuiFlexItem grow={1}>
-          <Link to={`${RepositoryUtils.locationToUrl(location)}?tab=structure`}>
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              {/*
+      <EuiFlexGroup gutterSize="none" alignItems="center">
+        <Symbol isContainer={isContainer}>
+          {isContainer &&
+            (forceOpen ? (
+              <EuiIcon
+                type="arrowDown"
+                size="s"
+                color="subdued"
+                className="codeStructureTree--icon"
+                onClick={() => this.props.closeSymbolPath(path)}
+              />
+            ) : (
+              <EuiIcon
+                type="arrowRight"
+                size="s"
+                color="subdued"
+                className="codeStructureTree--icon"
+                onClick={() => this.props.openSymbolPath(path)}
+              />
+            ))}
+          <EuiFlexItem grow={1}>
+            <Link
+              to={`${RepositoryUtils.locationToUrl(location)}?tab=structure`}
+              className="code-link"
+              onClick={this.getClickHandler(path)}
+            >
+              <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
+                {/*
                 // @ts-ignore */}
-              <Token iconType={tokenType} />
-              <EuiText data-test-subj={`codeStructureTreeNode-${name}`}>
-                <strong>{name}</strong>
-              </EuiText>
-            </EuiFlexGroup>
-          </Link>
-        </EuiFlexItem>
-      </Symbol>
+                <Token iconType={tokenType} />
+                <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
+                  {name}
+                </EuiText>
+              </EuiFlexGroup>
+            </Link>
+          </EuiFlexItem>
+        </Symbol>
+        {bg}
+      </EuiFlexGroup>
     );
   };
 
@@ -106,7 +140,8 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
           s.name,
           s.kind,
           false,
-          false
+          false,
+          s.path
         );
       }
       return item;
@@ -117,6 +152,10 @@ export class CodeSymbolTree extends React.PureComponent<Props> {
     const items = [
       { name: '', id: '', items: this.symbolsToSideNavItems(this.props.structureTree) },
     ];
-    return <Root items={items} />;
+    return (
+      <Root>
+        <EuiSideNav items={items} />
+      </Root>
+    );
   }
 }
