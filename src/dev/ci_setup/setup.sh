@@ -131,9 +131,6 @@ fi
 echo " -- installing node.js dependencies"
 yarn kbn bootstrap --prefer-offline
 
-echo "short circuit"
-exit 0
-
 ###
 ### verify no git modifications
 ###
