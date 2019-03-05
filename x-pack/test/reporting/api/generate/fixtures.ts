@@ -1,3 +1,9 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
 export const CSV_RESULT = `"@timestamp",clientip,extension
 "2015-09-20T10:26:48.725Z","74.214.76.90",jpg
 "2015-09-20T10:26:48.540Z","146.86.123.109",jpg
