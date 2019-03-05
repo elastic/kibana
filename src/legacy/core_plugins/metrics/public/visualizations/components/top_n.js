@@ -23,6 +23,21 @@ import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
 class TopN extends Component {
+  constructor(props) {
+    super(props);
+
+    this.tableRef = React.createRef();
+    this.state = {
+      labelMaxWidth: 150
+    };
+  }
+
+  componentDidMount() {
+    // set max width of label as 20% of the table
+    this.setState({
+      labelMaxWidth: this.tableRef.current.offsetWidth * 0.2
+    });
+  }
 
   handleClick(item) {
     return () => {
@@ -45,6 +60,9 @@ class TopN extends Component {
           innerBar: {
             width,
             backgroundColor
+          },
+          label: {
+            maxWidth: this.state.labelMaxWidth
           }
         },
         onClick: {
@@ -59,7 +77,9 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td title={item.label} className="tvbVisTopN__label">{ item.label }</td>
+          <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
+            { item.label }
+          </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div
               className="tvbVisTopN__innerBar"
@@ -87,7 +107,7 @@ class TopN extends Component {
 
     return (
       <div className={className}>
-        <table className="tvbVisTopN__table">
+        <table className="tvbVisTopN__table" ref={this.tableRef}>
           <tbody>
             { rows }
           </tbody>
