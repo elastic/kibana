@@ -442,62 +442,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const icmpParams = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query,
-        size: 0,
-        aggs: {
-          icmp: {
-            filter: {
-              term: {
-                'monitor.type': 'icmp',
-              },
-            },
-            aggs: {
-              error_type: {
-                terms: {
-                  field: 'error.type',
-                },
-                aggs: {
-                  by_id: {
-                    terms: {
-                      field: 'monitor.ip',
-                    },
-                    aggs: {
-                      latest: {
-                        top_hits: {
-                          sort: [
-                            {
-                              '@timestamp': {
-                                order: 'desc',
-                              },
-                            },
-                          ],
-                          size: 1,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
 
-    const [httpTcpResult, icmpResult] = await Promise.all([
-      this.database.search(request, params),
-      this.database.search(request, icmpParams),
-    ]);
-
-    const httpTcpBuckets: any[] = get(httpTcpResult, 'aggregations.error_type.buckets', []);
-    const icmpBuckets: any[] = get(icmpResult, 'aggregations.error_type.buckets', []);
-    const buckets = httpTcpBuckets.concat(icmpBuckets);
-
+    const queryResult = await this.database.search(request, params);
     const errorsList: ErrorListItem[] = [];
-    buckets.forEach(
+    get(queryResult, 'aggregations.error_type.buckets', []).forEach(
       ({
         key: errorType,
         by_id: { buckets: monitorBuckets },
