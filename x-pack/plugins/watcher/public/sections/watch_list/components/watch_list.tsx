@@ -73,7 +73,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       },
     },
     {
-      field: 'name',˝
+      field: 'name',
       name: i18n.translate('xpack.watcher.sections.watchList.watchTable.nameHeader', {
         defaultMessage: 'Name',
       }),
