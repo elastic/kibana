@@ -42,7 +42,7 @@ function executeJobFn(server) {
           'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
           {
             defaultMessage:
-              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {error}',
+              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
             values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
           }
         )
