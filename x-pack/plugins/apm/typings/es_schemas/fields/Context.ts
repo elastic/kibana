@@ -6,5 +6,4 @@
 
 export interface Context {
   page?: { url: string }; // only for RUM agent
-  [key: string]: unknown;
 }
