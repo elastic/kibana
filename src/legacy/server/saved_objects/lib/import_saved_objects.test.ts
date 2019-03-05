@@ -555,52 +555,7 @@ Object {
   "success": true,
 }
 `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('works with overwrites', async () => {
@@ -646,40 +601,8 @@ Object {
         "overwrite": true,
       },
     ],
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
   ],
   "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
     Object {
       "type": "return",
       "value": Promise {},
@@ -724,24 +647,6 @@ Object {
       Array [
         Object {
           "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
           "id": "4",
           "references": Array [
             Object {
@@ -761,63 +666,6 @@ Object {
       "value": Promise {},
     },
   ],
-}
-`);
-  });
-
-  test('extracts errors', async () => {
-    const readStream = new Readable({
-      read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
-        this.push(null);
-      },
-    });
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(savedObject => ({
-        type: savedObject.type,
-        id: savedObject.id,
-        error: {
-          statusCode: 409,
-          message: 'conflict',
-        },
-      })),
-    });
-    const result = await resolveImportConflicts({
-      readStream,
-      objectLimit: 4,
-      overwrites: [],
-      savedObjectsClient,
-      replaceReferences: [],
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "id": "1",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "2",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "search",
-    },
-    Object {
-      "id": "3",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "visualization",
-    },
-    Object {
-      "id": "4",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "dashboard",
-    },
-  ],
-  "success": false,
 }
 `);
   });
