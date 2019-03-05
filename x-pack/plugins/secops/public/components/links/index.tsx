@@ -8,9 +8,9 @@ import { EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-const escapeIpv6 = (ip: string) => ip.replace(/:/g, '-');
+import { encodeIpv6 } from '../../containers/helpers';
 
-export const HostDetailsLink = pure<{ children: React.ReactNode; hostId: string }>(
+export const HostDetailsLink = pure<{ children?: React.ReactNode; hostId: string }>(
   ({ children, hostId }) => (
     <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostId)}`}>
       {children ? children : hostId}
@@ -18,6 +18,10 @@ export const HostDetailsLink = pure<{ children: React.ReactNode; hostId: string 
   )
 );
 
-export const NetworkDetailsLink = pure<{ ip: string }>(({ ip }) => (
-  <EuiLink href={`#/link-to/network/ip/${encodeURIComponent(escapeIpv6(ip))}`}>{ip}</EuiLink>
-));
+export const NetworkDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
+  ({ children, ip }) => (
+    <EuiLink href={`#/link-to/network/ip/${encodeURIComponent(encodeIpv6(ip))}`}>
+      {children ? children : ip}
+    </EuiLink>
+  )
+);

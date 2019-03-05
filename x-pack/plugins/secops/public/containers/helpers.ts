@@ -13,3 +13,6 @@ export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
 
 export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-and-network';
+
+export const encodeIpv6 = (ip: string) => ip.replace(/:/g, '-');
+export const decodeIpv6 = (ip: string) => ip.replace(/-/g, ':');

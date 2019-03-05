@@ -14,8 +14,8 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
-
 import { GlobalTime } from '../../containers/global_time';
+import { decodeIpv6 } from '../../containers/helpers';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
 import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
@@ -48,7 +48,9 @@ const NetworkDetailsComponent = pure<NetworkDetailsComponentProps>(
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
-                <GlobalTime>{({ poll, to, from, setQuery }) => <>{`Hello ${ip}!`}</>}</GlobalTime>
+                <GlobalTime>
+                  {({ poll, to, from, setQuery }) => <>{`Hello ${decodeIpv6(ip)}!`}</>}
+                </GlobalTime>
               </PageContentBody>
             </PageContent>
           </>

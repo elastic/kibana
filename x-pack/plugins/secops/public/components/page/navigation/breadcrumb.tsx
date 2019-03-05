@@ -5,36 +5,36 @@
  */
 
 import {
-  EuiBreadcrumbDefinition,
-  EuiHeader,
-  EuiHeaderBreadcrumbs,
-  EuiHeaderSection,
+  // @ts-ignore: EuiBreadcrumbs has no exported member
+  EuiBreadcrumbs,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-import * as i18n from './translations';
+import { getBreadcrumbs as getHostBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getNetworkBreadcrumbs } from '../../../pages/network/network_details';
 
-interface HeaderBreadcrumbsProps {
-  breadcrumbs?: EuiBreadcrumbDefinition[];
-}
+import { Navigation } from '.';
 
-const staticBreadcrumbs = [
-  {
-    href: '#/',
-    text: i18n.SECOPS,
-  },
-];
+const getBreadcrumbsForRoute = (pathname: string) => {
+  if (pathname.match(/hosts\/.*?/)) {
+    return getHostBreadcrumbs(pathname.match(/([^\/]+$)/)![0]);
+  } else if (pathname.match(/network\/ip\/.*?/)) {
+    return getNetworkBreadcrumbs(pathname.match(/([^\/]+$)/)![0]);
+  }
+};
 
-export const HeaderBreadcrumbs = pure<HeaderBreadcrumbsProps>(({ breadcrumbs = [] }) => (
-  <HeaderWrapper>
-    <EuiHeaderSection>
-      <EuiHeaderBreadcrumbs breadcrumbs={[...staticBreadcrumbs, ...breadcrumbs]} />
-    </EuiHeaderSection>
-  </HeaderWrapper>
+const HeaderBreadcrumbsComponent = pure<RouteComponentProps>(({ location }) => (
+  <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
+    {location.pathname.match(/[hosts|overview|network]?/) && (
+      <Navigation data-test-subj="navigation" />
+    )}
+    {getBreadcrumbsForRoute(location.pathname) && (
+      <EuiBreadcrumbs breadcrumbs={getBreadcrumbsForRoute(location.pathname)} />
+    )}
+  </EuiFlexItem>
 ));
 
-const HeaderWrapper = styled(EuiHeader)`
-  height: 29px;
-`;
+export const HeaderBreadcrumbs = withRouter(HeaderBreadcrumbsComponent);
