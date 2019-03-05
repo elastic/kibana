@@ -53,10 +53,3 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
 
   return InfraRootConfigSchema;
 };
-
-export const getDeprecations = () => [];
-
-// interface DeprecationHelpers {
-//   rename(oldKey: string, newKey: string): (settings: unknown, log: unknown) => void;
-//   unused(oldKey: string): (settings: unknown, log: unknown) => void;
-// }
