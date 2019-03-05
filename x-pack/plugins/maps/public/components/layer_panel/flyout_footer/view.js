@@ -33,6 +33,16 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
     </EuiFlexItem>
   );
 
+
+  const cancelButtonLabel =   hasStateChanged ? (<FormattedMessage
+    id="xpack.maps.layerPanel.footer.cancelButtonLabel"
+    defaultMessage="Cancel"
+  />) : (<FormattedMessage
+    id="xpack.maps.layerPanel.footer.closeButtonLabel"
+    defaultMessage="Close"
+  />);
+
+
   return (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
@@ -40,7 +50,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={cancelLayerPanel}
           flush="left"
         >
-          {hasStateChanged ? 'Cancel' : 'Close'}
+          {cancelButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -54,7 +64,10 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
           onClick={saveLayerEdits}
           fill
         >
-          Save &amp; close
+          <FormattedMessage
+            id="xpack.maps.layerPanel.footer.saveAndCloseButtonLabel"
+            defaultMessage="Save & close"
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
