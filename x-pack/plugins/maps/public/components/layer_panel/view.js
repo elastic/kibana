@@ -25,6 +25,8 @@ import {
   EuiLink,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
 export class LayerPanel extends React.Component {
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -40,22 +42,22 @@ export class LayerPanel extends React.Component {
     return null;
   }
 
-  state = {}
+      state = {}
 
-  componentDidMount() {
-    this._isMounted = true;
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-  }
+      componentDidMount() {
+        this._isMounted = true;
+        this.loadDisplayName();
+        this.loadImmutableSourceProperties();
+      }
 
-  componentDidUpdate() {
-    this.loadDisplayName();
-    this.loadImmutableSourceProperties();
-  }
+      componentDidUpdate() {
+        this.loadDisplayName();
+        this.loadImmutableSourceProperties();
+      }
 
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
+      componentWillUnmount() {
+        this._isMounted = false;
+      }
 
   loadDisplayName = async () => {
     if (!this.props.selectedLayer) {
@@ -143,7 +145,11 @@ export class LayerPanel extends React.Component {
           <div className="mapLayerPanel__sourceDetails">
             <EuiAccordion
               id="accordion1"
-              buttonContent="Source details"
+              buttonContent={
+                i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+                  defaultMessage: 'Source details'
+                })
+              }
             >
               <EuiText color="subdued" size="s">
                 <EuiSpacer size="xs" />
