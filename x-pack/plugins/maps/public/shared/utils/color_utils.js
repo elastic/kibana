@@ -11,7 +11,7 @@ import chroma from 'chroma-js';
 export function getRGBColorRangeStrings(colorName, numberColors) {
   const colorKeys = Object.keys(vislibColorMaps);
   if (!colorKeys.includes(colorName)) {
-    //This is an internal error and should never occur. It it does, it is a bug.
+    //This is an internal error and should never occur. If it does, then it is a bug.
     throw new Error(`${colorName} not found. Expected one of following values: \
       ${colorKeys}`);
   }

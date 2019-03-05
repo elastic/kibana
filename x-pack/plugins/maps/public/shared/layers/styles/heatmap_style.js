@@ -46,7 +46,11 @@ export class HeatmapStyle extends AbstractStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      throw new Error(`Resolution param not recognized: ${this._descriptor.refinement}`);
+      const errorMessage = i18n.translate('xpack.maps.style.heatmap.displayNameLabel', {
+        defaultMessage: `Resolution param not recognized: {resolution}`,
+        values: { resolution }
+      });
+      throw new Error(errorMessage);
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
     mbMap.setPaintProperty(layerId, 'heatmap-weight', {
