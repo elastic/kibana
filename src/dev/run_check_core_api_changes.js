@@ -31,7 +31,7 @@ const options = {
   localBuild: false
 };
 
-run(async ({ log }) => {
+run(({ log }) => {
   const extractor = new Extractor(config, options);
   const apiChanged = !extractor.processProject();
   if (apiChanged) {

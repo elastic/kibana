@@ -1,4 +1,21 @@
 // @public
+interface CallAPIOptions {
+    wrap401Errors: boolean;
+}
+
+// @public
+declare class ClusterClient {
+    // (undocumented)
+    constructor(config: ElasticsearchClientConfig, log: Logger);
+    asScoped(req?: {
+        // (undocumented)
+        headers?: Headers;
+    }): ScopedClusterClient;
+    callAsInternalUser: (endpoint: string, clientParams?: Record<string, unknown>, options?: CallAPIOptions | undefined) => Promise<any>;
+    close(): void;
+    }
+
+// @public
 interface Logger {
     debug(message: string, meta?: LogMeta): void;
     error(errorOrMessage: string | Error, meta?: LogMeta): void;
@@ -11,6 +28,12 @@ interface Logger {
 // @public
 interface LoggerFactory {
     get(...contextParts: string[]): Logger;
+}
+
+// @public (undocumented)
+interface LogMeta {
+    // (undocumented)
+    [key: string]: any;
 }
 
 // @public
@@ -36,6 +59,13 @@ declare type PluginName = string;
 
 // @public
 interface PluginStartContext {
+    // (undocumented)
+    elasticsearch: {
+        // (undocumented)
+        adminClient$: Observable<ClusterClient>;
+        // (undocumented)
+        dataClient$: Observable<ClusterClient>;
+    };
 }
 
 

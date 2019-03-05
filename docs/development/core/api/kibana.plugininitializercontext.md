@@ -2,7 +2,7 @@
 
 ## PluginInitializerContext interface
 
-Core API's exposed to plugins on initialization
+Context that's available to plugins during initialization stage.
 
 <b>Signature:</b>
 

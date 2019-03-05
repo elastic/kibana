@@ -2,10 +2,17 @@
 
 ## PluginStartContext interface
 
-Core API's exposed to plugins on `start()`
+Context passed to the plugins `start` method.
 
 <b>Signature:</b>
 
 ```typescript
 export interface PluginStartContext 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [elasticsearch](./kibana.pluginstartcontext.elasticsearch.md) | `{`<p/>`        adminClient$: Observable<ClusterClient>;`<p/>`        dataClient$: Observable<ClusterClient>;`<p/>`    }` |  |
+
