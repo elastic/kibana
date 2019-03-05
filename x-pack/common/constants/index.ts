@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const UNAVAILABLE = 'UNAVAILABLE';
-export const INVALID = 'INVALID';
-export const EXPIRED = 'EXPIRED';
-export const VALID = 'VALID';
+export {
+  LICENSE_STATUS_UNAVAILABLE,
+  LICENSE_STATUS_INVALID,
+  LICENSE_STATUS_EXPIRED,
+  LICENSE_STATUS_VALID,
+} from './license_status';
