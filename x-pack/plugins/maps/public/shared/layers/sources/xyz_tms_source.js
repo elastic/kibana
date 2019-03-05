@@ -98,7 +98,9 @@ class XYZTMSEditor extends  React.Component {
     return (
       <EuiFormRow label="Url">
         <EuiFieldText
-          placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          placeholder={i18n.translate('xpack.maps.source.ems_xyzPlaceholder', {
+            defaultMessage: 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          })}
           onChange={(e) => this._handleTMSInputChange(e)}
         />
       </EuiFormRow>
