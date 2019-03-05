@@ -89,6 +89,7 @@ module.directive('mlTimeseriesChart', function ($timeout) {
     scope.$watchCollection('focusForecastData', renderFocusChart);
     scope.$watchCollection('focusChartData', renderFocusChart);
     scope.$watchGroup(['showModelBounds', 'showForecast'], renderFocusChart);
+    scope.$watch('annotationsEnabled', renderReactComponent);
     if (scope.annotationsEnabled) {
       scope.$watchCollection('focusAnnotationData', renderFocusChart);
       scope.$watch('showAnnotations', renderFocusChart);
