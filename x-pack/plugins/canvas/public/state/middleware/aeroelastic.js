@@ -323,7 +323,11 @@ export const aeroelastic = ({ dispatch, getState }) => {
     }
 
     if (pageChangerActions.indexOf(action.type) >= 0) {
-      unselectShape(prevPage);
+      if (getSelectedElement(getState())) {
+        dispatch(selectElement(null)); // ensure sidebar etc. get updated; will update the layout engine too
+      } else {
+        unselectShape(prevPage); // deselect persistent groups as they're not currently selections in Redux
+      }
     }
 
     next(action);
