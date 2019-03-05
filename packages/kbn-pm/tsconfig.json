@@ -4,8 +4,7 @@
     "dist"
   ],
   "include": [
-    "./src/**/*.ts",
-    "./types/index.d.ts"
+    "./src/**/*.ts"
   ],
   "compilerOptions": {
     "types": [

@@ -140,5 +140,29 @@ export function InspectorProvider({ getService }) {
       });
       await renderable.waitForRender();
     }
+
+    async openInspectorView(viewId) {
+      log.debug(`Open Inspector view ${viewId}`);
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click(viewId);
+    }
+
+    async openInspectorRequestsView() {
+      await this.openInspectorView('inspectorViewChooserRequests');
+    }
+
+    async getRequestNames() {
+      await this.openInspectorRequestsView();
+      const requestChooserExists = await testSubjects.exists('inspectorRequestChooser');
+      if (requestChooserExists) {
+        await testSubjects.click('inspectorRequestChooser');
+        const menu = await testSubjects.find('inspectorRequestChooserMenuPanel');
+        const requestNames = await menu.getVisibleText();
+        return requestNames.trim().split('\n').join(',');
+      }
+
+      const singleRequest = await testSubjects.find('inspectorRequestName');
+      return await singleRequest.getVisibleText();
+    }
   };
 }

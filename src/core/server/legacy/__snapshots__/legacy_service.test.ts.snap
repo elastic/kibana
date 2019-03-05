@@ -29,6 +29,9 @@ Array [
         },
       },
       "log": Object {
+        "context": Array [
+          "server",
+        ],
         "debug": [MockFunction] {
           "calls": Array [
             Array [
@@ -37,7 +40,7 @@ Array [
           ],
           "results": Array [
             Object {
-              "isThrow": false,
+              "type": "return",
               "value": undefined,
             },
           ],
