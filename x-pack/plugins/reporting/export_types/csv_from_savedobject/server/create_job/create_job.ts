@@ -69,12 +69,7 @@ function createJobFn(server: KbnServer) {
         }
 
         // saved search type
-        return await createJobSearch(
-          timerange,
-          attributes,
-          references,
-          kibanaSavedObjectMeta
-        );
+        return await createJobSearch(timerange, attributes, references, kibanaSavedObjectMeta);
       })
       .catch((err: Error) => {
         const boomErr = (err as unknown) as { isBoom: boolean };
