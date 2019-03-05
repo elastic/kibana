@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
-// @ts-ignore
 import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { TraceList } from './TraceList';
