@@ -115,13 +115,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
   return { driver: session, By, Key, until, LegacyActionSequence };
 }
 
-export async function initWebDriver({
-  log,
-  browserType,
-}: {
-  log: ToolingLog;
-  browserType: 'chrome' | 'firefox';
-}) {
+export async function initWebDriver(log: ToolingLog, browserType: 'chrome' | 'firefox') {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
   logger.addHandler((entry: { message: string }) => {

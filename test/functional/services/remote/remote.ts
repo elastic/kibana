@@ -24,20 +24,15 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
-  if (!possibleBrowsers.includes(browserType)) {
+  if (browserType !== 'chrome' && browserType !== 'firefox') {
     throw new Error(
-      `Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +
-        possibleBrowsers.join(',')
+      `Unexpected TEST_BROWSER_TYPE "${browserType}", only "chrome" and "firefox" are supported`
     );
   }
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({
-    log,
-    browserType: browserType as 'chrome' | 'firefox',
-  });
+  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver(log, browserType);
 
   log.info('Remote initialized');
 
