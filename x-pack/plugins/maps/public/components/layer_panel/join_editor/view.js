@@ -85,7 +85,10 @@ export function JoinEditor({ joins, layer, onChange }) {
           <EuiButtonIcon
             iconType="plusInCircle"
             onClick={addJoin}
-            aria-label="Add join"
+            aria-label={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinAriaLabel', {
+              defaultMessage: 'Add join'
+            })
+            }
             title={
               i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButtonLabel', {
                 defaultMessage: 'Add join'
