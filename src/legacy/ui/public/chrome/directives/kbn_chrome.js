@@ -20,6 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import $ from 'jquery';
+import url from 'url';
 
 import { uiModules } from '../../modules';
 import {
@@ -57,7 +58,7 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, Private) {
+        controller($scope, $rootScope, Private, $location) {
           const getUnhashableStates = Private(getUnhashableStatesProvider);
           const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
@@ -73,6 +74,19 @@ export function kbnChromeProvider(chrome, internals) {
             }
           }
 
+          $rootScope.$on('$locationChangeStart', (e, newUrl) => {
+            // This handler fixes issue #31238 where browser back navigation
+            // fails due to angular 1.6 parsing url encoded params wrong.
+            const absUrlHash = url.parse($location.absUrl()).hash;
+            const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
+            const hash = url.parse(newUrl).hash;
+            const decodedHash = decodeURIComponent(hash);
+            if (absUrlHash !== hash && decodedHash === decodedAbsUrlHash) {
+              // replace the urlencoded hash with the version that angular sees.
+              $location.url(absUrlHash).replace();
+            }
+
+          });
           $rootScope.$on('$routeChangeSuccess', onRouteChange);
           $rootScope.$on('$routeUpdate', onRouteChange);
           updateSubUrls(); // initialize sub urls
