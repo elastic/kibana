@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { PluginDiscoveryErrorType } from './plugin_discovery_error';
+jest.mock('fs', () => ({ readFile: jest.fn(), stat: jest.fn() }));
 
-const mockReadFile = jest.fn();
-const mockStat = jest.fn();
-jest.mock('fs', () => ({ readFile: mockReadFile, stat: mockStat }));
-
+import { readFile } from 'fs';
 import { resolve } from 'path';
+import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 
 const pluginPath = resolve('path', 'existent-dir');
@@ -34,6 +32,8 @@ const packageInfo = {
   buildSha: '',
   version: '7.0.0-alpha1',
 };
+
+const mockReadFile = (readFile as unknown) as jest.Mock;
 
 afterEach(() => {
   jest.clearAllMocks();

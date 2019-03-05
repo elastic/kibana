@@ -25,17 +25,18 @@ function mockClass<T>(
   const MockClass = jest.fn(function(this: any, ...args: any[]) {
     setup(this, args);
   });
+  const mockClassName = Class.name;
 
   // define the mock name which is used in some snapshots
-  MockClass.mockName(`Mock${Class.name}`);
+  MockClass.mockName(`Mock${mockClassName}`);
 
   // define the class name for the MockClass which is used in other snapshots
   Object.defineProperty(MockClass, 'name', {
-    value: `Mock${Class.name}`,
+    value: `Mock${mockClassName}`,
   });
 
-  jest.doMock(module, () => ({
-    [Class.name]: MockClass,
+  jest.mock(module, () => ({
+    [mockClassName]: MockClass,
   }));
 
   return MockClass;

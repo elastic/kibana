@@ -17,21 +17,23 @@
  * under the License.
  */
 
-const mockCreateLayout = jest.fn();
 jest.mock('../layouts/layouts', () => {
   const { schema } = require('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({ kind: schema.literal('mock') }),
-      create: mockCreateLayout,
+      create: jest.fn(),
     },
   };
 });
 
 import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
+import { Layouts } from '../layouts/layouts';
 import { Appenders } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
+
+const mockCreateLayout = Layouts.create as jest.Mock;
 
 beforeEach(() => {
   mockCreateLayout.mockReset();

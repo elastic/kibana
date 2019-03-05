@@ -17,16 +17,17 @@
  * under the License.
  */
 
-const mockHttpServer = jest.fn();
-
 jest.mock('./http_server', () => ({
-  HttpServer: mockHttpServer,
+  HttpServer: jest.fn(),
 }));
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpConfig, HttpService, Router } from '.';
 import { logger } from '../logging/__mocks__';
+import { HttpServer } from './http_server';
+
+const mockHttpServer = HttpServer as jest.Mock;
 
 beforeEach(() => {
   logger.mockClear();

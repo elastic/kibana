@@ -17,6 +17,13 @@
  * under the License.
  */
 
+jest.mock('react-dom', () => {
+  return {
+    render: jest.fn(),
+  };
+});
+
+import ReactDOM from 'react-dom';
 import * as Rx from 'rxjs';
 
 expect.addSnapshotSerializer({
@@ -24,14 +31,9 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
-const mockRender = jest.fn();
-jest.mock('react-dom', () => {
-  return {
-    render: mockRender,
-  };
-});
-
 import { FatalErrorsService } from './fatal_errors_service';
+
+const mockRender = ReactDOM.render as jest.Mock;
 
 function setup() {
   const rootDomElement = document.createElement('div');

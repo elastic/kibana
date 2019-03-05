@@ -17,15 +17,17 @@
  * under the License.
  */
 
-const mockReadFileSync = jest.fn();
-jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
+jest.mock('fs', () => ({ readFileSync: jest.fn() }));
 
+import { readFileSync } from 'fs';
 import { duration } from 'moment';
 import { logger } from '../logging/__mocks__';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
+
+const mockReadFileSync = readFileSync as jest.Mock;
 
 afterEach(() => jest.clearAllMocks());
 
