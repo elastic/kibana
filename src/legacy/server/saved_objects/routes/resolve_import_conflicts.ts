@@ -47,6 +47,10 @@ interface ImportRequest extends Hapi.Request {
       from: string;
       to: string;
     }>;
+    skips: Array<{
+      type: string;
+      id: string;
+    }>;
   };
 }
 
@@ -79,6 +83,14 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
             })
           )
           .default([]),
+        skips: Joi.array()
+          .items(
+            Joi.object({
+              type: Joi.string().required(),
+              id: Joi.string().required(),
+            })
+          )
+          .default([]),
       }).default(),
     },
   },
@@ -93,6 +105,7 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
+      skips: request.payload.skips,
       overwrites: request.payload.overwrites,
       replaceReferences: request.payload.replaceReferences,
     });

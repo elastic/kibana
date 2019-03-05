@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The resolve import conflicts API enables you to resolve conflicts given by the import API by indicating which records to overwrite as well as changing references to a newly created object.
+The resolve import conflicts API enables you to resolve conflicts given by the import API by either skipping or overwriting specific saved objects as well as changing references to a newly created object.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -24,6 +24,9 @@ The request body must be of type multipart/form-data.
 `replaceReferences` (optional)::
   (array) A list of "type", "from" and "to" used to change imported saved object references to.
 
+`skips` (optional)::
+  (array) A list of "type" and "id" objects to skip importing.
+
 ==== Response body
 
 The response body will have a top level `success` property that indicates
@@ -32,7 +35,37 @@ a top level `errors` array will contain the objects that failed to import.
 
 ==== Examples
 
-The following example resolves conflicts by indicating to overwrite the dashboard.
+The following example attempts to import an index pattern and dashboard but indicates to skip importing the index-pattern.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_resolve_import_conflicts
+Content-Type: multipart/form-data; boundary=EXAMPLE
+--EXAMPLE
+Content-Disposition: form-data; name="file"; filename="export.ndjson"
+Content-Type: application/ndjson
+
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--EXAMPLE
+Content-Disposition: form-data; name="skips"
+
+[{"type":"index-pattern","id":"my-pattern"}]
+--EXAMPLE---
+--------------------------------------------------
+// KIBANA
+
+A successful call returns a response code of `200` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "success": true
+}
+--------------------------------------------------
+
+The following example attempts to import an index pattern and dashboard but indicates to overwrite the dashboard.
 
 [source,js]
 --------------------------------------------------
@@ -62,7 +95,8 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example replaces the visualization references to another.
+The following example attempts to import a visualization and dashboard but indicates
+to skip the visualization and replace the references to another visualization.
 
 [source,js]
 --------------------------------------------------
@@ -74,6 +108,10 @@ Content-Type: application/ndjson
 
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}
+--EXAMPLE
+Content-Disposition: form-data; name="skips"
+
+[{"type":"index-pattern","id":"my-pattern"}]
 --EXAMPLE
 Content-Disposition: form-data; name="replaceReferences"
 
