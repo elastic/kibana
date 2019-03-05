@@ -187,8 +187,10 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToQuery = false;
+    let updateDueToFilters = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
     }
 
     let updateDueToPrecisionChange = false;
@@ -203,6 +205,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
+      && !updateDueToFilters
       && !updateDueToPrecisionChange;
   }
 
@@ -282,9 +285,7 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data, meta } = await this._source.getGeoJsonWithMeta({
-        layerName,
-      }, searchFilters);
+      const { data, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
       stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
       return {
         refreshed: true,

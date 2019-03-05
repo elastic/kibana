@@ -117,8 +117,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async brushHistogram(from, to) {
       const bars = await find.allByCssSelector('.series.histogram rect');
       await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
       );
     }
 
