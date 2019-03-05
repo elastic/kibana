@@ -38,21 +38,27 @@ interface CoreApi {
 }
 
 interface RuntimeContext {
-  core: CoreApi | null;
-  plugins: null;
+  start: {
+    core: CoreApi | null;
+    plugins: null;
+  };
+  stop: null;
 }
 
 const runtimeContext: RuntimeContext = {
-  core: null,
-  plugins: null,
+  start: {
+    core: null,
+    plugins: null,
+  },
+  stop: null,
 };
 
 export function __newPlatformInit__(core: CoreApi) {
-  if (runtimeContext.core) {
-    throw new Error('New platform api was already initialized');
+  if (runtimeContext.start.core) {
+    throw new Error('New platform core api was already initialized');
   }
 
-  runtimeContext.core = Object.freeze(core);
+  runtimeContext.start.core = core;
 }
 
 export function getNewPlatform() {
