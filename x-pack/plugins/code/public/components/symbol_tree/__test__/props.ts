@@ -85,6 +85,33 @@ export const props: { structureTree: SymbolWithMembers[] } = {
               containerName: 'StackControl',
               path: '"stack-control"/StackControl/stackView',
             },
+            {
+              name: 'HashMap<K, V>',
+              kind: SymbolKind.Class,
+              location: {
+                uri:
+                  'git://github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java',
+                range: { start: { line: 136, character: 13 }, end: { line: 136, character: 20 } },
+              },
+              containerName: 'HashMap.java',
+              path: 'HashMap<K, V>',
+              members: [
+                {
+                  name: 'serialVersionUID',
+                  kind: SymbolKind.Field,
+                  location: {
+                    uri:
+                      'git://github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java',
+                    range: {
+                      start: { line: 139, character: 30 },
+                      end: { line: 139, character: 46 },
+                    },
+                  },
+                  containerName: 'HashMap',
+                  path: 'HashMap<K, V>/serialVersionUID',
+                },
+              ],
+            },
           ],
         },
       ],
