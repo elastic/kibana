@@ -73,7 +73,10 @@ export class Join extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${indexPatternId}`
+          loadError: i18n.translate('xpack.maps.layerPanel.join.noIndexPatternErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {indexPatternId}`,
+            values: { indexPatternId }
+          })
         });
       }
       return;
