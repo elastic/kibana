@@ -88,5 +88,4 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
-  superDatePicker: SuperDatePickerProvider,
 };
