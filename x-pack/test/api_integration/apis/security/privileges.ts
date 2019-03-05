@@ -575,6 +575,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 all: [
                   'login:',
                   `version:${version}`,
+                  'api:infra/graphql',
                   'app:infra',
                   'app:kibana',
                   'ui:catalogue/infraops',
@@ -599,6 +600,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 read: [
                   'login:',
                   `version:${version}`,
+                  'api:infra/graphql',
                   'app:infra',
                   'app:kibana',
                   'ui:catalogue/infraops',
@@ -618,6 +620,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 all: [
                   'login:',
                   `version:${version}`,
+                  'api:infra/graphql',
                   'app:infra',
                   'app:kibana',
                   'ui:catalogue/infralogging',
@@ -642,6 +645,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 read: [
                   'login:',
                   `version:${version}`,
+                  'api:infra/graphql',
                   'app:infra',
                   'app:kibana',
                   'ui:catalogue/infralogging',
@@ -842,6 +846,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:savedObjectsManagement/canvas-workpad/delete',
                 'ui:savedObjectsManagement/canvas-workpad/edit',
                 'ui:canvas/save',
+                'api:infra/graphql',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
@@ -950,6 +955,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:canvas',
                 'ui:catalogue/canvas',
                 'ui:navLinks/canvas',
+                'api:infra/graphql',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
@@ -1122,6 +1128,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:savedObjectsManagement/canvas-workpad/delete',
                 'ui:savedObjectsManagement/canvas-workpad/edit',
                 'ui:canvas/save',
+                'api:infra/graphql',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
@@ -1230,6 +1237,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:canvas',
                 'ui:catalogue/canvas',
                 'ui:navLinks/canvas',
+                'api:infra/graphql',
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
