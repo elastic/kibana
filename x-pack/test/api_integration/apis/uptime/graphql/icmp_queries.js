@@ -26,8 +26,8 @@ export default function ({ getService }) {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
         variables: {
-          dateRangeStart: 1551236216000,
-          dateRangeEnd: 1551311816000,
+          dateRangeStart: 1551763670000,
+          dateRangeEnd: 1551821270000,
         },
       };
 
@@ -45,8 +45,8 @@ export default function ({ getService }) {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
         variables: {
-          dateRangeStart: 1551236216000,
-          dateRangeEnd: 1551311816000,
+          dateRangeStart: 1551763670000,
+          dateRangeEnd: 1551821270000,
           filters: `{"bool":{"must":[{"match":{"monitor.type":{"query":"icmp","operator":"and"}}}]}}`,
         },
       };
