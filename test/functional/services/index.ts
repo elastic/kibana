@@ -63,7 +63,7 @@ import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 
 export const services = {
-  __leadfoot__: RemoteProvider,
+  __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
   find: FindProvider,

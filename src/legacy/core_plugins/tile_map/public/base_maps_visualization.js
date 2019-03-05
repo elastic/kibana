@@ -71,7 +71,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
      * @param status
      * @return {Promise}
      */
-    async render(esResponse, status) {
+    async render(esResponse, visParams, status) {
       if (!this._kibanaMap) {
         //the visualization has been destroyed;
         return;
@@ -83,6 +83,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         this._kibanaMap.resize();
       }
       if (status.params || status.aggs) {
+        this._params = visParams;
         await this._updateParams();
       }
 
@@ -233,7 +234,7 @@ export function BaseMapsVisualizationProvider(serviceSettings, i18n) {
         {},
         this.vis.type.visConfig.defaults,
         { type: this.vis.type.name },
-        this.vis.params
+        this._params
       );
     }
 
