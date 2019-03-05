@@ -78,12 +78,8 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
         defaultMessage: 'Name',
       }),
       render: (name: string, item: any) => {
-        return (
-          <span data-test-subj={`watchNameColumn-${item.id}`}>
-            {name}
-          </span>
-        )
-      }
+        return <span data-test-subj={`watchNameColumn-${item.id}`}>{name}</span>;
+      },
       sortable: true,
       truncateText: true,
     },
