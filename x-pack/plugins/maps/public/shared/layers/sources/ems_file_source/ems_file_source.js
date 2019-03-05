@@ -69,8 +69,18 @@ export class EMSFileSource extends AbstractVectorSource {
   async getImmutableProperties() {
     const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
     return [
-      { label: 'Data source', value: EMSFileSource.title },
-      { label: 'Layer', value: this._descriptor.id, link: emsLink }
+      {
+        label: i18n.translate('xpack.maps.source.emsFile.dataSourceLabel', {
+          defaultMessage: `Data source`,
+        }),
+        value: EMSFileSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
+          defaultMessage: `Layer`,
+        }),
+        value: this._descriptor.id,
+        link: emsLink }
     ];
   }
 
