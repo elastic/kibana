@@ -9,26 +9,46 @@ import fetch from 'node-fetch';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
+import { setContext } from 'apollo-link-context';
 
 import introspectionQueryResultData from '../../../plugins/infra/public/graphql/introspection.json';
 
-export function InfraOpsGraphQLProvider({ getService }) {
-  const config = getService('config');
-  const kbnURL = formatUrl(config.get('servers.kibana'));
+export function InfraOpsGraphQLClientProvider({ getService }) {
+  return new InfraOpsGraphQLClientFactoryProvider({ getService })();
+}
 
-  return new ApolloClient({
-    cache: new InMemoryCache({
-      fragmentMatcher: new IntrospectionFragmentMatcher({
-        introspectionQueryResultData,
-      }),
-    }),
-    link: new HttpLink({
+export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
+  const config = getService('config');
+  const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
+
+  return function ({ username = superUsername, password = superPassword, basePath = null } = {}) {
+    const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+    const httpLink = new HttpLink({
       credentials: 'same-origin',
       fetch,
       headers: {
         'kbn-xsrf': 'xxx',
       },
-      uri: `${kbnURL}/api/infra/graphql`,
-    }),
-  });
+      uri: `${kbnURLWithoutAuth}${basePath || ''}/api/infra/graphql`,
+    });
+
+    const authLink = setContext((_, { headers }) => {
+      return {
+        headers: {
+          ...headers,
+          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+        }
+      };
+    });
+
+    return new ApolloClient({
+      cache: new InMemoryCache({
+        fragmentMatcher: new IntrospectionFragmentMatcher({
+          introspectionQueryResultData,
+        }),
+      }),
+      link: authLink.concat(httpLink),
+    });
+  };
 }

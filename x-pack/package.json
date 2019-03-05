@@ -70,6 +70,7 @@
     "abab": "^1.0.4",
     "ansi-colors": "^3.0.5",
     "ansicolors": "0.3.2",
+    "apollo-link-context": "^1.0.14",
     "axios": "^0.18.0",
     "babel-jest": "^23.6.0",
     "babel-plugin-inline-react-svg": "^0.5.4",
