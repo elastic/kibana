@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const CSV_RESULT = `"@timestamp",clientip,extension
+export const CSV_RESULT_TIMEBASED = `"@timestamp",clientip,extension
 "2015-09-20T10:26:48.725Z","74.214.76.90",jpg
 "2015-09-20T10:26:48.540Z","146.86.123.109",jpg
 "2015-09-20T10:26:48.353Z","233.126.159.144",jpg
@@ -64,4 +64,19 @@ export const CSV_RESULT = `"@timestamp",clientip,extension
 "2015-09-20T10:19:43.754Z","171.243.18.67",gif
 "2015-09-20T10:19:41.208Z","126.87.234.213",jpg
 "2015-09-20T10:19:40.307Z","78.216.173.242",css
+`;
+
+export const CSV_RESULT_TIMELESS = `name,power
+"Jonelle-Jane Marth","1.1768"
+"Suzie-May Rishel","1.824"
+"Suzie-May Rishel","2.077"
+"Rosana Casto","2.8084"
+"Stephen Cortez","4.9856"
+"Jonelle-Jane Marth","6.156"
+"Jonelle-Jane Marth","7.0966"
+"Florinda Alejandro","10.3734"
+"Jonelle-Jane Marth","14.8074"
+"Suzie-May Rishel","19.7377"
+"Suzie-May Rishel","20.9198"
+"Florinda Alejandro","22.2092"
 `;

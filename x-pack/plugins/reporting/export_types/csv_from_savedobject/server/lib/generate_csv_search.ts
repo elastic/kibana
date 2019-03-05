@@ -48,7 +48,7 @@ interface GenerateCsvParams {
   settings: {
     separator: string;
     quoteValues: boolean;
-    timezone: string;
+    timezone: string | null;
     maxSizeBytes: number;
     scroll: { duration: string; size: number };
   };
@@ -76,24 +76,31 @@ const getTimebasedParts = (
   savedSearchObjectAttr: SavedSearchObjectAttributes,
   searchSourceFilter: any[]
 ) => {
-  const timeFilter = indexPatternSavedObject.timeFieldName
-    ? {
-        range: {
-          [indexPatternSavedObject.timeFieldName]: {
-            format: 'epoch_millis',
-            gte: moment(timerange.min).valueOf(),
-            lte: moment(timerange.max).valueOf(),
-          },
+  let includes: string[];
+  let timeFilter: any | null;
+  let timezone: string | null;
+
+  if (indexPatternSavedObject.timeFieldName) {
+    includes = [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns];
+    timeFilter = {
+      range: {
+        [indexPatternSavedObject.timeFieldName]: {
+          format: 'epoch_millis',
+          gte: moment(timerange.min).valueOf(),
+          lte: moment(timerange.max).valueOf(),
         },
-      }
-    : null;
-  const includes = indexPatternSavedObject.timeFieldName
-    ? [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns]
-    : savedSearchObjectAttr.columns;
+      },
+    };
+    timezone = timerange.timezone;
+  } else {
+    includes = savedSearchObjectAttr.columns;
+    timeFilter = null;
+    timezone = null;
+  }
 
   const combinedFilter = timeFilter ? [timeFilter].concat(searchSourceFilter) : searchSourceFilter;
 
-  return { combinedFilter, includes };
+  return { combinedFilter, includes, timezone };
 };
 
 export async function generateCsvSearch(
@@ -116,7 +123,7 @@ export async function generateCsvSearch(
   const { searchSource } = kibanaSavedObjectMeta as { searchSource: SearchSource };
 
   const { filter: searchSourceFilter, query: searchSourceQuery } = searchSource;
-  const { combinedFilter, includes } = getTimebasedParts(
+  const { combinedFilter, includes, timezone } = getTimebasedParts(
     indexPatternSavedObject,
     timerange,
     savedSearchObjectAttr,
@@ -161,9 +168,9 @@ export async function generateCsvSearch(
     cancellationToken: [],
     settings: {
       ...uiSettings,
-      timezone: timerange.timezone,
       maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
       scroll: config.get('xpack.reporting.csv.scroll'),
+      timezone,
     },
   };
 

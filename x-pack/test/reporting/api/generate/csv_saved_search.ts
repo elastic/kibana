@@ -6,10 +6,14 @@
 
 import expect from 'expect.js';
 import supertest from 'supertest';
-import { CSV_RESULT } from './fixtures';
+import { CSV_RESULT_TIMEBASED, CSV_RESULT_TIMELESS } from './fixtures';
 
 interface GenerateOpts {
-  timerange: {};
+  timerange?: {
+    timezone: string;
+    min: number | string | Date;
+    max: number | string | Date;
+  };
   state: any;
 }
 
@@ -27,11 +31,12 @@ export default function({ getService }: { getService: any }) {
   };
 
   describe('Generation from Saved Search ID', () => {
-    it('Return a 200', async () => {
+    it('With filters and timebased data', async () => {
       // load test data that contains a saved search and documents
-      await esArchiver.load('reporting');
+      await esArchiver.load('reporting/logs');
       await esArchiver.load('logstash_functional');
 
+      // TODO: check headers for inline filename
       const {
         status: resStatus,
         text: resText,
@@ -47,10 +52,30 @@ export default function({ getService }: { getService: any }) {
 
       expect(resStatus).to.eql(200);
       expect(resType).to.eql('text/csv');
-      expect(resText).to.eql(CSV_RESULT);
+      expect(resText).to.eql(CSV_RESULT_TIMEBASED);
 
-      await esArchiver.unload('reporting');
+      await esArchiver.unload('reporting/logs');
       await esArchiver.unload('logstash_functional');
+    });
+
+    it('With filters and non-timebased data', async () => {
+      // load test data that contains a saved search and documents
+      await esArchiver.load('reporting/sales');
+
+      // TODO: check headers for inline filename
+      const {
+        status: resStatus,
+        text: resText,
+        type: resType,
+      } = (await generateAPI.getCsvFromSavedSearch('search:71e3ee20-3f99-11e9-b8ee-6b9604f2f877', {
+        state: {},
+      })) as supertest.Response;
+
+      expect(resStatus).to.eql(200);
+      expect(resType).to.eql('text/csv');
+      expect(resText).to.eql(CSV_RESULT_TIMELESS);
+
+      await esArchiver.unload('reporting/sales');
     });
 
     it('Return a 404', async () => {
