@@ -10,6 +10,7 @@ import { Request } from 'hapi';
 import { createTaggedLogger } from '../../../../server/lib';
 import { KbnServer, Logger } from '../../../../types';
 import { SearchPanel, VisPanel } from '../../types';
+import { generateCsvAggTable } from './generate_csv_agg_table';
 import { generateCsvSearch } from './generate_csv_search';
 
 interface FakeRequest {
@@ -31,6 +32,8 @@ export function createGenerateCsv(logger: Logger) {
     // This structure will not be needed when the vis data just consists of an
     // expression that we could run through the interpreter to get csv
     switch (visType) {
+      case 'table':
+        return await generateCsvAggTable(request as Request, server, logger, panel as VisPanel);
       case 'search':
         return await generateCsvSearch(request as Request, server, logger, panel as SearchPanel);
       default:

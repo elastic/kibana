@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound, notImplemented } from 'boom';
+import { notFound } from 'boom';
 import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
@@ -17,14 +17,16 @@ import {
   SearchPanel,
   TimeRangeParams,
   VisObjectAttributesJSON,
+  VisPanel,
 } from '../../types';
 import { createGenerateCsv } from '../lib/generate_csv';
 import { createJobSearch } from './create_job_search';
+import { createJobVis } from './create_job_vis';
 
 interface VisData {
   title: string;
   visType: string;
-  panel: SearchPanel;
+  panel: VisPanel | SearchPanel;
 }
 
 function createJobFn(server: KbnServer) {
@@ -64,8 +66,10 @@ function createJobFn(server: KbnServer) {
         };
 
         const { visState: visStateJSON } = attributes as VisObjectAttributesJSON;
+
         if (visStateJSON) {
-          throw notImplemented('Visualization types are not yet implemented');
+          // visualization type
+          return await createJobVis(timerange, attributes, references, kibanaSavedObjectMeta);
         }
 
         // saved search type
