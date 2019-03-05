@@ -953,7 +953,7 @@ module.controller('MlExplorerController', function (
     }
   }
 
-  async function loadAnnotationsTableData() {
+  function loadAnnotationsTableData() {
     $scope.annotationsData = [];
 
     const cellData = $scope.cellData;
@@ -962,30 +962,35 @@ module.controller('MlExplorerController', function (
     const timeRange = getSelectionTimeRange(cellData);
 
     if (mlAnnotationsEnabled) {
-      const resp = await ml.annotations.getAnnotations({
+      ml.annotations.getAnnotations({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      });
-
-      $scope.$evalAsync(() => {
-        const annotationsData = [];
-        jobIds.forEach((jobId) => {
-          const jobAnnotations = resp.annotations[jobId];
-          if (jobAnnotations !== undefined) {
-            annotationsData.push(...jobAnnotations);
-          }
-        });
-
-        $scope.annotationsData = annotationsData
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
+      }).then((resp) => {
+        $scope.$evalAsync(() => {
+          const annotationsData = [];
+          jobIds.forEach((jobId) => {
+            const jobAnnotations = resp.annotations[jobId];
+            if (jobAnnotations !== undefined) {
+              annotationsData.push(...jobAnnotations);
+            }
           });
+
+          $scope.annotationsData = annotationsData
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = String.fromCharCode(65 + i);
+              return d;
+            });
+        });
+      }).catch((resp) => {
+        console.log('Error loading list of annotations for jobs list:', resp);
+        // Silently fail and just return an empty array for annotations to not break the UI.
+        $scope.annotationsData = [];
+        $scope.$applyAsync();
       });
     }
   }

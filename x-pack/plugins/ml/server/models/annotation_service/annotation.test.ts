@@ -16,6 +16,8 @@ import { annotationServiceProvider } from './index';
 
 const acknowledgedResponseMock = { acknowledged: true };
 
+const jobIdMock = 'jobIdMock';
+
 describe('annotation_service', () => {
   let callWithRequestSpy: jest.Mock;
 
@@ -56,8 +58,6 @@ describe('annotation_service', () => {
     it('should get annotations for specific job', async done => {
       const { getAnnotations } = annotationServiceProvider(callWithRequestSpy);
 
-      const jobIdMock = 'jobIdMock';
-
       const indexAnnotationArgsMock: IndexAnnotationArgs = {
         jobIds: [jobIdMock],
         earliestMs: 1454804100000,
@@ -74,13 +74,37 @@ describe('annotation_service', () => {
       expect(isAnnotations(response.annotations[jobIdMock])).toBeTruthy();
       done();
     });
+
+    it('should throw and catch an error', async () => {
+      const mockEsError = {
+        statusCode: 404,
+        error: 'Not Found',
+        message: 'mock error message',
+      };
+
+      const callWithRequestSpyError = jest.fn(() => {
+        return Promise.resolve(mockEsError);
+      });
+
+      const { getAnnotations } = annotationServiceProvider(callWithRequestSpyError);
+
+      const indexAnnotationArgsMock: IndexAnnotationArgs = {
+        jobIds: [jobIdMock],
+        earliestMs: 1454804100000,
+        latestMs: 1455233399999,
+        maxAnnotations: 500,
+      };
+
+      await expect(getAnnotations(indexAnnotationArgsMock)).rejects.toEqual(
+        Error(`Annotations couldn't be retrieved from Elasticsearch.`)
+      );
+    });
   });
 
   describe('indexAnnotation()', () => {
     it('should index annotation', async done => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
 
-      const jobIdMock = 'jobIdMock';
       const annotationMock: Annotation = {
         annotation: 'Annotation text',
         job_id: jobIdMock,
@@ -108,7 +132,6 @@ describe('annotation_service', () => {
     it('should remove ._id and .key before updating annotation', async done => {
       const { indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
 
-      const jobIdMock = 'jobIdMock';
       const annotationMock: Annotation = {
         _id: 'mockId',
         annotation: 'Updated annotation text',
@@ -139,8 +162,6 @@ describe('annotation_service', () => {
 
     it('should update annotation text and the username for modified_username', async done => {
       const { getAnnotations, indexAnnotation } = annotationServiceProvider(callWithRequestSpy);
-
-      const jobIdMock = 'jobIdMock';
 
       const indexAnnotationArgsMock: IndexAnnotationArgs = {
         jobIds: [jobIdMock],
