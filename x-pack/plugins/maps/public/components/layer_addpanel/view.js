@@ -106,7 +106,12 @@ export class AddLayerPanel extends Component {
     return (
       <Fragment>
         <EuiTitle size="xs">
-          <h2>Choose data source</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.maps.addLayerPanel.chooseDataSourceTitle"
+              defaultMessage="Choose data source"
+            />
+          </h2>
         </EuiTitle>
         {this._renderSourceCards()}
       </Fragment>
@@ -187,7 +192,10 @@ export class AddLayerPanel extends Component {
                 flush="left"
                 data-test-subj="layerAddCancelButton"
               >
-                Cancel
+                <FormattedMessage
+                  id="xpack.maps.addLayerPanel.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
