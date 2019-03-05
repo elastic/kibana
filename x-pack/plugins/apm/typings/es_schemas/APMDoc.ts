@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export type AgentName =
+  | 'java'
+  | 'nodejs'
+  | 'python'
+  | 'ruby'
+  | 'js-react'
+  | 'js-base';
+
 // all documents types extend APMDoc and inherit all properties
 export interface APMDoc {
   '@timestamp': string;
   agent: {
-    name: string;
+    name: AgentName;
     version: string;
   };
   timestamp: { us: number };
