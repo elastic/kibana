@@ -43,7 +43,6 @@ exports[`render 1`] = `
           />
         </EuiButtonEmpty>
       }
-      makeUrl={[Function]}
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."

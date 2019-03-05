@@ -86,8 +86,10 @@ export class OpenSearchPanel extends React.Component {
                 name: 'Search',
               },
             ]}
-            onChoose={this.props.onClose}
-            makeUrl={this.props.makeUrl}
+            onChoose={(id) => {
+              window.open(this.props.makeUrl(id), '_self');
+              this.props.onClose();
+            }}
             callToActionButton={this.renderMangageSearchesButton()}
           />
 

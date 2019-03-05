@@ -86,7 +86,6 @@ interface BaseSavedObjectFinder {
     type: SimpleSavedObject<SavedObjectAttributes>['type'],
     name: string
   ) => void;
-  makeUrl?: (id: SimpleSavedObject<SavedObjectAttributes>['id']) => string;
   noItemsMessage?: React.ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<SavedObjectAttributes>>;
   showFilter?: boolean;
@@ -112,7 +111,6 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
     initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
     fixedPageSize: PropTypes.number,
     showFilter: PropTypes.bool,
-    makeUrl: PropTypes.func,
   };
 
   private isComponentMounted: boolean = false;
@@ -421,7 +419,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
 
   private renderListing() {
     const items = this.state.items.length === 0 ? [] : this.getPageOfItems();
-    const { onChoose, makeUrl, savedObjectMetaData } = this.props;
+    const { onChoose, savedObjectMetaData } = this.props;
 
     return (
       <>
@@ -446,17 +444,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                   iconType={iconType}
                   label={item.title}
                   onClick={
-                    !makeUrl && onChoose
-                      ? () => {
-                          onChoose(item.id, item.type, fullName);
-                        }
-                      : undefined
-                  }
-                  href={makeUrl ? makeUrl(item.id) : undefined}
-                  onMouseUp={
-                    // this is a workaround because onClick doesn't fire if a href props is provided
-                    // can be removed as soon as this bug is fixed in EUI
-                    onChoose && makeUrl
+                    onChoose
                       ? () => {
                           onChoose(item.id, item.type, fullName);
                         }
