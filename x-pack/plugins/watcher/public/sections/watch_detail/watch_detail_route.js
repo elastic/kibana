@@ -4,16 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import routes from 'ui/routes';
 import 'ui/url';
 import { toastNotifications } from 'ui/notify';
 import template from './watch_detail_route.html';
 import 'plugins/watcher/services/watch';
-import './components/watch_detail';
 import { WATCH_HISTORY } from '../../../common/constants';
 import { updateWatchSections } from 'plugins/watcher/lib/update_management_sections';
 import 'plugins/watcher/services/license';
 import { getWatchDetailBreadcrumbs } from '../../lib/breadcrumbs';
+import { setHttpClient } from '../../lib/api';
+import { manageAngularLifecycle } from '../../lib/manage_angular_lifecycle';
+import './components/watch_detail';
+import { WatchDetail } from './components/watch_detail/watch_detail_component';
+import { I18nContext } from 'ui/i18n';
+
+let elem;
+const renderReact = async elem => {
+  render(
+    <I18nContext>
+      <WatchDetail />
+    </I18nContext>,
+    elem
+  );
+};
 
 routes
   .when('/management/elasticsearch/watcher/watches/watch/:id', {
@@ -74,11 +90,19 @@ routes
     },
     controllerAs: 'watchDetailRoute',
     controller: class WatchDetailRouteController {
-      constructor($injector) {
+      constructor($injector, $scope, $http) {
         const $route = $injector.get('$route');
         this.initialHistoryRange = $route.current.locals.initialHistoryRange;
         this.watch = $route.current.locals.watch;
         this.watchHistoryItems = $route.current.locals.watchHistoryItems;
+        // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
+        // e.g. to check license status per request.
+        setHttpClient($http);
+        $scope.$$postDigest(() => {
+          elem = document.getElementById('watchDetailReactRoot');
+          renderReact(elem);
+          manageAngularLifecycle($scope, $route, elem);
+        });
       }
     }
   });
