@@ -63,8 +63,9 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
 
   public render() {
     return (
-      <div className="code-navigation__sidebar">
+      <div>
         <EuiTabbedContent
+          className="code-navigation__sidebar"
           tabs={this.tabs}
           initialSelectedTab={this.tabs.find(t => t.id === this.sideTab)}
           onTabClick={tab => this.switchTab(tab.id as Tabs)}

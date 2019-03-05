@@ -28,9 +28,11 @@ export enum RepoState {
 }
 
 export interface RepoStatus {
-  state: RepoState;
-  progress?: number;
+  repoUri: string;
+  progress: number;
   cloneProgress?: any;
+  timestamp?: Date;
+  state?: RepoState;
 }
 
 export interface StatusState {
