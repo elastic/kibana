@@ -39,19 +39,20 @@ export function fetchUserActions(
 
   return Promise.all(actionTypes.map(fetchUserAction)).then(
     (userActions): UserActionCountByActionType => {
-      const userActionCountByActionType = userActions.reduce(
-        (byActionType: UserActionCountByActionType, userAction: UserActionRecord | undefined) => {
+      const userActionAndCountKeyValuePairs = userActions.reduce(
+        (pairs: UserActionCountByActionType, userAction: UserActionRecord | undefined) => {
           // User action is undefined if nobody has performed this action on the client yet.
           if (userAction !== undefined) {
             const { actionType, count } = userAction;
-            byActionType[actionType] = count;
+            const pair = { key: actionType, value: count };
+            pairs.push(pair);
           }
-          return byActionType;
+          return pairs;
         },
-        {}
+        []
       );
 
-      return userActionCountByActionType;
+      return userActionAndCountKeyValuePairs;
     }
   );
 }
