@@ -181,7 +181,7 @@ export class BulkUploader {
     const flat = Object.keys(typesNested).reduce((accum, type) => {
       return [
         ...accum,
-        { index: { _type: type } },
+        { index: { monitoring_type: type } },
         {
           kibana: this._getKibanaInfoForStats(),
           ...typesNested[type],
