@@ -10,6 +10,7 @@ and guides you through the process of resolving issues, including reindexing.
 Before upgrading to {es} 7.0, make sure that you are using the final 6.7.x minor 
 release to see the most up-to-date deprecation issues. 
 
+[float]
 === Reindexing
 
 The *Indices* page lists the indices that are incompatible with the next 
