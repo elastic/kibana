@@ -35,7 +35,7 @@ export const LegendControls = injectI18n(
   ({ intl, autoBounds, boundsOverride, onChange, dataBounds }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const [draftAuto, setDraftAuto] = useState(autoBounds);
-    const [draftBounds, setDraftBounds] = useState(boundsOverride); // should come from bounds prop
+    const [draftBounds, setDraftBounds] = useState(autoBounds ? dataBounds : boundsOverride); // should come from bounds prop
     const buttonComponent = (
       <EuiButtonIcon
         iconType="gear"
@@ -50,7 +50,6 @@ export const LegendControls = injectI18n(
 
     const handleAutoChange = (e: SyntheticEvent<HTMLInputElement>) => {
       setDraftAuto(e.currentTarget.checked);
-      setDraftBounds(dataBounds);
     };
 
     const createBoundsHandler = (name: string) => (e: SyntheticEvent<HTMLInputElement>) => {
