@@ -16,20 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Server } from '../../server/kbn_server';
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
+export type InitPluginFunction = (server: Server) => void;
+export interface UiExports {
+  injectDefaultVars: (server: Server) => { [key: string]: any };
+}
 
-  describe('homepage app', function () {
-    this.tags('ciGroup6');
-
-    before(function () {
-      return browser.setWindowSize(1200, 800);
-    });
-
-    loadTestFile(require.resolve('./_navigation'));
-    loadTestFile(require.resolve('./_home'));
-    loadTestFile(require.resolve('./_add_data'));
-    loadTestFile(require.resolve('./_sample_data'));
-  });
+export interface PluginSpecOptions {
+  id: string;
+  require: string[];
+  publicDir: string;
+  uiExports?: UiExports;
+  init: InitPluginFunction;
 }
