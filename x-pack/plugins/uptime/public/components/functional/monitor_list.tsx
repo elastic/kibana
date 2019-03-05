@@ -81,12 +81,9 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             name: i18n.translate('xpack.uptime.monitorList.hostColumnLabel', {
               defaultMessage: 'Host',
             }),
-            render: (host: string, item: any) =>
-              item.ping.monitor.type === 'icmp' ? (
-                <span>{item.ping.monitor.ip || item.ping.monitor.host}</span>
-              ) : (
-                <Link to={`/monitor/${item.key.id}`}>{host}</Link>
-              ),
+            render: (host: string, monitor: any) => (
+              <Link to={`/monitor/${monitor.key.id}`}>{host || monitor.key.id}</Link>
+            ),
           },
           {
             field: 'key.port',

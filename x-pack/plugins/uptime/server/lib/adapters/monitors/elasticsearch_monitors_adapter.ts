@@ -190,67 +190,32 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const icmpParams = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        query,
-        size: 0,
-        aggs: {
-          icmp: {
-            filter: {
-              term: {
-                'monitor.type': 'icmp',
-              },
-            },
-            aggs: {
-              ids: {
-                terms: {
-                  field: 'monitor.ip',
-                  size: 10000,
-                },
-                aggs: {
-                  latest: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': { order: 'desc' },
-                        },
-                      ],
-                      size: 1,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
+    let up: number = 0;
+    let down: number = 0;
+    let searchAfter: any = null;
 
-    const results = await Promise.all([
-      this.performSnapshotQuery(
-        request,
-        icmpParams,
-        'body.aggs.ids.composite.after',
-        'aggregations.icmp.ids.buckets',
-        statusFilter
-      ),
-      this.performSnapshotQuery(
-        request,
-        params,
-        'body.aggs.ids.composite.after',
-        'aggregations.ids.buckets',
-        statusFilter
-      ),
-    ]);
-
-    const { up, down } = results.reduce(
-      (acc: any, cur: any) => ({ up: acc.up + cur.up, down: acc.down + cur.down }),
-      {
-        up: 0,
-        down: 0,
+    do {
+      if (searchAfter) {
+        set(params, 'body.aggs.ids.composite.after', searchAfter);
       }
-    );
+
+      const queryResult = await this.database.search(request, params);
+      const idBuckets = get(queryResult, 'aggregations.ids.buckets', []);
+
+      idBuckets.forEach(bucket => {
+        // We only get the latest doc
+        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
+        if (!statusFilter || (statusFilter && statusFilter === status)) {
+          if (status === 'up') {
+            up++;
+          } else {
+            down++;
+          }
+        }
+      });
+
+      searchAfter = get(queryResult, 'aggregations.ids.after_key');
+    } while (searchAfter);
 
     return { up, down, total: up + down };
   }
@@ -286,6 +251,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   port: {
                     terms: {
                       field: 'tcp.port',
+                      missing_bucket: true,
                     },
                   },
                 },
@@ -323,67 +289,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
 
-    const icmpParams = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        size: 0,
-        query,
-        aggs: {
-          icmp: {
-            filter: {
-              term: {
-                'monitor.type': 'icmp',
-              },
-            },
-            aggs: {
-              hosts: {
-                terms: {
-                  field: 'monitor.ip',
-                  size: 100,
-                },
-                aggs: {
-                  latest: {
-                    top_hits: {
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      size: 1,
-                    },
-                  },
-                  histogram: {
-                    auto_date_histogram: {
-                      field: '@timestamp',
-                      buckets: 25,
-                    },
-                    aggs: {
-                      status: {
-                        terms: {
-                          field: 'monitor.status',
-                          size: 10,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    const [httpTcpResult, icmpResult] = await Promise.all([
-      this.database.search(request, params),
-      this.database.search(request, icmpParams),
-    ]);
-    const res: any = httpTcpResult.aggregations.hosts.buckets.concat(
-      icmpResult.aggregations.icmp.hosts.buckets
-    );
-    const result = res
+    const httpTcpResult = await this.database.search(request, params);
+    const result = get(httpTcpResult, 'aggregations.hosts.buckets', [])
       .map((resultBucket: any) => {
         const key = get(resultBucket, 'key');
         const buckets: any[] = get(resultBucket, 'histogram.buckets', []);
@@ -619,41 +526,5 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }
     );
     return errorsList;
-  }
-
-  private async performSnapshotQuery(
-    request: any,
-    params: any,
-    pathToAfterKey: string,
-    pathToIds: string,
-    statusFilter?: string
-  ): Promise<any> {
-    let up: number = 0;
-    let down: number = 0;
-    let searchAfter: any = null;
-
-    do {
-      if (searchAfter) {
-        set(params, pathToAfterKey, searchAfter);
-      }
-
-      const queryResult = await this.database.search(request, params);
-      const idBuckets = get(queryResult, pathToIds, []);
-
-      idBuckets.forEach(bucket => {
-        // We only get the latest doc
-        const status = get(bucket, 'latest.hits.hits[0]._source.monitor.status', null);
-        if (!statusFilter || (statusFilter && statusFilter === status)) {
-          if (status === 'up') {
-            up++;
-          } else {
-            down++;
-          }
-        }
-      });
-
-      searchAfter = get(queryResult, 'aggregations.ids.after_key');
-    } while (searchAfter);
-    return { up, down };
   }
 }
