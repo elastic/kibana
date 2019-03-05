@@ -27,4 +27,5 @@ import KbnServer from '../kbn_server';
  */
 export function coreMixin(kbnServer: KbnServer, server: Server) {
   server.decorate('server', 'core', kbnServer.core);
+  server.decorate('server', 'newPlatform', kbnServer.newPlatform);
 }

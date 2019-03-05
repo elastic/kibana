@@ -55,6 +55,18 @@ export default class KbnServer {
     this.settings = settings || {};
 
     this.core = core;
+    const { plugins, elasticsearch, serverOptions, handledConfigPaths } = core;
+
+    this.newPlatform = {
+      core: {
+        elasticsearch,
+      },
+      plugins,
+      params: {
+        serverOptions,
+        handledConfigPaths,
+      },
+    };
 
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
