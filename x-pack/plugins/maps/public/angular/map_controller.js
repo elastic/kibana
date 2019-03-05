@@ -7,6 +7,7 @@
 import chrome from 'ui/chrome';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -201,7 +202,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
-    { text: 'Maps', href: '#' },
+    { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+      defaultMessage: 'Maps'
+    }), href: '#' },
     { text: $scope.map.title }
   ]);
 
@@ -216,7 +219,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       docTitle.change(savedMap.title);
     } catch(err) {
       toastNotifications.addDanger({
-        title: `Error on saving '${savedMap.title}'`,
+        title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {
+          defaultMessage: `Error on saving '{title}'`,
+          values: { title: savedMap.title }
+        }),
         text: err.message,
         'data-test-subj': 'saveMapError',
       });
@@ -225,7 +231,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     if (id) {
       toastNotifications.addSuccess({
-        title: `Saved '${savedMap.title}'`,
+        title: i18n.translate('xpack.maps.mapController.saveDescription', {
+          defaultMessage: `Saved '{title}'`,
+          values: { title: savedMap.title }
+        }),
         'data-test-subj': 'saveMapSuccess',
       });
 
