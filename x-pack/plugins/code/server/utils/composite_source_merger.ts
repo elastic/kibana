@@ -119,8 +119,12 @@ export class LineMapping {
   }
 
   public lineNumber(originLineNumber: number, startAtLine: number = 1) {
-    const n = this.reverseMap.get(originLineNumber) || Number.NaN;
-    return n + startAtLine;
+    const n = this.reverseMap.get(originLineNumber);
+    if (n === undefined) {
+      return Number.NaN;
+    } else {
+      return n + startAtLine;
+    }
   }
 
   public hasLine(line: number) {

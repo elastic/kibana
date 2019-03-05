@@ -21,6 +21,7 @@
 
 // @ts-ignore
 import { SearchSourceProvider } from 'ui/courier';
+import moment from 'moment';
 
 import { reverseSortDirection } from './utils/sorting';
 
@@ -202,10 +203,10 @@ function fetchContextProvider(indexPatterns, Private) {
     maxCount
   ) {
     const startRange = {
-      [timeSortDirection === 'asc' ? 'gte' : 'lte']: startTimeValue,
+      [timeSortDirection === 'asc' ? 'gte' : 'lte']: moment(startTimeValue).toISOString(),
     };
     const endRange = endTimeValue === null ? {} : {
-      [timeSortDirection === 'asc' ? 'lte' : 'gte']: endTimeValue,
+      [timeSortDirection === 'asc' ? 'lte' : 'gte']: moment(endTimeValue).toISOString(),
     };
 
     const response = await searchSource
@@ -216,7 +217,7 @@ function fetchContextProvider(indexPatterns, Private) {
             filter: {
               range: {
                 [timeField]: {
-                  format: 'epoch_millis',
+                  format: 'strict_date_optional_time',
                   ...startRange,
                   ...endRange,
                 }

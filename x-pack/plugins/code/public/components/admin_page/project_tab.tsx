@@ -219,7 +219,9 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem>
             {isAdmin && (
               // @ts-ignore
-              <NewProjectButton onClick={this.openModal}>Add New Project</NewProjectButton>
+              <NewProjectButton onClick={this.openModal} data-test-subj="newProjectButton">
+                Add New Project
+              </NewProjectButton>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

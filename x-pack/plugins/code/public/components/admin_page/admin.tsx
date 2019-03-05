@@ -122,7 +122,7 @@ class AdminPage extends React.PureComponent<Props, State> {
         const repositoriesCount = this.props.repositories.length;
         const showEmpty = repositoriesCount === 0 && !this.props.repositoryLoading;
         if (showEmpty) {
-          return <EmptyProject />;
+          return <EmptyProject isAdmin={this.props.isAdmin} />;
         }
         return <ProjectTab />;
       }
