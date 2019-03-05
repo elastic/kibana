@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-echo "************* HELLO HELLO HELLO"
+echo "************* HELLO HELLO HELLO $ghprbActualCommit"
 
 # move to Kibana root
 cd "$(dirname "$0")/.."
