@@ -54,7 +54,6 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.core = core;
     const { plugins, elasticsearch, serverOptions, handledConfigPaths } = core;
 
     this.newPlatform = {

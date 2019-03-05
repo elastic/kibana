@@ -55,7 +55,6 @@ declare module 'hapi' {
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 
 export default class KbnServer {
-  public readonly core: any;
   public readonly newPlatform: any;
   public server: Server;
   public inject: Server['inject'];
