@@ -34,12 +34,10 @@ export class MBMapContainer extends React.Component {
     }
   }, 256);
 
-   _onMouseMove = _.debounce((e) => {
+   _onMouseMove = _.debounce(async (e) => {
 
      const mbLayerIds = this._getMbLayerIdsForTooltips();
-     const features = this._mbMap.queryRenderedFeatures(e.point, {
-       layers: mbLayerIds
-     });
+     const features = this._mbMap.queryRenderedFeatures(e.point, { layers: mbLayerIds });
 
      if (!features.length) {
        this.props.setTooltipState(null);
@@ -55,9 +53,31 @@ export class MBMapContainer extends React.Component {
        }
      }
 
+     const layer = this._getLayer(targetFeature.layer.id);
+     const formattedProperties = await layer.getPropertiesForTooltip(targetFeature.properties);
+
+     let popupAnchorLocation = [e.lngLat.lng, e.lngLat.lat]; // default popup location to mouse location
+     if (targetFeature.geometry.type === 'Point') {
+       const coordinates = targetFeature.geometry.coordinates.slice();
+
+       // Ensure that if the map is zoomed out such that multiple
+       // copies of the feature are visible, the popup appears
+       // over the copy being pointed to.
+       while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+       }
+
+       popupAnchorLocation = coordinates;
+     }
+
      this.props.setTooltipState({
-       activeFeature: targetFeature,
-       lngLat: e.lngLat
+       activeFeature: {
+         properties: targetFeature.properties,
+         geometry: targetFeature.geometry
+       },
+       formattedProperties: formattedProperties,
+       layerId: layer.getId(),
+       location: popupAnchorLocation
      });
 
    }, 100);
@@ -103,7 +123,6 @@ export class MBMapContainer extends React.Component {
        this._mbMap.off('mousemove', this._onMouseMove);
        this._mbMap = null;
        this._tooltipContainer = null;
-       this._activeTooltipFeature = null;
      }
      this.props.onMapDestroyed();
    }
@@ -142,7 +161,7 @@ export class MBMapContainer extends React.Component {
      this.assignSizeWatch();
 
 
-     //todo :these callbacks should be remove on destroy
+     //todo :these callbacks should be removed on destroy
      // moveend callback is debounced to avoid updating map extent state while map extent is still changing
      // moveend is fired while the map extent is still changing in the following scenarios
      // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
@@ -215,36 +234,18 @@ export class MBMapContainer extends React.Component {
      })());
    }
 
-   async _showTooltip(feature, eventLngLat, mbLayerId)  {
-
+   _showTooltip()  {
      //todo: can still be optimized. No need to rerender if content remains identical
-     let popupAnchorLocation = eventLngLat; // default popup location to mouse location
-     if (feature.geometry.type === 'Point') {
-       const coordinates = feature.geometry.coordinates.slice();
-
-       // Ensure that if the map is zoomed out such that multiple
-       // copies of the feature are visible, the popup appears
-       // over the copy being pointed to.
-       while (Math.abs(eventLngLat.lng - coordinates[0]) > 180) {
-         coordinates[0] += eventLngLat.lng > coordinates[0] ? 360 : -360;
-       }
-
-       popupAnchorLocation = coordinates;
-     }
-
-     const layer = this._getLayer(mbLayerId);
-     const properties = await layer.getPropertiesForTooltip(feature.properties);
-
      ReactDOM.render(
        React.createElement(
          FeatureTooltip, {
-           properties: properties,
+           properties: this.props.tooltipState.formattedProperties,
          }
        ),
        this._tooltipContainer
      );
 
-     this._mbPopup.setLngLat(popupAnchorLocation)
+     this._mbPopup.setLngLat(this.props.tooltipState.location)
        .setDOMContent(this._tooltipContainer)
        .addTo(this._mbMap);
    }
@@ -259,11 +260,7 @@ export class MBMapContainer extends React.Component {
        return;
      }
 
-     this._showTooltip(
-       this.props.tooltipState.activeFeature,
-       this.props.tooltipState.lngLat,
-       this.props.tooltipState.activeFeature.layer.id
-     );
+     this._showTooltip();
    }
 
   _syncMbMapWithMapState = () => {
