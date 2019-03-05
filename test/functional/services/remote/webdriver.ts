@@ -19,16 +19,16 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 import { delay } from 'bluebird';
-// @ts-ignore types dependency not worth it
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
+
+// @ts-ignore types for 4.0 not available yet
 import { Builder, By, Key, logging, until } from 'selenium-webdriver';
 // @ts-ignore types not available
 import chrome from 'selenium-webdriver/chrome';
 // @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 // @ts-ignore internal modules are not typed
@@ -100,7 +100,6 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 
-    // @ts-ignore untyped method
     session.setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).

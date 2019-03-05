@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export function preventParallelCalls<C, A, R>(
+export function preventParallelCalls<C extends void, A, R>(
   fn: (this: C, arg: A) => Promise<R>,
   filter: (arg: A) => boolean
 ) {

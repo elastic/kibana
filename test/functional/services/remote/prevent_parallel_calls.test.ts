@@ -17,12 +17,13 @@
  * under the License.
  */
 
+import 'jest';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 it('only calls fn when previous call is complete, ignores when filter returns true', async () => {
-  const orderOfEvents = [];
+  const orderOfEvents: string[] = [];
 
-  async function foo(arg) {
+  async function foo(arg: number) {
     orderOfEvents.push(`called with ${arg}`);
     await new Promise(resolve => setTimeout(resolve, arg));
     orderOfEvents.push(`resolved with ${arg}`);
