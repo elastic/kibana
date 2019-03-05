@@ -307,9 +307,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
      * verify that the save was successful
      *
      * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
      */
-    async saveDashboard(dashName, saveOptions = {}) {
+    async saveDashboard(dashName, saveOptions = { waitDialogIsClosed: true }) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
 
       if (saveOptions.needsConfirm) {
@@ -352,12 +352,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     /**
      *
      * @param dashboardTitle {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, waitDialogIsClosed: boolean}}
      */
-    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = {}) {
+    async enterDashboardTitleAndClickSave(dashboardTitle, saveOptions = { waitDialogIsClosed: true }) {
       await testSubjects.click('dashboardSaveMenuItem');
-
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      const modalDialog = await testSubjects.find('savedObjectSaveModal');
 
       log.debug('entering new title');
       await testSubjects.setValue('savedObjectTitle', dashboardTitle);
@@ -371,6 +370,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       await this.clickSave();
+      if (saveOptions.waitDialogIsClosed) {
+        await testSubjects.waitForDeleted(modalDialog);
+      }
     }
 
     async selectDashboard(dashName) {

@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-import execa from 'execa';
-
 import { deepFreeze } from './deep_freeze';
 
 it('returns the first argument with all original references', () => {
@@ -72,18 +68,4 @@ it('prevents reassigning items in a frozen array', () => {
     // @ts-ignore ts knows this shouldn't be possible, but just making sure
     frozen.foo[0] = 2;
   }).toThrowError(`read only property '0'`);
-});
-
-it('types return values to prevent mutations in typescript', async () => {
-  await expect(
-    execa.stdout('tsc', ['--noEmit'], {
-      cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
-    })
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`
-"Command failed: tsc --noEmit
-
-index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a constant or a read-only property.
-index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a constant or a read-only property.
-"
-`);
 });
