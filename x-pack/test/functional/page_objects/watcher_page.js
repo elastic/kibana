@@ -31,13 +31,13 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async getWatch(watchID) {
-      const watchIdColumn = await testSubjects.find(`watchIDColumn-${watchID}`);
+      const watchIdColumn = await testSubjects.find(`watchIdColumn-${watchID}`);
       const watchNameColumn = await testSubjects.find(`watchNameColumn-${watchID}`);
-      const id =  await watchIdColumn.getVisibleText();
-      const name =  await watchNameColumn.getVisibleText();
+      const id = await watchIdColumn.getVisibleText();
+      const name = await watchNameColumn.getVisibleText();
       return {
         id,
-        name
+        name,
       };
     }
 
@@ -57,7 +57,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
         return {
           checkBox: (await checkBox.getProperty('innerHTML')).includes('input'),
           id: await id.getVisibleText(),
-          name: (await name.getVisibleText()).split(',').map(role => role.trim())
+          name: (await name.getVisibleText()).split(',').map(role => role.trim()),
         };
       });
     }
