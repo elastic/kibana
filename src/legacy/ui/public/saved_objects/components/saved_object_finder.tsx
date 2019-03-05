@@ -168,7 +168,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
       items: [],
       isFetchingItems: false,
       page: 0,
-      perPage: props.initialPageSize || props.fixedPageSize || 15,
+      perPage: props.initialPageSize || props.fixedPageSize || 10,
       filter: '',
       filterOpen: false,
       filteredTypes: [],
