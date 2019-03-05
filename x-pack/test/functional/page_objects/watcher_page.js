@@ -13,9 +13,9 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
   class WatcherPage {
     async clearAllWatches() {
-      const checkBoxExists = await testSubjects.exists('selectAllWatchesCheckBox');
+      const checkBoxExists = await testSubjects.exists('checkboxSelectAll');
       if (checkBoxExists) {
-        await testSubjects.click('selectAllWatchesCheckBox');
+        await testSubjects.click('checkboxSelectAll');
         await testSubjects.click('btnDeleteWatches');
         await testSubjects.click('confirmModalConfirmButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -42,7 +42,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async deleteWatch() {
-      await testSubjects.click('selectAllWatchesCheckBox');
+      await testSubjects.click('checkboxSelectAll');
       await testSubjects.click('btnDeleteWatches');
     }
 
