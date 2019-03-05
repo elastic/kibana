@@ -17,26 +17,31 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { delay } from 'bluebird';
-import  { Builder, By, Key, until, logging } from 'selenium-webdriver';
-const { LegacyActionSequence } =  require('selenium-webdriver/lib/actions');
-const { getLogger } =  require('selenium-webdriver/lib/logging');
-const { Executor } =  require('selenium-webdriver/lib/http');
-const chrome = require('selenium-webdriver/chrome');
-const firefox = require('selenium-webdriver/firefox');
-const geckoDriver = require('geckodriver');
-const chromeDriver = require('chromedriver');
-const throttleOption = process.env.TEST_THROTTLE_NETWORK;
+// @ts-ignore types dependency not worth it
+import chromeDriver from 'chromedriver';
+// @ts-ignore types not available
+import geckoDriver from 'geckodriver';
+import { Builder, By, Key, logging, until } from 'selenium-webdriver';
+// @ts-ignore types not available
+import chrome from 'selenium-webdriver/chrome';
+// @ts-ignore types not available
+import firefox from 'selenium-webdriver/firefox';
+
+// @ts-ignore internal modules are not typed
+import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
+// @ts-ignore internal modules are not typed
+import { Executor } from 'selenium-webdriver/lib/http';
+// @ts-ignore internal modules are not typed
+import { getLogger } from 'selenium-webdriver/lib/logging';
 
 import { preventParallelCalls } from './prevent_parallel_calls';
 
+const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
-const NO_QUEUE_COMMANDS = [
-  'getStatus',
-  'newSession',
-  'quit'
-];
+const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
 
 /**
  * Best we can tell WebDriver locks up sometimes when we send too many
@@ -46,24 +51,26 @@ const NO_QUEUE_COMMANDS = [
  * queue all calls to Executor#send() if there is already a call in
  * progress.
  */
-Executor.prototype.execute = preventParallelCalls(Executor.prototype.execute, (command) => (
-  NO_QUEUE_COMMANDS.includes(command.getName())
-));
+Executor.prototype.execute = preventParallelCalls(
+  Executor.prototype.execute,
+  (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
+);
 
 let attemptCounter = 0;
-async function attemptToCreateCommand(log, browserType) {
+async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | 'firefox') {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
 
-  const buildDriverInstance = async (browserType) => {
+  const buildDriverInstance = async () => {
     switch (browserType) {
       case 'chrome':
         const chromeOptions = new chrome.Options();
-        const loggingPref = new logging.Preferences().setLevel(logging.Type.BROWSER, logging.Level.ALL);
+        const loggingPref = new logging.Preferences();
+        loggingPref.setLevel(logging.Type.BROWSER, logging.Level.ALL);
         chromeOptions.setLoggingPrefs(loggingPref);
         if (process.env.TEST_BROWSER_HEADLESS) {
-          //Use --disable-gpu to avoid an error from a missing Mesa library, as per
-          //See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
+          // Use --disable-gpu to avoid an error from a missing Mesa library, as per
+          // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
           chromeOptions.addArguments('headless', 'disable-gpu');
         }
         return new Builder()
@@ -74,7 +81,7 @@ async function attemptToCreateCommand(log, browserType) {
       case 'firefox':
         const firefoxOptions = new firefox.Options();
         if (process.env.TEST_BROWSER_HEADLESS) {
-          //See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
+          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.addArguments('-headless');
         }
         return new Builder()
@@ -87,30 +94,40 @@ async function attemptToCreateCommand(log, browserType) {
     }
   };
 
-  const session = await buildDriverInstance(browserType);
+  const session = await buildDriverInstance();
 
-  if (throttleOption === 'true' && browserType === 'chrome') { //Only chrome supports this option.
+  if (throttleOption === 'true' && browserType === 'chrome') {
+    // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
+
+    // @ts-ignore untyped method
     session.setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).
       download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
-      upload_throughput: 256 * 1024
+      upload_throughput: 256 * 1024,
     });
   }
 
-  if (attemptId !== attemptCounter) return; // abort
+  if (attemptId !== attemptCounter) {
+    return;
+  } // abort
 
   return { driver: session, By, Key, until, LegacyActionSequence };
 }
 
-export async function initWebDriver({ log, browserType }) {
+export async function initWebDriver({
+  log,
+  browserType,
+}: {
+  log: ToolingLog;
+  browserType: 'chrome' | 'firefox';
+}) {
   const logger = getLogger('webdriver.http.Executor');
   logger.setLevel(logging.Level.FINEST);
-  logger.addHandler((entry) => {
+  logger.addHandler((entry: { message: string }) => {
     log.verbose(entry.message);
   });
-
 
   return await Promise.race([
     (async () => {
@@ -122,7 +139,7 @@ export async function initWebDriver({ log, browserType }) {
       while (true) {
         const command = await Promise.race([
           delay(30 * SECOND),
-          attemptToCreateCommand(log, browserType)
+          attemptToCreateCommand(log, browserType),
         ]);
 
         if (!command) {
@@ -131,6 +148,6 @@ export async function initWebDriver({ log, browserType }) {
 
         return command;
       }
-    })()
+    })(),
   ]);
 }

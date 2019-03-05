@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { initWebDriver } from './webdriver';
 
-export async function RemoteProvider({ getService }) {
+export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
@@ -27,22 +28,36 @@ export async function RemoteProvider({ getService }) {
   const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (!possibleBrowsers.includes(browserType)) {
-    throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
+    throw new Error(
+      `Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +
+        possibleBrowsers.join(',')
+    );
   }
 
-  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({ log, browserType });
+  const { driver, By, Key, until, LegacyActionSequence } = await initWebDriver({
+    log,
+    browserType: browserType as 'chrome' | 'firefox',
+  });
 
   log.info('Remote initialized');
 
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite
-    await driver.manage().window().setRect({ width: 1600, height: 1000 });
+    await driver
+      .manage()
+      .window()
+      .setRect({ width: 1600, height: 1000 });
   });
 
-  const windowSizeStack = [];
+  const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.unshift(await driver.manage().window().getRect());
+    windowSizeStack.unshift(
+      await driver
+        .manage()
+        .window()
+        .getRect()
+    );
   });
 
   lifecycle.on('beforeEachTest', async () => {
@@ -50,8 +65,11 @@ export async function RemoteProvider({ getService }) {
   });
 
   lifecycle.on('afterTestSuite', async () => {
-    const { width, height } = windowSizeStack.shift();
-    await driver.manage().window().setRect({ width: width, height: height });
+    const { width, height } = windowSizeStack.shift()!;
+    await driver
+      .manage()
+      .window()
+      .setRect({ width, height });
   });
 
   lifecycle.on('cleanup', async () => await driver.quit());
