@@ -29,6 +29,7 @@ export const convertChangeToUpdater = (change: UpdateSourceInput) => <
             fields: {
               container: defaultTo(c.fields.container, change.setFields.container),
               host: defaultTo(c.fields.host, change.setFields.host),
+              message: c.fields.message,
               pod: defaultTo(c.fields.pod, change.setFields.pod),
               tiebreaker: defaultTo(c.fields.tiebreaker, change.setFields.tiebreaker),
               timestamp: defaultTo(c.fields.timestamp, change.setFields.timestamp),
