@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import { routes } from './server/routes';
+// @ts-ignore
 import { registryFactory } from '@kbn/interpreter/common';
+
+// @ts-ignore
 import { registries } from '@kbn/interpreter/server';
 
-export default async function (server /*options*/) {
+// @ts-ignore
+import { routes } from './server/routes';
+
+import { Legacy } from '../../../../kibana';
+
+export async function init(server: Legacy.Server /*options*/) {
   server.injectUiAppVars('canvas', () => {
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
       const configKey = 'xpack.reporting.capture.browser.type';
-      if (!config.has(configKey)) return null;
+      if (!config.has(configKey)) {
+        return null;
+      }
       return config.get(configKey);
     })();
 
