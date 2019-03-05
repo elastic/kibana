@@ -205,7 +205,11 @@ export class JoinExpression extends Component {
             />
           </EuiPopoverTitle>
           <EuiFormRow
-            label="Left source"
+            label={
+              i18n.translate('xpack.maps.layerPanel.joinExpression.leftSourceLabel', {
+                defaultMessage: 'Left source'
+              })
+            }
           >
             <EuiComboBox
               selectedOptions={[{ value: leftSourceName, label: leftSourceName }]}
