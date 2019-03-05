@@ -251,4 +251,8 @@ export default () => Joi.object({
     locale: Joi.string().default('en'),
   }).default(),
 
+  savedObjects: Joi.object({
+    maxImportExportSize: Joi.number().default(10000),
+  }).default(),
+
 }).default();

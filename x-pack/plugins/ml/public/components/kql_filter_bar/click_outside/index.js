@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogMinimapState } from './reducer';
-
-export const selectMinimapIntervalSize = (state: LogMinimapState) => state.intervalSize;
+export { ClickOutside } from './click_outside';

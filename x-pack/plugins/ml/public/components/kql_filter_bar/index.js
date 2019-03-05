@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogTextviewState } from './reducer';
-
-export const selectTextviewScale = (state: LogTextviewState) => state.scale;
-
-export const selectTextviewWrap = (state: LogTextviewState) => state.wrap;
+export { KqlFilterBar } from './kql_filter_bar';

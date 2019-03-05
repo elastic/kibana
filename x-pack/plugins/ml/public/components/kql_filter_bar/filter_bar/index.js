@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as logMinimapActions from './actions';
-import * as logMinimapSelectors from './selectors';
-
-export { logMinimapActions, logMinimapSelectors };
-export * from './reducer';
+export { FilterBar } from './filter_bar';
