@@ -707,7 +707,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             topFieldValues,
             overallSwimlaneData,
             selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName
+            viewBySwimlaneOptions.swimlaneViewByFieldName,
+            influencersFilterQuery
           ),
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
