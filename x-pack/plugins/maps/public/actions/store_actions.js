@@ -14,6 +14,7 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
+  getTooltipState
 } from '../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
@@ -147,6 +148,15 @@ export function setLayerErrorStatus(layerId, errorMessage) {
   };
 }
 
+export function clearTooltipStateForLayer(layerId) {
+  return (dispatch, getState) => {
+    const tooltipState = getTooltipState(getState());
+    if (tooltipState.layerId === layerId) {
+      dispatch(setTooltipState(null));
+    }
+  };
+}
+
 export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
@@ -158,6 +168,11 @@ export function toggleLayerVisible(layerId) {
       return;
     }
     const makeVisible = !layer.isVisible();
+
+    if (!makeVisible) {
+      dispatch(clearTooltipStateForLayer(layerId));
+    }
+
     await dispatch({
       type: TOGGLE_LAYER_VISIBLE,
       layerId
@@ -196,7 +211,7 @@ export function removeTransientLayer() {
 }
 
 export function setTransientLayer(layerId) {
-  return  {
+  return {
     type: SET_TRANSIENT_LAYER,
     transientLayerId: layerId,
   };
@@ -285,7 +300,7 @@ export function mapExtentChanged(newMapConstants) {
         ...newMapConstants
       }
     });
-    const newDataFilters =  { ...dataFilters, ...newMapConstants };
+    const newDataFilters = { ...dataFilters, ...newMapConstants };
     await syncDataForAllLayers(getState, dispatch, newDataFilters);
   };
 }
@@ -471,18 +486,19 @@ export function removeSelectedLayer() {
   };
 }
 
-export function removeLayer(id) {
+export function removeLayer(layerId) {
   return (dispatch, getState) => {
     const layerGettingRemoved = getLayerList(getState()).find(layer => {
-      return id === layer.getId();
+      return layerId === layer.getId();
     });
-    if (layerGettingRemoved) {
-      layerGettingRemoved.destroy();
+    if (!layerGettingRemoved) {
+      return;
     }
-
+    dispatch(clearTooltipStateForLayer(layerId));
+    layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
-      id
+      id: layerId
     });
   };
 }
