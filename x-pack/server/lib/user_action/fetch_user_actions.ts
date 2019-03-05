@@ -11,8 +11,9 @@ export interface UserActionRecord {
   count: number;
 }
 
-export interface UserActionCountByActionType {
-  [userActionType: string]: number;
+export interface UserActionAndCountKeyValuePair {
+  key: string;
+  value: number;
 }
 
 // This is a helper method for retrieving user action telemetry data stored via the OSS
@@ -21,7 +22,7 @@ export function fetchUserActions(
   server: Server,
   appName: string,
   actionTypes: string[]
-): Promise<UserActionCountByActionType> {
+): Promise<UserActionAndCountKeyValuePair[]> {
   const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
   const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
   const internalRepository = getSavedObjectsRepository(callWithInternalUser);
@@ -38,13 +39,13 @@ export function fetchUserActions(
   }
 
   return Promise.all(actionTypes.map(fetchUserAction)).then(
-    (userActions): UserActionCountByActionType => {
+    (userActions): UserActionAndCountKeyValuePair[] => {
       const userActionAndCountKeyValuePairs = userActions.reduce(
-        (pairs: UserActionCountByActionType, userAction: UserActionRecord | undefined) => {
+        (pairs: UserActionAndCountKeyValuePair[], userAction: UserActionRecord | undefined) => {
           // User action is undefined if nobody has performed this action on the client yet.
           if (userAction !== undefined) {
             const { actionType, count } = userAction;
-            const pair = { key: actionType, value: count };
+            const pair: UserActionAndCountKeyValuePair = { key: actionType, value: count };
             pairs.push(pair);
           }
           return pairs;
