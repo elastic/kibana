@@ -96,7 +96,7 @@ import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution'
 // import 'monaco-editor/esm/vs/basic-languages/pug/pug.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
-import chrome from '../../../../../src/legacy/ui/public/chrome';
+import chrome from 'ui/chrome';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
