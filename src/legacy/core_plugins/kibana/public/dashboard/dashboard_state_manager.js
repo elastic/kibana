@@ -274,7 +274,7 @@ export class DashboardStateManager {
   }
 
   getPanelIndexPatterns() {
-    return _.uniq(Object.values(this.panelIndexPatternMapping));
+    return _.uniq(Object.values(this.panelIndexPatternMapping), 'id');
   }
 
   /**
