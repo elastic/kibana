@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Suggestion snapshot 1`] = `
+<styled.li
+  innerRef={[Function]}
+  onClick={[Function]}
+  onMouseEnter={[Function]}
+  selected={true}
+>
+  <styled.div
+    type="field"
+  >
+    <EuiIcon
+      size="m"
+      type="kqlField"
+    />
+  </styled.div>
+  <styled.div>
+    fieldValue
+  </styled.div>
+  <styled.div
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "<p>Test description for fieldValue</p>",
+      }
+    }
+  />
+</styled.li>
+`;
