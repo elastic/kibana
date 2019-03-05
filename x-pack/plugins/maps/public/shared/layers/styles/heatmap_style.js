@@ -28,7 +28,7 @@ export class HeatmapStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return i18n.translate('xpack.maps.style.heatmap.displayName', {
+    return i18n.translate('xpack.maps.style.heatmap.displayNameLabel', {
       defaultMessage: 'Heatmap style'
     });
   }

@@ -55,7 +55,7 @@ export function SettingsPanel(props) {
         <EuiCallOut
           color="warning"
           title={
-            i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoad', {
+            i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
               defaultMessage: 'Unable to load layer'
             })
           }
@@ -73,7 +73,7 @@ export function SettingsPanel(props) {
     return (
       <EuiFormRow
         helpText={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.zoomFeedback', {
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.zoomFeedbackHelptext', {
             defaultMessage: 'Display layer when map is in zoom range.'
           })
         }
@@ -116,7 +116,7 @@ export function SettingsPanel(props) {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerName', {
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
             defaultMessage: 'Layer name'
           })
         }
@@ -133,7 +133,7 @@ export function SettingsPanel(props) {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparency', {
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
             defaultMessage: 'Layer transparency'
           })
         }

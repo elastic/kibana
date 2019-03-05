@@ -26,13 +26,13 @@ class MapDetails extends Component {
 
   tabs = [{
     id: DETAILS_TAB_ID,
-    name: i18n.translate('xpack.maps.inspector.mapDetails', {
+    name: i18n.translate('xpack.maps.inspector.mapDetailsTitle', {
       defaultMessage: 'Map details'
     }),
     dataTestSubj: 'mapDetailsTab',
   }, {
     id: STYLE_TAB_ID,
-    name: i18n.translate('xpack.maps.inspector.mapboxStyle', {
+    name: i18n.translate('xpack.maps.inspector.mapboxStyleTitle', {
       defaultMessage: 'Mapbox style'
     }),
     dataTestSubj: 'mapboxStyleTab',
@@ -68,7 +68,7 @@ class MapDetails extends Component {
           <EuiTableRow>
             <EuiTableRowCell>
               <FormattedMessage
-                id="xpack.maps.inspector.centerLon"
+                id="xpack.maps.inspector.centerLonLabel"
                 defaultMessage="Center lon"
               />
             </EuiTableRowCell>
@@ -78,7 +78,7 @@ class MapDetails extends Component {
           <EuiTableRow>
             <EuiTableRowCell>
               <FormattedMessage
-                id="xpack.maps.inspector.centerLat"
+                id="xpack.maps.inspector.centerLatLabel"
                 defaultMessage="Center lat"
               />
             </EuiTableRowCell>
@@ -88,7 +88,7 @@ class MapDetails extends Component {
           <EuiTableRow>
             <EuiTableRowCell>
               <FormattedMessage
-                id="xpack.maps.inspector.zoom"
+                id="xpack.maps.inspector.zoomLabel"
                 defaultMessage="Zoom"
               />
             </EuiTableRowCell>

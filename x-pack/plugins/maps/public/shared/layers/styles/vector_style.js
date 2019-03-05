@@ -45,7 +45,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return i18n.translate('xpack.maps.style.vector.displayName', {
+    return i18n.translate('xpack.maps.style.vector.displayNameLabel', {
       defaultMessage: 'Vector style'
     });
   }

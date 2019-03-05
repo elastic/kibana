@@ -26,7 +26,7 @@ export const FlyoutFooter = ({ cancelLayerPanel, saveLayerEdits, removeLayer,
         data-test-subj="mapRemoveLayerButton"
       >
         <FormattedMessage
-          id="xpack.maps.layerPanel.footer.removeLayer"
+          id="xpack.maps.layerPanel.footer.removeLayerButtonLabel"
           defaultMessage="Remove layer"
         />
       </EuiButtonEmpty>

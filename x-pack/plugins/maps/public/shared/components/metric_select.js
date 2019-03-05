@@ -10,23 +10,23 @@ import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 
 const AGG_OPTIONS = [
-  { label: i18n.translate('xpack.maps.metricSelect.average', {
+  { label: i18n.translate('xpack.maps.metricSelect.averageDropDownOptionLabel', {
     defaultMessage: 'Average'
   }),
   value: 'avg' },
-  { label: i18n.translate('xpack.maps.metricSelect.count', {
+  { label: i18n.translate('xpack.maps.metricSelect.count.averageDropDownOptionLabel', {
     defaultMessage: 'Count'
   }),
   value: 'count' },
-  { label: i18n.translate('xpack.maps.metricSelect.max', {
+  { label: i18n.translate('xpack.maps.metricSelect.max.averageDropDownOptionLabel', {
     defaultMessage: 'Max'
   }),
   value: 'max' },
-  { label: i18n.translate('xpack.maps.metricSelect.min', {
+  { label: i18n.translate('xpack.maps.metricSelect.min.averageDropDownOptionLabel', {
     defaultMessage: 'Min'
   }),
   value: 'min' },
-  { label: i18n.translate('xpack.maps.metricSelect.sum', {
+  { label: i18n.translate('xpack.maps.metricSelect.sum.averageDropDownOptionLabel', {
     defaultMessage: 'Sum'
   }),
   value: 'sum' },
@@ -50,7 +50,7 @@ export function MetricSelect({ value, onChange, metricsFilter }) {
   return (
     <EuiComboBox
       placeholder={
-        i18n.translate('xpack.maps.metricSelect.selectAggregation', {
+        i18n.translate('xpack.maps.metricSelect.selectAggregationPlaceholder', {
           defaultMessage: 'Select aggregation'
         })
       }

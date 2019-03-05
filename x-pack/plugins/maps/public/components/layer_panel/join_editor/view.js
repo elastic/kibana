@@ -74,7 +74,7 @@ export function JoinEditor({ joins, layer, onChange }) {
           <EuiTitle size="xs">
             <h5>
               <FormattedMessage
-                id="xpack.maps.layerPanel.joinEditor.termJoins"
+                id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
                 defaultMessage="Term joins"
               />
             </h5>

@@ -27,7 +27,7 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
           data-test-subj="addLayerButton"
         >
           <FormattedMessage
-            id="xpack.maps.layerControl.addLayer"
+            id="xpack.maps.layerControl.addLayerButtonLabel"
             defaultMessage="Add layer"
           />
         </EuiButtonEmpty>
@@ -48,7 +48,7 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
             <EuiTitle size="xs">
               <h2>
                 <FormattedMessage
-                  id="xpack.maps.layerControl.layers"
+                  id="xpack.maps.layerControl.layersTitle"
                   defaultMessage="Layers"
                 />
               </h2>

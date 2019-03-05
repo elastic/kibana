@@ -15,7 +15,7 @@ export function NoIndexPatternCallout() {
   return (
     <EuiCallOut
       title={
-        i18n.translate('xpack.maps.noIndexPattern.message', {
+        i18n.translate('xpack.maps.noIndexPattern.messageTitle', {
           defaultMessage: `Couldn't find any index patterns with geospatial fields`
         })
       }
@@ -23,28 +23,28 @@ export function NoIndexPatternCallout() {
     >
       <p>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.doThis"
+          id="xpack.maps.noIndexPattern.doThisDescription"
           defaultMessage="You'll need to "
         />
         <EuiLink href={chrome.addBasePath('/app/kibana#/management/kibana/index_pattern')}>
           <FormattedMessage
-            id="xpack.maps.noIndexPattern.doThisLinkText"
+            id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
             defaultMessage="create an index pattern"
           />
         </EuiLink>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.doThisWith"
+          id="xpack.maps.noIndexPattern.doThisWithDescription"
           defaultMessage=" with geospatial fields."
         />
       </p>
       <p>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.hint"
+          id="xpack.maps.noIndexPattern.hintDescription"
           defaultMessage="Don't have any geospatial data sets? "
         />
         <EuiLink href={chrome.addBasePath('/app/kibana#/home/tutorial_directory/sampleData')}>
           <FormattedMessage
-            id="xpack.maps.noIndexPattern.getStarted"
+            id="xpack.maps.noIndexPattern.getStartedDescription"
             defaultMessage="Get started with some sample data sets."
           />
         </EuiLink>

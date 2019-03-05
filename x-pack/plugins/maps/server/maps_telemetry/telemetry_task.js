@@ -23,7 +23,7 @@ export function scheduleTask(server, taskManager) {
       });
     }catch(e) {
       server.log(['warning', 'maps'],
-        i18n.translate('xpack.maps.telemetry.scheduleError', {
+        i18n.translate('xpack.maps.telemetry.scheduleErrorMessage', {
           defaultMessage: `Error scheduling telemetry task, received {message}`,
           values: {
             message: e.message
@@ -65,7 +65,7 @@ export function telemetryTaskRunner() {
           mapsTelemetry = await getMapsTelemetry(server, callCluster);
         } catch (err) {
           server.log(['warning'],
-            i18n.translate('xpack.maps.telemetry.loadError', {
+            i18n.translate('xpack.maps.telemetry.loadErrorMessage', {
               defaultMessage: `Error loading maps telemetry: {error}`,
               values: {
                 error: err

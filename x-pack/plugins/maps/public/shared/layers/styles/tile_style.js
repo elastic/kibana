@@ -30,7 +30,7 @@ export class TileStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return i18n.translate('xpack.maps.style.tile.displayName', {
+    return i18n.translate('xpack.maps.style.tile.displayNameLabel', {
       defaultMessage: 'Tile style'
     });
   }

@@ -31,7 +31,7 @@ export function initRoutes(server, licenseUid) {
 
       if (!request.query.id) {
         server.log('warning',
-          i18n.translate('xpack.maps.server.missingEMSId', {
+          i18n.translate('xpack.maps.server.missingEMSIdErrorMessage', {
             defaultMessage: 'Must supply id parameters to retrieve EMS file'
           }));
         return null;

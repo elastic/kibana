@@ -203,19 +203,16 @@ export class Join extends Component {
             className="mapJoinItem__delete"
             iconType="trash"
             color="danger"
-            aria-label={getDeleteJoin()}
-            title={getDeleteJoin()}
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join'
+            })}
+            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+              defaultMessage: 'Delete join'
+            })}
             onClick={onRemove}
           />
         </EuiFlexGroup>
       </div>
     );
   }
-}
-
-
-function getDeleteJoin() {
-  return i18n.translate('xpack.maps.layerPanel.join.deleteJoin', {
-    defaultMessage: 'Delete join'
-  });
 }

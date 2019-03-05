@@ -104,7 +104,7 @@ export class LayerTocActions extends Component {
     if (layer.hasErrors()) {
       smallLegendIcon = (
         <EuiIconTip
-          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarning', { defaultMessage: 'Load warning' })}
+          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
           size="m"
           type="alert"
           color="warning"
@@ -120,7 +120,7 @@ export class LayerTocActions extends Component {
         <EuiToolTip
           position="top"
           content={
-            i18n.translate('xpack.maps.layerTocActions.zoomFeedback', {
+            i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
               defaultMessage: `Map is at zoom level {zoom}.
           This layer is only visible between zoom levels {minZoom} to {maxZoom}.`,
               values: { minZoom, maxZoom, zoom }
@@ -140,12 +140,12 @@ export class LayerTocActions extends Component {
     const visibilityToggle = this._getVisbilityIcon();
     const panelTree = {
       id: 0,
-      title: i18n.translate('xpack.maps.layerTocActions.layerActions', {
+      title: i18n.translate('xpack.maps.layerTocActions.layerActionsTitle', {
         defaultMessage: 'Layer actions',
       }),
       items: [
         {
-          name: i18n.translate('xpack.maps.layerTocActions.fitToData', {
+          name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
             defaultMessage: 'Fit to data',
           }),
           icon: (
@@ -155,7 +155,7 @@ export class LayerTocActions extends Component {
             />
           ),
           'data-test-subj': 'fitToBoundsButton',
-          toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupport', {
+          toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
             defaultMessage: 'Layer does not support fit to data',
           }),
           disabled: !this.state.supportsFitToBounds,
@@ -165,9 +165,9 @@ export class LayerTocActions extends Component {
           },
         },
         {
-          name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayer', {
+          name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
             defaultMessage: 'Hide layer',
-          }) : i18n.translate('xpack.maps.layerTocActions.showLayer', {
+          }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
             defaultMessage: 'Show layer',
           }),
           icon: visibilityToggle,

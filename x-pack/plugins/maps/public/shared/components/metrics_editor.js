@@ -62,7 +62,7 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
         fieldSelect = (
           <EuiFlexItem>
             <SingleFieldSelect
-              placeholder={i18n.translate('xpack.maps.metricsEditor.selectField', {
+              placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
                 defaultMessage: 'Select field'
               })}
               value={metric.field}
@@ -81,8 +81,12 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             <EuiButtonIcon
               iconType="trash"
               color="danger"
-              aria-label={getDeleteMetric()}
-              title={getDeleteMetric()}
+              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+                defaultMessage: 'Delete metric'
+              })}
+              title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
+                defaultMessage: 'Delete metric'
+              })}
               onClick={onRemove}
             />
           </EuiFlexItem>
@@ -124,8 +128,12 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
     return (<EuiButtonIcon
       iconType="plusInCircle"
       onClick={addMetric}
-      aria-label={getAddMetric()}
-      title={getAddMetric()}
+      aria-label={i18n.translate('xpack.maps.metricsEditor.addMetricAriaLabel', {
+        defaultMessage: 'Add metric'
+      })}
+      title={i18n.translate('xpack.maps.metricsEditor.addMetricButtonLabel', {
+        defaultMessage: 'Add metric'
+      })}
     />);
   }
 
@@ -165,16 +173,3 @@ MetricsEditor.defaultProps = {
   ],
   allowMultipleMetrics: true
 };
-
-
-function getAddMetric() {
-  return i18n.translate('xpack.maps.metricsEditor.addMetric', {
-    defaultMessage: 'Add metric'
-  });
-}
-
-function getDeleteMetric() {
-  return i18n.translate('xpack.maps.metricsEditor.deleteMetric', {
-    defaultMessage: 'Delete metric'
-  });
-}

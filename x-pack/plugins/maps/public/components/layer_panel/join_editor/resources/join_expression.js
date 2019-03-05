@@ -88,13 +88,13 @@ export class JoinExpression extends Component {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.leftField', {
+          i18n.translate('xpack.maps.layerPanel.joinExpression.leftFieldLabel', {
             defaultMessage: 'Left field'
           })
         }
       >
         <EuiComboBox
-          placeholder={getSelectField()}
+          placeholder={getSelectFieldPlaceholder()}
           singleSelection={true}
           isClearable={false}
           options={options}
@@ -113,14 +113,14 @@ export class JoinExpression extends Component {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.rightSource', {
+          i18n.translate('xpack.maps.layerPanel.joinExpression.rightSourceLabel', {
             defaultMessage: 'Right source'
           })
         }
       >
         <IndexPatternSelect
           placeholder={
-            i18n.translate('xpack.maps.layerPanel.joinExpression.selectIndexPattern', {
+            i18n.translate('xpack.maps.layerPanel.joinExpression.selectIndexPatternPlaceholder', {
               defaultMessage: 'Select index pattern'
             })
           }
@@ -144,13 +144,13 @@ export class JoinExpression extends Component {
     return (
       <EuiFormRow
         label={
-          i18n.translate('xpack.maps.layerPanel.joinExpression.rightField', {
+          i18n.translate('xpack.maps.layerPanel.joinExpression.rightFieldLabel', {
             defaultMessage: 'Right field'
           })
         }
       >
         <SingleFieldSelect
-          placeholder={getSelectField()}
+          placeholder={getSelectFieldPlaceholder()}
           value={this.props.rightValue}
           onChange={this.props.onRightFieldChange}
           filterField={filterStringOrNumberFields}
@@ -200,7 +200,7 @@ export class JoinExpression extends Component {
         <div style={{ width: 300 }}>
           <EuiPopoverTitle>
             <FormattedMessage
-              id="xpack.maps.layerPanel.joinExpression.join"
+              id="xpack.maps.layerPanel.joinExpression.joinPopoverTitle"
               defaultMessage="Join"
             />
           </EuiPopoverTitle>
@@ -246,8 +246,8 @@ JoinExpression.propTypes = {
   onRightFieldChange: PropTypes.func.isRequired,
 };
 
-function getSelectField() {
-  i18n.translate('xpack.maps.layerPanel.joinExpression.selectField', {
+function getSelectFieldPlaceholder() {
+  i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
     defaultMessage: 'selectField'
   });
 }

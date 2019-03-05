@@ -55,11 +55,11 @@ MapViewComponent.propTypes = {
 };
 
 const MapView = {
-  title: i18n.translate('xpack.maps.inspector.mapDetailsView', {
+  title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
     defaultMessage: 'Map details'
   }),
   order: 30,
-  help: i18n.translate('xpack.maps.inspector.viewMapState', {
+  help: i18n.translate('xpack.maps.inspector.viewMapStateTitle', {
     defaultMessage: 'View the map state'
   }),
   shouldShow(adapters) {

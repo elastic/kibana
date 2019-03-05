@@ -38,7 +38,7 @@ export class MetricsExpression extends Component {
       return (
         <EuiFormErrorText>
           <FormattedMessage
-            id="xpack.maps.layerPanel.metricsExpression.joinMustBeSet"
+            id="xpack.maps.layerPanel.metricsExpression.joinMustBeSetErrorMessage"
             defaultMessage="JOIN must be set"
           />
         </EuiFormErrorText>
@@ -74,11 +74,13 @@ export class MetricsExpression extends Component {
         return `${type} ${field}`;
       });
 
-    const useMetricDescription = metricExpressions.length > 1 ? i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetrics', {
-      defaultMessage: 'and use metrics'
-    }) : i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetric', {
-      defaultMessage: 'and use metric'
-    });
+    const useMetricDescription = metricExpressions.length > 1 ?
+      i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsMultipleDescription', {
+        defaultMessage: 'and use metrics'
+      }) :
+      i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsSingleDescription', {
+        defaultMessage: 'and use metric'
+      });
     return (
       <EuiPopover
         id="metricsPopover"
@@ -100,7 +102,7 @@ export class MetricsExpression extends Component {
         <div style={{ width: 400 }}>
           <EuiPopoverTitle>
             <FormattedMessage
-              id="xpack.maps.layerPanel.metricsExpression.metrics"
+              id="xpack.maps.layerPanel.metricsExpression.metricsPopoverTitle"
               defaultMessage="Metrics"
             />
           </EuiPopoverTitle>

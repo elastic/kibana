@@ -88,7 +88,7 @@ export class MapListing extends React.Component {
       await this.props.delete(this.state.selectedIds);
     } catch (error) {
       toastNotifications.addDanger({
-        title: i18n.translate('xpack.maps.mapListing.unableToDelete', {
+        title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
           defaultMessage: `Unable to delete map(s)`
         }),
         text: `${error}`,
@@ -172,15 +172,15 @@ export class MapListing extends React.Component {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={i18n.translate('xpack.maps.mapListing.deleteSelectedItems', {
+          title={i18n.translate('xpack.maps.mapListing.deleteSelectedItemsTitle', {
             defaultMessage: 'Delete selected items?'
           })}
           onCancel={this.closeDeleteModal}
           onConfirm={this.deleteSelectedItems}
-          cancelButtonText={i18n.translate('xpack.maps.mapListing.cancel', {
+          cancelButtonText={i18n.translate('xpack.maps.mapListing.cancelTitle', {
             defaultMessage: 'Cancel'
           })}
-          confirmButtonText={i18n.translate('xpack.maps.mapListing.delete', {
+          confirmButtonText={i18n.translate('xpack.maps.mapListing.deleteTitle', {
             defaultMessage: 'Delete'
           })}
           defaultFocusedButton="cancel"
@@ -202,7 +202,7 @@ export class MapListing extends React.Component {
         <React.Fragment>
           <EuiCallOut
             title={
-              i18n.translate('xpack.maps.mapListing.limitExceeded', {
+              i18n.translate('xpack.maps.mapListing.limitExceededTitle', {
                 defaultMessage: 'Listing limit exceeded'
               })
             }
@@ -212,7 +212,7 @@ export class MapListing extends React.Component {
             <p>
 
               <FormattedMessage
-                id="xpack.maps.mapListing.limitHelp"
+                id="xpack.maps.mapListing.limitHelpDescription"
                 defaultMessage="You have {totalItems} items,
               but your <strong>listingLimit</strong> setting prevents the table below from displaying more than {listingLimit}.
               You can change this setting under "
@@ -223,7 +223,7 @@ export class MapListing extends React.Component {
               />
               <EuiLink href="#/management/kibana/settings">
                 <FormattedMessage
-                  id="xpack.maps.mapListing.advancedSettings"
+                  id="xpack.maps.mapListing.advancedSettingsLinkText"
                   defaultMessage="Advanced Settings"
                 />
               </EuiLink>.
@@ -241,12 +241,12 @@ export class MapListing extends React.Component {
     }
 
     if (this.hasNoItems()) {
-      return i18n.translate('xpack.maps.mapListing.noItems', {
+      return i18n.translate('xpack.maps.mapListing.noItemsDescription', {
         defaultMessage: `Looks like you don't have any maps. Click the create button to create one.`
       });
     }
 
-    return i18n.translate('xpack.maps.mapListing.noMatch', {
+    return i18n.translate('xpack.maps.mapListing.noMatchDescription', {
       defaultMessage: 'No items matched your search.'
     });
   }
@@ -263,7 +263,7 @@ export class MapListing extends React.Component {
             key="delete"
           >
             <FormattedMessage
-              id="xpack.maps.mapListing.deleteSelected"
+              id="xpack.maps.mapListing.deleteSelectedButtonLabel"
               defaultMessage="Delete selected"
             />
           </EuiButton>
@@ -276,7 +276,7 @@ export class MapListing extends React.Component {
         {deleteBtn}
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            aria-label={i18n.translate('xpack.maps.mapListing.filterItems', {
+            aria-label={i18n.translate('xpack.maps.mapListing.filterItemsAriaLabel', {
               defaultMessage: 'Filter items'
             })}
             placeholder={i18n.translate('xpack.maps.mapListing.searchPlaceholder', {
@@ -300,7 +300,7 @@ export class MapListing extends React.Component {
     const tableColumns = [
       {
         field: 'title',
-        name: i18n.translate('xpack.maps.mapListing.titleField', {
+        name: i18n.translate('xpack.maps.mapListing.titleFieldTitle', {
           defaultMessage: 'Title'
         }),
         sortable: true,
@@ -315,7 +315,7 @@ export class MapListing extends React.Component {
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.maps.mapListing.descriptionField', {
+        name: i18n.translate('xpack.maps.mapListing.descriptionFieldTitle', {
           defaultMessage: 'Description'
         }),
         dataType: 'string',
@@ -370,7 +370,7 @@ export class MapListing extends React.Component {
             fill
           >
             <FormattedMessage
-              id="xpack.maps.mapListing.createMap"
+              id="xpack.maps.mapListing.createMapButtonLabel"
               defaultMessage="Create map"
             />
           </EuiButton>
@@ -387,7 +387,7 @@ export class MapListing extends React.Component {
               <EuiTitle size="l">
                 <h1>
                   <FormattedMessage
-                    id="xpack.maps.mapListing.maps"
+                    id="xpack.maps.mapListing.mapsTitle"
                     defaultMessage="Maps"
                   />
                 </h1>
@@ -398,7 +398,7 @@ export class MapListing extends React.Component {
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={
-                  i18n.translate('xpack.maps.mapListing.betaMessage', {
+                  i18n.translate('xpack.maps.mapListing.betaMessageBadge', {
                     defaultMessage: 'Maps is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo.'
                   })
                 }

@@ -39,7 +39,7 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
           data-test-subj="toggleSetViewVisibilityButton"
         >
           <FormattedMessage
-            id="xpack.maps.viewControl.goTo"
+            id="xpack.maps.viewControl.goToButtonLabel"
             defaultMessage="Go to"
           />
         </EuiButton>)}
@@ -63,13 +63,13 @@ export function ViewControl({ isSetViewOpen, closeSetView, openSetView, mouseCoo
           <p>
             <strong>
               <FormattedMessage
-                id="xpack.maps.viewControl.lat"
+                id="xpack.maps.viewControl.latLabel"
                 defaultMessage="lat:"
               />
             </strong> {lat},{' '}
             <strong>
               <FormattedMessage
-                id="xpack.maps.viewControl.lon"
+                id="xpack.maps.viewControl.lonLabel"
                 defaultMessage="lon:"
               />
             </strong> {lon}

@@ -28,7 +28,7 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     } else if (geoFieldType === 'geo_shape') {
       geometries = geoShapeToGeometry(properties[geoFieldName]);
     } else {
-      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldType', {
+      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldTypeErrorMessage', {
         defaultMessage: 'Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}',
         values: { geoFieldType }
       });
@@ -68,7 +68,7 @@ export function geoPointToGeometry(value) {
   if (typeof value === 'string') {
     const commaSplit = value.split(',');
     if (commaSplit.length === 1) {
-      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.geohashIsUnsupported', {
+      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.geohashIsUnsupportedErrorMessage', {
         defaultMessage: `Unable to convert to geojson, geohash not supported`
       });
 
@@ -86,7 +86,7 @@ export function geoPointToGeometry(value) {
   }
 
   if (!Array.isArray(value)) {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoPointValue', {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoPointValueErrorMessage', {
       defaultMessage: `Unsupported geo_point value: {geoPointValue}`,
       values: {
         geoPointValue: value
@@ -130,7 +130,7 @@ export function geoShapeToGeometry(value) {
 
   // TODO handle case where value is WKT and convert to geojson
   if (typeof value === 'string') {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.wktIsUnsupported', {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.wktIsUnsupportedErrorMessage', {
       defaultMessage: `Unable to convert WKT to geojson, not supported`,
     });
     throw new Error(errorMessage);
@@ -197,7 +197,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
       }
     };
   } else {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldType', {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldTypeErrorMessage', {
       defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
       values: { geoFieldType }
     });
