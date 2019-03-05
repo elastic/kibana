@@ -4,42 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
-import 'jest-styled-components';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-import configureStore from '../../../../../store/config/configureStore';
-import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
-import { DiscoverSpanLink } from '../DiscoverSpanLink';
+import * as savedObjects from 'x-pack/plugins/apm/public/services/rest/savedObjects';
+import { getRenderedHref } from 'x-pack/plugins/apm/public/utils/testHelpers';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { DiscoverErrorLink } from '../DiscoverErrorLink';
+import { DiscoverSpanLink } from '../DiscoverSpanLink';
+import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 
-// NOTE: this test file must be a .js file for jest.mock() to work with ts-jest
-
-jest.mock('x-pack/plugins/apm/public/services/rest/savedObjects', () => ({
-  getAPMIndexPattern: () => Promise.resolve({ id: 'apm-index-pattern-id' })
-}));
-
-async function asyncFlush() {
-  return new Promise(resolve => setTimeout(resolve, 0));
-}
-
-async function getRenderedHref(Component) {
-  const store = configureStore({
-    location: { search: '?rangeFrom=now/w&rangeTo=now' }
-  });
-  const mounted = mount(
-    <Provider store={store}>
-      <MemoryRouter>
-        <Component />
-      </MemoryRouter>
-    </Provider>
+// NOTE: jest.mock() is broken in TS test files (b/c of ts-jest, I think)
+// but using jest's "spies can be stubbed" feature, this works:
+jest
+  .spyOn(savedObjects, 'getAPMIndexPattern')
+  .mockReturnValue(
+    Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
   );
-
-  await asyncFlush();
-
-  return mounted.render().attr('href');
-}
 
 test('DiscoverTransactionLink should produce the correct URL', async () => {
   const transaction = {
@@ -49,7 +30,7 @@ test('DiscoverTransactionLink should produce the correct URL', async () => {
     trace: {
       id: '8b60bd32ecc6e1506735a8b6cfcf175c'
     }
-  };
+  } as Transaction;
   const href = await getRenderedHref(() => (
     <DiscoverTransactionLink transaction={transaction} />
   ));
@@ -64,7 +45,7 @@ test('DiscoverSpanLink should produce the correct URL', async () => {
     span: {
       id: 'test-span-id'
     }
-  };
+  } as Span;
   const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />);
 
   expect(href).toEqual(
@@ -80,7 +61,7 @@ test('DiscoverErrorLink should produce the correct URL', async () => {
     error: {
       grouping_key: 'grouping-key'
     }
-  };
+  } as APMError;
   const href = await getRenderedHref(() => <DiscoverErrorLink error={error} />);
 
   expect(href).toEqual(
@@ -96,7 +77,7 @@ test('DiscoverErrorLink should include optional kuery string in URL', async () =
     error: {
       grouping_key: 'grouping-key'
     }
-  };
+  } as APMError;
   const href = await getRenderedHref(() => (
     <DiscoverErrorLink error={error} kuery="some:kuery-string" />
   ));

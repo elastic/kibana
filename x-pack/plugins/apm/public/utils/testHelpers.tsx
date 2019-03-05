@@ -13,8 +13,13 @@ import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import PropTypes from 'prop-types';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 // @ts-ignore
 import { createMockStore } from 'redux-test-utils';
+// @ts-ignore
+import configureStore from '../store/config/configureStore';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -82,4 +87,27 @@ export function mockMoment() {
     .mockImplementation(function(this: Moment) {
       return `1337 minutes ago (mocking ${this.unix()})`;
     });
+}
+
+// Await this when you need to "flush" promises to immediately resolve or throw in tests
+export async function asyncFlush() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+// Useful for getting the rendered href from any kind of link component
+export async function getRenderedHref(Component: React.FunctionComponent<{}>) {
+  const store = configureStore({
+    location: { search: '?rangeFrom=now/w&rangeTo=now' }
+  });
+  const mounted = mount(
+    <Provider store={store}>
+      <MemoryRouter>
+        <Component />
+      </MemoryRouter>
+    </Provider>
+  );
+
+  await asyncFlush();
+
+  return mounted.render().attr('href');
 }
