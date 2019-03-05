@@ -13,7 +13,14 @@ import { KbnServer, Logger } from '../../../../types';
 import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map';
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest, SearchSource } from '../../types';
+import {
+  IndexPatternSavedObject,
+  SavedSearchObjectAttributes,
+  SearchPanel,
+  SearchRequest,
+  SearchSource,
+  TimeRangeParams,
+} from '../../types';
 import { getDataSource } from './get_data_source';
 
 interface SavedSearchGeneratorResult {
@@ -63,6 +70,32 @@ const getUiSettings = async (config: any) => {
   return { separator, quoteValues };
 };
 
+const getTimebasedParts = (
+  indexPatternSavedObject: IndexPatternSavedObject,
+  timerange: TimeRangeParams,
+  savedSearchObjectAttr: SavedSearchObjectAttributes,
+  searchSourceFilter: any[]
+) => {
+  const timeFilter = indexPatternSavedObject.timeFieldName
+    ? {
+        range: {
+          [indexPatternSavedObject.timeFieldName]: {
+            format: 'epoch_millis',
+            gte: moment(timerange.min).valueOf(),
+            lte: moment(timerange.max).valueOf(),
+          },
+        },
+      }
+    : null;
+  const includes = indexPatternSavedObject.timeFieldName
+    ? [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns]
+    : savedSearchObjectAttr.columns;
+
+  const combinedFilter = timeFilter ? [timeFilter].concat(searchSourceFilter) : searchSourceFilter;
+
+  return { combinedFilter, includes };
+};
+
 export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
@@ -79,27 +112,23 @@ export async function generateCsvSearch(
   );
   const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
 
-  const timeFilter = {
-    range: {
-      [indexPatternSavedObject.timeFieldName]: {
-        format: 'epoch_millis',
-        gte: moment(timerange.min).valueOf(),
-        lte: moment(timerange.max).valueOf(),
-      },
-    },
-  };
   const kibanaSavedObjectMeta = savedSearchObjectAttr.kibanaSavedObjectMeta;
   const { searchSource } = kibanaSavedObjectMeta as { searchSource: SearchSource };
+
   const { filter: searchSourceFilter, query: searchSourceQuery } = searchSource;
+  const { combinedFilter, includes } = getTimebasedParts(
+    indexPatternSavedObject,
+    timerange,
+    savedSearchObjectAttr,
+    searchSourceFilter
+  );
   const esQueryConfig = await getEsQueryConfig(uiConfig);
-  const combinedFilter = [timeFilter].concat(searchSourceFilter);
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
+
   const searchRequest: SearchRequest = {
     index: indexPatternSavedObject.title,
     body: {
-      _source: {
-        includes: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
-      },
+      _source: { includes },
       docvalue_fields: [],
       query: buildEsQuery(
         indexPatternSavedObject,
@@ -125,7 +154,7 @@ export async function generateCsvSearch(
   const generateCsvParams: GenerateCsvParams = {
     searchRequest,
     callEndpoint: callCluster,
-    fields: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
+    fields: includes,
     formatsMap,
     metaFields: [],
     conflictedTypesFields: [],
