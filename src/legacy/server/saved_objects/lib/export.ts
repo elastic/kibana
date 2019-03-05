@@ -55,6 +55,8 @@ export async function getSortedObjectsForExport({
   } else {
     const findResponse = await savedObjectsClient.find({
       type: types,
+      sortField: '_id',
+      sortOrder: 'asc',
       perPage: exportSizeLimit,
     });
     if (findResponse.total > exportSizeLimit) {

@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The export saved object API enables you to retrieve a set of Kibana saved objects by various conditions into a newline delimited JSON format.
+The export saved objects API enables you to retrieve a set of saved objects that can later be imported into Kibana.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -25,7 +25,7 @@ The response body will have a format of newline delimited JSON.
 
 ==== Examples
 
-The following example attempts to export index patterns
+The following example exports all index pattern saved objects.
 
 [source,js]
 --------------------------------------------------
