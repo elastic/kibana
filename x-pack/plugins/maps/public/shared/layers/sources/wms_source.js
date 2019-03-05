@@ -19,10 +19,10 @@ import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters
 export class WMSSource extends AbstractTMSSource {
 
   static type = 'WMS';
-  static title = i18n.translate('xpack.maps.source.wms.title', {
+  static title = i18n.translate('xpack.maps.source.wmsTitle', {
     defaultMessage: 'Web Map Service'
   });
-  static description = i18n.translate('xpack.maps.source.wms.description', {
+  static description = i18n.translate('xpack.maps.source.wmsDescription', {
     defaultMessage: 'Maps from OGC Standard WMS'
   });
   static icon = 'grid';
@@ -77,7 +77,7 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   getUrlTemplate() {
-    const styles = this._descriptor.styles ? this._descriptor.styles : '';
+    const styles = this._descriptor.styles || '';
     // eslint-disable-next-line max-len
     return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${styles}`;
   }

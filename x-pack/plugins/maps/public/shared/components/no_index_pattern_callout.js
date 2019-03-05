@@ -44,7 +44,7 @@ export function NoIndexPatternCallout() {
         />
         <EuiLink href={chrome.addBasePath('/app/kibana#/home/tutorial_directory/sampleData')}>
           <FormattedMessage
-            id="xpack.maps.noIndexPattern.getStartedDescription"
+            id="xpack.maps.noIndexPattern.getStartedLinkText"
             defaultMessage="Get started with some sample data sets."
           />
         </EuiLink>

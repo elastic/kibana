@@ -70,7 +70,7 @@ export class ValidatedRange extends React.Component {
       errorMessage = (
         <EuiFormErrorText>
           <FormattedText
-            id="xpack.maps.validatedRange.rangeErrorText"
+            id="xpack.maps.validatedRange.rangeErrorMessage"
             defaultMessage="Must be between {min} and {max}"
             values={{ min, max }}
           />
