@@ -16,24 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Server } from '../../server/kbn_server';
 
-import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
-import { get } from 'lodash';
-
-const filterableTypes = KBN_FIELD_TYPES.filter(type => type.filterable).map(type => type.name);
-
-export function isFilterable(field) {
-  return field.name === '_id' || field.scripted || (field.searchable && filterableTypes.includes(field.type));
+export type InitPluginFunction = (server: Server) => void;
+export interface UiExports {
+  injectDefaultVars: (server: Server) => { [key: string]: any };
 }
 
-export function getFromSavedObject(savedObject) {
-  if (get(savedObject, 'attributes.fields') === undefined) {
-    return null;
-  }
-
-  return {
-    id: savedObject.id,
-    fields: JSON.parse(savedObject.attributes.fields),
-    title: savedObject.attributes.title,
-  };
+export interface PluginSpecOptions {
+  id: string;
+  require: string[];
+  publicDir: string;
+  uiExports?: UiExports;
+  init: InitPluginFunction;
 }
