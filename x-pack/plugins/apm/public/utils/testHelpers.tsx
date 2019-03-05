@@ -20,6 +20,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { createMockStore } from 'redux-test-utils';
 // @ts-ignore
 import configureStore from '../store/config/configureStore';
+import { IReduxState } from '../store/rootReducer';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -95,10 +96,11 @@ export async function asyncFlush() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(Component: React.FunctionComponent<{}>) {
-  const store = configureStore({
-    location: { search: '?rangeFrom=now/w&rangeTo=now' }
-  });
+export async function getRenderedHref(
+  Component: React.FunctionComponent<{}>,
+  globalState: Partial<IReduxState> = {}
+) {
+  const store = configureStore(globalState);
   const mounted = mount(
     <Provider store={store}>
       <MemoryRouter>
