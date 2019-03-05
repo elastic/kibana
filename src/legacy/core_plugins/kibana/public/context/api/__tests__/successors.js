@@ -19,6 +19,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import moment from 'moment';
 import * as _ from 'lodash';
 
 import { createIndexPatternsStub, createSearchSourceStubProvider } from './_stubs';
@@ -99,9 +100,9 @@ describe('context app', function () {
             .filter(([property]) => property === 'query')
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
-          expect(intervals.every(({ gte, lte }) => (gte && lte) ? gte < lte : true)).to.be(true);
+          expect(intervals.every(({ gte, lte }) => (gte && lte) ? moment(gte).isBefore(lte) : true)).to.be(true);
           // should have started at the given time
-          expect(intervals[0].lte).to.eql(MS_PER_DAY * 3000);
+          expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
           // should have ended with a half-open interval
           expect(_.last(intervals)).to.only.have.keys('lte', 'format');
           expect(intervals.length).to.be.greaterThan(1);
@@ -138,9 +139,9 @@ describe('context app', function () {
             .map(([, { query }]) => _.get(query, ['constant_score', 'filter', 'range', '@timestamp']));
 
           // should have started at the given time
-          expect(intervals[0].lte).to.eql(MS_PER_DAY * 3000);
+          expect(intervals[0].lte).to.eql(moment(MS_PER_DAY * 3000).toISOString());
           // should have stopped before reaching MS_PER_DAY * 2200
-          expect(_.last(intervals).gte).to.be.greaterThan(MS_PER_DAY * 2200);
+          expect(moment(_.last(intervals).gte).valueOf()).to.be.greaterThan(MS_PER_DAY * 2200);
           expect(intervals.length).to.be.greaterThan(1);
 
           expect(hits).to.eql(searchSourceStub._stubHits.slice(0, 4));
