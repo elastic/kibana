@@ -501,9 +501,9 @@ describe('SavedObjectsRepository', () => {
       expect(bulkCalls.length).toEqual(1);
 
       expect(bulkCalls[0][1].body).toEqual([
-        { create: { _type: '_doc', _id: 'config:one' } },
+        { create: { _id: 'config:one' } },
         { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, references: [{ name: 'ref_0', type: 'test', id: '1' }] },
-        { create: { _type: '_doc', _id: 'index-pattern:two' } },
+        { create: { _id: 'index-pattern:two' } },
         {
           type: 'index-pattern',
           ...mockTimestampFields,
@@ -551,7 +551,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
-          { create: { _type: '_doc', _id: 'config:one' } },
+          { create: { _id: 'config:one' } },
           {
             type: 'config',
             ...mockTimestampFields,
@@ -559,7 +559,7 @@ describe('SavedObjectsRepository', () => {
             migrationVersion: { foo: '2.3.4' },
             references: [{ name: 'search_0', type: 'search', id: '123' }],
           },
-          { create: { _type: '_doc', _id: 'index-pattern:two' } },
+          { create: { _id: 'index-pattern:two' } },
           {
             type: 'index-pattern',
             ...mockTimestampFields,
@@ -606,7 +606,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
           // uses create because overwriting is not allowed
-          { create: { _type: '_doc', _id: 'foo:bar' } },
+          { create: { _id: 'foo:bar' } },
           { type: 'foo', ...mockTimestampFields, 'foo': {}, references: [] },
         ]
       }));
@@ -625,7 +625,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
           // uses index because overwriting is allowed
-          { index: { _type: '_doc', _id: 'foo:bar' } },
+          { index: { _id: 'foo:bar' } },
           { type: 'foo', ...mockTimestampFields, 'foo': {}, references: [] },
         ]
       }));
@@ -741,7 +741,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
-          { create: { _type: '_doc', _id: 'foo-namespace:config:one' } },
+          { create: { _id: 'foo-namespace:config:one' } },
           {
             namespace: 'foo-namespace',
             type: 'config',
@@ -749,7 +749,7 @@ describe('SavedObjectsRepository', () => {
             config: { title: 'Test One' },
             references: [],
           },
-          { create: { _type: '_doc', _id: 'foo-namespace:index-pattern:two' } },
+          { create: { _id: 'foo-namespace:index-pattern:two' } },
           {
             namespace: 'foo-namespace',
             type: 'index-pattern',
@@ -786,9 +786,9 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
-          { create: { _type: '_doc', _id: 'config:one' } },
+          { create: { _id: 'config:one' } },
           { type: 'config', ...mockTimestampFields, config: { title: 'Test One' }, references: [] },
-          { create: { _type: '_doc', _id: 'index-pattern:two' } },
+          { create: { _id: 'index-pattern:two' } },
           { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' }, references: [] }
         ]
       }));
@@ -810,7 +810,7 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('bulk', expect.objectContaining({
         body: [
-          { create: { _type: '_doc', _id: 'globaltype:one' } },
+          { create: { _id: 'globaltype:one' } },
           { type: 'globaltype', ...mockTimestampFields, 'globaltype': { title: 'Test One' }, references: [] },
         ]
       }));
@@ -853,7 +853,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -869,7 +868,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -887,7 +885,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('delete', {
-        type: '_doc',
         id: 'globaltype:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
@@ -1173,7 +1170,6 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         id: 'foo-namespace:index-pattern:logstash-*',
-        type: '_doc'
       }));
     });
 
@@ -1185,7 +1181,6 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         id: 'index-pattern:logstash-*',
-        type: '_doc'
       }));
     });
 
@@ -1199,7 +1194,6 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         id: 'globaltype:logstash-*',
-        type: '_doc'
       }));
     });
   });
@@ -1231,9 +1225,9 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         body: {
           docs: [
-            { _type: '_doc', _id: 'config:one' },
-            { _type: '_doc', _id: 'index-pattern:two' },
-            { _type: '_doc', _id: 'globaltype:three' },
+            { _id: 'config:one' },
+            { _id: 'index-pattern:two' },
+            { _id: 'globaltype:three' },
           ]
         }
       }));
@@ -1258,9 +1252,9 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
         body: {
           docs: [
-            { _type: '_doc', _id: 'foo-namespace:config:one' },
-            { _type: '_doc', _id: 'foo-namespace:index-pattern:two' },
-            { _type: '_doc', _id: 'globaltype:three' },
+            { _id: 'foo-namespace:config:one' },
+            { _id: 'foo-namespace:index-pattern:two' },
+            { _id: 'globaltype:three' },
           ]
         }
       }));
@@ -1423,7 +1417,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        type: '_doc',
         id: 'foo-namespace:index-pattern:logstash-*',
         body: {
           doc: {
@@ -1457,7 +1450,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        type: '_doc',
         id: 'index-pattern:logstash-*',
         body: {
           doc: {
@@ -1492,7 +1484,6 @@ describe('SavedObjectsRepository', () => {
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('update', {
-        type: '_doc',
         id: 'globaltype:foo',
         body: {
           doc: {
