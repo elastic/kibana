@@ -1,19 +1,23 @@
-[[saved-objects-api-export-objects]]
+[[saved-objects-api-export]]
 === Export Objects
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The export objects API enables you to retrieve a set of saved objects that can later be imported into Kibana.
+The export saved object API enables you to retrieve a set of Kibana saved objects by various conditions into a newline delimited JSON format.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-`POST /api/saved_objects/_export_objects`
+`POST /api/saved_objects/_export`
 
 ==== Request Body
-`objects`::
+`type` (optional)::
+  (array|string) The saved object type(s) that the export should be limited to
+`objects` (optional)::
   (array) A list of objects to export
+
+Note: At least `type` or `objects` must be passed in.
 
 ==== Response body
 
@@ -21,22 +25,13 @@ The response body will have a format of newline delimited JSON.
 
 ==== Examples
 
-The following example  exports an index pattern and visualization.
+The following example attempts to export index patterns
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_export_objects
+POST api/saved_objects/_export
 {
-  "objects" [
-    {
-      "type": "index-pattern",
-      "id": "1"
-    },
-    {
-      "type": "visualization",
-      "id": "2"
-    }
-  ]
+  "type": "index-patterns"
 }
 --------------------------------------------------
 // KIBANA

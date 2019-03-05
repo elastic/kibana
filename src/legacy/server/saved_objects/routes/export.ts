@@ -21,31 +21,36 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
 import { SavedObjectsClient } from '../';
-import { getExportObjects } from '../lib/export';
+import { getSortedObjectsForExport } from '../lib/export';
 import { Prerequisites } from './types';
 
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];
 
-interface ExportObjectsRequest extends Hapi.Request {
+interface ExportRequest extends Hapi.Request {
   pre: {
     savedObjectsClient: SavedObjectsClient;
   };
   payload: {
-    objects: Array<{
+    type?: string[];
+    objects?: Array<{
       type: string;
       id: string;
     }>;
   };
 }
 
-export const createExportObjectsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
-  path: '/api/saved_objects/_export_objects',
+export const createExportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+  path: '/api/saved_objects/_export',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     validate: {
       payload: Joi.object()
         .keys({
+          type: Joi.array()
+            .items(Joi.string().valid(ALLOWED_TYPES))
+            .single()
+            .optional(),
           objects: Joi.array()
             .items({
               type: Joi.string()
@@ -54,21 +59,23 @@ export const createExportObjectsRoute = (prereqs: Prerequisites, server: Hapi.Se
               id: Joi.string().required(),
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
-            .required(),
+            .optional(),
         })
-        .required(),
+        .xor('type', 'objects')
+        .default(),
     },
-  },
-  async handler(request: ExportObjectsRequest, h: Hapi.ResponseToolkit) {
-    const { savedObjectsClient } = request.pre;
-    const docsToExport = await getExportObjects({
-      savedObjectsClient,
-      objects: request.payload.objects,
-      exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
-    });
-    return h
-      .response(docsToExport.map(doc => stringify(doc)).join('\n'))
-      .header('Content-Disposition', `attachment; filename="export.ndjson"`)
-      .header('Content-Type', 'application/ndjson');
+    async handler(request: ExportRequest, h: Hapi.ResponseToolkit) {
+      const { savedObjectsClient } = request.pre;
+      const docsToExport = await getSortedObjectsForExport({
+        savedObjectsClient,
+        types: request.payload.type,
+        objects: request.payload.objects,
+        exportSizeLimit: server.config().get('savedObjects.maxImportExportSize'),
+      });
+      return h
+        .response(docsToExport.map(doc => stringify(doc)).join('\n'))
+        .header('Content-Disposition', `attachment; filename="export.ndjson"`)
+        .header('Content-Type', 'application/ndjson');
+    },
   },
 });

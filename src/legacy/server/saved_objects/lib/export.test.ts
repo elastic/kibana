@@ -17,131 +17,9 @@
  * under the License.
  */
 
-import { getExportObjects, getExportObjectsByType, sortObjects } from './export';
+import { getSortedObjectsForExport, sortObjects } from './export';
 
-describe('getExportObjects', () => {
-  const savedObjectsClient = {
-    errors: {} as any,
-    find: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    delete: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-
-  afterEach(() => {
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
-  });
-
-  test('exports selected objects and sorts them', async () => {
-    savedObjectsClient.bulkGet.mockResolvedValueOnce({
-      saved_objects: [
-        {
-          id: '2',
-          type: 'search',
-          references: [
-            {
-              type: 'index-pattern',
-              id: '1',
-            },
-          ],
-        },
-        {
-          id: '1',
-          type: 'index-pattern',
-          references: [],
-        },
-      ],
-    });
-    const response = await getExportObjects({
-      exportSizeLimit: 10000,
-      savedObjectsClient,
-      objects: [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-      ],
-    });
-    expect(response).toMatchInlineSnapshot(`
-Array [
-  Object {
-    "id": "1",
-    "references": Array [],
-    "type": "index-pattern",
-  },
-  Object {
-    "id": "2",
-    "references": Array [
-      Object {
-        "id": "1",
-        "type": "index-pattern",
-      },
-    ],
-    "type": "search",
-  },
-]
-`);
-    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "id": "1",
-          "type": "index-pattern",
-        },
-        Object {
-          "id": "2",
-          "type": "search",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
-  });
-
-  test('export selected objects throws error when exceeding exportSizeLimit', async () => {
-    const exportOpts = {
-      exportSizeLimit: 1,
-      savedObjectsClient,
-      objects: [
-        {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-      ],
-    };
-    await expect(getExportObjects(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Can't export more than 1 objects"`
-    );
-  });
-});
-
-describe('getExportObjectsByType()', () => {
+describe('getSortedObjectsForExport()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     find: jest.fn(),
@@ -184,7 +62,7 @@ describe('getExportObjectsByType()', () => {
         },
       ],
     });
-    const response = await getExportObjectsByType({
+    const response = await getSortedObjectsForExport({
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
@@ -255,12 +133,113 @@ Array [
       ],
     });
     await expect(
-      getExportObjectsByType({
+      getSortedObjectsForExport({
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
+  });
+
+  test('exports selected objects and sorts them', async () => {
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          references: [
+            {
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          references: [],
+        },
+      ],
+    });
+    const response = await getSortedObjectsForExport({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      types: ['index-pattern', 'search'],
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+    });
+    expect(response).toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "1",
+    "references": Array [],
+    "type": "index-pattern",
+  },
+  Object {
+    "id": "2",
+    "references": Array [
+      Object {
+        "id": "1",
+        "type": "index-pattern",
+      },
+    ],
+    "type": "search",
+  },
+]
+`);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "2",
+          "type": "search",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('export selected objects throws error when exceeding exportSizeLimit', async () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient,
+      types: ['index-pattern', 'search'],
+      objects: [
+        {
+          type: 'index-pattern',
+          id: '1',
+        },
+        {
+          type: 'search',
+          id: '2',
+        },
+      ],
+    };
+    await expect(getSortedObjectsForExport(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Can't export more than 1 objects"`
+    );
   });
 });
 

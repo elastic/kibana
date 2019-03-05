@@ -6,7 +6,7 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
-import { exportObjectsTestSuiteFactory } from '../../common/suites/export_objects';
+import { exportTestSuiteFactory } from '../../common/suites/export';
 
 // tslint:disable:no-default-export
 export default function({ getService }: TestInvoker) {
@@ -16,11 +16,11 @@ export default function({ getService }: TestInvoker) {
   const {
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
-    exportObjectsTest,
-  } = exportObjectsTestSuiteFactory(esArchiver, supertest);
+    exportTest,
+  } = exportTestSuiteFactory(esArchiver, supertest);
 
-  describe('export_objects', () => {
-    exportObjectsTest('objects only within the current space (space_1)', {
+  describe('export', () => {
+    exportTest('objects only within the current space (space_1)', {
       ...SPACES.SPACE_1,
       tests: {
         spaceAwareType: {
@@ -36,7 +36,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    exportObjectsTest('objects only within the current space (default)', {
+    exportTest('objects only within the current space (default)', {
       ...SPACES.DEFAULT,
       tests: {
         spaceAwareType: {

@@ -19,9 +19,9 @@
 
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
-import { createExportByTypeRoute } from './export_by_type';
+import { createExportRoute } from './export';
 
-describe('POST /api/saved_objects/_export_by_type', () => {
+describe('POST /api/saved_objects/_export', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
@@ -45,7 +45,7 @@ describe('POST /api/saved_objects/_export_by_type', () => {
       },
     };
 
-    server.route(createExportByTypeRoute(prereqs));
+    server.route(createExportRoute(prereqs, server));
   });
 
   afterEach(() => {
@@ -61,7 +61,10 @@ describe('POST /api/saved_objects/_export_by_type', () => {
   test('formats successful response', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_export_by_type/index-pattern,search',
+      url: '/api/saved_objects/_export',
+      payload: {
+        type: 'index-pattern',
+      },
     };
     savedObjectsClient.find.mockResolvedValueOnce({
       total: 1,
@@ -99,7 +102,6 @@ Array [
         "sortOrder": "asc",
         "type": Array [
           "index-pattern",
-          "search",
         ],
       },
     ],
