@@ -15,25 +15,25 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
   const client = getService('infraOpsGraphQLClient');
 
   describe('metadata', () => {
-    describe('7.0.0', () => {
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+    describe('docker', () => {
+      before(() => esArchiver.load('infra/6.6.0/docker'));
+      after(() => esArchiver.unload('infra/6.6.0/docker'));
 
-      it('hosts', () => {
+      it('supports the metadata container query', () => {
         return client
           .query<MetadataQuery.Query>({
             query: metadataQuery,
             variables: {
               sourceId: 'default',
-              nodeId: 'demo-stack-mysql-01',
-              nodeType: 'host',
+              nodeId: '242fddb9d376bbf0e38025d81764847ee5ec0308adfa095918fd3266f9d06c6a',
+              nodeType: 'container',
             },
           })
           .then(resp => {
             const metadata = resp.data.source.metadataByNode;
             if (metadata) {
-              expect(metadata.features.length).to.be(14);
-              expect(metadata.name).to.equal('demo-stack-mysql-01');
+              expect(metadata.features.length).to.be(8);
+              expect(metadata.name).to.equal('docker-autodiscovery_nginx_1');
             } else {
               throw new Error('Metadata should never be empty');
             }
@@ -41,25 +41,25 @@ const metadataTests: KbnTestProvider = ({ getService }) => {
       });
     });
 
-    describe('6.6.0', () => {
-      before(() => esArchiver.load('infra/6.6.0/docker'));
-      after(() => esArchiver.unload('infra/6.6.0/docker'));
+    describe('hosts', () => {
+      before(() => esArchiver.load('infra/metrics_and_logs'));
+      after(() => esArchiver.unload('infra/metrics_and_logs'));
 
-      it('docker', () => {
+      it('supports the metadata container query', () => {
         return client
           .query<MetadataQuery.Query>({
             query: metadataQuery,
             variables: {
               sourceId: 'default',
-              nodeId: '631f36a845514442b93c3fdd2dc91bcd8feb680b8ac5832c7fb8fdc167bb938e',
-              nodeType: 'container',
+              nodeId: 'demo-stack-nginx-01',
+              nodeType: 'host',
             },
           })
           .then(resp => {
             const metadata = resp.data.source.metadataByNode;
             if (metadata) {
-              expect(metadata.features.length).to.be(10);
-              expect(metadata.name).to.equal('docker-autodiscovery_elasticsearch_1');
+              expect(metadata.features.length).to.be(14);
+              expect(metadata.name).to.equal('demo-stack-nginx-01');
             } else {
               throw new Error('Metadata should never be empty');
             }

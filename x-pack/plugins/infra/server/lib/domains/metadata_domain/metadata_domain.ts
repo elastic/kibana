@@ -43,7 +43,17 @@ export class InfraMetadataDomain {
 
 const pickMetadata = (buckets: InfraMetadataAggregationBucket[]): string[] => {
   if (buckets) {
-    const metadata = buckets.map(bucket => bucket.key);
+    const metadata = buckets
+      .map(module => {
+        if (module.names) {
+          return module.names.buckets.map(name => {
+            return `${module.key}.${name.key}`;
+          });
+        } else {
+          return [];
+        }
+      })
+      .reduce((a: string[], b: string[]) => a.concat(b), []);
     return metadata;
   } else {
     return [];

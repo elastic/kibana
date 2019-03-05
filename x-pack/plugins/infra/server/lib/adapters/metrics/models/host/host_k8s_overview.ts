@@ -122,7 +122,7 @@ export const hostK8sOverview: InfraMetricModelCreator = (timeField, indexPattern
           type: InfraMetricModelMetricType.max,
         },
         {
-          field: 'kubernetes.pod.uid',
+          field: 'kubernetes.pod.name',
           id: 'card-pod-name',
           type: InfraMetricModelMetricType.cardinality,
         },

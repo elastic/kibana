@@ -10,7 +10,7 @@ export const defaultSourceConfiguration = {
   metricAlias: 'metricbeat-*',
   logAlias: 'filebeat-*,kibana_sample_data_logs*',
   fields: {
-    container: 'container.id',
+    container: 'docker.container.id',
     host: 'host.name',
     pod: 'kubernetes.pod.uid',
     tiebreaker: '_doc',
