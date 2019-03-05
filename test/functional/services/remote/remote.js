@@ -24,7 +24,7 @@ export async function RemoteProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
   const possibleBrowsers = ['chrome', 'firefox', 'ie'];
-  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
+  const browserType = 'firefox';
 
   if (!possibleBrowsers.includes(browserType)) {
     throw new Error(`Unexpected TEST_BROWSER_TYPE "${browserType}". Valid options are ` +  possibleBrowsers.join(','));
