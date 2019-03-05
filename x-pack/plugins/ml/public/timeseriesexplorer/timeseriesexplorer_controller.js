@@ -56,7 +56,7 @@ import {
 
 
 import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+let mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -392,6 +392,12 @@ module.controller('MlTimeSeriesExplorerController', function (
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
+
+          // If the annotations failed to load and the feature flag is set to `false`,
+          // make sure the checkbox toggle gets hidden.
+          if (mlAnnotationsEnabled === false) {
+            $scope.showAnnotationsCheckbox = false;
+          }
         });
       }
     }
@@ -466,19 +472,24 @@ module.controller('MlTimeSeriesExplorerController', function (
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
-        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
-          });
+        refreshFocusData.focusAnnotationData = [];
+
+        if (Array.isArray(resp.annotations[$scope.selectedJob.job_id])) {
+          refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = String.fromCharCode(65 + i);
+              return d;
+            });
+        }
 
         finish();
       }).catch(() => {
-        // silent fail
+        // silently fail and disable annotations feature if loading annotations fails.
         refreshFocusData.focusAnnotationData = [];
+        mlAnnotationsEnabled = false;
         finish();
       });
     } else {

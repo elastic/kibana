@@ -72,6 +72,7 @@ export type callWithRequestType = (
 export function annotationProvider(callWithRequest: callWithRequestType) {
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
+      // No need to translate, this will not be exposed in the UI.
       return Promise.reject(new Error('invalid annotation format'));
     }
 
@@ -214,27 +215,37 @@ export function annotationProvider(callWithRequest: callWithRequestType) {
       },
     };
 
-    const resp = await callWithRequest('search', params);
+    try {
+      const resp = await callWithRequest('search', params);
 
-    const docs: Annotations = _.get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
-      // get the original source document and the document id, we need it
-      // to identify the annotation when editing/deleting it.
-      return { ...d._source, _id: d._id } as Annotation;
-    });
-
-    if (isAnnotations(docs) === false) {
-      throw Boom.badRequest(`Annotations didn't pass integrity check.`);
-    }
-
-    docs.forEach((doc: Annotation) => {
-      const jobId = doc.job_id;
-      if (typeof obj.annotations[jobId] === 'undefined') {
-        obj.annotations[jobId] = [];
+      if (resp.error !== undefined && resp.message !== undefined) {
+        // No need to translate, this will not be exposed in the UI.
+        throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
-      obj.annotations[jobId].push(doc);
-    });
 
-    return obj;
+      const docs: Annotations = _.get(resp, ['hits', 'hits'], []).map((d: EsResult) => {
+        // get the original source document and the document id, we need it
+        // to identify the annotation when editing/deleting it.
+        return { ...d._source, _id: d._id } as Annotation;
+      });
+
+      if (isAnnotations(docs) === false) {
+        // No need to translate, this will not be exposed in the UI.
+        throw new Error(`Annotations didn't pass integrity check.`);
+      }
+
+      docs.forEach((doc: Annotation) => {
+        const jobId = doc.job_id;
+        if (typeof obj.annotations[jobId] === 'undefined') {
+          obj.annotations[jobId] = [];
+        }
+        obj.annotations[jobId].push(doc);
+      });
+
+      return obj;
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
   }
 
   async function deleteAnnotation(id: string) {
