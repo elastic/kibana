@@ -12,12 +12,28 @@ import {
   EuiFlexItem,
   EuiFormLabel
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 
 const OPTIONS = [
-  { value: GRID_RESOLUTION.COARSE, inputDisplay: 'coarse' },
-  { value: GRID_RESOLUTION.FINE, inputDisplay: 'fine' },
-  { value: GRID_RESOLUTION.MOST_FINE, inputDisplay: 'finest' }
+  {
+    value: GRID_RESOLUTION.COARSE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
+      defaultMessage: 'coarse'
+    })
+  },
+  { value: GRID_RESOLUTION.FINE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.fineDropdownOption', {
+      defaultMessage: 'fine'
+    })
+
+  },
+  {
+    value: GRID_RESOLUTION.MOST_FINE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.finestDropdownOption', {
+      defaultMessage: 'finest'
+    })
+  }
 ];
 
 export function ResolutionEditor({ resolution, onChange }) {
