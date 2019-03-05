@@ -48,7 +48,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
     //get all the watches in the list
     async getWatches() {
-      const watches = await find.allByCssSelector('.kuiTableRow');
+      const watches = await find.allByCssSelector('.euiTableRow');
       return mapAsync(watches, async watch => {
         const checkBox = await watch.findByCssSelector('td:nth-child(1)');
         const id = await watch.findByCssSelector('td:nth-child(2)');
