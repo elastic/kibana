@@ -253,11 +253,27 @@ The Kibana functional tests define the vast majority of the actual functionality
 ***** number: number of pixels from the top to offset mouse
 ** `browser.getWindowSize()` - Retrieves the a rect describing the current top-level window's size and position.
 *** returns
-**** {height: number, width: number, x: number, y: number}
+**** {`height`: number, `width`: number, `x`: number, `y`: number}
 ** `browser.setWindowSize(...args)` - Sets the dimensions of a window.
 *** args
-**** args[0] : number : width
-**** args[1] : number : height
+**** `width` 
+***** number : number of pixels wide that the window should be.
+**** `height` 
+***** number : number of pixels tall that the window should be. 
+** `browser.getCurrentUrl()` - Gets the URL that is loaded in the focused window/frame.
+*** returns
+**** string : url
+** `browser.get(url)`
+*** `args`
+**** `url`
+***** string : Well formed URL to navigate to in the browser.
+** `browser.goBack()` - Navigates the focused window/frame back one page using the browser’s navigation history.
+** `browser.pressKeys(...args)` - Sends a sequence of keyboard keys. For each key, this will perform a pair of keyDown and keyUp actions.
+*** args
+**** `keys`
+***** string : A string with the keys that should be want pressed.
+***** string[] : An array of the strings that should be pressed. 
+
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
