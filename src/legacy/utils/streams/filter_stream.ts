@@ -29,14 +29,5 @@ export function createFilterStream<T>(fn: (obj: T) => boolean) {
       }
       done();
     },
-    async writev(chunks, done) {
-      chunks
-        .map(({ chunk: record }) => record)
-        .filter(obj => fn(obj))
-        .forEach((obj: T) => {
-          this.push(obj);
-        });
-      done();
-    },
   });
 }
