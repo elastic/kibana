@@ -33,9 +33,9 @@ class TopN extends Component {
   }
 
   componentDidMount() {
-    // set max width of label as 20% of the table
+    // set max width of label as 35% of the table
     this.setState({
-      labelMaxWidth: this.tableRef.current.offsetWidth * 0.2
+      labelMaxWidth: this.tableRef.current.offsetWidth * 0.35
     });
   }
 
