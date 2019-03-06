@@ -6947,6 +6947,11 @@ constants-browserify@^1.0.0:
   resolved "https://registry.yarnpkg.com/constants-browserify/-/constants-browserify-1.0.0.tgz#c20b96d8c617748aaf1c16021760cd27fcb8cb75"
   integrity sha1-wguW2MYXdIqvHBYCF2DNJ/y4y3U=
 
+"constate-latest@npm:constate@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/constate/-/constate-1.0.0.tgz#93fa87108e364a05e93b3597e22d53adaf86776d"
+  integrity sha512-b1Pip712fAQ1el4pndiYeVMXAzlbrD8+Z8ik79TOQc3ZJNjxKGawT0gCPpANsNbT4eHszDZ/8472hvL1rowUhQ==
+
 constate@^0.9.0:
   version "0.9.0"
   resolved "https://registry.yarnpkg.com/constate/-/constate-0.9.0.tgz#877197ef8fbcacee95672a7e98f7b21dec818891"
@@ -7087,6 +7092,11 @@ copy-webpack-plugin@^4.6.0:
     p-limit "^1.0.0"
     serialize-javascript "^1.4.0"
 
+core-js@2.5.3, core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.3.tgz#8acc38345824f16d8365b7c9b4259168e8ed603e"
+  integrity sha1-isw4NFgk8W2DZbfJtCWRaOjtYD4=
+
 core-js@2.5.7, core-js@^2.5.1, core-js@^2.5.3, core-js@^2.5.7:
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.7.tgz#f972608ff0cead68b841a16a932d0b183791814e"
@@ -7096,11 +7106,6 @@ core-js@^1.0.0:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
   integrity sha1-ZSKUwUZR2yj6k70tX/KYOk8IxjY=
-
-core-js@^2.2.0, core-js@^2.4.0, core-js@^2.5.0:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.3.tgz#8acc38345824f16d8365b7c9b4259168e8ed603e"
-  integrity sha1-isw4NFgk8W2DZbfJtCWRaOjtYD4=
 
 core-js@~2.3.0:
   version "2.3.0"
