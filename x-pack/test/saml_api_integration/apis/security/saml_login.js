@@ -501,6 +501,52 @@ export default function ({ getService }) {
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
       });
+
+      it('refresh token cannot be re-used after 60 seconds', async function () {
+        this.timeout(100000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await delay(20000);
+
+        // This api call should succeed and automatically refresh token. Returned cookie will contain
+        // the new access and refresh token pair.
+        const apiResponse = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        const cookies = apiResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const newSessionCookie = request.cookie(cookies[0]);
+        expectNewSessionCookie(newSessionCookie);
+
+        // If we wait just over 60 seconds, we can't use the original refresh token
+        await delay(65000);
+
+        // Request with old cookie should fail with `400` since it contains expired access token and
+        // already used refresh tokens.
+        const apiResponseWithExpiredToken = await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(400);
+        expect(apiResponseWithExpiredToken.headers['set-cookie']).to.be(undefined);
+        expect(apiResponseWithExpiredToken.body).to.eql({
+          error: 'Bad Request',
+          message: 'invalid_grant',
+          statusCode: 400
+        });
+
+        // The new cookie with fresh pair of access and refresh tokens should work.
+        await supertest
+          .get('/api/security/v1/me')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', newSessionCookie.cookieString())
+          .expect(200);
+      });
     });
   });
 }
