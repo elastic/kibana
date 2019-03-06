@@ -73,14 +73,12 @@ export class MetricsExpression extends Component {
 
         return `${type} ${field}`;
       });
-
-    const useMetricDescription = metricExpressions.length > 1 ?
-      i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsMultipleDescription', {
-        defaultMessage: 'and use metrics'
-      }) :
-      i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsSingleDescription', {
-        defaultMessage: 'and use metric'
-      });
+    const useMetricDescription = i18n.translate('xpack.maps.layerPanel.metricsExpression.useMetricsDescription', {
+      defaultMessage: '{metricsLength, plural, one {and use metric} other {and use metrics}}',
+      values: {
+        metricsLength: metricExpressions.length
+      }
+    });
     return (
       <EuiPopover
         id="metricsPopover"
