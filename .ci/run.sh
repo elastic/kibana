@@ -2,6 +2,7 @@
 
 set -e
 echo "************* HELLO HELLO HELLO $ghprbActualCommit"
+echo $'console.log(\'hi\')' | node
 
 # move to Kibana root
 cd "$(dirname "$0")/.."
