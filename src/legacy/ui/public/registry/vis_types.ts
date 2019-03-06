@@ -20,12 +20,14 @@
 import { VisType } from '../vis';
 import { uiRegistry, UIRegistry } from './_registry';
 
-export type VisTypesRegistry = UIRegistry<VisType> & {
+interface VisTypesRegistryAccessors {
   byName: { [typeName: string]: VisType };
-};
+}
 
-export const VisTypesRegistryProvider = uiRegistry({
+export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
+
+export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
   name: 'visTypes',
   index: ['name'],
   order: ['title'],
-}) as VisTypesRegistry;
+});

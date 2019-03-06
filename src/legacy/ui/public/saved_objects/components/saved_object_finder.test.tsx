@@ -228,13 +228,11 @@ describe('SavedObjectsFinder', () => {
             type: 'search',
             name: 'Search',
             getIconForSavedObject: () => 'search',
-            showSavedObject: () => true,
           },
           {
             type: 'vis',
             name: 'Vis',
             getIconForSavedObject: () => 'visualization',
-            showSavedObject: () => true,
           },
         ]}
       />
@@ -260,13 +258,11 @@ describe('SavedObjectsFinder', () => {
         type: 'search',
         name: 'Search',
         getIconForSavedObject: () => 'search',
-        showSavedObject: () => true,
       },
       {
         type: 'vis',
         name: 'Vis',
         getIconForSavedObject: () => 'document',
-        showSavedObject: () => true,
       },
     ];
 
@@ -467,7 +463,6 @@ describe('SavedObjectsFinder', () => {
               type: 'search',
               name: 'Search',
               getIconForSavedObject: () => 'search',
-              showSavedObject: () => true,
             },
           ]}
         />

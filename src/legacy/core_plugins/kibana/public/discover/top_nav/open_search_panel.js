@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 import rison from 'rison-node';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -81,13 +82,14 @@ export class OpenSearchPanel extends React.Component {
             savedObjectMetaData={[
               {
                 type: SEARCH_OBJECT_TYPE,
-                showSavedObject: () => true,
                 getIconForSavedObject: () => 'search',
-                name: 'Search',
+                name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+                  defaultMessage: 'Saved Search',
+                }),
               },
             ]}
             onChoose={(id) => {
-              window.open(this.props.makeUrl(id), '_self');
+              window.location.assign(this.props.makeUrl(id));
               this.props.onClose();
             }}
             callToActionButton={this.renderMangageSearchesButton()}

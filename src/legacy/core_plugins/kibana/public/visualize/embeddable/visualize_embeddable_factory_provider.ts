@@ -32,7 +32,7 @@ export function visualizeEmbeddableFactoryProvider(Private: IPrivate) {
     return new VisualizeEmbeddableFactory(
       savedVisualizations,
       config,
-      Private(VisTypesRegistryProvider as any)
+      Private(VisTypesRegistryProvider)
     );
   };
   return Private(VisualizeEmbeddableFactoryProvider);

@@ -27,15 +27,12 @@ import {
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFieldSearch,
-  // @ts-ignore
   EuiFilterGroup,
-  // @ts-ignore
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiListGroup,
-  // @ts-ignore
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPagination,
@@ -53,13 +50,15 @@ import { SavedObjectAttributes } from '../../../../server/saved_objects';
 import { SimpleSavedObject } from '../simple_saved_object';
 
 // TODO the typings for EuiListGroup are incorrect - maxWidth is missing. This can be removed when the types are adjusted
-const FixedEuiListGroup = (EuiListGroup as any) as React.SFC<CommonProps & { maxWidth: boolean }>;
+const FixedEuiListGroup = (EuiListGroup as any) as React.FunctionComponent<
+  CommonProps & { maxWidth: boolean }
+>;
 
 export interface SavedObjectMetaData<T extends SavedObjectAttributes> {
   type: string;
   name: string;
   getIconForSavedObject(savedObject: SimpleSavedObject<T>): string | undefined;
-  showSavedObject(savedObject: SimpleSavedObject<T>): boolean;
+  showSavedObject?(savedObject: SimpleSavedObject<T>): boolean;
 }
 
 interface SavedObjectFinderState {
@@ -128,10 +127,14 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
       defaultSearchOperator: 'AND',
     });
 
-    resp.savedObjects = resp.savedObjects.filter(
-      savedObject =>
-        metaDataMap[savedObject.type] && metaDataMap[savedObject.type].showSavedObject(savedObject)
-    );
+    resp.savedObjects = resp.savedObjects.filter(savedObject => {
+      const metaData = metaDataMap[savedObject.type];
+      if (metaData.showSavedObject) {
+        return metaData.showSavedObject(savedObject);
+      } else {
+        return true;
+      }
+    });
 
     if (!this.isComponentMounted) {
       return;

@@ -42,7 +42,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         }),
         type: 'search',
         getIconForSavedObject: () => 'search',
-        showSavedObject: () => true,
       },
     });
   }
