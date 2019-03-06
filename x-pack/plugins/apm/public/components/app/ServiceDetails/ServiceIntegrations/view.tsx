@@ -19,7 +19,7 @@ import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
 
-interface ServiceIntegrationProps {
+export interface ServiceIntegrationProps {
   mlAvailable: boolean;
   location: Location;
   serviceDetails: {

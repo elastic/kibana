@@ -13,7 +13,7 @@ import { ServiceIntegrationsView } from './view';
 function mapStateToProps(state = {} as IReduxState) {
   return {
     mlAvailable: selectIsMLAvailable(state),
-    serviceDetails: getServiceDetails(state)
+    serviceDetails: getServiceDetails(state).data
   };
 }
 

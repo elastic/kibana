@@ -51,9 +51,9 @@ interface LocationAction {
 }
 interface TimepickerAction {
   type: typeof TIMEPICKER_UPDATE;
-  time: { min: number; max: number };
+  time: { min: string; max: string };
 }
-type Action = LocationAction | TimepickerAction;
+export type APMAction = LocationAction | TimepickerAction;
 
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
@@ -63,7 +63,7 @@ type Action = LocationAction | TimepickerAction;
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = INITIAL_STATE, action: Action) {
+export function urlParamsReducer(state = INITIAL_STATE, action: APMAction) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -218,7 +218,7 @@ export interface IUrlParams {
   kuery?: string;
   serviceName?: string;
   sortField?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: string;
   start?: string;
   traceId?: string;
   transactionId?: string;

@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 // @ts-ignore
 import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
+import { mockNow } from 'x-pack/plugins/apm/public/utils/testHelpers';
 import { DatePicker } from '../DatePicker';
 
 function mountPicker(search?: string) {
@@ -30,15 +31,14 @@ function mountPicker(search?: string) {
 
 describe('DatePicker', () => {
   describe('date calculations', () => {
-    const fakeNow = new Date('2019-02-15T12:00:00.000Z');
-    const realDateNow = global.Date.now.bind(global.Date);
+    let restoreNow: () => void;
 
     beforeAll(() => {
-      global.Date.now = jest.fn(() => fakeNow);
+      restoreNow = mockNow('2019-02-15T12:00:00.000Z');
     });
 
     afterAll(() => {
-      global.Date.now = realDateNow;
+      restoreNow();
     });
 
     it('should initialize with APM default date range', () => {

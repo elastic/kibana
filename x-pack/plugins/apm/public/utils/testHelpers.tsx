@@ -113,3 +113,14 @@ export async function getRenderedHref(
 
   return mounted.render().attr('href');
 }
+
+export function mockNow(date: string) {
+  const fakeNow = new Date(date).getTime();
+  const realDateNow = global.Date.now.bind(global.Date);
+
+  global.Date.now = jest.fn(() => fakeNow);
+
+  return () => {
+    global.Date.now = realDateNow;
+  };
+}
