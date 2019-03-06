@@ -86,6 +86,10 @@ export class SecretService {
           };
         }
       } catch (e) {
+        logEvent(
+          'secret_object_decrypt_failed',
+          "Kibana's encryption key is invalid, please ensure that this instance has the right keystore!"
+        );
         const err = new Error(`SecretService Decrypt Failed: ${e.message}`);
         err.stack = e.stack;
         throw err;
@@ -109,10 +113,6 @@ export class SecretService {
       try {
         objToValidate = await this.unhideAttribute(id);
       } catch (e) {
-        logEvent(
-          'secret_object_decrypt_failed',
-          "Kibana's encryption key is invalid, please ensure that this instance has the right keystore!"
-        );
         return false;
       }
 
