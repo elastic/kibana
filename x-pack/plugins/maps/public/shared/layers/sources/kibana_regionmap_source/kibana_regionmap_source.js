@@ -7,7 +7,6 @@
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-
 import { getKibanaRegionList } from '../../../../meta';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
