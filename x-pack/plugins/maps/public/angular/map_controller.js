@@ -253,14 +253,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
     key: 'full screen',
-    description: 'full screen',
+    description: i18n.translate('xpack.maps.mapController.fullScreenLabel', {
+      defaultMessage: `full screen`
+    }),
     testId: 'mapsFullScreenMode',
     run() {
       store.dispatch(enableFullScreen());
     }
   }, {
     key: 'inspect',
-    description: 'Open Inspector',
+    description: i18n.translate('xpack.maps.mapController.openInspectorLabel', {
+      defaultMessage: `Open Inspector`
+    }),
     testId: 'openInspectorButton',
     run() {
       const inspectorAdapters = getInspectorAdapters(store.getState());
@@ -268,7 +272,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   }, {
     key: 'save',
-    description: 'Save map',
+    description: i18n.translate('xpack.maps.mapController.saveMapLabels', {
+      defaultMessage: `Save map`
+    }),
     testId: 'mapSaveButton',
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
