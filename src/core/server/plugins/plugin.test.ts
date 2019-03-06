@@ -59,7 +59,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-const startDeps = { elasticsearch: elasticsearchServiceMock.startContract };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 

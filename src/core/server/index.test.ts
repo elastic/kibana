@@ -83,18 +83,8 @@ test('starts services on "start"', async () => {
 
   expect(httpService.start).toHaveBeenCalledTimes(1);
   expect(elasticsearchService.start).toHaveBeenCalledTimes(1);
-
   expect(mockPluginsService.start).toHaveBeenCalledTimes(1);
-  expect(mockPluginsService.start).toHaveBeenCalledWith({
-    elasticsearch: elasticsearchServiceMock.startContract,
-  });
-
   expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.start).toHaveBeenCalledWith({
-    elasticsearch: elasticsearchServiceMock.startContract,
-    http: httpServiceMock.startContract,
-    plugins: mockPluginsServiceStart,
-  });
 });
 
 test('does not fail on "start" if there are unused paths detected', async () => {

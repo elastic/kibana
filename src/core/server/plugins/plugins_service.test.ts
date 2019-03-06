@@ -43,7 +43,7 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-const startDeps = { elasticsearch: elasticsearchServiceMock.startContract };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
 const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockPackage.raw = {

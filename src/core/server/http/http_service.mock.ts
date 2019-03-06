@@ -19,10 +19,13 @@
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 
-const startContract = {
-  // we can mock some hapi server method when we need it
-  server: {} as Server,
-  options: {} as ServerOptions,
+const createStartContractMock = () => {
+  const startContract = {
+    // we can mock some hapi server method when we need it
+    server: {} as Server,
+    options: {} as ServerOptions,
+  };
+  return startContract;
 };
 
 type MethodKeysOf<T> = {
@@ -38,11 +41,11 @@ const createHttpServiceMock = () => {
     stop: jest.fn(),
     registerRouter: jest.fn(),
   };
-  mocked.start.mockResolvedValue(startContract);
+  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createHttpServiceMock,
-  startContract,
+  createStartContract: createStartContractMock,
 };
