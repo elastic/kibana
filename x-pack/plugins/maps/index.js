@@ -67,7 +67,7 @@ export function maps(kibana) {
       }).default();
     },
 
-    init: function (server) {
+    init(server) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
 
       if (!mapsEnabled) {
