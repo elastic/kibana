@@ -24,11 +24,11 @@ export const UA_INDEX_UNFREEZE = 'index_unfreeze';
 export const UA_INDEX_UNFREEZE_BULK = 'index_unfreeze_bulk';
 export const UA_INDEX_SETTINGS_EDIT = 'index_settings_edit';
 export const UA_SHOW_DETAILS_CLICK = 'show_details_click';
-export const UA_DETAIL_PANEL_SUMMARY_TAB_CLICK = 'detail_panel_summary_tab_click';
-export const UA_DETAIL_PANEL_SETTINGS_TAB_CLICK = 'detail_panel_settings_tab_click';
-export const UA_DETAIL_PANEL_MAPPING_TAB_CLICK = 'detail_panel_mapping_tab_click';
-export const UA_DETAIL_PANEL_STATS_TAB_CLICK = 'detail_panel_stats_tab_click';
-export const UA_DETAIL_PANEL_EDIT_SETTINGS_TAB_CLICK = 'detail_panel_edit_settings_tab_click';
+export const UA_DETAIL_PANEL_SUMMARY_TAB = 'detail_panel_summary_tab';
+export const UA_DETAIL_PANEL_SETTINGS_TAB = 'detail_panel_settings_tab';
+export const UA_DETAIL_PANEL_MAPPING_TAB = 'detail_panel_mapping_tab';
+export const UA_DETAIL_PANEL_STATS_TAB = 'detail_panel_stats_tab';
+export const UA_DETAIL_PANEL_EDIT_SETTINGS_TAB = 'detail_panel_edit_settings_tab';
 
 export const USER_ACTIONS = [
   UA_INDEX_CLEAR_CACHE,
@@ -49,9 +49,9 @@ export const USER_ACTIONS = [
   UA_INDEX_UNFREEZE_BULK,
   UA_INDEX_SETTINGS_EDIT,
   UA_SHOW_DETAILS_CLICK,
-  UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
-  UA_DETAIL_PANEL_SETTINGS_TAB_CLICK,
-  UA_DETAIL_PANEL_MAPPING_TAB_CLICK,
-  UA_DETAIL_PANEL_STATS_TAB_CLICK,
-  UA_DETAIL_PANEL_EDIT_SETTINGS_TAB_CLICK,
+  UA_DETAIL_PANEL_SUMMARY_TAB,
+  UA_DETAIL_PANEL_SETTINGS_TAB,
+  UA_DETAIL_PANEL_MAPPING_TAB,
+  UA_DETAIL_PANEL_STATS_TAB,
+  UA_DETAIL_PANEL_EDIT_SETTINGS_TAB,
 ];

@@ -23,6 +23,11 @@ import {
   UA_INDEX_UNFREEZE,
   UA_INDEX_UNFREEZE_BULK,
 } from '../../common/constants';
+import {
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+} from '../constants';
 import { trackUserRequestBulk } from './track_user_action';
 
 let httpClient;
@@ -150,11 +155,13 @@ export async function loadIndexMapping(indexName) {
 
 export async function loadIndexData(type, indexName) {
   switch (type) {
-    case 'Mapping':
+    case TAB_MAPPING:
       return loadIndexMapping(indexName);
-    case 'Settings':
+
+    case TAB_SETTINGS:
       return loadIndexSettings(indexName);
-    case 'Stats':
+
+    case TAB_STATS:
       return loadIndexStats(indexName);
   }
 }
