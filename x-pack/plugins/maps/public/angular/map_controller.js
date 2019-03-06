@@ -7,12 +7,13 @@
 import chrome from 'ui/chrome';
 import React from 'react';
 import { I18nContext } from 'ui/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import ReactDOM, { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
+import { HelpMenu } from '../components/help_menu';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -204,6 +205,13 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     { text: 'Maps', href: '#' },
     { text: $scope.map.title }
   ]);
+
+  chrome.helpExtension.set(domElement => {
+    render(<HelpMenu/>, domElement);
+    return () => {
+      ReactDOM.unmountComponentAtNode(domElement);
+    };
+  });
 
   async function doSave(saveOptions) {
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
