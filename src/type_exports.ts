@@ -62,4 +62,5 @@
 
 export { CallAPIOptions, ClusterClient } from './core/server/elasticsearch';
 export { Logger, LoggerFactory } from './core/server/logging';
-export { PluginInitializerContext, PluginName, PluginStartContext } from './core/server/plugins';
+export { PluginInitializerContext, PluginStartContext } from './core/server/plugins';
+export { PluginName } from './core/types';

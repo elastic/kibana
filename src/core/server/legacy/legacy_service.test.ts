@@ -33,6 +33,7 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { configServiceMock } from '../config/config_service.mock';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { loggingServiceMock } from '../logging/logging_service.mock';
+import { DiscoveredPlugin } from '../plugins/plugin';
 import { PluginsServiceStart } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
@@ -62,7 +63,10 @@ beforeEach(() => {
       server: { listener: { addListener: jest.fn() }, route: jest.fn() },
       options: { someOption: 'foo', someAnotherOption: 'bar' },
     },
-    plugins: new Map([['plugin-id', 'plugin-value']]),
+    plugins: {
+      pluginStarts: new Map([['plugin-id', 'plugin-value']]),
+      discoveredPlugins: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+    },
   };
 
   config$ = new BehaviorSubject<Config>(
@@ -341,7 +345,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
 
     await devClusterLegacyService.start({
       elasticsearch: startDeps.elasticsearch,
-      plugins: new Map(),
+      plugins: { pluginStarts: new Map(), discoveredPlugins: new Map() },
     });
 
     expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
@@ -363,7 +367,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
 
     await devClusterLegacyService.start({
       elasticsearch: startDeps.elasticsearch,
-      plugins: new Map(),
+      plugins: { pluginStarts: new Map(), discoveredPlugins: new Map() },
     });
 
     expect(MockClusterManager.create.mock.calls).toMatchSnapshot(

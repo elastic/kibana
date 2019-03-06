@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { PluginName } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, Plugin } from './plugin';
 import { createPluginStartContext } from './plugin_context';
 import { PluginsServiceStartDeps } from './plugins_service';
 
@@ -40,7 +41,7 @@ export class PluginsSystem {
   public async startPlugins(deps: PluginsServiceStartDeps) {
     const exposedValues = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
-      return exposedValues;
+      return new Map();
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
@@ -93,6 +94,25 @@ export class PluginsSystem {
       this.log.debug(`Stopping plugin "${pluginName}"...`);
       await this.plugins.get(pluginName)!.stop();
     }
+  }
+
+  /**
+   * Get a Map of all discovered plugins in topological order.
+   */
+  public discoveredPlugins(): Map<PluginName, DiscoveredPlugin> {
+    return new Map<PluginName, DiscoveredPlugin>(
+      [...this.getTopologicallySortedPluginNames().keys()].map(
+        pluginName =>
+          [
+            pluginName,
+            {
+              id: pluginName,
+              path: this.plugins.get(pluginName)!.path,
+              manifest: this.plugins.get(pluginName)!.manifest,
+            },
+          ] as [PluginName, DiscoveredPlugin]
+      )
+    );
   }
 
   /**

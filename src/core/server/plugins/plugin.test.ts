@@ -19,12 +19,14 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
+import { PluginManifest } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { Plugin, PluginManifest } from './plugin';
+
+import { Plugin } from './plugin';
 import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();

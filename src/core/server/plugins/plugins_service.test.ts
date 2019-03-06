@@ -161,6 +161,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
 
   mockPluginSystem.startPlugins.mockResolvedValue(new Map());
+  mockPluginSystem.discoveredPlugins.mockReturnValue(new Map());
 
   mockDiscover.mockReturnValue({
     error$: from([]),
@@ -224,7 +225,10 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     ]),
   });
 
-  expect(await pluginsService.start(startDeps)).toBeInstanceOf(Map);
+  const start = await pluginsService.start(startDeps);
+
+  expect(start.pluginStarts).toBeInstanceOf(Map);
+  expect(start.discoveredPlugins).toBeInstanceOf(Map);
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
@@ -287,12 +291,15 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginsStart = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginsStart);
+  const pluginStarts = new Map();
+  const discoveredPlugins = new Map();
+  mockPluginSystem.startPlugins.mockResolvedValue(pluginStarts);
+  mockPluginSystem.discoveredPlugins.mockReturnValue(discoveredPlugins);
 
   const start = await pluginsService.start(startDeps);
 
-  expect(start).toBe(pluginsStart);
+  expect(start.pluginStarts).toBe(pluginStarts);
+  expect(start.discoveredPlugins).toBe(discoveredPlugins);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);

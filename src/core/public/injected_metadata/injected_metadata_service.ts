@@ -18,6 +18,7 @@
  */
 
 import { get } from 'lodash';
+import { PluginManifest, PluginName } from '../../types';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
@@ -32,6 +33,10 @@ export interface InjectedMetadataParams {
     vars: {
       [key: string]: unknown;
     };
+    uiPlugins: Array<{
+      name: PluginName;
+      manifest: PluginManifest;
+    }>;
     legacyMetadata: {
       app: unknown;
       translations: unknown;
@@ -75,6 +80,10 @@ export class InjectedMetadataService {
 
       getCspConfig: () => {
         return this.state.csp;
+      },
+
+      getPlugins: () => {
+        return this.state.uiPlugins;
       },
 
       getLegacyMetadata: () => {

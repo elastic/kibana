@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { PluginName } from '../../types';
 import { CoreContext } from '../core_context';
 
 const mockCreatePluginStartContext = jest.fn();
@@ -29,7 +30,7 @@ import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { Plugin, PluginName } from './plugin';
+import { Plugin } from './plugin';
 import { PluginsSystem } from './plugins_system';
 
 const logger = loggingServiceMock.create();
@@ -231,4 +232,115 @@ Array [
   expect(firstPluginToRun.start).toHaveBeenCalledTimes(1);
   expect(secondPluginNotToRun.start).not.toHaveBeenCalled();
   expect(thirdPluginToRun.start).toHaveBeenCalledTimes(1);
+});
+
+test('`discoveredPlugins` returns empty Map before plugins are added', async () => {
+  expect(pluginsSystem.discoveredPlugins()).toMatchInlineSnapshot(`Map {}`);
+});
+
+test('`discoveredPlugins` returns ordered Map of all plugin manifests', async () => {
+  const plugins = new Map([
+    [createPlugin('order-4', { required: ['order-2'] }), { 'order-2': 'added-as-2' }],
+    [createPlugin('order-0'), {}],
+    [
+      createPlugin('order-2', { required: ['order-1'], optional: ['order-0'] }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [createPlugin('order-1', { required: ['order-0'] }), { 'order-0': 'added-as-1' }],
+    [
+      createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[Plugin, Record<PluginName, unknown>]>);
+
+  [...plugins.keys()].forEach(plugin => {
+    pluginsSystem.addPlugin(plugin);
+  });
+
+  expect(pluginsSystem.discoveredPlugins()).toMatchInlineSnapshot(`
+Map {
+  "order-0" => Object {
+    "id": "order-0",
+    "manifest": Object {
+      "configPath": "path",
+      "id": "order-0",
+      "kibanaVersion": "7.0.0",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [],
+      "server": true,
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "some-path",
+  },
+  "order-1" => Object {
+    "id": "order-1",
+    "manifest": Object {
+      "configPath": "path",
+      "id": "order-1",
+      "kibanaVersion": "7.0.0",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [
+        "order-0",
+      ],
+      "server": true,
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "some-path",
+  },
+  "order-2" => Object {
+    "id": "order-2",
+    "manifest": Object {
+      "configPath": "path",
+      "id": "order-2",
+      "kibanaVersion": "7.0.0",
+      "optionalPlugins": Array [
+        "order-0",
+      ],
+      "requiredPlugins": Array [
+        "order-1",
+      ],
+      "server": true,
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "some-path",
+  },
+  "order-3" => Object {
+    "id": "order-3",
+    "manifest": Object {
+      "configPath": "path",
+      "id": "order-3",
+      "kibanaVersion": "7.0.0",
+      "optionalPlugins": Array [
+        "missing-dep",
+      ],
+      "requiredPlugins": Array [
+        "order-2",
+      ],
+      "server": true,
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "some-path",
+  },
+  "order-4" => Object {
+    "id": "order-4",
+    "manifest": Object {
+      "configPath": "path",
+      "id": "order-4",
+      "kibanaVersion": "7.0.0",
+      "optionalPlugins": Array [],
+      "requiredPlugins": Array [
+        "order-2",
+      ],
+      "server": true,
+      "ui": true,
+      "version": "some-version",
+    },
+    "path": "some-path",
+  },
+}
+`);
 });

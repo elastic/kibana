@@ -23,7 +23,6 @@ import { PluginsService } from './plugins_service';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
 export { PluginInitializerContext, PluginStartContext } from './plugin_context';
-export { PluginName } from './plugin';
 
 /** @internal */
 export class PluginsModule {

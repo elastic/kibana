@@ -19,17 +19,20 @@
 
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
-import { CoreService } from '../../types';
+import { CoreService, PluginName } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, Plugin } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export type PluginsServiceStart = Map<PluginName, unknown>;
+export interface PluginsServiceStart {
+  pluginStarts: Map<PluginName, unknown>;
+  discoveredPlugins: Map<PluginName, DiscoveredPlugin>;
+}
 
 /** @internal */
 export interface PluginsServiceStartDeps {
@@ -60,10 +63,16 @@ export class PluginsService implements CoreService<PluginsServiceStart> {
 
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
-      return new Map();
+      return {
+        pluginStarts: new Map(),
+        discoveredPlugins: this.pluginsSystem.discoveredPlugins(),
+      };
     }
 
-    return await this.pluginsSystem.startPlugins(deps);
+    return {
+      pluginStarts: await this.pluginsSystem.startPlugins(deps),
+      discoveredPlugins: this.pluginsSystem.discoveredPlugins(),
+    };
   }
 
   public async stop() {
