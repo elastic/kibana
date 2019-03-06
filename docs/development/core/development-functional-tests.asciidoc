@@ -276,7 +276,7 @@ The Kibana functional tests define the vast majority of the actual functionality
 ** `browser.clickMouseButton(...args)` - Performs a left click at a given origin being either the center of an element, the viewport or the mouse's current position. 
 *** args
 **** `element`
-***** { element: WebElementWrapper } 
+***** { WebElementWrapper } 
 **** `xOffset`
 ***** number : number of pixels from left of origin to target click
 **** `yOffset`
@@ -290,6 +290,18 @@ The Kibana functional tests define the vast majority of the actual functionality
 ***** { logging.Type } - Type Object from Selenium Library to indicate what type of logs to return.
 *** returns
 **** { LogEntry[] } : Array of LogEntry items; Logs are cleared after return. 
+** `browser.takeScreenshot()` - Gets a screenshot of the focused window/frame and returns it as a base-64 encoded PNG.
+*** returns
+**** Buffer : The PNG
+** `browser.doubleClick(element)` - Performs a double left-click with the mouse at a given element. If no element specified, mouse will double-click at its current location.
+**** `element`
+***** { WebElementWrapper } 
+** `browser.switchWindowTo(...args)` - Changes the focus to a new window of the specified handle. All actions will be performed on this window going forward.
+*** args 
+**** `handle`
+***** string : Identifier for the window
+
+
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
