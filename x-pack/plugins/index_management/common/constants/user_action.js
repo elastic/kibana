@@ -6,6 +6,7 @@
 
 export const UA_APP_NAME = 'index-management';
 
+export const UA_UPDATE_SETTINGS = 'update_settings';
 export const UA_INDEX_CLEAR_CACHE = 'index_clear_cache';
 export const UA_INDEX_CLEAR_CACHE_BULK = 'index_clear_cache_bulk';
 export const UA_INDEX_DELETE = 'index_delete';
@@ -31,6 +32,7 @@ export const UA_DETAIL_PANEL_STATS_TAB = 'detail_panel_stats_tab';
 export const UA_DETAIL_PANEL_EDIT_SETTINGS_TAB = 'detail_panel_edit_settings_tab';
 
 export const USER_ACTIONS = [
+  UA_UPDATE_SETTINGS,
   UA_INDEX_CLEAR_CACHE,
   UA_INDEX_CLEAR_CACHE_BULK,
   UA_INDEX_DELETE,

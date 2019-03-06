@@ -6,6 +6,7 @@
 
 import chrome from 'ui/chrome';
 import {
+  UA_UPDATE_SETTINGS,
   UA_INDEX_CLEAR_CACHE,
   UA_INDEX_CLEAR_CACHE_BULK,
   UA_INDEX_DELETE,
@@ -28,7 +29,7 @@ import {
   TAB_MAPPING,
   TAB_STATS,
 } from '../constants';
-import { trackUserRequestBulk } from './track_user_action';
+import { trackUserRequest, trackUserRequestBulk } from './track_user_action';
 
 let httpClient;
 
@@ -140,7 +141,9 @@ export async function loadIndexSettings(indexName) {
 }
 
 export async function updateIndexSettings(indexName, settings) {
-  return await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
+  const request = httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
+  trackUserRequest(request, UA_UPDATE_SETTINGS);
+  return await request;
 }
 
 export async function loadIndexStats(indexName) {

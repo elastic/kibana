@@ -11,6 +11,7 @@ export * from './index_statuses';
 export {
   UA_APP_NAME,
   USER_ACTIONS,
+  UA_UPDATE_SETTINGS,
   UA_INDEX_CLEAR_CACHE,
   UA_INDEX_CLEAR_CACHE_BULK,
   UA_INDEX_DELETE,
