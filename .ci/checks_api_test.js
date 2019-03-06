@@ -21,7 +21,7 @@ octokit.repos.listForOrg({
 
 const client = getGithubClient();
 */
-client.repos.listForOrg({
+client.repos.getForOrg({
   org: 'octokit',
   type: 'public'
 }).then(({data}) => {
