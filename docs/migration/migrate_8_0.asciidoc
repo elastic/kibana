@@ -13,7 +13,7 @@ See also <<release-highlights>> and <<release-notes>>.
 
 ////
 The following section is re-used in the Installation and Upgrade Guide
-[[notable-breaking-changes-8.0]]
+[[breaking_80_notable]]
 === Notable breaking changes
 ////
 // tag::notable-breaking-changes[]
