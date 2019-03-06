@@ -77,7 +77,8 @@ export function extractErrors(savedObjects: SavedObject[]) {
 
 export async function collectSavedObjects(
   readStream: Readable,
-  objectLimit: number
+  objectLimit: number,
+  filter?: (obj: SavedObject) => boolean
 ): Promise<SavedObject[]> {
   return (await createPromiseFromStreams([
     readStream,
@@ -87,36 +88,18 @@ export async function collectSavedObjects(
         return JSON.parse(str);
       }
     }),
-    createFilterStream<SavedObject>(obj => !!obj),
+    createFilterStream<SavedObject>(obj => {
+      if (!obj) {
+        return false;
+      }
+      if (filter) {
+        return filter(obj);
+      }
+      return true;
+    }),
     createLimitStream(objectLimit),
     createConcatStream([]),
   ])) as SavedObject[];
-}
-
-export function splitOverwrites(
-  savedObjects: SavedObject[],
-  overwrites: Array<{
-    type: string;
-    id: string;
-  }>,
-  skips: Array<{
-    type: string;
-    id: string;
-  }>
-) {
-  const objectsToOverwrite: SavedObject[] = [];
-  const objectsToNotOverwrite: SavedObject[] = [];
-  for (const savedObject of savedObjects) {
-    if (skips.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
-      continue;
-    }
-    if (overwrites.some(obj => obj.type === savedObject.type && obj.id === savedObject.id)) {
-      objectsToOverwrite.push(savedObject);
-    } else {
-      objectsToNotOverwrite.push(savedObject);
-    }
-  }
-  return { objectsToOverwrite, objectsToNotOverwrite };
 }
 
 export async function importSavedObjects({
@@ -156,6 +139,45 @@ export async function importSavedObjects({
   };
 }
 
+export function createObjectsFilter(
+  skips: Array<{
+    type: string;
+    id: string;
+  }>,
+  overwrites: Array<{
+    type: string;
+    id: string;
+  }>,
+  replaceReferences: Array<{
+    type: string;
+    from: string;
+    to: string;
+  }>
+) {
+  return (obj: SavedObject) => {
+    if (skips.some(skipObj => skipObj.type === obj.type && skipObj.id === obj.id)) {
+      return false;
+    }
+    if (
+      overwrites.some(overwriteObj => overwriteObj.type === obj.type && overwriteObj.id === obj.id)
+    ) {
+      return true;
+    }
+    let hasReferenceToReplace = false;
+    for (const reference of obj.references || []) {
+      for (const referenceToReplace of replaceReferences) {
+        if (
+          reference.type === referenceToReplace.type &&
+          reference.id === referenceToReplace.from
+        ) {
+          hasReferenceToReplace = true;
+        }
+      }
+    }
+    return hasReferenceToReplace;
+  };
+}
+
 export async function resolveImportConflicts({
   readStream,
   objectLimit,
@@ -166,13 +188,15 @@ export async function resolveImportConflicts({
 }: ResolveImportConflictsOptions): Promise<{
   success: boolean;
   errors?: CustomError[];
+  successCount: number;
 }> {
   const errors: CustomError[] = [];
-  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+  const filter = createObjectsFilter(skips, overwrites, replaceReferences);
+  const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
   // Replace references
   for (const referenceToReplace of replaceReferences) {
-    for (const savedObject of objectsToImport) {
+    for (const savedObject of objectsToResolve) {
       for (const reference of savedObject.references || []) {
         if (
           reference.type === referenceToReplace.type &&
@@ -184,28 +208,16 @@ export async function resolveImportConflicts({
     }
   }
 
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(
-    objectsToImport,
-    overwrites,
-    skips
-  );
-
-  // Overwrite objects
-  if (objectsToOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
+  if (objectsToResolve.length) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToResolve, {
       overwrite: true,
     });
     errors.push(...extractErrors(bulkCreateResult.saved_objects));
   }
 
-  // Create other objects, detect collisions
-  if (objectsToNotOverwrite.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
-  }
-
   return {
     success: errors.length === 0,
+    successCount: objectsToResolve.length - errors.length,
     ...(errors.length ? { errors } : []),
   };
 }

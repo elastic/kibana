@@ -21,11 +21,11 @@ import { Readable } from 'stream';
 import { SavedObject } from '../service';
 import {
   collectSavedObjects,
+  createObjectsFilter,
   extractErrors,
   importSavedObjects,
   resolveImportConflicts,
-  splitOverwrites,
-} from './import_saved_objects';
+} from './import';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {
@@ -126,154 +126,168 @@ Array [
   });
 });
 
-describe('splitOverwrites()', () => {
-  const savedObjects: SavedObject[] = [
-    {
-      id: '1',
-      type: 'index-pattern',
-      attributes: {},
-      references: [],
-    },
-    {
-      id: '2',
-      type: 'search',
-      attributes: {},
-      references: [],
-    },
-    {
-      id: '3',
-      type: 'visualization',
-      attributes: {},
-      references: [],
-    },
-    {
-      id: '4',
-      type: 'dashboard',
-      attributes: {},
-      references: [],
-    },
-  ];
-
-  it('empty skips and overwrites puts all objects into objectsToNotOverwrite', () => {
-    const result = splitOverwrites(savedObjects, [], []);
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "objectsToNotOverwrite": Array [
-    Object {
-      "attributes": Object {},
-      "id": "1",
-      "references": Array [],
-      "type": "index-pattern",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "2",
-      "references": Array [],
-      "type": "search",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "3",
-      "references": Array [],
-      "type": "visualization",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "4",
-      "references": Array [],
-      "type": "dashboard",
-    },
-  ],
-  "objectsToOverwrite": Array [],
-}
-`);
+describe('createObjectsFilter()', () => {
+  test('filters should return false when contains empty parameters', () => {
+    const fn = createObjectsFilter([], [], []);
+    expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
   });
 
-  it('all objects in skips returns empty arrays', () => {
-    const result = splitOverwrites(
-      savedObjects,
+  test('filters should exclude skips', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+        },
+      ],
       [],
       [
         {
-          type: 'index-pattern',
-          id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-        {
-          type: 'visualization',
-          id: '3',
-        },
-        {
-          type: 'dashboard',
-          id: '4',
+          type: 'b',
+          from: '1',
+          to: '2',
         },
       ]
     );
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "objectsToNotOverwrite": Array [],
-  "objectsToOverwrite": Array [],
-}
-`);
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'b', id: '1' }],
+      })
+    ).toEqual(false);
+    expect(
+      fn({
+        type: 'a',
+        id: '2',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'b', id: '1' }],
+      })
+    ).toEqual(true);
   });
 
-  it('all objects in overwrites puts all objects into objectsToOverwrite', () => {
-    const result = splitOverwrites(
-      savedObjects,
+  test('filter should include references to replace', () => {
+    const fn = createObjectsFilter(
+      [],
+      [],
       [
         {
-          type: 'index-pattern',
+          type: 'b',
+          from: '1',
+          to: '2',
+        },
+      ]
+    );
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'b',
+            id: '1',
+          },
+        ],
+      })
+    ).toEqual(true);
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'b',
+            id: '2',
+          },
+        ],
+      })
+    ).toEqual(false);
+  });
+
+  test('filter should include objects to overwrite', () => {
+    const fn = createObjectsFilter(
+      [],
+      [
+        {
+          type: 'a',
           id: '1',
-        },
-        {
-          type: 'search',
-          id: '2',
-        },
-        {
-          type: 'visualization',
-          id: '3',
-        },
-        {
-          type: 'dashboard',
-          id: '4',
         },
       ],
       []
     );
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "objectsToNotOverwrite": Array [],
-  "objectsToOverwrite": Array [
-    Object {
-      "attributes": Object {},
-      "id": "1",
-      "references": Array [],
-      "type": "index-pattern",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "2",
-      "references": Array [],
-      "type": "search",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "3",
-      "references": Array [],
-      "type": "visualization",
-    },
-    Object {
-      "attributes": Object {},
-      "id": "4",
-      "references": Array [],
-      "type": "dashboard",
-    },
-  ],
-}
-`);
+    expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(true);
+    expect(fn({ type: 'a', id: '2', attributes: {}, references: [] })).toEqual(false);
+  });
+
+  test('filter should work with skips, overwrites and replaceReferences', () => {
+    const fn = createObjectsFilter(
+      [
+        {
+          type: 'a',
+          id: '1',
+        },
+      ],
+      [
+        {
+          type: 'a',
+          id: '2',
+        },
+      ],
+      [
+        {
+          type: 'b',
+          from: '1',
+          to: '2',
+        },
+      ]
+    );
+    expect(
+      fn({
+        type: 'a',
+        id: '1',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'b',
+            id: '1',
+          },
+        ],
+      })
+    ).toEqual(false);
+    expect(
+      fn({
+        type: 'a',
+        id: '2',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'b',
+            id: '2',
+          },
+        ],
+      })
+    ).toEqual(true);
+    expect(
+      fn({
+        type: 'a',
+        id: '3',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'b',
+            id: '1',
+          },
+        ],
+      })
+    ).toEqual(true);
   });
 });
 
@@ -589,54 +603,10 @@ describe('resolveImportConflicts()', () => {
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 0,
 }
 `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('works with skips', async () => {
@@ -654,59 +624,27 @@ Object {
       objectLimit: 4,
       skips: [
         {
-          type: 'index-pattern',
-          id: '1',
+          type: 'dashboard',
+          id: '4',
         },
       ],
       overwrites: [],
       savedObjectsClient,
-      replaceReferences: [],
+      replaceReferences: [
+        {
+          type: 'visualization',
+          from: '3',
+          to: '30',
+        },
+      ],
     });
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 0,
 }
 `);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 
   test('works with overwrites', async () => {
@@ -735,6 +673,7 @@ Object {
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 1,
 }
 `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
@@ -753,40 +692,8 @@ Object {
         "overwrite": true,
       },
     ],
-    Array [
-      Array [
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "4",
-          "references": Array [
-            Object {
-              "id": "3",
-              "name": "panel_0",
-              "type": "visualization",
-            },
-          ],
-          "type": "dashboard",
-        },
-      ],
-    ],
   ],
   "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
     Object {
       "type": "return",
       "value": Promise {},
@@ -823,6 +730,7 @@ Object {
     expect(result).toMatchInlineSnapshot(`
 Object {
   "success": true,
+  "successCount": 1,
 }
 `);
     expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
@@ -830,24 +738,6 @@ Object {
   "calls": Array [
     Array [
       Array [
-        Object {
-          "attributes": Object {},
-          "id": "1",
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "2",
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {},
-          "id": "3",
-          "references": Array [],
-          "type": "visualization",
-        },
         Object {
           "attributes": Object {},
           "id": "4",
@@ -861,6 +751,9 @@ Object {
           "type": "dashboard",
         },
       ],
+      Object {
+        "overwrite": true,
+      },
     ],
   ],
   "results": Array [
@@ -869,64 +762,6 @@ Object {
       "value": Promise {},
     },
   ],
-}
-`);
-  });
-
-  test('extracts errors', async () => {
-    const readStream = new Readable({
-      read() {
-        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
-        this.push(null);
-      },
-    });
-    savedObjectsClient.bulkCreate.mockResolvedValue({
-      saved_objects: savedObjects.map(savedObject => ({
-        type: savedObject.type,
-        id: savedObject.id,
-        error: {
-          statusCode: 409,
-          message: 'conflict',
-        },
-      })),
-    });
-    const result = await resolveImportConflicts({
-      readStream,
-      objectLimit: 4,
-      skips: [],
-      overwrites: [],
-      savedObjectsClient,
-      replaceReferences: [],
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "id": "1",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "2",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "search",
-    },
-    Object {
-      "id": "3",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "visualization",
-    },
-    Object {
-      "id": "4",
-      "message": "conflict",
-      "statusCode": 409,
-      "type": "dashboard",
-    },
-  ],
-  "success": false,
 }
 `);
   });

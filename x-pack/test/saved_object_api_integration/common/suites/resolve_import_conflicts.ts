@@ -52,6 +52,7 @@ export function resolveImportConflictsTestSuiteFactory(
   }) => {
     expect(resp.body).to.eql({
       success: true,
+      successCount: 1,
     });
   };
 

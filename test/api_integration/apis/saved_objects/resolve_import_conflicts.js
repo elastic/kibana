@@ -24,13 +24,13 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('import', () => {
+  describe('resolve_import_conflicts', () => {
     describe('with kibana index', () => {
       describe('without basic data existing', () => {
         // Cleanup data that got created in import
         after(() => esArchiver.unload('saved_objects/basic'));
 
-        it('should return 200', async () => {
+        it('should return 200 and import nothing when empty parameters are passed in', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_conflicts')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
@@ -38,6 +38,34 @@ export default function ({ getService }) {
             .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
+                successCount: 0,
+              });
+            });
+        });
+
+        it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
+          await supertest
+            .post('/api/saved_objects/_resolve_import_conflicts')
+            .field('overwrites', JSON.stringify([
+              {
+                type: 'index-pattern',
+                id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+              },
+              {
+                type: 'visualization',
+                id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+              },
+              {
+                type: 'dashboard',
+                id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+              },
+            ]))
+            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: true,
+                successCount: 3,
               });
             });
         });
@@ -86,6 +114,7 @@ export default function ({ getService }) {
             .then((resp) => {
               expect(resp.body).to.eql({
                 success: true,
+                successCount: 1,
               });
             });
           await supertest
@@ -106,34 +135,6 @@ export default function ({ getService }) {
       describe('with basic data existing', () => {
         before(() => esArchiver.load('saved_objects/basic'));
         after(() => esArchiver.unload('saved_objects/basic'));
-
-        it('should return 409 when conflicts still exist', async () => {
-          await supertest
-            .post('/api/saved_objects/_resolve_import_conflicts')
-            .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(409)
-            .then((resp) => {
-              expect(resp.body).to.eql({
-                message: 'Conflict',
-                statusCode: 409,
-                error: 'Conflict',
-                objects: [
-                  {
-                    id: '91200a00-9efd-11e7-acb3-3dab96693fab',
-                    type: 'index-pattern',
-                  },
-                  {
-                    id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    type: 'visualization',
-                  },
-                  {
-                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                    type: 'dashboard',
-                  },
-                ],
-              });
-            });
-        });
 
         it('should return 200 when skipping all the records', async () => {
           await supertest
@@ -157,7 +158,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true });
+              expect(resp.body).to.eql({ success: true, successCount: 0 });
             });
         });
 
@@ -183,11 +184,11 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true });
+              expect(resp.body).to.eql({ success: true, successCount: 3 });
             });
         });
 
-        it('should return 409 with only one record when overwriting 1 and skipping 1', async () => {
+        it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_conflicts')
             .field('overwrites', JSON.stringify(
@@ -207,19 +208,9 @@ export default function ({ getService }) {
               ]
             ))
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(409)
+            .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
-                message: 'Conflict',
-                statusCode: 409,
-                error: 'Conflict',
-                objects: [
-                  {
-                    id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                    type: 'dashboard',
-                  },
-                ],
-              });
+              expect(resp.body).to.eql({ success: true, successCount: 1 });
             });
         });
       });
