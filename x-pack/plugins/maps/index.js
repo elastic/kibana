@@ -6,9 +6,9 @@
 
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
-import { getSavedObjects as ecommerceSavedObjects } from './server/sample_data/ecommerce_saved_objects';
-import { getSavedObjects as fligthsSavedObjects } from './server/sample_data/flights_saved_objects.js';
-import { getSavedObjects as webLogsSavedObjects } from './server/sample_data/web_logs_saved_objects.js';
+import { getEcommerceSavedObjects } from './server/sample_data/ecommerce_saved_objects';
+import { getFlightsSavedObjects } from './server/sample_data/flights_saved_objects.js';
+import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_objects.js';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { migrations } from './migrations';
@@ -91,9 +91,9 @@ export function maps(kibana) {
         .feature(this.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
-      server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects());
-      server.addSavedObjectsToSampleDataset('flights', fligthsSavedObjects());
-      server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects());
+      server.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+      server.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
+      server.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
       server.injectUiAppVars('maps', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });

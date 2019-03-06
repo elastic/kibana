@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getSavedObjects = () => {
+export const getEcommerceSavedObjects = () => {
   return [
     {
       'id': '2c9c1f60-1909-11e9-919b-ffe5949a18d2',

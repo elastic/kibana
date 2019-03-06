@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const getSavedObjects = () => {
+export const getWebLogsSavedObjects = () => {
   return [
     {
       'id': 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
