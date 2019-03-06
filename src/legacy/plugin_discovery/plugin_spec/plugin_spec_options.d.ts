@@ -16,34 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Server } from '../../server/kbn_server';
 
-import Hapi from 'hapi';
-import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
+export type InitPluginFunction = (server: Server) => void;
+export interface UiExports {
+  injectDefaultVars: (server: Server) => { [key: string]: any };
+}
 
-const defaultConfig = {
-  'kibana.index': '.kibana',
-  'savedObjects.maxImportExportSize': 10000,
-};
-
-export function createMockServer(config: { [key: string]: any } = defaultConfig) {
-  const server = new Hapi.Server({
-    port: 0,
-    routes: {
-      validate: {
-        failAction: defaultValidationErrorHandler,
-      },
-    },
-  });
-  server.config = () => {
-    return {
-      get(key: string) {
-        return config[key];
-      },
-      has(key: string) {
-        return config.hasOwnProperty(key);
-      },
-    };
-  };
-
-  return server;
+export interface PluginSpecOptions {
+  id: string;
+  require: string[];
+  publicDir: string;
+  uiExports?: UiExports;
+  init: InitPluginFunction;
 }
