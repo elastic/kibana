@@ -101,7 +101,7 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
     if (fileExtension !== '.ndjson') {
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
-    const importResult = await resolveImportConflicts({
+    return await resolveImportConflicts({
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
@@ -109,13 +109,5 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
       overwrites: request.payload.overwrites,
       replaceReferences: request.payload.replaceReferences,
     });
-    if (importResult.errors) {
-      for (const error of importResult.errors) {
-        if (error.statusCode !== 409) {
-          return new Boom(error.message, { statusCode: error.statusCode });
-        }
-      }
-    }
-    return importResult;
   },
 });

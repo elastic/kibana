@@ -57,9 +57,11 @@ describe('extractErrors()', () => {
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
+    "error": Object {
+      "message": "Conflict",
+      "statusCode": 409,
+    },
     "id": "2",
-    "message": "Conflict",
-    "statusCode": 409,
     "type": "dashboard",
   },
 ]
@@ -497,27 +499,35 @@ Object {
 Object {
   "errors": Array [
     Object {
+      "error": Object {
+        "message": "conflict",
+        "statusCode": 409,
+      },
       "id": "1",
-      "message": "conflict",
-      "statusCode": 409,
       "type": "index-pattern",
     },
     Object {
+      "error": Object {
+        "message": "conflict",
+        "statusCode": 409,
+      },
       "id": "2",
-      "message": "conflict",
-      "statusCode": 409,
       "type": "search",
     },
     Object {
+      "error": Object {
+        "message": "conflict",
+        "statusCode": 409,
+      },
       "id": "3",
-      "message": "conflict",
-      "statusCode": 409,
       "type": "visualization",
     },
     Object {
+      "error": Object {
+        "message": "conflict",
+        "statusCode": 409,
+      },
       "id": "4",
-      "message": "conflict",
-      "statusCode": 409,
       "type": "dashboard",
     },
   ],

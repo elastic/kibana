@@ -71,31 +71,11 @@ export const createImportRoute = (prereqs: Prerequisites) => ({
     if (fileExtension !== '.ndjson') {
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
-    const importResult = await importSavedObjects({
+    return await importSavedObjects({
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),
       overwrite: request.query.overwrite,
     });
-    if (importResult.errors) {
-      // Throw non 409 errors first
-      for (const error of importResult.errors) {
-        if (error.statusCode !== 409) {
-          return new Boom(error.message, { statusCode: error.statusCode });
-        }
-      }
-      // Throw 409s
-      return h
-        .response({
-          message: 'Conflict',
-          statusCode: 409,
-          error: 'Conflict',
-          objects: importResult.errors
-            .filter(err => err.statusCode === 409)
-            .map(err => ({ id: err.id, type: err.type })),
-        })
-        .code(409);
-    }
-    return importResult;
   },
 });

@@ -65,24 +65,35 @@ export default function ({ getService }) {
           await supertest
             .post('/api/saved_objects/_import')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
-            .expect(409)
+            .expect(200)
             .then((resp) => {
               expect(resp.body).to.eql({
-                message: 'Conflict',
-                statusCode: 409,
-                error: 'Conflict',
-                objects: [
+                success: false,
+                successCount: 0,
+                errors: [
                   {
                     id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                     type: 'index-pattern',
+                    error: {
+                      statusCode: 409,
+                      message: 'version conflict, document already exists',
+                    }
                   },
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     type: 'visualization',
+                    error: {
+                      statusCode: 409,
+                      message: 'version conflict, document already exists',
+                    }
                   },
                   {
                     id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                     type: 'dashboard',
+                    error: {
+                      statusCode: 409,
+                      message: 'version conflict, document already exists',
+                    }
                   },
                 ],
               });

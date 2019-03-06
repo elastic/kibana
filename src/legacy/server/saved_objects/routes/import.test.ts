@@ -154,7 +154,7 @@ describe('POST /api/saved_objects/_import', () => {
           references: [],
           error: {
             statusCode: 409,
-            message: 'Conflict',
+            message: 'version conflict, document already exists',
           },
         },
         {
@@ -169,15 +169,18 @@ describe('POST /api/saved_objects/_import', () => {
     });
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
-    expect(statusCode).toBe(409);
+    expect(statusCode).toBe(200);
     expect(response).toEqual({
-      message: 'Conflict',
-      statusCode: 409,
-      error: 'Conflict',
-      objects: [
+      success: false,
+      successCount: 1,
+      errors: [
         {
           id: 'my-pattern',
           type: 'index-pattern',
+          error: {
+            statusCode: 409,
+            message: 'version conflict, document already exists',
+          },
         },
       ],
     });

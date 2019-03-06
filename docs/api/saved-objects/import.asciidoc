@@ -74,20 +74,23 @@ Content-Type: application/ndjson
 --------------------------------------------------
 // KIBANA
 
-The call returns a response code of `409` and a response body
+The call returns a response code of `200` and a response body
 containing a JSON structure similar to the following example:
 
 [source,js]
 --------------------------------------------------
 {
-  "message": "Conflict",
-  "statusCode": 409,
-  "error": "Conflict",
-  "objects": [
+  "success": false,
+  "successCount": 1,
+  "errors": [
     {
       "id": "my-pattern",
-      "type": "index-pattern"
-    }
-  ]
+      "type": "index-pattern",
+      "error": {
+        "statusCode": 409,
+        "message": "version conflict, document already exists",
+      },
+    },
+  ],
 }
 --------------------------------------------------

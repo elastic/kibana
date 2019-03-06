@@ -29,10 +29,18 @@ import {
 import { SavedObject, SavedObjectsClient } from '../service';
 
 interface CustomError {
-  message: string;
-  statusCode: number;
   id: string;
   type: string;
+  error: {
+    message: string;
+    statusCode: number;
+  };
+}
+
+interface ImportResponse {
+  success: boolean;
+  successCount: number;
+  errors?: CustomError[];
 }
 
 interface ImportSavedObjectsOptions {
@@ -66,9 +74,9 @@ export function extractErrors(savedObjects: SavedObject[]) {
   for (const savedObject of savedObjects) {
     if (savedObject.error) {
       errors.push({
-        ...savedObject.error,
         id: savedObject.id,
         type: savedObject.type,
+        error: savedObject.error,
       });
     }
   }
@@ -100,43 +108,6 @@ export async function collectSavedObjects(
     createLimitStream(objectLimit),
     createConcatStream([]),
   ])) as SavedObject[];
-}
-
-export async function importSavedObjects({
-  readStream,
-  objectLimit,
-  overwrite,
-  savedObjectsClient,
-}: ImportSavedObjectsOptions): Promise<{
-  success: boolean;
-  errors?: CustomError[];
-  successCount: number;
-}> {
-  const errors: CustomError[] = [];
-  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
-
-  if (objectsToImport.length === 0) {
-    return {
-      success: true,
-      successCount: 0,
-    };
-  }
-
-  if (overwrite) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
-      overwrite: true,
-    });
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
-  } else {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport);
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
-  }
-
-  return {
-    success: errors.length === 0,
-    successCount: objectsToImport.length - errors.length,
-    ...(errors.length ? { errors } : []),
-  };
 }
 
 export function createObjectsFilter(
@@ -178,6 +149,39 @@ export function createObjectsFilter(
   };
 }
 
+export async function importSavedObjects({
+  readStream,
+  objectLimit,
+  overwrite,
+  savedObjectsClient,
+}: ImportSavedObjectsOptions): Promise<ImportResponse> {
+  const errors: CustomError[] = [];
+  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+
+  if (objectsToImport.length === 0) {
+    return {
+      success: true,
+      successCount: 0,
+    };
+  }
+
+  if (overwrite) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
+      overwrite: true,
+    });
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
+  } else {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport);
+    errors.push(...extractErrors(bulkCreateResult.saved_objects));
+  }
+
+  return {
+    success: errors.length === 0,
+    successCount: objectsToImport.length - errors.length,
+    ...(errors.length ? { errors } : []),
+  };
+}
+
 export async function resolveImportConflicts({
   readStream,
   objectLimit,
@@ -185,11 +189,7 @@ export async function resolveImportConflicts({
   overwrites,
   savedObjectsClient,
   replaceReferences,
-}: ResolveImportConflictsOptions): Promise<{
-  success: boolean;
-  errors?: CustomError[];
-  successCount: number;
-}> {
+}: ResolveImportConflictsOptions): Promise<ImportResponse> {
   const errors: CustomError[] = [];
   const filter = createObjectsFilter(skips, overwrites, replaceReferences);
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
