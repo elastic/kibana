@@ -43,7 +43,7 @@ export class EMSFileSource extends AbstractVectorSource {
     const emsFiles = await getEmsVectorFilesMeta();
     const meta = emsFiles.find((source => source.id === this._descriptor.id));
     if (!meta) {
-      throw new Error(i18n.translate('xpack.maps.source.emsFile.errorMessage', {
+      throw new Error(i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
         defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
         values: {
           id: this._descriptor.id

@@ -23,7 +23,7 @@ export function NoIndexPatternCallout() {
     >
       <p>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.doThisDescription"
+          id="xpack.maps.noIndexPattern.doThisPrefixDescription"
           defaultMessage="You'll need to "
         />
         <EuiLink href={chrome.addBasePath('/app/kibana#/management/kibana/index_pattern')}>
@@ -33,7 +33,7 @@ export function NoIndexPatternCallout() {
           />
         </EuiLink>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.doThisWithDescription"
+          id="xpack.maps.noIndexPattern.xpack.maps.noIndexPattern.doThisSuffixDescription"
           defaultMessage=" with geospatial fields."
         />
       </p>

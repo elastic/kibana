@@ -276,7 +276,7 @@ export class MapListing extends React.Component {
         {deleteBtn}
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            aria-label={i18n.translate('xpack.maps.mapListing.filterItemsAriaLabel', {
+            aria-label={i18n.translate('xpack.maps.mapListing.searchAriaLabel', {
               defaultMessage: 'Filter items'
             })}
             placeholder={i18n.translate('xpack.maps.mapListing.searchPlaceholder', {
@@ -387,7 +387,7 @@ export class MapListing extends React.Component {
               <EuiTitle size="l">
                 <h1>
                   <FormattedMessage
-                    id="xpack.maps.mapListing.mapsTitle"
+                    id="xpack.maps.mapListing.listingTableTitle"
                     defaultMessage="Maps"
                   />
                 </h1>

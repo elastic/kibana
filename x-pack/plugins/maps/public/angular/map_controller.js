@@ -231,7 +231,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     if (id) {
       toastNotifications.addSuccess({
-        title: i18n.translate('xpack.maps.mapController.saveDescription', {
+        title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
           defaultMessage: `Saved '{title}'`,
           values: { title: savedMap.title }
         }),

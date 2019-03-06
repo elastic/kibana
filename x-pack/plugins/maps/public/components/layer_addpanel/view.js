@@ -73,7 +73,7 @@ export class AddLayerPanel extends Component {
         fill
       >
         <FormattedMessage
-          id="xpack.maps.addLayerPanel.addLayerInWizardButtonLabel"
+          id="xpack.maps.addLayerPanel.addLayerButtonLabel"
           defaultMessage="Add layer"
         />
       </EuiButton>
@@ -170,7 +170,7 @@ export class AddLayerPanel extends Component {
           <EuiTitle size="s">
             <h2>
               <FormattedMessage
-                id="xpack.maps.addLayerPanel.addLayerInFlyoutTitle"
+                id="xpack.maps.addLayerPanel.panelTitle"
                 defaultMessage="Add layer"
               />
             </h2>

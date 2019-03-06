@@ -251,7 +251,7 @@ JoinExpression.propTypes = {
 };
 
 function getSelectFieldPlaceholder() {
-  i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
+  return i18n.translate('xpack.maps.layerPanel.joinExpression.selectFieldPlaceholder', {
     defaultMessage: 'selectField'
   });
 }

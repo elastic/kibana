@@ -14,19 +14,19 @@ const AGG_OPTIONS = [
     defaultMessage: 'Average'
   }),
   value: 'avg' },
-  { label: i18n.translate('xpack.maps.metricSelect.count.averageDropDownOptionLabel', {
+  { label: i18n.translate('xpack.maps.metricSelect.countDropDownOptionLabel', {
     defaultMessage: 'Count'
   }),
   value: 'count' },
-  { label: i18n.translate('xpack.maps.metricSelect.max.averageDropDownOptionLabel', {
+  { label: i18n.translate('xpack.maps.metricSelect.maxDropDownOptionLabel', {
     defaultMessage: 'Max'
   }),
   value: 'max' },
-  { label: i18n.translate('xpack.maps.metricSelect.min.averageDropDownOptionLabel', {
+  { label: i18n.translate('xpack.maps.metricSelect.minDropDownOptionLabel', {
     defaultMessage: 'Min'
   }),
   value: 'min' },
-  { label: i18n.translate('xpack.maps.metricSelect.sum.averageDropDownOptionLabel', {
+  { label: i18n.translate('xpack.maps.metricSelect.sumDropDownOptionLabel', {
     defaultMessage: 'Sum'
   }),
   value: 'sum' },

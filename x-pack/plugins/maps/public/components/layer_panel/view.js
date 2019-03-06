@@ -11,7 +11,7 @@ import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
 import {
-  EuiIcon,
+  EuiButtonIcon,
   EuiFlexItem,
   EuiTitle,
   EuiPanel,
@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class LayerPanel extends React.Component {
 
@@ -133,7 +134,21 @@ export class LayerPanel extends React.Component {
         <EuiFlyoutHeader hasBorder className="mapLayerPanel__header">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={selectedLayer.getLayerTypeIconName()} />
+              <EuiButtonIcon
+                aria-label={
+                  i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
+                    defaultMessage: 'Fit to bounds'
+                  })
+                }
+                iconType={selectedLayer.getLayerTypeIconName()}
+                onClick={this.props.fitToBounds}
+              >
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+                  defaultMessage="Fit"
+                />
+
+              </EuiButtonIcon>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="s">
