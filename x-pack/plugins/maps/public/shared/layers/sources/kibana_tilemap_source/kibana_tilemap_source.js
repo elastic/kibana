@@ -61,7 +61,9 @@ export class KibanaTilemapSource extends AbstractTMSSource {
   async getUrlTemplate() {
     const tilemap = await getKibanaTileMap();
     if (!tilemap.url) {
-      throw new Error(`Unable to find map.tilemap.url configuration in the kibana.yml`);
+      throw new Error(i18n.translate('xpack.maps.source.kbnTMS.noConfigErrorMessage', {
+        defaultMessage: `Unable to find map.tilemap.url configuration in the kibana.yml`
+      }));
     }
     return tilemap.url;
   }
