@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
 import { wrapCustomError } from '../error_wrappers';
 import { LICENSE_STATUS_VALID } from '../../../../common/constants';
 
 export const licensePreRoutingFactory = (server, pluginId) => {
-  const licensePreRouting = () => {
+  return () => {
     // License checking and enable/disable logic
     const xpackMainPlugin = server.plugins.xpack_main;
     const licenseCheckResults = xpackMainPlugin.info.feature(pluginId).getLicenseCheckResults();
@@ -21,6 +20,4 @@ export const licensePreRoutingFactory = (server, pluginId) => {
 
     return null;
   };
-
-  return () => once(licensePreRouting)();
 };
