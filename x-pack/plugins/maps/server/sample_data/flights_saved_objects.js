@@ -35,7 +35,7 @@ export const getFlightsSavedObjects = () => {
         'map': '7.1.0'
       },
       'attributes': {
-        'title': i18n.translate('server.sampleData.flightaSpec.mapsTitle', {
+        'title': i18n.translate('xpack.maps.sampleData.flightaSpec.mapsTitle', {
           defaultMessage: '[Flights] Origin and Destination Flight Time'
         }),
         'description': '',

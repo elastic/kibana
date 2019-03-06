@@ -50,7 +50,7 @@ export const getEcommerceSavedObjects = () => {
         'map': '7.1.0'
       },
       'attributes': {
-        'title': i18n.translate('server.sampleData.ecommerceSpec.mapsTitle', {
+        'title': i18n.translate('xpack.maps.sampleData.ecommerceSpec.mapsTitle', {
           defaultMessage: '[eCommerce] Orders by Country',
         }),
         'description': '',

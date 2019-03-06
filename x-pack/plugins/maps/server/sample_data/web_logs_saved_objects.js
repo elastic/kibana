@@ -35,7 +35,7 @@ export const getWebLogsSavedObjects = () => {
         'map': '7.1.0'
       },
       'attributes': {
-        'title': i18n.translate('server.sampleData.flightaSpec.logsTitle', {
+        'title': i18n.translate('xpack.maps.sampleData.flightaSpec.logsTitle', {
           defaultMessage: '[Logs] Total Requests and Bytes'
         }),
         'description': '',
