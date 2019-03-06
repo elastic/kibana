@@ -19,6 +19,7 @@ export default function({ loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./resolve_import_conflicts'));
     loadTestFile(require.resolve('./update'));
   });
 }
