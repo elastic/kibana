@@ -22,10 +22,10 @@ import { WatchDetail } from './components/watch_detail/watch_detail_component';
 import { I18nContext } from 'ui/i18n';
 
 let elem;
-const renderReact = async elem => {
+const renderReact = async (elem, watchId) => {
   render(
     <I18nContext>
-      <WatchDetail />
+      <WatchDetail watchId={watchId}/>
     </I18nContext>,
     elem
   );
@@ -100,7 +100,7 @@ routes
         setHttpClient($http);
         $scope.$$postDigest(() => {
           elem = document.getElementById('watchDetailReactRoot');
-          renderReact(elem);
+          renderReact(elem, $route.current.params.id);
           manageAngularLifecycle($scope, $route, elem);
         });
       }
