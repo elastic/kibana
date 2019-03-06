@@ -20,15 +20,14 @@ export class HeatmapLayer extends AbstractLayer {
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
     heatmapLayerDescriptor.type = HeatmapLayer.type;
-    const defaultStyle = HeatmapStyle.createDescriptor('coarse');
-    heatmapLayerDescriptor.style = defaultStyle;
+    heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;
   }
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
     if (!style) {
-      const defaultStyle = HeatmapStyle.createDescriptor('coarse');
+      const defaultStyle = HeatmapStyle.createDescriptor();
       this._style = new HeatmapStyle(defaultStyle);
     }
   }
