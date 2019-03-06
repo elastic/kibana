@@ -7,7 +7,7 @@
 import chrome from 'ui/chrome';
 import React from 'react';
 import { I18nContext } from 'ui/i18n';
-import ReactDOM, { render, unmountComponentAtNode } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
@@ -209,7 +209,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   chrome.helpExtension.set(domElement => {
     render(<HelpMenu/>, domElement);
     return () => {
-      ReactDOM.unmountComponentAtNode(domElement);
+      unmountComponentAtNode(domElement);
     };
   });
 
