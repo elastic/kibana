@@ -169,7 +169,7 @@ export class ESGeoGridSource extends AbstractESSource {
       return 4;
     }
 
-    throw new Error(i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
+    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
       defaultMessage: `Grid resolution param not recognized: {resolution}`,
       values: {
         resolution: this._descriptor.resolution
