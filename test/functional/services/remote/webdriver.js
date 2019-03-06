@@ -24,7 +24,7 @@ const { getLogger } =  require('selenium-webdriver/lib/logging');
 const { Executor } =  require('selenium-webdriver/lib/http');
 const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
-const geckoDriver = require('geckodriver');
+//const geckoDriver = require('geckodriver');
 const chromeDriver = require('chromedriver');
 const throttleOption = process.env.TEST_THROTTLE_NETWORK;
 
@@ -79,8 +79,8 @@ async function attemptToCreateCommand(log, browserType) {
         }
         return new Builder()
           .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
+          //.setFirefoxOptions(firefoxOptions)
+          //.setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
       default:
         throw new Error(`${browserType} is not supported yet`);
@@ -88,6 +88,7 @@ async function attemptToCreateCommand(log, browserType) {
   };
 
   const session = await buildDriverInstance(browserType);
+  log.debug('[webdriver] Session created');
 
   if (throttleOption === 'true' && browserType === 'chrome') { //Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
