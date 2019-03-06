@@ -5,7 +5,6 @@
  */
 
 import { getMapsTelemetry } from './maps_telemetry';
-import { i18n } from '@kbn/i18n';
 
 const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 
@@ -22,14 +21,7 @@ export function scheduleTask(server, taskManager) {
         state: { stats: {}, runs: 0 },
       });
     }catch(e) {
-      server.log(['warning', 'maps'],
-        i18n.translate('xpack.maps.telemetry.scheduleErrorMessage', {
-          defaultMessage: `Error scheduling telemetry task, received {message}`,
-          values: {
-            message: e.message
-          },
-        })
-      );
+      server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
     }
   });
 }
