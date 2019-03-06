@@ -17,18 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import init from './init';
-
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'interpreter',
-    require: ['kibana', 'elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    uiExports: {
-      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
-    },
-    init,
+export default function ({ loadTestFile }) {
+  describe('User Action', () => {
+    loadTestFile(require.resolve('./user_action'));
   });
 }
-

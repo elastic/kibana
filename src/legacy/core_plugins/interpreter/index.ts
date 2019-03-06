@@ -17,11 +17,21 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from './lib';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+import { init } from './init';
 
-export interface DefaultServiceProviders {
-  config(): Config;
-  log(): ToolingLog;
-  lifecycle(): Lifecycle;
+// tslint:disable-next-line
+export default function InterpreterPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'interpreter',
+    require: ['kibana', 'elasticsearch'],
+    publicDir: resolve(__dirname, 'public'),
+    uiExports: {
+      injectDefaultVars: server => ({ serverBasePath: server.config().get('server.basePath') }),
+    },
+    init,
+  };
+
+  return new kibana.Plugin(config);
 }
