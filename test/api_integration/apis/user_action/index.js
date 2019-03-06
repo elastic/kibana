@@ -17,26 +17,8 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
-import execa from 'execa';
-
-const MINUTE = 60 * 1000;
-
-it(
-  'types return values to prevent mutations in typescript',
-  async () => {
-    await expect(
-      execa.stdout('tsc', ['--noEmit'], {
-        cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-"Command failed: tsc --noEmit
-
-index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a read-only property.
-index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a read-only property.
-"
-`);
-  },
-  MINUTE
-);
+export default function ({ loadTestFile }) {
+  describe('User Action', () => {
+    loadTestFile(require.resolve('./user_action'));
+  });
+}

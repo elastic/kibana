@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'rollup'
-};
-
-export const UA_APP_NAME = 'rollup-job-wizard';
-export const UA_ROLLUP_JOB_CREATE = 'create';
-
-export const USER_ACTIONS = [
-  UA_ROLLUP_JOB_CREATE,
-];
+export const LICENSE_STATUS_UNAVAILABLE = 'UNAVAILABLE';
+export const LICENSE_STATUS_INVALID = 'INVALID';
+export const LICENSE_STATUS_EXPIRED = 'EXPIRED';
+export const LICENSE_STATUS_VALID = 'VALID';
