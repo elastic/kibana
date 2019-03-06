@@ -31,80 +31,25 @@ describe('fromQuery', () => {
 });
 
 describe('getKibanaHref', () => {
-  it('should build correct url', () => {
-    const location = {} as Location;
-    const pathname = '/app/kibana';
-    const hash = '/discover';
+  it('should build correct URL for APM paths, include existing date range params', () => {
+    const location = { search: '?rangeFrom=now/w&rangeTo=now-24h' } as Location;
+    const pathname = '/app/apm';
+    const hash = '/services/x/transactions';
     const query = { transactionId: 'something' };
     const href = getKibanaHref({ location, pathname, hash, query });
-    expect(href).toBe('/app/kibana#/discover?transactionId=something');
+    expect(href).toBe(
+      '/app/apm#/services/x/transactions?rangeFrom=now%2Fw&rangeTo=now-24h&transactionId=something'
+    );
   });
 
-  // it('should rison encode _a', () => {
-  //   const location = {} as Location;
-  //   const pathname = '/app/kibana';
-  //   const hash = '/discover';
-  //   const query = {
-  //     _a: {
-  //       interval: 'auto',
-  //       query: {
-  //         language: 'lucene',
-  //         query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
-  //       },
-  //       sort: { '@timestamp': 'desc' }
-  //     }
-  //   };
-  //   const href = getKibanaHref({ query, location, pathname, hash });
-  //   const { _a } = getUrlQuery(href);
-  //   expect(_a).toEqual(
-  //     `(interval:auto,query:(language:lucene,query:'context.service.name:\"myServiceName\" AND error.grouping_key:\"myGroupId\"'),sort:('@timestamp':desc))`
-  //   );
-  // });
-
-  // describe('_g', () => {
-  //   it('should preserve _g from location', () => {
-  //     const location = {
-  //       search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-  //     } as Location;
-  //     const pathname = '/app/kibana';
-  //     const hash = '/discover';
-  //     const href = getKibanaHref({ location, pathname, hash });
-  //     const { _g } = getUrlQuery(href);
-  //     expect(_g).toBe('(time:(from:now-7d,mode:relative,to:now-1d))');
-  //   });
-
-  //   it('should use default time range when _g is empty', () => {
-  //     const location = {} as Location;
-  //     const pathname = '/app/kibana';
-  //     const hash = '/discover';
-  //     const href = getKibanaHref({ location, pathname, hash });
-  //     const { _g } = getUrlQuery(href);
-  //     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-  //   });
-
-  //   it('should use default value when given invalid input', () => {
-  //     const location = { search: '?_g=H@whatever' } as Location;
-  //     const pathname = '/app/kibana';
-  //     const hash = '/discover';
-  //     const href = getKibanaHref({ location, pathname, hash });
-  //     const { _g } = getUrlQuery(href);
-  //     expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-  //   });
-
-  //   it('should merge in _g query values', () => {
-  //     const location = {
-  //       search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-  //     } as Location;
-  //     const pathname = '/app/kibana';
-  //     const hash = '/discover';
-  //     const query = { _g: { ml: { jobIds: [1337] } } };
-  //     const href = getKibanaHref({ location, query, pathname, hash });
-  //     const { _g } = getUrlQuery(href);
-  //     expect(_g).toBe(
-  //       '(ml:(jobIds:!(1337)),time:(from:now-7d,mode:relative,to:now-1d))'
-  //     );
-  //   });
-  // });
+  it('should build correct url for non-APM paths, ignoring date range params', () => {
+    const location = { search: '?rangeFrom=now/w&rangeTo=now-24h' } as Location;
+    const pathname = '/app/kibana';
+    const hash = '/outside';
+    const query = { transactionId: 'something' };
+    const href = getKibanaHref({ location, pathname, hash, query });
+    expect(href).toBe('/app/kibana#/outside?transactionId=something');
+  });
 
   describe('when location contains kuery', () => {
     const location = {

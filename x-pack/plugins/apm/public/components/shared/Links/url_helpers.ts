@@ -54,6 +54,8 @@ export interface KibanaHrefArgs<T = APMQueryParams> {
   query?: T;
 }
 
+// TODO: Will eventually need to solve for the case when we need to use this helper to link to
+// another Kibana app which requires url query params not covered by APMQueryParams
 export function getKibanaHref({
   location,
   pathname = '',
