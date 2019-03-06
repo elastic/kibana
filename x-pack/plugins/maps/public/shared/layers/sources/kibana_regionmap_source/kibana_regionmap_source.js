@@ -45,8 +45,17 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: KibanaRegionmapSource.title },
-      { label: 'Vector layer', value: this._descriptor.name },
+      {
+        label: i18n.translate('xpack.maps.source.kbnRegionMap.dataSourceLabel', {
+          defaultMessage: 'Data source'
+        }),
+        value: KibanaRegionmapSource.title },
+      {
+        label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
+          defaultMessage: 'Vector layer'
+        }),
+        value: this._descriptor.name
+      },
     ];
   }
 

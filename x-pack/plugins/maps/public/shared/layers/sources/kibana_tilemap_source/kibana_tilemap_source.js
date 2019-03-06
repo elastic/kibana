@@ -39,8 +39,18 @@ export class KibanaTilemapSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: KibanaTilemapSource.title },
-      { label: 'Tilemap url', value: (await this.getUrlTemplate()) },
+      {
+        label: i18n.translate('xpack.maps.source.kbnTMS.dataSourceLabel', {
+          defaultMessage: 'Data source'
+        }),
+        value: KibanaTilemapSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.kbnTMS.urlLabel', {
+          defaultMessage: 'Tilemap url'
+        }),
+        value: (await this.getUrlTemplate())
+      },
     ];
   }
 

@@ -13,6 +13,7 @@ import {
   EuiFormLabel
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 const OPTIONS = [
@@ -42,7 +43,10 @@ export function ResolutionEditor({ resolution, onChange }) {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiFormLabel style={{ marginBottom: 0 }}>
-              Grid resolution
+            <FormattedMessage
+              id="xpack.maps.geoGrid.resolutionLabel"
+              defaultMessage="Grid resolution"
+            />
           </EuiFormLabel>
         </EuiFlexItem>
       </EuiFlexGroup>
