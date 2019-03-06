@@ -86,7 +86,9 @@ export class SecretService {
           };
         }
       } catch (e) {
-        throw Error(`SecretService Decrypt Failed: ${e.message}`);
+        const err = new Error(`SecretService Decrypt Failed: ${e.message}`);
+        err.stack = e.stack;
+        throw err;
       }
 
       return undefined;
@@ -97,7 +99,7 @@ export class SecretService {
       const secret = 'Secret Service v1.0.0';
       let objToValidate;
       try {
-        objToValidate = await this.hideAttributeWithId(id, secret);
+        objToValidate = await this.hideAttributeWithId(id, { version: secret });
       } catch (e) {
         if (!isConflictError(e)) {
           throw e;
@@ -111,11 +113,11 @@ export class SecretService {
           'secret_object_decrypt_failed',
           "Kibana's encryption key is invalid, please ensure that this instance has the right keystore!"
         );
-        throw e;
+        return false;
       }
 
       return objToValidate.attributes
-        ? objToValidate.attributes.secret === 'Secret Service v1.0.0'
+        ? objToValidate.attributes.version === 'Secret Service v1.0.0'
         : false;
     };
   }

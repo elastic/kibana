@@ -18,18 +18,39 @@ describe('The SecretService', function TestSecretService() {
     mockKbn.Plugin = jest.fn();
   });
 
-  it('should expose itself to other plugins', function Exposure() {
+  it('should expose itself to other plugins', () => {
     expect(subject).not.toBeNull();
   });
 
-  it('should expose a method to encrypt data', () => {
+  it('should expose a method to encrypt data', async () => {
     const stubConfigGet = jest.fn();
+    let secret: string;
     const core = {
       expose: jest.fn(),
       log: jest.fn(),
       savedObjects: {
         addScopedSavedObjectsClientWrapperFactory: jest.fn(),
-        getSavedObjectsRepository: jest.fn(),
+        getSavedObjectsRepository: jest.fn(() => {
+          return {
+            create: jest.fn((type, attributes, { id }) => {
+              secret = attributes.secret;
+              return {
+                id,
+                type,
+                attributes,
+              };
+            }),
+            get: jest.fn((type, id) => {
+              return {
+                id,
+                type,
+                attributes: {
+                  secret,
+                },
+              };
+            }),
+          };
+        }),
       },
       config: () => {
         return {
@@ -45,8 +66,10 @@ describe('The SecretService', function TestSecretService() {
         },
       },
     };
-    stubConfigGet.mockReturnValue('test-kibana-keystore');
-    subject.init(core);
+    stubConfigGet.mockReturnValueOnce('test-kibana-keystore');
+    stubConfigGet.mockReturnValueOnce(false);
+    stubConfigGet.mockReturnValue('bogusencryptionkey');
+    await subject.init(core);
     expect(core.expose).toHaveBeenCalledWith('secretService', expect.any(Object));
   });
 });

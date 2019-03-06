@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SecretService } from './secret_service';
-
-describe('The Secret Secret Store', function TestSecretServiceObject() {
+describe('The Secret Secret Store', async function TestSecretServiceObject() {
   const savedObjectsClient = {
     create: jest.fn(),
     errors: jest.fn(),
@@ -37,19 +36,17 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
       return insideJob;
     });
 
-    const hidden = await subject.hideAttribute(hideMe, 'message');
+    const hidden = await subject.hideAttribute(hideMe);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update).not.toHaveBeenCalled();
     expect(hidden).toBeDefined();
-    expect(hidden.attributes.message).toBeUndefined();
-    expect(hidden.attributes.secret).toBeDefined();
-    expect(hidden.attributes.secret).not.toContain('my secret message');
-    expect(hidden.attributes.anotherSecret).toBeUndefined();
+    expect(typeof hidden).toBe('string');
+    expect(hidden).toMatch(/^[\w+\/]+/);
     expect(subject);
   });
 
   it('should be able to unhide values from saved objects', async () => {
-    expect.assertions(4);
+    expect.assertions(3);
     const hideMe = {
       message: 'my secret message',
       anotherSecret: 'this is unhidden',
@@ -67,11 +64,10 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
     savedObjectsClient.get.mockImplementation((type: string, id: string, options?: any) => {
       return insideJob;
     });
-    const hidden = await subject.hideAttribute(hideMe, 'message');
-    const unhidden = await subject.unhideAttribute(hidden.id);
-    expect(unhidden.id).toEqual(hidden.id);
-    expect(unhidden.type).toEqual(hidden.type);
-    expect(unhidden.version).toEqual(hidden.version);
+    const hidden = await subject.hideAttribute(hideMe);
+    const unhidden = await subject.unhideAttribute(hidden);
+    expect(unhidden.id).toEqual(hidden);
+    expect(unhidden.type).toEqual('testSecretType');
     expect(unhidden.attributes).toMatchObject(hideMe);
   });
 
@@ -109,10 +105,10 @@ describe('The Secret Secret Store', function TestSecretServiceObject() {
       internalSavedObject.addNewField = 'me';
       return internalSavedObject;
     });
-    const hidden = await subject.hideAttribute(hideMe, 'message');
+    const hidden = await subject.hideAttribute(hideMe);
 
     try {
-      await subject.unhideAttribute(hidden.id);
+      await subject.unhideAttribute(hidden);
       fail('The test fails because no exception was thrown');
     } catch (e) {
       expect(e).not.toBeNull();

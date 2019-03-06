@@ -36,7 +36,7 @@ export const secretService = (kibana: any) => {
       }).default();
     },
 
-    init(server: any) {
+    async init(server: any) {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
       const configKey = 'xpack.secret_service.secret';
@@ -66,7 +66,7 @@ export const secretService = (kibana: any) => {
       const service = new SecretService(repository, 'secret', encryptionKey, auditor);
 
       // validate key used
-      if (!service.validateKey()) {
+      if (!(await service.validateKey())) {
         warn(
           'Could not validate encryption key, please make sure that the right key in the keystore!'
         );
