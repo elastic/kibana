@@ -92,3 +92,7 @@ export {
 export {
   sortTable,
 } from './sort_table';
+
+export {
+  trackUserAction,
+} from './track_user_action';

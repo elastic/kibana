@@ -423,7 +423,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('API access with expired access token.', () => {
+    describe.skip('API access with expired access token.', () => {
       let sessionCookie;
 
       beforeEach(async () => {
