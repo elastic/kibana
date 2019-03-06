@@ -20,10 +20,10 @@ const DEFAULT_LIMIT = 2048;
 export class ESSearchSource extends AbstractESSource {
 
   static type = ES_SEARCH;
-  static title = i18n.translate('xpack.maps.source.esSearch.geofieldTitle', {
+  static title = i18n.translate('xpack.maps.source.esSearchTitle', {
     defaultMessage: 'Documents'
   });
-  static description = i18n.translate('xpack.maps.source.esSearch.geofieldDescription', {
+  static description = i18n.translate('xpack.maps.source.esSearchDescription', {
     defaultMessage: 'Geospatial data from a Kibana index pattern'
   });
 

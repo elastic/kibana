@@ -176,12 +176,12 @@ export class CreateSourceEditor extends Component {
     }
 
     return (
-      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.showasLabel', {
+      <EuiFormRow label={i18n.translate('xpack.maps.source.esGeoGrid.showAsLabel', {
         defaultMessage: 'Show as'
       })}
       >
         <EuiComboBox
-          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.showasPlaceholder', {
+          placeholder={i18n.translate('xpack.maps.source.esGeoGrid.showAsPlaceholder', {
             defaultMessage: 'Select a single option'
           })}
           singleSelection={{ asPlainText: true }}

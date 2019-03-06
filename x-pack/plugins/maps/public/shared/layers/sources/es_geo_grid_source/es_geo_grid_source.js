@@ -202,7 +202,7 @@ export class ESGeoGridSource extends AbstractESSource {
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
     const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
-      defaultMessage: `'Elasticsearch geohash_grid aggregation request'`
+      defaultMessage: 'Elasticsearch geo grid aggregation request'
     }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
