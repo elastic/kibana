@@ -309,7 +309,7 @@ export class AnomalyDetails extends Component {
               {definition.terms}
             </EuiText>
           </EuiFlexItem>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
         </Fragment> }
         {(definition !== undefined && definition.regex) &&
           <Fragment>
@@ -341,7 +341,7 @@ export class AnomalyDetails extends Component {
                 {definition.regex}
               </EuiText>
             </EuiFlexItem>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="xs" />
           </Fragment>}
 
         {examples.map((example, i) => {
