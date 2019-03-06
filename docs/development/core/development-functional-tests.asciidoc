@@ -246,7 +246,7 @@ The Kibana functional tests define the vast majority of the actual functionality
 ** `browser.moveMouseTo(element, xOffset, yOffset)` - Moves the remote environment's mouse cursor to the specified element or relative position.
 *** args
 **** `element`
-***** {element: WebElementWrapper} 
+***** { element: WebElementWrapper } 
 **** `xOffset`
 ***** number: number of pixels from the left to offset mouse
 **** `yOffset`
@@ -262,7 +262,7 @@ The Kibana functional tests define the vast majority of the actual functionality
 ***** number : number of pixels tall that the window should be. 
 ** `browser.getCurrentUrl()` - Gets the URL that is loaded in the focused window/frame.
 *** returns
-**** string : url
+**** string : Current URL
 ** `browser.get(url)`
 *** `args`
 **** `url`
@@ -273,7 +273,23 @@ The Kibana functional tests define the vast majority of the actual functionality
 **** `keys`
 ***** string : A string with the keys that should be want pressed.
 ***** string[] : An array of the strings that should be pressed. 
-
+** `browser.clickMouseButton(...args)` - Performs a left click at a given origin being either the center of an element, the viewport or the mouse's current position. 
+*** args
+**** `element`
+***** { element: WebElementWrapper } 
+**** `xOffset`
+***** number : number of pixels from left of origin to target click
+**** `yOffset`
+***** number : number of pixels from top of origin to target click
+** `browser.getPageSource()` - Gets the HTML loaded in the focused window/frame.
+*** returns
+**** string : HTML source
+** `browser.getLogsFor(...args)` - Get's all logs from the remote environment of the given type. 
+*** args
+**** `type`
+***** { logging.Type } - Type Object from Selenium Library to indicate what type of logs to return.
+*** returns
+**** { LogEntry[] } : Array of LogEntry items; Logs are cleared after return. 
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
