@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The import saved objects API enables you to create a set of Kibana saved objects.
+The import saved objects API enables you to create a set of Kibana saved objects from a given file.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -14,7 +14,7 @@ Note: You cannot access this endpoint via the Console in Kibana.
 ==== Query Parameters
 
 `overwrite` (optional)::
-  (boolean) Overwrite saved objects when they exist already
+  (boolean) Overwrite saved objects if they exist already
 
 ==== Request body
 
@@ -31,7 +31,7 @@ In the scenario the import wasn't successful a top level `errors` array will con
 
 ==== Examples
 
-The following example attemps to import an index pattern and dashboard.
+The following example imports an index pattern and dashboard.
 
 [source,js]
 --------------------------------------------------
@@ -55,5 +55,39 @@ containing a JSON structure similar to the following example:
 {
   "success": true,
   "successCount": 2
+}
+--------------------------------------------------
+
+The following example imports an index pattern and dashboard but has a conflict on the index pattern.
+
+[source,js]
+--------------------------------------------------
+POST api/saved_objects/_import
+Content-Type: multipart/form-data; boundary=EXAMPLE
+--EXAMPLE
+Content-Disposition: form-data; name="file"; filename="export.ndjson"
+Content-Type: application/ndjson
+
+{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
+{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
+--EXAMPLE---
+--------------------------------------------------
+// KIBANA
+
+The call returns a response code of `409` and a response body
+containing a JSON structure similar to the following example:
+
+[source,js]
+--------------------------------------------------
+{
+  "message": "Conflict",
+  "statusCode": 409,
+  "error": "Conflict",
+  "objects": [
+    {
+      "id": "my-pattern",
+      "type": "index-pattern"
+    }
+  ]
 }
 --------------------------------------------------
