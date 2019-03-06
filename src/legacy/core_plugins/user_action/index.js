@@ -17,21 +17,19 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', () => {
-    loadTestFile(require.resolve('./elasticsearch'));
-    loadTestFile(require.resolve('./general'));
-    loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./index_patterns'));
-    loadTestFile(require.resolve('./kql_telemetry'));
-    loadTestFile(require.resolve('./management'));
-    loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./scripts'));
-    loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./shorten'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./status'));
-    loadTestFile(require.resolve('./stats'));
-    loadTestFile(require.resolve('./user_action'));
+import { registerUserActionRoute } from './server/routes/api/user_action';
+
+export default function (kibana) {
+  return new kibana.Plugin({
+    id: 'user_action',
+    require: ['kibana', 'elasticsearch'],
+
+    uiExports: {
+      mappings: require('./mappings.json'),
+    },
+
+    init: function (server) {
+      registerUserActionRoute(server);
+    }
   });
 }
