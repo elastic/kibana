@@ -33,7 +33,7 @@ export function NoIndexPatternCallout() {
           />
         </EuiLink>
         <FormattedMessage
-          id="xpack.maps.noIndexPattern.xpack.maps.noIndexPattern.doThisSuffixDescription"
+          id="xpack.maps.noIndexPattern.doThisSuffixDescription"
           defaultMessage=" with geospatial fields."
         />
       </p>
