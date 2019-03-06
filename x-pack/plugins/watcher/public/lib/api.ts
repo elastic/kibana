@@ -22,6 +22,14 @@ export const fetchWatches = async () => {
     return Watch.fromUpstreamJson(watch);
   });
 };
+
+export const fetchWatchDetail = async (id: string) => {
+  const {
+    data: { watch },
+  } = await getHttpClient().get(`${basePath}/watch/${id}`);
+  return Watch.fromUpstreamJson(watch).actions;
+};
+
 export const deleteWatches = async (watchIds: string[]) => {
   const body = {
     watchIds,
