@@ -17,6 +17,14 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
+jest.mock('../../../services', () => {
+  const services = require.requireActual('../../../services');
+  return {
+    ...services,
+    trackUserAction: jest.fn(),
+  };
+});
+
 const defaultJob = getJob();
 
 const defaultProps = {
