@@ -165,10 +165,7 @@ export class ESJoinSource extends AbstractESSource {
       defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
       values: { leftSourceName, leftFieldName }
     }));
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinTermDescription', {
-      defaultMessage: `{indexPatternTitle}:{term}`,
-      values: { indexPatternTitle: this._descriptor.indexPatternTitle, term: this._descriptor.term }
-    }));
+    joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
       defaultMessage: `for metrics {metrics}`,
       values: { metrics: metrics.join(',') }

@@ -71,10 +71,7 @@ export function maps(kibana) {
       const mapsEnabled = server.config().get('xpack.maps.enabled');
 
       if (!mapsEnabled) {
-        server.log(['info', 'maps'],
-          i18n.translate('xpack.maps.appDisabled', {
-            defaultMessage: 'Maps app disabled by configuration'
-          }));
+        server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
       initTelemetryCollection(server);

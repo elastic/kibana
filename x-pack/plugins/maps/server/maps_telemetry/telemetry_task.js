@@ -37,9 +37,7 @@ export function scheduleTask(server, taskManager) {
 export function registerMapsTelemetryTask(taskManager) {
   taskManager.registerTaskDefinitions({
     [TELEMETRY_TASK_TYPE]: {
-      title: i18n.translate('xpack.maps.telemetry.taskTitle', {
-        defaultMessage: 'Maps telemetry fetch task',
-      }),
+      title: 'Maps telemetry fetch task',
       type: TELEMETRY_TASK_TYPE,
       timeout: '1m',
       numWorkers: 2,
@@ -64,14 +62,7 @@ export function telemetryTaskRunner() {
         try {
           mapsTelemetry = await getMapsTelemetry(server, callCluster);
         } catch (err) {
-          server.log(['warning'],
-            i18n.translate('xpack.maps.telemetry.loadErrorMessage', {
-              defaultMessage: `Error loading maps telemetry: {error}`,
-              values: {
-                error: err
-              }
-            })
-          );
+          server.log(['warning'], `Error loading maps telemetry: ${err}`);
         } finally {
           return {
             state: {
