@@ -300,8 +300,21 @@ The Kibana functional tests define the vast majority of the actual functionality
 *** args 
 **** `handle`
 ***** string : Identifier for the window
-
-
+** `browser.getAllWindowHandles()` - Get the handles of all currently open windows.
+*** returns
+**** string[] : Array of all open window handles.
+** `browser.closeCurrentWindow()` - Closes the currently open window.
+** `browser.execute(fn, ...args)` - Executes the given JavaScript function within the focused window/frame.
+*** `function`
+**** string : String representation of desired function to execute.
+**** function : JavaScript function to execute.
+*** `args`
+**** any[] - An array of any type containing arguments to pass into given function.
+** `browser.setLocalStorageItem(key, value)` - Sets a value in local storage for the focused window/frame.
+*** `key`
+**** string : Key to set in local storage.
+*** `value`
+**** string : Value for given key to set in local storage.
 
 **retry:**:::
 * Source: {blob}test/functional/services/retry.js[test/functional/services/retry.js]
