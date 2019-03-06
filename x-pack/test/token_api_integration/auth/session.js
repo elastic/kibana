@@ -57,7 +57,7 @@ export default function ({ getService }) {
         .expect(200);
     });
 
-    it.skip('expired access token should be automatically refreshed', async function () {
+    it('expired access token should be automatically refreshed', async function () {
       this.timeout(40000);
 
       const originalCookie = await createSessionCookie();
@@ -68,40 +68,58 @@ export default function ({ getService }) {
 
       // This api call should succeed and automatically refresh token. Returned cookie will contain
       // the new access and refresh token pair.
-      const response = await supertest
+      const firstResponse = await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', originalCookie.cookieString())
         .expect(200);
 
-      const newCookie = extractSessionCookie(response);
-      if (!newCookie) {
+      const firstNewCookie = extractSessionCookie(firstResponse);
+      if (!firstNewCookie) {
         throw new Error('No session cookie set after token refresh');
       }
-      if (!newCookie.httpOnly) {
+      if (!firstNewCookie.httpOnly) {
         throw new Error('Session cookie is not marked as HttpOnly');
       }
-      if (newCookie.value === originalCookie.value) {
+      if (firstNewCookie.value === originalCookie.value) {
         throw new Error('Session cookie has not changed after refresh');
       }
 
-      // Request with old cookie should fail with `400` since it contains expired access token and
-      // already used refresh tokens.
-      const apiResponseWithExpiredToken = await supertest
+      // Request with old cookie should return another valid cookie we can use to authenticate requests
+      // if it happens within 60 seconds of the refresh token being used
+      const secondResponse = await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'true')
         .set('Cookie', originalCookie.cookieString())
-        .expect(400);
+        .expect(200);
 
-      if (apiResponseWithExpiredToken.headers['set-cookie'] !== undefined) {
-        throw new Error('Request rejecting expired access token still set session cookie');
+      const secondNewCookie = extractSessionCookie(secondResponse);
+      if (!secondNewCookie) {
+        throw new Error('No session cookie set after token refresh');
+      }
+      if (!secondNewCookie.httpOnly) {
+        throw new Error('Session cookie is not marked as HttpOnly');
+      }
+      if (secondNewCookie.value === originalCookie.value) {
+        throw new Error('Session cookie has not changed after refresh');
       }
 
-      // The new cookie with fresh pair of access and refresh tokens should work.
+      if (secondNewCookie.value === firstNewCookie.value) {
+        throw new Error('Second new cookie is the same as the first new cookie');
+      }
+
+      // The first new cookie should authenticate a subsequent request
       await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'true')
-        .set('Cookie', newCookie.cookieString())
+        .set('Cookie', firstNewCookie.cookieString())
+        .expect(200);
+
+      // The second new cookie should authenticate a subsequent request
+      await supertest
+        .get('/api/security/v1/me')
+        .set('kbn-xsrf', 'true')
+        .set('Cookie', secondNewCookie.cookieString())
         .expect(200);
     });
   });
