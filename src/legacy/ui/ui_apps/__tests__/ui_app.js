@@ -29,7 +29,6 @@ function createStubUiAppSpec(extraParams) {
     main: 'main.js',
     title: 'UIApp Test',
     order: 9000,
-    description: 'Test of UI App Constructor',
     icon: 'ui_app_test.svg',
     linkToLastSubUrl: true,
     hidden: false,
@@ -139,7 +138,6 @@ describe('ui apps / UiApp', () => {
         expect(JSON.parse(JSON.stringify(app))).to.eql({
           id: spec.id,
           title: spec.title,
-          description: spec.description,
           icon: spec.icon,
           main: spec.main,
           linkToLastSubUrl: spec.linkToLastSubUrl,
