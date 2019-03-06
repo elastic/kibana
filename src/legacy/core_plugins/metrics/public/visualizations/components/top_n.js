@@ -32,11 +32,23 @@ class TopN extends Component {
     };
   }
 
+  get labelMaxWidth() {
+    // calculate max-width of a label column as 35% of the table
+    return this.tableRef.current.offsetWidth * 0.35;
+  }
+
   componentDidMount() {
-    // set max width of label as 35% of the table
     this.setState({
-      labelMaxWidth: this.tableRef.current.offsetWidth * 0.35
+      labelMaxWidth: this.labelMaxWidth
     });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.labelMaxWidth !== this.labelMaxWidth) {
+      this.setState({
+        labelMaxWidth: this.labelMaxWidth
+      });
+    }
   }
 
   handleClick(item) {
