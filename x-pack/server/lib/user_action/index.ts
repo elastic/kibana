@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const LICENSE_STATUS = {
-  UNAVAILABLE: 'UNAVAILABLE',
-  INVALID: 'INVALID',
-  EXPIRED: 'EXPIRED',
-  VALID: 'VALID',
-};
+export { fetchUserActions } from './fetch_user_actions';

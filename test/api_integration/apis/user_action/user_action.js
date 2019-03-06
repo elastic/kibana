@@ -17,26 +17,29 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import expect from 'expect.js';
+import { get } from 'lodash';
 
-import execa from 'execa';
+export default function ({ getService }) {
+  const supertest = getService('supertest');
+  const es = getService('es');
 
-const MINUTE = 60 * 1000;
+  describe('user_action API', () => {
+    it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
+      await supertest
+        .post('/api/user_action/myApp/myAction')
+        .set('kbn-xsrf', 'kibana')
+        .expect(200);
 
-it(
-  'types return values to prevent mutations in typescript',
-  async () => {
-    await expect(
-      execa.stdout('tsc', ['--noEmit'], {
-        cwd: resolve(__dirname, '__fixtures__/frozen_object_mutation'),
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`
-"Command failed: tsc --noEmit
+      return es.search({
+        index: '.kibana',
+        q: 'type:user-action',
+      }).then(response => {
+        const doc = get(response, 'hits.hits[0]');
+        expect(get(doc, '_source.user-action.count')).to.be(1);
+        expect(doc._id).to.be('user-action:myApp:myAction');
+      });
+    });
+  });
+}
 
-index.ts(30,11): error TS2540: Cannot assign to 'baz' because it is a read-only property.
-index.ts(40,10): error TS2540: Cannot assign to 'bar' because it is a read-only property.
-"
-`);
-  },
-  MINUTE
-);

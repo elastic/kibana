@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'rollup'
-};
+import chrome from 'ui/chrome';
 
-export const UA_APP_NAME = 'rollup-job-wizard';
-export const UA_ROLLUP_JOB_CREATE = 'create';
-
-export const USER_ACTIONS = [
-  UA_ROLLUP_JOB_CREATE,
-];
+export function createUserActionUri(appName: string, actionType: string): string {
+  return chrome.addBasePath(`/api/user_action/${appName}/${actionType}`);
+}
