@@ -10,7 +10,7 @@ source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
 
 echo "************* HELLO HELLO HELLO $ghprbActualCommit"
-node checks_api_test.js
+node ./.ci/checks_api_test.js
 
 case "$JOB" in
 kibana-intake)
