@@ -17,14 +17,39 @@
  * under the License.
  */
 
-import { Extractor } from '@microsoft/api-extractor';
+import { Extractor, IExtractorConfig } from '@microsoft/api-extractor';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import execa from 'execa';
-import * as fs from 'fs';
 import getopts from 'getopts';
-import * as path from 'path';
 import { run } from './run';
+
+const apiExtractorConfig: IExtractorConfig = {
+  compiler: {
+    configType: 'tsconfig',
+    rootFolder: '.',
+  },
+  project: {
+    entryPointSourceFile: 'target/types/type_exports.d.ts',
+  },
+  apiReviewFile: {
+    enabled: true,
+    apiReviewFolder: './common/core_api_review/',
+    tempFolder: './build',
+  },
+  apiJsonFile: {
+    enabled: true,
+    outputFolder: './build',
+  },
+  dtsRollup: {
+    enabled: false,
+    trimming: true,
+    publishFolderForInternal: '',
+    publishFolderForBeta: '',
+    publishFolderForPublic: '',
+    mainDtsRollupPath: '',
+  },
+};
 
 const runBuildTypes = async () => {
   await execa.shell('yarn run build:types');
@@ -35,8 +60,6 @@ const runApiDocumenter = async () => {
 };
 
 const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
-  const config = JSON.parse(fs.readFileSync(path.resolve('./api-extractor.json')).toString());
-
   // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
   const warnings = [] as string[];
   const errors = [] as string[];
@@ -68,7 +91,7 @@ const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
     customLogger: memoryLogger,
   };
 
-  const extractor = new Extractor(config, options);
+  const extractor = new Extractor(apiExtractorConfig, options);
   extractor.processProject();
 
   errors.forEach(msg => log.error(msg));
