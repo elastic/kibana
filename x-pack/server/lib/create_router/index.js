@@ -16,13 +16,13 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
   const requestHandler = (handler) => async (request, h) => {
     const callWithRequest = callWithRequestFactory(server, request);
     try {
-      return handler(request, callWithRequest, h);
+      return await handler(request, callWithRequest, h);
     } catch (err) {
       if (isEsError(err)) {
-        throw wrapEsError(err);
+        return wrapEsError(err);
       }
 
-      throw wrapUnknownError(err);
+      return wrapUnknownError(err);
     }
   };
 
