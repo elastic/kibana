@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
 set -e
-echo "************* HELLO HELLO HELLO $ghprbActualCommit"
-echo $'console.log(\'hi\')' | node
+
 
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
 source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
+
+echo "************* HELLO HELLO HELLO $ghprbActualCommit"
+echo $'console.log(\'hi\')' | node
 
 case "$JOB" in
 kibana-intake)
