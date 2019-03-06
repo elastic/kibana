@@ -66,29 +66,19 @@ const initFillFormFields = form => async (step) => {
   }
 };
 
-const initGoToStep = (fillFormFields, clickNextStep) => async (step) => {
-  if (!step || step === 1) {
-    return;
-  }
+const initGoToStep = (fillFormFields, clickNextStep) => async (targetStep) => {
+  const stepHandlers = {
+    1: () => fillFormFields('logistics'),
+    2: () => fillFormFields('date-histogram')
+  };
 
-  await fillFormFields('logistics');
-  clickNextStep();
-
-  if (step > 2) {
-    await fillFormFields('date-histogram');
+  let currentStep = 1;
+  while(currentStep < targetStep) {
+    if (stepHandlers[currentStep]) {
+      await stepHandlers[currentStep]();
+    }
     clickNextStep();
-  }
-
-  if (step > 3) {
-    clickNextStep();
-  }
-
-  if (step > 4) {
-    clickNextStep();
-  }
-
-  if (step > 5) {
-    clickNextStep();
+    currentStep++;
   }
 };
 
