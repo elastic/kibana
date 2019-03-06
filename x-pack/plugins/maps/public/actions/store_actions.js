@@ -151,7 +151,7 @@ export function setLayerErrorStatus(layerId, errorMessage) {
 export function clearTooltipStateForLayer(layerId) {
   return (dispatch, getState) => {
     const tooltipState = getTooltipState(getState());
-    if (tooltipState.layerId === layerId) {
+    if (tooltipState && tooltipState.layerId === layerId) {
       dispatch(setTooltipState(null));
     }
   };
