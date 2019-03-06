@@ -18,6 +18,8 @@ function getGithubClient() {
 
   return client;
 }
+console.log('START TEST');
+console.log(Object.keys(process.env))
 
 const client = getGithubClient();
 
