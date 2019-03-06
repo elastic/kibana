@@ -86,8 +86,8 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
         }
         return new Builder()
           .forBrowser(browserType)
-          .setFirefoxOptions(firefoxOptions)
-          .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
+          //.setFirefoxOptions(firefoxOptions)
+          //.setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path).enableVerboseLogging())
           .build();
       default:
         throw new Error(`${browserType} is not supported yet`);
