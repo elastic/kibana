@@ -8,7 +8,7 @@ octokit.repos.listForOrg({
   console.log('data: ', data);
 })
 */
-export function getGithubClient() {
+function getGithubClient() {
   const client = new Octokit();
   client.authenticate({
     type: 'token',
