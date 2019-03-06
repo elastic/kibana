@@ -852,8 +852,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
           'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
-          'with each object containing "from", "to" (see {acceptedFormatsLink}), ' +
-          '"display" (the title to be displayed), and "section" (which column to put the option in).',
+          'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
+          '"display" (the title to be displayed).',
         description:
           'Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + ' +
           'kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
