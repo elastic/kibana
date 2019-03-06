@@ -9,11 +9,12 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
+import { injectI18n } from '@kbn/i18n/react';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
-export const SimpleTemplate = props => {
-  const { typeInstance, argValue, onValueChange, labels, workpad } = props;
+const SimpleTemplateUI = props => {
+  const { typeInstance, argValue, onValueChange, labels, workpad, intl } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -36,7 +37,13 @@ export const SimpleTemplate = props => {
             <span>Color&nbsp;</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => handlePlain('color', '#000000')}>
+            <EuiLink
+              aria-label={intl.formatMessage({
+                id: 'xpack.canvas.expressionTypes.ArgTypes.colorStatus',
+                defaultMessage: 'Color: Auto',
+              })}
+              onClick={() => handlePlain('color', '#000000')}
+            >
               Auto <EuiIcon type="bolt" />
             </EuiLink>
           </EuiFlexItem>
@@ -78,9 +85,9 @@ export const SimpleTemplate = props => {
   );
 };
 
-SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
+SimpleTemplateUI.displayName = 'SeriesStyleArgSimpleInput';
 
-SimpleTemplate.propTypes = {
+SimpleTemplateUI.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   labels: PropTypes.array,
@@ -88,4 +95,7 @@ SimpleTemplate.propTypes = {
     colors: PropTypes.array.isRequired,
   }).isRequired,
   typeInstance: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
+  intl: PropTypes.any,
 };
+
+export const SimpleTemplate = injectI18n(SimpleTemplateUI);
