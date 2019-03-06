@@ -43,7 +43,7 @@ Content-Type: application/ndjson
 
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE---
+--EXAMPLE--
 --------------------------------------------------
 // KIBANA
 
@@ -70,7 +70,7 @@ Content-Type: application/ndjson
 
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
---EXAMPLE---
+--EXAMPLE--
 --------------------------------------------------
 // KIBANA
 

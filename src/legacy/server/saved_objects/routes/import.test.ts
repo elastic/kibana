@@ -18,26 +18,31 @@
  */
 
 import Hapi from 'hapi';
-import { SavedObjectsClient } from '../';
 import { createMockServer } from './_mock_server';
 import { createImportRoute } from './import';
 
 describe('POST /api/saved_objects/_import', () => {
   let server: Hapi.Server;
-  let savedObjectsClient: SavedObjectsClient;
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
 
   beforeEach(() => {
     server = createMockServer();
-    savedObjectsClient = {
-      errors: {} as any,
-      bulkCreate: jest.fn(),
-      bulkGet: jest.fn(),
-      create: jest.fn(),
-      delete: jest.fn(),
-      find: jest.fn(),
-      get: jest.fn(),
-      update: jest.fn(),
-    };
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
 
     const prereqs = {
       getSavedObjectsClient: {
@@ -75,5 +80,106 @@ describe('POST /api/saved_objects/_import', () => {
       successCount: 0,
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
+  });
+
+  test('imports an index pattern and dashboard', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          attributes: {
+            title: 'my-pattern-*',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({
+      success: true,
+      successCount: 2,
+    });
+  });
+
+  test('imports an index pattern and dashboard but has a conflict on the index pattern', async () => {
+    // NOTE: changes to this scenario should be reflected in the docs
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          attributes: {},
+          references: [],
+          error: {
+            statusCode: 409,
+            message: 'Conflict',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'my-dashboard',
+          attributes: {
+            title: 'Look at my dashboard',
+          },
+          references: [],
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(409);
+    expect(response).toEqual({
+      message: 'Conflict',
+      statusCode: 409,
+      error: 'Conflict',
+      objects: [
+        {
+          id: 'my-pattern',
+          type: 'index-pattern',
+        },
+      ],
+    });
   });
 });

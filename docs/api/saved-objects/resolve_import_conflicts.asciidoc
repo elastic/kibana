@@ -56,7 +56,7 @@ Content-Disposition: form-data; name="skips"
 Content-Disposition: form-data; name="overwrites"
 
 [{"type":"dashboard","id":"my-dashboard"}]
---EXAMPLE---
+--EXAMPLE--
 --------------------------------------------------
 // KIBANA
 
@@ -88,7 +88,7 @@ Content-Type: application/ndjson
 Content-Disposition: form-data; name="replaceReferences"
 
 [{"type":"visualization","from":"my-vis","to":"my-vis-2"}]
---EXAMPLE---
+--EXAMPLE--
 --------------------------------------------------
 // KIBANA
 
