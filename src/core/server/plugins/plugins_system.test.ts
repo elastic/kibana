@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 
 const mockCreatePluginStartContext = jest.fn();
 jest.mock('./plugin_context', () => ({

@@ -23,9 +23,9 @@ const MockClusterClient = jest.fn();
 jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { CoreContext } from '../core_context';
 import { logger } from '../logging/__mocks__';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
