@@ -8,12 +8,18 @@ import { AbstractTMSSource } from '../tms_source';
 import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaTileMap } from '../../../../meta';
+import { i18n } from '@kbn/i18n';
 
 export class KibanaTilemapSource extends AbstractTMSSource {
 
   static type = 'KIBANA_TILEMAP';
-  static title = 'Custom Tile Map Service';
-  static description = 'Map tiles configured in kibana.yml';
+  static title = i18n.translate('xpack.maps.source.kbnTMSTitle', {
+    defaultMessage: 'Custom Tile Map Service'
+  });
+  static description = i18n.translate('xpack.maps.source.kbnTMSTitle', {
+    defaultMessage: 'Map tiles configured in kibana.yml'
+  });
+
   static icon = 'logoKibana';
 
   static createDescriptor() {
