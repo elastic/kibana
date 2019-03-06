@@ -32,7 +32,7 @@ exports[`LayerControl is rendered 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Layers"
-              id="xpack.maps.layerControl.layers"
+              id="xpack.maps.layerControl.layersTitle"
               values={Object {}}
             />
           </h2>
@@ -53,7 +53,7 @@ exports[`LayerControl is rendered 1`] = `
         >
           <FormattedMessage
             defaultMessage="Add layer"
-            id="xpack.maps.layerControl.addLayer"
+            id="xpack.maps.layerControl.addLayerButtonLabel"
             values={Object {}}
           />
         </EuiButtonEmpty>
@@ -102,7 +102,7 @@ exports[`LayerControl props isReadOnly 1`] = `
           <h2>
             <FormattedMessage
               defaultMessage="Layers"
-              id="xpack.maps.layerControl.layers"
+              id="xpack.maps.layerControl.layersTitle"
               values={Object {}}
             />
           </h2>
