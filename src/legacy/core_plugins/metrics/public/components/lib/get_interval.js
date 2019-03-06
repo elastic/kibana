@@ -49,10 +49,11 @@ export const convertIntervalIntoUnit = (interval, hasTranslateUnitString = true)
     }
   }
 };
+export const isGteInterval = (interval) => GTE_INTERVAL_RE.test(interval);
 
 export const isIntervalValid = (interval) => {
   return isString(interval) &&
-    (interval === 'auto' || INTERVAL_STRING_RE.test(interval) || GTE_INTERVAL_RE.test(interval));
+    (interval === 'auto' || INTERVAL_STRING_RE.test(interval) || isGteInterval(interval));
 };
 
 export const getInterval = (visData, model) => {

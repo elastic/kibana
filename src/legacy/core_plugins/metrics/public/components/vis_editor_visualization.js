@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getInterval, convertIntervalIntoUnit, isIntervalValid } from './lib/get_interval';
+import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval } from './lib/get_interval';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -161,8 +161,9 @@ class VisEditorVisualization extends Component {
   getFormattedPanelInterval() {
     const interval = get(this.props, 'model.interval') || 'auto';
     const isValid = isIntervalValid(interval);
+    const shouldShowActualInterval = interval === 'auto' || isGteInterval(interval);
 
-    if (interval === 'auto' || !isValid) {
+    if (shouldShowActualInterval || !isValid) {
       const autoInterval = convertIntervalIntoUnit(this.state.panelInterval, false);
 
       if (autoInterval) {
