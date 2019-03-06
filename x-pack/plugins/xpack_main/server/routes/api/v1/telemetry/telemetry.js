@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getAllStats, getLocalStats, encryptRequest } from '../../../../lib/telemetry';
+import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/telemetry';
 
 export function isAllowedToViewTelemetryData(req) {
   const { roles } = req.auth.credential;
@@ -94,19 +94,15 @@ export function telemetryRoute(server) {
       }
     },
     handler: async (req, h) => {
-
-      console.log('roles::', req.auth.credentials.roles);
-
       const config = req.server.config();
       const viewUnencrypted = req.viewUnencrypted;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
 
       if(viewUnencrypted) {
-        const isAllowed = viewUnencrypted && isAllowedToViewTelemetryData(req)
+        const isAllowed = viewUnencrypted && isAllowedToViewTelemetryData(req);
         if(!isAllowed) {
           const notAllowedErr = Error('Not allowed.');
-          console.log('notAllowedErr.status::', notAllowedErr.status);
           notAllowedErr.status = 401;
           throw notAllowedErr;
         }
@@ -118,7 +114,7 @@ export function telemetryRoute(server) {
           return usageData;
         }
 
-        return encryptRequest(req, usageData);
+        return encryptTelemetry(req, usageData);
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode

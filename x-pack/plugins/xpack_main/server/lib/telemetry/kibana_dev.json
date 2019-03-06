@@ -1,8 +1,0 @@
-{
-  "kty": "RSA",
-  "kid": "kibana_dev",
-  "use": "enc",
-  "alg": "RSA-OAEP",
-  "e": "AQAB",
-  "n": "r4yXWQW38QJh7SkO_MJe07uQdIFvYiw-HZ0M4sixye60aShyjlHocQPHrFQ4KN7MbKDN0_SMFTKFB5fXrPRV_iPfSkOzD-qW6S9-QtIMmQD2L_jRbpYNnbXuuT5c3yf3EzQr2RGjMLvFhPi-ir-ltdn_kAWBf2rSXME4XOmNDKDx8i30VDi-7subwl5SyeVWhm2x3QvAl5nTrlFEpgtR4chOzcd9dY_5L2DjHPbAur7_jFetUU8Es0M-FCrxtSZkFO43TlMurklO7yT7tQ4bsO-BOe0X00gZhXahKtTZmFWXMQJfhRekVpoUlvOqaOHjH-gl47eiRoyLWyQA9zIYaBhWwRmCeGTWbFa5zlBcr3kujnWXPwVoOpOo8TXHkAHqYfWNSrI_IRaAwIufHUMXFjSYdUy7hUu59-LSitsgwfyKYhN2PQFtaIijfDTVZUm0cMtUIwH7U_ytpFSndsGkZHGAsrqtrEuCpjiK01PVvwhGYac_V6DvCEUMpCYq2y1muUQe7e7Ms4p_MZaiNCS4x6Y_b2VTkcPgi3dbcDE6fOJ3RbGolU0JEbG8CE44TE81bWPYdGhe7oCTvVhe9NTHgENSb_p2JabHkFuEatmy87uQO_NScJ6YmlCgS152TY3v0Tfu3j5NEaRT4W3JcPdcXS_jkjfrc-jW-uR7l4G1qvs"
-}
