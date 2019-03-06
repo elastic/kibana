@@ -19,6 +19,8 @@
 
 require('ui/directives/input_focus');
 
+const mappings = require('../mappings');
+
 require('ui/modules')
   .get('app/sense')
   .directive('senseSettings', function () {
@@ -33,6 +35,7 @@ require('ui/modules')
         this.apply = () => {
           this.vals = settings.updateSettings(this.vals);
           $scope.kbnTopNav.close();
+          mappings.retrieveAutoCompleteInfo();
         };
 
         const self = this;

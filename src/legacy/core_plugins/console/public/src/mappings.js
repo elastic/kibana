@@ -304,7 +304,7 @@ function retrieveAutocompleteInfoFromServer() {
       if (templates) {
         loadTemplates(JSON.parse(templates[0]));
       } else {
-        templates = [];
+        loadTemplates({});
       }
       // Trigger an update event with the mappings, aliases
       $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
@@ -329,5 +329,6 @@ export default _.assign(mappingObj, {
   loadAliases: loadAliases,
   expandAliases: expandAliases,
   clear: clear,
-  startRetrievingAutoCompleteInfo: autocompleteRetriever
+  startRetrievingAutoCompleteInfo: autocompleteRetriever,
+  retrieveAutoCompleteInfo: retrieveAutocompleteInfoFromServer
 });
