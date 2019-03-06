@@ -6,7 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { RANKED_LICENSE_TYPES } from '../constants';
-import { LICENSE_STATUS } from '../../../common/constants';
+import {
+  LICENSE_STATUS_UNAVAILABLE,
+  LICENSE_STATUS_INVALID,
+  LICENSE_STATUS_EXPIRED,
+  LICENSE_STATUS_VALID,
+} from '../../../common/constants';
 
 export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {
   if(!RANKED_LICENSE_TYPES.includes(minimumLicenseRequired)) {
@@ -17,7 +22,7 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   // from Elasticsearch, assume worst case and disable
   if (!xpackLicenseInfo || !xpackLicenseInfo.isAvailable()) {
     return {
-      status: LICENSE_STATUS.UNAVAILABLE,
+      status: LICENSE_STATUS_UNAVAILABLE,
       message: i18n.translate(
         'xpack.server.checkLicense.errorUnavailableMessage',
         {
@@ -36,7 +41,7 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   // License is not valid
   if (!isLicenseModeValid) {
     return {
-      status: LICENSE_STATUS.INVALID,
+      status: LICENSE_STATUS_INVALID,
       message: i18n.translate(
         'xpack.server.checkLicense.errorUnsupportedMessage',
         {
@@ -50,7 +55,7 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
   // License is valid but not active
   if (!isLicenseActive) {
     return {
-      status: LICENSE_STATUS.EXPIRED,
+      status: LICENSE_STATUS_EXPIRED,
       message: i18n.translate(
         'xpack.server.checkLicense.errorExpiredMessage',
         {
@@ -63,6 +68,6 @@ export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInf
 
   // License is valid and active
   return {
-    status: LICENSE_STATUS.VALID,
+    status: LICENSE_STATUS_VALID,
   };
 }

@@ -14,6 +14,12 @@ export const getInitialState = path => {
     assets: {}, // assets end up here
     transient: {
       canUserWrite: uiCapabilities.canvas.save,
+      elementStats: {
+        total: 0,
+        ready: 0,
+        pending: 0,
+        error: 0,
+      },
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},

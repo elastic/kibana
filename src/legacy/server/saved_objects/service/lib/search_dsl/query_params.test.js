@@ -235,7 +235,8 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'us*',
-                    all_fields: true
+                    lenient: true,
+                    fields: ['*'],
                   }
                 }
               ]
@@ -265,7 +266,8 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'us*',
-                    all_fields: true
+                    lenient: true,
+                    fields: ['*'],
                   }
                 }
               ]
@@ -294,7 +296,8 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'us*',
-                    all_fields: true
+                    lenient: true,
+                    fields: ['*'],
                   }
                 }
               ]
@@ -323,7 +326,8 @@ describe('searchDsl/queryParams', () => {
                 {
                   simple_query_string: {
                     query: 'us*',
-                    all_fields: true
+                    lenient: true,
+                    fields: ['*'],
                   }
                 }
               ]
@@ -767,7 +771,8 @@ describe('searchDsl/queryParams', () => {
               must: [
                 {
                   simple_query_string: {
-                    all_fields: true,
+                    lenient: true,
+                    fields: ['*'],
                     default_operator: 'AND',
                     query: 'foo',
                   },
