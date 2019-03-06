@@ -9,6 +9,7 @@ import { TileLayer } from '../../tile_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaTileMap } from '../../../../meta';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 export class KibanaTilemapSource extends AbstractTMSSource {
 
@@ -40,9 +41,7 @@ export class KibanaTilemapSource extends AbstractTMSSource {
   async getImmutableProperties() {
     return [
       {
-        label: i18n.translate('xpack.maps.source.kbnTMS.dataSourceLabel', {
-          defaultMessage: 'Data source'
-        }),
+        label: getDataSourceLabel(),
         value: KibanaTilemapSource.title
       },
       {

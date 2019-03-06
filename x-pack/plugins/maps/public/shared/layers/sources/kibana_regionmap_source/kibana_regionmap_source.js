@@ -9,6 +9,7 @@ import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../../meta';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
@@ -46,9 +47,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   async getImmutableProperties() {
     return [
       {
-        label: i18n.translate('xpack.maps.source.kbnRegionMap.dataSourceLabel', {
-          defaultMessage: 'Data source'
-        }),
+        label: getDataSourceLabel(),
         value: KibanaRegionmapSource.title },
       {
         label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {

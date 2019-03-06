@@ -14,6 +14,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 const DEFAULT_LIMIT = 2048;
 
@@ -102,9 +103,7 @@ export class ESSearchSource extends AbstractESSource {
 
     return [
       {
-        label: i18n.translate('xpack.maps.source.esSearch.dataSourceLabel', {
-          defaultMessage: `Data source`,
-        }),
+        label: getDataSourceLabel(),
         value: ESSearchSource.title
       },
       {

@@ -10,6 +10,7 @@ import { TileLayer } from '../../tile_layer';
 import { getEmsTMSServices } from '../../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 
 export class EMSTMSSource extends AbstractTMSSource {
@@ -45,9 +46,7 @@ export class EMSTMSSource extends AbstractTMSSource {
   async getImmutableProperties() {
     return [
       {
-        label: i18n.translate('xpack.maps.source.emsTile.dataSourceLabel', {
-          defaultMessage: `Data source`,
-        }),
+        label: getDataSourceLabel(),
         value: EMSTMSSource.title
       },
       {

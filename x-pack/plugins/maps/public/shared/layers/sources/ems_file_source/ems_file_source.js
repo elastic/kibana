@@ -11,6 +11,7 @@ import { emsServiceSettings } from '../../../../kibana_services';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 export class EMSFileSource extends AbstractVectorSource {
 
@@ -70,9 +71,7 @@ export class EMSFileSource extends AbstractVectorSource {
     const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
     return [
       {
-        label: i18n.translate('xpack.maps.source.emsFile.dataSourceLabel', {
-          defaultMessage: `Data source`,
-        }),
+        label: getDataSourceLabel(),
         value: EMSFileSource.title
       },
       {
