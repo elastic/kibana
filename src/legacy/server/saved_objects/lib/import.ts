@@ -178,7 +178,7 @@ export async function importSavedObjects({
   return {
     success: errors.length === 0,
     successCount: objectsToImport.length - errors.length,
-    ...(errors.length ? { errors } : []),
+    ...(errors.length ? { errors } : {}),
   };
 }
 
@@ -218,6 +218,6 @@ export async function resolveImportConflicts({
   return {
     success: errors.length === 0,
     successCount: objectsToResolve.length - errors.length,
-    ...(errors.length ? { errors } : []),
+    ...(errors.length ? { errors } : {}),
   };
 }
