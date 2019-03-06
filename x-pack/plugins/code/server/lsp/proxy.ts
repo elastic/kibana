@@ -280,10 +280,10 @@ export class LanguageServerProxy implements ILanguageServerHandler {
             this.logger.debug(notification.message);
             break;
           case MessageType.Warning:
-            this.logger.debug(notification.message);
+            this.logger.log(notification.message);
             break;
           case MessageType.Error:
-            this.logger.error(notification.message);
+            this.logger.warn(notification.message);
             break;
         }
       }
