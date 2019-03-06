@@ -18,58 +18,147 @@
  */
 
 import { Extractor } from '@microsoft/api-extractor';
+import chalk from 'chalk';
+import dedent from 'dedent';
+import execa from 'execa';
 import * as fs from 'fs';
+import getopts from 'getopts';
 import * as path from 'path';
 import { run } from './run';
 
-const config = JSON.parse(fs.readFileSync(path.resolve('./api-extractor.json')).toString());
-
-// Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
-const memoryLogger = {
-  warnings: [] as string[],
-  errors: [] as string[],
-  logVerbose(message: string) {
-    return null;
-  },
-
-  logInfo(message: string) {
-    return null;
-  },
-
-  logWarning(message: string) {
-    this.warnings.push(message);
-  },
-
-  logError(message: string) {
-    this.errors.push(message);
-  },
+const runBuildTypes = async () => {
+  await execa.shell('yarn run build:types');
 };
 
-const options = {
-  // Indicates that API Extractor is running as part of a local build,
-  // e.g. on developer's machine. For example, if the *.api.ts output file
-  // has differences, it will be automatically overwritten for a
-  // local build, whereas this should report an error for a production build.
-  localBuild: false,
-  customLogger: memoryLogger,
+const runApiDocumenter = async () => {
+  await execa.shell('api-documenter markdown -i ./build -o ./docs/development/core/api');
 };
 
-run(({ log }) => {
+const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
+  const config = JSON.parse(fs.readFileSync(path.resolve('./api-extractor.json')).toString());
+
+  // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
+  const warnings = [] as string[];
+  const errors = [] as string[];
+
+  const memoryLogger = {
+    logVerbose(message: string) {
+      return null;
+    },
+
+    logInfo(message: string) {
+      return null;
+    },
+
+    logWarning(message: string) {
+      warnings.push(message);
+    },
+
+    logError(message: string) {
+      errors.push(message);
+    },
+  };
+
+  const options = {
+    // Indicates that API Extractor is running as part of a local build,
+    // e.g. on developer's machine. For example, if the *.api.ts output file
+    // has differences, it will be automatically overwritten for a
+    // local build, whereas this should report an error for a production build.
+    localBuild: acceptChanges,
+    customLogger: memoryLogger,
+  };
+
   const extractor = new Extractor(config, options);
-  const apiChanged = !extractor.processProject();
+  extractor.processProject();
 
-  memoryLogger.errors.forEach(e => log.warning(e));
-  memoryLogger.warnings
+  errors.forEach(msg => log.error(msg));
+  warnings
     .filter(msg => !msg.startsWith('You have changed the public API signature for this project.'))
     .forEach(msg => log.warning(msg));
 
-  if (apiChanged) {
-    log.warning('You have changed the public signature of the Kibana Core API\n');
+  const apiChanged = warnings.some(msg =>
+    msg.startsWith('You have changed the public API signature for this project.')
+  );
+
+  if (apiChanged && !acceptChanges) {
+    log.warning('You have changed the public signature of the Kibana Core API');
     log.warning(
-      'Review your changes and then:\n' +
-        '\t 1. Overwrite common/core_api_review/kibana.api.ts with a copy of build/kibana.api.ts\n' +
-        '\t 2. Regenarate core documentation with `yarn docs:api`\n' +
-        "\t 3. Describe the change in your PR including whether it's a major, minor or patch"
+      'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
+        '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
+        "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
     );
+  }
+
+  if (apiChanged && acceptChanges) {
+    log.warning('You have changed the public signature of the Kibana Core API');
+    log.warning(
+      'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
+    );
+  }
+
+  return apiChanged;
+};
+
+run(async ({ log }) => {
+  const extraFlags: string[] = [];
+  const opts = getopts(process.argv.slice(2), {
+    boolean: ['accept', 'docs', 'help'],
+    default: {
+      project: undefined,
+    },
+    unknown(name) {
+      extraFlags.push(name);
+      return false;
+    },
+  });
+
+  if (extraFlags.length) {
+    for (const flag of extraFlags) {
+      log.error(`Unknown flag: ${flag}`);
+    }
+
+    process.exitCode = 1;
+    opts.help = true;
+  }
+
+  if (opts.help) {
+    process.stdout.write(
+      dedent(chalk`
+        {dim usage:} node scripts/check_core_api_changes [...options]
+
+        Checks for any changes to the Kibana Core API
+
+        Examples:
+
+          {dim # Checks for any changes to the Kibana Core API}
+          {dim $} node scripts/check_core_api_changes
+
+          {dim # Checks for any changes to the Kibana Core API and updates the documentation}
+          {dim $} node scripts/check_core_api_changes --docs
+
+          {dim # Checks for and automatically accepts and updates documentation for any changes to the Kibana Core API}
+          {dim $} node scripts/check_core_api_changes --accept
+
+        Options:
+
+          --accept    {dim Accepts all changes by updating the API Review file \`common/core_api_review/kibana.api.ts\` and documentation}
+          --help      {dim Show this message}
+      `)
+    );
+    process.stdout.write('\n');
+    process.exit();
+  }
+
+  await runBuildTypes();
+
+  const apiChanged = runApiExtractor(opts.accept, log);
+
+  if (opts.accept || opts.docs) {
+    await runApiDocumenter();
+  }
+
+  if (apiChanged && !opts.accept) {
+    // If the API changed and we're not accepting the changes, exit process with error
+    process.exit(1);
   }
 });
