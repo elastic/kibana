@@ -98,7 +98,11 @@ function runServerFunctions(server) {
         } catch (err) {
           if (Boom.isBoom(err)) {
             return batchError(id, err.output.payload, err.statusCode);
+          } else if (err instanceof Error) {
+            return batchError(id, err.message);
           }
+
+          server.log(['interpreter', 'error'], err);
           return batchError(id, 'See server logs for details.');
         }
       };
