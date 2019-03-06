@@ -25,8 +25,7 @@ export { markdownMetadata };
 export function getGithubClient() {
   const client = new Octokit();
   client.authenticate({
-    type: 'token',
-    token: process.env.GITHUB_TOKEN
+    auth: process.env.GITHUB_TOKEN
   });
 
   return client;

@@ -7,7 +7,7 @@ octokit.repos.listForOrg({
 }).then(({data}) => {
   console.log('data: ', data);
 })
-*/
+
 function getGithubClient() {
   const client = new Octokit();
 
@@ -19,11 +19,20 @@ function getGithubClient() {
   return client;
 }
 console.log('START TEST');
-console.log(Object.keys(process.env))
 
 const client = getGithubClient();
 
 client.repos.getForOrg({
+  org: 'octokit',
+  type: 'public'
+}).then(({data}) => {
+  console.log('data: ', data);
+})
+*/
+
+const clientWithAuth = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+clientWithAuth.repos.listForOrg({
   org: 'octokit',
   type: 'public'
 }).then(({data}) => {
