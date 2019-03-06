@@ -171,7 +171,7 @@ export class ESJoinSource extends AbstractESSource {
     }));
     joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
       defaultMessage: `for metrics {metrics}`,
-      values: { metrlcs: metrics.join(',') }
+      values: { metrics: metrics.join(',') }
     }));
     return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
       defaultMessage: `Elasticsearch terms aggregation request for {description}`,
