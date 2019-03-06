@@ -32,8 +32,8 @@ export class Plugin {
     // Register react root
     routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id`, {
       template,
-      controller: ($scope, $route, $http, $q) => {
-        let elem;
+      controller: ($scope: any, $route: any, $http: any, $q: any) => {
+        let elem: Element | null | undefined;
 
         // React-router's <Redirect> does not play well with the angular router. It will cause this controller
         // to re-execute without the $destroy handler being called. This means that the app will be mounted twice

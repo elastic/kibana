@@ -15,7 +15,7 @@ import { App } from './app';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
-export const renderReact = async (elem: Element, core: object, plugins: object): void => {
+export const renderReact = async (elem: Element | null, core: object, plugins: object): Promise<void> => {
   const {
     i18n: { Context: I18nContext },
   } = core;

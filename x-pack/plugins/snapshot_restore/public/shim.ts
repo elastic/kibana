@@ -18,14 +18,14 @@ import { HashRouter } from 'react-router-dom';
 export function createShim() {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
-  let httpClient;
+  let httpClient: any;
 
   // The deffered AngularJS api allows us to create deferred promise
   // to be resolved later. This allows us to cancel in flight Http Requests
   // https://docs.angularjs.org/api/ng/service/$q#the-deferred-api
-  let $q;
+  let $q: any;
 
-  let reactRouter;
+  let reactRouter: HashRouter | undefined;
 
   return {
     core: {
@@ -38,7 +38,7 @@ export function createShim() {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);
         },
-        unmountReactApp: (elem: Element | undefined): void => {
+        unmountReactApp: (elem: Element | undefined | null): void => {
           if (elem) {
             unmountComponentAtNode(elem);
           }
@@ -46,7 +46,7 @@ export function createShim() {
         registerRouter: (router: HashRouter): void => {
           reactRouter = router;
         },
-        getRouter: (): HashRouter => {
+        getRouter: (): undefined | HashRouter => {
           return reactRouter;
         },
       },
