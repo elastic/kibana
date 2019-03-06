@@ -32,11 +32,31 @@ client.repos.getForOrg({
 
 const clientWithAuth = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
+console.log('creating check');
+clientWithAuth.checks.create({
+  owner:'elastic',
+  repo:'kibana',
+  name: 'check name',
+  head_sha: process.env.ghprbActualCommit,
+  details_url: 'http://www.google.com',
+  external_id: 'external id',
+  status: 'in_progress',
+  output: {
+    title: 'title',
+    summary: 'summary',
+    text: 'text',
+  },
+});
+console.log('check created');
+
+/*
 clientWithAuth.repos.listForOrg({
   org: 'octokit',
   type: 'public'
 }).then(({data}) => {
   console.log('data: ', data);
 })
+*/
+
 
 console.log('hi from script');
