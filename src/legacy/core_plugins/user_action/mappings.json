@@ -1,0 +1,9 @@
+{
+  "user-action": {
+    "properties": {
+      "count": {
+        "type": "integer"
+      }
+    }
+  }
+}

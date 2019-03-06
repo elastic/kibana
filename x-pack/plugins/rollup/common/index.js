@@ -7,3 +7,10 @@
 export const PLUGIN = {
   ID: 'rollup'
 };
+
+export const UA_APP_NAME = 'rollup-job-wizard';
+export const UA_ROLLUP_JOB_CREATE = 'create';
+
+export const USER_ACTIONS = [
+  UA_ROLLUP_JOB_CREATE,
+];

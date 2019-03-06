@@ -74,7 +74,8 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "resolutions": {
-    "**/@types/node": "10.12.27"
+    "**/@types/node": "10.12.27",
+    "**/typescript": "^3.3.3333"
   },
   "workspaces": {
     "packages": [
@@ -108,6 +109,7 @@
     "@kbn/pm": "1.0.0",
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
+    "@types/json-stable-stringify": "^1.0.32",
     "@types/lodash.clonedeep": "^4.5.4",
     "JSONStream": "1.1.1",
     "abortcontroller-polyfill": "^1.1.9",
@@ -131,6 +133,7 @@
     "color": "1.0.3",
     "commander": "2.8.1",
     "compare-versions": "3.1.0",
+    "core-js": "2.5.3",
     "css-loader": "1.0.0",
     "custom-event-polyfill": "^0.3.0",
     "d3": "3.5.6",
@@ -160,6 +163,7 @@
     "joi": "^13.5.2",
     "jquery": "^3.3.1",
     "js-yaml": "3.4.1",
+    "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
     "leaflet": "1.0.3",
@@ -363,7 +367,6 @@
     "jest-cli": "^24.1.0",
     "jest-raw-loader": "^1.0.1",
     "jimp": "0.2.28",
-    "json-stable-stringify": "^1.0.1",
     "json5": "^1.0.1",
     "karma": "3.1.4",
     "karma-chrome-launcher": "2.1.1",
