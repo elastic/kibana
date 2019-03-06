@@ -5,6 +5,8 @@
  */
 
 import { get } from 'lodash';
+import { fetchUserActions } from '../../../../server/lib/user_action';
+import { UA_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
 
@@ -180,6 +182,8 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
+      const userActions = await fetchUserActions(server, UA_APP_NAME, USER_ACTIONS);
+
       return {
         index_patterns: {
           total: rollupIndexPatterns.length,
@@ -193,6 +197,7 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
+        user_actions: userActions,
       };
     },
   });
