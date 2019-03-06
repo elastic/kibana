@@ -1,8 +1,8 @@
 [role="xpack"]
 [[using-kibana-with-security]]
-== Configuring Security in {kib}
+== Configuring security in {kib}
 ++++
-<titleabbrev>Configuring Security</titleabbrev>
+<titleabbrev>Configuring security</titleabbrev>
 ++++
 
 {kib} users have to log in when {security} is enabled on your cluster. You
@@ -126,4 +126,3 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
 include::audit-logging.asciidoc[]
-include::{kib-repo-dir}/settings/security-settings.asciidoc[]

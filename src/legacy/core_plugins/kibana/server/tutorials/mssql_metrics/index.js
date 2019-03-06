@@ -39,12 +39,12 @@ export function mssqlMetricsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mssql.html',
       },
     }),
-    euiIconType: 'logoMSSQL',
+    // euiIconType: 'logoMSSQL',
     isBeta: false,
     artifacts: {
       dashboards: [
         {
-          id: 'a2ead240-18bb-11e9-9836-f37dedd3b411',
+          id: 'a2ead240-18bb-11e9-9836-f37dedd3b411-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.mssqlMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Microsoft SQL Server metrics dashboard',
           }),

@@ -19,7 +19,7 @@
 
 
 import { Server } from 'hapi';
-import { registerHapiPlugins } from '../../server/http/register_hapi_plugins';
+import { registerHapiPlugins } from '../../legacy/server/http/register_hapi_plugins';
 
 export default class WatchServer {
   constructor(host, port, basePath, optimizer) {

@@ -33,7 +33,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     async getWatch(watchID) {
       const watchRow = await testSubjects.find(`watchRow-${watchID}`);
       const text =  await watchRow.getVisibleText();
-      const columns = text.split("\n");
+      const columns = text.split('\n');
       return {
         id: columns[0],
         name: columns[1]

@@ -63,7 +63,7 @@ Array [
               },
               Object {
                 "term": Object {
-                  "processor.name": "metric",
+                  "processor.event": "metric",
                 },
               },
               Object {

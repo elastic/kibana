@@ -18,6 +18,7 @@ import {
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
+import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
 
 interface ResponseTimeBucket {
@@ -86,16 +87,12 @@ export function timeseriesFetcher({
   const filter: ESFilter[] = [
     { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { range: rangeFilter(start, end) }
   ];
+
+  if (transactionName) {
+    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
+  }
 
   if (transactionType) {
     filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
@@ -142,12 +139,6 @@ export function timeseriesFetcher({
       }
     }
   };
-
-  if (transactionName) {
-    params.body.query.bool.must = [
-      { term: { [TRANSACTION_NAME]: transactionName } }
-    ];
-  }
 
   return client<void, Aggs>('search', params);
 }

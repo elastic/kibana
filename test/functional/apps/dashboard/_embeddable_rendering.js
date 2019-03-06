@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(27);
       await PageObjects.dashboard.waitForRenderComplete();
       const panelCount = await PageObjects.dashboard.getPanelCount();
       log.debug(`---------------------------- panel count = ${panelCount}`);
@@ -158,6 +159,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await dashboardExpect.panelCount(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await retry.try(async function tryingForTime() {

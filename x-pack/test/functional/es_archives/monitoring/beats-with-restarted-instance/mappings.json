@@ -4,11 +4,11 @@
     "index": ".monitoring-beats-6-2018.02.09",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -20,11 +20,11 @@
     "index": ".monitoring-es-6-2018.02.09",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -36,11 +36,11 @@
     "index": ".monitoring-alerts-6",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }
@@ -52,11 +52,11 @@
     "index": ".monitoring-kibana-6-2018.02.09",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

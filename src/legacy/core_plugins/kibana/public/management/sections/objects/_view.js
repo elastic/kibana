@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import angular from 'angular';
+import 'angular-elastic/elastic';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from '../../saved_object_registry';
 import objectViewHTML from './_view.html';
@@ -26,7 +27,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
-import { castEsToKbnFieldTypeName } from '../../../../../../../utils';
+import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
 
@@ -40,7 +41,7 @@ uiRoutes
     k7Breadcrumbs: getViewBreadcrumbs
   });
 
-uiModules.get('apps/management')
+uiModules.get('apps/management', ['monospaced.elastic'])
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',

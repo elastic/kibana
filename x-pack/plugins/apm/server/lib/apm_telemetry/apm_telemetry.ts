@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { countBy } from 'lodash';
-import { SavedObjectAttributes } from 'src/server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 
 // Support telemetry for additional agent types by appending definitions in
 // mappings.json and the AgentName enum.

@@ -22,7 +22,7 @@ import { createReadStream } from 'fs';
 
 import {
   createPromiseFromStreams
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   isGzip,

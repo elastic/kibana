@@ -13,7 +13,7 @@ import {
   EuiText
 } from '@elastic/eui';
 
-export function StyleTabs({ layer, reset, updateStyle }) {
+export function StyleTabs({ layer, updateStyle }) {
   return layer.getSupportedStyles().map((Style, index) => {
     let description;
     if (Style.description) {
@@ -29,8 +29,7 @@ export function StyleTabs({ layer, reset, updateStyle }) {
       handleStyleChange: (styleDescriptor) => {
         updateStyle(styleDescriptor);
       },
-      style: (Style.canEdit(currentStyle)) ? currentStyle : null,
-      resetStyle: () => reset()
+      style: (Style.canEdit(currentStyle)) ? currentStyle : null
     });
 
     if (!styleEditor) {

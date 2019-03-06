@@ -44,7 +44,7 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
-import { getVisualizeLoader } from '../../../../../../ui/public/visualize/loader';
+import { getVisualizeLoader } from '../../../../../ui/public/visualize/loader';
 import { showShareContextMenu, ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
@@ -119,6 +119,7 @@ function VisEditor(
   AppState,
   $window,
   $injector,
+  indexPatterns,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -135,7 +136,7 @@ function VisEditor(
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
-  // vis is instance of src/ui/public/vis/vis.js.
+  // vis is instance of src/legacy/ui/public/vis/vis.js.
   // SearchSource is a promise-based stream of search results that can inherit from other search sources.
   const { vis, searchSource } = savedVis;
 
@@ -313,7 +314,14 @@ function VisEditor(
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.indexPattern = vis.indexPattern;
+    if (vis.indexPattern) {
+      $scope.indexPattern = vis.indexPattern;
+    } else {
+      indexPatterns.getDefault().then(defaultIndexPattern => {
+        $scope.indexPattern = defaultIndexPattern;
+      });
+    }
+
     $scope.searchSource = searchSource;
     $scope.state = $state;
 

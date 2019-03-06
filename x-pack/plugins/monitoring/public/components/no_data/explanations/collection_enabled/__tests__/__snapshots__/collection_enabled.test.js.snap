@@ -194,6 +194,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             <EuiCodeBlockImpl
               fontSize="s"
               inline={true}
+              isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
             >
@@ -214,6 +215,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             <EuiCodeBlockImpl
               fontSize="s"
               inline={true}
+              isCopyable={false}
               paddingSize="l"
               transparentBackground={false}
             >

@@ -18,6 +18,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/saved_object_api_integration/security_and_spaces/config'),
   require.resolve('../test/saved_object_api_integration/security_only/config'),
   require.resolve('../test/saved_object_api_integration/spaces_only/config'),
-  // todo: re-enable when https://github.com/elastic/kibana/issues/30586 is fixed
-  //require.resolve('../test/upgrade_assistant_integration/config'),
+  require.resolve('../test/upgrade_assistant_integration/config'),
 ]);

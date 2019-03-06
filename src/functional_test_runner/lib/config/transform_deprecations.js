@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createTransform, Deprecations } from '../../../deprecation';
+import { createTransform, Deprecations } from '../../../legacy/deprecation';
 
 export const transformDeprecations = createTransform([
   Deprecations.unused('servers.webdriver')

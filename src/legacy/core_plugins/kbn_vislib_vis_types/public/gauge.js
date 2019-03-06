@@ -61,7 +61,7 @@ export default function GaugeVisType(Private, i18n) {
           scale: {
             show: true,
             labels: false,
-            color: '#333',
+            color: 'rgba(105,112,125,0.2)',
           },
           type: 'meter',
           style: {
@@ -70,7 +70,7 @@ export default function GaugeVisType(Private, i18n) {
             mask: false,
             bgMask: false,
             maskBars: 50,
-            bgFill: '#eee',
+            bgFill: 'rgba(105,112,125,0.2)',
             bgColor: true,
             subText: '',
             fontSize: 60,
@@ -108,7 +108,7 @@ export default function GaugeVisType(Private, i18n) {
           title: i18n('kbnVislibVisTypes.gauge.groupTitle', { defaultMessage: 'Split Group' }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
         }
       ])
     },

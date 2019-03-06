@@ -1,67 +1,71 @@
 {
   "type": "index",
   "value": {
+    "aliases": {
+    },
     "index": ".monitoring-kibana-6-2017.08.23",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
-    },
-    "aliases": {}
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
+    "aliases": {
+    },
     "index": ".monitoring-alerts-6",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
-    },
-    "aliases": {}
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
+    "aliases": {
+    },
     "index": ".monitoring-logstash-6-2017.08.23",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
-    },
-    "aliases": {}
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
+    "aliases": {
+    },
     "index": ".monitoring-es-6-2017.08.23",
     "settings": {
       "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
         "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
         "format": "6",
-        "number_of_replicas": "0"
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
-    },
-    "aliases": {}
+    }
   }
 }

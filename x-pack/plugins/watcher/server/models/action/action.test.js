@@ -28,8 +28,8 @@ describe('action', () => {
         upstreamJson = {
           id: 'my-action',
           actionJson: {
-            "logging": {
-              "text": "foo"
+            'logging': {
+              'text': 'foo'
             }
           }
         };
@@ -112,8 +112,8 @@ describe('action', () => {
         upstreamJson = {
           id: 'my-action',
           actionJson: {
-            "email": {
-              "to": "elastic@elastic.co"
+            'email': {
+              'to': 'elastic@elastic.co'
             }
           }
         };

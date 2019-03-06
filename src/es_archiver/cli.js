@@ -65,6 +65,10 @@ cmd.command('unload <name>')
   .description('remove indices created by the archive in --dir with <name>')
   .action(name => execute(archiver => archiver.unload(name)));
 
+cmd.command('empty-kibana-index')
+  .description('[internal] Delete any Kibana indices, and initialize the Kibana index as Kibana would do on startup.')
+  .action(() => execute(archiver => archiver.emptyKibanaIndex()));
+
 cmd.command('edit [prefix]')
   .description('extract the archives under the prefix, wait for edits to be completed, and then recompress the archives')
   .action(prefix => (
@@ -115,6 +119,10 @@ async function execute(fn) {
       errorCount++;
       log.error(msg);
     };
+
+    if (!fn) {
+      error(`Unknown command "${cmd.args[0]}"`);
+    }
 
     if (!cmd.esUrl) {
       error('You must specify either --es-url or --config flags');

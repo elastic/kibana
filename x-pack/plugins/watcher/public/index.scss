@@ -1,5 +1,5 @@
 // Import the EUI global scope so we can use EUI constants
-@import 'ui/public/styles/_styling_constants';
+@import 'src/legacy/ui/public/styles/_styling_constants';
 
 // Temporary hacks
 @import 'hacks';
@@ -26,3 +26,4 @@
 @import 'sections/watch_edit/components/watch_edit_detail/index';
 @import 'sections/watch_edit/components/watch_edit_execute_detail/index';
 @import 'sections/watch_edit/components/watch_edit_title_panel/index';
+@import 'sections/watch_list/components/watch_list/index';

@@ -64,5 +64,5 @@ export async function getKibanaRegionList() {
 
 export async function getKibanaTileMap() {
   const dataSource = await getDataSources();
-  return _.get(dataSource, 'kibana.tilemap', []);
+  return _.get(dataSource, 'kibana.tilemap', {});
 }

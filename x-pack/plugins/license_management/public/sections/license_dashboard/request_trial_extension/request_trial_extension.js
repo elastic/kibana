@@ -8,6 +8,7 @@ import React from 'react';
 
 import { EuiFlexItem, EuiCard, EuiLink, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 
 export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   if (!shouldShowRequestTrialExtension) {
@@ -22,7 +23,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
         values={{
           platinumLicenseFeaturesLinkText: (
             <EuiLink
-              href="https://www.elastic.co/subscriptions/xpack"
+              href={EXTERNAL_LINKS.SUBSCRIPTIONS}
               target="_blank"
             >
               <FormattedMessage
@@ -47,7 +48,7 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
           <EuiButton
             data-test-subj="extendTrialButton"
             target="_blank"
-            href="https://www.elastic.co/trialextension"
+            href={EXTERNAL_LINKS.TRIAL_EXTENSION}
           >
             <FormattedMessage
               id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendTrialButtonLabel"

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectAttributes } from 'src/server/saved_objects/service/saved_objects_client';
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
   AgentName,
   APM_TELEMETRY_DOC_ID,

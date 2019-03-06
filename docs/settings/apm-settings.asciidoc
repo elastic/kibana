@@ -1,8 +1,8 @@
 [role="xpack"]
 [[apm-settings-kb]]
-=== APM Settings in Kibana
+=== APM settings in Kibana
 ++++
-<titleabbrev>APM Settings</titleabbrev>
+<titleabbrev>APM settings</titleabbrev>
 ++++
 
 You do not need to configure any settings to use APM. It is enabled by default.
@@ -11,7 +11,7 @@ copy and paste the relevant settings below into your `kibana.yml` configuration 
 
 [float]
 [[general-apm-settings-kb]]
-==== General APM Settings
+==== General APM settings
 
 xpack.apm.enabled:: Set to `false` to disabled the APM plugin {kib}. Defaults to
 `true`.

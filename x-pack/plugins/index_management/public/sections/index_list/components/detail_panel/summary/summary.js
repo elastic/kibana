@@ -86,7 +86,7 @@ export class Summary extends React.PureComponent {
         <EuiDescriptionListTitle key={fieldName}>
           <strong>{headers[fieldName]}</strong>
         </EuiDescriptionListTitle>,
-        <EuiDescriptionListDescription key={fieldName + "_desc"}>
+        <EuiDescriptionListDescription key={fieldName + '_desc'}>
           {content}
         </EuiDescriptionListDescription>
       ];

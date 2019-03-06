@@ -1,24 +1,16 @@
 {
   "type": "index",
   "value": {
-    "index": ".monitoring-es-6-2017.08.15",
-    "settings": {
-      "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "format": "6",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": ".monitoring-es-6-2017.08.15",
     "mappings": {
-      "dynamic": "false",
       "date_detection": false,
+      "dynamic": "false",
       "properties": {
         "ccr_auto_follow_stats": {
           "properties": {
             "auto_followed_clusters": {
-              "type": "nested",
               "properties": {
                 "cluster_name": {
                   "type": "keyword"
@@ -29,7 +21,8 @@
                 "time_since_last_check_millis": {
                   "type": "long"
                 }
-              }
+              },
+              "type": "nested"
             },
             "number_of_failed_follow_indices": {
               "type": "long"
@@ -41,7 +34,6 @@
               "type": "long"
             },
             "recent_auto_follow_errors": {
-              "type": "nested",
               "properties": {
                 "auto_follow_exception": {
                   "properties": {
@@ -59,7 +51,8 @@
                 "timestamp": {
                   "type": "long"
                 }
-              }
+              },
+              "type": "nested"
             }
           }
         },
@@ -124,7 +117,6 @@
               "type": "long"
             },
             "read_exceptions": {
-              "type": "nested",
               "properties": {
                 "exception": {
                   "properties": {
@@ -142,7 +134,8 @@
                 "retries": {
                   "type": "integer"
                 }
-              }
+              },
+              "type": "nested"
             },
             "remote_cluster": {
               "type": "keyword"
@@ -1069,8 +1062,8 @@
               "type": "keyword"
             },
             "timestamp": {
-              "type": "date",
-              "format": "date_time"
+              "format": "date_time",
+              "type": "date"
             },
             "transport_address": {
               "type": "keyword"
@@ -1084,31 +1077,32 @@
           "type": "keyword"
         },
         "timestamp": {
-          "type": "date",
-          "format": "date_time"
+          "format": "date_time",
+          "type": "date"
         },
         "type": {
           "type": "keyword"
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
-    "index": ".monitoring-logstash-6-2017.08.15",
-    "settings": {
-      "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "format": "6",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": ".monitoring-logstash-6-2017.08.15",
     "mappings": {
       "dynamic": "false",
       "properties": {
@@ -1150,8 +1144,8 @@
                   "type": "keyword"
                 },
                 "representation": {
-                  "type": "object",
-                  "enabled": false
+                  "enabled": false,
+                  "type": "object"
                 },
                 "version": {
                   "type": "keyword"
@@ -1338,7 +1332,6 @@
               }
             },
             "pipelines": {
-              "type": "nested",
               "properties": {
                 "ephemeral_id": {
                   "type": "keyword"
@@ -1395,10 +1388,8 @@
                   }
                 },
                 "vertices": {
-                  "type": "nested",
                   "properties": {
                     "double_gauges": {
-                      "type": "nested",
                       "properties": {
                         "name": {
                           "type": "keyword"
@@ -1406,7 +1397,8 @@
                         "value": {
                           "type": "double"
                         }
-                      }
+                      },
+                      "type": "nested"
                     },
                     "duration_in_millis": {
                       "type": "long"
@@ -1421,7 +1413,6 @@
                       "type": "keyword"
                     },
                     "long_counters": {
-                      "type": "nested",
                       "properties": {
                         "name": {
                           "type": "keyword"
@@ -1429,7 +1420,8 @@
                         "value": {
                           "type": "long"
                         }
-                      }
+                      },
+                      "type": "nested"
                     },
                     "pipeline_ephemeral_id": {
                       "type": "keyword"
@@ -1437,9 +1429,11 @@
                     "queue_push_duration_in_millis": {
                       "type": "long"
                     }
-                  }
+                  },
+                  "type": "nested"
                 }
-              }
+              },
+              "type": "nested"
             },
             "process": {
               "properties": {
@@ -1498,8 +1492,8 @@
               "type": "keyword"
             },
             "timestamp": {
-              "type": "date",
-              "format": "date_time"
+              "format": "date_time",
+              "type": "date"
             },
             "transport_address": {
               "type": "keyword"
@@ -1510,31 +1504,32 @@
           }
         },
         "timestamp": {
-          "type": "date",
-          "format": "date_time"
+          "format": "date_time",
+          "type": "date"
         },
         "type": {
           "type": "keyword"
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
-    "index": ".monitoring-kibana-6-2017.08.15",
-    "settings": {
-      "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "format": "6",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": ".monitoring-kibana-6-2017.08.15",
     "mappings": {
       "dynamic": "false",
       "properties": {
@@ -1727,8 +1722,8 @@
               "type": "keyword"
             },
             "timestamp": {
-              "type": "date",
-              "format": "date_time"
+              "format": "date_time",
+              "type": "date"
             },
             "transport_address": {
               "type": "keyword"
@@ -1739,31 +1734,32 @@
           }
         },
         "timestamp": {
-          "type": "date",
-          "format": "date_time"
+          "format": "date_time",
+          "type": "date"
         },
         "type": {
           "type": "keyword"
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }
 
 {
   "type": "index",
   "value": {
-    "index": ".monitoring-alerts-6",
-    "settings": {
-      "index": {
-        "codec": "best_compression",
-        "number_of_shards": "1",
-        "auto_expand_replicas": "0-1",
-        "format": "6",
-        "number_of_replicas": "0"
-      }
+    "aliases": {
     },
+    "index": ".monitoring-alerts-6",
     "mappings": {
       "dynamic": "false",
       "properties": {
@@ -1809,6 +1805,14 @@
         }
       }
     },
-    "aliases": {}
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "codec": "best_compression",
+        "format": "6",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
   }
 }

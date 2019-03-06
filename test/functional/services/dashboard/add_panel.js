@@ -45,9 +45,9 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       const addPanel = await testSubjects.find('dashboardAddPanel');
       const embeddableRows = await addPanel.findAllByClassName('euiLink');
       for (let i = 0; i < embeddableRows.length; i++) {
-        await embeddableRows[i].click();
         log.debug(`added ${await embeddableRows[i].getVisibleText()}`);
-        // await PageObjects.common.sleep(1000);
+        await embeddableRows[i].click();
+        await PageObjects.common.closeToast();
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
     }
@@ -173,7 +173,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       // The search input field may be disabled while the table is loading so wait for it
       await this.waitForEuiTableLoading();
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitForEuiTableLoading();
     }
 
     async panelAddLinkExists(name) {

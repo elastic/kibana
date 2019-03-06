@@ -26,7 +26,7 @@ import {
   createConcatStream,
   createListStream,
   createPromiseFromStreams,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createParseArchiveStreams } from '../parse';
 

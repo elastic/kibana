@@ -32,8 +32,16 @@ export const transientReducer = handleActions(
       return set(transientState, 'canUserWrite', Boolean(payload));
     },
 
+    [actions.setFirstLoad]: (transientState, { payload }) => {
+      return set(transientState, 'isFirstLoad', Boolean(payload));
+    },
+
     [actions.setFullscreen]: (transientState, { payload }) => {
       return set(transientState, 'fullscreen', Boolean(payload));
+    },
+
+    [actions.setElementStats]: (transientState, { payload }) => {
+      return set(transientState, 'elementStats', payload);
     },
 
     [actions.selectElement]: (transientState, { payload }) => {

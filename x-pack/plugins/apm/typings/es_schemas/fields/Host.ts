@@ -5,8 +5,5 @@
  */
 
 export interface Host {
-  architecture?: string;
   hostname?: string;
-  ip?: string;
-  os?: { platform?: string };
 }

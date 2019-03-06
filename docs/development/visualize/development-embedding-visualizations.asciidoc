@@ -35,7 +35,7 @@ For a more complex use-case you usually want to use that method.
 `params` is a parameter object specifying several parameters, that influence rendering.
 
 You will find a detailed description of all the parameters in the inline docs
-in the {repo}blob/{branch}/src/ui/public/visualize/loader/types.ts[loader source code].
+in the {repo}blob/{branch}/src/legacy/ui/public/visualize/loader/types.ts[loader source code].
 
 Both methods return an `EmbeddedVisualizeHandler`, that gives you some access
 to the visualization. The `embedVisualizationWithSavedObject` method will return
@@ -55,4 +55,4 @@ The returned `EmbeddedVisualizeHandler` itself has the following methods and pro
 - `removeRenderCompleteListener(listener)`: removes an event listener from the handler again
 
 You can find the detailed `EmbeddedVisualizeHandler` documentation in its
-{repo}blob/{branch}/src/ui/public/visualize/loader/embedded_visualize_handler.ts[source code].
+{repo}blob/{branch}/src/legacy/ui/public/visualize/loader/embedded_visualize_handler.ts[source code].

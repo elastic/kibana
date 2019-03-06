@@ -23,16 +23,11 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
-  type HistogramSeries {
-    monitorId: String
-    data: [HistogramDataPoint!]
-  }
-
   type Snapshot {
     up: Int
     down: Int
     total: Int
-    histogram: [HistogramSeries!]
+    histogram: [HistogramDataPoint!]!
   }
 
   type DataPoint {
@@ -40,24 +35,30 @@ export const monitorsSchema = gql`
     y: Float
   }
 
+  "Represents a bucket of monitor status information."
   type StatusData {
-    x: UnsignedInteger
+    "The timeseries point for this status data."
+    x: UnsignedInteger!
+    "The value of up counts for this point."
     up: Int
+    "The value for down counts for this point."
     down: Int
+    "The total down counts for this point."
     total: Int
   }
 
-  type MonitorChartEntry {
-    maxContent: DataPoint
-    maxResponse: DataPoint
-    maxValidate: DataPoint
-    maxTotal: DataPoint
-    maxWriteRequest: DataPoint
-    maxTcpRtt: DataPoint
-    maxDuration: DataPoint
-    minDuration: DataPoint
-    avgDuration: DataPoint
-    status: StatusData
+  "The data used to populate the monitor charts."
+  type MonitorChart {
+    "The max and min values for the monitor duration."
+    durationArea: [MonitorDurationAreaPoint!]!
+    "The average values for the monitor duration."
+    durationLine: [MonitorDurationAveragePoint!]!
+    "The counts of up/down checks for the monitor."
+    status: [StatusData!]!
+    "The maximum status doc count in this chart."
+    statusMaxCount: Int!
+    "The maximum duration value in this chart."
+    durationMaxValue: Int!
   }
 
   type MonitorKey {
@@ -70,10 +71,33 @@ export const monitorsSchema = gql`
     y: Int
   }
 
+  "Represents a monitor's duration performance in microseconds at a point in time."
+  type MonitorDurationAreaPoint {
+    "The timeseries value for this point in time."
+    x: UnsignedInteger!
+    "The min duration value in microseconds at this time."
+    yMin: Float
+    "The max duration value in microseconds at this point."
+    yMax: Float
+  }
+
+  "Represents the average monitor duration ms at a point in time."
+  type MonitorDurationAveragePoint {
+    "The timeseries value for this point."
+    x: UnsignedInteger!
+    "The average duration ms for the monitor."
+    y: Float
+  }
+
+  "Represents the latest recorded information about a monitor."
   type LatestMonitor {
+    "The ID of the monitor represented by this data."
     id: MonitorKey!
+    "Information from the latest document."
     ping: Ping
+    "Buckets of recent up count status data."
     upSeries: [MonitorSeriesPoint]
+    "Buckets of recent down count status data."
     downSeries: [MonitorSeriesPoint]
   }
 
@@ -109,7 +133,7 @@ export const monitorsSchema = gql`
       monitorId: String!
       dateRangeStart: String!
       dateRangeEnd: String!
-    ): [MonitorChartEntry]
+    ): MonitorChart
 
     getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
 

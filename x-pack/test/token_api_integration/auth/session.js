@@ -57,7 +57,7 @@ export default function ({ getService }) {
         .expect(200);
     });
 
-    it('expired access token should be automatically refreshed', async function () {
+    it.skip('expired access token should be automatically refreshed', async function () {
       this.timeout(40000);
 
       const originalCookie = await createSessionCookie();

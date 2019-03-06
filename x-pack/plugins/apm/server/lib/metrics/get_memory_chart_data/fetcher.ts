@@ -7,7 +7,7 @@ import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
 import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  PROCESSOR_NAME,
+  PROCESSOR_EVENT,
   SERVICE_NAME
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../helpers/get_bucket_size';
@@ -36,7 +36,7 @@ export async function fetch({
   const { intervalString } = getBucketSize(start, end, 'auto');
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_NAME]: 'metric' } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
     {
       range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
     },

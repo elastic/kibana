@@ -40,6 +40,11 @@ Array [
           "bool": Object {
             "filter": Array [
               Object {
+                "exists": Object {
+                  "field": "bucket_span",
+                },
+              },
+              Object {
                 "range": Object {
                   "timestamp": Object {
                     "format": "epoch_millis",
@@ -49,11 +54,6 @@ Array [
                 },
               },
             ],
-            "must": Object {
-              "exists": Object {
-                "field": "bucket_span",
-              },
-            },
           },
         },
         "size": 0,

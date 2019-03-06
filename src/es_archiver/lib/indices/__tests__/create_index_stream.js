@@ -25,7 +25,7 @@ import {
   createPromiseFromStreams,
   createConcatStream,
   createListStream
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import {
   createCreateIndexStream

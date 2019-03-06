@@ -18,6 +18,7 @@
  */
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
+const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
 const DATA_LOADING_SELECTOR = '[data-loading]';
 
 export function RenderableProvider({ getService }) {
@@ -39,7 +40,14 @@ export function RenderableProvider({ getService }) {
       await retry.try(async () => {
         const completedElements = await find.allByCssSelector(RENDER_COMPLETE_SELECTOR);
         if (completedElements.length < count) {
-          throw new Error(`${completedElements.length} elements completed rendering, waiting on a total of ${count}`);
+          const pendingElements = await find.allByCssSelector(RENDER_COMPLETE_PENDING_SELECTOR);
+          const pendingElementNames = [];
+          for (const pendingElement of pendingElements) {
+            const title = await pendingElement.getAttribute('data-title');
+            pendingElementNames.push(title);
+          }
+          throw new Error(`${completedElements.length} elements completed rendering, still waiting on a total of ${count}
+            specifically:\n${pendingElementNames.join('\n')}`);
         }
 
         const stillLoadingElements = await find.allByCssSelector(DATA_LOADING_SELECTOR, 1000);

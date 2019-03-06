@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import { ElasticsearchServiceStart } from '../elasticsearch';
+
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
 const mockDiscover = jest.fn();
 jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
@@ -42,6 +44,7 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
+let startDeps: { elasticsearch: ElasticsearchServiceStart };
 beforeEach(() => {
   mockPackage.raw = {
     branch: 'feature-v1',
@@ -54,6 +57,7 @@ beforeEach(() => {
   };
 
   env = Env.createDefault(getEnvOptions());
+  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
@@ -75,7 +79,7 @@ test('`start` throws if plugin has an invalid manifest', async () => {
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Invalid JSON (invalid-manifest, path-1)]
 `);
@@ -96,7 +100,7 @@ test('`start` throws if plugin required Kibana version is incompatible with the 
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Incompatible version (incompatible-version, path-3)]
 `);
@@ -144,7 +148,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
     ]),
   });
 
-  await expect(pluginsService.start()).rejects.toMatchInlineSnapshot(
+  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Plugin with id "conflicting-id" is already registered!]`
   );
 
@@ -221,9 +225,10 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     ]),
   });
 
-  expect(await pluginsService.start()).toBeInstanceOf(Map);
+  expect(await pluginsService.start(startDeps)).toBeInstanceOf(Map);
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
 
   expect(logger.mockCollect().info).toMatchInlineSnapshot(`
 Array [
@@ -283,12 +288,12 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginContracts = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginContracts);
+  const pluginsStart = new Map();
+  mockPluginSystem.startPlugins.mockResolvedValue(pluginsStart);
 
-  const startContract = await pluginsService.start();
+  const start = await pluginsService.start(startDeps);
 
-  expect(startContract).toBe(pluginContracts);
+  expect(start).toBe(pluginsStart);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);

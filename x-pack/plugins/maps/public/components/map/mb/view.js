@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React from 'react';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
-import { inspectorAdapters } from '../../../kibana_services';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
 
@@ -94,8 +93,7 @@ export class MBMapContainer extends React.Component {
       originalMbBoxRemoveLayerFunc.apply(this._mbMap, [id]);
     };
 
-    this.assignSizeWatch();
-
+    this._initResizerChecker();
 
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
@@ -150,20 +148,11 @@ export class MBMapContainer extends React.Component {
     }
   }
 
-  assignSizeWatch() {
+  _initResizerChecker() {
     this._checker = new ResizeChecker(this.refs.mapContainer);
-    this._checker.on('resize', (() => {
-      let lastWidth = window.innerWidth;
-      let lastHeight = window.innerHeight;
-      return () => {
-        if (lastWidth === window.innerWidth
-          && lastHeight === window.innerHeight && this._mbMap) {
-          this._mbMap.resize();
-        }
-        lastWidth = window.innerWidth;
-        lastHeight = window.innerHeight;
-      };
-    })());
+    this._checker.on('resize', () => {
+      this._mbMap.resize();
+    });
   }
 
   _syncMbMapWithMapState = () => {
@@ -185,7 +174,9 @@ export class MBMapContainer extends React.Component {
         new mapboxgl.LngLat(clamp(goto.bounds.min_lon, -180, 180), clamp(goto.bounds.min_lat, -89, 89)),
         new mapboxgl.LngLat(clamp(goto.bounds.max_lon, -180, 180), clamp(goto.bounds.max_lat, -89, 89)),
       );
-      this._mbMap.fitBounds(lnLatBounds);
+      //maxZoom ensure we're not zooming in too far on single points or small shapes
+      //the padding is to avoid too tight of a fit around edges
+      this._mbMap.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
     } else if (goto.center) {
       this._mbMap.setZoom(goto.center.zoom);
       this._mbMap.setCenter({
@@ -215,7 +206,7 @@ export class MBMapContainer extends React.Component {
   };
 
   _syncMbMapWithInspector = () => {
-    if (!this.props.isMapReady || !inspectorAdapters.map) {
+    if (!this.props.isMapReady || !this.props.inspectorAdapters.map) {
       return;
     }
 
@@ -224,7 +215,7 @@ export class MBMapContainer extends React.Component {
       zoom: this._mbMap.getZoom(),
 
     };
-    inspectorAdapters.map.setMapState({
+    this.props.inspectorAdapters.map.setMapState({
       stats,
       style: this._mbMap.getStyle(),
     });
