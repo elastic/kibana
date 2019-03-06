@@ -17,7 +17,7 @@
 
 .monaco-editor-hover {
   min-width: 350px;
-  border: 1px solid #c8c8c8;
+  border: $euiBorderThin;
   cursor: default;
   position: absolute;
   overflow-y: auto;
@@ -30,10 +30,9 @@
   box-sizing: initial;
   animation: fadein .1s linear;
   line-height: 1.5em;
-  background: #FFFFFF;
+  background: $euiColorLightestShade;
   border-radius: 4px 4px 4px 4px;
-  box-shadow: 0 4px 8px 0 rgba(153,153,153,0.15),
-  0 2px 3px -1px rgba(153,153,153,0.30);
+  @include euiBottomShadow;
 }
 
 .monaco-editor-hover .hover-row {
@@ -41,14 +40,14 @@
 }
 
 .monaco-editor-hover .button-group {
-  background: linear-gradient(-180deg, #FAFAFA 0%, #F8F8F8 100%);
+  background: linear-gradient(-180deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
   border-radius: 0 0 4px 4px;
-  box-shadow: 0 -1px 0 0 #D9D9D9;
+  box-shadow: 0 -1px 0 0 $euiBorderColor;
   height: 32px;
 }
 
 .monaco-editor-hover .button-group button:not(:first-child) {
-  border-left: 1px solid #D8D8D8;
+  border-left: 1px solid $euiBorderColor;
 }
 
 .monaco-editor-hover .button-group button{
@@ -57,6 +56,14 @@
   border: 0;
   border-radius: 0;
   flex: 1;
+}
+
+.monaco-editor .scroll-decoration {
+  display: none;
+}
+
+.code-mark-line-number, .code-monaco-highlight-line {
+  background-color: $euiColorLightShade;
 }
 
 .text-placeholder {
@@ -71,8 +78,8 @@
   animation-iteration-count: infinite;
   animation-name: placeHolderShimmer;
   animation-timing-function: linear;
-  background: #f6f7f8;
-  background: linear-gradient(to right, #eaeaea 8%, #f8f8f8 38%, #eaeaea 54%);
+  background: $euiColorLightestShade;
+  background: linear-gradient(to right, $euiColorLightShade 8%, $euiColorLightestShade 38%, $euiColorLightShade 54%);
   background-size: 1000px 640px;
 
   position: relative;

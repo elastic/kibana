@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import convert from 'color-convert';
 // (1) Desired editor features:
 import 'monaco-editor/esm/vs/editor/browser/controller/coreCommands.js';
 import 'monaco-editor/esm/vs/editor/browser/widget/codeEditorWidget.js';
@@ -49,6 +49,8 @@ import 'monaco-editor/esm/vs/editor/contrib/goToDefinition/goToDefinitionMouse';
 // import 'monaco-editor/esm/vs/editor/standalone/browser/toggleHighContrast/toggleHighContrast.js';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api.js';
 
+import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
+import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 // (2) Desired languages:
 // import 'monaco-editor/esm/vs/language/typescript/monaco.contribution';
 // import 'monaco-editor/esm/vs/language/css/monaco.contribution';
@@ -94,6 +96,9 @@ import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution'
 // import 'monaco-editor/esm/vs/basic-languages/pug/pug.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/python/python.contribution.js';
 import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution';
+import chrome from 'ui/chrome';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 // @ts-ignore
 /*self.MonacoEnvironment = {
@@ -114,46 +119,74 @@ import 'monaco-editor/esm/vs/basic-languages/typescript/typescript.contribution'
   },
 };*/
 
-const elasticLight = {
-  keyword: '#DD0A73',
-  comment: '#90A4AE',
-  delimeter: '#017F75',
-  string: '#0079A5',
-  number: '#E5830E',
-  regexp: '#0079A5',
-  types: '#909AA1',
-  annotation: '#D9D9D9',
-  tag: '#DD0A73',
-  symbol: '#A30000',
-  foreground: '#3F3F3F',
-  editorBackground: '#FFFFFF',
-  lineNumbers: '#D9D9D9',
+function getTheme() {
+  if (IS_DARK_THEME) {
+    return darkTheme;
+  } else {
+    return lightTheme;
+  }
+}
+
+const themeName = getTheme();
+
+function getHex(rgbString: string) {
+  const colorValues = rgbString.slice(4, -1);
+  const colorArray = colorValues.split(', ');
+
+  // @ts-ignore
+  return '#' + convert.rgb.hex(Number(colorArray[0]), Number(colorArray[1]), Number(colorArray[2]));
+}
+
+const syntaxTheme = {
+  keyword: getHex(themeName.euiColorAccent),
+  comment: getHex(themeName.euiColorMediumShade),
+  delimiter: getHex(themeName.euiColorSecondary),
+  string: getHex(themeName.euiColorPrimary),
+  number: getHex(themeName.euiColorWarning),
+  regexp: getHex(themeName.euiColorPrimary),
+  types: `${IS_DARK_THEME ? getHex(themeName.euiColorVis5) : getHex(themeName.euiColorVis9)}`,
+  annotation: getHex(themeName.euiColorLightShade),
+  tag: getHex(themeName.euiColorAccent),
+  symbol: getHex(themeName.euiColorDanger),
+  foreground: getHex(themeName.euiColorDarkestShade),
+  editorBackground: getHex(themeName.euiColorLightestShade),
+  lineNumbers: getHex(themeName.euiColorDarkShade),
+  editorIndentGuide: getHex(themeName.euiColorLightShade),
+  selectionBackground: getHex(themeName.euiColorLightShade),
+  editorWidgetBackground: getHex(themeName.euiColorLightestShade),
+  editorWidgetBorder: getHex(themeName.euiColorLightShade),
+  findMatchBackground: getHex(themeName.euiColorWarning),
+  findMatchHighlightBackground: getHex(themeName.euiColorWarning),
 };
 
-monaco.editor.defineTheme('k6-colors-light', {
+monaco.editor.defineTheme('euiColors', {
   base: 'vs',
   inherit: true,
   rules: [
-    { token: 'keyword', foreground: elasticLight.keyword, fontStyle: 'bold' },
-    { token: 'comment', foreground: elasticLight.comment },
-    { token: 'delimiter', foreground: elasticLight.delimeter },
-    { token: 'string', foreground: elasticLight.string },
-    { token: 'number', foreground: elasticLight.number },
-    { token: 'regexp', foreground: elasticLight.regexp },
-    { token: 'type', foreground: elasticLight.types },
-    { token: 'annotation', foreground: elasticLight.annotation },
-    { token: 'tag', foreground: elasticLight.tag },
-    { token: 'symbol', foreground: elasticLight.symbol },
+    { token: 'keyword', foreground: syntaxTheme.keyword, fontStyle: 'bold' },
+    { token: 'comment', foreground: syntaxTheme.comment },
+    { token: 'delimiter', foreground: syntaxTheme.delimiter },
+    { token: 'string', foreground: syntaxTheme.string },
+    { token: 'number', foreground: syntaxTheme.number },
+    { token: 'regexp', foreground: syntaxTheme.regexp },
+    { token: 'type', foreground: syntaxTheme.types },
+    { token: 'annotation', foreground: syntaxTheme.annotation },
+    { token: 'tag', foreground: syntaxTheme.tag },
+    { token: 'symbol', foreground: syntaxTheme.symbol },
     // We provide an empty string fallback
-    { token: '', foreground: elasticLight.foreground },
+    { token: '', foreground: syntaxTheme.foreground },
   ],
   colors: {
-    'editor.foreground': elasticLight.foreground,
-    'editor.background': elasticLight.editorBackground,
-    'editorLineNumber.foreground': elasticLight.lineNumbers,
-    'editorLineNumber.activeForeground': elasticLight.lineNumbers,
+    'editor.foreground': syntaxTheme.foreground,
+    'editor.background': syntaxTheme.editorBackground,
+    'editorLineNumber.foreground': syntaxTheme.lineNumbers,
+    'editorLineNumber.activeForeground': syntaxTheme.lineNumbers,
+    'editorIndentGuide.background': syntaxTheme.editorIndentGuide,
+    'editor.selectionBackground': syntaxTheme.selectionBackground,
+    'editorWidget.border': syntaxTheme.editorWidgetBorder,
+    'editorWidget.background': syntaxTheme.editorWidgetBackground,
   },
 });
-monaco.editor.setTheme('k6-colors-light');
+monaco.editor.setTheme('euiColors');
 
 export { monaco };
