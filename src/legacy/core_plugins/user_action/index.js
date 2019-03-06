@@ -17,11 +17,19 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-import { Config, Lifecycle } from './lib';
+import { registerUserActionRoute } from './server/routes/api/user_action';
 
-export interface DefaultServiceProviders {
-  config(): Config;
-  log(): ToolingLog;
-  lifecycle(): Lifecycle;
+export default function (kibana) {
+  return new kibana.Plugin({
+    id: 'user_action',
+    require: ['kibana', 'elasticsearch'],
+
+    uiExports: {
+      mappings: require('./mappings.json'),
+    },
+
+    init: function (server) {
+      registerUserActionRoute(server);
+    }
+  });
 }
