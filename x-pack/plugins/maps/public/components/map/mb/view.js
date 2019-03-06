@@ -106,6 +106,13 @@ export class MBMapContainer extends React.Component {
     };
   }
 
+  componentDidUpdate() {
+    // do not debounce syncing of map-state and tooltip
+    this._syncMbMapWithMapState();
+    this._syncTooltipState();
+    this._debouncedSync();
+  }
+
   componentDidMount() {
     this._initializeMap();
     this._isMounted = true;
@@ -118,7 +125,7 @@ export class MBMapContainer extends React.Component {
     }
     if (this._mbMap) {
       this._mbMap.remove();
-      this._mbMap.off('mousemove', this._updateTooltipState);
+      this._mbMap = null;
       this._mbMap = null;
       this._tooltipContainer = null;
     }
@@ -126,7 +133,6 @@ export class MBMapContainer extends React.Component {
   }
 
   async _initializeMap() {
-
 
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
 
@@ -136,7 +142,6 @@ export class MBMapContainer extends React.Component {
 
     this._initResizerChecker();
 
-    //todo :these callbacks should be removed on destroy
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
     // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
@@ -272,13 +277,7 @@ export class MBMapContainer extends React.Component {
   };
 
   render() {
-    // do not debounce syncing of map-state
-    this._syncMbMapWithMapState();
-    this._syncTooltipState();
-    this._debouncedSync();
-    return (
-      <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
-    );
+    return (<div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>);
   }
 }
 
