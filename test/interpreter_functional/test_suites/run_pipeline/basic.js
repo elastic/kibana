@@ -54,7 +54,7 @@ export default function ({ getService, updateBaselines }) {
             {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
           }]'  | 
         kibana_metric 
-          visConfig='{"metrics":[{"accessor":1,"format":{"id":"number"},"params":{}}],"bucket":{"accessor":0}}'
+          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"},"params":{}}],"bucket":{"accessor":0}}}'
       `;
 
       it ('runs the expression and compares final output', async () => {
@@ -71,17 +71,31 @@ export default function ({ getService, updateBaselines }) {
       });
 
       it('runs the expression and combines different checks', async () => {
-        await expectExpression('combined_test', expression).stepsToMatchSnapshot().toReturn({}).toMatchScreenshot();
+        await (await expectExpression('combined_test', expression).stepsToMatchSnapshot()).toMatchScreenshot();
       });
     });
 
     describe('reusing partial results', () => {
       it ('does some screenshot comparisons', async () => {
-        const context = await expectExpression('partial_test', 'kibana | esaggs').getResponse();
+        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
+          {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
+          {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
+            {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
+          }]'`;
+        const context = await expectExpression('partial_test', expression).getResponse();
 
-        await expectExpression('partial_test_1', 'tagcloud', context).toMatchScreenshot();
-        await expectExpression('partial_test_2', 'metric', context).toMatchScreenshot();
-        await expectExpression('partial_test_3', 'region_map', context).toMatchScreenshot();
+        const tagCloudExpr =
+          `tagcloud visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+        await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
+
+        const metricExpr =
+          `kibana_metric 
+          visConfig='{"dimensions":{"metrics":[{"accessor":1,"format":{"id":"number"}}],"bucket":{"accessor":0}}}'`;
+        await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
+
+        const regionMapExpr =
+          `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+        await expectExpression('partial_test_3', regionMapExpr, context).toMatchScreenshot();
       });
     });
   });

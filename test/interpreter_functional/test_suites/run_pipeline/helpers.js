@@ -18,6 +18,7 @@
  */
 
 import expect from 'expect.js';
+import { delay } from 'bluebird';
 
 export const expectExpressionProvider = ({ getService, updateBaselines }) => {
   const browser = getService('browser');
@@ -56,16 +57,18 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
           const diff = await snapshots.compareAgainstBaseline(name + i, lastResponse, updateBaselines);
           expect(diff).to.be.lessThan(0.05);
         }
-        if (!lastResponse) {
+        if (!responsePromise) {
           responsePromise = new Promise(resolve => {
             resolve(lastResponse);
           });
         }
+        return handler;
       },
       toMatchSnapshot: async () => {
         const pipelineResponse = await handler.getResponse();
         const diff = await snapshots.compareAgainstBaseline(name, pipelineResponse, updateBaselines);
         expect(diff).to.be.lessThan(0.05);
+        return handler;
       },
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
@@ -74,9 +77,11 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
             done(result);
           });
         }, pipelineResponse);
+        await delay(1000);
 
         const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
         expect(percentDifference).to.be.lessThan(0.05);
+        return handler;
       }
     };
 

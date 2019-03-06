@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { unmountComponentAtNode } from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -53,6 +54,10 @@ class Main extends React.Component {
       });
     };
 
+    const handlers = {
+      onDestroy: () => { return; },
+    };
+
     window.renderPipelineResponse = async (context = {}) => {
       if (context.type !== 'render') {
         this.exprDiv.innerText = 'Expression did not return render type!\n\n' + JSON.stringify(context);
@@ -63,10 +68,8 @@ class Main extends React.Component {
         this.exprDiv.innerText = 'Renderer was not found in registry!\n\n' + JSON.stringify(context);
         return;
       }
-
-      renderer.render(this.chartDiv, context.value, {
-        onDestroy: () => { return; },
-      });
+      unmountComponentAtNode(this.chartDiv);
+      renderer.render(this.chartDiv, context.value, handlers);
     };
 
   }
