@@ -47,7 +47,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      const configurationBlocks = apiResponse.configuration_blocks;
+      const configurationBlocks = apiResponse.list;
 
       expect(configurationBlocks).to.be.an(Array);
       expect(configurationBlocks.length).to.be(0);
@@ -64,7 +64,7 @@ export default function ({ getService }) {
         )
         .expect(200);
 
-      const configurationBlocks = apiResponse.configuration_blocks;
+      const configurationBlocks = apiResponse.list;
 
       expect(configurationBlocks).to.be.an(Array);
       expect(configurationBlocks.length).to.be(3);

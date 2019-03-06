@@ -38,9 +38,19 @@ export const createTagAssignmentsRoute = (libs: CMServerLibs) => ({
       success: true,
       results: response.assignments.map(assignment => ({
         success: assignment.status && assignment.status >= 200 && assignment.status < 300,
-        result: {
-          message: assignment.result,
-        },
+        error:
+          !assignment.status || assignment.status >= 300
+            ? {
+                code: assignment.status || 400,
+                message: assignment.result,
+              }
+            : undefined,
+        result:
+          assignment.status && assignment.status >= 200 && assignment.status < 300
+            ? {
+                message: assignment.result,
+              }
+            : undefined,
       })),
     } as ReturnTypeBulkAction;
   },

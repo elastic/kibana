@@ -141,7 +141,15 @@ export class BackendFrameworkLib {
           })
           .code(result.error.code || 400);
       } catch (err) {
-        const statusCode = err.statusCode;
+        let statusCode = err.statusCode;
+
+        // This is the only known non-status code error in the system, but just in case we have an else
+        if (!statusCode && (err.message as string).includes('Invalid user type')) {
+          statusCode = 403;
+        } else {
+          statusCode = 500;
+        }
+
         if (statusCode === 403) {
           return h
             .response({

@@ -33,7 +33,7 @@ describe('assign_tags_to_beats', () => {
     });
 
     expect(statusCode).toEqual(200);
-    expect(result.assignments).toEqual([{ status: 200, result: 'updated' }]);
+    expect(result.results).toEqual([{ success: true, result: { message: 'updated' } }]);
   });
 
   it('should not re-add an existing tag to a beat', async () => {
@@ -52,7 +52,7 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([{ status: 200, result: 'updated' }]);
+    expect(result.results).toEqual([{ success: true, result: { message: 'updated' } }]);
 
     let beat;
 
@@ -81,9 +81,9 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([
-      { status: 200, result: 'updated' },
-      { status: 200, result: 'updated' },
+    expect(result.results).toEqual([
+      { success: true, result: { message: 'updated' } },
+      { success: true, result: { message: 'updated' } },
     ]);
 
     let beat;
@@ -123,9 +123,9 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([
-      { status: 200, result: 'updated' },
-      { status: 200, result: 'updated' },
+    expect(result.results).toEqual([
+      { success: true, result: { message: 'updated' } },
+      { success: true, result: { message: 'updated' } },
     ]);
 
     const beat = await serverLibs.beats.getById(
