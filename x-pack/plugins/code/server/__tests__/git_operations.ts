@@ -13,7 +13,7 @@ import rimraf from 'rimraf';
 import {getDefaultBranch, GitOperations} from '../git_operations';
 import {ServerOptions} from "../server_options";
 import * as mkdirp from "mkdirp";
-import Git from 'nodegit';
+import Git from '@elastic/nodegit';
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {

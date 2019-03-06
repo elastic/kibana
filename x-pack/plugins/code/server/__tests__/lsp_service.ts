@@ -6,7 +6,7 @@
 /* tslint:disable */
 
 import fs from 'fs';
-import Git from 'nodegit';
+import Git from '@elastic/nodegit';
 // import rimraf from 'rimraf';
 import sinon from 'sinon';
 import path from 'path';

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Clone, Commit, Error as GitError, Repository, Reset } from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
 import { delay } from 'lodash';
 import mkdirp from 'mkdirp';
-import { Clone, Commit, Error as GitError, Repository, Reset } from 'nodegit';
 import path from 'path';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Hover, Location, TextDocumentPositionParams } from 'vscode-languageserver';
