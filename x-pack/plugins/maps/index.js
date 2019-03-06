@@ -39,6 +39,9 @@ export function maps(kibana) {
           isEmsEnabled: mapConfig.includeElasticMapsService,
         };
       },
+      embeddableFactories: [
+        'plugins/maps/embeddable/map_embeddable_factory_provider'
+      ],
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
       ],

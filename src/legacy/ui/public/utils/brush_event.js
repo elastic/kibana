@@ -66,11 +66,12 @@ export function onBrushEvent(event, $state) {
     const min = event.range[0];
     const max = event.range[event.range.length - 1];
     let range;
+
     if (isDate) {
       range = {
-        gte: moment(min).valueOf(),
-        lt: moment(max).valueOf(),
-        format: 'epoch_millis'
+        gte: moment(min).toISOString(),
+        lt: moment(max).toISOString(),
+        format: 'strict_date_optional_time'
       };
     } else {
       range = {
