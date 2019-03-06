@@ -8,9 +8,9 @@ octokit.repos.listForOrg({
   console.log('data: ', data);
 })
 */
-//function getGithubClient() {
+function getGithubClient() {
   const client = new Octokit();
-  /*
+
   client.authenticate({
     type: 'token',
     token: process.env.GITHUB_TOKEN
@@ -20,7 +20,7 @@ octokit.repos.listForOrg({
 }
 
 const client = getGithubClient();
-*/
+
 client.repos.getForOrg({
   org: 'octokit',
   type: 'public'
