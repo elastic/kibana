@@ -147,7 +147,6 @@ describe('ui apps / UiApp', () => {
             order: 9000,
             url: '/app/uiapp-test',
             subUrlBase: '/app/uiapp-test',
-            description: 'Test of UI App Constructor',
             icon: 'ui_app_test.svg',
             linkToLastSubUrl: true,
             hidden: false,
