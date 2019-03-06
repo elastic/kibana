@@ -6,7 +6,12 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getAllStats, getLocalStats } from '../../../../lib/telemetry';
+import { getAllStats, getLocalStats, encryptRequest } from '../../../../lib/telemetry';
+
+export function isAllowedToViewTelemetryData(req) {
+  const { roles } = req.auth.credential;
+  return roles.some(role => /superuser|remote_monitoring_collector|remote_monitoring_agent/.test(role));
+}
 
 /**
  * Get the telemetry data.
@@ -79,6 +84,7 @@ export function telemetryRoute(server) {
     path: '/api/telemetry/v1/clusters/_stats',
     config: {
       validate: {
+        viewUnencrypted: Joi.bool(),
         payload: Joi.object({
           timeRange: Joi.object({
             min: Joi.date().required(),
@@ -88,12 +94,31 @@ export function telemetryRoute(server) {
       }
     },
     handler: async (req, h) => {
+
+      console.log('roles::', req.auth.credentials.roles);
+
       const config = req.server.config();
+      const viewUnencrypted = req.viewUnencrypted;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
 
+      if(viewUnencrypted) {
+        const isAllowed = viewUnencrypted && isAllowedToViewTelemetryData(req)
+        if(!isAllowed) {
+          const notAllowedErr = Error('Not allowed.');
+          console.log('notAllowedErr.status::', notAllowedErr.status);
+          notAllowedErr.status = 401;
+          throw notAllowedErr;
+        }
+      }
+
       try {
-        return await getTelemetry(req, config, start, end);
+        const usageData = await getTelemetry(req, config, start, end);
+        if(viewUnencrypted) {
+          return usageData;
+        }
+
+        return encryptRequest(req, usageData);
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode
