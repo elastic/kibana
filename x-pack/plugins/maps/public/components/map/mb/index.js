@@ -13,7 +13,6 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setLayerErrorStatus,
   setTooltipState
 } from '../../../actions/store_actions';
 import { getTooltipState, getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
@@ -50,9 +49,6 @@ function mapDispatchToProps(dispatch) {
     },
     clearGoto: () => {
       dispatch(clearGoto());
-    },
-    setLayerErrorStatus: (id, msg) => {
-      dispatch(setLayerErrorStatus(id, msg));
     },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
