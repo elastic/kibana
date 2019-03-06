@@ -36,7 +36,7 @@ export default function (kbnServer, server, config) {
   if (!useSsl) {
     const connection = server.connection(connectionOptions);
 
-    // revert to previous 2m keepalive timeout in Node < 8
+    // revert to previous 2m keepalive timeout in Node < 6
     connection.listener.keepAliveTimeout = 120e3;
 
     return;
