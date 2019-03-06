@@ -89,9 +89,14 @@ export function getElementCounts(state) {
 
   Object.keys(resolvedArgs).forEach(resolvedArg => {
     const arg = resolvedArgs[resolvedArg];
-    const { expressionRenderable, expressionContext } = arg;
-    const expressionObject = expressionRenderable || expressionContext;
-    const { value, state } = expressionObject;
+    const { expressionRenderable } = arg;
+
+    if (!expressionRenderable) {
+      results.pending++;
+      return;
+    }
+
+    const { value, state } = expressionRenderable;
 
     if (value && value.as === 'error') {
       results.error++;
