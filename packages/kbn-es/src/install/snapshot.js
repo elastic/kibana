@@ -27,11 +27,6 @@ const { BASE_PATH } = require('../paths');
 const { installArchive } = require('./archive');
 const { log: defaultLog, cache } = require('../utils');
 
-// pin TEST_ES_SNAPSHOT_VERSION until https://github.com/elastic/elasticsearch/pull/39582 is merged and snapshots have updated
-if (!process.env.TEST_ES_SNAPSHOT_VERSION) {
-  process.env.TEST_ES_SNAPSHOT_VERSION = '7.1.0-36d8499e';
-}
-
 /**
  * Download an ES snapshot
  *
