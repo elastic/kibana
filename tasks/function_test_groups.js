@@ -17,35 +17,18 @@
  * under the License.
  */
 
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
 import execa from 'execa';
 import grunt from 'grunt';
+import { safeLoad } from 'js-yaml';
 
-/**
- * The list of tags that we use in the functional tests, if we add a new group we need to add it to this list
- * and to the list of jobs in .ci/jobs.yml
- */
-const TEST_TAGS = [
-  'ciGroup2-1',
-  'ciGroup2-2',
-  'ciGroup2-3',
-  'ciGroup2-4',
-  'ciGroup2-5',
-  'ciGroup2-6',
-  'ciGroup2-7',
-  'ciGroup2-8',
-  'ciGroup2-9',
-  'ciGroup2-10',
-  'ciGroup2-11',
-  'ciGroup2-12',
-  'ciGroup2-13',
-  'ciGroup2-14',
-  'ciGroup2-15',
-  'ciGroup2-16',
-  'ciGroup2-17',
-  'ciGroup2-18',
-  'ciGroup2-19',
-  'ciGroup2-20'
-];
+const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
+const TEST_TAGS = safeLoad(JOBS_YAML)
+  .JOB
+  .filter(id => id.startsWith('kibana-ciGroup'))
+  .map(id => id.replace(/^kibana-/, ''));
 
 export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = {}) {
   return {
