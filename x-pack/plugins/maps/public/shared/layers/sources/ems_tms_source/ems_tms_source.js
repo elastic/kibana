@@ -44,8 +44,18 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: EMSTMSSource.title },
-      { label: 'Tile service', value: this._descriptor.id }
+      {
+        label: i18n.translate('xpack.maps.source.emsTile.dataSourceLabel', {
+          defaultMessage: `Data source`,
+        }),
+        value: EMSTMSSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
+          defaultMessage: `Tile service`,
+        }),
+        value: this._descriptor.id
+      }
     ];
   }
 
