@@ -13,6 +13,18 @@ cd "x-pack";
 yarn gulp prepare;
 cd -;
 
+# cache the chromedriver bin
+mkdir -p ".chromedriver/master"
+chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"
+chromedriverPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
+if [ -z "$chromedriverDistVersion" ] || [ -z "$chromedriverPkgVersion" ]; then
+  echo "UNABLE TO DETERMINE CHROMEDRIVER VERSIONS"
+  exit 1
+fi
+
+curl "https://chromedriver.storage.googleapis.com/$chromedriverDistVersion/chromedriver_linux64.zip" > .chromedriver/master/chromedriver.zip
+echo "$chromedriverPkgVersion" > .chromedriver/master/pkgVersion
+
 # archive cacheable directories
 mkdir -p "$HOME/.kibana/bootstrap_cache"
 tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
@@ -22,4 +34,5 @@ tar -cf "$HOME/.kibana/bootstrap_cache/master.tar" \
   x-pack/plugins/*/node_modules \
   x-pack/plugins/reporting/.chromium \
   test/plugin_functional/plugins/*/node_modules \
-  .es;
+  .es \
+  .chromedriver;
