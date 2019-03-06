@@ -5,39 +5,52 @@
  */
 
 import React, { PureComponent } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { BASE_PATH } from '../../constants';
-import { AppContext } from '../../services/app_context';
+import { AppContext, AppContextInterface } from '../../services/app_context';
 
 import { RepositoryList } from '../repository_list';
 import { SnapshotList } from '../snapshot_list';
 
-export class SnapshotRestoreHome extends PureComponent {
+type Section = 'repositories' | 'snapshots';
+
+interface MatchParams {
+  section: Section;
+}
+
+interface Props extends RouteComponentProps<MatchParams> {}
+
+interface State {
+  activeSection: Section;
+}
+
+export class SnapshotRestoreHome extends PureComponent<Props, State> {
   public static contextType = AppContext;
 
-  public static getDerivedStateFromProps(props) {
+  public static getDerivedStateFromProps(nextProps: Props) {
     const {
       match: {
         params: { section },
       },
-    } = props;
+    } = nextProps;
     return {
       activeSection: section,
     };
   }
+  public context!: React.ContextType<typeof AppContext>;
 
-  public state = {
-    activeSection: 'repositories',
+  public readonly state: Readonly<State> = {
+    activeSection: 'repositories' as Section,
   };
 
   public componentDidMount() {
     const {
       core: { i18n, chrome },
       plugins: { management },
-    } = this.context;
+    } = this.context as AppContextInterface;
 
     chrome.breadcrumbs.set([
       management.constants.BREADCRUMB,
@@ -50,7 +63,7 @@ export class SnapshotRestoreHome extends PureComponent {
     ]);
   }
 
-  public onSectionChange = section => {
+  public onSectionChange = (section: Section): void => {
     const { history } = this.props;
     history.push(`${BASE_PATH}/${section}`);
   };
@@ -60,10 +73,11 @@ export class SnapshotRestoreHome extends PureComponent {
       core: {
         i18n: { FormattedMessage },
       },
-    } = this.context;
+    } = this.context as AppContextInterface;
+
     const tabs = [
       {
-        id: 'snapshots',
+        id: 'snapshots' as Section,
         name: (
           <FormattedMessage
             id="xpack.snapshotRestore.home.snapshotsTabTitle"
@@ -73,7 +87,7 @@ export class SnapshotRestoreHome extends PureComponent {
         testSubj: 'srSnapshotsTab',
       },
       {
-        id: 'repositories',
+        id: 'repositories' as Section,
         name: (
           <FormattedMessage
             id="xpack.snapshotRestore.home.repositoriesTabTitle"

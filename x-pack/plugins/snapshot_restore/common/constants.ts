@@ -9,5 +9,5 @@ import { LicenseType } from '../../../common/constants';
 export const PLUGIN = {
   ID: 'snapshot_restore',
   NAME: 'Snapshot and Restore',
-  MINIMUM_LICENSE_REQUIRED: <LicenseType>'basic',
+  MINIMUM_LICENSE_REQUIRED: 'basic' as LicenseType,
 };

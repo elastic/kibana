@@ -5,5 +5,11 @@
  */
 
 import React from 'react';
+import { AppCore, AppPlugins } from '../../shim';
 
-export const AppContext = React.createContext({});
+export interface AppContextInterface {
+  core: AppCore;
+  plugins: AppPlugins;
+}
+
+export const AppContext = React.createContext<AppContextInterface | null>(null);

@@ -6,17 +6,14 @@
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
 import template from './index.html';
-import { createShim } from './shim';
+import { AppCore, AppPlugins, Core, Plugins } from './shim';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
-  public start(): void {
-    const shim = createShim();
-    const {
-      core: { i18n, routing, http },
-      plugins: { management },
-    } = shim;
+  public start(core: Core, plugins: Plugins): void {
+    const { i18n, routing, http, chrome, notification } = core;
+    const { management } = plugins;
 
     // Register management section
     const esSection = management.sections.getSection('elasticsearch');
@@ -47,7 +44,11 @@ export class Plugin {
 
         $scope.$$postDigest(() => {
           elem = document.getElementById(REACT_ROOT_ID);
-          renderReact(elem, shim.core, shim.plugins);
+          renderReact(
+            elem,
+            { i18n, chrome, notification } as AppCore,
+            { management } as AppPlugins
+          );
 
           // Angular Lifecycle
           const appRoute = $route.current;

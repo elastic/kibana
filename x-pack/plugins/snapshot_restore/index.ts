@@ -8,8 +8,9 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
 import { Plugin as SnapshotRestorePlugin } from './plugin';
+import { createShim } from './shim';
 
-export function snapshotRestore(kibana) {
+export function snapshotRestore(kibana: any) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     configPrefix: 'xpack.snapshot_restore',
@@ -20,8 +21,19 @@ export function snapshotRestore(kibana) {
       managementSections: ['plugins/snapshot_restore'],
     },
     init(server: Legacy.Server) {
-      const snapshotRestorePlugin = new SnapshotRestorePlugin(server);
-      snapshotRestorePlugin.start();
+      const { core, plugins } = createShim(server, PLUGIN.ID);
+      const snapshotRestorePlugin = new SnapshotRestorePlugin();
+
+      // Start plugin
+      snapshotRestorePlugin.start(core, plugins);
+
+      // Register license checker
+      plugins.license.registerLicenseChecker(
+        server,
+        PLUGIN.ID,
+        PLUGIN.NAME,
+        PLUGIN.MINIMUM_LICENSE_REQUIRED
+      );
     },
   });
 }

@@ -15,10 +15,6 @@ import { SnapshotRestoreHome } from './sections';
 export class App extends Component {
   public static contextType = AppContext;
 
-  constructor(...args) {
-    super(...args);
-  }
-
   public render() {
     return (
       <div>

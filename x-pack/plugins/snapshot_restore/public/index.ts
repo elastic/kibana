@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Plugin as SnapshotRestorePlugin } from './plugin';
+import { createShim } from './shim';
 
+const { core, plugins } = createShim();
 const snapshotRestorePlugin = new SnapshotRestorePlugin();
-snapshotRestorePlugin.start();
+snapshotRestorePlugin.start(core, plugins);

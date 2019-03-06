@@ -3,30 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Legacy } from 'kibana';
-import { PLUGIN } from './common/constants';
 import { registerRoutes } from './server/routes/api/register_routes';
-import { createShim } from './shim';
+import { Core, Plugins } from './shim';
 
 export class Plugin {
-  public server: Legacy.Server;
-
-  constructor(server: Legacy.Server) {
-    this.server = server;
-  }
-
-  public start(): void {
-    const server = this.server;
-    const { core, plugins } = createShim(server, PLUGIN.ID);
+  public start(core: Core, plugins: Plugins): void {
     const router = core.http.createRouter('/api/snapshot_restore/');
-
-    // Register license checker
-    plugins.license.registerLicenseChecker(
-      server,
-      PLUGIN.ID,
-      PLUGIN.NAME,
-      PLUGIN.MINIMUM_LICENSE_REQUIRED
-    );
 
     // Register routes
     registerRoutes(router);

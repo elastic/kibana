@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { LicenseType } from '../../../common/constants';
 
 export declare function registerLicenseChecker(
-  server: any,
+  server: Legacy.Server,
   pluginId: string,
   pluginName: string,
   minimumLicenseRequired: LicenseType

@@ -15,7 +15,43 @@ import routes from 'ui/routes';
 import { unmountComponentAtNode } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
-export function createShim() {
+export interface AppCore {
+  i18n: {
+    [i18nPackage: string]: any;
+    Context: typeof I18nContext;
+    FormattedMessage: typeof FormattedMessage;
+  };
+  chrome: typeof chrome;
+  notification: {
+    fatalError: typeof fatalError;
+  };
+}
+
+export interface AppPlugins {
+  management: {
+    sections: typeof management;
+    constants: {
+      BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
+    };
+  };
+}
+
+export interface Core extends AppCore {
+  routing: {
+    registerAngularRoute(path: string, config: object): void;
+    unmountReactApp(elem: Element | undefined | null): void;
+    registerRouter(router: HashRouter): void;
+    getRouter(): HashRouter | undefined;
+  };
+  http: {
+    setClient(client: any, $deferred: any): void;
+    getClient(): any;
+  };
+}
+
+export interface Plugins extends AppPlugins {} // tslint:disable-line no-empty-interface
+
+export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let httpClient: any;
@@ -46,7 +82,7 @@ export function createShim() {
         registerRouter: (router: HashRouter): void => {
           reactRouter = router;
         },
-        getRouter: (): undefined | HashRouter => {
+        getRouter: (): HashRouter | undefined => {
           return reactRouter;
         },
       },
