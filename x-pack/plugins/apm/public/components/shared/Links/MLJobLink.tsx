@@ -7,7 +7,7 @@
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
-import { getKibanaHref } from './url_helpers';
+import { getRisonHref } from './rison_helpers';
 
 interface Props {
   serviceName: string;
@@ -29,7 +29,7 @@ export const MLJobLink: React.SFC<Props> = ({
     _g: { ml: { jobIds: [jobId] } }
   };
 
-  const href = getKibanaHref({
+  const href = getRisonHref({
     location,
     pathname,
     hash,
