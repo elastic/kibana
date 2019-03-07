@@ -15,7 +15,7 @@ import { ElasticsearchHostsAdapter, Hosts } from '../hosts';
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
-import { ElasticsearchNetworkTopNFlowAdapter, NetworkTopNFlow } from '../network_top_n_flow';
+import { ElasticsearchNetworkAdapter, Network } from '../network';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
@@ -32,7 +32,7 @@ export function compose(server: Server): AppBackendLibs {
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
-    networkTopNFlow: new NetworkTopNFlow(new ElasticsearchNetworkTopNFlowAdapter(framework)),
+    networkTopNFlow: new Network(new ElasticsearchNetworkAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
   };

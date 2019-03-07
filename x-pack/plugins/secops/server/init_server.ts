@@ -10,7 +10,7 @@ import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createEventsResolvers, createScalarDetailItemValueResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
-import { createNetworkTopNFlowResolvers } from './graphql/network_top_n_flow';
+import { createNetworkResolvers } from './graphql/network';
 import { createScalarDateResolvers } from './graphql/scalar_date';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
@@ -33,7 +33,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createHostsResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarDetailItemValueResolvers() as IResolvers,
-      createNetworkTopNFlowResolvers(libs) as IResolvers,
+      createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,

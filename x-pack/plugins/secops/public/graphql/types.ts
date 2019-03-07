@@ -1,9 +1,9 @@
 /* tslint:disable */
 /*
-     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-     * or more contributor license agreements. Licensed under the Elastic License;
-     * you may not use this file except in compliance with the Elastic License.
-     */
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 // ====================================================
 // START: Typescript template
@@ -45,6 +45,8 @@ export interface Source {
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
+
+  NetworkDns: NetworkDnsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -583,6 +585,42 @@ export interface TopNFlowItem {
   ip?: string | null;
 }
 
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  direction?: NetworkDirectionEcs[] | null;
+}
+
+export interface NetworkDnsData {
+  edges: NetworkDnsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface NetworkDnsEdges {
+  node: NetworkDnsItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkDnsItem {
+  _id?: string | null;
+
+  dnsBytesIn?: number | null;
+
+  dnsBytesOut?: number | null;
+
+  name?: string | null;
+
+  queryCount?: number | null;
+
+  timestamp?: Date | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -674,6 +712,12 @@ export interface SortField {
   direction?: Direction | null;
 }
 
+export interface NetworkDnsSortField {
+  field: NetworkDnsDirection;
+
+  sort: Direction;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -718,6 +762,19 @@ export interface NetworkTopNFlowSourceArgs {
   direction: NetworkTopNFlowDirection;
 
   type: NetworkTopNFlowType;
+
+  timerange: TimerangeInput;
+
+  pagination: PaginationInput;
+
+  filterQuery?: string | null;
+}
+export interface NetworkDnsSourceArgs {
+  id?: string | null;
+
+  sort: NetworkDnsSortField;
+
+  isPtrIncluded: boolean;
 
   timerange: TimerangeInput;
 
@@ -777,6 +834,22 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  unknown = 'unknown',
+}
+
+export enum NetworkDnsDirection {
+  dnsName = 'dnsName',
+  queryCount = 'queryCount',
+  uniqueDomains = 'uniqueDomains',
+  dnsBytesIn = 'dnsBytesIn',
+  dnsBytesOut = 'dnsBytesOut',
 }
 
 // ====================================================

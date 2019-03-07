@@ -7,6 +7,7 @@
 import { get, getOr } from 'lodash/fp';
 
 import {
+  NetworkDnsEdges,
   NetworkTopNFlowData,
   NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
@@ -15,11 +16,12 @@ import {
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
-import { NetworkTopNFlowRequestOptions } from './index';
-import { buildQuery } from './query.dsl';
-import { NetworkTopNFlowAdapter, NetworkTopNFlowBuckets } from './types';
+import { NetworkDnsRequestOptions, NetworkTopNFlowRequestOptions } from './index';
+import { buildDnsQuery } from './query_dns.dsl';
+import { buildTopNFlowQuery } from './query_top_n_flow.dsl';
+import { NetworkAdapter, NetworkDnsBuckets, NetworkTopNFlowBuckets } from './types';
 
-export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapter {
+export class ElasticsearchNetworkAdapter implements NetworkAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getNetworkTopNFlow(
@@ -29,7 +31,7 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      buildTopNFlowQuery(options)
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
@@ -37,6 +39,37 @@ export class ElasticsearchNetworkTopNFlowAdapter implements NetworkTopNFlowAdapt
     const hasNextPage = networkTopNFlowEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
+
+    return {
+      edges,
+      totalCount,
+      pageInfo: {
+        hasNextPage,
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
+      },
+    };
+  }
+
+  public async getNetworkDns(
+    request: FrameworkRequest,
+    options: NetworkDnsRequestOptions
+  ): Promise<NetworkTopNFlowData> {
+    const response = await this.framework.callWithRequest<NetworkTopNFlowData, TermAggregation>(
+      request,
+      'search',
+      buildDnsQuery(options)
+    );
+    const { cursor, limit } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.dns_count.value', response);
+    const networkDnsEdges: NetworkDnsEdges[] = formatDnsEgdes(
+      getOr([], 'aggregations.dns_name_query_count', response)
+    );
+    const hasNextPage = networkDnsEdges.length > limit;
+    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
+    const edges = networkDnsEdges.splice(beginning, limit - beginning);
 
     return {
       edges,
@@ -93,7 +126,23 @@ const formatTopNFlowEgdes = (
     },
   }));
 
-const getOrNumber = (path: string, bucket: NetworkTopNFlowBuckets) => {
+const formatDnsEgdes = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
+  buckets.map((bucket: NetworkDnsBuckets) => ({
+    node: {
+      _id: bucket.key,
+      timestamp: bucket.timestamp.value_as_string,
+      dnsBytesIn: getOrNumber('dns_bytes_in.value', bucket),
+      dnsBytesOut: getOrNumber('dns_bytes_out.value', bucket),
+      name: bucket.key,
+      queryCount: bucket.doc_count,
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));
+
+const getOrNumber = (path: string, bucket: NetworkTopNFlowBuckets | NetworkDnsBuckets) => {
   const numb = get(path, bucket);
   if (numb == null) {
     return null;

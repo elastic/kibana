@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const networkTopNFlowSchema = gql`
+export const networkSchema = gql`
   type TopNFlowItem {
     count: Float
     domain: [String!]
@@ -46,6 +46,39 @@ export const networkTopNFlowSchema = gql`
     biDirectional
   }
 
+  enum NetworkDnsDirection {
+    dnsName
+    queryCount
+    uniqueDomains
+    dnsBytesIn
+    dnsBytesOut
+  }
+
+  input NetworkDnsSortField {
+    field: NetworkDnsDirection!
+    sort: Direction!
+  }
+
+  type NetworkDnsItem {
+    _id: String
+    dnsBytesIn: Float
+    dnsBytesOut: Float
+    name: String
+    queryCount: Float
+    timestamp: Date
+  }
+
+  type NetworkDnsEdges {
+    node: NetworkDnsItem!
+    cursor: CursorType!
+  }
+
+  type NetworkDnsData {
+    edges: [NetworkDnsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     NetworkTopNFlow(
@@ -56,5 +89,13 @@ export const networkTopNFlowSchema = gql`
       pagination: PaginationInput!
       filterQuery: String
     ): NetworkTopNFlowData!
+    NetworkDns(
+      id: String
+      sort: NetworkDnsSortField!
+      isPtrIncluded: Boolean!
+      timerange: TimerangeInput!
+      pagination: PaginationInput!
+      filterQuery: String
+    ): NetworkDnsData!
   }
 `;

@@ -6,7 +6,7 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { NetworkTopNFlow } from '../../lib/network_top_n_flow';
+import { Network } from '../../lib/network';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -15,15 +15,21 @@ type QueryNetworkTopNFlowResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
-export interface NetworkTopNFlowResolversDeps {
-  networkTopNFlow: NetworkTopNFlow;
+type QueryDnsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.NetworkDnsResolver>,
+  QuerySourceResolver
+>;
+
+export interface NetworkResolversDeps {
+  network: Network;
 }
 
-export const createNetworkTopNFlowResolvers = (
-  libs: NetworkTopNFlowResolversDeps
+export const createNetworkResolvers = (
+  libs: NetworkResolversDeps
 ): {
   Source: {
     NetworkTopNFlow: QueryNetworkTopNFlowResolver;
+    NetworkDns: QueryDnsResolver;
   };
 } => ({
   Source: {
@@ -33,7 +39,15 @@ export const createNetworkTopNFlowResolvers = (
         networkTopNFlowType: args.type,
         networkTopNFlowDirection: args.direction,
       };
-      return libs.networkTopNFlow.getNetworkTopNFlow(req, options);
+      return libs.network.getNetworkTopNFlow(req, options);
+    },
+    async NetworkDns(source, args, { req }, info) {
+      const options = {
+        ...createOptions(source, args, info),
+        networkDnsSortField: args.sort,
+        isPtrIncluded: args.isPtrIncluded,
+      };
+      return libs.network.getNetworkDns(req, options);
     },
   },
 });
