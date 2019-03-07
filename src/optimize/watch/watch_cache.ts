@@ -92,7 +92,7 @@ export class WatchCache {
     // start by deleting the state file to lower the
     // amount of time that another process might be able to
     // successfully read it once we decide to delete it
-    await del(this.statePath);
+    await del(this.statePath, { force: true });
 
     // delete everything in optimize/.cache directory
     // except ts-node

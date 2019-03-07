@@ -117,6 +117,7 @@ export const IndexPattern = props => {
               disabled={props.disabled}
               onChange={handleTextChange(intervalName, 'auto')}
               value={model[intervalName]}
+              placeholder={'auto'}
             />
           </EuiFormRow>
         </EuiFlexItem>
