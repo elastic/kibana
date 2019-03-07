@@ -302,9 +302,7 @@ export function explorerChartsContainerServiceFactory(callback) {
     }
 
     function findChartPointForTime(chartData, time) {
-      return chartData.find((point) => {
-        return point.date === time;
-      });
+      return chartData.find(point => point.date === time);
     }
 
     Promise.all(seriesPromises)

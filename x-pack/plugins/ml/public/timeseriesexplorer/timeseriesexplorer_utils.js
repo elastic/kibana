@@ -119,7 +119,7 @@ export function processDataForFocusAnomalies(
     }
   });
 
-  timesToAddPointsFor.sort((a, b) => {return a - b;});
+  timesToAddPointsFor.sort((a, b) => a - b);
 
   timesToAddPointsFor.forEach((time) => {
     chartData.push({
