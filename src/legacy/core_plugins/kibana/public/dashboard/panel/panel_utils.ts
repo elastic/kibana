@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { GridData, PanelState } from '../selectors';
+import { PanelState } from '../selectors';
+import { GridData } from '../types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -32,17 +33,19 @@ export interface SemanticVersion {
   minor: number;
 }
 
+export interface PanelData {
+  panelIndex: number | string; // earlier versions allowed panelIndex to be a number or a string
+  gridData: GridData;
+  col: number;
+  row: number;
+  size_x: number;
+  size_y: number;
+  version: string;
+}
+
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
-  public static convertPanelDataPre_6_1(panel: {
-    panelIndex: any; // earlier versions allowed panelIndex to be a number or a string
-    gridData: GridData;
-    col: number;
-    row: number;
-    size_x: number;
-    size_y: number;
-    version: string;
-  }): Partial<PanelState> {
+  public static convertPanelDataPre_6_1(panel: PanelData): Partial<PanelState> {
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
         throw new Error(
@@ -76,13 +79,7 @@ export class PanelUtils {
   // 1) decrease column height from 100 to 20.
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
-  public static convertPanelDataPre_6_3(
-    panel: {
-      gridData: { w: number; x: number; h: number; y: number };
-      version: string;
-    },
-    useMargins: boolean
-  ) {
+  public static convertPanelDataPre_6_3(panel: PanelData, useMargins: boolean) {
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
         throw new Error(

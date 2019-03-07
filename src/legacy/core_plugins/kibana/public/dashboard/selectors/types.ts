@@ -19,6 +19,7 @@
 
 import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
+import { GridData } from '../types';
 
 export interface ViewState {
   readonly viewMode: DashboardViewMode;
@@ -31,14 +32,6 @@ export interface ViewState {
   readonly useMargins: boolean;
   readonly query: Query;
   readonly filters: Filters;
-}
-
-export interface GridData {
-  readonly w: number;
-  readonly h: number;
-  readonly x: number;
-  readonly y: number;
-  readonly i: string;
 }
 
 export type PanelId = string;
