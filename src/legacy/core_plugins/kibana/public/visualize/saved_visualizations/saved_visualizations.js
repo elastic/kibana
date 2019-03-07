@@ -17,49 +17,61 @@
  * under the License.
  */
 
-import './_saved_vis';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { uiModules } from 'ui/modules';
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { savedVisFactory } from './_saved_vis';
 
-const app = uiModules.get('app/visualize');
+export class SavedVisualizations {
+  start({
+    createLegacyClass,
+    uiModules,
+    updateOldState,
+    SavedObjectLoader,
+    savedObjectManagementRegistry,
+    SavedObjectProvider,
+    SavedObjectsClientProvider,
+    VisProvider,
+    VisTypesRegistryProvider,
+  }) {
+    const app = uiModules.get('app/visualize');
 
-// Register this service with the saved object registry so it can be
-// edited by the object editor.
-savedObjectManagementRegistry.register({
-  service: 'savedVisualizations',
-  title: 'visualizations'
-});
+    savedVisFactory({ app, VisProvider, updateOldState, SavedObjectProvider, createLegacyClass });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
-  const visTypes = Private(VisTypesRegistryProvider);
+    // Register this service with the saved object registry so it can be
+    // edited by the object editor.
+    savedObjectManagementRegistry.register({
+      service: 'savedVisualizations',
+      title: 'visualizations'
+    });
 
-  const savedObjectClient = Private(SavedObjectsClientProvider);
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
+    app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
+      const visTypes = Private(VisTypesRegistryProvider);
 
-  saveVisualizationLoader.mapHitSource = function (source, id) {
-    source.id = id;
-    source.url = this.urlFor(id);
+      const savedObjectClient = Private(SavedObjectsClientProvider);
+      const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
 
-    let typeName = source.typeName;
-    if (source.visState) {
-      try { typeName = JSON.parse(source.visState).type; }
-      catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
-    }
+      saveVisualizationLoader.mapHitSource = function (source, id) {
+        source.id = id;
+        source.url = this.urlFor(id);
 
-    if (!typeName || !visTypes.byName[typeName]) {
-      source.error = 'Unknown visualization type';
-      return source;
-    }
+        let typeName = source.typeName;
+        if (source.visState) {
+          try { typeName = JSON.parse(source.visState).type; }
+          catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
+        }
 
-    source.type = visTypes.byName[typeName];
-    source.icon = source.type.icon;
-    return source;
-  };
+        if (!typeName || !visTypes.byName[typeName]) {
+          source.error = 'Unknown visualization type';
+          return source;
+        }
 
-  saveVisualizationLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
-  };
-  return saveVisualizationLoader;
-});
+        source.type = visTypes.byName[typeName];
+        source.icon = source.type.icon;
+        return source;
+      };
+
+      saveVisualizationLoader.urlFor = function (id) {
+        return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+      };
+      return saveVisualizationLoader;
+    });
+  }
+}
