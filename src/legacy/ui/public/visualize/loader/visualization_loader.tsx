@@ -33,6 +33,7 @@ function renderVisualization(
   element: HTMLElement,
   vis: Vis,
   visData: any,
+  visParams: any,
   uiState: PersistedState,
   params: VisualizationLoaderParams
 ) {
@@ -42,6 +43,7 @@ function renderVisualization(
       <Visualization
         vis={vis}
         visData={visData}
+        visParams={visParams}
         uiState={uiState}
         listenOnChange={listenOnChange}
         onInit={resolve}
