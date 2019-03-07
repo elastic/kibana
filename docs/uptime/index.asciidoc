@@ -11,6 +11,7 @@ and view a high-level snapshot of your environment at a selected point in time.
 [float]
 == Add monitors
 To get started with Uptime monitoring, you'll need to define some monitors and run Heartbeat.
+These monitors will provide the data we will be visualizing in the Uptime UI.
 See {heartbeat-ref}/heartbeat-configuration.html[Configure Heartbeat] for instructions
 on configuring monitors to begin storing Uptime information in your cluster.
 
@@ -19,6 +20,8 @@ on configuring monitors to begin storing Uptime information in your cluster.
 For Uptime to work, it is important you use the same major versions of Heartbeat and Kibana.
 For example, version 6.7 of Kibana will expect an index of `heartbeat-6*`, while Kibana
 7.0 requires an index of `heartbeat-7*` (containing documents from Heartbeat 7.0).
+Kibana 7.0 does not support older versions of Heartbeat data because there are breaking
+changes in the schema mappings between the major versions.
 
 --
 

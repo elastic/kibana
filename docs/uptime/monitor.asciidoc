@@ -14,7 +14,9 @@ SCREENSHOT
 The Status bar displays a quick summary of the latest information
 regarding your monitor. You can view its latest status, click a link to
 visit the targeted URL, see its most recent request duration, and determine the
-amount of time that has elapsed since the last check.
+amount of time that has elapsed since the last check. You can use the Staus bar
+to get a quick summary of current performance, beyond simply knowing if the monitor
+is `up` or `down`.
 
 [float]
 === Monitor charts
@@ -29,6 +31,10 @@ bucket, the line is the average time.
 
 Next is a graphical representation of the check statuses over time. Hover over
 the charts to display crosshairs with more specific numeric data.
+
+These charts can help you gain insight into how quickly requests are being resolved
+by the targeted endpoint, and give you a sense of how frequently a host or endpoint
+was down in your selected timespan.
 SCREENSHOT
 
 [float]
@@ -37,4 +43,5 @@ SCREENSHOT
 
 The Check history displays the total count of this monitor's checks for the selected
 date range. You can additionally filter the checks by `status` to help find recent problems
-on a per-check basis.
+on a per-check basis. This table can help you gain some insight into more granular details
+about recent individual data points Heartbeat is logging about your host or endpoint.
