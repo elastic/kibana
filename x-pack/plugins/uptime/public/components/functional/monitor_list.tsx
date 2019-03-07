@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
@@ -79,16 +80,20 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
           },
           {
             field: 'ping.monitor.id',
-            name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
-              defaultMessage: 'ID',
+            name: i18n.translate('xpack.uptime.monitorList.nameIdColumnLabel', {
+              defaultMessage: 'Name / ID',
             }),
-            render: (id: string, monitor: LatestMonitor) => (
-              <Link to={`/monitor/${id}`}>
-                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                  ? monitor.ping.monitor.name
-                  : id}
-              </Link>
-            ),
+            render: (id: string, monitor: LatestMonitor) => {
+              const name = get(monitor, 'ping.monitor.name');
+              return (
+                <Link
+                  to={`/monitor/${id}`}
+                  title={`Name: ${name ? "'" + name + "'" : 'N/A'}, ID: '${id}'`}
+                >
+                  {name ? name : <em>{id}</em>}
+                </Link>
+              );
+            },
           },
           {
             field: 'ping.url.full',
