@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getBuiltinRules } from '.';
 import { compileFormattingRules } from '../message';
-import { filebeatNginxRules } from './filebeat_nginx';
 
-const { format } = compileFormattingRules(filebeatNginxRules);
+const { format } = compileFormattingRules(getBuiltinRules([]));
+
 describe('Filebeat Rules', () => {
   test('Nginx Access Rule', () => {
     const event = {
