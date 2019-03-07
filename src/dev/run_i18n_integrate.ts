@@ -68,7 +68,9 @@ run(
       typeof dryRun !== 'boolean'
     ) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --ignore-incompatible can't have a value`
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --ignore-incompatible, --ignore-unused, --ignore-missing, and --dry-run can't have values`
       );
     }
 
