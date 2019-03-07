@@ -29,7 +29,7 @@ export interface Flags {
   help: boolean;
   _: string[];
 
-  [key: string]: boolean | string | string[];
+  [key: string]: undefined | boolean | string | string[];
 }
 
 export function getFlags(argv: string[]): Flags {
