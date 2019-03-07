@@ -33,9 +33,20 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   openTreePath: (paths: string) => void;
   fetchRepoTree: (p: FetchRepoTreePayload) => void;
   openedPaths: string[];
+  treeLoading?: boolean;
 }
 
 export class CodeFileTree extends React.Component<Props> {
+  public componentDidUpdate(prevProps: Readonly<Props>): void {
+    const { openedPaths, match, treeLoading } = this.props;
+    const path = match.params.path;
+    if (prevProps.match.params.path !== path || prevProps.treeLoading !== treeLoading) {
+      if (!openedPaths.includes(path)) {
+        this.props.openTreePath(path);
+      }
+    }
+  }
+
   public componentDidMount(): void {
     const { path } = this.props.match.params;
     if (path) {
@@ -242,6 +253,7 @@ export class CodeFileTree extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   node: state.file.tree,
   openedPaths: state.file.openedPaths,
+  treeLoading: state.file.loading,
 });
 
 const mapDispatchToProps = {
