@@ -7,6 +7,11 @@
 import stringify from 'json-stable-stringify';
 
 import { InfraLogMessageSegment } from '../../../graphql/types';
+import {
+  LogMessageFormattingCondition,
+  LogMessageFormattingInstruction,
+  LogMessageFormattingRule,
+} from './rule_types';
 
 export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
   const compiledRules = rules.map(compileRule);
@@ -156,37 +161,6 @@ const compileConstantFormattingInstruction = (
 
 interface Fields {
   [fieldName: string]: string | number | object | boolean | null;
-}
-
-interface LogMessageFormattingRule {
-  when: LogMessageFormattingCondition;
-  format: LogMessageFormattingInstruction[];
-}
-
-type LogMessageFormattingCondition =
-  | LogMessageFormattingExistsCondition
-  | LogMessageFormattingFieldValueCondition;
-
-interface LogMessageFormattingExistsCondition {
-  exists: string[];
-}
-
-interface LogMessageFormattingFieldValueCondition {
-  values: {
-    [fieldName: string]: string | number | boolean | null;
-  };
-}
-
-type LogMessageFormattingInstruction =
-  | LogMessageFormattingFieldReference
-  | LogMessageFormattingConstant;
-
-interface LogMessageFormattingFieldReference {
-  field: string;
-}
-
-interface LogMessageFormattingConstant {
-  constant: string;
 }
 
 interface CompiledLogMessageFormattingRule {
