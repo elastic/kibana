@@ -73,12 +73,14 @@ export default function ({ getService }) {
         it('should return 415 when no file passed in', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_conflicts')
-            .expect(415)
+            .field('skips', '[]')
+            .expect(400)
             .then((resp) => {
               expect(resp.body).to.eql({
-                statusCode: 415,
-                error: 'Unsupported Media Type',
-                message: 'Unsupported Media Type',
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'child "file" fails because ["file" is required]',
+                validation: { source: 'payload', keys: [ 'file' ] }
               });
             });
         });

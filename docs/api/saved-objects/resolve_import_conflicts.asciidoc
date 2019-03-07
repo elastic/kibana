@@ -19,13 +19,13 @@ The request body must be of type multipart/form-data.
   (ndjson) The same new line delimited JSON objects given to the import API.
 
 `overwrites` (optional)::
-  (array) A list of "type" and "id" objects allowed to be overwritten on import.
+  (array) A list of `type` and `id` objects allowed to be overwritten on import.
 
 `replaceReferences` (optional)::
-  (array) A list of "type", "from" and "to" used to change imported saved object references to.
+  (array) A list of `type`, `from` and `to` used to change imported saved object references to.
 
 `skips` (optional)::
-  (array) A list of "type" and "id" objects to skip importing.
+  (array) A list of `type` and `id` objects to skip importing.
 
 ==== Response body
 

@@ -26,13 +26,14 @@ export default function ({ getService }) {
 
   describe('import', () => {
     describe('with kibana index', () => {
-      describe('without basic data existing', () => {
-        // Cleanup data that got created in import
+      describe('with basic data existing', () => {
+        before(() => esArchiver.load('saved_objects/basic'));
         after(() => esArchiver.unload('saved_objects/basic'));
 
         it('should return 200', async () => {
           await supertest
             .post('/api/saved_objects/_import')
+            .query({ overwrite: true })
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
@@ -55,11 +56,6 @@ export default function ({ getService }) {
               });
             });
         });
-      });
-
-      describe('with basic data existing', () => {
-        before(() => esArchiver.load('saved_objects/basic'));
-        after(() => esArchiver.unload('saved_objects/basic'));
 
         it('should return 409 when conflicts exist', async () => {
           await supertest

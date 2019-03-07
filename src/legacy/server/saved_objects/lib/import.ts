@@ -134,18 +134,13 @@ export function createObjectsFilter(
     ) {
       return true;
     }
-    let hasReferenceToReplace = false;
+    const refReplacements = replaceReferences.map(ref => `${ref.type}:${ref.from}`);
     for (const reference of obj.references || []) {
-      for (const referenceToReplace of replaceReferences) {
-        if (
-          reference.type === referenceToReplace.type &&
-          reference.id === referenceToReplace.from
-        ) {
-          hasReferenceToReplace = true;
-        }
+      if (refReplacements.includes(`${reference.type}:${reference.id}`)) {
+        return true;
       }
     }
-    return hasReferenceToReplace;
+    return false;
   };
 }
 
@@ -155,7 +150,6 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  const errors: CustomError[] = [];
   const objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   if (objectsToImport.length === 0) {
@@ -165,15 +159,10 @@ export async function importSavedObjects({
     };
   }
 
-  if (overwrite) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
-      overwrite: true,
-    });
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
-  } else {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport);
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
-  }
+  const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
+    overwrite,
+  });
+  const errors = extractErrors(bulkCreateResult.saved_objects);
 
   return {
     success: errors.length === 0,
@@ -190,20 +179,22 @@ export async function resolveImportConflicts({
   savedObjectsClient,
   replaceReferences,
 }: ResolveImportConflictsOptions): Promise<ImportResponse> {
-  const errors: CustomError[] = [];
+  let errors: CustomError[] = [];
   const filter = createObjectsFilter(skips, overwrites, replaceReferences);
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
   // Replace references
-  for (const referenceToReplace of replaceReferences) {
-    for (const savedObject of objectsToResolve) {
-      for (const reference of savedObject.references || []) {
-        if (
-          reference.type === referenceToReplace.type &&
-          reference.id === referenceToReplace.from
-        ) {
-          reference.id = referenceToReplace.to;
-        }
+  const refReplacementsMap = replaceReferences.reduce(
+    (acc, refReplacement) => {
+      acc[`${refReplacement.type}:${refReplacement.from}`] = refReplacement.to;
+      return acc;
+    },
+    {} as { [key: string]: string }
+  );
+  for (const savedObject of objectsToResolve) {
+    for (const reference of savedObject.references || []) {
+      if (refReplacementsMap[`${reference.type}:${reference.id}`]) {
+        reference.id = refReplacementsMap[`${reference.type}:${reference.id}`];
       }
     }
   }
@@ -212,7 +203,7 @@ export async function resolveImportConflicts({
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToResolve, {
       overwrite: true,
     });
-    errors.push(...extractErrors(bulkCreateResult.saved_objects));
+    errors = extractErrors(bulkCreateResult.saved_objects);
   }
 
   return {

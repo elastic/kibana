@@ -393,6 +393,9 @@ Object {
           "type": "dashboard",
         },
       ],
+      Object {
+        "overwrite": false,
+      },
     ],
   ],
   "results": Array [
