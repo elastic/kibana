@@ -60,7 +60,7 @@ Elasticsearch to constantly be executing those side effects whenever an
 observable changes. Instead, they need a point in time when they can safely
 assume the necessary configurations have been made.
 
-An `setup` lifecycle handler would allow core and plugins to expose contracts
+A `setup` lifecycle handler would allow core and plugins to expose contracts
 that have a reliable expiration in the context of the overall lifecycle.
 
 # Detailed design
