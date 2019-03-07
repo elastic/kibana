@@ -69,7 +69,11 @@ const options = {
   queueTimeout: 60 * 60 * 1000, // 1 hour by default
   updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
   indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lspRequestTimeoutMs: 5 * 60, // timeout a request over 30s
+  lsp: {
+    requestTimeoutMs: 5 * 60, // timeout a request over 30s
+    detach: false,
+    verbose: false,
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
   disableScheduler: true, // Temp option to disable all schedulers.

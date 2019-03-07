@@ -7,6 +7,11 @@
 import { resolve } from 'path';
 import { RepoConfig, RepoConfigs } from '../model';
 
+export interface LspOptions {
+  requestTimeoutMs: number;
+  detach: boolean;
+  verbose: boolean;
+}
 export class ServerOptions {
   public readonly workspacePath = resolve(this.config.get('path.data'), 'code/workspace');
 
@@ -24,13 +29,13 @@ export class ServerOptions {
 
   public readonly indexRepoFrequencyMs: number = this.options.indexRepoFrequencyMs;
 
-  public readonly lspRequestTimeoutMs: number = this.options.lspRequestTimeoutMs;
-
   public readonly maxWorkspace: number = this.options.maxWorkspace;
 
   public readonly disableScheduler: boolean = this.options.disableScheduler;
 
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
+
+  public readonly lsp: LspOptions = this.options.lsp;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {

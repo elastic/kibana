@@ -20,7 +20,6 @@ export interface ILanguageServerLauncher {
 export interface LauncherConstructor {
   new (
     targetHost: string,
-    detach: boolean,
     options: ServerOptions,
     loggerFactory: LoggerFactory
   ): ILanguageServerLauncher;

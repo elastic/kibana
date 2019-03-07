@@ -14,7 +14,6 @@ export class GoLauncher implements ILanguageServerLauncher {
   private isRunning: boolean = false;
   constructor(
     readonly targetHost: string,
-    readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
@@ -26,7 +25,7 @@ export class GoLauncher implements ILanguageServerLauncher {
     const port = 2091;
 
     const log = this.loggerFactory.getLogger(['code', `go@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
 
     log.info('Detach mode, expected langserver launch externally');
     proxy.onConnected(() => {

@@ -41,7 +41,7 @@ export function lspRoute(
         if (method) {
           try {
             const result = await promiseTimeout(
-              serverOptions.lspRequestTimeoutMs,
+              serverOptions.lsp.requestTimeoutMs,
               lspService.sendRequest(`textDocument/${method}`, req.payload, 1000)
             );
             return result;
@@ -84,11 +84,11 @@ export function lspRoute(
         const { textDocument, position } = req.payload;
         const { uri } = textDocument;
         const response: ResponseMessage = await promiseTimeout(
-          serverOptions.lspRequestTimeoutMs,
+          serverOptions.lsp.requestTimeoutMs,
           lspService.sendRequest(
             `textDocument/references`,
             { textDocument: { uri }, position },
-            serverOptions.lspRequestTimeoutMs / 2
+            1000
           )
         );
         const hover = await lspService.sendRequest('textDocument/hover', {

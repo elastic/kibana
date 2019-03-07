@@ -41,8 +41,14 @@ export const code = (kibana: any) =>
         updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
-        // timeout a request over 30s.
-        lspRequestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
+        lsp: Joi.object({
+          // timeout of a request
+          requestTimeoutMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
+          // if we want the language server run in seperately
+          detach: Joi.boolean().default(false),
+          // whether we want to show more language server logs
+          verbose: Joi.boolean().default(false),
+        }),
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
