@@ -165,6 +165,14 @@ export class AbstractLayer {
     //no-op by default
   }
 
+  getMbLayerIds() {
+    throw new Error('Should implement AbstractLayer#getMbLayerIds');
+  }
+
+  canShowTooltip() {
+    return false;
+  }
+
   syncLayerWithMb() {
     //no-op by default
   }

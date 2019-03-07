@@ -29,9 +29,10 @@ export default function percentile(resp, panel, series, meta) {
 
     getSplits(resp, panel, series, meta).forEach((split) => {
       metric.percentiles.forEach(percentile => {
-        const label = (split.label) + ` (${percentile.value})`;
+        const percentileValue = percentile.value ? percentile.value : 0;
+        const label = (split.label) + ` (${percentileValue})`;
         const data = split.timeseries.buckets.map(bucket => {
-          const m = _.assign({}, metric, { percent: percentile.value });
+          const m = _.assign({}, metric, { percent: percentileValue });
           return [bucket.key, getAggValue(bucket, m)];
         });
         if (percentile.mode === 'band') {
