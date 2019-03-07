@@ -27,6 +27,7 @@ exports[`render 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiRadioGroup
       idSelected="snapshot"
@@ -133,6 +134,7 @@ exports[`render 1`] = `
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    labelType="label"
   >
     <EuiFlexGroup
       alignItems="stretch"
@@ -208,6 +210,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiRadioGroup
       idSelected="snapshot"
@@ -314,6 +317,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     describedByIds={Array []}
     fullWidth={false}
     hasEmptyLabelSpace={false}
+    labelType="label"
   >
     <EuiFlexGroup
       alignItems="stretch"
