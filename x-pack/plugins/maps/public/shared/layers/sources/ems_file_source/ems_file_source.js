@@ -7,7 +7,6 @@
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
-import { emsServiceSettings } from '../../../../kibana_services';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
 import { i18n } from '@kbn/i18n';
@@ -68,18 +67,25 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getImmutableProperties() {
-    const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
+    const emsLayerProperty = {
+      label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
+        defaultMessage: `Layer`,
+      }),
+      value: this._descriptor.id
+    };
+    try {
+      const emsVectorFileMeta = await this._getEmsVectorFileMeta();
+      emsLayerProperty.link = emsVectorFileMeta.emsLink;
+    } catch(error) {
+      // ignore error if EMS layer id could not be found
+    }
+
     return [
       {
         label: getDataSourceLabel(),
         value: EMSFileSource.title
       },
-      {
-        label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
-          defaultMessage: `Layer`,
-        }),
-        value: this._descriptor.id,
-        link: emsLink }
+      emsLayerProperty
     ];
   }
 
