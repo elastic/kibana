@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { builtinRules } from '.';
+import { getBuiltinRules } from '.';
 import { compileFormattingRules } from '../message';
 
-const { format } = compileFormattingRules(builtinRules);
+const { format } = compileFormattingRules(getBuiltinRules([]));
 
 describe('Filebeat Rules', () => {
   describe('in ECS format', () => {
