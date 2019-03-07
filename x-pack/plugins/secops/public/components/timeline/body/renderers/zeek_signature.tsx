@@ -32,8 +32,18 @@ type StringRenderer = (value: string) => string;
 
 export const defaultStringRenderer: StringRenderer = (value: string) => value;
 
-export const moduleStringRenderer: StringRenderer = (value: string) =>
-  value.split('.')[1] != null ? value.split('.')[1] : value;
+export const moduleStringRenderer: StringRenderer = (value: string) => {
+  const split = value.split('.');
+  if (split.length >= 2 && split[1] != null) {
+    if (split[1] !== '') {
+      return split[1];
+    } else {
+      return split[0];
+    }
+  } else {
+    return value;
+  }
+};
 
 export const droppedStringRenderer: StringRenderer = (value: string) => `Dropped:${value}`;
 

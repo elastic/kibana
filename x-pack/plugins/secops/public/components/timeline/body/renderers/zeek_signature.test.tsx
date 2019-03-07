@@ -226,6 +226,10 @@ describe('ZeekSignature', () => {
     test('renders modules of bad input with multiple dots as only the second value', () => {
       expect(moduleStringRenderer('abc.def.ghi')).toEqual('def');
     });
+
+    test('renders modules of bad input with single dot as that value (but with the dot)', () => {
+      expect(moduleStringRenderer('abc.')).toEqual('abc');
+    });
   });
 
   describe('#defaultStringRenderer', () => {
