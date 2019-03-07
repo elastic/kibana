@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
@@ -45,7 +45,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return 'Vector style';
+    return i18n.translate('xpack.maps.style.vector.displayNameLabel', {
+      defaultMessage: 'Vector style'
+    });
   }
 
   static description = '';
