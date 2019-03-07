@@ -86,7 +86,7 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
 
   const products = PRODUCTS.map(product => {
     const token = product.token || product.name;
-    const buckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
+    const indexBuckets = indicesBuckets.filter(bucket => bucket.key.includes(token));
     const uuidBucketName = getUuidBucketName(product.name);
 
     const capabilities = {
@@ -97,44 +97,69 @@ export const getSetupCapabilities = async (req, indexPatterns, clusterUuid) => {
       isFullyMigrated: false,
       internalCollectorsUuids: [],
       fullyMigratedUuids: [],
+      partiallyMigratedUuids: [],
       fullyMigratedButNeedsToDisableLegacy: false
     };
 
+    const fullyMigratedUuidsMap = {};
+    const internalCollectorsUuidsMap = {};
+    const partiallyMigratedUuidsMap = {};
+
     // If there is no data, then they are a net new user
-    if (!buckets || buckets.length === 0) {
+    if (!indexBuckets || indexBuckets.length === 0) {
       capabilities.totalUniqueInstanceCount = 0;
       capabilities.isNetNewUser = true;
     }
     // If there is a single bucket, then they are fully migrated or fully on the internal collector
-    else if (buckets.length === 1) {
-      const uuidBuckets = get(buckets[0], `${uuidBucketName}.buckets`, []);
-      capabilities.totalUniqueInstanceCount = 1;
-      if (buckets[0].key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
-        capabilities.isFullyMigrated = true;
-        capabilities.fullyMigratedUuids = uniq(uuidBuckets.map(bucket => bucket.key));
-      } else {
-        capabilities.isInternalCollector = true;
-        capabilities.internalCollectorsUuids = uniq(uuidBuckets.map(bucket => bucket.key));
+    else if (indexBuckets.length === 1) {
+      const singleIndexBucket = indexBuckets[0];
+      const isFullyMigrated = singleIndexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+
+      const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
+      const uuidBuckets = get(singleIndexBucket, `${uuidBucketName}.buckets`, []);
+      for (const { key } of uuidBuckets) {
+        if (!map[key]) {
+          map[key] = true;
+        }
       }
+      capabilities.isFullyMigrated = isFullyMigrated;
+      capabilities.isInternalCollector = !isFullyMigrated;
+      capabilities.totalUniqueInstanceCount = Object.keys(map).length;
+      capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
+      capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
     }
     // If there are multiple buckets, they are partially upgraded assuming a single mb index exists
     else {
-      for (const bucket of buckets) {
-        const uuidBuckets = get(bucket, `${uuidBucketName}.buckets`, []);
-        if (bucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN)) {
-          capabilities.fullyMigratedUuids.push(...uniq(uuidBuckets.map(bucket => bucket.key)));
-          capabilities.isPartiallyMigrated = true;
-        } else {
-          capabilities.internalCollectorsUuids.push(...uniq(uuidBuckets.map(bucket => bucket.key)));
+      for (const indexBucket of indexBuckets) {
+        const isFullyMigrated = indexBucket.key.includes(METRICBEAT_INDEX_NAME_UNIQUE_TOKEN);
+        const map = isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
+        const otherMap = !isFullyMigrated ? fullyMigratedUuidsMap : internalCollectorsUuidsMap;
+        const uuidBuckets = get(indexBucket, `${uuidBucketName}.buckets`, []);
+        for (const { key } of uuidBuckets) {
+          if (!map[key]) {
+            if (otherMap[key]) {
+              delete otherMap[key];
+              partiallyMigratedUuidsMap[key] = true;
+            }
+            else {
+              map[key] = true;
+            }
+          }
         }
       }
-      if (!capabilities.isPartiallyMigrated) {
-        // TODO: is this right? should this even happen?
-        capabilities.isInternalCollector = true;
-      } else {
-        capabilities.fullyMigratedButNeedsToDisableLegacy = isEqual(capabilities.fullyMigratedUuids, capabilities.internalCollectorsUuids);
-      }
-      capabilities.totalUniqueInstanceCount = uniq([...capabilities.fullyMigratedUuids, ...capabilities.internalCollectorsUuids]).length;
+
+      capabilities.isFullyMigrated = Object.keys(internalCollectorsUuidsMap).length === 0;
+      capabilities.isPartiallyMigrated = Object.keys(partiallyMigratedUuidsMap).length > 0;
+      capabilities.isInternalCollector = Object.keys(fullyMigratedUuidsMap).length === 0
+        && Object.keys(partiallyMigratedUuidsMap).length === 0;
+      capabilities.totalUniqueInstanceCount = uniq([
+        ...Object.keys(internalCollectorsUuidsMap),
+        ...Object.keys(fullyMigratedUuidsMap)
+      ]).length;
+      capabilities.fullyMigratedUuids = Object.keys(fullyMigratedUuidsMap);
+      capabilities.partiallyMigratedUuids = Object.keys(partiallyMigratedUuidsMap);
+      capabilities.internalCollectorsUuids = Object.keys(internalCollectorsUuidsMap);
+      capabilities.fullyMigratedButNeedsToDisableLegacy = isEqual(capabilities.fullyMigratedUuids, capabilities.internalCollectorsUuids);
     }
 
     return {

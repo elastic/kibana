@@ -43,8 +43,9 @@ export const getProductStatus = product => {
       status.color = 'warning';
       status.stepStatus = 'warning';
     } else {
-      status.label = `Found ${product.fullyMigratedUuids.length} migrated
-      instances and ${product.internalCollectorsUuids.length} unmigrated instance`;
+      status.label = `Found ${product.fullyMigratedUuids.length} migrated instances,
+      ${product.internalCollectorsUuids.length} unmigrated instances
+      and ${product.partiallyMigratedUuids.length} partially migrated instances.`;
       status.icon = 'branch';
       status.color = 'warning';
       status.stepStatus = 'warning';

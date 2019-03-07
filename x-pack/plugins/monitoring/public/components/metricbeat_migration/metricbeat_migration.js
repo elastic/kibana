@@ -100,6 +100,11 @@ export class MetricbeatMigration extends Component {
                 Use the docs
               </EuiButtonEmpty>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton size="s" onClick={() => this.updateCapabilities()}>
+                Refresh
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCallOut>
         <EuiSpacer/>

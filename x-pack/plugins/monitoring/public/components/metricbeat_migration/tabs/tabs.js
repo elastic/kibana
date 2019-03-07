@@ -16,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiIcon
+  EuiIcon,
 } from '@elastic/eui';
 import { getProductStatus } from './get_product_status';
 import { getInstructionSteps } from '../instruction_steps';
@@ -40,17 +40,18 @@ export class Tabs extends Component {
     activeTabId: null,
     hasCheckedMigrationStatus: false,
     checkingMigrationStatus: false,
+    isShowingMigrationSteps: false,
   }
 
   buildTabs() {
     const { products, esMonitoringUrl, updateCapabilities } = this.props;
-    const { checkingMigrationStatus, hasCheckedMigrationStatus } = this.state;
+    const { checkingMigrationStatus, hasCheckedMigrationStatus, isShowingMigrationSteps } = this.state;
 
     const tabs = products.map(product => {
       const status = getProductStatus(product);
 
       let instructions = null;
-      if (status.showInstructions) {
+      if (status.showInstructions && isShowingMigrationSteps) {
         const instructionSteps = getInstructionSteps(product, {
           doneWithMigration: async () => {
             await updateCapabilities();
@@ -88,6 +89,10 @@ export class Tabs extends Component {
           ...uniq(product.fullyMigratedUuids || []).map(uuid => ({
             uuid,
             status: 'migrated'
+          })),
+          ...uniq(product.partiallyMigratedUuids || []).map(uuid => ({
+            uuid,
+            status: 'partial'
           }))
         ];
 
@@ -107,6 +112,9 @@ export class Tabs extends Component {
                       if (status === 'unmigrated') {
                         return <EuiIcon type="cross" color="danger"/>;
                       }
+                      if (status === 'partial') {
+                        return <EuiIcon type="alert" color="warning"/>;
+                      }
                       return <EuiIcon type="check" color="secondary"/>;
                     }
                   },
@@ -115,6 +123,19 @@ export class Tabs extends Component {
                     name: 'UUID',
                     sortable: true,
                   },
+                  {
+                    name: 'Action',
+                    render: () => {
+                      return (
+                        <EuiButton
+                          onClick={() => this.setState({ isShowingMigrationSteps: true })}
+                          color="danger"
+                        >
+                          Migrate
+                        </EuiButton>
+                      );
+                    }
+                  }
                 ]}
                 sorting={true}
                 pagination={true}
