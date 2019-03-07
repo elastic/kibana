@@ -12,7 +12,6 @@ export {
 } from './license_status';
 
 export {
-  LICENSE_TYPE_OSS,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_GOLD,
