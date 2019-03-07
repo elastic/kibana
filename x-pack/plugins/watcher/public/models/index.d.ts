@@ -6,3 +6,7 @@
 declare module 'plugins/watcher/models/watch' {
   export const Watch: any;
 }
+
+declare module 'plugins/watcher/models/watch_history_item' {
+  export const WatchHistoryItem: any;
+}
