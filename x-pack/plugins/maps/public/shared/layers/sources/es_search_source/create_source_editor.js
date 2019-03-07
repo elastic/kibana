@@ -13,6 +13,7 @@ import { IndexPatternSelect } from 'ui/index_patterns/components/index_pattern_s
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
+import { i18n } from '@kbn/i18n';
 
 function filterGeoField(field) {
   return ['geo_point', 'geo_shape'].includes(field.type);
@@ -22,14 +23,14 @@ export class CreateSourceEditor extends Component {
 
   static propTypes = {
     onSelect: PropTypes.func.isRequired,
-  }
+  };
 
   state = {
     isLoadingIndexPattern: false,
     indexPatternId: '',
     geoField: '',
     noGeoIndexPatternsExist: false,
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -52,7 +53,7 @@ export class CreateSourceEditor extends Component {
       indexPattern: undefined,
       geoField: undefined,
     }, this.debouncedLoad.bind(null, indexPatternId));
-  }
+  };
 
   debouncedLoad = _.debounce(async (indexPatternId) => {
     if (!indexPatternId || indexPatternId.length === 0) {
@@ -126,10 +127,14 @@ export class CreateSourceEditor extends Component {
 
     return (
       <EuiFormRow
-        label="Geospatial field"
+        label={i18n.translate('xpack.maps.source.esSearch.geofieldLabel', {
+          defaultMessage: 'Geospatial field'
+        })}
       >
         <SingleFieldSelect
-          placeholder="Select geo field"
+          placeholder={i18n.translate('xpack.maps.source.esSearch.selectLabel', {
+            defaultMessage: 'Select geo field'
+          })}
           value={this.state.geoField}
           onChange={this.onGeoFieldSelect}
           filterField={filterGeoField}
@@ -159,13 +164,18 @@ export class CreateSourceEditor extends Component {
         {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
-          label="Index pattern"
+          label={
+            i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
+              defaultMessage: 'Index pattern'
+            })}
         >
           <IndexPatternSelect
             isDisabled={this.state.noGeoIndexPatternsExist}
             indexPatternId={this.state.indexPatternId}
             onChange={this.onIndexPatternSelect}
-            placeholder="Select index pattern"
+            placeholder={i18n.translate('xpack.maps.source.esSearch.selectIndexPatternPlaceholder', {
+              defaultMessage: 'Select index pattern'
+            })}
             fieldTypes={['geo_point', 'geo_shape']}
             onNoIndexPatterns={this._onNoIndexPatterns}
           />

@@ -17,34 +17,44 @@
  * under the License.
  */
 
-export function preventParallelCalls(fn, filter) {
-  const execQueue = [];
+export function preventParallelCalls<C extends void, A, R>(
+  fn: (this: C, arg: A) => Promise<R>,
+  filter: (arg: A) => boolean
+) {
+  const execQueue: Task[] = [];
 
-  return async function (arg) {
+  class Task {
+    public promise: Promise<R>;
+    private resolve!: (result: R) => void;
+    private reject!: (error: Error) => void;
+
+    constructor(private readonly context: C, private readonly arg: A) {
+      this.promise = new Promise((resolve, reject) => {
+        this.resolve = resolve;
+        this.reject = reject;
+      });
+    }
+
+    public async exec() {
+      try {
+        this.resolve(await fn.call(this.context, this.arg));
+      } catch (error) {
+        this.reject(error);
+      } finally {
+        execQueue.shift();
+        if (execQueue.length) {
+          execQueue[0].exec();
+        }
+      }
+    }
+  }
+
+  return async function(this: C, arg: A) {
     if (filter(arg)) {
       return await fn.call(this, arg);
     }
 
-    const task = {
-      exec: async () => {
-        try {
-          task.resolve(await fn.call(this, arg));
-        } catch (error) {
-          task.reject(error);
-        } finally {
-          execQueue.shift();
-          if (execQueue.length) {
-            execQueue[0].exec();
-          }
-        }
-      }
-    };
-
-    task.promise = new Promise((resolve, reject) => {
-      task.resolve = resolve;
-      task.reject = reject;
-    });
-
+    const task = new Task(this, arg);
     if (execQueue.push(task) === 1) {
       // only item in the queue, kick it off
       task.exec();
