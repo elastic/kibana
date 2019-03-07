@@ -70,7 +70,7 @@ export default function ({ getService }) {
             });
         });
 
-        it('should return 415 when no file passed in', async () => {
+        it('should return 400 when no file passed in', async () => {
           await supertest
             .post('/api/saved_objects/_resolve_import_conflicts')
             .field('skips', '[]')
