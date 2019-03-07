@@ -9,12 +9,11 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiButtonIcon } from '@elastic/eui';
 import { set, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import { injectI18n } from '@kbn/i18n/react';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 
-const SimpleTemplateUI = props => {
-  const { typeInstance, argValue, onValueChange, labels, workpad, intl } = props;
+export const SimpleTemplate = props => {
+  const { typeInstance, argValue, onValueChange, labels, workpad } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -37,13 +36,7 @@ const SimpleTemplateUI = props => {
             <span>Color&nbsp;</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink
-              aria-label={intl.formatMessage({
-                id: 'xpack.canvas.expressionTypes.ArgTypes.colorStatus',
-                defaultMessage: 'Color: Auto',
-              })}
-              onClick={() => handlePlain('color', '#000000')}
-            >
+            <EuiLink aria-label="Color: Auto" onClick={() => handlePlain('color', '#000000')}>
               Auto <EuiIcon type="bolt" />
             </EuiLink>
           </EuiFlexItem>
@@ -85,9 +78,9 @@ const SimpleTemplateUI = props => {
   );
 };
 
-SimpleTemplateUI.displayName = 'SeriesStyleArgSimpleInput';
+SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
 
-SimpleTemplateUI.propTypes = {
+SimpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   labels: PropTypes.array,
@@ -95,7 +88,4 @@ SimpleTemplateUI.propTypes = {
     colors: PropTypes.array.isRequired,
   }).isRequired,
   typeInstance: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
-  intl: PropTypes.any.isRequired,
 };
-
-export const SimpleTemplate = injectI18n(SimpleTemplateUI);
