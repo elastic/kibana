@@ -13,7 +13,7 @@ import { CMServerLibs } from '../../lib/types';
 
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/agents/{listByAndValue*}',
+  path: '/api/beats/agents/{tagId}/{page}/{size?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
 
@@ -28,33 +28,25 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
     }),
   },
   handler: async (request: FrameworkRequest): Promise<ReturnTypeList<CMBeat>> => {
-    const listByAndValueParts = request.params.listByAndValue
-      ? request.params.listByAndValue.split('/')
-      : [];
-    let listBy: 'tag' | null = null;
-    let listByValue: string | null = null;
+    const tagIdOrAll = request.params.tagId;
+    const page = request.params.page;
+    const size = request.params.size;
 
-    if (listByAndValueParts.length === 2) {
-      listBy = listByAndValueParts[0];
-      listByValue = listByAndValueParts[1];
-    }
-
-    let beats: CMBeat[];
-
-    switch (listBy) {
-      case 'tag':
-        beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
-        break;
-
-      default:
-        beats = await libs.beats.getAll(
+    if (tagIdOrAll !== 'all') {
+      return {
+        success: true,
+        ...(await libs.beats.getAllWithTag(request.user, tagIdOrAll, page, size)),
+      };
+    } else {
+      return {
+        success: true,
+        ...(await libs.beats.getAll(
           request.user,
-          request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-        );
-
-        break;
+          request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined,
+          page,
+          size
+        )),
+      };
     }
-
-    return { list: beats, success: true, page: -1, total: -1 };
   },
 });

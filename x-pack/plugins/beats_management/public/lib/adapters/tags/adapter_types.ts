@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { BeatTag, CMBeat } from '../../../../common/domain_types';
+import { ReturnTypeList } from '../../../../common/return_types';
 
 export interface CMTagsAdapter {
   getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;
   delete(tagIds: string[]): Promise<boolean>;
-  getAll(ESQuery?: string): Promise<BeatTag[]>;
+  getAll(
+    ESQuery: string | undefined,
+    page: number,
+    size?: number
+  ): Promise<ReturnTypeList<BeatTag>>;
   upsertTag(tag: BeatTag): Promise<BeatTag | null>;
   getAssignable(beats: CMBeat[]): Promise<BeatTag[]>;
 }

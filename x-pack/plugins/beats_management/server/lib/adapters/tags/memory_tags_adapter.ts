@@ -16,7 +16,11 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
   }
 
   public async getAll(user: FrameworkUser) {
-    return this.tagsDB;
+    return {
+      list: this.tagsDB,
+      page: -1,
+      total: this.tagsDB.length,
+    };
   }
   public async delete(user: FrameworkUser, tagIds: string[]) {
     this.tagsDB = this.tagsDB.filter(tag => !tagIds.includes(tag.id));

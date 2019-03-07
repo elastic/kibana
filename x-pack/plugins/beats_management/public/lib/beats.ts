@@ -28,19 +28,18 @@ export class BeatsLib {
   };
 
   /** Get an array of beats that have a given tag id assigned to it */
-  public getBeatsWithTag = async (tagId: string): Promise<CMBeat[]> => {
-    const beats = await this.adapter.getBeatsWithTag(tagId);
+  public getBeatsWithTag = async (tagId: string, page: number, size?: number) => {
+    const beats = await this.adapter.getBeatsWithTag(tagId, page, size);
     return beats;
   };
 
-  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
   /** Get an array of all enrolled beats. */
-  public getAll = async (kuery?: string): Promise<CMBeat[]> => {
+  public getAll = async (kuery: string | undefined, page: number, size?: number) => {
     let ESQuery;
     if (kuery) {
       ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
     }
-    const beats = await this.adapter.getAll(ESQuery);
+    const beats = await this.adapter.getAll(ESQuery, page, size || 25);
     return beats;
   };
 

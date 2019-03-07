@@ -11,9 +11,27 @@ export interface CMBeatsAdapter {
   insert(user: FrameworkUser, beat: CMBeat): Promise<void>;
   update(user: FrameworkUser, beat: CMBeat): Promise<void>;
   get(user: FrameworkUser, id: string): Promise<CMBeat | null>;
-  getAll(user: FrameworkUser, ESQuery?: any): Promise<CMBeat[]>;
+  getAll(
+    user: FrameworkUser,
+    ESQuery?: any,
+    page?: number,
+    size?: number
+  ): Promise<{
+    list: CMBeat[];
+    page: number;
+    total: number;
+  }>;
   getWithIds(user: FrameworkUser, beatIds: string[]): Promise<CMBeat[]>;
-  getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]>;
+  getAllWithTags(
+    user: FrameworkUser,
+    tagIds: string[],
+    page?: number,
+    size?: number
+  ): Promise<{
+    list: CMBeat[];
+    page: number;
+    total: number;
+  }>;
   getBeatWithToken(user: FrameworkUser, enrollmentToken: string): Promise<CMBeat | null>;
   removeTagsFromBeats(
     user: FrameworkUser,

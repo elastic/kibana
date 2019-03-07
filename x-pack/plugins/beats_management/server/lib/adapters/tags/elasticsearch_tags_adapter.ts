@@ -18,13 +18,23 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     this.database = database;
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
+  public async getAll(
+    user: FrameworkUser,
+    ESQuery?: any,
+    page: number = 0,
+    size: number = 100
+  ): Promise<{
+    list: BeatTag[];
+    page: number;
+    total: number;
+  }> {
     const params = {
       ignore: [404],
       _source: true,
-      size: 10000,
       index: INDEX_NAMES.BEATS,
       body: {
+        from: page === -1 ? undefined : page * size,
+        size,
         query: {
           bool: {
             must: {
@@ -42,10 +52,23 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
         ...ESQuery,
       };
     }
-    const response = await this.database.search(user, params);
+    let response;
+    if (page === -1) {
+      response = await this.database.searchAll(user, params);
+    } else {
+      response = await this.database.search(user, params);
+    }
+
     const tags = get<any>(response, 'hits.hits', []);
 
-    return tags.map((tag: any) => ({ hasConfigurationBlocksTypes: [], ...tag._source.tag }));
+    return {
+      list: tags.map((tag: any) => ({
+        hasConfigurationBlocksTypes: [] as string[],
+        ...tag._source.tag,
+      })) as BeatTag[],
+      page,
+      total: response.hits ? ((response.hits.total as any).value as number) : 0,
+    };
   }
 
   public async delete(user: FrameworkUser, tagIds: string[]): Promise<boolean> {

@@ -32,10 +32,22 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getAll() {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return {
+      success: true,
+      list: this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token'])),
+      page: -1,
+      total: this.beatsDB.length,
+    };
   }
-  public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+  public async getBeatsWithTag(tagId: string) {
+    return {
+      success: true,
+      list: this.beatsDB
+        .filter(b => b.tags.includes(tagId))
+        .map<CMBeat>((beat: any) => omit(beat, ['access_token'])),
+      page: -1,
+      total: this.beatsDB.filter(b => b.tags.includes(tagId)).length,
+    };
   }
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {

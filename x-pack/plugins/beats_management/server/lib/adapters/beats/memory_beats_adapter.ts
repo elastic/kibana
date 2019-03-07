@@ -5,7 +5,6 @@
  */
 
 import { intersection, omit } from 'lodash';
-
 import { CMBeat } from '../../../../common/domain_types';
 import { FrameworkUser } from '../framework/adapter_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
@@ -38,8 +37,12 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
     return this.beatsDB.filter(beat => beatIds.includes(beat.id));
   }
 
-  public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
-    return this.beatsDB.filter(beat => intersection(tagIds, beat.tags || []).length !== 0);
+  public async getAllWithTags(user: FrameworkUser, tagIds: string[]) {
+    return {
+      list: this.beatsDB.filter(beat => intersection(tagIds, beat.tags || []).length !== 0),
+      page: -1,
+      total: this.beatsDB.filter(beat => intersection(tagIds, beat.tags || []).length !== 0).length,
+    };
   }
 
   public async getBeatWithToken(
@@ -50,7 +53,11 @@ export class MemoryBeatsAdapter implements CMBeatsAdapter {
   }
 
   public async getAll(user: FrameworkUser) {
-    return this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token']));
+    return {
+      list: this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token'])),
+      page: -1,
+      total: this.beatsDB.map<CMBeat>((beat: any) => omit(beat, ['access_token'])).length,
+    };
   }
 
   public async removeTagsFromBeats(

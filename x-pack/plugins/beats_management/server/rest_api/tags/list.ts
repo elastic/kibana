@@ -13,7 +13,7 @@ import { CMServerLibs } from '../../lib/types';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/tags',
+  path: '/api/beats/tags/{page}/{size?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
   validate: {
@@ -27,12 +27,16 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     }),
   },
   handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
-    let tags: BeatTag[];
-    tags = await libs.tags.getAll(
-      request.user,
-      request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-    );
-
-    return { list: tags, success: true, page: -1, total: -1 };
+    const page = request.params.page;
+    const size = request.params.size;
+    return {
+      success: true,
+      ...(await libs.tags.getAll(
+        request.user,
+        request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined,
+        page,
+        size
+      )),
+    };
   },
 });

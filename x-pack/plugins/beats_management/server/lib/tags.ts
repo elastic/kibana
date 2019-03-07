@@ -18,8 +18,8 @@ export class CMTagsDomain {
     private readonly beatsAdabter: CMBeatsAdapter
   ) {}
 
-  public async getAll(user: FrameworkUser, ESQuery?: any): Promise<BeatTag[]> {
-    const tags = await this.adapter.getAll(user, ESQuery);
+  public async getAll(user: FrameworkUser, ESQuery?: any, page: number = 0, size: number = 10) {
+    const tags = await this.adapter.getAll(user, ESQuery, page, size);
     return tags;
   }
 
@@ -30,7 +30,7 @@ export class CMTagsDomain {
 
   public async delete(user: FrameworkUser, tagIds: string[]) {
     const beats = await this.beatsAdabter.getAllWithTags(user, tagIds);
-    if (beats.filter(b => b.active).length > 0) {
+    if (beats.list.filter(b => b.active).length > 0) {
       return false;
     }
     await this.configurationBlocksAdapter.deleteForTags(user, tagIds);

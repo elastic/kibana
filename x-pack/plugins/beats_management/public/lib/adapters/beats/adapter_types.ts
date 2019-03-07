@@ -5,13 +5,13 @@
  */
 
 import { CMBeat } from '../../../../common/domain_types';
-import { ReturnTypeBulkAction } from '../../../../common/return_types';
+import { ReturnTypeBulkAction, ReturnTypeList } from '../../../../common/return_types';
 
 export interface CMBeatsAdapter {
   get(id: string): Promise<CMBeat | null>;
   update(id: string, beatData: Partial<CMBeat>): Promise<boolean>;
-  getBeatsWithTag(tagId: string): Promise<CMBeat[]>;
-  getAll(ESQuery?: any): Promise<CMBeat[]>;
+  getBeatsWithTag(tagId: string, page: number, size?: number): Promise<ReturnTypeList<CMBeat>>;
+  getAll(ESQuery: string | undefined, page: number, size: number): Promise<ReturnTypeList<CMBeat>>;
   removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<ReturnTypeBulkAction['results']>;
   assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<ReturnTypeBulkAction['results']>;
   getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null>;

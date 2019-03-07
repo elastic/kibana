@@ -79,11 +79,22 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
       .map((b: any) => ({ tags: [], ...b._source.beat }));
   }
 
-  public async getAllWithTags(user: FrameworkUser, tagIds: string[]): Promise<CMBeat[]> {
+  public async getAllWithTags(
+    user: FrameworkUser,
+    tagIds: string[],
+    page: number = 0,
+    size: number = 100
+  ): Promise<{
+    list: CMBeat[];
+    page: number;
+    total: number;
+  }> {
     const params = {
       ignore: [404],
       index: INDEX_NAMES.BEATS,
       body: {
+        from: page === -1 ? undefined : page * size,
+        size,
         query: {
           terms: { 'beat.tags': tagIds },
         },
@@ -94,13 +105,14 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
 
     const beats = _get<CMBeat[]>(response, 'hits.hits', []);
 
-    if (beats.length === 0) {
-      return [];
-    }
-    return beats.map((beat: any) => ({
-      tags: [] as string[],
-      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
-    }));
+    return {
+      list: beats.map((beat: any) => ({
+        tags: [] as string[],
+        ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
+      })) as CMBeat[],
+      page,
+      total: response.hits ? ((response.hits.total as any).value as number) : 0,
+    };
   }
 
   public async getBeatWithToken(
@@ -124,17 +136,19 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     if (beats.length === 0) {
       return null;
     }
+
     return omit<CMBeat, {}>(_get<CMBeat>({ tags: [], ...beats[0] }, '_source.beat'), [
       'access_token',
     ]);
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
+  public async getAll(user: FrameworkUser, ESQuery?: any, page: number = 0, size: number = 100) {
     const params = {
       index: INDEX_NAMES.BEATS,
-      size: 10000,
       ignore: [404],
       body: {
+        from: page === -1 ? undefined : page * size,
+        size,
         query: {
           bool: {
             must: {
@@ -155,20 +169,21 @@ export class ElasticsearchBeatsAdapter implements CMBeatsAdapter {
     }
 
     let response;
-    try {
+    if (page === -1) {
+      response = await this.database.searchAll(user, params);
+    } else {
       response = await this.database.search(user, params);
-    } catch (e) {
-      // TODO something
-    }
-    if (!response) {
-      return [];
     }
     const beats = _get<any>(response, 'hits.hits', []);
 
-    return beats.map((beat: any) => ({
-      tags: [] as string[],
-      ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
-    }));
+    return {
+      list: beats.map((beat: any) => ({
+        tags: [] as string[],
+        ...(omit(beat._source.beat as CMBeat, ['access_token']) as CMBeat),
+      })) as CMBeat[],
+      page,
+      total: response.hits ? ((response.hits.total as any).value as number) : 0,
+    };
   }
 
   public async removeTagsFromBeats(

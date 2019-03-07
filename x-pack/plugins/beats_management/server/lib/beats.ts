@@ -46,16 +46,21 @@ export class CMBeatsDomain {
     return beats.filter(beat => beat.active);
   }
 
-  public async getAll(user: FrameworkUser, ESQuery?: any) {
-    return (await this.adapter.getAll(user, ESQuery)).filter(
-      (beat: CMBeat) => beat.active === true
-    );
+  public async getAll(user: FrameworkUser, ESQuery?: any, page: number = 0, size: number = 10) {
+    const results = await this.adapter.getAll(user, ESQuery, page, size);
+    results.list = results.list.filter((beat: CMBeat) => beat.active === true);
+    return results;
   }
 
-  public async getAllWithTag(user: FrameworkUser, tagId: string) {
-    return (await this.adapter.getAllWithTags(user, [tagId])).filter(
-      (beat: CMBeat) => beat.active === true
-    );
+  public async getAllWithTag(
+    user: FrameworkUser,
+    tagId: string,
+    page: number = 0,
+    size: number = 10
+  ) {
+    const results = await this.adapter.getAllWithTags(user, [tagId], page, size);
+    results.list = results.list.filter((beat: CMBeat) => beat.active === true);
+    return results;
   }
 
   public async getByEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {

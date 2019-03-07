@@ -34,20 +34,48 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
     }
   }
 
-  public async getAll(ESQuery?: string): Promise<CMBeat[]> {
+  public async getAll(
+    ESQuery: string | undefined,
+    page: number,
+    size?: number
+  ): Promise<ReturnTypeList<CMBeat>> {
     try {
-      return (await this.REST.get<ReturnTypeList<CMBeat>>('/api/beats/agents/all', { ESQuery }))
-        .list;
+      return await this.REST.get<ReturnTypeList<CMBeat>>(
+        `/api/beats/agents/all/${page}/${size || 25}`,
+        { ESQuery }
+      );
     } catch (e) {
-      return [];
+      return {
+        success: false,
+        error: {
+          message: e.message,
+        },
+        list: [],
+        page: 0,
+        total: 0,
+      };
     }
   }
 
-  public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
+  public async getBeatsWithTag(
+    tagId: string,
+    page: number,
+    size?: number
+  ): Promise<ReturnTypeList<CMBeat>> {
     try {
-      return (await this.REST.get<ReturnTypeList<CMBeat>>(`/api/beats/agents/tag/${tagId}`)).list;
+      return await this.REST.get<ReturnTypeList<CMBeat>>(
+        `/api/beats/agents/${tagId}/${page}/${size || 25}`
+      );
     } catch (e) {
-      return [];
+      return {
+        success: false,
+        error: {
+          message: e.message,
+        },
+        list: [],
+        page: 0,
+        total: 0,
+      };
     }
   }
 

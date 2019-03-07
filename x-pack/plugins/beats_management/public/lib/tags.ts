@@ -25,13 +25,13 @@ export class TagsLib {
   }
 
   // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
-  public async getAll(kuery?: string): Promise<BeatTag[]> {
+  public async getAll(kuery: string | undefined, page: number, size?: number) {
     let ESQuery;
     if (kuery) {
       ESQuery = await this.elasticsearch.convertKueryToEsQuery(kuery);
     }
 
-    return await this.adapter.getAll(ESQuery);
+    return await this.adapter.getAll(ESQuery, page, size);
   }
   public async upsertTag(tag: BeatTag): Promise<BeatTag | null> {
     if (!tag.id) {
