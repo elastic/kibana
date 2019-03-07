@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// agent names can be any string. This list only defines the official agents that we might want to
+// target specifically eg. linking to their documentation
 export type AgentName =
   | 'java'
   | 'nodejs'
