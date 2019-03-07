@@ -17,6 +17,10 @@ const createMockXpackInfoFeature = (allowRbac) => {
 };
 
 describe(`#useRbac`, () => {
+  test('force failure', () => {
+    throw new Error('forced failure');
+  });
+
   test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
     const mockXpackInfoFeature = createMockXpackInfoFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
