@@ -9,7 +9,6 @@ import fetch from 'node-fetch';
 import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
-import { setContext } from 'apollo-link-context';
 
 import introspectionQueryResultData from '../../../plugins/infra/public/graphql/introspection.json';
 
@@ -29,17 +28,9 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
       fetch,
       headers: {
         'kbn-xsrf': 'xxx',
+        authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
       },
       uri: `${kbnURLWithoutAuth}${basePath || ''}/api/infra/graphql`,
-    });
-
-    const authLink = setContext((_, { headers }) => {
-      return {
-        headers: {
-          ...headers,
-          authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-        }
-      };
     });
 
     return new ApolloClient({
@@ -48,7 +39,7 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
           introspectionQueryResultData,
         }),
       }),
-      link: authLink.concat(httpLink),
+      link: httpLink,
     });
   };
 }

@@ -83,7 +83,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
   };
 
   describe('feature controls', () => {
-    it(`APIs can't be accessed by logstash-* read privileges role`, async () => {
+    it(`APIs can't be accessed by user with logstash-* "read" privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
       const password = `${username}-password`;
@@ -116,7 +116,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
       }
     });
 
-    it('APIs can be accessed global all with logstash-* read privileges role', async () => {
+    it('APIs can be accessed user with global "all" and logstash-* "read" privileges', async () => {
       const username = 'global_all';
       const roleName = 'global_all';
       const password = `${username}-password`;
@@ -156,7 +156,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
     });
 
     // this could be any role which doesn't have access to the infra feature
-    it(`APIs can't be accessed by dashboard all with logstash-* read privileges role`, async () => {
+    it(`APIs can't be accessed by user with dashboard "all" and logstash-* "read" privileges`, async () => {
       const username = 'dashboard_all';
       const roleName = 'dashboard_all';
       const password = `${username}-password`;
