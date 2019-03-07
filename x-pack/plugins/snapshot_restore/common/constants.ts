@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicenseType } from '../../../common/constants';
+import { LICENSE_TYPE_BASIC } from '../../../common/constants';
 
 export const PLUGIN = {
   ID: 'snapshot_restore',
   NAME: 'Snapshot and Restore',
-  MINIMUM_LICENSE_REQUIRED: 'basic' as LicenseType,
+  MINIMUM_LICENSE_REQUIRED: LICENSE_TYPE_BASIC,
 };
