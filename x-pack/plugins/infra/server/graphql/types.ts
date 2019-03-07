@@ -88,6 +88,8 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
+  /** The fields to use as the log message */
+  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -798,6 +800,8 @@ export namespace InfraSourceFieldsResolvers {
     container?: ContainerResolver<string, TypeParent, Context>;
     /** The fields to identify a host by */
     host?: HostResolver<string, TypeParent, Context>;
+    /** The fields to use as the log message */
+    message?: MessageResolver<string[], TypeParent, Context>;
     /** The field to identify a pod by */
     pod?: PodResolver<string, TypeParent, Context>;
     /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -813,6 +817,11 @@ export namespace InfraSourceFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = string,
+    Parent = InfraSourceFields,
+    Context = InfraContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string[],
     Parent = InfraSourceFields,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
