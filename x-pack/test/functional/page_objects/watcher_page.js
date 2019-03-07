@@ -13,9 +13,9 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
 
   class WatcherPage {
     async clearAllWatches() {
-      const checkBoxExists = await testSubjects.exists('selectAllWatchesCheckBox');
+      const checkBoxExists = await testSubjects.exists('checkboxSelectAll');
       if (checkBoxExists) {
-        await testSubjects.click('selectAllWatchesCheckBox');
+        await testSubjects.click('checkboxSelectAll');
         await testSubjects.click('btnDeleteWatches');
         await testSubjects.click('confirmModalConfirmButton');
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -31,23 +31,24 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     }
 
     async getWatch(watchID) {
-      const watchRow = await testSubjects.find(`watchRow-${watchID}`);
-      const text =  await watchRow.getVisibleText();
-      const columns = text.split('\n');
+      const watchIdColumn = await testSubjects.find(`watchIdColumn-${watchID}`);
+      const watchNameColumn = await testSubjects.find(`watchNameColumn-${watchID}`);
+      const id = await watchIdColumn.getVisibleText();
+      const name = await watchNameColumn.getVisibleText();
       return {
-        id: columns[0],
-        name: columns[1]
+        id,
+        name,
       };
     }
 
     async deleteWatch() {
-      await testSubjects.click('selectAllWatchesCheckBox');
+      await testSubjects.click('checkboxSelectAll');
       await testSubjects.click('btnDeleteWatches');
     }
 
     //get all the watches in the list
     async getWatches() {
-      const watches = await find.allByCssSelector('.kuiTableRow');
+      const watches = await find.allByCssSelector('.euiTableRow');
       return mapAsync(watches, async watch => {
         const checkBox = await watch.findByCssSelector('td:nth-child(1)');
         const id = await watch.findByCssSelector('td:nth-child(2)');
@@ -56,7 +57,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
         return {
           checkBox: (await checkBox.getProperty('innerHTML')).includes('input'),
           id: await id.getVisibleText(),
-          name: (await name.getVisibleText()).split(',').map(role => role.trim())
+          name: (await name.getVisibleText()).split(',').map(role => role.trim()),
         };
       });
     }

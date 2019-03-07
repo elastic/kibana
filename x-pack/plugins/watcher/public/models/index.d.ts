@@ -3,13 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export const WATCH_TYPES = {
-
-  JSON: 'json',
-
-  THRESHOLD: 'threshold',
-
-  MONITORING: 'monitoring'
-
-};
+declare module 'plugins/watcher/models/watch' {
+  export const Watch: any;
+}

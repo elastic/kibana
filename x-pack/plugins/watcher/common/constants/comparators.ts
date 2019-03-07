@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ES_SCROLL_SETTINGS = {
+export const COMPARATORS: { [key: string]: string } = {
+  GREATER_THAN: '>',
 
-  // How long to keep a scroll alive
-  KEEPALIVE: '30s',
-
-  // How many results to return per scroll response
-  PAGE_SIZE: 100
+  LESS_THAN: '<',
 };

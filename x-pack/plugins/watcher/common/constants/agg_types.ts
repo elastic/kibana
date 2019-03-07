@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// In milliseconds
-const SIXTY_SECONDS = 60 * 1000;
+export const AGG_TYPES: { [key: string]: string } = {
+  COUNT: 'count',
 
-export const REFRESH_INTERVALS = {
-  WATCH_LIST: SIXTY_SECONDS,
-  WATCH_HISTORY: SIXTY_SECONDS,
-  WATCH_VISUALIZATION: SIXTY_SECONDS
+  AVERAGE: 'avg',
+
+  SUM: 'sum',
+
+  MIN: 'min',
+
+  MAX: 'max',
 };

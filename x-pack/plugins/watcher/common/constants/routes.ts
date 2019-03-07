@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const WATCH_HISTORY = {
-  INITIAL_RANGE: 'now-1h'
+export const ROUTES: { [key: string]: string } = {
+  API_ROOT: '/api/watcher',
 };

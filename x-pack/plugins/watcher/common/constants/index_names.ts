@@ -4,24 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const ACTION_TYPES = {
-
-  EMAIL: 'email',
-
-  WEBHOOK: 'webhook',
-
-  INDEX: 'index',
-
-  LOGGING: 'logging',
-
-  HIPCHAT: 'hipchat',
-
-  SLACK: 'slack',
-
-  JIRA: 'jira',
-
-  PAGERDUTY: 'pagerduty',
-
-  UNKNOWN: 'unknown/invalid'
-
+export const INDEX_NAMES: { [key: string]: string } = {
+  WATCHES: '.watches',
+  WATCHER_HISTORY: '.watcher-history-*',
 };

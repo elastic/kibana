@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN = {
-  ID: 'watcher'
+export const TIME_UNITS: { [key: string]: string } = {
+  SECOND: 's',
+  MINUTE: 'm',
+  HOUR: 'h',
+  DAY: 'd',
 };

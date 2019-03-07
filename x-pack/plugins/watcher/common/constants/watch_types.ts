@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// Durations are in ms
-export const LISTS = {
-  NEW_ITEMS_HIGHLIGHT_DURATION: 1 * 1000
+export const WATCH_TYPES: { [key: string]: string } = {
+  JSON: 'json',
+
+  THRESHOLD: 'threshold',
+
+  MONITORING: 'monitoring',
 };

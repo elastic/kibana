@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const AGG_TYPES = {
+export const ACTION_TYPES: { [key: string]: string } = {
+  EMAIL: 'email',
 
-  COUNT: 'count',
+  WEBHOOK: 'webhook',
 
-  AVERAGE: 'avg',
+  INDEX: 'index',
 
-  SUM: 'sum',
+  LOGGING: 'logging',
 
-  MIN: 'min',
+  HIPCHAT: 'hipchat',
 
-  MAX: 'max'
+  SLACK: 'slack',
 
+  JIRA: 'jira',
+
+  PAGERDUTY: 'pagerduty',
+
+  UNKNOWN: 'unknown/invalid',
 };
