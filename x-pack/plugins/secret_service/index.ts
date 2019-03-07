@@ -7,7 +7,7 @@
 import crypto from 'crypto';
 import { join, resolve } from 'path';
 // @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
+import { AuditLogger } from 'src/legacy/server/lib/audit_logger';
 import mappings from './mappings.json';
 import { SecretService } from './server';
 

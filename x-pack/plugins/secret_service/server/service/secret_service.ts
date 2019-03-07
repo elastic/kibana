@@ -8,9 +8,9 @@
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
 // @ts-ignore
-import { AuditLogger } from '../../../../../src/legacy/server/lib/audit_logger';
-import { SavedObjectsClient } from '../../../../../src/legacy/server/saved_objects';
-import { isConflictError } from '../../../../../src/legacy/server/saved_objects/service/lib/errors';
+import { AuditLogger } from 'src/legacy/server/lib/audit_logger';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { isConflictError } from 'src/legacy/server/saved_objects/service/lib/errors';
 
 type SSEvents = 'secret_object_created' | 'secret_object_accessed' | 'secret_object_decrypt_failed';
 type SecretId = Promise<string>;
