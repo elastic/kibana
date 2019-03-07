@@ -13,12 +13,18 @@ import {
 
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 export class WMSSource extends AbstractTMSSource {
 
   static type = 'WMS';
-  static title = 'Web Map Service';
-  static description = 'Maps from OGC Standard WMS';
+  static title = i18n.translate('xpack.maps.source.wmsTitle', {
+    defaultMessage: 'Web Map Service'
+  });
+  static description = i18n.translate('xpack.maps.source.wmsDescription', {
+    defaultMessage: 'Maps from OGC Standard WMS'
+  });
   static icon = 'grid';
 
   static createDescriptor({ serviceUrl, layers, styles }) {
@@ -41,10 +47,14 @@ export class WMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: WMSSource.title },
-      { label: 'Url', value: this._descriptor.serviceUrl },
-      { label: 'Layers', value: this._descriptor.layers },
-      { label: 'Styles', value: this._descriptor.styles },
+      { label: getDataSourceLabel(), value: WMSSource.title },
+      { label: getUrlLabel(), value: this._descriptor.serviceUrl },
+      { label: i18n.translate('xpack.maps.source.wms.layersLabel', {
+        defaultMessage: 'Layers'
+      }), value: this._descriptor.layers },
+      { label: i18n.translate('xpack.maps.source.wms.stylesLabel', {
+        defaultMessage: 'Styles'
+      }), value: this._descriptor.styles },
     ];
   }
 
@@ -67,8 +77,7 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   getUrlTemplate() {
-    console.warn('should compose url using url formatter, not string formatting');
-    const styles = this._descriptor.styles ? this._descriptor.styles : '';
+    const styles = this._descriptor.styles || '';
     // eslint-disable-next-line max-len
     return `${this._descriptor.serviceUrl}?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&transparent=true&width=256&height=256&layers=${this._descriptor.layers}&styles=${styles}`;
   }
@@ -125,12 +134,26 @@ class WMSEditor extends  React.Component {
             onChange={(e) => this._handleServiceUrlChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.wms.layersLabel', {
+            defaultMessage: 'Layers'
+          })}
+          helpText={i18n.translate('xpack.maps.source.wms.layersHelpText', {
+            defaultMessage: 'use comma separated list of layer names'
+          })}
+        >
           <EuiFieldText
             onChange={(e) => this._handleLayersChange(e)}
           />
         </EuiFormRow>
-        <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.wms.stylesLabel', {
+            defaultMessage: 'Styles'
+          })}
+          helpText={i18n.translate('xpack.maps.source.wms.stylesHelpText', {
+            defaultMessage: 'use comma separated list of style names'
+          })}
+        >
           <EuiFieldText
             onChange={(e) => this._handleStylesChange(e)}
           />

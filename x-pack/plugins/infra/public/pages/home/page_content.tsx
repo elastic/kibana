@@ -27,7 +27,15 @@ export const HomePageContent: React.SFC = () => (
                 <WithWaffleTime>
                   {({ currentTimeRange, isAutoReloading }) => (
                     <WithWaffleOptions>
-                      {({ metric, groupBy, nodeType, view, changeView }) => (
+                      {({
+                        metric,
+                        groupBy,
+                        nodeType,
+                        view,
+                        changeView,
+                        autoBounds,
+                        boundsOverride,
+                      }) => (
                         <WithWaffleNodes
                           filterQuery={filterQueryAsJson}
                           metric={metric}
@@ -52,6 +60,8 @@ export const HomePageContent: React.SFC = () => (
                               timeRange={currentTimeRange}
                               view={view}
                               onViewChange={changeView}
+                              autoBounds={autoBounds}
+                              boundsOverride={boundsOverride}
                             />
                           )}
                         </WithWaffleNodes>
