@@ -261,7 +261,7 @@ describe('<DetailPanel />', () => {
       const getRowsText = () => (
         tabContent
           .find('tr')
-          .map(row => row.text())
+          .map(row => row.find('.euiTableCellContent').text())
           .slice(1) // we remove the first row as it is the table header
       );
       it('should list the Job terms fields', () => {
@@ -279,7 +279,7 @@ describe('<DetailPanel />', () => {
       const getRowsText = () => (
         tabContent
           .find('tr')
-          .map(row => row.text())
+          .map(row => row.find('.euiTableCellContent').text())
           .slice(1) // we remove the first row as it is the table header
       );
 
@@ -309,10 +309,10 @@ describe('<DetailPanel />', () => {
           row.find('td').forEach((cell, j) => {
             if (j === 0) {
               // field
-              expect(cell.text()).toEqual(metric.name);
+              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.name);
             } else if (j === 1) {
               // types
-              expect(cell.text()).toEqual(metric.types.join(', '));
+              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.types.join(', '));
             }
           });
         });
