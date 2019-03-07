@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
@@ -19,7 +16,6 @@ import { GlobalTime } from '../../containers/global_time';
 import { decodeIpv6 } from '../../containers/helpers';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
-import { convertKueryToElasticSearchQuery, escapeQueryValue } from '../../lib/keury';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 
@@ -86,15 +82,3 @@ export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
     text: decodeIpv6(ip),
   },
 ];
-
-const getFilterQuery = (
-  ip: string,
-  filterQueryExpression: string,
-  indexPattern: StaticIndexPattern
-): ESTermQuery | string =>
-  isEmpty(filterQueryExpression)
-    ? { term: { ip } }
-    : convertKueryToElasticSearchQuery(
-        `${filterQueryExpression} and ip: ${escapeQueryValue(ip)}`,
-        indexPattern
-      );
