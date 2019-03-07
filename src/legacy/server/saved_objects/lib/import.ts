@@ -132,6 +132,7 @@ export function createObjectsFilter(
     to: string;
   }>
 ) {
+  const refReplacements = replaceReferences.map(ref => `${ref.type}:${ref.from}`);
   return (obj: SavedObject) => {
     if (skips.some(skipObj => skipObj.type === obj.type && skipObj.id === obj.id)) {
       return false;
@@ -141,7 +142,6 @@ export function createObjectsFilter(
     ) {
       return true;
     }
-    const refReplacements = replaceReferences.map(ref => `${ref.type}:${ref.from}`);
     for (const reference of obj.references || []) {
       if (refReplacements.includes(`${reference.type}:${reference.id}`)) {
         return true;
@@ -191,13 +191,10 @@ export async function resolveImportConflicts({
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
   // Replace references
-  const refReplacementsMap = replaceReferences.reduce(
-    (acc, refReplacement) => {
-      acc[`${refReplacement.type}:${refReplacement.from}`] = refReplacement.to;
-      return acc;
-    },
-    {} as { [key: string]: string }
-  );
+  const refReplacementsMap: Record<string, string> = {};
+  for (const { type, to, from } of replaceReferences) {
+    refReplacementsMap[`${type}:${from}`] = to;
+  }
   for (const savedObject of objectsToResolve) {
     for (const reference of savedObject.references || []) {
       if (refReplacementsMap[`${reference.type}:${reference.id}`]) {
