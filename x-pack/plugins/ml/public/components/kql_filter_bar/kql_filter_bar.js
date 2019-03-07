@@ -9,15 +9,11 @@ import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut } from '@elastic/eui';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { getKqlQueryValues } from '../../util/kql_filter_bar_utils';
 import { getSuggestions } from './utils';
 
 
-function convertKueryToEsQuery(kuery, indexPattern) {
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern);
-}
 export class KqlFilterBar extends Component {
   state = {
     error: null,
@@ -60,39 +56,11 @@ export class KqlFilterBar extends Component {
   onSubmit = inputValue => {
     const { indexPattern } = this.props;
     const { onSubmit } = this.props;
-    const filteredFields = [];
 
     try {
-      const ast = fromKueryExpression(inputValue);
-      const query = convertKueryToEsQuery(inputValue, indexPattern);
-
-      if (!query) {
-        return;
-      }
-
-      // if ast.type == 'function' then layout of ast.arguments:
-      // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
-      if (ast && Array.isArray(ast.arguments)) {
-
-        ast.arguments.forEach((arg) => {
-          if (arg.arguments !== undefined) {
-            arg.arguments.forEach((nestedArg) => {
-              if (typeof nestedArg.value === 'string') {
-                filteredFields.push(nestedArg.value);
-              }
-            });
-          } else if (typeof arg.value === 'string') {
-            filteredFields.push(arg.value);
-          }
-        });
-
-      }
-
-      onSubmit({
-        influencersFilterQuery: query,
-        filteredFields,
-        queryString: inputValue
-      });
+      // returns object with properties:  { influencersFilterQuery, filteredFields, queryString, isAndOperator }
+      const kqlQueryValues = getKqlQueryValues(inputValue, indexPattern);
+      onSubmit(kqlQueryValues);
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
       const errorMessage = i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessage', {
