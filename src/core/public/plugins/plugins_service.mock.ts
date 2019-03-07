@@ -17,26 +17,28 @@
  * under the License.
  */
 
-import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { UiSettingsSetup } from './ui_settings';
+import { PluginsService, PluginsServiceSetup } from './plugins_service';
 
-export { CoreContext, CoreSystem } from './core_system';
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<PublicMethodsOf<PluginsServiceSetup>> = {
+    pluginSetups: new Map(),
+  };
+  // we have to suppress type errors until decide how to mock es6 class
+  return (setupContract as unknown) as PluginsServiceSetup;
+};
 
-export interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
-}
+type PluginsServiceContract = PublicMethodsOf<PluginsService>;
+const createMock = () => {
+  const mocked: jest.Mocked<PluginsServiceContract> = {
+    setup: jest.fn(),
+    stop: jest.fn(),
+  };
 
-export { PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+  mocked.setup.mockResolvedValue(createSetupContractMock());
+  return mocked;
+};
+
+export const pluginsServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

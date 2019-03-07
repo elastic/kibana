@@ -17,11 +17,12 @@
  * under the License.
  */
 
+import { Observable, Subject, Subscription } from 'rxjs';
 import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
 
 interface Params {
-  targetDomElement: HTMLElement;
+  targetDomElement$: Observable<HTMLElement>;
 }
 
 interface Deps {
@@ -31,27 +32,45 @@ interface Deps {
 export class NotificationsService {
   private readonly toasts: ToastsService;
 
-  private readonly toastsContainer: HTMLElement;
+  private readonly toastsContainer$: Subject<HTMLElement>;
+  private domElemSubscription?: Subscription;
+  private targetDomElement?: HTMLElement;
 
   constructor(private readonly params: Params) {
-    this.toastsContainer = document.createElement('div');
+    this.toastsContainer$ = new Subject<HTMLElement>();
     this.toasts = new ToastsService({
-      targetDomElement: this.toastsContainer,
+      targetDomElement$: this.toastsContainer$.asObservable(),
     });
   }
 
   public setup({ i18n }: Deps) {
-    this.params.targetDomElement.appendChild(this.toastsContainer);
+    this.domElemSubscription = this.params.targetDomElement$.subscribe({
+      next: targetDomElement => {
+        this.cleanupTargetDomElement();
+        this.targetDomElement = targetDomElement;
 
-    return {
-      toasts: this.toasts.setup({ i18n }),
-    };
+        const toastsContainer = document.createElement('div');
+        targetDomElement.appendChild(toastsContainer);
+        this.toastsContainer$.next(toastsContainer);
+      },
+    });
+
+    return { toasts: this.toasts.setup({ i18n }) };
   }
 
   public stop() {
     this.toasts.stop();
+    this.cleanupTargetDomElement();
 
-    this.params.targetDomElement.textContent = '';
+    if (this.domElemSubscription) {
+      this.domElemSubscription.unsubscribe();
+    }
+  }
+
+  private cleanupTargetDomElement() {
+    if (this.targetDomElement) {
+      this.targetDomElement.textContent = '';
+    }
   }
 }
 
