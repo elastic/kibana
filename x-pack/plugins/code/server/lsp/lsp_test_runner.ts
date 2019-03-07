@@ -29,7 +29,11 @@ const options = {
   queueTimeout: 60 * 60 * 1000, // 1 hour by default
   updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
   indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lspRequestTimeoutMs: 5 * 60, // timeout a request over 30s
+  lsp: {
+    requestTimeoutMs: 5 * 60, // timeout a request over 30s
+    detach: false,
+    verbose: false,
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
   disableScheduler: true, // Temp option to disable all schedulers.
@@ -249,12 +253,12 @@ export class LspTestRunner {
   }
 
   private async launchTypescriptLanguageServer() {
-    const launcher = new TypescriptServerLauncher('127.0.0.1', false, serverOptions, new ConsoleLoggerFactory());
+    const launcher = new TypescriptServerLauncher('127.0.0.1', serverOptions, new ConsoleLoggerFactory());
     return await launcher.launch(false, 1, TYPESCRIPT.embedPath!);
   }
 
   private async launchJavaLanguageServer() {
-    const launcher = new JavaLauncher('127.0.0.1', false, serverOptions, new ConsoleLoggerFactory());
+    const launcher = new JavaLauncher('127.0.0.1', serverOptions, new ConsoleLoggerFactory());
     // @ts-ignore
     const installManager = new InstallManager(null, serverOptions);
     return await launcher.launch(false, 1, installManager.installationPath(JAVA));

@@ -20,6 +20,10 @@ const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const options: ServerOptions = {
   workspacePath: `${tmpDataPath}/workspace`,
   jdtWorkspacePath: `${tmpDataPath}/jdt`,
+  // @ts-ignore
+  lsp: {
+    detach: false,
+  },
 };
 
 beforeAll(async () => {
@@ -40,13 +44,7 @@ function delay(seconds: number) {
 }
 
 test('typescript language server could be shutdown', async () => {
-  // @ts-ignore
-  const tsLauncher = new TypescriptServerLauncher(
-    'localhost',
-    false,
-    options,
-    new ConsoleLoggerFactory()
-  );
+  const tsLauncher = new TypescriptServerLauncher('localhost', options, new ConsoleLoggerFactory());
   const proxy = await tsLauncher.launch(true, 1, TYPESCRIPT.embedPath!);
   await proxy.initialize(options.workspacePath);
   await delay(2);

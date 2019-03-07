@@ -18,7 +18,6 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
   private isRunning: boolean = false;
   constructor(
     readonly targetHost: string,
-    readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
@@ -30,13 +29,13 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
   public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     let port = 2089;
 
-    if (!this.detach) {
+    if (!this.options.lsp.detach) {
       port = await getPort();
     }
     const log: Logger = this.loggerFactory.getLogger(['code', `ts@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
 
-    if (this.detach) {
+    if (this.options.lsp.detach) {
       log.info('Detach mode, expected langserver launch externally');
       proxy.onConnected(() => {
         this.isRunning = true;

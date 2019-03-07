@@ -21,7 +21,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
   private isRunning: boolean = false;
   constructor(
     readonly targetHost: string,
-    readonly detach: boolean,
     readonly options: ServerOptions,
     readonly loggerFactory: LoggerFactory
   ) {}
@@ -32,13 +31,13 @@ export class JavaLauncher implements ILanguageServerLauncher {
   public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     let port = 2090;
 
-    if (!this.detach) {
+    if (!this.options) {
       port = await getPort();
     }
     const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
-    const proxy = new LanguageServerProxy(port, this.targetHost, log);
+    const proxy = new LanguageServerProxy(port, this.targetHost, log, this.options.lsp);
     proxy.awaitServerConnection();
-    if (this.detach) {
+    if (this.options.lsp.detach) {
       // detach mode
       proxy.onConnected(() => {
         this.isRunning = true;

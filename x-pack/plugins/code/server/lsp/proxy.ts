@@ -27,6 +27,7 @@ import { createConnection, IConnection } from 'vscode-languageserver/lib/main';
 
 import { LspRequest } from '../../model';
 import { Logger } from '../log';
+import { LspOptions } from '../server_options';
 import { HttpMessageReader } from './http_message_reader';
 import { HttpMessageWriter } from './http_message_writer';
 import { HttpRequestEmitter } from './http_request_emitter';
@@ -54,15 +55,17 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private replies = createRepliesMap();
   private readonly targetHost: string;
   private readonly targetPort: number;
-  private readonly logger?: Logger;
+  private readonly logger: Logger;
+  private readonly lspOptions: LspOptions;
   private eventEmitter = new EventEmitter();
 
   private connectingPromise?: Promise<MessageConnection>;
 
-  constructor(targetPort: number, targetHost: string, logger?: Logger) {
+  constructor(targetPort: number, targetHost: string, logger: Logger, lspOptions: LspOptions) {
     this.targetHost = targetHost;
     this.targetPort = targetPort;
     this.logger = logger;
+    this.lspOptions = lspOptions;
     this.conn = createConnection(
       new HttpMessageReader(this.httpEmitter),
       new HttpMessageWriter(this.replies, logger)
@@ -80,7 +83,9 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       params,
     };
     return new Promise<ResponseMessage>((resolve, reject) => {
-      if (this.logger) {
+      if (this.lspOptions.verbose) {
+        this.logger.info(`emit message ${JSON.stringify(message)}`);
+      } else {
         this.logger.debug(`emit message ${JSON.stringify(message)}`);
       }
       if (isNotification) {
@@ -106,9 +111,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       capabilities: clientCapabilities,
     };
     return await clientConn.sendRequest('initialize', params).then(r => {
-      if (this.logger) {
-        this.logger.info(`initialized at ${rootUri}`);
-      }
+      this.logger.info(`initialized at ${rootUri}`);
 
       // @ts-ignore
       // TODO fix this
@@ -120,11 +123,16 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public listen() {
     this.conn.onRequest((method: string, ...params) => {
-      if (this.logger) {
+      if (this.lspOptions.verbose) {
+        this.logger.info('received request method: ' + method);
+      } else {
         this.logger.debug('received request method: ' + method);
       }
+
       return this.connect().then(clientConn => {
-        if (this.logger) {
+        if (this.lspOptions.verbose) {
+          this.logger.info(`proxy method:${method} to Language Server `);
+        } else {
           this.logger.debug(`proxy method:${method} to Language Server `);
         }
 
@@ -136,9 +144,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
 
   public async shutdown() {
     const clientConn = await this.connect();
-    if (this.logger) {
-      this.logger.info(`sending shutdown request`);
-    }
+    this.logger.info(`sending shutdown request`);
     return await clientConn.sendRequest('shutdown');
   }
   /**
@@ -147,14 +153,11 @@ export class LanguageServerProxy implements ILanguageServerHandler {
    */
   public async exit() {
     if (this.clientConnection) {
-      if (this.logger) {
-        this.logger.info('sending `shutdown` request to language server.');
-      }
+      this.logger.info('sending `shutdown` request to language server.');
       const clientConn = this.clientConnection;
       await clientConn.sendRequest('shutdown').then(() => {
-        if (this.logger) {
-          this.logger.info('sending `exit` notification to language server.');
-        }
+        this.logger.info('sending `exit` notification to language server.');
+
         // @ts-ignore
         // TODO fix this
         clientConn.sendNotification(ExitNotification.type);
@@ -172,9 +175,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
         this.eventEmitter.emit('connect');
         socket.on('close', () => this.onSocketClosed());
 
-        if (this.logger) {
-          this.logger.info('Java langserver connection established on port ' + this.targetPort);
-        }
+        this.logger.info('Java langserver connection established on port ' + this.targetPort);
 
         const reader = new SocketMessageReader(socket);
         const writer = new SocketMessageWriter(socket);
@@ -186,9 +187,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       server.on('error', rej);
       server.listen(this.targetPort, () => {
         server.removeListener('error', rej);
-        if (this.logger) {
-          this.logger.info('Wait Java langserver connection on port ' + this.targetPort);
-        }
+        this.logger.info('Wait Java langserver connection on port ' + this.targetPort);
       });
     });
   }
@@ -271,21 +270,31 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   private registerOnNotificationHandler(clientConnection: MessageConnection) {
     // @ts-ignore
     clientConnection.onNotification(LogMessageNotification.type, notification => {
-      if (this.logger) {
-        switch (notification.type) {
-          case MessageType.Log:
+      switch (notification.type) {
+        case MessageType.Log:
+          this.logger.debug(notification.message);
+          break;
+        case MessageType.Info:
+          if (this.lspOptions.verbose) {
+            this.logger.info(notification.message);
+          } else {
             this.logger.debug(notification.message);
-            break;
-          case MessageType.Info:
-            this.logger.debug(notification.message);
-            break;
-          case MessageType.Warning:
-            this.logger.log(notification.message);
-            break;
-          case MessageType.Error:
+          }
+          break;
+        case MessageType.Warning:
+          if (this.lspOptions.verbose) {
             this.logger.warn(notification.message);
-            break;
-        }
+          } else {
+            this.logger.log(notification.message);
+          }
+          break;
+        case MessageType.Error:
+          if (this.lspOptions.verbose) {
+            this.logger.error(notification.message);
+          } else {
+            this.logger.warn(notification.message);
+          }
+          break;
       }
     });
   }

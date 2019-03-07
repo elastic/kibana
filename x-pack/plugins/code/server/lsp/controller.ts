@@ -47,7 +47,6 @@ export class LanguageServerController implements ILanguageServerHandler {
   // a { lang -> server } map from above list
   private readonly languageServerMap: { [lang: string]: LanguageServerData };
   private log: Logger;
-  private readonly detach: boolean = process.env.LSP_DETACH === 'true';
 
   constructor(
     readonly options: ServerOptions,
@@ -62,7 +61,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       builtinWorkspaceFolders: def.builtinWorkspaceFolders,
       languages: def.languages,
       maxWorkspace: options.maxWorkspace,
-      launcher: new def.launcher(this.targetHost, this.detach, options, loggerFactory),
+      launcher: new def.launcher(this.targetHost, options, loggerFactory),
     }));
     this.languageServerMap = this.languageServers.reduce(
       (map, ls) => {
@@ -241,7 +240,7 @@ export class LanguageServerController implements ILanguageServerHandler {
     const ls = this.languageServerMap[lang];
     if (ls) {
       if (
-        !this.detach &&
+        !this.options.lsp.detach &&
         this.installManager.status(ls.definition) !== LanguageServerStatus.READY
       ) {
         throw new ResponseError(
