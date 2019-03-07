@@ -67,15 +67,10 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
   async getImmutableProperties() {
-    const emsLayerProperty = {
-      label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
-        defaultMessage: `Layer`,
-      }),
-      value: this._descriptor.id
-    };
+    let emsLink;
     try {
       const emsVectorFileMeta = await this._getEmsVectorFileMeta();
-      emsLayerProperty.link = emsVectorFileMeta.emsLink;
+      emsLink = emsVectorFileMeta.emsLink;
     } catch(error) {
       // ignore error if EMS layer id could not be found
     }
@@ -85,7 +80,13 @@ export class EMSFileSource extends AbstractVectorSource {
         label: getDataSourceLabel(),
         value: EMSFileSource.title
       },
-      emsLayerProperty
+      {
+        label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
+          defaultMessage: `Layer`,
+        }),
+        value: this._descriptor.id,
+        link: emsLink
+      }
     ];
   }
 
