@@ -17,9 +17,23 @@
  * under the License.
  */
 
-export function createAbsolutePathSerializer(rootPath) {
+export function createAbsolutePathSerializer(rootPath, { global = false } = {}) {
+  if (global) {
+    return {
+      print: (value, serialize) =>
+        serialize(
+          value
+            .split(rootPath)
+            .join('<absolute path>')
+            .replace(/\\/g, '/')
+        ),
+      test: value => typeof value === 'string' && value.includes(rootPath),
+    };
+  }
+
   return {
-    print: value => value.replace(rootPath, '<absolute path>').replace(/\\/g, '/'),
+    print: (value, serialize) =>
+      serialize(value.replace(rootPath, '<absolute path>').replace(/\\/g, '/')),
     test: value => typeof value === 'string' && value.startsWith(rootPath),
   };
 }
