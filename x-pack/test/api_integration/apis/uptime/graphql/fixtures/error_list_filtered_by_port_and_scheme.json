@@ -3,6 +3,7 @@
     {
       "latestMessage": "received status code 301 expecting 200",
       "monitorId": "http@http://www.example.com",
+      "monitorType": "http",
       "type": "validate",
       "count": 482,
       "statusCode": "301",
@@ -11,6 +12,7 @@
     {
       "latestMessage": "Get https://example.com/: http: request timed out while waiting for response (Client.Timeout exceeded while awaiting headers)",
       "monitorId": "http@http://www.example.com",
+      "monitorType": "http",
       "type": "io",
       "count": 1,
       "statusCode": null,
@@ -19,6 +21,7 @@
     {
       "latestMessage": "Get http://www.google.com/: dial tcp 172.217.11.36:80: connect: network is down",
       "monitorId": "http@http://www.google.com/",
+      "monitorType": "http",
       "type": "io",
       "count": 1,
       "statusCode": null,

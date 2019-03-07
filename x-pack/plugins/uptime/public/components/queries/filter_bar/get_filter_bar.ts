@@ -12,7 +12,7 @@ query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
     status
     port
     id
-    scheme
+    type
   }
 }
 `;

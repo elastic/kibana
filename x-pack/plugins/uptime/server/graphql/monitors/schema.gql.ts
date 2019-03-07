@@ -10,8 +10,8 @@ export const monitorsSchema = gql`
   type FilterBar {
     id: [String!]
     port: [Int!]
-    scheme: [String!]
     status: [String!]
+    type: [String!]
   }
 
   type HistogramDataPoint {
@@ -79,6 +79,7 @@ export const monitorsSchema = gql`
     latestMessage: String
     monitorId: String
     type: String!
+    monitorType: String
     count: Int
     statusCode: String
     timestamp: String

@@ -234,6 +234,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
+        size: 0,
         query,
         aggs: {
           hosts: {
@@ -250,6 +251,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                   port: {
                     terms: {
                       field: 'tcp.port',
+                      missing_bucket: true,
                     },
                   },
                 },
@@ -270,7 +272,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               histogram: {
                 auto_date_histogram: {
                   field: '@timestamp',
-                  buckets: 50,
+                  buckets: 25,
                 },
                 aggs: {
                   status: {
@@ -286,11 +288,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const res = await this.database.search(request, params);
-    const aggBuckets: any[] = get(res, 'aggregations.hosts.buckets', []);
-    const result = aggBuckets
-      .map(({ key, histogram: { buckets }, latest: { hits: { hits } } }) => {
-        if (statusFilter && hits[0]._source.monitor.status !== statusFilter) {
+
+    const httpTcpResult = await this.database.search(request, params);
+    const result = get(httpTcpResult, 'aggregations.hosts.buckets', [])
+      .map((resultBucket: any) => {
+        const key = get(resultBucket, 'key');
+        const buckets: any[] = get(resultBucket, 'histogram.buckets', []);
+        const hits: any[] = get(resultBucket, 'latest.hits.hits', []);
+        const latestStatus: string | undefined = get(hits, '[0]._source.monitor.status', undefined);
+        if (statusFilter && latestStatus !== statusFilter) {
           return undefined;
         }
         const upSeries: any[] = [];
@@ -317,7 +323,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           downSeries,
         };
       })
-      .filter(f => f !== undefined);
+      .filter((f: any) => f !== undefined);
     return result;
   }
 
@@ -328,11 +334,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   ): Promise<any> {
     const MONITOR_SOURCE_ID_KEY = 'monitor.id';
     const MONITOR_SOURCE_TCP_KEY = 'tcp.port';
-    const MONITOR_SOURCE_SCHEME_KEY = 'monitor.scheme';
+    const MONITOR_SOURCE_TYPE_KEY = 'monitor.type';
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
-        _source: [MONITOR_SOURCE_ID_KEY, MONITOR_SOURCE_TCP_KEY, MONITOR_SOURCE_SCHEME_KEY],
+        _source: [MONITOR_SOURCE_ID_KEY, MONITOR_SOURCE_TCP_KEY, MONITOR_SOURCE_TYPE_KEY],
         size: 1000,
         query: {
           range: {
@@ -353,7 +359,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const result = await this.database.search(request, params);
     const ids: string[] = [];
     const ports = new Set<number>();
-    const schemes = new Set<string>();
+    const types = new Set<string>();
 
     const hits = get(result, 'hits.hits', []);
     hits.forEach((hit: any) => {
@@ -363,9 +369,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         `_source.${MONITOR_SOURCE_TCP_KEY}`,
         undefined
       );
-      const schemeValue: string | undefined = get(
+      const typeValue: string | undefined = get(
         hit,
-        `_source.${MONITOR_SOURCE_SCHEME_KEY}`,
+        `_source.${MONITOR_SOURCE_TYPE_KEY}`,
         undefined
       );
 
@@ -375,13 +381,13 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       if (portValue) {
         ports.add(portValue);
       }
-      if (schemeValue) {
-        schemes.add(schemeValue);
+      if (typeValue) {
+        types.add(typeValue);
       }
     });
 
     return {
-      scheme: Array.from(schemes).sort(),
+      type: Array.from(types).sort(),
       port: Array.from(ports).sort((a: number, b: number) => a - b),
       id: ids.sort(),
       status: ['up', 'down'],
@@ -436,14 +442,10 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const {
-      aggregations: {
-        error_type: { buckets },
-      },
-    } = await this.database.search(request, params);
 
+    const queryResult = await this.database.search(request, params);
     const errorsList: ErrorListItem[] = [];
-    buckets.forEach(
+    get(queryResult, 'aggregations.error_type.buckets', []).forEach(
       ({
         key: errorType,
         by_id: { buckets: monitorBuckets },
@@ -458,10 +460,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
+          const monitorType = get(source, 'monitor.type', null);
           errorsList.push({
             latestMessage: errorMessage,
             monitorId,
             type: errorType,
+            monitorType,
             count,
             statusCode,
             timestamp,
