@@ -21,7 +21,7 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import React from 'react';
+import React, { useState } from 'react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
 
@@ -36,6 +36,7 @@ interface DefaultEditorAggSelectProps {
 
 type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   label: string;
+  value?: any;
   options?: EuiComboBoxOptionProps[];
 };
 
@@ -49,7 +50,10 @@ function DefaultEditorAggSelect({
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
+  const initOptions: ComboBoxGroupedOption[] = agg.type
+    ? [{ label: agg.type.title, value: agg.type }]
+    : [];
+  const [selectedOptions, setSelectedOptions] = useState(initOptions);
   const label = isSubAggregation ? (
     <FormattedMessage
       id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
@@ -78,6 +82,7 @@ function DefaultEditorAggSelect({
   );
 
   const onChange = (options: ComboBoxGroupedOption[]) => {
+    setSelectedOptions(options);
     onChangeAggType(agg, get(options, '0.value'));
   };
 
