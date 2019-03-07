@@ -159,7 +159,6 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
     </EuiTextColor>
   </Component>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
@@ -245,9 +244,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
