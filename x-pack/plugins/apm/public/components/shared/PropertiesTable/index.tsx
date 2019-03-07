@@ -15,7 +15,7 @@ import { StringMap } from '../../../../typings/common';
 import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
 import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';
 import { NestedKeyValueTable } from './NestedKeyValueTable';
-import { TabKey } from './tabConfig';
+import { PropertyTabKey } from './tabConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -38,7 +38,7 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-function getTabHelpText(tabKey: TabKey) {
+function getTabHelpText(tabKey: PropertyTabKey) {
   switch (tabKey) {
     case 'user':
       return i18n.translate(
@@ -72,7 +72,7 @@ export function TabHelpMessage({
   tabKey,
   agentName
 }: {
-  tabKey?: TabKey;
+  tabKey?: PropertyTabKey;
   agentName?: AgentName;
 }) {
   if (!tabKey) {
@@ -103,7 +103,7 @@ export function PropertiesTable({
   agentName
 }: {
   propData?: StringMap;
-  propKey?: TabKey;
+  propKey?: PropertyTabKey;
   agentName?: AgentName;
 }) {
   return (

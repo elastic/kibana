@@ -11,31 +11,26 @@ import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
-export type TabKey =
+export type PropertyTabKey =
   | keyof Transaction
   | keyof APMError
   | 'transaction.custom'
   | 'error.custom';
 
-export interface Tab {
-  key: TabKey;
+export interface PropertyTab {
+  key: PropertyTabKey;
   label: string;
 }
 
-interface TabConfig extends Tab {
+interface TabConfig extends PropertyTab {
   required: boolean;
   presortedKeys: string[];
 }
 
-export function getTabsFromObject(obj: Transaction | APMError): Tab[] {
+export function getTabsFromObject(obj: Transaction | APMError): PropertyTab[] {
   return TAB_CONFIG.filter(
     ({ key, required }) => required || has(obj, key)
   ).map(({ key, label }) => ({ key, label }));
-}
-
-interface GenericTab {
-  key: string;
-  label: string;
 }
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
@@ -50,10 +45,10 @@ export const sortKeysByConfig: KeySorter = (object, currentKey) => {
   return uniq([...presorted, ...Object.keys(object).sort()]);
 };
 
-export function getCurrentTab<T extends GenericTab>(
+export function getCurrentTab<T extends { key: string; label: string }>(
   tabs: T[] = [],
   currentTabKey: string | undefined
-) {
+): T {
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }

@@ -10,10 +10,10 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import {
   getTabsFromObject,
-  Tab
+  PropertyTab
 } from '../../../shared/PropertiesTable/tabConfig';
 
-export type ErrorTab = Tab | ExceptionTab | LogTab;
+export type ErrorTab = PropertyTab | ExceptionTab | LogTab;
 
 interface LogTab {
   key: 'log_stacktrace';
