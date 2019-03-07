@@ -20,7 +20,7 @@ interface FilterBarProps {
 const MAX_SELECTION_LENGTH = 20;
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({ filterBar: { id, port, scheme }, updateQuery }: FilterBarProps) => {
+export const FilterBar = ({ filterBar: { id, port, type }, updateQuery }: FilterBarProps) => {
   const showFilterDisclaimer =
     (id && id.length && id.length > MAX_SELECTION_LENGTH) ||
     (port && port.length && port.length > MAX_SELECTION_LENGTH);
@@ -50,7 +50,7 @@ export const FilterBar = ({ filterBar: { id, port, scheme }, updateQuery }: Filt
       type: 'field_value_selection',
       field: 'monitor.id',
       name: i18n.translate('xpack.uptime.filterBar.options.hostLabel', {
-        defaultMessage: 'Host',
+        defaultMessage: 'ID',
       }),
       multiSelect: false,
       options: take(id || [], MAX_SELECTION_LENGTH).map((idValue: any) => ({
@@ -74,13 +74,12 @@ export const FilterBar = ({ filterBar: { id, port, scheme }, updateQuery }: Filt
     },
     {
       type: 'field_value_selection',
-      field: 'monitor.scheme',
+      field: 'monitor.type',
       name: i18n.translate('xpack.uptime.filterBar.options.typeLabel', {
         defaultMessage: 'Type',
       }),
       multiSelect: false,
-      options:
-        scheme && scheme.map((schemeValue: string) => ({ value: schemeValue, view: schemeValue })),
+      options: type && type.map((typeValue: string) => ({ value: typeValue, view: typeValue })),
       searchThreshold: SEARCH_THRESHOLD,
     },
   ];

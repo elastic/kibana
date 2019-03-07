@@ -145,6 +145,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       rest_total_hits_as_int: true,
       body: {
         query,
+        size: 0,
         aggs: {
           timeseries: {
             auto_date_histogram: {

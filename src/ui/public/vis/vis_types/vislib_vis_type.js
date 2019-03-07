@@ -23,7 +23,7 @@ import 'plugins/kbn_vislib_vis_types/controls/line_interpolation_option';
 import 'plugins/kbn_vislib_vis_types/controls/heatmap_options';
 import 'plugins/kbn_vislib_vis_types/controls/gauge_options';
 import 'plugins/kbn_vislib_vis_types/controls/point_series';
-import './vislib_vis_legend';
+import { CUSTOM_LEGEND_VIS_TYPES } from './vislib_vis_legend';
 import { BaseVisTypeProvider } from './base_vis_type';
 import { AggResponsePointSeriesProvider } from '../../agg_response/point_series/point_series';
 import VislibProvider from '../../vislib';
@@ -70,6 +70,13 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           return resolve();
         }
 
+        this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
+        this.vis.vislibVis.on('brush', this.vis.API.events.brush);
+        this.vis.vislibVis.on('click', this.vis.API.events.filter);
+        this.vis.vislibVis.on('renderComplete', resolve);
+
+        this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+
         if (this.vis.params.addLegend) {
           $(this.container).attr('class', (i, cls) => {
             return cls.replace(/visLib--legend-\S+/g, '');
@@ -85,15 +92,16 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           this.$scope.$digest();
         }
 
-        this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
-        this.vis.vislibVis.on('brush', this.vis.API.events.brush);
-        this.vis.vislibVis.on('click', this.vis.API.events.filter);
-        this.vis.vislibVis.on('renderComplete', resolve);
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
 
-        if (this.vis.params.addLegend) {
+        // refreshing the legend after the chart is rendered.
+        // this is necessary because some visualizations
+        // provide data necessary for the legend only after a render cycle.
+        if (this.vis.params.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
           this.$scope.refreshLegend++;
           this.$scope.$digest();
+
+          this.vis.vislibVis.render(esResponse, this.vis.getUiState());
         }
       });
     }

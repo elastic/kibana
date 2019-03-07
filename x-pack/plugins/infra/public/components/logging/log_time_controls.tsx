@@ -6,7 +6,7 @@
 
 import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import moment, { Moment } from 'moment';
+import moment, { Moment } from 'moment-timezone';
 import React from 'react';
 import styled from 'styled-components';
 
