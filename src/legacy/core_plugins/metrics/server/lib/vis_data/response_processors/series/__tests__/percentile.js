@@ -91,9 +91,9 @@ describe('percentile(resp, panel, series)', () => {
     const results = percentile(resp, panel, series)(next)([]);
     expect(results).to.have.length(3);
 
-    expect(results[0]).to.have.property('id', '10-90:test');
+    expect(results[0]).to.have.property('id', 'test:10-90');
     expect(results[0]).to.have.property('color', 'rgb(255, 0, 0)');
-    expect(results[0]).to.have.property('fillBetween', '10-90:test:90');
+    expect(results[0]).to.have.property('fillBetween', 'test:10-90:90');
     expect(results[0]).to.have.property('label', 'Percentile of cpu (10)');
     expect(results[0]).to.have.property('legend', false);
     expect(results[0]).to.have.property('lines');
@@ -109,7 +109,7 @@ describe('percentile(resp, panel, series)', () => {
       [2, 1.2]
     ]);
 
-    expect(results[1]).to.have.property('id', '10-90:test:90');
+    expect(results[1]).to.have.property('id', 'test:10-90:90');
     expect(results[1]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[1]).to.have.property('label', 'Percentile of cpu (10)');
     expect(results[1]).to.have.property('legend', false);
@@ -126,7 +126,7 @@ describe('percentile(resp, panel, series)', () => {
       [2, 5.3]
     ]);
 
-    expect(results[2]).to.have.property('id', '50:test');
+    expect(results[2]).to.have.property('id', 'test:50');
     expect(results[2]).to.have.property('color', 'rgb(255, 0, 0)');
     expect(results[2]).to.have.property('label', 'Percentile of cpu (50)');
     expect(results[2]).to.have.property('stack', false);

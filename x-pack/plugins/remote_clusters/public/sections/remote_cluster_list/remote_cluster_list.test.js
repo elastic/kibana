@@ -47,6 +47,6 @@ describe('RemoteClusterList', () => {
     );
 
     const emptyPrompt = findTestSubject(component, 'remoteClusterListEmptyPrompt');
-    expect(emptyPrompt).toBeTruthy();
+    expect(emptyPrompt.length).toBeTruthy();
   });
 });

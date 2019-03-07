@@ -12,7 +12,7 @@ export const filebeatIisRules = [
     },
     format: [
       {
-        constant: '[IIS][access] ',
+        constant: '[iis][access] ',
       },
       {
         field: 'iis.access.remote_ip',
@@ -62,7 +62,7 @@ export const filebeatIisRules = [
     },
     format: [
       {
-        constant: '[IIS][error] ',
+        constant: '[iis][error] ',
       },
       {
         field: 'iis.error.remote_ip',
@@ -100,13 +100,33 @@ export const filebeatIisRules = [
     ],
   },
   {
+    // ECS
+    when: {
+      exists: ['ecs.version', 'iis.error.reason_phrase'],
+    },
+    format: [
+      {
+        constant: '[iis][error] ',
+      },
+      {
+        field: 'source.ip',
+      },
+      {
+        constant: ' ',
+      },
+      {
+        field: 'iis.error.reason_phrase',
+      },
+    ],
+  },
+  {
     // pre-ECS
     when: {
       exists: ['iis.error.reason_phrase'],
     },
     format: [
       {
-        constant: '[IIS][error] ',
+        constant: '[iis][error] ',
       },
       {
         field: 'iis.error.remote_ip',

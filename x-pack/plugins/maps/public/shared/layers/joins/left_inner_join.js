@@ -7,6 +7,7 @@
 
 import { ESJoinSource } from '../sources/es_join_source';
 import { VectorStyle } from '../styles/vector_style';
+import { filterPropertiesForTooltip } from '../util';
 
 export class LeftInnerJoin {
 
@@ -46,23 +47,25 @@ export class LeftInnerJoin {
   }
 
   joinPropertiesToFeatureCollection(featureCollection, propertiesMap) {
-    const joinFields = this.getJoinFields();
+    const joinFields = this._rightSource.getMetricFields();
     featureCollection.features.forEach(feature => {
       // Clean up old join property values
-      joinFields.forEach(({ name }) => {
-        delete feature.properties[name];
-        const stylePropertyName = VectorStyle.getComputedFieldName(name);
+      joinFields.forEach(({ propertyKey }) => {
+        delete feature.properties[propertyKey];
+        const stylePropertyName = VectorStyle.getComputedFieldName(propertyKey);
         delete feature.properties[stylePropertyName];
       });
 
       const joinKey = feature.properties[this._descriptor.leftField];
       if (propertiesMap.has(joinKey)) {
-        feature.properties = {
-          ...feature.properties,
-          ...propertiesMap.get(joinKey),
-        };
+        Object.assign(feature.properties,  propertiesMap.get(joinKey));
       }
     });
+
+    //Create a new instance.
+    //We use a reference check to determine whether the feature collection has changed and needs to be updated on the mapbox-gl source.
+    //We need to update because mapbox creates copies of the property object, that it then dispatches on tooltip-events.
+    return { ...featureCollection };
   }
 
   getJoinSource() {
@@ -78,19 +81,9 @@ export class LeftInnerJoin {
   }
 
   filterAndFormatPropertiesForTooltip(properties) {
-    const joinFields = this.getJoinFields();
-    const tooltipProps = {};
-    joinFields.forEach((joinField) => {
-      for (const key in properties) {
-        if (properties.hasOwnProperty(key)) {
-          if (joinField.name === key) {
-            tooltipProps[joinField.label] = properties[key];
-          }
-        }
-      }
-    });
+    const metricFields = this._rightSource.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
 
-    return tooltipProps;
   }
 
   getIndexPatternIds() {

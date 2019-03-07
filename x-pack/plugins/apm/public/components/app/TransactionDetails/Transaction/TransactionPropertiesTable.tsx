@@ -18,6 +18,7 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
+import { HeightRetainer } from '../../../shared/HeightRetainer';
 import {
   getPropertyTabNames,
   PropertiesTable
@@ -67,7 +68,7 @@ export function TransactionPropertiesTable({
   const isTimelineTab = currentTab.key === timelineTab.key;
 
   return (
-    <div>
+    <HeightRetainer>
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
@@ -108,6 +109,6 @@ export function TransactionPropertiesTable({
           />
         </TableContainer>
       )}
-    </div>
+    </HeightRetainer>
   );
 }
