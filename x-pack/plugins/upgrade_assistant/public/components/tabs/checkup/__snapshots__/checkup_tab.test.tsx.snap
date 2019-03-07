@@ -2,9 +2,7 @@
 
 exports[`CheckupTab render with deprecations 1`] = `
 <Fragment>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiText
     grow={false}
     size="m"
@@ -24,9 +22,7 @@ exports[`CheckupTab render with deprecations 1`] = `
       />
     </p>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiCallOut
     color="warning"
     iconType="help"
@@ -62,9 +58,7 @@ exports[`CheckupTab render with deprecations 1`] = `
       />
     </p>
   </EuiCallOut>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiPageContent
     panelPaddingSize="l"
   >
@@ -184,9 +178,7 @@ exports[`CheckupTab render with deprecations 1`] = `
         onSearchChange={[Function]}
         search=""
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <GroupedDeprecations
         allDeprecations={
           Array [
@@ -298,9 +290,7 @@ exports[`CheckupTab render with deprecations 1`] = `
 
 exports[`CheckupTab render with error 1`] = `
 <Fragment>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiText
     grow={false}
     size="m"
@@ -320,9 +310,7 @@ exports[`CheckupTab render with error 1`] = `
       />
     </p>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiCallOut
     color="warning"
     iconType="help"
@@ -358,9 +346,7 @@ exports[`CheckupTab render with error 1`] = `
       />
     </p>
   </EuiCallOut>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiPageContent
     panelPaddingSize="l"
   >
@@ -375,9 +361,7 @@ exports[`CheckupTab render with error 1`] = `
 
 exports[`CheckupTab render without deprecations 1`] = `
 <Fragment>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiText
     grow={false}
     size="m"
@@ -397,9 +381,7 @@ exports[`CheckupTab render without deprecations 1`] = `
       />
     </p>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiCallOut
     color="warning"
     iconType="help"
@@ -435,9 +417,7 @@ exports[`CheckupTab render without deprecations 1`] = `
       />
     </p>
   </EuiCallOut>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiPageContent
     panelPaddingSize="l"
   >
