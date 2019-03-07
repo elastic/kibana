@@ -3,7 +3,7 @@
 
 == Overview
 
-The Overview page is intended to help you quickly identify and diagnose outages and
+The Uptime overview is intended to help you quickly identify and diagnose outages and
 other connectivity issues within your network or environment. There is a date range
 selection that is global to the Uptime UI; you can use this selection to highlight
 an absolute date range, or a relative one, similar to other areas of Kibana.
@@ -19,7 +19,7 @@ text to select specific monitors by field, URL, ID, and other attributes.
 === Snapshot view
 SCREENSHOT
 
-From this view you can see the total number of detected monitors within the selected
+Here, you can see the total number of detected monitors within the selected
 Uptime date range. In addition to the total, the counts for the number of monitors
 in an `up` or `down` state are displayed, based on the last check reported by Heartbeat
 for each monitor.
@@ -41,4 +41,5 @@ over time.
 SCREENSHOT
 
 The Error list displays aggregations of errors that Heartbeat has logged. Errors are
-displayed by Error type, monitor ID, and message. Clicking a monitor's ID from this view will take you to the corresponding Monitor page.
+displayed by Error type, monitor ID, and message. Clicking a monitor's ID will take you
+to the corresponding Monitor view.
