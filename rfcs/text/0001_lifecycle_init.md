@@ -43,7 +43,7 @@ takes place because it gets fired off almost immediately on startup and then no
 new lifecycle events are encountered until it's time to shutdown.
 
 This results in lifecycle-like behaviors being hardcoded into the `start`
-handler itself rather than being exposed in a systemmatic way that other
+handler itself rather than being exposed in a systematic way that other
 services and plugins can take advantage of.
 
 For example, core should not bind to a port until all HTTP handlers have been
