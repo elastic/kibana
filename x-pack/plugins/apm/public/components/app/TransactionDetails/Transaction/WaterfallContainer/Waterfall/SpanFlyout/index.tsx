@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -28,6 +27,7 @@ import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktra
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
@@ -65,7 +65,7 @@ export function SpanFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -152,7 +152,7 @@ export function SpanFlyout({
             ]}
           />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }
