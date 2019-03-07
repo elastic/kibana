@@ -50,35 +50,31 @@ function DefaultEditorAggSelect({
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
   const selectedOptions = agg.type ? [{ label: agg.type.title, value: agg.type }] : [];
-  const labelNode = (
-    <div>
-      {isSubAggregation ? (
-        <FormattedMessage
-          id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
-          defaultMessage="Sub aggregation"
-        />
-      ) : (
-        <FormattedMessage
-          id="common.ui.vis.defaultEditor.aggSelect.aggregationLabel"
-          defaultMessage="Aggregation"
-        />
-      )}
-      {aggHelpLink && (
-        <EuiLink
-          href={aggHelpLink}
-          target="_blank"
-          rel="noopener"
-          className="visEditorAggSelect__helpLink pull-right"
-          type="button"
-        >
-          <FormattedMessage
-            id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
-            defaultMessage="{aggTitle} help"
-            values={{ aggTitle: agg.type && agg.type.title }}
-          />
-        </EuiLink>
-      )}
-    </div>
+  const label = isSubAggregation ? (
+    <FormattedMessage
+      id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
+      defaultMessage="Sub aggregation"
+    />
+  ) : (
+    <FormattedMessage
+      id="common.ui.vis.defaultEditor.aggSelect.aggregationLabel"
+      defaultMessage="Aggregation"
+    />
+  );
+  const helpLink = aggHelpLink && (
+    <EuiLink
+      href={aggHelpLink}
+      target="_blank"
+      rel="noopener"
+      className="visEditorAggSelect__helpLink pull-right"
+      type="button"
+    >
+      <FormattedMessage
+        id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
+        defaultMessage="{aggTitle} help"
+        values={{ aggTitle: agg.type && agg.type.title }}
+      />
+    </EuiLink>
   );
 
   const onChange = (options: ComboBoxGroupedOption[]) => {
@@ -86,7 +82,7 @@ function DefaultEditorAggSelect({
   };
 
   return (
-    <EuiFormRow label={labelNode} className="form-group">
+    <EuiFormRow label={label} labelAppend={helpLink} className="form-group">
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
