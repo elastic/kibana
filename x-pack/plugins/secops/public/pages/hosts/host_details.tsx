@@ -18,6 +18,7 @@ import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
+import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
@@ -200,7 +201,7 @@ const makeMapStateToProps = () => {
 
 export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
 
-export const getBreadcrumbs = (hostId: string) => [
+export const getBreadcrumbs = (hostId: string): BreadcrumbItem[] => [
   {
     text: i18n.HOSTS,
     href: getHostsUrl(),

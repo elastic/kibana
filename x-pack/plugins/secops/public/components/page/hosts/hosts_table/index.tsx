@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, isNil } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -17,6 +17,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -120,7 +121,8 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null = get('host.name', node);
-      if (hostName != null) {
+      const hostId: string | null = get('host.id', node);
+      if (hostName != null && hostId != null) {
         return (
           <DraggableWrapper
             dataProvider={{
@@ -134,7 +136,7 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
                 displayField: 'host.name',
                 displayValue: hostName,
                 field: 'host.id',
-                value: node.host!.id!,
+                value: hostId,
               },
               queryDate: {
                 from: new Date(node.firstSeen!).valueOf(),
@@ -146,12 +148,8 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
-              ) : isNil(get('host.id', node)) ? (
-                <>{hostName}</>
               ) : (
-                <EuiLink href={`#/link-to/hosts/${encodeURIComponent(node.host!.id!)}`}>
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
               )
             }
           />
