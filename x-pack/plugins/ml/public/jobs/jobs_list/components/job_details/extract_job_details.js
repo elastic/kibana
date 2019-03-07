@@ -55,6 +55,12 @@ export function extractJobDetails(job) {
   };
   if (job.calendars) {
     calendars.items = job.calendars.map(c => ['', c]);
+    // remove the calendars list from the general section
+    // so not to show it twice.
+    const i = general.items.findIndex(item => item[0] === 'calendars');
+    if (i >= 0) {
+      general.items.splice(i, 1);
+    }
   }
 
   const detectors = {
