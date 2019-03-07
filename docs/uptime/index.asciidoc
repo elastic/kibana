@@ -25,3 +25,4 @@ from Heartbeat 7.0.
 
 include::overview.asciidoc[]
 include::monitor.asciidoc[]
+include::security.asciidoc[]
