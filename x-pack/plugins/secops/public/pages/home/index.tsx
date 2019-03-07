@@ -5,8 +5,6 @@
  */
 
 import {
-  // @ts-ignore: EuiBreadcrumbs has no exported member
-  EuiBreadcrumbs,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
@@ -27,12 +25,11 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
-import { Navigation } from '../../components/page/navigation';
+import { HeaderBreadcrumbs } from '../../components/page/navigation/breadcrumb';
 import { RangeDatePicker } from '../../components/range_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
-import { getBreadcrumbs } from '../hosts/host_details';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
 
@@ -83,18 +80,7 @@ export const HomePage = pure(() => (
               <PageHeader data-test-subj="pageHeader">
                 <PageHeaderSection>
                   <FixEuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
-                    <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-                      {window.location.hash.match(/[hosts|overview|network]\?/) && (
-                        <Navigation data-test-subj="navigation" />
-                      )}
-                      {window.location.hash.match(/hosts\/.*?/) !== null && (
-                        <EuiBreadcrumbs
-                          breadcrumbs={getBreadcrumbs(
-                            window.location.hash.match(/\/([^/]*)\?/)![1]
-                          )}
-                        />
-                      )}
-                    </EuiFlexItem>
+                    <HeaderBreadcrumbs />
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
                         <EuiFlexItem grow={false} data-test-subj="datePickerContainer">

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -21,6 +21,7 @@ import {
   getEmptyValue,
   getOrEmptyTag,
 } from '../../../empty_value';
+import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -223,7 +224,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                       <Provider dataProvider={dataProvider} />
                     </DragEffects>
                   ) : (
-                    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(id!)}`}>{name}</EuiLink>
+                    <HostDetailsLink hostId={id!}>{name}</HostDetailsLink>
                   )
                 }
               />

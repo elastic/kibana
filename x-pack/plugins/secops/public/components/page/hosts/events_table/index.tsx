@@ -16,6 +16,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -169,7 +170,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('source.ip', node)} : {getOrEmptyTag('source.port', node)}
+        {formatIpSafely('source.ip', node)}:{getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -179,7 +180,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('destination.ip', node)} : {getOrEmptyTag('destination.port', node)}
+        {formatIpSafely('destination.ip', node)}:{getOrEmptyTag('destination.port', node)}
       </>
     ),
   },
@@ -201,7 +202,8 @@ export const formatIpSafely = (path: string, data: Ecs): JSX.Element => {
     if (txt === '') {
       return getEmptyStringTag();
     } else {
-      return txt && txt.slice ? <>{txt.slice(0, 45)}</> : <>{txt}</>;
+      const ip = txt && txt.slice ? txt.slice(0, 45) : txt;
+      return <IPDetailsLink ip={ip} />;
     }
   }
   return getEmptyTagValue();

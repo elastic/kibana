@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, has, isNil } from 'lodash/fp';
+import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -17,6 +17,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -205,7 +206,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                sourceIp
+                <IPDetailsLink ip={sourceIp} />
               )
             }
           />
@@ -221,7 +222,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null = get('lastFailure.host.name', node);
-      if (hostName != null) {
+      const hostId: string | null = get('lastFailure.host.id', node);
+      if (hostName != null && hostId != null) {
         return (
           <DraggableWrapper
             dataProvider={{
@@ -235,7 +237,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 displayField: 'host.name',
                 displayValue: hostName,
                 field: 'host.id',
-                value: node.lastFailure!.host!.id!,
+                value: hostId,
               },
               queryDate: {
                 from: startDate,
@@ -247,14 +249,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
-              ) : isNil(get('lastFailure.host.id', node)) ? (
-                <>{hostName}</>
               ) : (
-                <EuiLink
-                  href={`#/link-to/hosts/${encodeURIComponent(node.lastFailure!.host!.id!)}`}
-                >
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
               )
             }
           />
@@ -314,7 +310,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                sourceIp
+                <IPDetailsLink ip={sourceIp} />
               )
             }
           />
@@ -330,7 +326,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null = get('lastSuccess.host.name', node);
-      if (hostName != null) {
+      const hostId: string | null = get('lastSuccess.host.id', node);
+      if (hostName != null && hostId != null) {
         return (
           <DraggableWrapper
             dataProvider={{
@@ -344,7 +341,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 displayField: 'host.name',
                 displayValue: hostName,
                 field: 'host.id',
-                value: node.lastSuccess!.host!.id!,
+                value: hostId,
               },
               queryDate: {
                 from: startDate,
@@ -356,14 +353,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
-              ) : isNil(get('lastSuccess.host.id', node)) ? (
-                <>{hostName}</>
               ) : (
-                <EuiLink
-                  href={`#/link-to/hosts/${encodeURIComponent(node.lastSuccess!.host!.id!)}`}
-                >
-                  {hostName}
-                </EuiLink>
+                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
               )
             }
           />
