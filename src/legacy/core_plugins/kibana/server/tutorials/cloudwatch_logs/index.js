@@ -51,8 +51,8 @@ export function cloudwatchLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/uptime_monitors/screenshot.png',
-    onPrem: onPremInstructions(moduleName, null, null, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPrem: onPremInstructions(null, null, null, context),
+    elasticCloud: cloudInstructions(),
+    onPremElasticCloud: onPremCloudInstructions()
   };
 }
