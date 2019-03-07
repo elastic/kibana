@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
+
 import { Indexer, IndexProgress, ProgressReporter } from '.';
 import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
@@ -16,6 +18,7 @@ export abstract class AbstractIndexer implements Indexer {
   protected type: string = 'abstract';
   protected cancelled: boolean = false;
   protected indexCreator: IndexCreator;
+  protected INDEXER_PROGRESS_UPDATE_INTERVAL_MS = 1000;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
@@ -44,7 +47,7 @@ export abstract class AbstractIndexer implements Indexer {
 
     // Prepare all the index requests
     let totalCount = 0;
-    let prevPercentage = 0;
+    let prevTimestamp = moment();
     let successCount = 0;
     let failCount = 0;
     const statsBuffer: IndexStats[] = [];
@@ -83,9 +86,9 @@ export abstract class AbstractIndexer implements Indexer {
           fail: failCount,
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
         };
-        if (progress.percentage > prevPercentage + 5) {
+        if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
           progressReporter(progress);
-          prevPercentage = progress.percentage;
+          prevTimestamp = moment();
         }
       }
     }
