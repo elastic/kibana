@@ -42,11 +42,7 @@ export function lspRoute(
           try {
             const result = await promiseTimeout(
               serverOptions.lspRequestTimeoutMs,
-              lspService.sendRequest(
-                `textDocument/${method}`,
-                req.payload,
-                serverOptions.lspRequestTimeoutMs / 2
-              )
+              lspService.sendRequest(`textDocument/${method}`, req.payload, 1000)
             );
             return result;
           } catch (error) {
