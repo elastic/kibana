@@ -59,7 +59,11 @@ const runApiDocumenter = async () => {
   await execa.shell('api-documenter markdown -i ./build -o ./docs/development/core/api');
 };
 
-const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
+const isApiChangedWarning = (warning: string) => {
+  return warning.startsWith('You have changed the public API signature for this project.');
+};
+
+const runApiExtractor = (acceptChanges: boolean = false) => {
   // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
   const warnings = [] as string[];
   const errors = [] as string[];
@@ -94,32 +98,10 @@ const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
   const extractor = new Extractor(apiExtractorConfig, options);
   extractor.processProject();
 
-  errors.forEach(msg => log.error(msg));
-  warnings
-    .filter(msg => !msg.startsWith('You have changed the public API signature for this project.'))
-    .forEach(msg => log.warning(msg));
+  const printableWarnings = warnings.filter(msg => !isApiChangedWarning(msg));
+  const apiChanged = warnings.some(isApiChangedWarning);
 
-  const apiChanged = warnings.some(msg =>
-    msg.startsWith('You have changed the public API signature for this project.')
-  );
-
-  if (apiChanged && !acceptChanges) {
-    log.warning('You have changed the public signature of the Kibana Core API');
-    log.warning(
-      'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
-        '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
-        "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
-    );
-  }
-
-  if (apiChanged && acceptChanges) {
-    log.warning('You have changed the public signature of the Kibana Core API');
-    log.warning(
-      'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
-    );
-  }
-
-  return apiChanged;
+  return { apiChanged, warnings: printableWarnings, errors };
 };
 
 (async function run() {
@@ -177,16 +159,43 @@ const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
     process.exit();
   }
 
+  log.info('Kibana Core API: checking for changes in API signature...');
+
   await runBuildTypes();
 
-  const apiChanged = runApiExtractor(opts.accept, log);
+  const { apiChanged, warnings, errors } = runApiExtractor(opts.accept);
+
+  if (apiChanged) {
+    if (opts.accept) {
+      log.warning('You have changed the public signature of the Kibana Core API');
+      log.warning(
+        'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
+      );
+    } else {
+      log.warning('You have changed the public signature of the Kibana Core API');
+      log.warning(
+        'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
+          '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
+          "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
+      );
+
+      // If the API changed and we're not accepting the changes, exit process with error
+      process.exit(1);
+    }
+  } else {
+    log.info('Kibana Core API: no changes detected ✔');
+  }
 
   if (opts.accept || opts.docs) {
     await runApiDocumenter();
+    log.info('Kibana Core API: updated documentation ✔');
   }
 
-  if (apiChanged && !opts.accept) {
-    // If the API changed and we're not accepting the changes, exit process with error
+  // If any errors or warnings occured, exit with an error
+  if (errors.length > 0 || warnings.length > 0) {
+    log.error('Kibana Core API: api-extractor failed with the following errors or warnings:');
+    errors.forEach(msg => log.error(msg));
+    warnings.forEach(msg => log.warning(msg));
     process.exit(1);
   }
 })();
