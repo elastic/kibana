@@ -10,9 +10,8 @@ export const UptimePageProvider = ({
   getPageObjects,
   getService,
 }: KibanaFunctionalTestDefaultProviders) => {
-  const pageObject = getPageObjects(['common']);
+  const pageObject = getPageObjects(['common', 'timePicker']);
   const uptimeService = getService('uptime');
-  const superDatePicker = getService('superDatePicker');
 
   return new class UptimePage {
     public async goToUptimeOverviewAndLoadData(
@@ -21,7 +20,7 @@ export const UptimePageProvider = ({
     ) {
       await pageObject.common.navigateToApp('home');
       await uptimeService.navigateToPlugin();
-      await superDatePicker.setAbsoluteStart(datePickerStartValue);
+      await pageObject.timePicker.setAbsoluteStart(datePickerStartValue);
       await uptimeService.monitorIdExists(monitorIdToCheck);
     }
 
@@ -32,7 +31,7 @@ export const UptimePageProvider = ({
     ) {
       await pageObject.common.navigateToApp('home');
       await uptimeService.navigateToPlugin();
-      await superDatePicker.setAbsoluteStart(datePickerStartValue);
+      await pageObject.timePicker.setAbsoluteStart(datePickerStartValue);
       await uptimeService.navigateToMonitorWithId(monitorId);
       if ((await uptimeService.getMonitorNameDisplayedOnPageTitle()) !== monitorName) {
         throw new Error('Expected monitor name not found');

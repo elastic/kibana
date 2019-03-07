@@ -53,8 +53,6 @@ import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
 // @ts-ignore not TS yet
 import { ScreenshotsProvider } from './screenshots';
-
-import { SuperDatePickerProvider } from './super_date_picker';
 // @ts-ignore not TS yet
 import { TableProvider } from './table';
 // @ts-ignore not TS yet
@@ -88,5 +86,4 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
-  superDatePicker: SuperDatePickerProvider,
 };

@@ -47,6 +47,18 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await find.waitForElementStale(panelElement);
     }
 
+    async setAbsoluteStart(startTime) {
+      await this.showStartEndTimes();
+
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      const panel = await this.getTimePickerPanel();
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.setValue('superDatePickerAbsoluteDateInput', startTime);
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
+      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
+    }
+
     /**
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
      * @param {String} fromTime YYYY-MM-DD HH:mm:ss.SSS
