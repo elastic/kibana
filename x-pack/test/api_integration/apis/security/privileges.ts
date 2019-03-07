@@ -65,6 +65,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:discover/show',
                   'ui:discover/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -122,6 +123,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/search/read',
                   'ui:visualize/show',
                   'ui:visualize/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -192,6 +194,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:dashboard/createNew',
                   'ui:dashboard/show',
                   'ui:dashboard/showWriteControls',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -245,7 +248,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                   'ui:dev_tools/show',
-                  'ui:dev_tools/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -281,6 +284,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/edit',
                   'ui:savedObjectsManagement/config/read',
                   'ui:advancedSettings/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -315,6 +319,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/index-pattern/edit',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -359,6 +364,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:timelion/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -409,6 +415,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:graph/save',
                   'ui:graph/delete',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -443,6 +450,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
               },
               ml: {
@@ -457,6 +465,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
               },
               apm: {
@@ -471,6 +480,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
               },
               maps: {
@@ -500,6 +510,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:maps/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -549,6 +560,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:canvas/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -583,7 +595,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
-                  'ui:infrastructure/configureSource',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -610,7 +622,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
-                  'ui:logs/configureSource',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -637,7 +649,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
-                  'ui:uptime/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -735,7 +747,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:catalogue/grokdebugger',
                 'ui:navLinks/kibana:dev_tools',
                 'ui:dev_tools/show',
-                'ui:dev_tools/save',
                 'ui:catalogue/advanced_settings',
                 'ui:management/kibana/settings',
                 'saved_object:config/create',
@@ -814,14 +825,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
-                'ui:infrastructure/configureSource',
                 'ui:catalogue/infralogging',
                 'ui:navLinks/infra:logs',
-                'ui:logs/configureSource',
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
-                'ui:uptime/save',
               ],
               read: [
                 'login:',
@@ -997,7 +1005,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'ui:catalogue/grokdebugger',
                 'ui:navLinks/kibana:dev_tools',
                 'ui:dev_tools/show',
-                'ui:dev_tools/save',
                 'ui:catalogue/advanced_settings',
                 'ui:management/kibana/settings',
                 'saved_object:config/create',
@@ -1076,14 +1083,11 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:infra',
                 'ui:catalogue/infraops',
                 'ui:navLinks/infra:home',
-                'ui:infrastructure/configureSource',
                 'ui:catalogue/infralogging',
                 'ui:navLinks/infra:logs',
-                'ui:logs/configureSource',
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
-                'ui:uptime/save',
               ],
               read: [
                 'login:',

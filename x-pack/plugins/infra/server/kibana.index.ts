@@ -38,7 +38,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
           all: [],
           read: ['config'],
         },
-        ui: ['configureSource'],
+        ui: [],
       },
       read: {
         savedObject: {
@@ -65,7 +65,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
           all: [],
           read: ['config'],
         },
-        ui: ['configureSource'],
+        ui: [],
       },
       read: {
         savedObject: {

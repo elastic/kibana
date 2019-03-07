@@ -160,7 +160,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
-        await validateFeaturePrivileges(authorization.privileges, xpackMainPlugin.getFeatures());
+        await validateFeaturePrivileges(authorization.actions, xpackMainPlugin.getFeatures());
         await registerPrivilegesWithCluster(server);
       }
     });

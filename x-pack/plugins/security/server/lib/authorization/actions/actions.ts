@@ -11,6 +11,8 @@ import { SpaceActions } from './space';
 import { UIActions } from './ui';
 
 export class Actions {
+  public allHack = 'allHack:';
+
   public api = new ApiActions();
 
   public app = new AppActions();

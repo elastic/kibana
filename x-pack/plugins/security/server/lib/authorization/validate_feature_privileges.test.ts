@@ -19,34 +19,6 @@ const mockConfig = {
 };
 const actions = actionsFactory(mockConfig);
 
-it(`doesn't allow all and read to grant the same privileges`, () => {
-  const feature: Feature = {
-    id: 'foo',
-    name: 'foo',
-    app: [],
-    privileges: {
-      all: {
-        savedObject: {
-          all: ['foo'],
-          read: ['bar'],
-        },
-        ui: [],
-      },
-      read: {
-        savedObject: {
-          all: ['foo'],
-          read: ['bar'],
-        },
-        ui: [],
-      },
-    },
-  };
-
-  expect(() => validateFeaturePrivileges(actions, [feature])).toThrowErrorMatchingInlineSnapshot(
-    `"foo's \\"all\\" privilege should grant additional actions compared to the \\"read\\" privilege."`
-  );
-});
-
 it(`doesn't allow read to grant privileges which aren't also included in all`, () => {
   const feature: Feature = {
     id: 'foo',
@@ -71,8 +43,34 @@ it(`doesn't allow read to grant privileges which aren't also included in all`, (
   };
 
   expect(() => validateFeaturePrivileges(actions, [feature])).toThrowErrorMatchingInlineSnapshot(
-    `"foo's \\"all\\" privilege should grant additional actions compared to the \\"read\\" privilege."`
+    `"foo's \\"all\\" privilege should be a superset of the \\"read\\" privilege."`
   );
+});
+
+it(`allows all and read to grant the same privileges`, () => {
+  const feature: Feature = {
+    id: 'foo',
+    name: 'foo',
+    app: [],
+    privileges: {
+      all: {
+        savedObject: {
+          all: ['foo'],
+          read: ['bar'],
+        },
+        ui: [],
+      },
+      read: {
+        savedObject: {
+          all: ['foo'],
+          read: ['bar'],
+        },
+        ui: [],
+      },
+    },
+  };
+
+  validateFeaturePrivileges(actions, [feature]);
 });
 
 it(`allows all to grant privileges in addition to read`, () => {

@@ -51,10 +51,11 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
 
       return {
         features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
-          acc[feature.id] = mapValues(feature.privileges, privilege => [
+          acc[feature.id] = mapValues(feature.privileges, (privilege, privilegeId) => [
             actions.login,
             actions.version,
             ...featurePrivilegeBuilder.getActions(privilege, feature),
+            ...(privilegeId === 'all' ? [actions.allHack] : []),
           ]);
           return acc;
         }, {}),

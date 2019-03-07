@@ -9,24 +9,15 @@ import { areActionsFullyCovered } from '../../../common/privilege_calculator_uti
 import { Actions } from './actions';
 import { featurePrivilegeBuilderFactory } from './privileges/feature_privilege_builder';
 
-const areActionsMorePermissive = (actionSet1: string[], actionSet2: string[]) => {
-  return (
-    areActionsFullyCovered(actionSet1, actionSet2) &&
-    !areActionsFullyCovered(actionSet2, actionSet1)
-  );
-};
-
 export function validateFeaturePrivileges(actions: Actions, features: Feature[]) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
   for (const feature of features) {
     if (feature.privileges.all != null && feature.privileges.read != null) {
       const allActions = featurePrivilegeBuilder.getActions(feature.privileges.all, feature);
       const readActions = featurePrivilegeBuilder.getActions(feature.privileges.read, feature);
-      if (!areActionsMorePermissive(allActions, readActions)) {
+      if (!areActionsFullyCovered(allActions, readActions)) {
         throw new Error(
-          `${
-            feature.id
-          }'s "all" privilege should grant additional actions compared to the "read" privilege.`
+          `${feature.id}'s "all" privilege should be a superset of the "read" privilege.`
         );
       }
     }

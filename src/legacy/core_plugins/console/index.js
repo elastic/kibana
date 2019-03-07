@@ -113,7 +113,6 @@ export default function (kibana) {
         ),
         uiCapabilities: {
           dev_tools: {
-            save: true,
             show: true
           },
         }
