@@ -84,7 +84,7 @@ interface Props {
   dateRangeTo?: string;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 interface State {
