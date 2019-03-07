@@ -154,12 +154,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-jwKygS jynuQh"
+                      className="sc-btzYZH hFKPFq"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-jwKygS jynuQh"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-btzYZH hFKPFq"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -388,13 +388,13 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                                                           iconType="number"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-btzYZH jBzfTi"
+                                                            className="sc-lhVmIH bQfDtX"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="number"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-btzYZH jBzfTi"
+                                                              className="euiBadge euiBadge--hollow sc-lhVmIH bQfDtX"
                                                               style={null}
                                                             >
                                                               <span
@@ -483,12 +483,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="ET"
                   >
                     <EuiFlexItem
-                      className="sc-lhVmIH krgDqk"
+                      className="sc-bYSBpT eKLAFC"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
                       >
                         <EuiBadge
                           color="hollow"
@@ -547,12 +547,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="SCAN"
                   >
                     <EuiFlexItem
-                      className="sc-lhVmIH krgDqk"
+                      className="sc-bYSBpT eKLAFC"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
                       >
                         <EuiBadge
                           color="hollow"
@@ -611,12 +611,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="ATTACK"
                   >
                     <EuiFlexItem
-                      className="sc-lhVmIH krgDqk"
+                      className="sc-bYSBpT eKLAFC"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
                       >
                         <EuiBadge
                           color="hollow"
@@ -684,12 +684,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-bYSBpT kqevpY"
+                      className="sc-jwKygS jEeQns"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT kqevpY"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-jwKygS jEeQns"
                       >
                         <EuiLink
                           color="primary"

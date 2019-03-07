@@ -56,6 +56,79 @@ export const suricataFieldsMap: Readonly<Record<string, string>> = {
   'suricata.eve.alert.signature_id': 'suricata.eve.alert.signature_id',
 };
 
+export const urlFieldsMap: Readonly<Record<string, string>> = {
+  'url.original': 'url.original',
+  'url.domain': 'url.domain',
+  'user.username': 'user.username',
+  'user.password': 'user.password',
+};
+
+export const httpFieldsMap: Readonly<Record<string, string>> = {
+  'http.version': 'http.version',
+  'http.request': 'http.request',
+  'http.request.method': 'http.request.method',
+  'http.request.body.bytes': 'http.request.body.bytes',
+  'http.request.body.content': 'http.request.body.content',
+  'http.request.referrer': 'http.request.referrer',
+  'http.response.status_code': 'http.response.status_code',
+  'http.response.body': 'http.response.body',
+  'http.response.body.bytes': 'http.response.body.bytes',
+  'http.response.body.content': 'http.response.body.content',
+};
+
+export const zeekFieldsMap: Readonly<Record<string, string>> = {
+  'zeek.session_id': 'zeek.session_id',
+  'zeek.connection.local_resp': 'zeek.connection.local_resp',
+  'zeek.connection.local_orig': 'zeek.connection.local_orig',
+  'zeek.connection.missed_bytes': 'zeek.connection.missed_bytes',
+  'zeek.connection.state': 'zeek.connection.state',
+  'zeek.connection.history': 'zeek.connection.history',
+  'zeek.notice.suppress_for': 'zeek.notice.suppress_for',
+  'zeek.notice.msg': 'zeek.notice.msg',
+  'zeek.notice.note': 'zeek.notice.note',
+  'zeek.notice.sub': 'zeek.notice.sub',
+  'zeek.notice.dst': 'zeek.notice.dst',
+  'zeek.notice.dropped': 'zeek.notice.dropped',
+  'zeek.notice.peer_descr': 'zeek.notice.peer_descr',
+  'zeek.dns.AA': 'zeek.dns.AA',
+  'zeek.dns.qclass_name': 'zeek.dns.qclass_name',
+  'zeek.dns.RD': 'zeek.dns.RD',
+  'zeek.dns.qtype_name': 'zeek.dns.qtype_name',
+  'zeek.dns.qtype': 'zeek.dns.qtype',
+  'zeek.dns.query': 'zeek.dns.query',
+  'zeek.dns.trans_id': 'zeek.dns.trans_id',
+  'zeek.dns.qclass': 'zeek.dns.qclass',
+  'zeek.dns.RA': 'zeek.dns.RA',
+  'zeek.dns.TC': 'zeek.dns.TC',
+  'zeek.http.resp_mime_types': 'zeek.http.resp_mime_types',
+  'zeek.http.trans_depth': 'zeek.http.trans_depth',
+  'zeek.http.status_msg': 'zeek.http.status_msg',
+  'zeek.http.resp_fuids': 'zeek.http.resp_fuids',
+  'zeek.http.tags': 'zeek.http.tags',
+  'zeek.files.session_ids': 'zeek.files.session_ids',
+  'zeek.files.timedout': 'zeek.files.timedout',
+  'zeek.files.local_orig': 'zeek.files.local_orig',
+  'zeek.files.tx_host': 'zeek.files.tx_host',
+  'zeek.files.source': 'zeek.files.source',
+  'zeek.files.is_orig': 'zeek.files.is_orig',
+  'zeek.files.overflow_bytes': 'zeek.files.overflow_bytes',
+  'zeek.files.sha1': 'zeek.files.sha1',
+  'zeek.files.duration': 'zeek.files.duration',
+  'zeek.files.depth': 'zeek.files.depth',
+  'zeek.files.analyzers': 'zeek.files.analyzers',
+  'zeek.files.mime_type': 'zeek.files.mime_type',
+  'zeek.files.rx_host': 'zeek.files.rx_host',
+  'zeek.files.total_bytes': 'zeek.files.total_bytes',
+  'zeek.files.fuid': 'zeek.files.fuid',
+  'zeek.files.seen_bytes': 'zeek.files.seen_bytes',
+  'zeek.files.missing_bytes': 'zeek.files.missing_bytes',
+  'zeek.files.md5': 'zeek.files.md5',
+  'zeek.ssl.cipher': 'zeek.ssl.cipher',
+  'zeek.ssl.established': 'zeek.ssl.established',
+  'zeek.ssl.resumed': 'zeek.ssl.resumed',
+  'zeek.ssl.version': 'zeek.ssl.version',
+};
+
 export const sourceFieldsMap: Readonly<Record<string, string>> = {
   'source.ip': 'source.ip',
   'source.port': 'source.port',
@@ -69,6 +142,8 @@ export const destinationFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const networkFieldsMap: Readonly<Record<string, string>> = {
+  'network.transport': 'network.transport',
+  'network.direction': 'network.direction',
   'network.bytes': 'network.bytes',
   'network.packets': 'network.packets',
 };
@@ -87,6 +162,7 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.module': 'event.module',
   'event.severity': 'event.severity',
   'event.type': 'event.type',
+  'event.dataset': 'event.dataset',
 };
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
@@ -98,4 +174,6 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...networkFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
+  ...{ ...zeekFieldsMap },
+  ...{ ...httpFieldsMap },
 };

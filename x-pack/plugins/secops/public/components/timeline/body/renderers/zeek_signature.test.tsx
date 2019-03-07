@@ -1,0 +1,236 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import toJson from 'enzyme-to-json';
+import { cloneDeep, noop } from 'lodash/fp';
+import * as React from 'react';
+import { DragDropContext } from 'react-beautiful-dnd';
+import { Provider } from 'react-redux';
+import { ThemeProvider } from 'styled-components';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
+import { Ecs } from '../../../../graphql/types';
+import { mockGlobalState } from '../../../../mock';
+import { mockEcsData } from '../../../../mock';
+import { createStore, State } from '../../../../store';
+
+import {
+  constructDroppedValue,
+  defaultStringRenderer,
+  DraggableZeekElement,
+  droppedStringRenderer,
+  extractStateValue,
+  Link,
+  md5StringRenderer,
+  moduleStringRenderer,
+  sha1StringRenderer,
+  TotalVirusLinkSha,
+  ZeekSignature,
+} from './zeek_signature';
+
+describe('ZeekSignature', () => {
+  const state: State = mockGlobalState;
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  let zeek: Ecs;
+  let store = createStore(state);
+
+  beforeEach(() => {
+    store = createStore(state);
+    zeek = cloneDeep(mockEcsData[13]);
+  });
+
+  describe('rendering', () => {
+    test('it renders the default Zeek', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <ZeekSignature data={zeek} />
+            </DragDropContext>
+          </Provider>
+        </ThemeProvider>
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+
+  describe('#extractStateValue', () => {
+    test('it returns a valid state i18n string given a valid string', () => {
+      expect(extractStateValue('S0')).toEqual('Connection attempt seen, no reply');
+    });
+
+    test('it returns null given null', () => {
+      expect(extractStateValue(null)).toEqual(null);
+    });
+
+    test('it returns null given an invalid string', () => {
+      expect(extractStateValue('garbage')).toEqual(null);
+    });
+  });
+
+  describe('#constructDroppedValue', () => {
+    test('it returns a valid Dropped string given a valid boolean of "true"', () => {
+      expect(constructDroppedValue(true)).toEqual('true');
+    });
+
+    test('it returns a valid Dropped string given a valid boolean of "false"', () => {
+      expect(constructDroppedValue(false)).toEqual('false');
+    });
+
+    test('it returns null given null', () => {
+      expect(constructDroppedValue(null)).toEqual(null);
+    });
+  });
+
+  describe('#TotalVirusLinkSha', () => {
+    test('should return null if value is null', () => {
+      const wrapper = mountWithIntl(<TotalVirusLinkSha value={null} />);
+      expect(wrapper.text()).toEqual(null);
+    });
+
+    test('should render value', () => {
+      const wrapper = mountWithIntl(<TotalVirusLinkSha value={'abc'} />);
+      expect(wrapper.text()).toEqual('abc');
+    });
+
+    test('should render link with sha', () => {
+      const wrapper = mountWithIntl(<TotalVirusLinkSha value={'abcdefg'} />);
+      expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abcdefg');
+    });
+  });
+
+  describe('#Link', () => {
+    test('should return null if value is null', () => {
+      const wrapper = mountWithIntl(<Link value={null} />);
+      expect(wrapper.text()).toEqual(null);
+    });
+
+    test('should render value', () => {
+      const wrapper = mountWithIntl(<Link value={'abc'} />);
+      expect(wrapper.text()).toEqual('abc');
+    });
+
+    test('should render value and link', () => {
+      const wrapper = mountWithIntl(<Link value={'abcdefg'} link={'somethingelse'} />);
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://www.google.com/search?q=somethingelse'
+      );
+    });
+  });
+
+  describe('DraggableZeekElement', () => {
+    test('it returns null if value is null', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+            </DragDropContext>
+          </Provider>
+        </ThemeProvider>
+      );
+      expect(wrapper.text()).toEqual(null);
+    });
+
+    test('it renders the default ZeekSignature', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+            </DragDropContext>
+          </Provider>
+        </ThemeProvider>
+      );
+      expect(wrapper.text()).toEqual('mynote');
+    });
+
+    test('it renders with a custom string renderer', () => {
+      const wrapper = mountWithIntl(
+        <ThemeProvider theme={theme}>
+          <Provider store={store}>
+            <DragDropContext onDragEnd={noop}>
+              <DraggableZeekElement
+                id="id-123"
+                field="zeek.notice"
+                value={'mynote'}
+                stringRenderer={value => `->${value}<-`}
+              />
+            </DragDropContext>
+          </Provider>
+        </ThemeProvider>
+      );
+      expect(wrapper.text()).toEqual('->mynote<-');
+    });
+  });
+
+  describe('#sha1StringRenderer', () => {
+    test('renders first 7 characters of a sha', () => {
+      expect(sha1StringRenderer('12345678910')).toEqual('sha1: 1234567...');
+    });
+
+    test('renders less than 7 characters if for some reason there is bad input', () => {
+      expect(sha1StringRenderer('123')).toEqual('sha1: 123...');
+    });
+  });
+
+  describe('#md5StringRenderer', () => {
+    test('renders first 7 characters of a md5', () => {
+      expect(md5StringRenderer('12345678910')).toEqual('md5: 1234567...');
+    });
+
+    test('renders less than 7 characters if for some reason there is bad input', () => {
+      expect(md5StringRenderer('123')).toEqual('md5: 123...');
+    });
+  });
+
+  describe('#droppedStringRenderer', () => {
+    test('renders the words Dropped:someValue', () => {
+      expect(droppedStringRenderer('someValue')).toEqual('Dropped:someValue');
+    });
+  });
+
+  describe('#moduleStringRenderer', () => {
+    test('renders modules of zeek.connection as the string connection', () => {
+      expect(moduleStringRenderer('zeek.connection')).toEqual('connection');
+    });
+
+    test('renders modules of zeek.dns as the string dns', () => {
+      expect(moduleStringRenderer('zeek.dns')).toEqual('dns');
+    });
+
+    test('renders modules of zeek.http as the string http', () => {
+      expect(moduleStringRenderer('zeek.http')).toEqual('http');
+    });
+
+    test('renders modules of zeek.files as the string files', () => {
+      expect(moduleStringRenderer('zeek.files')).toEqual('files');
+    });
+
+    test('renders modules of zeek.notice as the string notice', () => {
+      expect(moduleStringRenderer('zeek.notice')).toEqual('notice');
+    });
+
+    test('renders modules of zeek.ssl as the string ssl', () => {
+      expect(moduleStringRenderer('zeek.ssl')).toEqual('ssl');
+    });
+
+    test('renders modules of bad input as that module name', () => {
+      expect(moduleStringRenderer('ssl')).toEqual('ssl');
+    });
+
+    test('renders modules of bad input with multiple dots as only the second value', () => {
+      expect(moduleStringRenderer('abc.def.ghi')).toEqual('def');
+    });
+  });
+
+  describe('#defaultStringRenderer', () => {
+    test('renders default string', () => {
+      expect(defaultStringRenderer('identity')).toEqual('identity');
+    });
+  });
+});

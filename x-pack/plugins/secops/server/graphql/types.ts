@@ -273,9 +273,17 @@ export interface Ecs {
 
   host?: HostEcsFields | null;
 
+  network?: NetworkEcsField | null;
+
   source?: SourceEcsFields | null;
 
   suricata?: SuricataEcsFields | null;
+
+  zeek?: ZeekEcsFields | null;
+
+  http?: HttpEcsFields | null;
+
+  url?: UrlEcsFields | null;
 
   timestamp?: Date | null;
 
@@ -304,12 +312,24 @@ export interface EventEcsFields {
   action?: string | null;
 
   type?: string | null;
+
+  dataset?: string | null;
 }
 
 export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
+}
+
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface SuricataEcsFields {
@@ -328,6 +348,176 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface ZeekEcsFields {
+  session_id?: string | null;
+
+  connection?: ZeekConnectionData | null;
+
+  notice?: ZeekNoticeData | null;
+
+  dns?: ZeekDnsData | null;
+
+  http?: ZeekHttpData | null;
+
+  files?: ZeekFileData | null;
+
+  ssl?: ZeekSslData | null;
+}
+
+export interface ZeekConnectionData {
+  local_resp?: string | null;
+
+  local_orig?: string | null;
+
+  missed_bytes?: number | null;
+
+  state?: string | null;
+
+  history?: string | null;
+}
+
+export interface ZeekNoticeData {
+  suppress_for?: number | null;
+
+  msg?: string | null;
+
+  note?: string | null;
+
+  sub?: string | null;
+
+  dst?: string | null;
+
+  dropped?: boolean | null;
+
+  peer_descr?: string | null;
+}
+
+export interface ZeekDnsData {
+  AA?: boolean | null;
+
+  qclass_name?: string | null;
+
+  RD?: boolean | null;
+
+  qtype_name?: string | null;
+
+  rejected?: boolean | null;
+
+  qtype?: number | null;
+
+  query?: string | null;
+
+  trans_id?: number | null;
+
+  qclass?: number | null;
+
+  RA?: boolean | null;
+
+  TC?: boolean | null;
+}
+
+export interface ZeekHttpData {
+  resp_mime_types?: string[] | null;
+
+  trans_depth?: string | null;
+
+  status_msg?: string | null;
+
+  resp_fuids?: string[] | null;
+
+  tags?: string[] | null;
+}
+
+export interface ZeekFileData {
+  session_ids?: string[] | null;
+
+  timedout?: boolean | null;
+
+  local_orig?: boolean | null;
+
+  tx_host?: string | null;
+
+  source?: string | null;
+
+  is_orig?: boolean | null;
+
+  overflow_bytes?: number | null;
+
+  sha1?: string | null;
+
+  duration?: number | null;
+
+  depth?: number | null;
+
+  analyzers?: string[] | null;
+
+  mime_type?: string | null;
+
+  rx_host?: string | null;
+
+  total_bytes?: number | null;
+
+  fuid?: string | null;
+
+  seen_bytes?: number | null;
+
+  missing_bytes?: number | null;
+
+  md5?: string | null;
+}
+
+export interface ZeekSslData {
+  cipher?: string | null;
+
+  established?: boolean | null;
+
+  resumed?: boolean | null;
+
+  version?: string | null;
+}
+
+export interface HttpEcsFields {
+  version?: string | null;
+
+  request?: HttpRequestData | null;
+
+  response?: HttpResponseData | null;
+}
+
+export interface HttpRequestData {
+  method?: string | null;
+
+  body?: HttpBodyData | null;
+
+  referrer?: string | null;
+
+  bytes?: number | null;
+}
+
+export interface HttpBodyData {
+  content?: string | null;
+
+  bytes?: number | null;
+}
+
+export interface HttpResponseData {
+  status_code?: number | null;
+
+  body?: HttpBodyData | null;
+
+  bytes?: number | null;
+}
+
+export interface UrlEcsFields {
+  domain?: string | null;
+
+  original?: string | null;
+
+  username?: string | null;
+
+  password?: string | null;
 }
 
 export interface HostsData {
@@ -390,14 +580,6 @@ export interface TopNFlowItem {
   domain?: string[] | null;
 
   ip?: string | null;
-}
-
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface UncommonProcessesData {
@@ -571,6 +753,14 @@ export enum Direction {
   descending = 'descending',
 }
 
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  unknown = 'unknown',
+}
+
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -581,14 +771,6 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
 }
 
 // ====================================================
@@ -1370,9 +1552,17 @@ export namespace EcsResolvers {
 
     host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
 
+    network?: NetworkResolver<NetworkEcsField | null, TypeParent, Context>;
+
     source?: SourceResolver<SourceEcsFields | null, TypeParent, Context>;
 
     suricata?: SuricataResolver<SuricataEcsFields | null, TypeParent, Context>;
+
+    zeek?: ZeekResolver<ZeekEcsFields | null, TypeParent, Context>;
+
+    http?: HttpResolver<HttpEcsFields | null, TypeParent, Context>;
+
+    url?: UrlResolver<UrlEcsFields | null, TypeParent, Context>;
 
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
@@ -1409,6 +1599,11 @@ export namespace EcsResolvers {
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type NetworkResolver<
+    R = NetworkEcsField | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type SourceResolver<
     R = SourceEcsFields | null,
     Parent = Ecs,
@@ -1416,6 +1611,21 @@ export namespace EcsResolvers {
   > = Resolver<R, Parent, Context>;
   export type SuricataResolver<
     R = SuricataEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ZeekResolver<
+    R = ZeekEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HttpResolver<
+    R = HttpEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UrlResolver<
+    R = UrlEcsFields | null,
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -1472,6 +1682,8 @@ export namespace EventEcsFieldsResolvers {
     action?: ActionResolver<string | null, TypeParent, Context>;
 
     type?: TypeResolver<string | null, TypeParent, Context>;
+
+    dataset?: DatasetResolver<string | null, TypeParent, Context>;
   }
 
   export type CategoryResolver<
@@ -1509,6 +1721,11 @@ export namespace EventEcsFieldsResolvers {
     Parent = EventEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type DatasetResolver<
+    R = string | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace GeoEcsFieldsResolvers {
@@ -1526,6 +1743,39 @@ export namespace GeoEcsFieldsResolvers {
   export type RegionNameResolver<
     R = string | null,
     Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace NetworkEcsFieldResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkEcsField> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+
+    transport?: TransportResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TransportResolver<
+    R = string | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = NetworkDirectionEcs[] | null,
+    Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1583,6 +1833,577 @@ export namespace SuricataAlertDataResolvers {
   export type SignatureIdResolver<
     R = number | null,
     Parent = SuricataAlertData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekEcsFields> {
+    session_id?: SessionIdResolver<string | null, TypeParent, Context>;
+
+    connection?: ConnectionResolver<ZeekConnectionData | null, TypeParent, Context>;
+
+    notice?: NoticeResolver<ZeekNoticeData | null, TypeParent, Context>;
+
+    dns?: DnsResolver<ZeekDnsData | null, TypeParent, Context>;
+
+    http?: HttpResolver<ZeekHttpData | null, TypeParent, Context>;
+
+    files?: FilesResolver<ZeekFileData | null, TypeParent, Context>;
+
+    ssl?: SslResolver<ZeekSslData | null, TypeParent, Context>;
+  }
+
+  export type SessionIdResolver<
+    R = string | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ConnectionResolver<
+    R = ZeekConnectionData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NoticeResolver<
+    R = ZeekNoticeData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DnsResolver<
+    R = ZeekDnsData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HttpResolver<
+    R = ZeekHttpData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FilesResolver<
+    R = ZeekFileData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SslResolver<
+    R = ZeekSslData | null,
+    Parent = ZeekEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekConnectionDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekConnectionData> {
+    local_resp?: LocalRespResolver<string | null, TypeParent, Context>;
+
+    local_orig?: LocalOrigResolver<string | null, TypeParent, Context>;
+
+    missed_bytes?: MissedBytesResolver<number | null, TypeParent, Context>;
+
+    state?: StateResolver<string | null, TypeParent, Context>;
+
+    history?: HistoryResolver<string | null, TypeParent, Context>;
+  }
+
+  export type LocalRespResolver<
+    R = string | null,
+    Parent = ZeekConnectionData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type LocalOrigResolver<
+    R = string | null,
+    Parent = ZeekConnectionData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MissedBytesResolver<
+    R = number | null,
+    Parent = ZeekConnectionData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type StateResolver<
+    R = string | null,
+    Parent = ZeekConnectionData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HistoryResolver<
+    R = string | null,
+    Parent = ZeekConnectionData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekNoticeDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekNoticeData> {
+    suppress_for?: SuppressForResolver<number | null, TypeParent, Context>;
+
+    msg?: MsgResolver<string | null, TypeParent, Context>;
+
+    note?: NoteResolver<string | null, TypeParent, Context>;
+
+    sub?: SubResolver<string | null, TypeParent, Context>;
+
+    dst?: DstResolver<string | null, TypeParent, Context>;
+
+    dropped?: DroppedResolver<boolean | null, TypeParent, Context>;
+
+    peer_descr?: PeerDescrResolver<string | null, TypeParent, Context>;
+  }
+
+  export type SuppressForResolver<
+    R = number | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MsgResolver<
+    R = string | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NoteResolver<
+    R = string | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SubResolver<
+    R = string | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DstResolver<
+    R = string | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DroppedResolver<
+    R = boolean | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PeerDescrResolver<
+    R = string | null,
+    Parent = ZeekNoticeData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekDnsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekDnsData> {
+    AA?: AaResolver<boolean | null, TypeParent, Context>;
+
+    qclass_name?: QclassNameResolver<string | null, TypeParent, Context>;
+
+    RD?: RdResolver<boolean | null, TypeParent, Context>;
+
+    qtype_name?: QtypeNameResolver<string | null, TypeParent, Context>;
+
+    rejected?: RejectedResolver<boolean | null, TypeParent, Context>;
+
+    qtype?: QtypeResolver<number | null, TypeParent, Context>;
+
+    query?: QueryResolver<string | null, TypeParent, Context>;
+
+    trans_id?: TransIdResolver<number | null, TypeParent, Context>;
+
+    qclass?: QclassResolver<number | null, TypeParent, Context>;
+
+    RA?: RaResolver<boolean | null, TypeParent, Context>;
+
+    TC?: TcResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type AaResolver<
+    R = boolean | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type QclassNameResolver<
+    R = string | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RdResolver<
+    R = boolean | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type QtypeNameResolver<
+    R = string | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RejectedResolver<
+    R = boolean | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type QtypeResolver<
+    R = number | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type QueryResolver<
+    R = string | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TransIdResolver<
+    R = number | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type QclassResolver<
+    R = number | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RaResolver<
+    R = boolean | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TcResolver<
+    R = boolean | null,
+    Parent = ZeekDnsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekHttpDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekHttpData> {
+    resp_mime_types?: RespMimeTypesResolver<string[] | null, TypeParent, Context>;
+
+    trans_depth?: TransDepthResolver<string | null, TypeParent, Context>;
+
+    status_msg?: StatusMsgResolver<string | null, TypeParent, Context>;
+
+    resp_fuids?: RespFuidsResolver<string[] | null, TypeParent, Context>;
+
+    tags?: TagsResolver<string[] | null, TypeParent, Context>;
+  }
+
+  export type RespMimeTypesResolver<
+    R = string[] | null,
+    Parent = ZeekHttpData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TransDepthResolver<
+    R = string | null,
+    Parent = ZeekHttpData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type StatusMsgResolver<
+    R = string | null,
+    Parent = ZeekHttpData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RespFuidsResolver<
+    R = string[] | null,
+    Parent = ZeekHttpData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TagsResolver<
+    R = string[] | null,
+    Parent = ZeekHttpData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekFileDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekFileData> {
+    session_ids?: SessionIdsResolver<string[] | null, TypeParent, Context>;
+
+    timedout?: TimedoutResolver<boolean | null, TypeParent, Context>;
+
+    local_orig?: LocalOrigResolver<boolean | null, TypeParent, Context>;
+
+    tx_host?: TxHostResolver<string | null, TypeParent, Context>;
+
+    source?: SourceResolver<string | null, TypeParent, Context>;
+
+    is_orig?: IsOrigResolver<boolean | null, TypeParent, Context>;
+
+    overflow_bytes?: OverflowBytesResolver<number | null, TypeParent, Context>;
+
+    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+
+    duration?: DurationResolver<number | null, TypeParent, Context>;
+
+    depth?: DepthResolver<number | null, TypeParent, Context>;
+
+    analyzers?: AnalyzersResolver<string[] | null, TypeParent, Context>;
+
+    mime_type?: MimeTypeResolver<string | null, TypeParent, Context>;
+
+    rx_host?: RxHostResolver<string | null, TypeParent, Context>;
+
+    total_bytes?: TotalBytesResolver<number | null, TypeParent, Context>;
+
+    fuid?: FuidResolver<string | null, TypeParent, Context>;
+
+    seen_bytes?: SeenBytesResolver<number | null, TypeParent, Context>;
+
+    missing_bytes?: MissingBytesResolver<number | null, TypeParent, Context>;
+
+    md5?: Md5Resolver<string | null, TypeParent, Context>;
+  }
+
+  export type SessionIdsResolver<
+    R = string[] | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TimedoutResolver<
+    R = boolean | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type LocalOrigResolver<
+    R = boolean | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TxHostResolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IsOrigResolver<
+    R = boolean | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type OverflowBytesResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type Sha1Resolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DurationResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DepthResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AnalyzersResolver<
+    R = string[] | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MimeTypeResolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RxHostResolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalBytesResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FuidResolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SeenBytesResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type MissingBytesResolver<
+    R = number | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type Md5Resolver<
+    R = string | null,
+    Parent = ZeekFileData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ZeekSslDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ZeekSslData> {
+    cipher?: CipherResolver<string | null, TypeParent, Context>;
+
+    established?: EstablishedResolver<boolean | null, TypeParent, Context>;
+
+    resumed?: ResumedResolver<boolean | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type CipherResolver<
+    R = string | null,
+    Parent = ZeekSslData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type EstablishedResolver<
+    R = boolean | null,
+    Parent = ZeekSslData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ResumedResolver<
+    R = boolean | null,
+    Parent = ZeekSslData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = ZeekSslData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HttpEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HttpEcsFields> {
+    version?: VersionResolver<string | null, TypeParent, Context>;
+
+    request?: RequestResolver<HttpRequestData | null, TypeParent, Context>;
+
+    response?: ResponseResolver<HttpResponseData | null, TypeParent, Context>;
+  }
+
+  export type VersionResolver<
+    R = string | null,
+    Parent = HttpEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RequestResolver<
+    R = HttpRequestData | null,
+    Parent = HttpEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ResponseResolver<
+    R = HttpResponseData | null,
+    Parent = HttpEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HttpRequestDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HttpRequestData> {
+    method?: MethodResolver<string | null, TypeParent, Context>;
+
+    body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
+
+    referrer?: ReferrerResolver<string | null, TypeParent, Context>;
+
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+  }
+
+  export type MethodResolver<
+    R = string | null,
+    Parent = HttpRequestData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type BodyResolver<
+    R = HttpBodyData | null,
+    Parent = HttpRequestData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ReferrerResolver<
+    R = string | null,
+    Parent = HttpRequestData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type BytesResolver<
+    R = number | null,
+    Parent = HttpRequestData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HttpBodyDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HttpBodyData> {
+    content?: ContentResolver<string | null, TypeParent, Context>;
+
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+  }
+
+  export type ContentResolver<
+    R = string | null,
+    Parent = HttpBodyData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type BytesResolver<
+    R = number | null,
+    Parent = HttpBodyData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HttpResponseDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = HttpResponseData> {
+    status_code?: StatusCodeResolver<number | null, TypeParent, Context>;
+
+    body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
+
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+  }
+
+  export type StatusCodeResolver<
+    R = number | null,
+    Parent = HttpResponseData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type BodyResolver<
+    R = HttpBodyData | null,
+    Parent = HttpResponseData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type BytesResolver<
+    R = number | null,
+    Parent = HttpResponseData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UrlEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = UrlEcsFields> {
+    domain?: DomainResolver<string | null, TypeParent, Context>;
+
+    original?: OriginalResolver<string | null, TypeParent, Context>;
+
+    username?: UsernameResolver<string | null, TypeParent, Context>;
+
+    password?: PasswordResolver<string | null, TypeParent, Context>;
+  }
+
+  export type DomainResolver<
+    R = string | null,
+    Parent = UrlEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type OriginalResolver<
+    R = string | null,
+    Parent = UrlEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UsernameResolver<
+    R = string | null,
+    Parent = UrlEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PasswordResolver<
+    R = string | null,
+    Parent = UrlEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1786,32 +2607,6 @@ export namespace TopNFlowItemResolvers {
   export type IpResolver<
     R = string | null,
     Parent = TopNFlowItem,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace NetworkEcsFieldResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
-
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
-
-    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
-  }
-
-  export type BytesResolver<
-    R = number | null,
-    Parent = NetworkEcsField,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketsResolver<
-    R = number | null,
-    Parent = NetworkEcsField,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type DirectionResolver<
-    R = NetworkDirectionEcs[] | null,
-    Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

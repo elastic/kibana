@@ -35,6 +35,7 @@ export const timelineQuery = gql`
               module
               category
               id
+              dataset
             }
             host {
               id
@@ -61,6 +62,98 @@ export const timelineQuery = gql`
                   signature
                   signature_id
                 }
+              }
+            }
+            network {
+              transport
+            }
+            http {
+              version
+              request {
+                method
+                body {
+                  bytes
+                  content
+                }
+                referrer
+              }
+              response {
+                status_code
+                body {
+                  bytes
+                  content
+                }
+              }
+            }
+            url {
+              original
+              domain
+              username
+              password
+            }
+            zeek {
+              session_id
+              connection {
+                local_resp
+                local_orig
+                missed_bytes
+                state
+                history
+              }
+              notice {
+                suppress_for
+                msg
+                note
+                sub
+                dst
+                dropped
+                peer_descr
+              }
+              dns {
+                AA
+                qclass_name
+                RD
+                qtype_name
+                rejected
+                qtype
+                query
+                trans_id
+                qclass
+                RA
+                TC
+              }
+              http {
+                resp_mime_types
+                trans_depth
+                status_msg
+                resp_fuids
+                tags
+              }
+              files {
+                session_ids
+                timedout
+                local_orig
+                tx_host
+                source
+                is_orig
+                overflow_bytes
+                sha1
+                duration
+                depth
+                analyzers
+                mime_type
+                rx_host
+                total_bytes
+                fuid
+                seen_bytes
+                missing_bytes
+                md5
+              }
+              ssl {
+                cipher
+                established
+                resumed
+                version
               }
             }
           }

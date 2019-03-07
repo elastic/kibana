@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -13,6 +13,7 @@ import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../../timeline/data_providers/provider';
 
+import { GoogleLink } from './google_link';
 import { getBeginningTokens } from './suricata_links';
 
 const SignatureFlexItem = styled(EuiFlexItem)`
@@ -26,18 +27,6 @@ const Badge = styled(EuiBadge)`
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
-
-const LinkFlexItem = styled(EuiFlexItem)`
-  margin-left: 6px;
-`;
-
-export const GoogleLink = pure(({ link, value }: { link: string; value: string }) => (
-  <LinkFlexItem grow={false}>
-    <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
-      {value}
-    </EuiLink>
-  </LinkFlexItem>
-));
 
 export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
   <>
