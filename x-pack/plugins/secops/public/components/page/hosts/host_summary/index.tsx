@@ -24,7 +24,7 @@ import { HostItem, HostsEdges } from 'x-pack/plugins/secops/server/graphql/types
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
-import { NetworkDetailsLink } from '../../../links';
+import { IPDetailsLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -132,7 +132,7 @@ export const createDraggable = (
             <FormattedRelative value={new Date(summaryValue)} />
           </EuiToolTip>
         ) : field === 'host.ip' ? (
-          <NetworkDetailsLink ip={summaryValue} />
+          <IPDetailsLink ip={summaryValue} />
         ) : (
           <>{defaultToEmptyTag(summaryValue)}</>
         )

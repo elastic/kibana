@@ -21,7 +21,7 @@ import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
-import { NetworkDetailsLink } from '../../../links';
+import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -70,7 +70,7 @@ export const getNetworkTopNFlowColumns = (
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <NetworkDetailsLink ip={ip} />
+                <IPDetailsLink ip={ip} />
               )
             }
           />

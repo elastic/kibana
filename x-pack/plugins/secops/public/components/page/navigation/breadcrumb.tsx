@@ -13,22 +13,31 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 import { pure } from 'recompose';
 
-import { getBreadcrumbs as getHostBreadcrumbs } from '../../../pages/hosts/host_details';
-import { getBreadcrumbs as getNetworkBreadcrumbs } from '../../../pages/network/network_details';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 
 import { Navigation } from '.';
 
-const getBreadcrumbsForRoute = (pathname: string) => {
-  if (pathname.match(/hosts\/.*?/)) {
-    return getHostBreadcrumbs(pathname.match(/([^\/]+$)/)![0]);
-  } else if (pathname.match(/network\/ip\/.*?/)) {
-    return getNetworkBreadcrumbs(pathname.match(/([^\/]+$)/)![0]);
+export interface BreadcrumbItem {
+  text: string;
+  href?: string;
+}
+
+export const getBreadcrumbsForRoute = (pathname: string): BreadcrumbItem[] | null => {
+  const trailingPath = pathname.match(/([^\/]+$)/);
+  if (trailingPath !== null) {
+    if (pathname.match(/hosts\/.*?/)) {
+      return getHostDetailsBreadcrumbs(trailingPath[0]);
+    } else if (pathname.match(/network\/ip\/.*?/)) {
+      return getIPDetailsBreadcrumbs(trailingPath[0]);
+    }
   }
+  return null;
 };
 
-const HeaderBreadcrumbsComponent = pure<RouteComponentProps>(({ location }) => (
+export const HeaderBreadcrumbsComponent = pure<RouteComponentProps>(({ location }) => (
   <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-    {location.pathname.match(/[hosts|overview|network]?/) && (
+    {location.pathname.match(/(hosts|overview|network)\/?$/) && (
       <Navigation data-test-subj="navigation" />
     )}
     {getBreadcrumbsForRoute(location.pathname) && (

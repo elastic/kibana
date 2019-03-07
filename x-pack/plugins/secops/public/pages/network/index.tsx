@@ -10,14 +10,14 @@ import { pure } from 'recompose';
 
 import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 
+import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { NetworkDetails } from './network_details';
 
 export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
   <>
     <Switch>
       <Route strict exact path={match.url} component={Network} />
-      <Route path={`${match.url}/ip/:ip`} component={NetworkDetails} />
+      <Route path={`${match.url}/ip/:ip`} component={IPDetails} />
       <Redirect from="/network/" to="/network" />
     </Switch>
   </>

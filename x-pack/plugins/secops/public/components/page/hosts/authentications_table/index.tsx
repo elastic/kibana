@@ -17,7 +17,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
-import { HostDetailsLink, NetworkDetailsLink } from '../../../links';
+import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -206,7 +206,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <NetworkDetailsLink ip={sourceIp} />
+                <IPDetailsLink ip={sourceIp} />
               )
             }
           />
@@ -311,7 +311,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <NetworkDetailsLink ip={sourceIp} />
+                <IPDetailsLink ip={sourceIp} />
               )
             }
           />

@@ -18,7 +18,7 @@ export const HostDetailsLink = pure<{ children?: React.ReactNode; hostId: string
   )
 );
 
-export const NetworkDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
+export const IPDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
   ({ children, ip }) => (
     <EuiLink href={`#/link-to/network/ip/${encodeURIComponent(encodeIpv6(ip))}`}>
       {children ? children : ip}

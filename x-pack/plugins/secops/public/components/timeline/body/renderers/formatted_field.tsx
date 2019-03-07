@@ -12,7 +12,7 @@ import { Ecs } from '../../../../../server/graphql/types';
 import { getMappedEcsValue } from '../../../../lib/ecs';
 import { getOrEmptyTag } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
-import { NetworkDetailsLink } from '../../../links';
+import { IPDetailsLink } from '../../../links';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
 export const FormattedField = pure<{ data: Ecs; fieldName: string; fieldType: string }>(
@@ -25,7 +25,7 @@ export const FormattedField = pure<{ data: Ecs; fieldName: string; fieldType: st
         <PreferenceFormattedDate value={value} />
       </LocalizedDateTooltip>
     ) : (fieldName === 'source.ip' || fieldName === 'destination.ip') && value != null ? (
-      <NetworkDetailsLink ip={value} />
+      <IPDetailsLink ip={value} />
     ) : (
       getOrEmptyTag(fieldName, data)
     );

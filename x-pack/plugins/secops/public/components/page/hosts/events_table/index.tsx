@@ -16,7 +16,7 @@ import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../sto
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { getEmptyStringTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
-import { NetworkDetailsLink } from '../../../links';
+import { IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -203,7 +203,7 @@ export const formatIpSafely = (path: string, data: Ecs): JSX.Element => {
       return getEmptyStringTag();
     } else {
       const ip = txt && txt.slice ? txt.slice(0, 45) : txt;
-      return <NetworkDetailsLink ip={ip} />;
+      return <IPDetailsLink ip={ip} />;
     }
   }
   return getEmptyTagValue();

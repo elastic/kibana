@@ -14,6 +14,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { GlobalTime } from '../../containers/global_time';
 import { decodeIpv6 } from '../../containers/helpers';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -28,13 +29,13 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 const type = networkModel.NetworkType.details;
 
-interface NetworkDetailsComponentReduxProps {
+interface IPDetailsComponentReduxProps {
   filterQueryExpression: string;
 }
 
-type NetworkDetailsComponentProps = NetworkDetailsComponentReduxProps & NetworkComponentProps;
+type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
-const NetworkDetailsComponent = pure<NetworkDetailsComponentProps>(
+const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
     match: {
       params: { ip },
@@ -74,19 +75,18 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const NetworkDetails = connect(makeMapStateToProps)(NetworkDetailsComponent);
+export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
 
-export const getBreadcrumbs = (ip: string) => [
+export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {
     text: i18n.NETWORK,
     href: getNetworkUrl(),
   },
   {
-    text: ip,
+    text: decodeIpv6(ip),
   },
 ];
 
-// @ts-ignore
 const getFilterQuery = (
   ip: string,
   filterQueryExpression: string,
