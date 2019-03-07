@@ -26,7 +26,6 @@ export class HelpMenu extends PureComponent {
         <EuiLink
           href="https://github.com/elastic/kibana/issues/new"
           target="_blank"
-          rel="noopener"
         >
           {i18n.translate('xpack.maps.helpMenu.feedbackLinkText', {
             defaultMessage: 'Provide feedback for the Maps application'

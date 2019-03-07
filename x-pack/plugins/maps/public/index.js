@@ -34,7 +34,6 @@ import listingTemplate from './angular/listing_ng_wrapper.html';
 import mapTemplate from './angular/map.html';
 import { MapListing } from './shared/components/map_listing';
 import { recentlyAccessed } from 'ui/persisted_log';
-import { addHelpMenuToAppChrome } from './help_menu_util';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
@@ -58,7 +57,6 @@ routes
     },
     resolve: {
       hasMaps: function (kbnUrl) {
-        addHelpMenuToAppChrome(chrome);
         chrome.getSavedObjectsClient().find({ type: 'map', perPage: 1 }).then(resp => {
           // Do not show empty listing page, just redirect to a new map
           if (resp.savedObjects.length === 0) {
