@@ -28,6 +28,11 @@ it('Should return true when lower and upper values are set and between min and m
   expect(isValid).toBe(true);
 });
 
+it('Should handle string values and return true when lower and upper values are set and between min and max', () => {
+  const { isValid } = isRangeValid(['192', '1000'], 100, 1000, formatMessageMock);
+  expect(isValid).toBe(true);
+});
+
 it('Should return true when lower and upper values are not set (empty range)', () => {
   const { isValid } = isRangeValid(['', ''], 1, 10, formatMessageMock);
   expect(isValid).toBe(true);

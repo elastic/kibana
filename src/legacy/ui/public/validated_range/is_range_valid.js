@@ -21,11 +21,17 @@ const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
 
 export function isRangeValid(value, min, max, formatMessage) {
-  const lowerValue = isNaN(value[LOWER_VALUE_INDEX]) ? '' : value[LOWER_VALUE_INDEX];
-  const upperValue = isNaN(value[UPPER_VALUE_INDEX]) ? '' : value[UPPER_VALUE_INDEX];
+  let lowerValue = isNaN(value[LOWER_VALUE_INDEX]) ? '' : value[LOWER_VALUE_INDEX];
+  let upperValue = isNaN(value[UPPER_VALUE_INDEX]) ? '' : value[UPPER_VALUE_INDEX];
 
   const isLowerValueValid = lowerValue !== '';
   const isUpperValueValid = upperValue !== '';
+  if (isLowerValueValid) {
+    lowerValue = parseFloat(lowerValue);
+  }
+  if (isUpperValueValid) {
+    upperValue = parseFloat(upperValue);
+  }
   let isValid = true;
   let errorMessage = '';
 
