@@ -28,10 +28,10 @@ import { fetchWatches } from '../../../lib/api';
 
 const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
-  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="grey" />,
-  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="primary" />,
-  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
-  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
+  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="euiColorMediumShade" />,
+  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="euiColorPrimary" />,
+  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="euiColorDanger" />,
+  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="euiColorDanger" />,
 };
 
 const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {

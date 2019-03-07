@@ -29,7 +29,7 @@ routes.when('/management/elasticsearch/watcher/', {
 });
 
 routes.when('/management/elasticsearch/watcher/watches/', {
-  template: template,
+  template,
   controller: class WatchListRouteController {
     constructor($injector, $scope, $http) {
       const $route = $injector.get('$route');

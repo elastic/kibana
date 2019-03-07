@@ -20,7 +20,7 @@ export const WATCH_STATES: { [key: string]: string } = {
   }),
 
   ERROR: i18n.translate('xpack.watcher.constants.watchStates.errorStateText', {
-    defaultMessage: 'Error!',
+    defaultMessage: 'Error',
   }),
 
   CONFIG_ERROR: i18n.translate('xpack.watcher.constants.watchStates.configErrorStateText', {
