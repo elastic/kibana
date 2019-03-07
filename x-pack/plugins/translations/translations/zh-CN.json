@@ -914,8 +914,6 @@
     "kbn.advancedSettings.query.allowWildcardsTitle": "在查询中允许前导通配符",
     "kbn.advancedSettings.query.queryStringOptions.optionsLinkText": "选项",
     "kbn.advancedSettings.query.queryStringOptionsTitle": "查询字符串选项",
-    "kbn.advancedSettings.rollupIndexPatternsText": "启用捕获汇总索引的索引模式的创建，汇总索引然后会基于汇总数据启用可视化。刷新页面以应用更改。",
-    "kbn.advancedSettings.rollupIndexPatternsTitle": "启用汇总索引模式",
     "kbn.advancedSettings.savedObjects.listingLimitText": "为列表页面提取的对象数目",
     "kbn.advancedSettings.savedObjects.listingLimitTitle": "对象列表限制",
     "kbn.advancedSettings.savedObjects.perPageText": "在加载对话框中每页要显示的对象数目",

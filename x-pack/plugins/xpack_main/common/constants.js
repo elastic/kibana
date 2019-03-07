@@ -22,6 +22,11 @@ export const getConfigTelemetryDesc = () => {
   });
 };
 
+/*
+ * config options opt into rollup jobs
+ * @type {string}
+ */
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 /**
  * The name of the Kibana System ID used to publish and look up Kibana stats through the Monitoring system.
  * @type {string}
