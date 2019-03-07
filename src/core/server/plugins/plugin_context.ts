@@ -21,9 +21,14 @@ import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { CoreContext } from '../../types';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { ClusterClient } from '../elasticsearch';
 import { LoggerFactory } from '../logging';
 import { Plugin, PluginManifest } from './plugin';
+import { PluginsServiceStartDeps } from './plugins_service';
 
+/**
+ * Context that's available to plugins during initialization stage.
+ */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
   logger: LoggerFactory;
@@ -37,8 +42,15 @@ export interface PluginInitializerContext {
   };
 }
 
-// tslint:disable no-empty-interface
-export interface PluginStartContext {}
+/**
+ * Context passed to the plugins `start` method.
+ */
+export interface PluginStartContext {
+  elasticsearch: {
+    adminClient$: Observable<ClusterClient>;
+    dataClient$: Observable<ClusterClient>;
+  };
+}
 
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin initializer.
@@ -104,11 +116,18 @@ export function createPluginInitializerContext(
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
+ * @param deps Dependencies that Plugins services gets during start.
  * @internal
  */
 export function createPluginStartContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
+  deps: PluginsServiceStartDeps,
   plugin: Plugin<TPlugin, TPluginDependencies>
 ): PluginStartContext {
-  return {};
+  return {
+    elasticsearch: {
+      adminClient$: deps.elasticsearch.adminClient$,
+      dataClient$: deps.elasticsearch.dataClient$,
+    },
+  };
 }

@@ -23,6 +23,7 @@ import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreContext, CoreService } from '../../types';
 import { Config } from '../config';
 import { DevConfig } from '../dev';
+import { ElasticsearchServiceStart } from '../elasticsearch';
 import { BasePathProxyServer, HttpConfig, HttpServiceStart } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceStart } from '../plugins/plugins_service';
@@ -36,8 +37,21 @@ interface LegacyKbnServer {
 }
 
 interface Deps {
+  elasticsearch: ElasticsearchServiceStart;
   http?: HttpServiceStart;
   plugins: PluginsServiceStart;
+}
+
+function getLegacyRawConfig(config: Config) {
+  const rawConfig = config.toRaw();
+
+  // Elasticsearch config is solely handled by the core and legacy platform
+  // shouldn't have direct access to it.
+  if (rawConfig.elasticsearch !== undefined) {
+    delete rawConfig.elasticsearch;
+  }
+
+  return rawConfig;
 }
 
 /** @internal */
@@ -111,28 +125,29 @@ export class LegacyService implements CoreService {
 
     require('../../../cli/cluster/cluster_manager').create(
       this.coreContext.env.cliArgs,
-      config.toRaw(),
+      getLegacyRawConfig(config),
       await basePathProxy$.toPromise()
     );
   }
 
-  private async createKbnServer(config: Config, deps: Deps) {
+  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: Deps) {
     const KbnServer = require('../../../legacy/server/kbn_server');
-    const kbnServer: LegacyKbnServer = new KbnServer(config.toRaw(), {
+    const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
       // options that were used to create that server so that we can properly
       // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
       serverOptions:
-        deps.http !== undefined
+        http !== undefined
           ? {
-              ...deps.http.options,
-              listener: this.setupProxyListener(deps.http.server),
+              ...http.options,
+              listener: this.setupProxyListener(http.server),
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-      plugins: deps.plugins,
+      elasticsearch,
+      plugins,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl
