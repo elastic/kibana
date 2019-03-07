@@ -95,7 +95,7 @@ SimpleTemplateUI.propTypes = {
     colors: PropTypes.array.isRequired,
   }).isRequired,
   typeInstance: PropTypes.shape({ name: PropTypes.string.isRequired }).isRequired,
-  intl: PropTypes.any,
+  intl: PropTypes.any.isRequired,
 };
 
 export const SimpleTemplate = injectI18n(SimpleTemplateUI);
