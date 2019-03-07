@@ -37,7 +37,8 @@ export function resultsServiceProvider(callWithRequest) {
     latestMs,
     dateFormatTz,
     maxRecords = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-    maxExamples = DEFAULT_MAX_EXAMPLES) {
+    maxExamples = DEFAULT_MAX_EXAMPLES,
+    influencersFilterQuery) {
 
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
@@ -85,6 +86,10 @@ export function resultsServiceProvider(callWithRequest) {
         }
       });
     });
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
+    }
 
     // Add a nested query to filter for each of the specified influencers.
     if (influencers.length > 0) {

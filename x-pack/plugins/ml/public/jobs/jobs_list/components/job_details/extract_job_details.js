@@ -46,6 +46,17 @@ export function extractJobDetails(job) {
     node.items.push(['name', job.node.name]);
   }
 
+  const calendars = {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.calendarsTitle', {
+      defaultMessage: 'Calendars'
+    }),
+    position: 'right',
+    items: []
+  };
+  if (job.calendars) {
+    calendars.items = job.calendars.map(c => ['', c]);
+  }
+
   const detectors = {
     title: i18n.translate('xpack.ml.jobsList.jobDetails.detectorsTitle', {
       defaultMessage: 'Detectors'
@@ -126,6 +137,7 @@ export function extractJobDetails(job) {
     general,
     customUrl,
     node,
+    calendars,
     detectors,
     influencers,
     analysisConfig,

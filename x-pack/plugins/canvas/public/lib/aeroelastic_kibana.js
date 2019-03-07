@@ -16,10 +16,6 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    if (stores.has(page)) {
-      throw new Error('Only a single aeroelastic store per page should exist');
-    }
-
     stores.set(page, state.createStore(initialState, onChangeCallback));
 
     const updateScene = state.select((nextScene, primaryUpdate) => ({

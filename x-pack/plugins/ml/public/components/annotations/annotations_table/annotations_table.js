@@ -130,14 +130,17 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     }
   }
 
-  componentWillUpdate() {
+  previousJobId = undefined;
+  componentDidUpdate() {
     if (
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
+      this.previousJobId !== this.props.jobs[0].job_id &&
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
-      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
       annotationsRefresh$.next(true);
+      this.previousJobId = this.props.jobs[0].job_id;
     }
   }
 
