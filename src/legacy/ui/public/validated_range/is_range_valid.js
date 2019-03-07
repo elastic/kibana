@@ -33,7 +33,7 @@ export function isRangeValid(value, min, max, formatMessage) {
     isValid = false;
     errorMessage = formatMessage({
       id: 'common.ui.dualRangeControl.mustSetBothErrorMessage',
-      defaultMessage: 'both lower and upper value must be set'
+      defaultMessage: 'Both lower and upper values must be set'
     });
   }
 
@@ -41,7 +41,7 @@ export function isRangeValid(value, min, max, formatMessage) {
     isValid = false;
     errorMessage = formatMessage({
       id: 'common.ui.dualRangeControl.outsideOfRangeErrorMessage',
-      defaultMessage: 'must be between {min} and {max}'
+      defaultMessage: 'Values must be on or between {min} and {max}'
     },
     {
       min,
@@ -53,7 +53,7 @@ export function isRangeValid(value, min, max, formatMessage) {
     isValid = false;
     errorMessage = formatMessage({
       id: 'common.ui.dualRangeControl.upperValidErrorMessage',
-      defaultMessage: 'upper must be greater or equal to lower'
+      defaultMessage: 'Upper value must be greater or equal to lower value'
     });
   }
 
