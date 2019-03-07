@@ -13,11 +13,12 @@ jest.mock('../../../../../src/legacy/ui/public/index_patterns', () => {
 });
 
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => '/api/rollup',
+  addBasePath: (path) => path,
   breadcrumbs: { set: () => {} },
 }));
 
 jest.mock('lodash/function/debounce', () => fn => fn);
+
 
 describe('Create Rollup Job, step 5: Metrics', () => {
   let server;
@@ -128,11 +129,16 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   });
 
   describe('save()', () => {
-    it('should call the create Api server endpoing', async () => {
+    it('should call the "create" Api server endpoint', async () => {
       await goToStep(6);
+
+      const jobCreateApiPath = '/api/rollup/create';
+      expect(server.requests.find(r => r.url === jobCreateApiPath)).toBe(undefined); // make sure it hasn't been called
+
       userActions.clickSave();
       await nextTick();
-      expect(server.lastRequest.url).toEqual('/api/rollup/create');
+
+      expect(server.requests.find(r => r.url === jobCreateApiPath)).not.toBe(undefined); // It has been called!
     });
   });
 });

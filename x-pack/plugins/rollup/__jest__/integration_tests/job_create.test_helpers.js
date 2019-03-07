@@ -129,8 +129,17 @@ export const mockServerResponses = server => {
     ]);
   };
 
+  const mockUserActions = () => {
+    server.respondWith(/\/api\/user_action\/.*/, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify({}),
+    ]);
+  };
+
   mockIndexPatternValidityResponse();
   mockCreateJob();
+  mockUserActions();
 
   return { mockIndexPatternValidityResponse };
 };
