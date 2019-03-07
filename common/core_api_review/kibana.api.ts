@@ -30,7 +30,7 @@ interface LoggerFactory {
     get(...contextParts: string[]): Logger;
 }
 
-// @public (undocumented)
+// @public
 interface LogMeta {
     // (undocumented)
     [key: string]: any;

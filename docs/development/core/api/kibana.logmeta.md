@@ -2,6 +2,8 @@
 
 ## LogMeta interface
 
+Contextual metadata
+
 <b>Signature:</b>
 
 ```typescript

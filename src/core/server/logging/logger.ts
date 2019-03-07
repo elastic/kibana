@@ -21,6 +21,11 @@ import { Appender } from './appenders/appenders';
 import { LogLevel } from './log_level';
 import { LogRecord } from './log_record';
 
+/**
+ * Contextual metadata
+ *
+ * @public
+ */
 export interface LogMeta {
   [key: string]: any;
 }
