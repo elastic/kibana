@@ -38,7 +38,7 @@ export default async (kbnServer, server, config) => {
     return await kbnServer.mixin(require('./watch/watch'));
   }
 
-  const { uiBundles } = kbnServer;
+  const { newPlatform, uiBundles } = kbnServer;
   server.route(createBundlesRoute({
     regularBundlesPath: uiBundles.getWorkingDir(),
     dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
@@ -66,6 +66,7 @@ export default async (kbnServer, server, config) => {
   const optimizer = new FsOptimizer({
     logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
+    discoveredPlugins: newPlatform.start.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
   });

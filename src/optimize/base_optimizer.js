@@ -58,6 +58,7 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
+    this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
 
     switch (opts.sourceMaps) {
@@ -251,6 +252,7 @@ export default class BaseOptimizer {
       cache: true,
       entry: {
         ...this.uiBundles.toWebpackEntries(),
+        ...this._getDiscoveredPluginEntryPoints(),
         light_theme: [
           require.resolve('../legacy/ui/public/styles/bootstrap_light.less'),
         ],
@@ -267,7 +269,13 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]'
+        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+
+        // When the entry point is loaded, assign it's exported `plugin`
+        // value to a key on the global `__kbnBundles__` object.
+        // NOTE: Only actually used by new platform plugins
+        library: ['__kbnBundles__', '[name]'],
+        libraryExport: 'plugin',
       },
 
       optimization: {
@@ -556,5 +564,14 @@ export default class BaseOptimizer {
         ...Stats.presetToOptions('detailed')
       }))
     );
+  }
+
+  _getDiscoveredPluginEntryPoints() {
+    // New platform plugin entry points
+    return [...this.discoveredPlugins.entries()]
+      .reduce((entryPoints, [pluginId, plugin]) => {
+        entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
+        return entryPoints;
+      }, {});
   }
 }
