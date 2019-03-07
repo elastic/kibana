@@ -118,8 +118,7 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })))
-          .then(() => ({ success: true }));
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);
