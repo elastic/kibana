@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Feature, FeatureRegistry, uiCapabilitiesRegex } from './feature_registry';
+export {
+  Feature,
+  FeatureWithAllOrReadPrivileges,
+  FeatureRegistry,
+  uiCapabilitiesRegex,
+} from './feature_registry';

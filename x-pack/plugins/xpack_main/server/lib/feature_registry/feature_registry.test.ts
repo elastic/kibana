@@ -128,39 +128,6 @@ describe('FeatureRegistry', () => {
     );
   });
 
-  it('prevents features from registering two privileges with the same actions', () => {
-    const feature: Feature = {
-      id: 'test-feature',
-      name: 'Test Feature',
-      app: ['app1', 'app2'],
-      privileges: {
-        all: {
-          app: ['app2', 'app1'],
-          savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
-          },
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
-          ui: ['allowsFoo', 'showBar', 'showBaz'],
-        },
-        read: {
-          api: ['someApiEndpointTag', 'anotherEndpointTag'],
-          app: ['app1', 'app2'],
-          savedObject: {
-            all: ['config', 'space', 'etc'],
-            read: ['canvas'],
-          },
-          ui: ['allowsFoo', 'showBar', 'showBaz'],
-        },
-      },
-    };
-
-    const featureRegistry = new FeatureRegistry();
-    expect(() => featureRegistry.register(feature)).toThrowErrorMatchingInlineSnapshot(
-      `"Multiple privileges with the same definition have been registered for test-feature this isn't supported"`
-    );
-  });
-
   it(`prevents privileges from specifying app entries that don't exist at the root level`, () => {
     const feature: Feature = {
       id: 'test-feature',
