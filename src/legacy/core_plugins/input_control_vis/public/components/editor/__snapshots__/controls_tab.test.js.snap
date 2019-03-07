@@ -94,6 +94,7 @@ exports[`renders ControlsTab 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="selectControlType"
+          labelType="label"
         >
           <EuiSelect
             aria-label="Select control type"
@@ -127,6 +128,7 @@ exports[`renders ControlsTab 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           id="addControl"
+          labelType="label"
         >
           <EuiButton
             aria-label="Add control"

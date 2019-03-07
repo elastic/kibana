@@ -27,6 +27,7 @@ import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
+  has(key: string): boolean;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -43,6 +44,7 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
   }
 
   interface Request {
@@ -55,6 +57,7 @@ declare module 'hapi' {
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 
 export default class KbnServer {
+  public readonly core: any;
   public server: Server;
   public inject: Server['inject'];
 
