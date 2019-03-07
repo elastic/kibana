@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, isNil } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -121,7 +121,8 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null = get('host.name', node);
-      if (hostName != null) {
+      const hostId: string | null = get('host.id', node);
+      if (hostName != null && hostId != null) {
         return (
           <DraggableWrapper
             dataProvider={{
@@ -135,7 +136,7 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
                 displayField: 'host.name',
                 displayValue: hostName,
                 field: 'host.id',
-                value: node.host!.id!,
+                value: hostId,
               },
               queryDate: {
                 from: new Date(node.firstSeen!).valueOf(),
@@ -147,10 +148,8 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
                 <DragEffects>
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
-              ) : isNil(get('host.id', node)) ? (
-                <>{hostName}</>
               ) : (
-                <HostDetailsLink hostId={node.host!.id!}>{hostName}</HostDetailsLink>
+                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
               )
             }
           />
