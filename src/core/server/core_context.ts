@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ConfigService, Env } from '../server/config';
-import { LoggerFactory } from '../server/logging';
+import { ConfigService, Env } from './config';
+import { LoggerFactory } from './logging';
 
 /**
  * Groups all main Kibana's core modules/systems/services that are consumed in a
