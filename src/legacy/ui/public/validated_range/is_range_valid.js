@@ -17,10 +17,12 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 const LOWER_VALUE_INDEX = 0;
 const UPPER_VALUE_INDEX = 1;
 
-export function isRangeValid(value, min, max, formatMessage) {
+export function isRangeValid(value, min, max) {
   let lowerValue = isNaN(value[LOWER_VALUE_INDEX]) ? '' : value[LOWER_VALUE_INDEX];
   let upperValue = isNaN(value[UPPER_VALUE_INDEX]) ? '' : value[UPPER_VALUE_INDEX];
 
@@ -37,28 +39,22 @@ export function isRangeValid(value, min, max, formatMessage) {
 
   if ((!isLowerValueValid && isUpperValueValid) || (isLowerValueValid && !isUpperValueValid)) {
     isValid = false;
-    errorMessage = formatMessage({
-      id: 'common.ui.dualRangeControl.mustSetBothErrorMessage',
+    errorMessage = i18n.translate('common.ui.dualRangeControl.mustSetBothErrorMessage', {
       defaultMessage: 'Both lower and upper values must be set'
     });
   }
 
   if ((isLowerValueValid && lowerValue < min) || (isUpperValueValid && upperValue > max)) {
     isValid = false;
-    errorMessage = formatMessage({
-      id: 'common.ui.dualRangeControl.outsideOfRangeErrorMessage',
-      defaultMessage: 'Values must be on or between {min} and {max}'
-    },
-    {
-      min,
-      max
+    errorMessage = i18n.translate('common.ui.dualRangeControl.outsideOfRangeErrorMessage', {
+      defaultMessage: 'Values must be on or between {min} and {max}',
+      values: { min, max }
     });
   }
 
   if (isLowerValueValid && isUpperValueValid && upperValue < lowerValue) {
     isValid = false;
-    errorMessage = formatMessage({
-      id: 'common.ui.dualRangeControl.upperValidErrorMessage',
+    errorMessage = i18n.translate('common.ui.dualRangeControl.upperValidErrorMessage', {
       defaultMessage: 'Upper value must be greater or equal to lower value'
     });
   }

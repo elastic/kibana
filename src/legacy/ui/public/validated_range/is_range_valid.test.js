@@ -19,46 +19,42 @@
 
 import { isRangeValid } from './is_range_valid';
 
-const formatMessageMock = () => {
-  return '';
-};
-
 it('Should return true when lower and upper values are set and between min and max', () => {
-  const { isValid } = isRangeValid([2, 3], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid([2, 3], 1, 10);
   expect(isValid).toBe(true);
 });
 
 it('Should handle string values and return true when lower and upper values are set and between min and max', () => {
-  const { isValid } = isRangeValid(['192', '1000'], 100, 1000, formatMessageMock);
+  const { isValid } = isRangeValid(['192', '1000'], 100, 1000);
   expect(isValid).toBe(true);
 });
 
 it('Should return true when lower and upper values are not set (empty range)', () => {
-  const { isValid } = isRangeValid(['', ''], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid(['', ''], 1, 10);
   expect(isValid).toBe(true);
 });
 
 it('Should return false when lower value is not set and upper value is set', () => {
-  const { isValid } = isRangeValid(['', 3], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid(['', 3], 1, 10);
   expect(isValid).toBe(false);
 });
 
 it('Should return false when lower value is set and upper value is not set', () => {
-  const { isValid } = isRangeValid([2, ''], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid([2, ''], 1, 10);
   expect(isValid).toBe(false);
 });
 
 it('Should return false when lower value is greater than upper value', () => {
-  const { isValid } = isRangeValid([3, 2], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid([3, 2], 1, 10);
   expect(isValid).toBe(false);
 });
 
 it('Should return false when lower value is less than min', () => {
-  const { isValid } = isRangeValid([0, 2], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid([0, 2], 1, 10);
   expect(isValid).toBe(false);
 });
 
 it('Should return false when upper value is greater than max', () => {
-  const { isValid } = isRangeValid([2, 12], 1, 10, formatMessageMock);
+  const { isValid } = isRangeValid([2, 12], 1, 10);
   expect(isValid).toBe(false);
 });

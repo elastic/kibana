@@ -18,7 +18,6 @@
  */
 
 import React, { Component } from 'react';
-import { injectI18n } from '@kbn/i18n/react';
 import { isRangeValid } from './is_range_valid';
 
 import {
@@ -28,7 +27,7 @@ import {
 
 // Wrapper around EuiDualRange that ensures onChange callback is only called when range value
 // is valid and within min/max
-class ValidatedDualRangeUi extends Component {
+export class ValidatedDualRange extends Component {
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -36,8 +35,7 @@ class ValidatedDualRangeUi extends Component {
       const { isValid, errorMessage } = isRangeValid(
         nextProps.value,
         nextProps.min,
-        nextProps.max,
-        nextProps.intl.formatMessage);
+        nextProps.max);
       return {
         value: nextProps.value,
         prevValue: nextProps.value,
@@ -50,7 +48,7 @@ class ValidatedDualRangeUi extends Component {
   }
 
   onChange = (value) => {
-    const { isValid, errorMessage } = isRangeValid(value, this.props.min, this.props.max, this.props.intl.formatMessage);
+    const { isValid, errorMessage } = isRangeValid(value, this.props.min, this.props.max);
 
     this.setState({
       value,
@@ -84,5 +82,3 @@ class ValidatedDualRangeUi extends Component {
     );
   }
 }
-
-export const ValidatedDualRange = injectI18n(ValidatedDualRangeUi);
