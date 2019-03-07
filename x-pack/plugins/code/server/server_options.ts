@@ -16,6 +16,8 @@ export class ServerOptions {
 
   public readonly jdtWorkspacePath = resolve(this.config.get('path.data'), 'code/jdt_ws');
 
+  public readonly jdtConfigPath = resolve(this.config.get('path.data'), 'code/jdt_config');
+
   public readonly updateFrequencyMs: number = this.options.updateFreqencyMs;
 
   public readonly indexFrequencyMs: number = this.options.indexFrequencyMs;
