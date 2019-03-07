@@ -41,6 +41,10 @@ const getCtrlShortcuts = shortcuts => {
 const refreshShortcut = { ...getAltShortcuts('r'), help: 'Refresh workpad' };
 const previousPageShortcut = { ...getAltShortcuts('['), help: 'Go to previous page' };
 const nextPageShortcut = { ...getAltShortcuts(']'), help: 'Go to next page' };
+const deleteElementShortcuts = ['del', 'backspace'];
+const groupShortcut = ['g'];
+const ungroupShortcut = ['u'];
+const fullscreentExitShortcut = ['esc'];
 
 export const keymap = {
   ELEMENT: {
@@ -50,10 +54,10 @@ export const keymap = {
     CUT: { ...getCtrlShortcuts('x'), help: 'Cut' },
     PASTE: { ...getCtrlShortcuts('v'), help: 'Paste' },
     DELETE: {
-      osx: ['backspace'],
-      windows: ['del', 'backspace'],
-      linux: ['del', 'backspace'],
-      other: ['del', 'backspace'],
+      osx: deleteElementShortcuts,
+      windows: deleteElementShortcuts,
+      linux: deleteElementShortcuts,
+      other: deleteElementShortcuts,
       help: 'Delete',
     },
     BRING_FORWARD: {
@@ -73,17 +77,17 @@ export const keymap = {
       help: 'Send to back',
     },
     GROUP: {
-      osx: ['g'],
-      windows: ['g'],
-      linux: ['g'],
-      other: ['g'],
+      osx: groupShortcut,
+      windows: groupShortcut,
+      linux: groupShortcut,
+      other: groupShortcut,
       help: 'Group',
     },
     UNGROUP: {
-      osx: ['u'],
-      windows: ['u'],
-      linux: ['u'],
-      other: ['u'],
+      osx: ungroupShortcut,
+      windows: ungroupShortcut,
+      linux: ungroupShortcut,
+      other: ungroupShortcut,
       help: 'Ungroup',
     },
   },
@@ -101,10 +105,10 @@ export const keymap = {
     displayName: 'Presentation mode',
     FULLSCREEN: { ...getAltShortcuts(['p', 'f']), help: 'Enter presentation mode' },
     FULLSCREEN_EXIT: {
-      osx: ['esc'],
-      windows: ['esc'],
-      linux: ['esc'],
-      other: ['esc'],
+      osx: fullscreentExitShortcut,
+      windows: fullscreentExitShortcut,
+      linux: fullscreentExitShortcut,
+      other: fullscreentExitShortcut,
       help: 'Exit presentation mode',
     },
     PREV: mapValues(previousPageShortcut, (osShortcuts, key) =>
