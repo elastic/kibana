@@ -17,23 +17,25 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
+import { FtrProviderContext } from '../../ftr_provider_context.d';
+
+// tslint:disable-next-line: no-default-export
+export default function({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-
-  describe('visualize app', function () {
-    before(async ()=> {
+  describe('visualize app', () => {
+    before(async () => {
       log.debug('Starting visualize before method');
       browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
-      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });
 
-    describe('', function () {
+    describe('', function() {
       this.tags('ciGroup9');
 
       loadTestFile(require.resolve('./_embedding_chart'));
@@ -43,7 +45,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_data_table_nontimeindex'));
     });
 
-    describe('', function () {
+    describe('', function() {
       this.tags('ciGroup10');
 
       loadTestFile(require.resolve('./_inspector'));
@@ -54,7 +56,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_histogram_request_start'));
     });
 
-    describe('', function () {
+    describe('', function() {
       this.tags('ciGroup11');
 
       loadTestFile(require.resolve('./_line_chart'));
@@ -68,7 +70,7 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_visualize_listing'));
     });
 
-    describe('', function () {
+    describe('', function() {
       this.tags('ciGroup12');
 
       loadTestFile(require.resolve('./_tag_cloud'));
