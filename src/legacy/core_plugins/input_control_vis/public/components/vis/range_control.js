@@ -21,9 +21,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { FormRow } from './form_row';
-import { injectI18n } from '@kbn/i18n/react';
 import { ValidatedDualRange } from 'ui/validated_range';
-
 
 function roundWithPrecision(value, decimalPlaces, roundFunction) {
   if (decimalPlaces <= 0) {
@@ -45,7 +43,7 @@ export function floorWithPrecision(value, decimalPlaces) {
   return roundWithPrecision(value, decimalPlaces, Math.floor);
 }
 
-class RangeControlUi extends Component {
+export class RangeControl extends Component {
   state = {};
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -121,10 +119,8 @@ class RangeControlUi extends Component {
   }
 }
 
-RangeControlUi.propTypes = {
+RangeControl.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired
 };
-
-export const RangeControl = injectI18n(RangeControlUi);

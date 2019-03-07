@@ -44,7 +44,7 @@ const control = {
 };
 
 test('renders RangeControl', () => {
-  const component = shallowWithIntl(<RangeControl.WrappedComponent
+  const component = shallowWithIntl(<RangeControl
     control={control}
     controlIndex={0}
     stageFilter={() => {}}
@@ -67,7 +67,7 @@ test('disabled', () => {
       return false;
     }
   };
-  const component = shallowWithIntl(<RangeControl.WrappedComponent
+  const component = shallowWithIntl(<RangeControl
     control={disabledRangeControl}
     controlIndex={0}
     stageFilter={() => {}}

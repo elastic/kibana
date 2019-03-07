@@ -7,7 +7,7 @@ exports[`disabled 1`] = `
   id="mock-range-control"
   label="range control"
 >
-  <InjectIntl(ValidatedDualRangeUi)
+  <ValidatedDualRange
     disabled={true}
     showInput={true}
   />
@@ -21,7 +21,7 @@ exports[`renders RangeControl 1`] = `
   id="mock-range-control"
   label="range control"
 >
-  <InjectIntl(ValidatedDualRangeUi)
+  <ValidatedDualRange
     id="mock-range-control"
     max={100}
     min={0}
