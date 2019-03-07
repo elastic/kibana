@@ -208,7 +208,7 @@ function getFieldNamesFromTypeMapping(typeMapping) {
   });
 }
 
-function loadTemplates(templatesObject) {
+function loadTemplates(templatesObject = {}) {
   templates = Object.keys(templatesObject);
 }
 
@@ -304,7 +304,7 @@ function retrieveAutocompleteInfoFromServer() {
       if (templates) {
         loadTemplates(JSON.parse(templates[0]));
       } else {
-        loadTemplates({});
+        loadTemplates();
       }
       // Trigger an update event with the mappings, aliases
       $(mappingObj).trigger('update', [mappings[0], aliases[0]]);

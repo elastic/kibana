@@ -35,6 +35,7 @@ require('ui/modules')
         this.apply = () => {
           this.vals = settings.updateSettings(this.vals);
           $scope.kbnTopNav.close();
+          // After the user saves settings, refetch autocomplete info so it takes effect immediately.
           mappings.retrieveAutoCompleteInfo();
         };
 
