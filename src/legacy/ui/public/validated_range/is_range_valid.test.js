@@ -35,26 +35,31 @@ it('Should return true when lower and upper values are not set (empty range)', (
 });
 
 it('Should return false when lower value is not set and upper value is set', () => {
-  const { isValid } = isRangeValid(['', 3], 1, 10);
+  const { isValid, errorMessage } = isRangeValid(['', 3], 1, 10);
   expect(isValid).toBe(false);
+  expect(errorMessage).toBe('Both lower and upper values must be set');
 });
 
 it('Should return false when lower value is set and upper value is not set', () => {
-  const { isValid } = isRangeValid([2, ''], 1, 10);
+  const { isValid, errorMessage } = isRangeValid([2, ''], 1, 10);
   expect(isValid).toBe(false);
+  expect(errorMessage).toBe('Both lower and upper values must be set');
 });
 
 it('Should return false when lower value is greater than upper value', () => {
-  const { isValid } = isRangeValid([3, 2], 1, 10);
+  const { isValid, errorMessage } = isRangeValid([3, 2], 1, 10);
   expect(isValid).toBe(false);
+  expect(errorMessage).toBe('Upper value must be greater or equal to lower value');
 });
 
 it('Should return false when lower value is less than min', () => {
-  const { isValid } = isRangeValid([0, 2], 1, 10);
+  const { isValid, errorMessage } = isRangeValid([0, 2], 1, 10);
   expect(isValid).toBe(false);
+  expect(errorMessage).toBe('Values must be on or between 1 and 10');
 });
 
 it('Should return false when upper value is greater than max', () => {
-  const { isValid } = isRangeValid([2, 12], 1, 10);
+  const { isValid, errorMessage } = isRangeValid([2, 12], 1, 10);
   expect(isValid).toBe(false);
+  expect(errorMessage).toBe('Values must be on or between 1 and 10');
 });
