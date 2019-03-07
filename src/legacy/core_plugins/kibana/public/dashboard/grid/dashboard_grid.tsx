@@ -113,7 +113,7 @@ interface Props {
   panels: PanelData[];
   getEmbeddableFactory: () => {};
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (PanelData[]) => void;
+  onPanelsUpdated: (updatedPanels: PanelData[]) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
 }
