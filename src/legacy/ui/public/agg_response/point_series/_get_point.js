@@ -20,8 +20,13 @@
 import _ from 'lodash';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
+function formatExtraMetrics({ format, title }, val) {
+  return { label: title, value: getFormat(format).convert(val) };
+}
+
 export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
-  const zRow = z && row[z.accessor];
+  // debugger;
+  const zRow = z && z.length > 0 && row[z[0].accessor];
   const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
   const yRow = row[y.accessor];
 
@@ -29,7 +34,7 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
     x: xRow,
     y: yRow,
     z: zRow,
-    extraMetrics: _.compact([zRow]),
+    extraMetrics: z && z.length > 0 && _.compact([formatExtraMetrics(z[0], zRow)]),
     yScale: yScale,
     seriesRaw: series && {
       table,
@@ -49,9 +54,9 @@ export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
       row: rowIndex,
       value: yRow,
     },
-    zRaw: z && {
+    zRaw: z && z.length > 0 && {
       table,
-      column: z.column,
+      column: z[0].column,
       row: rowIndex,
       value: zRow,
     },
