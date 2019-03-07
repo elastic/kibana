@@ -19,8 +19,9 @@
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { extractIndexPatterns } from './extract_index_patterns';
 
-async function fetchFields(indexPatterns = ['*']) {
+export async function fetchFields(indexPatterns = ['*']) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
     const indexFields = await Promise.all(patterns.map((pattern) => {
@@ -49,4 +50,7 @@ async function fetchFields(indexPatterns = ['*']) {
   }
 }
 
-export { fetchFields };
+export async function fetchIndexPatternFields(params, fields) {
+  const indexPatterns = extractIndexPatterns(params, fields);
+  return await fetchFields(indexPatterns);
+}

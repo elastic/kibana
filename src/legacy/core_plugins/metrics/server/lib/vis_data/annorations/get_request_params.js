@@ -22,7 +22,7 @@ import { getIndexPatternObject } from '../helpers/get_index_pattern';
 
 export async function getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities) {
   const bodies = [];
-  const esShardTimeout = getEsShardTimeout(req);
+  const esShardTimeout = await getEsShardTimeout(req);
   const indexPattern = annotation.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildAnnotationRequest(req, panel, annotation, esQueryConfig, indexPatternObject, capabilities);

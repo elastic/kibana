@@ -35,7 +35,11 @@ exports[`LayerPanel is rendered 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Fit
+          <FormattedMessage
+            defaultMessage="Fit"
+            id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonIcon>
       </EuiFlexItem>
       <EuiFlexItem

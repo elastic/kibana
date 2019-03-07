@@ -90,5 +90,48 @@ describe('plugin discovery', () => {
         },
       });
     });
+
+    it(`throws an error when migrations and mappings aren't defined in the same plugin`, () => {
+      const invalidSpecs = new PluginPack({
+        path: '/dev/null',
+        pkg: {
+          name: 'test',
+          version: 'kibana',
+        },
+        provider({ Plugin }) {
+          return [
+            new Plugin({
+              id: 'test',
+              uiExports: {
+                mappings: {
+                  'test-type': {
+                    properties: {},
+                  },
+                },
+              },
+            }),
+            new Plugin({
+              id: 'test2',
+              uiExports: {
+                migrations: {
+                  'test-type': {
+                    '1.2.3': (doc) => {
+                      return doc;
+                    },
+                  },
+                },
+              },
+            }),
+          ];
+        },
+      }).getPluginSpecs();
+      expect(
+        () => collectUiExports(invalidSpecs),
+      ).to.throwError((err) => {
+        expect(err).to.be.a(Error);
+        expect(err).to.have.property('message', 'Migrations and mappings must be defined together in the uiExports of a single plugin. ' +
+          'test2 defines migrations for types test-type but does not define their mappings.');
+      });
+    });
   });
 });
