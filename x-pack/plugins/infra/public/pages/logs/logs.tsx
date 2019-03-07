@@ -48,7 +48,7 @@ export const LogsPage = injectUICapabilities(
 
         return (
           <LogViewConfiguration.Provider>
-            <ColumnarPage>
+            <ColumnarPage data-test-subj="infraLogsPage">
               <Header
                 breadcrumbs={[
                   {
