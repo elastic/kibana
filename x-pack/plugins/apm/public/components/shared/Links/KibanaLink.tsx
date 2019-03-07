@@ -23,13 +23,13 @@ interface Props extends KibanaHrefArgs {
  *
  * You must remember to pass in location in that case.
  */
-export function UnconnectedKibanaLink({
+export const UnconnectedKibanaLink: React.FunctionComponent<Props> = ({
   location,
   pathname,
   hash,
   query,
   ...props
-}: Props) {
+}) => {
   const href = getKibanaHref({
     location,
     pathname,
@@ -37,7 +37,9 @@ export function UnconnectedKibanaLink({
     query
   });
   return <EuiLink {...props} href={href} />;
-}
+};
+
+UnconnectedKibanaLink.displayName = 'UnconnectedKibanaLink';
 
 const withLocation = connect(
   ({ location }: { location: Location }) => ({ location }),

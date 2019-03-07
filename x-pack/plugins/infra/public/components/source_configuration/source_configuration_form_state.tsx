@@ -27,6 +27,8 @@ export interface InputFieldProps<
 
 type FieldErrorMessage = string | JSX.Element;
 
+type EditableFieldName = 'container' | 'host' | 'pod' | 'tiebreaker' | 'timestamp';
+
 interface FormState {
   name: string;
   description: string;
@@ -35,6 +37,7 @@ interface FormState {
   fields: {
     container: string;
     host: string;
+    message: string[];
     pod: string;
     tiebreaker: string;
     timestamp: string;
@@ -50,7 +53,7 @@ interface Actions {
   updateName: (name: string) => void;
   updateLogAlias: (value: string) => void;
   updateMetricAlias: (value: string) => void;
-  updateField: (field: keyof FormState['fields'], value: string) => void;
+  updateField: (field: EditableFieldName, value: string) => void;
 }
 
 interface Selectors {
@@ -58,7 +61,7 @@ interface Selectors {
   getNameFieldValidationErrors: () => FieldErrorMessage[];
   getLogAliasFieldValidationErrors: () => FieldErrorMessage[];
   getMetricAliasFieldValidationErrors: () => FieldErrorMessage[];
-  getFieldFieldValidationErrors: (field: keyof FormState['fields']) => FieldErrorMessage[];
+  getFieldFieldValidationErrors: (field: EditableFieldName) => FieldErrorMessage[];
   isFormValid: () => boolean;
 }
 
@@ -128,7 +131,7 @@ interface WithSourceConfigurationFormStateProps {
     State &
       Actions &
       Selectors & {
-        getFieldFieldProps: (field: keyof FormState['fields']) => InputFieldProps;
+        getFieldFieldProps: (field: EditableFieldName) => InputFieldProps;
         getLogAliasFieldProps: () => InputFieldProps;
         getMetricAliasFieldProps: () => InputFieldProps;
         getNameFieldProps: () => InputFieldProps;

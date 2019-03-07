@@ -52,6 +52,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           hasEmptyLabelSpace={false}
           isInvalid={false}
           label="Confirm space name"
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}

@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import mapboxgl from 'mapbox-gl';
 import turf from 'turf';
-import React from 'react';
-import ReactDOM from 'react-dom';
-
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-
-import { FeatureTooltip } from '../../components/map/feature_tooltip';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
 
 const EMPTY_FEATURE_COLLECTION = {
@@ -24,13 +19,6 @@ const EMPTY_FEATURE_COLLECTION = {
 export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
-
-  static popup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false,
-  });
-
-  static tooltipContainer = document.createElement('div');
 
   static createDescriptor(options, mapColors) {
     const layerDescriptor = super.createDescriptor(options);
@@ -125,7 +113,7 @@ export class VectorLayer extends AbstractLayer {
       return {
         label,
         name,
-        origin: 'source'
+        origin: SOURCE_DATA_ID_ORIGIN
       };
     });
     const joinFields = [];
@@ -171,10 +159,7 @@ export class VectorLayer extends AbstractLayer {
       !isGeoGridPrecisionAware
     ) {
       const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-      if (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress()) {
-        return true;
-      }
-      return false;
+      return (sourceDataRequest && sourceDataRequest.hasDataOrRequestInProgress());
     }
 
     const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
@@ -202,8 +187,10 @@ export class VectorLayer extends AbstractLayer {
     }
 
     let updateDueToQuery = false;
+    let updateDueToFilters = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
     }
 
     let updateDueToPrecisionChange = false;
@@ -218,6 +205,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToExtentChange
       && !updateDueToFields
       && !updateDueToQuery
+      && !updateDueToFilters
       && !updateDueToPrecisionChange;
   }
 
@@ -282,11 +270,10 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncSource({ startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const sourceDataId = 'source';
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
 
     const searchFilters = this._getSearchFilters(dataFilters);
-    const canSkip = await this._canSkipSourceUpdate(this._source, sourceDataId, searchFilters);
+    const canSkip = await this._canSkipSourceUpdate(this._source, SOURCE_DATA_ID_ORIGIN, searchFilters);
     if (canSkip) {
       const sourceDataRequest = this.getSourceDataRequest();
       return {
@@ -296,25 +283,23 @@ export class VectorLayer extends AbstractLayer {
     }
 
     try {
-      startLoading(sourceDataId, requestToken, searchFilters);
+      startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data, meta } = await this._source.getGeoJsonWithMeta({
-        layerName,
-      }, searchFilters);
-      stopLoading(sourceDataId, requestToken, data, meta);
+      const { data, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
       return {
         refreshed: true,
         featureCollection: data
       };
     } catch (error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState) {
+  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
     if (!sourceResult.refreshed && !joinState.shouldJoin) {
       return false;
     }
@@ -322,27 +307,30 @@ export class VectorLayer extends AbstractLayer {
       return false;
     }
 
-    joinState.join.joinPropertiesToFeatureCollection(
+    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
+
+    updateSourceData(updatedFeatureCollection);
+
     return true;
   }
 
-  async _performJoins(sourceResult, joinStates) {
+  async _performJoins(sourceResult, joinStates, updateSourceData) {
     const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState);
+      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
 
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters }) {
+  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
     const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults);
+    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
     if (shouldRefresh) {
       onRefreshStyle();
     }
@@ -394,7 +382,7 @@ export class VectorLayer extends AbstractLayer {
 
   _setMbPointsProperties(mbMap) {
     const sourceId = this.getId();
-    const pointLayerId = this.getId() +  '_circle';
+    const pointLayerId = this._getMbPointLayerId();
     const pointLayer = mbMap.getLayer(pointLayerId);
     if (!pointLayer) {
       mbMap.addLayer({
@@ -412,13 +400,12 @@ export class VectorLayer extends AbstractLayer {
     });
     mbMap.setLayoutProperty(pointLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(pointLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._addTooltipListeners(mbMap, pointLayerId);
   }
 
   _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
-    const fillLayerId = this.getId() + '_fill';
-    const lineLayerId = this.getId() + '_line';
+    const fillLayerId = this._getMbPolygonLayerId();
+    const lineLayerId = this._getMbLineLayerId();
     if (!mbMap.getLayer(fillLayerId)) {
       mbMap.addLayer({
         id: fillLayerId,
@@ -459,7 +446,6 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._addTooltipListeners(mbMap, fillLayerId);
   }
 
   _syncStylePropertiesWithMb(mbMap) {
@@ -490,101 +476,37 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  _canShowTooltips() {
-    return this._source.canFormatFeatureProperties();
+  _getMbPointLayerId() {
+    return this.getId() +  '_circle';
   }
 
-  async _getPropertiesForTooltip(feature) {
-    const tooltipsFromSource =  await this._source.filterAndFormatProperties(feature.properties);
+  _getMbLineLayerId() {
+    return this.getId() + '_line';
+  }
+
+  _getMbPolygonLayerId() {
+    return this.getId() + '_fill';
+  }
+
+  getMbLayerIds() {
+    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
+  }
+
+  async getPropertiesForTooltip(properties) {
+    const tooltipsFromSource =  await this._source.filterAndFormatProperties(properties);
 
     //add tooltips from joins
-    const allProps = this._joins.reduce((acc, join) => {
-      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(feature.properties);
+    return this._joins.reduce((acc, join) => {
+      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(properties);
       return {
         ...propsFromJoin,
         ...acc,
       };
     }, { ...tooltipsFromSource });
-
-    return allProps;
   }
 
-  _addTooltipListeners(mbMap, mbLayerId) {
-
-    if (!this._canShowTooltips()) {
-      return;
-    }
-
-    const showTooltip = async (feature, eventLngLat) => {
-      let popupAnchorLocation = eventLngLat; // default popup location to mouse location
-      if (feature.geometry.type === 'Point') {
-        const coordinates = feature.geometry.coordinates.slice();
-
-        // Ensure that if the map is zoomed out such that multiple
-        // copies of the feature are visible, the popup appears
-        // over the copy being pointed to.
-        while (Math.abs(eventLngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += eventLngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        popupAnchorLocation = coordinates;
-      }
-
-      const properties = await this._getPropertiesForTooltip(feature);
-
-      ReactDOM.render(
-        React.createElement(
-          FeatureTooltip, {
-            properties: properties,
-          }
-        ),
-        VectorLayer.tooltipContainer
-      );
-
-      VectorLayer.popup.setLngLat(popupAnchorLocation)
-        .setDOMContent(VectorLayer.tooltipContainer)
-        .addTo(mbMap);
-    };
-
-    let activeFeature;
-    let isTooltipOpen = false;
-    mbMap.on('mousemove', mbLayerId, _.debounce((e) => {
-      if (!isTooltipOpen) {
-        return;
-      }
-
-      const features = mbMap.queryRenderedFeatures(e.point)
-        .filter(feature => {
-          return feature.layer.source === this.getId();
-        });
-      if (features.length === 0) {
-        return;
-      }
-
-      const propertiesUnchanged = _.isEqual(activeFeature.properties, features[0].properties);
-      const geometryUnchanged = _.isEqual(activeFeature.geometry, features[0].geometry);
-      if(propertiesUnchanged && geometryUnchanged) {
-        // mouse over same feature, no need to update tooltip
-        return;
-      }
-
-      activeFeature = features[0];
-      showTooltip(activeFeature, e.lngLat);
-    }, 100));
-
-    mbMap.on('mouseenter', mbLayerId, (e) => {
-      isTooltipOpen = true;
-      mbMap.getCanvas().style.cursor = 'pointer';
-
-      activeFeature = e.features[0];
-      showTooltip(activeFeature, e.lngLat);
-    });
-
-    mbMap.on('mouseleave', mbLayerId, () => {
-      isTooltipOpen = false;
-      mbMap.getCanvas().style.cursor = '';
-      VectorLayer.popup.remove();
-      ReactDOM.unmountComponentAtNode(VectorLayer.tooltipContainer);
-    });
+  canShowTooltip() {
+    return this._source.canFormatFeatureProperties();
   }
+
 }

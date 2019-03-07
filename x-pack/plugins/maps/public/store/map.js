@@ -34,10 +34,13 @@ import {
   CLEAR_GOTO,
   TRACK_CURRENT_LAYER_STATE,
   ROLLBACK_TO_TRACKED_LAYER_STATE,
-  REMOVE_TRACKED_LAYER_STATE
+  REMOVE_TRACKED_LAYER_STATE,
+  UPDATE_SOURCE_DATA_REQUEST,
+  SET_TOOLTIP_STATE
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
+import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
 
@@ -82,6 +85,7 @@ const updateLayerSourceDescriptorProp = (state, layerId, propName, value) => {
 const INITIAL_STATE = {
   ready: false,
   goto: null,
+  tooltipState: null,
   mapState: {
     zoom: 4,
     center: {
@@ -92,6 +96,7 @@ const INITIAL_STATE = {
     mouseCoordinates: null,
     timeFilters: null,
     query: null,
+    filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
   },
@@ -111,6 +116,11 @@ export function map(state = INITIAL_STATE, action) {
       return trackCurrentLayerState(state, action.layerId);
     case ROLLBACK_TO_TRACKED_LAYER_STATE:
       return rollbackTrackedLayerState(state, action.layerId);
+    case SET_TOOLTIP_STATE:
+      return {
+        ...state,
+        tooltipState: action.tooltipState
+      };
     case SET_MOUSE_COORDINATES:
       return {
         ...state,
@@ -162,6 +172,8 @@ export function map(state = INITIAL_STATE, action) {
           ...layerList.slice(layerIdx + 1)
         ]
       };
+    case UPDATE_SOURCE_DATA_REQUEST:
+      return updateSourceDataRequest(state, action);
     case LAYER_DATA_LOAD_STARTED:
       return updateWithDataRequest(state, action);
     case LAYER_DATA_LOAD_ERROR:
@@ -192,13 +204,14 @@ export function map(state = INITIAL_STATE, action) {
       };
       return { ...state, mapState: { ...state.mapState, ...newMapState } };
     case SET_QUERY:
-      const { query, timeFilters } = action;
+      const { query, timeFilters, filters } = action;
       return {
         ...state,
         mapState: {
           ...state.mapState,
           query,
           timeFilters,
+          filters,
         }
       };
     case SET_REFRESH_CONFIG:
@@ -309,6 +322,24 @@ function updateWithDataRequest(state, action) {
   const layerList = [...state.layerList];
   return { ...state, layerList };
 }
+
+
+function updateSourceDataRequest(state, action) {
+  const layerDescriptor = findLayerById(state, action.layerId);
+  if (!layerDescriptor) {
+    return state;
+  }
+  const dataRequest =   layerDescriptor.__dataRequests.find(dataRequest => {
+    return dataRequest.dataId === SOURCE_DATA_ID_ORIGIN;
+  });
+  if (!dataRequest) {
+    return state;
+  }
+
+  dataRequest.data = action.newData;
+  return resetDataRequest(state, action, dataRequest);
+}
+
 
 function updateWithDataResponse(state, action) {
   const dataRequest = getValidDataRequest(state, action);
