@@ -42,15 +42,13 @@ exports[`props exportedFieldsUrl 1`] = `
       text="this is a great tutorial about..."
     />
     <div>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiButton
         color="primary"
         fill={false}
         href="exported_fields_url"
         iconSide="left"
-        rel="noopener noreferrer"
+        rel="noopener"
         target="_blank"
         type="button"
       >

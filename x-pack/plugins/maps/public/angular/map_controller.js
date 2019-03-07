@@ -6,12 +6,13 @@
 
 import chrome from 'ui/chrome';
 import React from 'react';
-import { I18nContext } from 'ui/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
-import { getStore } from '../store/store';
+import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
 import {
   setSelectedLayer,
@@ -19,6 +20,7 @@ import {
   setGotoWithCenter,
   replaceLayerList,
   setQuery,
+  clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
   enableFullScreen,
@@ -27,9 +29,10 @@ import {
   FLYOUT_STATE
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
-import { inspectorAdapters, indexPatternService } from '../kibana_services';
+import { indexPatternService } from '../kibana_services';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { toastNotifications } from 'ui/notify';
@@ -48,7 +51,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   const savedMap = $scope.map = $route.current.locals.map;
   let unsubscribe;
 
-  inspectorAdapters.requests.reset();
+  const store = createMapStore();
 
   $scope.$listen(globalState, 'fetch_with_changes', (diff) => {
     if (diff.includes('time')) {
@@ -100,7 +103,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     $scope.time = dateRange;
     syncAppAndGlobalState();
 
-    getStore().dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
+    store.dispatch(setQuery({ query: $scope.query, timeFilters: $scope.time }));
   };
   $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
     $scope.refreshConfig = {
@@ -109,12 +112,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     };
     syncAppAndGlobalState();
 
-    getStore().dispatch(setRefreshConfig($scope.refreshConfig));
+    store.dispatch(setRefreshConfig($scope.refreshConfig));
   };
 
   function renderMap() {
-    const store = getStore();
-
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -143,9 +144,9 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     const root = document.getElementById(REACT_ANCHOR_DOM_ELEMENT_ID);
     render(
       <Provider store={store}>
-        <I18nContext>
+        <I18nProvider>
           <GisMap/>
-        </I18nContext>
+        </I18nProvider>
       </Provider>,
       root
     );
@@ -201,12 +202,15 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
-    { text: 'Maps', href: '#' },
+    { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+      defaultMessage: 'Maps'
+    }), href: '#' },
     { text: $scope.map.title }
   ]);
 
   async function doSave(saveOptions) {
-    savedMap.syncWithStore(getStore().getState());
+    await store.dispatch(clearTransientLayerStateAndCloseFlyout());
+    savedMap.syncWithStore(store.getState());
     const docTitle = Private(DocTitleProvider);
     let id;
 
@@ -215,7 +219,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       docTitle.change(savedMap.title);
     } catch(err) {
       toastNotifications.addDanger({
-        title: `Error on saving '${savedMap.title}'`,
+        title: i18n.translate('xpack.maps.mapController.saveErrorMessage', {
+          defaultMessage: `Error on saving '{title}'`,
+          values: { title: savedMap.title }
+        }),
         text: err.message,
         'data-test-subj': 'saveMapError',
       });
@@ -224,7 +231,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
 
     if (id) {
       toastNotifications.addSuccess({
-        title: `Saved '${savedMap.title}'`,
+        title: i18n.translate('xpack.maps.mapController.saveSuccessMessage', {
+          defaultMessage: `Saved '{title}'`,
+          values: { title: savedMap.title }
+        }),
         'data-test-subj': 'saveMapSuccess',
       });
 
@@ -242,22 +252,35 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
   $scope.topNavMenu = [{
-    key: 'full screen',
-    description: 'full screen',
+    key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+      defaultMessage: `full screen`
+    }),
+    description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
+      defaultMessage: `full screen`
+    }),
     testId: 'mapsFullScreenMode',
     run() {
-      getStore().dispatch(enableFullScreen());
+      store.dispatch(enableFullScreen());
     }
   }, {
-    key: 'inspect',
-    description: 'Open Inspector',
+    key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+      defaultMessage: `inspect`
+    }),
+    description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
+      defaultMessage: `Open Inspector`
+    }),
     testId: 'openInspectorButton',
     run() {
+      const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
   }, {
-    key: 'save',
-    description: 'Save map',
+    key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
+      defaultMessage: `save`
+    }),
+    description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
+      defaultMessage: `Save map`
+    }),
     testId: 'mapSaveButton',
     run: async () => {
       const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {

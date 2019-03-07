@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/AdvancedFilter default 1`] = `
+<form
+  className="canvasAdvancedFilter"
+  onSubmit={[Function]}
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem"
+    >
+      <input
+        className="canvasAdvancedFilter__input"
+        onChange={[Function]}
+        placeholder="Enter filter expression"
+        type="text"
+        value=""
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        className="canvasAdvancedFilter__button"
+        type="submit"
+      >
+        Apply
+      </button>
+    </div>
+  </div>
+</form>
+`;
+
+exports[`Storyshots renderers/AdvancedFilter with value 1`] = `
+<form
+  className="canvasAdvancedFilter"
+  onSubmit={[Function]}
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem"
+    >
+      <input
+        className="canvasAdvancedFilter__input"
+        onChange={[Function]}
+        placeholder="Enter filter expression"
+        type="text"
+        value="expression"
+      />
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        className="canvasAdvancedFilter__button"
+        type="submit"
+      >
+        Apply
+      </button>
+    </div>
+  </div>
+</form>
+`;

@@ -54,4 +54,4 @@ export class I18nService {
   }
 }
 
-export type I18nStartContract = ReturnType<I18nService['start']>;
+export type I18nStart = ReturnType<I18nService['start']>;

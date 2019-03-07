@@ -23,11 +23,11 @@ import { createHandlers } from './create_handlers';
 import { batchedFetch } from './batched_fetch';
 import { FUNCTIONS_URL } from './consts';
 
-export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
+export async function initializeInterpreter({ kfetch, ajaxStream, typesRegistry, functionsRegistry }) {
   const serverFunctionList = await kfetch({ pathname: FUNCTIONS_URL });
   const types = typesRegistry.toJS();
   const { serialize } = serializeProvider(types);
-  const batch = batchedFetch({ kfetch, serialize });
+  const batch = batchedFetch({ ajaxStream, serialize });
 
   // For every sever-side function, register a client-side
   // function that matches its definition, but which simply

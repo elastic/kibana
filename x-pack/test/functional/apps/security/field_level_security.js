@@ -19,8 +19,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/flstest');
       await esArchiver.load('empty_kibana');
       browser.setWindowSize(1600, 1000);
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern('flstest', null);
     });
 

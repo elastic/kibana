@@ -46,11 +46,6 @@ const newPercentile = (opts) => {
 
 class PercentilesUi extends Component {
 
-  constructor(props) {
-    super(props);
-    this.renderRow = this.renderRow.bind(this);
-  }
-
   handleTextChange(item, name) {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
@@ -60,12 +55,31 @@ class PercentilesUi extends Component {
     };
   }
 
-  renderRow(row, i, items) {
+  renderRow = (row, i, items) => {
     const defaults = { value: '', percentile: '', shade: '' };
     const model = { ...defaults, ...row };
+    const { intl, panel } = this.props;
+
+    const percentileFieldNumber = (
+      <EuiFlexItem grow={false}>
+        <EuiFieldNumber
+          aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
+          placeholder={0}
+          max={100}
+          min={0}
+          step={1}
+          onChange={this.handleTextChange(model, 'value')}
+          value={model.value === '' ? '' : Number(model.value)}
+        />
+      </EuiFlexItem>
+    );
+
+    if (panel.type === 'table') {
+      return percentileFieldNumber;
+    }
+
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const { intl } = this.props;
     const modeOptions = [
       {
         label: intl.formatMessage({ id: 'tsvb.percentile.modeOptions.lineLabel', defaultMessage: 'Line' }),
@@ -88,15 +102,8 @@ class PercentilesUi extends Component {
     return  (
       <EuiFlexItem key={model.id}>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiFieldNumber
-              aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
-              placeholder={intl.formatMessage({ id: 'tsvb.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
-              step={1}
-              onChange={this.handleTextChange(model, 'value')}
-              value={Number(model.value)}
-            />
-          </EuiFlexItem>
+
+          { percentileFieldNumber }
 
           <EuiFlexItem grow={false}>
             <EuiFormLabel style={labelStyle} htmlFor={htmlId('mode')}>
@@ -167,10 +174,15 @@ class PercentilesUi extends Component {
   }
 
   render() {
-    const { model, name } = this.props;
+    const { model, name, panel } = this.props;
     if (!model[name]) return (<div/>);
+    let rows;
+    if (panel.type === 'table') {
+      rows = this.renderRow(_.last(model[name]));
+    } else {
+      rows = model[name].map(this.renderRow);
+    }
 
-    const rows = model[name].map(this.renderRow);
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         { rows }
@@ -186,6 +198,7 @@ PercentilesUi.defaultProps = {
 PercentilesUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
+  panel: PropTypes.object,
   onChange: PropTypes.func
 };
 
@@ -259,6 +272,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
           onChange={handleChange}
           name="percentiles"
           model={model}
+          panel={panel}
         />
 
       </AggRow>

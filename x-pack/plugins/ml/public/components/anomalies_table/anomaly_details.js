@@ -152,7 +152,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'actual',
       }),
-      description: formatValue(anomaly.actual, source.function)
+      description: formatValue(anomaly.actual, source.function, undefined, source)
     });
   }
 
@@ -161,7 +161,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'typical',
       }),
-      description: formatValue(anomaly.typical, source.function)
+      description: formatValue(anomaly.typical, source.function, undefined, source)
     });
   }
 
@@ -309,7 +309,7 @@ export class AnomalyDetails extends Component {
               {definition.terms}
             </EuiText>
           </EuiFlexItem>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
         </Fragment> }
         {(definition !== undefined && definition.regex) &&
           <Fragment>
@@ -341,7 +341,7 @@ export class AnomalyDetails extends Component {
                 {definition.regex}
               </EuiText>
             </EuiFlexItem>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="xs" />
           </Fragment>}
 
         {examples.map((example, i) => {

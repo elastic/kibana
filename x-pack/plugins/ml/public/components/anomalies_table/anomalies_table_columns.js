@@ -171,7 +171,7 @@ export function getColumns(
       }),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.actual, item.source.function, fieldFormat);
+        return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
       sortable: true
     });
@@ -185,7 +185,7 @@ export function getColumns(
       }),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.typical, item.source.function, fieldFormat);
+        return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
       sortable: true
     });

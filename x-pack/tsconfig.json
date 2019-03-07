@@ -5,13 +5,13 @@
     "common/**/*",
     "server/**/*",
     "plugins/**/*",
-    "test_utils/**/*",
-    "typings/**/*"
+    "test_utils/**/*"
   ],
   "exclude": [
     "test/**/*"
   ],
   "compilerOptions": {
+    "outDir": ".",
     "paths": {
       "ui/*": [
         "src/legacy/ui/public/*"
@@ -31,7 +31,8 @@
     },
     "types": [
       "node",
-      "jest"
+      "jest",
+      "@kbn/test/types/expect.js"
     ]
   }
 }
