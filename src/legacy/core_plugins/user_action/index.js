@@ -17,39 +17,19 @@
  * under the License.
  */
 
-export function preventParallelCalls(fn, filter) {
-  const execQueue = [];
+import { registerUserActionRoute } from './server/routes/api/user_action';
 
-  return async function (arg) {
-    if (filter(arg)) {
-      return await fn.call(this, arg);
+export default function (kibana) {
+  return new kibana.Plugin({
+    id: 'user_action',
+    require: ['kibana', 'elasticsearch'],
+
+    uiExports: {
+      mappings: require('./mappings.json'),
+    },
+
+    init: function (server) {
+      registerUserActionRoute(server);
     }
-
-    const task = {
-      exec: async () => {
-        try {
-          task.resolve(await fn.call(this, arg));
-        } catch (error) {
-          task.reject(error);
-        } finally {
-          execQueue.shift();
-          if (execQueue.length) {
-            execQueue[0].exec();
-          }
-        }
-      }
-    };
-
-    task.promise = new Promise((resolve, reject) => {
-      task.resolve = resolve;
-      task.reject = reject;
-    });
-
-    if (execQueue.push(task) === 1) {
-      // only item in the queue, kick it off
-      task.exec();
-    }
-
-    return task.promise;
-  };
+  });
 }
