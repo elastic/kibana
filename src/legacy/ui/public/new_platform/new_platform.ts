@@ -26,7 +26,7 @@ import { InjectedMetadataStart } from '../../../../core/public/injected_metadata
 import { NotificationsStart } from '../../../../core/public/notifications';
 import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
-interface CoreApi {
+interface CoreStart {
   i18n: I18nStart;
   injectedMetadata: InjectedMetadataStart;
   fatalErrors: FatalErrorsStart;
@@ -37,23 +37,14 @@ interface CoreApi {
   chrome: ChromeStart;
 }
 
-interface RuntimeContext {
+const runtimeContext = {
   start: {
-    core: CoreApi | null;
-    plugins: null;
-  };
-  stop: null;
-}
-
-const runtimeContext: RuntimeContext = {
-  start: {
-    core: null,
-    plugins: null,
+    core: null as CoreStart | null,
+    plugins: {},
   },
-  stop: null,
 };
 
-export function __newPlatformInit__(core: CoreApi) {
+export function __newPlatformInit__(core: CoreStart) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already initialized');
   }
