@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 
+import chrome from 'ui/chrome';
 import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { ShortcutsProvider } from '../shortcuts';
@@ -35,6 +36,34 @@ interface Props extends RouteComponentProps<MainRouteParams> {
 }
 
 class CodeMain extends React.Component<Props> {
+  public componentDidMount() {
+    this.setBreadcrumbs();
+  }
+
+  public componentDidUpdate() {
+    this.setBreadcrumbs();
+  }
+
+  public setBreadcrumbs() {
+    const { org, repo } = this.props.match.params;
+    chrome.breadcrumbs.set([
+      {
+        text: 'Code',
+        href: '#/',
+      },
+      { text: `${org} → ${repo}` },
+    ]);
+  }
+
+  public componentWillUnmount() {
+    chrome.breadcrumbs.set([
+      {
+        text: 'Code',
+        href: '#/',
+      },
+    ]);
+  }
+
   public render() {
     if (this.props.isNotFound) {
       return <NotFound />;

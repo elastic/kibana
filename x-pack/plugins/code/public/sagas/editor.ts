@@ -7,7 +7,6 @@
 import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
-import chrome from 'ui/chrome';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
@@ -147,13 +146,6 @@ function* handleMainRouteChange(action: Action<Match>) {
   }
   yield put(loadRepo(repoUri));
   yield put(fetchRepoBranches({ uri: repoUri }));
-  chrome.breadcrumbs.set([
-    {
-      text: 'Code',
-      href: '',
-    },
-    { text: `${org} → ${repo}` },
-  ]);
   if (file) {
     if ([PathTypes.blob, PathTypes.blame].includes(pathType as PathTypes)) {
       yield call(handleFile, repoUri, file, revision);
