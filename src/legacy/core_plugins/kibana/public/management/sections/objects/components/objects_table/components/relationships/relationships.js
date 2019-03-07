@@ -205,7 +205,7 @@ class RelationshipsUI extends Component {
               items={list}
               columns={[
                 {
-                  width: 24,
+                  width: '24px',
                   render: () => (
                     <EuiToolTip
                       position="top"
