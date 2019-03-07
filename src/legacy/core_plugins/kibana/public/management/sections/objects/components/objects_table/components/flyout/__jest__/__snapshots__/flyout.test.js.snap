@@ -9,9 +9,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -202,9 +200,7 @@ exports[`Flyout should render import step 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiTitle
       size="m"
       textTransform="none"
@@ -231,6 +227,7 @@ exports[`Flyout should render import step 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFilePicker
           compressed={false}
@@ -248,6 +245,7 @@ exports[`Flyout should render import step 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
+        labelType="label"
       >
         <EuiSwitch
           checked={true}
