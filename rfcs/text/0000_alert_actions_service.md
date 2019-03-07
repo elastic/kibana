@@ -51,6 +51,7 @@ server.actions.fire({
   params: {
     message: 'This is a test message from kibana actions service',
     title: 'custom title',
+    // destination: '<slack url>' // optional
   },
 })
 ```
@@ -71,7 +72,7 @@ server.actions.instance({
   actionType: 'notification',
   connectorType: 'slack',
   params: {
-    destination: '<example slack url>',
+    destination: '<slack url>',
   },
   connectorParams: {
     channel: '#bot-playground',
@@ -87,7 +88,7 @@ The `connector` is what defines what happens when an action is *fired*. This
 will define the particular integration such as slack, email, etc.
 
 ```JS
-registerConnector({
+server.actions.registerConnector({
   actionType: 'notification',
   connectorType: 'slack',
   async handler({ params, connectorParams }) {
@@ -118,15 +119,29 @@ should provide and those that are handed off to the *connectors* to fit into
 whatever service integration they provide.
 
 ```JS
-registerActionType({
+server.actions.registerActionType({
   name: 'notification',
-  initParams: [{ name: 'username', type: 'string' }, { name: 'password', type: 'secret' }],
-  executionParams: [
+  fire: [
     { name: 'destination', type: 'string' },
     { name: 'message', type: 'string' },
     { name: 'title', type: 'string', optional: true },
   ],
 });
+```
+
+## Retrieve a list of available actions
+
+If you want to see the available list of actions that are registered you can get
+that list from the `server.actions` service.
+
+```JS
+server.actions.available(); // returns ['send message to slack']
+```
+
+Or from the front-end there is a REST API that will return the available actions.
+
+```sh
+$ curl -X GET localhost:5601/api/actions
 ```
 
 # Drawbacks
@@ -154,13 +169,22 @@ supports `notifications`.
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+Having a more generic `registry` of `actions` as simple functions that could be
+added as a list and executed when one or more `condition` functions returned
+`true` was considered. Drawbacks of that approach was that of passing data
+between conditions and actions to build customizable messages that included data
+specific to a particular action.
+
+Embedding actions in `canvas expressions` was discussed main issue being lack of
+support for running `canvas expressions` from the server side for background
+processing. But it is not impossible to imagine that a canvas expression could
+easily be written to use this service from the front-end.
 
 # Adoption strategy
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
+Applications will need to provide a UI for the user to set-up the action
+instances that will be used in their alerts. They can use any action type
+that is currently provided by
 
 # How we teach this
 
