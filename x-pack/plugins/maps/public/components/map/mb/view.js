@@ -126,7 +126,6 @@ export class MBMapContainer extends React.Component {
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
-      this._mbMap = null;
       this._tooltipContainer = null;
     }
     this.props.onMapDestroyed();
