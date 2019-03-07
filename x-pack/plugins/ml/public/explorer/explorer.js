@@ -45,6 +45,7 @@ import { SelectInterval, interval$ } from '../components/controls/select_interva
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
+import { getKqlQueryValues } from '../util/kql_filter_bar_utils';
 
 import {
   getClearedSelectedAnomaliesState,
@@ -917,6 +918,35 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
+    // TODO: Should always update the query string shown in the kqlFilterBar as the value
+    // TODO: pull out query removal into utils function and test
+    applyFilterFromTable = (fieldName, fieldValue, action) => {
+      let newQueryString = '';
+      const { queryString } = this.state;
+      const operator = 'and ';
+
+      if (action === '+') {
+        newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${fieldName}:"${fieldValue}"`;
+      } else if (action === '-') {
+        if (this.state.filterActive === false) {
+          return;
+        } else {
+          // Remove the passed in fieldName and value from the existing filter
+          const queryPattern = new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i', 'g');
+          newQueryString = this.state.queryString.replace(queryPattern, '');
+          // match 'and' or 'or' at the start/end of the string
+          const endPattern = /\s(and|or)\s?$/ig;
+          const startPattern = /^\s?(and|or)\s/ig;
+          // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
+          newQueryString = newQueryString.replace(endPattern, '');
+          newQueryString = newQueryString.replace(startPattern, '');
+        }
+      }
+
+      const queryValues = getKqlQueryValues(`${newQueryString}`, this.state.indexPattern);
+      this.applyInfluencersFilterQuery(queryValues);
+    }
+
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
       filteredFields,
@@ -996,7 +1026,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
 
-      const filterBarInitialValue = queryString;
       const filterBarPlaceholder = filterPlaceHolder;
 
       if (loading === true) {
@@ -1036,7 +1065,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               <KqlFilterBar
                 indexPattern={indexPattern}
                 onSubmit={this.applyInfluencersFilterQuery}
-                initialValue={filterBarInitialValue}
+                initialValue={queryString}
                 placeholder={filterBarPlaceholder}
               />
             </div>}
@@ -1245,7 +1274,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               {this.props.showCharts && <ExplorerChartsContainer {...chartsData} />}
             </div>
 
-            <AnomaliesTable tableData={tableData} timefilter={timefilter} />
+            <AnomaliesTable
+              tableData={tableData}
+              timefilter={timefilter}
+              influencerFilter={this.applyFilterFromTable}
+            />
           </div>
         </div>
       );
