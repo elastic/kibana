@@ -279,16 +279,6 @@ exports[`NestedValue component should render a formatted value when depth > 0 bu
 />
 `;
 
-exports[`NestedValue component should render a formatted value when depth is 0 1`] = `
-<FormattedValue
-  value={
-    Object {
-      "a": "hello",
-    }
-  }
-/>
-`;
-
 exports[`NestedValue component should render a nested KV Table when depth > 0 and value is an object 1`] = `
 <NestedKeyValueTable
   data={
@@ -296,8 +286,7 @@ exports[`NestedValue component should render a nested KV Table when depth > 0 an
       "a": "hello",
     }
   }
-  depth={0}
-  keySorter={[MockFunction]}
+  depth={2}
   parentKey="who_cares"
 />
 `;

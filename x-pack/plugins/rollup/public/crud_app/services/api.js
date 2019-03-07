@@ -5,7 +5,9 @@
  */
 
 import chrome from 'ui/chrome';
+import { UA_ROLLUP_JOB_CREATE } from '../../../common';
 import { getHttp } from './http_provider';
+import { trackUserRequest } from './track_user_action';
 
 const apiPrefix = chrome.addBasePath('/api/rollup');
 
@@ -31,7 +33,8 @@ export async function deleteJobs(jobIds) {
 
 export async function createJob(job) {
   const body = { job };
-  return await getHttp().put(`${apiPrefix}/create`, body);
+  const request = getHttp().put(`${apiPrefix}/create`, body);
+  return await trackUserRequest(request, UA_ROLLUP_JOB_CREATE);
 }
 
 export async function validateIndexPattern(indexPattern) {

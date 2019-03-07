@@ -57,7 +57,7 @@ const GradientLegendContainer = styled.div`
   height: 10px;
   bottom: 0;
   left: 0;
-  right: 0;
+  right: 40px;
 `;
 
 const GradientLegendTick = styled.div`
