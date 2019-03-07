@@ -21,7 +21,12 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { createAuthorizationService, disableUICapabilitesFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
+import {
+  createAuthorizationService,
+  disableUICapabilitesFactory,
+  registerPrivilegesWithCluster,
+  validateFeaturePrivileges
+} from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
@@ -155,6 +160,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
+        await validateFeaturePrivileges(authorization.privileges, xpackMainPlugin.getFeatures());
         await registerPrivilegesWithCluster(server);
       }
     });

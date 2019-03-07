@@ -9,13 +9,13 @@ import {
   Feature,
   FeatureKibanaPrivileges,
 } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
-import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
+import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = ['bulk_get', 'get', 'find'];
 const writeOperations: string[] = ['create', 'bulk_create', 'update', 'delete'];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
-export class FeaturePrivilegeSavedObjectBuilder extends FeaturePrivilegeBuilder {
+export class FeaturePrivilegeSavedObjectBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     return uniq([
       ...flatten(

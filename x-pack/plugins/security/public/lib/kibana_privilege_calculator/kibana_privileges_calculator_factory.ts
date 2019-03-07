@@ -5,9 +5,9 @@
  */
 import _ from 'lodash';
 import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../common/model';
+import { compareActions } from '../../../common/privilege_calculator_utils';
 import { copyRole } from '../../lib/role_utils';
 import { KibanaPrivilegeCalculator } from './kibana_privilege_calculator';
-import { compareActions } from './privilege_calculator_utils';
 
 export class KibanaPrivilegeCalculatorFactory {
   /** All feature privileges, sorted from most permissive => least permissive. */

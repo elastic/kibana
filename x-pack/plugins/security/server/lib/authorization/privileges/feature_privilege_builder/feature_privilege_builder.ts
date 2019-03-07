@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Feature,
-  FeatureKibanaPrivileges,
-} from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
+import { Feature, FeatureKibanaPrivileges } from 'x-pack/plugins/xpack_main/types';
 import { Actions } from '../../actions';
 
-export abstract class FeaturePrivilegeBuilder {
+export interface FeaturePrivilegeBuilder {
+  getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[];
+}
+export abstract class BaseFeaturePrivilegeBuilder implements FeaturePrivilegeBuilder {
   constructor(protected readonly actions: Actions) {}
 
   public abstract getActions(

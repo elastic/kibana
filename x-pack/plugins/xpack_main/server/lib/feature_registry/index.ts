@@ -6,7 +6,8 @@
 
 export {
   Feature,
-  FeatureWithAllOrReadPrivileges,
+  FeatureKibanaPrivileges,
   FeatureRegistry,
+  FeatureWithAllOrReadPrivileges,
   uiCapabilitiesRegex,
 } from './feature_registry';
