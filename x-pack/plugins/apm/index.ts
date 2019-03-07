@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+import { Server } from 'hapi';
 import { resolve } from 'path';
-import { initTransactionGroupsApi } from './server/routes/transaction_groups';
-import { initServicesApi } from './server/routes/services';
+import mappings from './mappings.json';
+import { makeApmUsageCollector } from './server/lib/apm_telemetry';
 import { initErrorsApi } from './server/routes/errors';
+import { initMetricsApi } from './server/routes/metrics';
+import { initServicesApi } from './server/routes/services';
 import { initStatusApi } from './server/routes/status_check';
 import { initTracesApi } from './server/routes/traces';
-import { initMetricsApi } from './server/routes/metrics';
-import mappings from './mappings';
-import { makeApmUsageCollector } from './server/lib/apm_telemetry';
-import { i18n } from '@kbn/i18n';
+import { initTransactionGroupsApi } from './server/routes/transaction_groups';
 
-export function apm(kibana) {
+// TODO: get proper types
+export function apm(kibana: any) {
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'apm_oss'],
     id: 'apm',
@@ -35,7 +37,9 @@ export function apm(kibana) {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/register_feature'],
-      injectDefaultVars(server) {
+
+      // TODO: get proper types
+      injectDefaultVars(server: Server) {
         const config = server.config();
         return {
           apmUiEnabled: config.get('xpack.apm.ui.enabled'),
@@ -51,7 +55,8 @@ export function apm(kibana) {
       mappings
     },
 
-    config(Joi) {
+    // TODO: get proper types
+    config(Joi: any) {
       return Joi.object({
         // display menu item
         ui: Joi.object({
@@ -68,7 +73,8 @@ export function apm(kibana) {
       }).default();
     },
 
-    init(server) {
+    // TODO: get proper types
+    init(server: any) {
       initTransactionGroupsApi(server);
       initTracesApi(server);
       initServicesApi(server);

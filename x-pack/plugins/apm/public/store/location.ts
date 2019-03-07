@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
+import { AnyAction } from 'redux';
+
 export const LOCATION_UPDATE = 'LOCATION_UPDATE';
 
-function location(state = { pathname: '', search: '', hash: '' }, action) {
+export function locationReducer(
+  state = { pathname: '', search: '', hash: '' },
+  action: AnyAction
+) {
   switch (action.type) {
     case LOCATION_UPDATE:
       return action.location;
@@ -15,11 +21,9 @@ function location(state = { pathname: '', search: '', hash: '' }, action) {
   }
 }
 
-export function updateLocation(nextLocation) {
+export function updateLocation(nextLocation: Location) {
   return {
     type: LOCATION_UPDATE,
     location: nextLocation
   };
 }
-
-export default location;

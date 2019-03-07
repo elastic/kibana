@@ -6,35 +6,31 @@
 
 import { GRID_RESOLUTION } from '../grid_resolution';
 import { AbstractStyle } from './abstract_style';
+import { i18n } from '@kbn/i18n';
 
 export class HeatmapStyle extends AbstractStyle {
 
   static type = 'HEATMAP';
 
-  constructor(styleDescriptor = {}) {
+  constructor() {
     super();
-    this._descriptor = HeatmapStyle.createDescriptor(
-      styleDescriptor.refinement,
-      styleDescriptor.properties
-    );
+    this._descriptor = HeatmapStyle.createDescriptor();
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === HeatmapStyle;
   }
 
-  static createDescriptor(refinement, properties = {}) {
+  static createDescriptor() {
     return {
       type: HeatmapStyle.type,
-      refinement: refinement || 'coarse',
-      properties: {
-        ...properties
-      }
     };
   }
 
   static getDisplayName() {
-    return 'Heatmap style';
+    return i18n.translate('xpack.maps.style.heatmap.displayNameLabel', {
+      defaultMessage: 'Heatmap style'
+    });
   }
 
   static renderEditor() {
@@ -50,7 +46,11 @@ export class HeatmapStyle extends AbstractStyle {
     } else if (resolution === GRID_RESOLUTION.MOST_FINE) {
       radius = 32;
     } else {
-      throw new Error(`Refinement param not recognized: ${this._descriptor.refinement}`);
+      const errorMessage = i18n.translate('xpack.maps.style.heatmap.resolutionStyleErrorMessage', {
+        defaultMessage: `Resolution param not recognized: {resolution}`,
+        values: { resolution }
+      });
+      throw new Error(errorMessage);
     }
     mbMap.setPaintProperty(layerId, 'heatmap-radius', radius);
     mbMap.setPaintProperty(layerId, 'heatmap-weight', {
