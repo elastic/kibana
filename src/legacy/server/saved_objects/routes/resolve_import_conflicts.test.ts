@@ -53,7 +53,7 @@ describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
       },
     };
 
-    server.route(createResolveImportConflictsRoute(prereqs));
+    server.route(createResolveImportConflictsRoute(prereqs, server));
   });
 
   test('formats successful response', async () => {

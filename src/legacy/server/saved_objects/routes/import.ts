@@ -44,12 +44,13 @@ interface ImportRequest extends WithoutQueryAndParams<Hapi.Request> {
   };
 }
 
-export const createImportRoute = (prereqs: Prerequisites) => ({
+export const createImportRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
   path: '/api/saved_objects/_import',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     payload: {
+      maxBytes: server.config().get('savedObjects.maxImportPayloadBytes'),
       output: 'stream',
       allow: 'multipart/form-data',
     },

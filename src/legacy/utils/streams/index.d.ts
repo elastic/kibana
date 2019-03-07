@@ -29,4 +29,3 @@ export function createConcatStream(initial: any): Transform;
 export function createMapStream<T>(fn: (value: T, i: number) => void): Transform;
 export function createReplaceStream(toReplace: string, replacement: string | Buffer): Transform;
 export function createFilterStream<T>(fn: (obj: T) => boolean): Transform;
-export function createLimitStream(limit: number): Transform;

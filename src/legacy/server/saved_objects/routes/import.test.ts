@@ -53,7 +53,7 @@ describe('POST /api/saved_objects/_import', () => {
       },
     };
 
-    server.route(createImportRoute(prereqs));
+    server.route(createImportRoute(prereqs, server));
   });
 
   test('formats successful response', async () => {

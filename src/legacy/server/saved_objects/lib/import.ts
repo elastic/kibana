@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
+import Boom from 'boom';
+import { Readable, Transform } from 'stream';
 import {
   createConcatStream,
   createFilterStream,
-  createLimitStream,
   createMapStream,
   createPromiseFromStreams,
   createSplitStream,
@@ -83,6 +83,20 @@ export function extractErrors(savedObjects: SavedObject[]) {
   return errors;
 }
 
+export function createLimitStream(limit: number) {
+  let counter = 0;
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      if (counter >= limit) {
+        return done(Boom.badRequest(`Can't import more than ${limit} objects`));
+      }
+      counter++;
+      done(undefined, obj);
+    },
+  });
+}
+
 export async function collectSavedObjects(
   readStream: Readable,
   objectLimit: number,
@@ -96,16 +110,9 @@ export async function collectSavedObjects(
         return JSON.parse(str);
       }
     }),
-    createFilterStream<SavedObject>(obj => {
-      if (!obj) {
-        return false;
-      }
-      if (filter) {
-        return filter(obj);
-      }
-      return true;
-    }),
+    createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
+    createFilterStream<SavedObject>(obj => (filter ? filter(obj) : true)),
     createConcatStream([]),
   ])) as SavedObject[];
 }

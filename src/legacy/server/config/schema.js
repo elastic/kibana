@@ -252,6 +252,7 @@ export default () => Joi.object({
   }).default(),
 
   savedObjects: Joi.object({
+    maxImportPayloadBytes: Joi.number().default(52428800),
     maxImportExportSize: Joi.number().default(10000),
   }).default(),
 

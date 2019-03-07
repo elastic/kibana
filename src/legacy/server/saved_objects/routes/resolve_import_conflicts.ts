@@ -54,12 +54,13 @@ interface ImportRequest extends Hapi.Request {
   };
 }
 
-export const createResolveImportConflictsRoute = (prereqs: Prerequisites) => ({
+export const createResolveImportConflictsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
   path: '/api/saved_objects/_resolve_import_conflicts',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
     payload: {
+      maxBytes: server.config().get('savedObjects.maxImportPayloadBytes'),
       output: 'stream',
       allow: 'multipart/form-data',
     },

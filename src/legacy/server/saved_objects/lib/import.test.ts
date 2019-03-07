@@ -18,9 +18,15 @@
  */
 
 import { Readable } from 'stream';
+import {
+  createConcatStream,
+  createListStream,
+  createPromiseFromStreams,
+} from '../../../utils/streams';
 import { SavedObject } from '../service';
 import {
   collectSavedObjects,
+  createLimitStream,
   createObjectsFilter,
   extractErrors,
   importSavedObjects,
@@ -64,6 +70,34 @@ Array [
     "id": "2",
     "type": "dashboard",
   },
+]
+`);
+  });
+});
+
+describe('createLimitStream()', () => {
+  test('limit of 5 allows 5 items through', async () => {
+    await createPromiseFromStreams([createListStream([1, 2, 3, 4, 5]), createLimitStream(5)]);
+  });
+
+  test('limit of 5 errors out when 6 items are through', async () => {
+    await expect(
+      createPromiseFromStreams([createListStream([1, 2, 3, 4, 5, 6]), createLimitStream(5)])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't import more than 5 objects"`);
+  });
+
+  test('send the values on the output stream', async () => {
+    const result = await createPromiseFromStreams([
+      createListStream([1, 2, 3]),
+      createLimitStream(3),
+      createConcatStream([]),
+    ]);
+
+    expect(result).toMatchInlineSnapshot(`
+Array [
+  1,
+  2,
+  3,
 ]
 `);
   });
@@ -123,7 +157,7 @@ Array [
       },
     });
     await expect(collectSavedObjects(readStream, 1)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Limit of 1 objects reached"`
+      `"Can't import more than 1 objects"`
     );
   });
 });

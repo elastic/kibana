@@ -111,6 +111,24 @@ export default function ({ getService }) {
               });
             });
         });
+
+        it('should return 400 when trying to import more than 10,000 objects', async () => {
+          const fileChunks = [];
+          for (let i = 0; i < 10001; i++) {
+            fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
+          }
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Can\'t import more than 10000 objects',
+              });
+            });
+        });
       });
     });
   });

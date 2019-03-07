@@ -27,4 +27,3 @@ export { createConcatStream } from './concat_stream';
 export { createMapStream } from './map_stream';
 export { createReplaceStream } from './replace_stream';
 export { createFilterStream } from './filter_stream';
-export { createLimitStream } from './limit_stream';
