@@ -14,22 +14,31 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName }) => (
+export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName, showFilterMessage = false }) => (
   <EuiEmptyPrompt
     iconType="alert"
     titleSize="xs"
     title={
       <h2>
-        <FormattedMessage
-          id="xpack.ml.explorer.noInfluencersFoundTitle"
-          defaultMessage="No {swimlaneViewByFieldName} influencers found"
-          values={{ swimlaneViewByFieldName }}
-        />
+        {showFilterMessage === false && (
+          <FormattedMessage
+            id="xpack.ml.explorer.noInfluencersFoundTitle"
+            defaultMessage="No {swimlaneViewByFieldName} influencers found"
+            values={{ swimlaneViewByFieldName }}
+          />
+        )}
+        {showFilterMessage === true && (
+          <FormattedMessage
+            id="xpack.ml.explorer.noInfluencersFoundTitleFilterMessage"
+            defaultMessage="{swimlaneViewByFieldName} influencers not applicable for given filter"
+            values={{ swimlaneViewByFieldName }}
+          />
+        )}
       </h2>
     }
-  />
-);
+  />);
 
 ExplorerNoInfluencersFound.propTypes = {
   swimlaneViewByFieldName: PropTypes.string.isRequired,
+  showFilterMessage: PropTypes.bool
 };

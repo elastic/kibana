@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
 import { createPluginStartContext } from './plugin_context';
