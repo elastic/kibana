@@ -41,6 +41,10 @@ exports[`FilterBar component renders without errors 1`] = `
                 "view": "http@http://localhost:12349/",
               },
               Object {
+                "value": "http@http://localhost:9200",
+                "view": "http@http://localhost:9200",
+              },
+              Object {
                 "value": "http@http://www.example.com",
                 "view": "http@http://www.example.com",
               },
@@ -67,6 +71,10 @@ exports[`FilterBar component renders without errors 1`] = `
               Object {
                 "value": "http@https://www.wikipedia.org/",
                 "view": "http@https://www.wikipedia.org/",
+              },
+              Object {
+                "value": "icmp-icmptest-ip@8.8.8.8",
+                "view": "icmp-icmptest-ip@8.8.8.8",
               },
               Object {
                 "value": "tcp-tcp@localhost:9200",
@@ -109,6 +117,10 @@ exports[`FilterBar component renders without errors 1`] = `
               Object {
                 "value": "http",
                 "view": "http",
+              },
+              Object {
+                "value": "icmp",
+                "view": "icmp",
               },
               Object {
                 "value": "tcp",
