@@ -132,7 +132,7 @@ exports[`render full suggestions component 1`] = `
             className="kbnTypeahead__popover"
           >
             <div
-              className="kbnTypeahead__items"
+              className="kbnTypeahead__items codeSearch-suggestion__group"
               data-test-subj="codeTypeaheadList-symbol"
               id="kbnTypeahead__items"
               key="symbol-suggestions"
@@ -215,7 +215,9 @@ exports[`render full suggestions component 1`] = `
                       </EuiText>
                     </div>
                   </EuiFlexGroup>
-                  <div>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
                     1
                      Result
                   </div>
@@ -317,7 +319,7 @@ exports[`render full suggestions component 1`] = `
               </Component>
             </div>
             <div
-              className="kbnTypeahead__items"
+              className="kbnTypeahead__items codeSearch-suggestion__group"
               data-test-subj="codeTypeaheadList-file"
               id="kbnTypeahead__items"
               key="file-suggestions"
@@ -400,7 +402,9 @@ exports[`render full suggestions component 1`] = `
                       </EuiText>
                     </div>
                   </EuiFlexGroup>
-                  <div>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
                     1
                      Result
                   </div>
@@ -454,7 +458,7 @@ exports[`render full suggestions component 1`] = `
               </Component>
             </div>
             <div
-              className="kbnTypeahead__items"
+              className="kbnTypeahead__items codeSearch-suggestion__group"
               data-test-subj="codeTypeaheadList-repository"
               id="kbnTypeahead__items"
               key="repository-suggestions"
@@ -538,7 +542,9 @@ exports[`render full suggestions component 1`] = `
                       </EuiText>
                     </div>
                   </EuiFlexGroup>
-                  <div>
+                  <div
+                    className="codeSearch-suggestion__group-result"
+                  >
                     2
                      Result
                     s

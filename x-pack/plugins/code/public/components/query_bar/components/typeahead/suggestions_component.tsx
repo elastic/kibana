@@ -95,7 +95,7 @@ export class SuggestionsComponent extends Component<Props> {
                 {this.getGroupTitle(group.type)}
               </EuiText>
             </EuiFlexGroup>
-            <div>
+            <div className="codeSearch-suggestion__group-result">
               {total} Result
               {total === 1 ? '' : 's'}
             </div>
@@ -117,7 +117,7 @@ export class SuggestionsComponent extends Component<Props> {
         return (
           <div
             id="kbnTypeahead__items"
-            className="kbnTypeahead__items"
+            className="kbnTypeahead__items codeSearch-suggestion__group"
             role="listbox"
             data-test-subj={`codeTypeaheadList-${type}`}
             ref={node => (this.parentNode = node)}
