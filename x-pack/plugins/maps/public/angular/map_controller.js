@@ -13,7 +13,7 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
-import { HelpMenu } from '../components/help_menu';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -206,12 +206,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     { text: $scope.map.title }
   ]);
 
-  chrome.helpExtension.set(domElement => {
-    render(<HelpMenu/>, domElement);
-    return () => {
-      unmountComponentAtNode(domElement);
-    };
-  });
+  addHelpMenuToAppChrome(chrome);
 
   async function doSave(saveOptions) {
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
