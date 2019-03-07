@@ -153,7 +153,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
                   _count: 'desc',
                 },
                 {
-                  _term: 'asc',
+                  _key: 'asc',
                 },
               ],
             },
@@ -170,7 +170,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
                   _count: 'desc',
                 },
                 {
-                  _term: 'asc',
+                  _key: 'asc',
                 },
               ],
             },
