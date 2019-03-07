@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
 import { Extractor, IExtractorConfig } from '@microsoft/api-extractor';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import execa from 'execa';
 import getopts from 'getopts';
-import { run } from './run';
 
 const apiExtractorConfig: IExtractorConfig = {
   compiler: {
@@ -122,7 +122,12 @@ const runApiExtractor = (acceptChanges: boolean = false, log: any) => {
   return apiChanged;
 };
 
-run(async ({ log }) => {
+(async function run() {
+  const log = new ToolingLog({
+    level: 'info',
+    writeTo: process.stdout,
+  });
+
   const extraFlags: string[] = [];
   const opts = getopts(process.argv.slice(2), {
     boolean: ['accept', 'docs', 'help'],
@@ -163,8 +168,8 @@ run(async ({ log }) => {
           {dim $} node scripts/check_core_api_changes --accept
 
         Options:
-
           --accept    {dim Accepts all changes by updating the API Review file \`common/core_api_review/kibana.api.ts\` and documentation}
+          --docs      {dim Updates the Core API documentation}
           --help      {dim Show this message}
       `)
     );
@@ -184,4 +189,4 @@ run(async ({ log }) => {
     // If the API changed and we're not accepting the changes, exit process with error
     process.exit(1);
   }
-});
+})();
