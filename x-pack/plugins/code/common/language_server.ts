@@ -20,4 +20,6 @@ export interface LanguageServer {
   version?: string;
   build?: string;
   status?: LanguageServerStatus;
+  downloadUrl?: any;
+  pluginName?: string;
 }

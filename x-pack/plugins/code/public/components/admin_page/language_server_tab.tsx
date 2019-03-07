@@ -6,10 +6,9 @@
 
 import {
   EuiButton,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
-  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -18,18 +17,18 @@ import {
   EuiOverlayMask,
   EuiPanel,
   EuiSpacer,
+  EuiTabbedContent,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
+import { InstallationType } from '../../../common/installation';
 import { LanguageServer, LanguageServerStatus } from '../../../common/language_server';
 import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
 import { JavaIcon, TypeScriptIcon } from '../shared/icons';
-const JAVA_URL =
-  'https://download.elasticsearch.org/code/java-langserver/snapshot/java_languageserver-1.0.0-SNAPSHOT-darwin.zip';
 
 const LanguageServerState = styled(EuiTextColor)`
   color: ${props => props.color};
@@ -55,25 +54,17 @@ const LanguageServerLi = (props: {
   let state = null;
   if (status === LanguageServerStatus.RUNNING) {
     state = <LanguageServerState>Running ...</LanguageServerState>;
-    button = (
-      <EuiButton size="s" color="secondary" onClick={onInstallClick}>
-        Re-install
-      </EuiButton>
-    );
   } else if (status === LanguageServerStatus.NOT_INSTALLED) {
     state = <LanguageServerState color={'subdued'}>Not Installed</LanguageServerState>;
-    button = props.loading ? (
-      <EuiButton size="s" color="secondary">
-        <EuiLoadingSpinner size="s" />
-        Installing
-      </EuiButton>
-    ) : (
-      <EuiButton size="s" color="secondary" onClick={onInstallClick}>
-        Install
-      </EuiButton>
-    );
   } else if (status === LanguageServerStatus.READY) {
     state = <LanguageServerState color={'subdued'}>Installed</LanguageServerState>;
+  }
+  if (props.languageServer.installationType === InstallationType.Plugin) {
+    button = (
+      <EuiButton size="s" color="secondary" onClick={onInstallClick}>
+        Setup
+      </EuiButton>
+    );
   }
   return (
     <EuiFlexItem>
@@ -108,6 +99,7 @@ interface State {
   showingInstruction: boolean;
   name?: string;
   url?: string;
+  pluginName?: string;
 }
 
 class AdminLanguageSever extends React.PureComponent<Props, State> {
@@ -116,8 +108,13 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
     this.state = { showingInstruction: false };
   }
 
-  public toggleInstruction = (showingInstruction: boolean, name?: string, url?: string) => {
-    this.setState({ showingInstruction, name, url });
+  public toggleInstruction = (
+    showingInstruction: boolean,
+    name?: string,
+    url?: string,
+    pluginName?: string
+  ) => {
+    this.setState({ showingInstruction, name, url, pluginName });
   };
 
   public render() {
@@ -125,13 +122,8 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
       <LanguageServerLi
         languageServer={ls}
         key={ls.name}
-        requestInstallLanguageServer={
-          () =>
-            this.toggleInstruction(
-              true,
-              ls.name,
-              JAVA_URL
-            ) /*this.props.requestInstallLanguageServer*/
+        requestInstallLanguageServer={() =>
+          this.toggleInstruction(true, ls.name, ls.downloadUrl, ls.pluginName)
         }
         loading={this.props.installLoading[ls.name]}
       />
@@ -156,6 +148,7 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
         <LanguageServerInstruction
           show={this.state.showingInstruction}
           name={this.state.name!}
+          pluginName={this.state.pluginName!}
           url={this.state.url!}
           close={() => this.toggleInstruction(false)}
         />
@@ -164,36 +157,57 @@ class AdminLanguageSever extends React.PureComponent<Props, State> {
   }
 }
 
+const SupportedOS = [
+  { id: 'win', name: 'Windows' },
+  { id: 'linux', name: 'Linux' },
+  { id: 'darwin', name: 'macOS' },
+];
+
 const LanguageServerInstruction = (props: {
   name: string;
+  pluginName: string;
   url: string;
   show: boolean;
   close: () => void;
 }) => {
+  const tabs = SupportedOS.map(({ id, name }) => {
+    const url = props.url ? props.url.replace('$OS', id) : '';
+    const installCode = `bin/kibana-plugin install ${url}`;
+    return {
+      id,
+      name,
+      content: (
+        <EuiText grow={false}>
+          <h3>Install</h3>
+          <p>
+            Stop your kibana Code node, then use the following command to install ${props.name}{' '}
+            Language Server plugin:
+            <EuiCodeBlock language="shell">{installCode}</EuiCodeBlock>
+          </p>
+          <h3>Uninstall</h3>
+          <p>
+            Stop your kibana Code node, then use the following command to remove ${props.name}{' '}
+            Language Server plugin:
+            <pre>
+              <code>bin/kibana-plugin remove {props.pluginName}</code>
+            </pre>
+          </p>
+        </EuiText>
+      ),
+    };
+  });
+
   return (
     <React.Fragment>
       {' '}
       {props.show && (
         <EuiOverlayMask>
-          <EuiModal onClose={props.close}>
+          <EuiModal onClose={props.close} maxWidth={false}>
             <EuiModalHeader>
               <EuiModalHeaderTitle>Install Instruction</EuiModalHeaderTitle>
             </EuiModalHeader>
             <EuiModalBody>
-              <EuiText grow={false}>
-                <h3>Download</h3>
-                <p>
-                  Download {props.name} language server plugin from
-                  <EuiLink href={props.url}> here.</EuiLink>
-                </p>
-                <h3>Install</h3>
-                <p>
-                  Stop your kibana code node. Install it using kibana-plugin command.
-                  <pre>
-                    <code>bin/kibana-plugin install {JAVA_URL}</code>
-                  </pre>
-                </p>
-              </EuiText>
+              <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[1]} size={'m'} />
             </EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={props.close} fill>
