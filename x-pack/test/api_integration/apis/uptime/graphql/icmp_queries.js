@@ -7,13 +7,15 @@
 import expect from 'expect.js';
 import monitorList from './fixtures/icmp_monitor_list';
 import monitorListFiltered from './fixtures/icmp_monitor_list_filtered';
+import icmpFilterList from './fixtures/icmp_filter_list';
+import { getFilterBarQueryString } from '../../../../../plugins/uptime/public/components/queries/filter_bar/get_filter_bar';
 import { getMonitorListQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_list/get_monitor_list';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const icmpArchive = 'uptime/icmp_docs';
-  describe('monitorList filtered for icmp', () => {
+  describe('uptime API with ICMP documents', () => {
     before('unload non-icmp index', async () => {
       await esArchiver.load(icmpArchive);
     });
@@ -21,7 +23,7 @@ export default function ({ getService }) {
       await esArchiver.unload(icmpArchive);
     });
 
-    it('will fetch a list of monitors including icmp-type', async () => {
+    it('will return a list of monitors including icmp-type', async () => {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
@@ -40,7 +42,7 @@ export default function ({ getService }) {
       expect(data).to.eql(monitorList);
     });
 
-    it('will fetch a list of only icmp-type monitors', async () => {
+    it('will return a list of only icmp-type monitors', async () => {
       const getMonitorListQuery = {
         operationName: 'MonitorList',
         query: getMonitorListQueryString,
@@ -58,6 +60,21 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorListQuery });
       expect(data).to.eql(monitorListFiltered);
+    });
+
+    it('will return a list of all available filter options for monitor type', async () => {
+      const getFilterBarQuery = {
+        operationName: 'FilterBar',
+        query: getFilterBarQueryString,
+        variables: { dateRangeStart: 1541821270000, dateRangeEnd: 1551821270000 },
+      };
+      const {
+        body: { data },
+      } = await supertest
+        .post('/api/uptime/graphql')
+        .set('kbn-xsrf', 'foo')
+        .send({ ...getFilterBarQuery });
+      expect(data).to.eql(icmpFilterList);
     });
   });
 }
