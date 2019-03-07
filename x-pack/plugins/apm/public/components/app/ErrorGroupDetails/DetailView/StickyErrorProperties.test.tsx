@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { IStickyProperty } from '../../../shared/StickyProperties';
 import { StickyErrorProperties } from './StickyErrorProperties';
 
 describe('StickyErrorProperties', () => {
@@ -40,5 +41,45 @@ describe('StickyErrorProperties', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  describe('error.exception.handled', () => {
+    function getIsHandledValue(error: APMError) {
+      const wrapper = shallow(
+        <StickyErrorProperties error={error} transaction={undefined} />
+      );
+
+      const stickyProps = wrapper.prop('stickyProperties') as IStickyProperty[];
+      const handledProp = stickyProps.find(
+        prop => prop.fieldName === 'error.exception.handled'
+      ) as IStickyProperty;
+
+      return handledProp.val;
+    }
+
+    it('should should render "true"', () => {
+      const error = {
+        error: { exception: [{ handled: true }] }
+      } as APMError;
+
+      const isHandledValue = getIsHandledValue(error);
+      expect(isHandledValue).toBe('true');
+    });
+
+    it('should should render "false"', () => {
+      const error = {
+        error: { exception: [{ handled: false }] }
+      } as APMError;
+
+      const isHandledValue = getIsHandledValue(error);
+      expect(isHandledValue).toBe('false');
+    });
+
+    it('should should render "N/A"', () => {
+      const error = {} as APMError;
+
+      const isHandledValue = getIsHandledValue(error);
+      expect(isHandledValue).toBe('N/A');
+    });
   });
 });
