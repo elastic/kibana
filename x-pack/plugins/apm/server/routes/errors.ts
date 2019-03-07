@@ -4,26 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
 import Boom from 'boom';
-
+import { Server } from 'hapi';
+import Joi from 'joi';
+import { Legacy } from 'kibana';
 import { getDistribution } from '../lib/errors/distribution/get_distribution';
-import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { getErrorGroup } from '../lib/errors/get_error_group';
-import { setupRequest } from '../lib/helpers/setup_request';
+import { getErrorGroups } from '../lib/errors/get_error_groups';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
+import { setupRequest } from '../lib/helpers/setup_request';
 
 const ROOT = '/api/apm/services/{serviceName}/errors';
-const defaultErrorHandler = err => {
+const defaultErrorHandler = (err: Error) => {
+  // tslint:disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initErrorsApi(server) {
+export function initErrorsApi(server: Server) {
   server.route({
     method: 'GET',
     path: ROOT,
-    config: {
+    options: {
       validate: {
         query: withDefaultValidators({
           sortField: Joi.string(),
@@ -34,7 +36,10 @@ export function initErrorsApi(server) {
     handler: req => {
       const setup = setupRequest(req);
       const { serviceName } = req.params;
-      const { sortField, sortDirection } = req.query;
+      const { sortField, sortDirection } = req.query as {
+        sortField: string;
+        sortDirection: 'desc' | 'asc';
+      };
 
       return getErrorGroups({
         serviceName,
@@ -48,7 +53,7 @@ export function initErrorsApi(server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/{groupId}`,
-    config: {
+    options: {
       validate: {
         query: withDefaultValidators()
       }
@@ -62,19 +67,19 @@ export function initErrorsApi(server) {
     }
   });
 
-  const distributionHandler = req => {
+  function distributionHandler(req: Legacy.Request) {
     const setup = setupRequest(req);
     const { serviceName, groupId } = req.params;
 
     return getDistribution({ serviceName, groupId, setup }).catch(
       defaultErrorHandler
     );
-  };
+  }
 
   server.route({
     method: 'GET',
     path: `${ROOT}/{groupId}/distribution`,
-    config: {
+    options: {
       validate: {
         query: withDefaultValidators()
       }
@@ -85,7 +90,7 @@ export function initErrorsApi(server) {
   server.route({
     method: 'GET',
     path: `${ROOT}/distribution`,
-    config: {
+    options: {
       validate: {
         query: withDefaultValidators()
       }

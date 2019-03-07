@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import { Component } from 'react';
 
-class ScrollToTopOnPathChange extends Component {
-  componentDidUpdate(prevProps) {
+interface Props {
+  location: Location;
+}
+
+export class ScrollToTopOnPathChange extends Component<Props> {
+  public componentDidUpdate(prevProps: Props) {
     if (this.props.location.pathname !== prevProps.location.pathname) {
       window.scrollTo(0, 0);
     }
   }
 
-  render() {
+  public render() {
     return null;
   }
 }
-
-export default ScrollToTopOnPathChange;
