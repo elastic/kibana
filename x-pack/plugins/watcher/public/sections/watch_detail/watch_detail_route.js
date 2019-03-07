@@ -19,6 +19,7 @@ import { setHttpClient } from '../../lib/api';
 import { manageAngularLifecycle } from '../../lib/manage_angular_lifecycle';
 import './components/watch_detail';
 import { WatchDetail } from './components/watch_detail/watch_detail_component';
+import { WatchHistory } from './components/watch_detail/watch_history_component';
 import { I18nContext } from 'ui/i18n';
 
 let elem;
@@ -26,6 +27,7 @@ const renderReact = async (elem, watchId) => {
   render(
     <I18nContext>
       <WatchDetail watchId={watchId}/>
+      <WatchHistory watchId={watchId}/>
     </I18nContext>,
     elem
   );
