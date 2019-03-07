@@ -5,10 +5,19 @@
  */
 
 import expect from 'expect.js';
+import gql from 'graphql-tag';
 import { SecurityService, SpacesService } from 'x-pack/test/common/services';
-import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
-import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
+
+const introspectionQuery = gql`
+  query Schema {
+    __schema {
+      queryType {
+        name
+      }
+    }
+  }
+`;
 
 // tslint:disable:no-default-export
 const featureControlsTests: KbnTestProvider = ({ getService }) => {
@@ -44,12 +53,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
 
   const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
     const queryOptions = {
-      query: metadataQuery,
-      variables: {
-        sourceId: 'default',
-        nodeId: 'demo-stack-mysql-01',
-        nodeType: 'host',
-      },
+      query: introspectionQuery,
     };
 
     const basePath = spaceId ? `/s/${spaceId}` : '';
@@ -58,7 +62,7 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
     let error;
     let response;
     try {
-      response = await client.query<MetadataQuery.Query>(queryOptions);
+      response = await client.query(queryOptions);
     } catch (err) {
       error = err;
     }
