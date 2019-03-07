@@ -29,7 +29,7 @@ export const fetchWatchDetail = async (id: string) => {
   const {
     data: { watch },
   } = await getHttpClient().get(`${basePath}/watch/${id}`);
-  return Watch.fromUpstreamJson(watch).actions;
+  return Watch.fromUpstreamJson(watch).watchStatus.actionStatuses;
 };
 
 export const fetchWatchHistory = async (id: string, startTime: string) => {

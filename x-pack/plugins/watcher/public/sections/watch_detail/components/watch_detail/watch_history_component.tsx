@@ -11,16 +11,27 @@ import React, { useEffect, useState } from 'react';
 import { fetchWatchHistory } from '../../../../lib/api';
 
 import { i18n } from '@kbn/i18n';
+import { WATCH_STATES } from '../../../../../common/constants';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiInMemoryTable,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+//TODO: remove duplication, [pcs]
+const stateToIcon: { [key: string]: JSX.Element } = {
+  [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
+  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="grey" />,
+  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="primary" />,
+  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
+  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
+};
 
 const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -35,12 +46,12 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     {
       field: 'startTime',
       name: i18n.translate('xpack.watcher.sections.watchList.watchTable.startTimeHeader', {
-        defaultMessage: 'Start Time',
+        defaultMessage: 'Trigger Time',
       }),
       sortable: true,
       truncateText: true,
       render: (startTime: Moment) => {
-        return startTime ? startTime.fromNow() : startTime;
+        return startTime.format();
       },
     },
     {
@@ -51,7 +62,14 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       sortable: true,
       truncateText: true,
       render: (state: string) => {
-        return <EuiText>{state}</EuiText>;
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>{stateToIcon[state]}</EuiFlexItem>
+            <EuiFlexItem grow={false} className="watchState__message">
+              <EuiText>{state}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
       },
     },
     {
