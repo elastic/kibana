@@ -20,6 +20,7 @@
 require('ui/directives/input_focus');
 
 const mappings = require('../mappings');
+const lodash = require('lodash');
 
 require('ui/modules')
   .get('app/sense')
@@ -33,10 +34,13 @@ require('ui/modules')
 
         this.vals = settings.getCurrentSettings();
         this.apply = () => {
+          const prevSettings = settings.getAutocomplete();
           this.vals = settings.updateSettings(this.vals);
           $scope.kbnTopNav.close();
-          // After the user saves settings, refetch autocomplete info so it takes effect immediately.
-          mappings.retrieveAutoCompleteInfo();
+          if (!lodash.isEqual(prevSettings, this.vals.autocomplete)) {
+            // If the user has changed their settings, update autocomplete info so it takes effect immediately.
+            mappings.retrieveAutoCompleteInfo();
+          }
         };
 
         const self = this;
