@@ -36,9 +36,11 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
       const addDetail = (label, value) => details.push({ label, value });
 
-      datum.extraMetrics.forEach(metric => {
-        addDetail(metric.label, metric.value);
-      });
+      if (datum.extraMetrics) {
+        datum.extraMetrics.forEach(metric => {
+          addDetail(metric.label, metric.value);
+        });
+      }
 
       if (datum.x) {
         addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));

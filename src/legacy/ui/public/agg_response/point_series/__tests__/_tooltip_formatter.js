@@ -69,4 +69,12 @@ describe('tooltipFormatter', function () {
     expect(cell($row3, 0)).to.be('top');
     expect(cell($row3, 1)).to.be('1');
   });
+
+  it('renders correctly on missing extraMetrics in datum', function () {
+    const event = _.cloneDeep(baseEvent);
+    delete event.datum.extraMetrics;
+    const $el = $(tooltipFormatter(event));
+    const $rows = $el.find('tr');
+    expect($rows.length).to.be(3);
+  });
 });
