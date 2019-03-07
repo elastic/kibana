@@ -81,6 +81,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -216,6 +217,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

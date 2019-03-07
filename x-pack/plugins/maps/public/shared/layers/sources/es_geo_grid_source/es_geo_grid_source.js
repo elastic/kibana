@@ -21,6 +21,8 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
 import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../../common/constants';
 import { filterPropertiesForTooltip } from '../../util';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
@@ -51,8 +53,12 @@ const aggSchemas = new Schemas([
 export class ESGeoGridSource extends AbstractESSource {
 
   static type = ES_GEO_GRID;
-  static title = 'Grid aggregation';
-  static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
+  static title = i18n.translate('xpack.maps.source.esGridTitle', {
+    defaultMessage: 'Grid aggregation'
+  });
+  static description = i18n.translate('xpack.maps.source.esGridDescription', {
+    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell'
+  });
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
@@ -102,10 +108,27 @@ export class ESGeoGridSource extends AbstractESSource {
     }
 
     return [
-      { label: 'Data source', value: ESGeoGridSource.title },
-      { label: 'Index pattern', value: indexPatternTitle },
-      { label: 'Geospatial field', value: this._descriptor.geoField },
-      { label: 'Show as', value: this._descriptor.requestType },
+      {
+        label: getDataSourceLabel(),
+        value: ESGeoGridSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
+          defaultMessage: 'Index pattern'
+        }),
+        value: indexPatternTitle },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
+          defaultMessage: 'Geospatial field'
+        }),
+        value: this._descriptor.geoField
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
+          defaultMessage: 'Show as'
+        }),
+        value: this._descriptor.requestType
+      },
     ];
   }
 
@@ -145,7 +168,12 @@ export class ESGeoGridSource extends AbstractESSource {
       return 4;
     }
 
-    throw new Error(`Grid resolution param not recognized: ${this._descriptor.resolution}`);
+    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+      defaultMessage: `Grid resolution param not recognized: {resolution}`,
+      values: {
+        resolution: this._descriptor.resolution
+      }
+    }));
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
@@ -172,7 +200,9 @@ export class ESGeoGridSource extends AbstractESSource {
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
+    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+      defaultMessage: 'Elasticsearch geo grid aggregation request'
+    }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
