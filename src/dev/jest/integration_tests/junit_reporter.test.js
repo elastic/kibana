@@ -21,6 +21,7 @@ import { resolve } from 'path';
 import { promisify } from 'util';
 import { readFileSync } from 'fs';
 
+import del from 'del';
 import execa from 'execa';
 import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import xml2js from 'xml2js';
@@ -36,6 +37,10 @@ expect.addSnapshotSerializer(
     global: true,
   })
 );
+
+afterAll(async () => {
+  await del(TARGET_DIR);
+});
 
 const parseXml = promisify(xml2js.parseString);
 
