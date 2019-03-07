@@ -2,10 +2,7 @@
 
 exports[`render 1`] = `
 <div>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGroup
     alignItems="center"
     component="div"
