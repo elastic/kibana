@@ -3004,7 +3004,6 @@
     "tsvb.percentile.modeOptions.bandLabel": "带",
     "tsvb.percentile.modeOptions.lineLabel": "折线图",
     "tsvb.percentile.percentileAriaLabel": "百分位数",
-    "tsvb.percentile.percentilePlaceholder": "百分位数",
     "tsvb.percentile.shadeLabel": "阴影（0 到 1）：",
     "tsvb.percentileRank.aggregationLabel": "聚合",
     "tsvb.percentileRank.fieldLabel": "字段",
