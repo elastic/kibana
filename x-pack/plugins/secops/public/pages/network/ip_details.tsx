@@ -13,9 +13,9 @@ import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { GlobalTime } from '../../containers/global_time';
-import { decodeIpv6 } from '../../containers/helpers';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
+import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 

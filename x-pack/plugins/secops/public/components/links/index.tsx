@@ -8,7 +8,7 @@ import { EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { encodeIpv6 } from '../../containers/helpers';
+import { encodeIpv6 } from '../../lib/helpers';
 
 export const HostDetailsLink = pure<{ children?: React.ReactNode; hostId: string }>(
   ({ children, hostId }) => (

@@ -7,7 +7,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { encodeIpv6 } from '../../containers/helpers';
+import { encodeIpv6 } from '../../lib/helpers';
 
 import { HostDetailsLink, IPDetailsLink } from '.';
 

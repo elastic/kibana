@@ -6,7 +6,7 @@
 
 import { ESQuery } from '../../common/typed_json';
 
-import { createFilter, decodeIpv6, encodeIpv6 } from './helpers';
+import { createFilter } from './helpers';
 
 describe('Helpers', () => {
   describe('#createFilter', () => {
@@ -24,20 +24,6 @@ describe('Helpers', () => {
     test('if it is undefined, then undefined is returned', () => {
       const filter = createFilter(undefined);
       expect(filter).toBe(undefined);
-    });
-  });
-
-  describe('#encodeIpv6', () => {
-    test('if it encodes the provided IPv6 by replacing : with -', () => {
-      const encodedIp = encodeIpv6('2001:db8:ffff:ffff:ffff:ffff:ffff:ffff');
-      expect(encodedIp).toBe('2001-db8-ffff-ffff-ffff-ffff-ffff-ffff');
-    });
-  });
-
-  describe('#decodeIpv6', () => {
-    test('if it decodes the provided IPv6 by replacing - with :', () => {
-      const decodedIp = decodeIpv6('2001-db8-ffff-ffff-ffff-ffff-ffff-ffff');
-      expect(decodedIp).toBe('2001:db8:ffff:ffff:ffff:ffff:ffff:ffff');
     });
   });
 });
