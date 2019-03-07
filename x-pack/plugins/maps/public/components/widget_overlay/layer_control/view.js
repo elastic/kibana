@@ -13,6 +13,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { LayerTOC } from './layer_toc';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function LayerControl({ isReadOnly, showAddLayerWizard }) {
   let addLayer;
@@ -25,7 +26,10 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
           onClick={showAddLayerWizard}
           data-test-subj="addLayerButton"
         >
-          Add layer
+          <FormattedMessage
+            id="xpack.maps.layerControl.addLayerButtonLabel"
+            defaultMessage="Add layer"
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     );
@@ -42,7 +46,12 @@ export function LayerControl({ isReadOnly, showAddLayerWizard }) {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h2>Layers</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.maps.layerControl.layersTitle"
+                  defaultMessage="Layers"
+                />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           {addLayer}

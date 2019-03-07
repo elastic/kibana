@@ -67,6 +67,12 @@ export function LoadingPanel() {
           <div style={{ textAlign: 'center' }}>
             <EuiTitle size="s">
               <h3>
+                <p role="alert" className="euiScreenReaderOnly">
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitleScreenReader"
+                    defaultMessage="Analyzing data"
+                  />
+                </p>
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.aboutPanel.analyzingDataTitle"
                   defaultMessage="Analyzing data"
