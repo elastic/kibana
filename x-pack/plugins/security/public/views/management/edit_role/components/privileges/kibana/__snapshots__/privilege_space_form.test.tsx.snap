@@ -26,6 +26,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <SpaceSelector
         onChange={[Function]}
@@ -64,6 +65,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           values={Object {}}
         />
       }
+      labelType="label"
     >
       <PrivilegeSelector
         availablePrivileges={
@@ -86,6 +88,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <EuiButtonIcon
         aria-label="Delete space privilege"

@@ -37,7 +37,7 @@ jest.mock(
 
 function expectBreadcrumbToMatchSnapshot(route) {
   mount(
-    <MemoryRouter initialEntries={[`${route}?_g=myG&kuery=myKuery`]}>
+    <MemoryRouter initialEntries={[`${route}?kuery=myKuery`]}>
       <UpdateBreadcrumbs />
     </MemoryRouter>
   );

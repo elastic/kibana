@@ -13,8 +13,14 @@ import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import PropTypes from 'prop-types';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 // @ts-ignore
 import { createMockStore } from 'redux-test-utils';
+// @ts-ignore
+import configureStore from '../store/config/configureStore';
+import { IReduxState } from '../store/rootReducer';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -82,4 +88,39 @@ export function mockMoment() {
     .mockImplementation(function(this: Moment) {
       return `1337 minutes ago (mocking ${this.unix()})`;
     });
+}
+
+// Await this when you need to "flush" promises to immediately resolve or throw in tests
+export async function asyncFlush() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+// Useful for getting the rendered href from any kind of link component
+export async function getRenderedHref(
+  Component: React.FunctionComponent<{}>,
+  globalState: Partial<IReduxState> = {}
+) {
+  const store = configureStore(globalState);
+  const mounted = mount(
+    <Provider store={store}>
+      <MemoryRouter>
+        <Component />
+      </MemoryRouter>
+    </Provider>
+  );
+
+  await asyncFlush();
+
+  return mounted.render().attr('href');
+}
+
+export function mockNow(date: string) {
+  const fakeNow = new Date(date).getTime();
+  const realDateNow = global.Date.now.bind(global.Date);
+
+  global.Date.now = jest.fn(() => fakeNow);
+
+  return () => {
+    global.Date.now = realDateNow;
+  };
 }

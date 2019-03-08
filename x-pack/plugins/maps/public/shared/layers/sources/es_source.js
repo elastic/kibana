@@ -14,6 +14,7 @@ import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
+import { i18n } from '@kbn/i18n';
 
 
 export class AbstractESSource extends AbstractVectorSource {
@@ -87,7 +88,10 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
-      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
+      throw new Error('xpack.maps.source.esSource.requestFailedErrorMessage', {
+        defaultMessage: `Elasticsearch search request failed, error: {message}`,
+        values: { message: error.message }
+      });
     }
   }
 
@@ -174,7 +178,10 @@ export class AbstractESSource extends AbstractVectorSource {
       this.indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
       return this.indexPattern;
     } catch (error) {
-      throw new Error(`Unable to find Index pattern for id: ${this._descriptor.indexPatternId}`);
+      throw new Error(i18n.translate('xpack.maps.source.esSource.noIndexPatternErrorMessage', {
+        defaultMessage: `Unable to find Index pattern for id: {indexPatternId}`,
+        values: { indexPatternId: this._descriptor.indexPatternId }
+      }));
     }
   }
 
@@ -194,7 +201,10 @@ export class AbstractESSource extends AbstractVectorSource {
     const indexPattern = await this._getIndexPattern();
     const geoField = indexPattern.fields.byName[this._descriptor.geoField];
     if (!geoField) {
-      throw new Error(`Index pattern ${indexPattern.title} no longer contains the geo field ${this._descriptor.geoField}`);
+      throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
+        defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
+        values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField }
+      }));
     }
     return geoField;
   }
