@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
@@ -51,16 +51,18 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <TransactionDistributionRequest
-        urlParams={urlParams}
-        render={({ data }) => (
-          <TransactionDistribution
-            distribution={data}
-            urlParams={urlParams}
-            location={location}
-          />
-        )}
-      />
+      <EuiPanel>
+        <TransactionDistributionRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <TransactionDistribution
+              distribution={data}
+              urlParams={urlParams}
+              location={location}
+            />
+          )}
+        />
+      </EuiPanel>
 
       <EuiSpacer size="l" />
       <WaterfallRequest
