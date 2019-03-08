@@ -17,6 +17,7 @@ import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
 
 const OLD_INDEX_MESSAGE = `Index created before ${CURRENT_MAJOR_VERSION}.0`;
 const DELETE_INDEX_MESSAGE = `.tasks index must be re-created`;
+const NEEDS_DEFAULT_FIELD_MESSAGE = 'Number of fields exceeds automatic field expansion limit';
 
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
@@ -97,6 +98,7 @@ export const DeprecationList: StatelessComponent<{
       details: dep.details,
       reindex: dep.message === OLD_INDEX_MESSAGE,
       delete: dep.message === DELETE_INDEX_MESSAGE,
+      needsDefaultFields: dep.message === NEEDS_DEFAULT_FIELD_MESSAGE,
     }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
