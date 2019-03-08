@@ -80,6 +80,8 @@ export async function runCheckTsProjectsCli() {
             .join('\n')}`
         );
       }
+
+      process.exit(1);
     },
     {
       helpDescription:
