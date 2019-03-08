@@ -29,7 +29,7 @@ describe('fromQuery', () => {
     ).toEqual('traceId=bar&transactionId=john%20doe');
   });
 
-  it('should not encode range params', () => {
+  it('should encode range params', () => {
     expect(
       fromQuery({
         traceId: 'b/c',
@@ -37,7 +37,7 @@ describe('fromQuery', () => {
         rangeTo: '2019-03-05T12:00:00.000Z'
       })
     ).toEqual(
-      'traceId=b%2Fc&rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
+      'traceId=b%2Fc&rangeFrom=2019-03-03T12%3A00%3A00.000Z&rangeTo=2019-03-05T12%3A00%3A00.000Z'
     );
   });
 
@@ -53,14 +53,14 @@ describe('fromQuery', () => {
 });
 
 describe('getKibanaHref', () => {
-  it('should build correct URL for APM paths, include existing date range params', () => {
+  it('should build correct URL for APM paths, merging in existing date range params', () => {
     const location = { search: '?rangeFrom=now/w&rangeTo=now-24h' } as Location;
     const pathname = '/app/apm';
     const hash = '/services/x/transactions';
     const query = { transactionId: 'something' };
     const href = getKibanaHref({ location, pathname, hash, query });
     expect(href).toEqual(
-      '/app/apm#/services/x/transactions?rangeFrom=now/w&rangeTo=now-24h&transactionId=something'
+      '/app/apm#/services/x/transactions?rangeFrom=now%2Fw&rangeTo=now-24h&refreshPaused=true&refreshInterval=0&transactionId=something'
     );
   });
 
