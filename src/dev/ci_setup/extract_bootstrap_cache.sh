@@ -16,6 +16,7 @@ else
   echo ""
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
   echo "            bootstrap_cache missing";
+  echo "            looked for '$bootstrapCache'";
   echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
   echo ""
   echo ""
