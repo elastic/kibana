@@ -19,10 +19,10 @@ export const createRouter = (server, pluginId, apiBasePath = '') => {
       return await handler(request, callWithRequest, h);
     } catch (err) {
       if (isEsError(err)) {
-        return wrapEsError(err);
+        throw wrapEsError(err);
       }
 
-      return wrapUnknownError(err);
+      throw wrapUnknownError(err);
     }
   };
 

@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ConfigService, Env } from './config';
+import { LoggerFactory } from './logging';
 
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+/**
+ * Groups all main Kibana's core modules/systems/services that are consumed in a
+ * variety of places within the core itself.
+ * @internal
+ */
+export interface CoreContext {
+  env: Env;
+  configService: ConfigService;
+  logger: LoggerFactory;
+}

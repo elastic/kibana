@@ -14,6 +14,7 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -207,6 +208,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }), href: '#' },
     { text: $scope.map.title }
   ]);
+
+  addHelpMenuToAppChrome(chrome);
 
   async function doSave(saveOptions) {
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());

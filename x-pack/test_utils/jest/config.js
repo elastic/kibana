@@ -26,7 +26,6 @@ export default {
     '<rootDir>/../src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/../src/dev/jest/setup/polyfills.js',
     '<rootDir>/../src/dev/jest/setup/enzyme.js',
-    '<rootDir>/../src/dev/jest/setup/throw_on_console_error.js',
   ],
   coverageDirectory: '<rootDir>/../target/jest-coverage',
   coverageReporters: [
