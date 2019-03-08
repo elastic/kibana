@@ -40,7 +40,7 @@ export class Plugin {
 
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
-        http.setClient($http, $q);
+        http.setClient($http);
 
         $scope.$$postDigest(() => {
           elem = document.getElementById(REACT_ROOT_ID);

@@ -44,7 +44,7 @@ export interface Core extends AppCore {
     getRouter(): HashRouter | undefined;
   };
   http: {
-    setClient(client: any, $deferred: any): void;
+    setClient(client: any): void;
     getClient(): any;
   };
 }
@@ -55,11 +55,6 @@ export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let httpClient: any;
-
-  // The deffered AngularJS api allows us to create deferred promise
-  // to be resolved later. This allows us to cancel in flight Http Requests
-  // https://docs.angularjs.org/api/ng/service/$q#the-deferred-api
-  let $q: any;
 
   let reactRouter: HashRouter | undefined;
 
@@ -87,9 +82,8 @@ export function createShim(): { core: Core; plugins: Plugins } {
         },
       },
       http: {
-        setClient: (client: any, $deferred: any): void => {
+        setClient: (client: any): void => {
           httpClient = client;
-          $q = $deferred;
         },
         getClient: (): any => httpClient,
       },
