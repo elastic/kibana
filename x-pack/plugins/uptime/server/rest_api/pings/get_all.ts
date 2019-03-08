@@ -22,7 +22,7 @@ export const createGetAllRoute = (libs: UMServerLibs) => ({
         status: Joi.string(),
       }),
     },
-    tags: ['access:pings'],
+    tags: ['access:uptime'],
   },
   handler: async (request: any): Promise<PingResults> => {
     const { size, sort, dateRangeStart, dateRangeEnd, monitorId, status } = request.query;

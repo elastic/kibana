@@ -11,6 +11,6 @@ export const createIsValidRoute = (libs: UMServerLibs) => ({
   path: '/api/uptime/is_valid',
   handler: async (request: any): Promise<boolean> => await libs.auth.requestIsValid(request),
   options: {
-    tags: ['access:is_valid'],
+    tags: ['access:uptime'],
   },
 });

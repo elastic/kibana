@@ -38,7 +38,7 @@ export const initServerWithKibana = (server: KibanaServer) => {
     catalogue: ['uptime'],
     privileges: {
       all: {
-        api: ['uptime/graphql', 'uptime/is_valid', 'uptime/pings'],
+        api: ['uptime/uptime'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -46,7 +46,7 @@ export const initServerWithKibana = (server: KibanaServer) => {
         ui: [],
       },
       read: {
-        api: ['uptime/graphql', 'uptime/is_valid', 'uptime/pings'],
+        api: ['uptime/uptime'],
         savedObject: {
           all: [],
           read: ['config'],
