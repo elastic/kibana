@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge /*, EuiLink*/ } from '@elastic/eui';
 import React from 'react';
-import { DIFF } from '../routes';
+// import { DIFF } from '../routes';
 
 interface Props {
   repoUri: string;
@@ -14,10 +14,10 @@ interface Props {
 }
 
 export const CommitLink = ({ repoUri, commit, children }: Props) => {
-  const href = DIFF.replace(':resource/:org/:repo', repoUri).replace(':commitId', commit);
+  // const href = DIFF.replace(':resource/:org/:repo', repoUri).replace(':commitId', commit);
   return (
-    <EuiLink href={`#${href}`}>
-      <EuiBadge color="hollow">{children || commit}</EuiBadge>
-    </EuiLink>
+    // <EuiLink href={`#${href}`}>
+    <EuiBadge color="hollow">{children || commit}</EuiBadge>
+    // </EuiLink>
   );
 };
