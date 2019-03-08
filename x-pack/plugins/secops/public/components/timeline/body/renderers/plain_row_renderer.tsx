@@ -14,7 +14,7 @@ import { RowRenderer } from '.';
 const PlainRow = styled.div`
   width: 100%;
   &:hover {
-    border: 1px solid ${props => props.theme.eui.euiColorMediumShade};
+    background-color: ${props => props.theme.eui.euiTableHoverColor};
   }
 `;
 

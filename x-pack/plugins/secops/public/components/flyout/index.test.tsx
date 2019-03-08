@@ -19,10 +19,8 @@ import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_pro
 
 import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
 import { FlyoutButton } from './button';
-import { FlyoutPane } from './pane';
 
 const testFlyoutHeight = 980;
-const testWidth = 640;
 const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
@@ -109,7 +107,7 @@ describe('Flyout', () => {
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
     });
 
-    test('it renders children elements when its state is set to flyout is true', () => {
+    test('it renders the flyout body', () => {
       const stateShowIsTrue = set('local.timeline.timelineById.test.show', true, state);
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
@@ -123,7 +121,7 @@ describe('Flyout', () => {
                 timelineId="test"
                 usersViewing={usersViewing}
               >
-                <p>I am a child of flyout</p>
+                <p>Fake flyout body</p>
               </Flyout>
             </DragDropContextWrapper>
           </ThemeProvider>
@@ -132,10 +130,10 @@ describe('Flyout', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="flyoutChildren"]')
+          .find('[data-test-subj="eui-flyout-body"]')
           .first()
           .text()
-      ).toContain('I am a child of flyout');
+      ).toContain('Fake flyout body');
     });
 
     test('it does render the data providers badge when the number is greater than 0', () => {
@@ -266,98 +264,11 @@ describe('Flyout', () => {
       );
 
       wrapper
-        .find('[data-test-subj="flyout"] button')
+        .find('[data-test-subj="close-timeline"] button')
         .first()
         .simulate('click');
 
       expect(showTimeline).toBeCalled();
-    });
-  });
-
-  describe('FlyoutPane', () => {
-    test('should return the flyout element with an empty title', () => {
-      const closeMock = jest.fn();
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutPane
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                onClose={closeMock}
-                timelineId={'test'}
-                usersViewing={usersViewing}
-                width={testWidth}
-              >
-                <span>I am a child of flyout</span>,
-              </FlyoutPane>
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
-
-      expect(
-        wrapper
-          .find('[data-test-subj="timeline-title"]')
-          .first()
-          .text()
-      ).toContain('');
-    });
-
-    test('should return the flyout element with children', () => {
-      const closeMock = jest.fn();
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutPane
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                onClose={closeMock}
-                timelineId={'test'}
-                usersViewing={usersViewing}
-                width={testWidth}
-              >
-                <span>I am a mock child</span>,
-              </FlyoutPane>
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
-      expect(
-        wrapper
-          .find('[data-test-subj="flyoutChildren"]')
-          .first()
-          .text()
-      ).toContain('I am a mock child');
-    });
-
-    test('should call the onClose when the close button is clicked', () => {
-      const closeMock = jest.fn();
-      const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutPane
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                onClose={closeMock}
-                timelineId={'test'}
-                usersViewing={usersViewing}
-                width={testWidth}
-              >
-                <span>I am a mock child</span>,
-              </FlyoutPane>
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
-      wrapper
-        .find('[data-test-subj="flyout"] button')
-        .first()
-        .simulate('click');
-
-      expect(closeMock).toBeCalled();
     });
   });
 

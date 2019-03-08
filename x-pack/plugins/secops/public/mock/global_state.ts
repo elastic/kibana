@@ -94,6 +94,7 @@ export const mockGlobalState: State = {
       timelineById: {
         test: {
           id: 'test',
+          columns: [],
           itemsPerPage: 5,
           dataProviders: [],
           description: '',
@@ -114,7 +115,7 @@ export const mockGlobalState: State = {
           pinnedEventIds: {},
           itemsPerPageOptions: [5, 10, 20],
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           width: defaultWidth,

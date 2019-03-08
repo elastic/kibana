@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ColumnHeader } from './body/column_headers/column_header';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
 
@@ -55,6 +56,18 @@ export type OnColumnSorted = (
   }
 ) => void;
 
+export type OnColumnRemoved = (columnId: ColumnId) => void;
+
+export type OnColumnResized = (
+  {
+    columnId,
+    delta,
+  }: {
+    columnId: ColumnId;
+    delta: number;
+  }
+) => void;
+
 /** Invoked when a user clicks to change the number items to show per page */
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
@@ -65,6 +78,9 @@ export type OnChangeDroppableAndProvider = (providerId: string) => void;
 
 /** Invoked when a user pins an event */
 export type OnPinEvent = (eventId: string) => void;
+
+/** Invoked when columns are updated */
+export type OnUpdateColumns = (columns: ColumnHeader[]) => void;
 
 /** Invoked when a user unpins an event */
 export type OnUnPinEvent = (eventId: string) => void;

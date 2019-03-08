@@ -6,141 +6,144 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
+
+import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 
 import { Actions } from '.';
 
 describe('Actions', () => {
-  test('it renders a button for expanding the event', () => {
+  test('it renders a checkbox for selecting the event', () => {
     const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={jest.fn()}
-        onPinClicked={jest.fn()}
-        showNotes={false}
-        toggleShowNotes={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="timeline-action-expand"]').exists()).toEqual(true);
+    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toEqual(true);
+  });
+
+  test('it renders a button for expanding the event', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toEqual(true);
   });
 
   test('it invokes onEventToggled when the button to expand an event is clicked', () => {
     const onEventToggled = jest.fn();
 
     const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={onEventToggled}
-        onPinClicked={jest.fn()}
-        showNotes={false}
-        toggleShowNotes={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          onEventToggled={onEventToggled}
+          onPinClicked={jest.fn()}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
     );
 
     wrapper
-      .find('[data-test-subj="timeline-action-expand"]')
+      .find('[data-test-subj="expand-event"]')
       .first()
       .simulate('click');
 
     expect(onEventToggled).toBeCalled();
   });
 
-  test('it renders a button for pinning the event', () => {
-    const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={jest.fn()}
-        onPinClicked={jest.fn()}
-        showNotes={false}
-        toggleShowNotes={jest.fn()}
-        updateNote={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="timeline-action-pin"]').exists()).toEqual(true);
-  });
-
-  test('it invokes onPinClicked when the button to pin an event is clicked', () => {
+  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
     const onPinClicked = jest.fn();
 
     const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={jest.fn()}
-        onPinClicked={onPinClicked}
-        showNotes={false}
-        toggleShowNotes={jest.fn()}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={onPinClicked}
+          showNotes={false}
+          toggleShowNotes={jest.fn()}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
     );
 
     wrapper
-      .find('[data-test-subj="timeline-action-pin"]')
+      .find('[data-test-subj="pin-event"]')
       .first()
       .simulate('click');
 
     expect(onPinClicked).toBeCalled();
   });
 
-  test('it renders a button for adding notes', () => {
-    const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={jest.fn()}
-        onPinClicked={jest.fn()}
-        showNotes={false}
-        toggleShowNotes={jest.fn()}
-        updateNote={jest.fn()}
-      />
-    );
-
-    expect(wrapper.find('[data-test-subj="timeline-action-notes-button"]').exists()).toEqual(true);
-  });
-
   test('it invokes toggleShowNotes when the button for adding notes is clicked', () => {
     const toggleShowNotes = jest.fn();
 
     const wrapper = mount(
-      <Actions
-        associateNote={jest.fn()}
-        expanded={false}
-        eventId="abc"
-        eventIsPinned={false}
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        onEventToggled={jest.fn()}
-        onPinClicked={jest.fn()}
-        showNotes={false}
-        toggleShowNotes={toggleShowNotes}
-        updateNote={jest.fn()}
-      />
+      <TestProviders>
+        <Actions
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          associateNote={jest.fn()}
+          checked={false}
+          expanded={false}
+          eventId="abc"
+          eventIsPinned={false}
+          getNotesByIds={jest.fn()}
+          noteIds={[]}
+          onEventToggled={jest.fn()}
+          onPinClicked={jest.fn()}
+          showNotes={false}
+          toggleShowNotes={toggleShowNotes}
+          updateNote={jest.fn()}
+        />
+      </TestProviders>
     );
 
     wrapper

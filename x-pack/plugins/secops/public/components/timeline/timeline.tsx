@@ -27,6 +27,8 @@ import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
+  OnColumnRemoved,
+  OnColumnResized,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnFilterChange,
@@ -37,7 +39,7 @@ import {
   OnUnPinEvent,
 } from './events';
 import { Footer, footerHeight } from './footer';
-import { TimelineHeader } from './header/timeline_header';
+import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
 
 const WrappedByAutoSizer = styled.div`
@@ -45,9 +47,10 @@ const WrappedByAutoSizer = styled.div`
 `; // required by AutoSizer
 
 const TimelineContainer = styled(EuiFlexGroup)`
-  user-select: none;
+  min-height: 500px;
   overflow: hidden;
   padding: 0 10px 0 12px;
+  user-select: none;
   width: 100%;
 `;
 
@@ -69,6 +72,8 @@ interface Props {
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onChangeItemsPerPage: OnChangeItemsPerPage;
+  onColumnResized: OnColumnResized;
+  onColumnRemoved: OnColumnRemoved;
   onColumnSorted: OnColumnSorted;
   onDataProviderRemoved: OnDataProviderRemoved;
   onFilterChange: OnFilterChange;
@@ -105,6 +110,8 @@ export const Timeline = pure<Props>(
     onChangeDataProviderKqlQuery,
     onChangeDroppableAndProvider,
     onChangeItemsPerPage,
+    onColumnRemoved,
+    onColumnResized,
     onColumnSorted,
     onDataProviderRemoved,
     onFilterChange,
@@ -128,7 +135,7 @@ export const Timeline = pure<Props>(
             data-test-subj="timeline"
             direction="column"
             gutterSize="none"
-            justifyContent="center"
+            justifyContent="flexStart"
           >
             <WrappedByAutoSizer innerRef={measureRef}>
               <TimelineHeader
@@ -160,6 +167,7 @@ export const Timeline = pure<Props>(
                     <Body
                       addNoteToEvent={addNoteToEvent}
                       id={id}
+                      isLoading={loading}
                       columnHeaders={columnHeaders}
                       columnRenderers={columnRenderers}
                       data={events}
@@ -171,6 +179,8 @@ export const Timeline = pure<Props>(
                         timelineHeaderHeight,
                         timelineFooterHeight: footerHeight,
                       })}
+                      onColumnResized={onColumnResized}
+                      onColumnRemoved={onColumnRemoved}
                       onColumnSorted={onColumnSorted}
                       onFilterChange={onFilterChange}
                       onPinEvent={onPinEvent}
@@ -181,9 +191,9 @@ export const Timeline = pure<Props>(
                       rowRenderers={rowRenderers}
                       sort={sort}
                       updateNote={updateNote}
+                      width={width}
                     />
                     <Footer
-                      dataProviders={dataProviders}
                       serverSideEventCount={totalCount}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       height={footerHeight}

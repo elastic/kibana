@@ -7,7 +7,6 @@
 import { EuiIcon } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
 import { Direction } from '../../../../graphql/types';
 
@@ -38,11 +37,7 @@ interface Props {
   sortDirection: SortDirection;
 }
 
-const Icon = styled(EuiIcon)`
-  margin: 2px 5px 0 5px;
-`;
-
 /** Renders a sort indicator */
 export const SortIndicator = pure<Props>(({ sortDirection }) => (
-  <Icon data-test-subj="sortIndicator" type={getDirection(sortDirection)} />
+  <EuiIcon data-test-subj="sortIndicator" type={getDirection(sortDirection)} />
 ));

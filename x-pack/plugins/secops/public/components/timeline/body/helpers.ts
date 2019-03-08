@@ -10,7 +10,12 @@ import { OnPinEvent, OnUnPinEvent } from '../events';
 
 import * as i18n from './translations';
 
-export const ACTIONS_COLUMN_WIDTH = 100; // px;
+/** The (fixed) width of the Actions column */
+export const ACTIONS_COLUMN_WIDTH = 150; // px;
+/** The default minimum width of a column (when a width for the column type is not specified) */
+export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
+/** The default minimum width of a column of type `date` */
+export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 240; // px
 
 // tslint:disable-next-line:no-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -60,3 +65,6 @@ export const getPinOnClick = ({
     ? () => onUnPinEvent(eventId)
     : () => onPinEvent(eventId);
 };
+
+export const getColumnWidthFromType = (type: string): number =>
+  type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;

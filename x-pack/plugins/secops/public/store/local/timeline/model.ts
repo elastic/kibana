@@ -5,6 +5,7 @@
  */
 
 import { defaultWidth } from '../../../components/timeline/body';
+import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { Direction } from '../../../graphql/types';
@@ -14,6 +15,8 @@ export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is
 export type KqlMode = 'filter' | 'search';
 
 export interface TimelineModel {
+  /** The columns displayed in the timeline */
+  columns: ColumnHeader[];
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** A summary of the events and notes in this timeline */
@@ -60,6 +63,7 @@ export interface TimelineModel {
 export const timelineDefaults: Readonly<
   Pick<
     TimelineModel,
+    | 'columns'
     | 'dataProviders'
     | 'description'
     | 'eventIdToNoteIds'
@@ -80,6 +84,7 @@ export const timelineDefaults: Readonly<
     | 'width'
   >
 > = {
+  columns: [],
   dataProviders: [],
   description: '',
   eventIdToNoteIds: {},
@@ -100,7 +105,7 @@ export const timelineDefaults: Readonly<
   range: '1 Day',
   show: false,
   sort: {
-    columnId: 'timestamp',
+    columnId: '@timestamp',
     sortDirection: Direction.descending,
   },
   width: defaultWidth,

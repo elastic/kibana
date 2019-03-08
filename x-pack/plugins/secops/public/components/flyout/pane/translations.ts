@@ -7,12 +7,15 @@
 import { i18n } from '@kbn/i18n';
 
 export const TIMELINE_DESCRIPTION = i18n.translate(
-  'xpack.secops.timeline.flyout.pane.timelineProperties',
+  'xpack.secops.timeline.flyout.pane.timelinePropertiesAriaLabel',
   {
     defaultMessage: 'Timeline Properties',
   }
 );
 
-export const CLOSE_TIMELINE = i18n.translate('xpack.secops.timeline.flyout.pane.closeTimeline', {
-  defaultMessage: 'Close timeline',
-});
+export const CLOSE_TIMELINE = i18n.translate(
+  'xpack.secops.timeline.flyout.pane.closeTimelineButtonLabel',
+  {
+    defaultMessage: 'Close timeline',
+  }
+);

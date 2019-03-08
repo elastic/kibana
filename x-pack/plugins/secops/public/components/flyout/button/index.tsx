@@ -39,13 +39,13 @@ export const Button = styled(EuiPanel)`
   z-index: 9;
   justify-content: center;
   text-align: center;
-  border-top: 1px solid ${props => props.theme.eui.euiColorLightShade};
-  border-bottom: 1px solid ${props => props.theme.eui.euiColorLightShade};
-  border-left: 1px solid ${props => props.theme.eui.euiColorLightShade};
+  border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  border-left: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
   border-radius: 6px 0 0 6px;
-  box-shadow: ${props =>
-    `0 3px 3px -1px ${props.theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
-      props.theme.eui.euiColorLightestShade
+  box-shadow: ${({ theme }) =>
+    `0 3px 3px -1px ${theme.eui.euiColorLightestShade}, 0 5px 7px -2px ${
+      theme.eui.euiColorLightestShade
     }`};
   background-color: inherit;
   cursor: pointer;

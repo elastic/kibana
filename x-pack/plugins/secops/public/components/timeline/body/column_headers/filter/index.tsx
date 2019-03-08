@@ -8,10 +8,9 @@ import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { OnFilterChange } from '../../events';
-
-import { ColumnHeader } from './column_header';
-import { TextFilter } from './text_filter';
+import { OnFilterChange } from '../../../events';
+import { ColumnHeader } from '../column_header';
+import { TextFilter } from '../text_filter';
 
 interface Props {
   header: ColumnHeader;
@@ -25,7 +24,7 @@ export const Filter = pure<Props>(({ header, onFilterChange = noop }) => {
       return (
         <TextFilter
           columnId={header.id}
-          minWidth={header.minWidth}
+          minWidth={header.width}
           onFilterChange={onFilterChange}
           placeholder={header.placeholder}
         />

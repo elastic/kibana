@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { cloneDeep, noop } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 
 import { Ecs } from '../../../../graphql/types';
 import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
-import { createStore } from '../../../../store';
+import { TestProviders } from '../../../../mock/test_providers';
 import { getEmptyValue } from '../../../empty_value';
 
 import { columnRenderers } from '.';
@@ -31,22 +27,17 @@ describe('get_column_renderer', () => {
   });
 
   test('should render event id when dealing with data that is not suricata', () => {
-    const store = createStore();
     const columnName = 'event.id';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn(
+    const column = columnRenderer.renderColumn({
       columnName,
-      nonSuricata,
-      allFieldsInSchemaByName[columnName]
-    );
+      data: nonSuricata,
+      field: allFieldsInSchemaByName[columnName],
+    });
     const wrapper = mount(
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <ReduxStoreProvider store={store}>
-          <DragDropContext onDragEnd={noop}>
-            <span>{column}</span>
-          </DragDropContext>
-        </ReduxStoreProvider>
-      </ThemeProvider>
+      <TestProviders>
+        <span>{column}</span>
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });
@@ -55,11 +46,11 @@ describe('get_column_renderer', () => {
     delete nonSuricata.user;
     const columnName = 'user.name';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn(
+    const column = columnRenderer.renderColumn({
       columnName,
-      nonSuricata,
-      allFieldsInSchemaByName[columnName]
-    );
+      data: nonSuricata,
+      field: allFieldsInSchemaByName[columnName],
+    });
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
@@ -67,11 +58,11 @@ describe('get_column_renderer', () => {
   test('should render empty value when dealing with an unknown column name', () => {
     const columnName = 'something made up';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
-    const column = columnRenderer.renderColumn(
+    const column = columnRenderer.renderColumn({
       columnName,
-      nonSuricata,
-      allFieldsInSchemaByName[columnName]
-    );
+      data: nonSuricata,
+      field: allFieldsInSchemaByName[columnName],
+    });
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

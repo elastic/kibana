@@ -4,25 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { Direction } from '../../graphql/types';
 import { mockEcsData } from '../../mock';
-import { mockGlobalState, mockIndexPattern } from '../../mock';
-import { createStore, State } from '../../store';
+import { mockIndexPattern } from '../../mock';
+import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
 
 import { ColumnHeaderType } from './body/column_headers/column_header';
-import { defaultHeaders } from './body/column_headers/headers';
+import { defaultHeaders } from './body/column_headers/default_headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
@@ -33,7 +27,7 @@ const mockGetNotesByIds = (eventId: string[]) => [];
 
 describe('Timeline', () => {
   const sort: Sort = {
-    columnId: 'timestamp',
+    columnId: '@timestamp',
     sortDirection: Direction.descending,
   };
 
@@ -50,60 +44,48 @@ describe('Timeline', () => {
     },
   ];
 
-  const state: State = mockGlobalState;
-
-  let store = createStore(state);
-
-  beforeEach(() => {
-    store = createStore(state);
-  });
-
   describe('rendering', () => {
     test('it renders the timeline header', () => {
       const wrapper = mount(
-        <I18nProvider>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    addNoteToEvent={noop}
-                    id="foo"
-                    columnHeaders={defaultHeaders}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    eventIdToNoteIds={{}}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    getNotesByIds={mockGetNotesByIds}
-                    indexPattern={indexPattern}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlMode="search"
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onPinEvent={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    onUnPinEvent={noop}
-                    pinnedEventIds={{}}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    updateNote={noop}
-                  />
-                </MockedProvider>
-              </DragDropContext>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </I18nProvider>
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              addNoteToEvent={jest.fn()}
+              id="foo"
+              columnHeaders={defaultHeaders}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              eventIdToNoteIds={{}}
+              flyoutHeight={testFlyoutHeight}
+              flyoutHeaderHeight={flyoutHeaderHeight}
+              getNotesByIds={mockGetNotesByIds}
+              indexPattern={indexPattern}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              kqlMode="search"
+              kqlQuery=""
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onChangeItemsPerPage={jest.fn()}
+              onColumnResized={jest.fn()}
+              onColumnRemoved={jest.fn()}
+              onColumnSorted={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onFilterChange={jest.fn()}
+              onPinEvent={jest.fn()}
+              onRangeSelected={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+              onUnPinEvent={jest.fn()}
+              pinnedEventIds={{}}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              show={true}
+              sort={sort}
+              updateNote={jest.fn()}
+            />
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
@@ -111,49 +93,45 @@ describe('Timeline', () => {
 
     test('it renders the timeline body', () => {
       const wrapper = mount(
-        <I18nProvider>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    addNoteToEvent={noop}
-                    id="foo"
-                    columnHeaders={defaultHeaders}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    eventIdToNoteIds={{}}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    getNotesByIds={mockGetNotesByIds}
-                    indexPattern={indexPattern}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlMode="search"
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onPinEvent={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    onUnPinEvent={noop}
-                    pinnedEventIds={{}}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    updateNote={noop}
-                  />
-                </MockedProvider>
-              </DragDropContext>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </I18nProvider>
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              addNoteToEvent={jest.fn()}
+              id="foo"
+              columnHeaders={defaultHeaders}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              eventIdToNoteIds={{}}
+              flyoutHeight={testFlyoutHeight}
+              flyoutHeaderHeight={flyoutHeaderHeight}
+              getNotesByIds={mockGetNotesByIds}
+              indexPattern={indexPattern}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              kqlMode="search"
+              kqlQuery=""
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onChangeItemsPerPage={jest.fn()}
+              onColumnRemoved={jest.fn()}
+              onColumnResized={jest.fn()}
+              onColumnSorted={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onFilterChange={jest.fn()}
+              onPinEvent={jest.fn()}
+              onRangeSelected={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+              onUnPinEvent={jest.fn()}
+              pinnedEventIds={{}}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              show={true}
+              sort={sort}
+              updateNote={jest.fn()}
+            />
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="horizontal-scroll"]').exists()).toEqual(true);
@@ -161,49 +139,45 @@ describe('Timeline', () => {
 
     test('it does NOT render the paging footer when you do NOT have any data providers', () => {
       const wrapper = mount(
-        <I18nProvider>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <DragDropContext onDragEnd={noop}>
-                <MockedProvider mocks={mocks}>
-                  <Timeline
-                    addNoteToEvent={noop}
-                    id="foo"
-                    columnHeaders={defaultHeaders}
-                    columnRenderers={columnRenderers}
-                    dataProviders={mockDataProviders}
-                    eventIdToNoteIds={{}}
-                    flyoutHeight={testFlyoutHeight}
-                    flyoutHeaderHeight={flyoutHeaderHeight}
-                    getNotesByIds={mockGetNotesByIds}
-                    indexPattern={indexPattern}
-                    itemsPerPage={5}
-                    itemsPerPageOptions={[5, 10, 20]}
-                    kqlMode="search"
-                    kqlQuery=""
-                    onChangeDataProviderKqlQuery={noop}
-                    onChangeDroppableAndProvider={noop}
-                    onChangeItemsPerPage={noop}
-                    onColumnSorted={noop}
-                    onDataProviderRemoved={noop}
-                    onFilterChange={noop}
-                    onPinEvent={noop}
-                    onRangeSelected={noop}
-                    onToggleDataProviderEnabled={noop}
-                    onToggleDataProviderExcluded={noop}
-                    onUnPinEvent={noop}
-                    pinnedEventIds={{}}
-                    range={'1 Day'}
-                    rowRenderers={rowRenderers}
-                    show={true}
-                    sort={sort}
-                    updateNote={noop}
-                  />
-                </MockedProvider>
-              </DragDropContext>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </I18nProvider>
+        <TestProviders>
+          <MockedProvider mocks={mocks}>
+            <Timeline
+              addNoteToEvent={jest.fn()}
+              id="foo"
+              columnHeaders={defaultHeaders}
+              columnRenderers={columnRenderers}
+              dataProviders={mockDataProviders}
+              eventIdToNoteIds={{}}
+              flyoutHeight={testFlyoutHeight}
+              flyoutHeaderHeight={flyoutHeaderHeight}
+              getNotesByIds={mockGetNotesByIds}
+              indexPattern={indexPattern}
+              itemsPerPage={5}
+              itemsPerPageOptions={[5, 10, 20]}
+              kqlMode="search"
+              kqlQuery=""
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onChangeItemsPerPage={jest.fn()}
+              onColumnRemoved={jest.fn()}
+              onColumnResized={jest.fn()}
+              onColumnSorted={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onFilterChange={jest.fn()}
+              onPinEvent={jest.fn()}
+              onRangeSelected={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+              onUnPinEvent={jest.fn()}
+              pinnedEventIds={{}}
+              range={'1 Day'}
+              rowRenderers={rowRenderers}
+              show={true}
+              sort={sort}
+              updateNote={jest.fn()}
+            />
+          </MockedProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
@@ -211,116 +185,50 @@ describe('Timeline', () => {
   });
 
   describe('event wire up', () => {
-    describe('onColumnSorted', () => {
-      test('it invokes the onColumnSorted callback when a header is clicked', () => {
-        const mockOnColumnSorted = jest.fn();
-
-        const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={defaultHeaders}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onColumnSorted={mockOnColumnSorted}
-                      onChangeItemsPerPage={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
-        );
-
-        wrapper
-          .find('[data-test-subj="header"]')
-          .first()
-          .simulate('click');
-
-        expect(mockOnColumnSorted).toBeCalledWith({
-          columnId: defaultHeaders[0].id,
-          sortDirection: 'ascending',
-        });
-      });
-    });
-
     describe('onDataProviderRemoved', () => {
       test('it invokes the onDataProviderRemoved callback when the delete button on a provider is clicked', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={defaultHeaders}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={mockOnDataProviderRemoved}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={defaultHeaders}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={mockOnDataProviderRemoved}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -335,49 +243,45 @@ describe('Timeline', () => {
         const mockOnDataProviderRemoved = jest.fn();
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={defaultHeaders}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={mockOnDataProviderRemoved}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={defaultHeaders}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={mockOnDataProviderRemoved}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
         wrapper
           .find('[data-test-subj="providerBadge"]')
@@ -407,49 +311,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={mockOnFilterChange}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={mockOnFilterChange}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -475,49 +375,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -550,49 +446,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={mockDataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={mockDataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -626,49 +518,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={dataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={dataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         const andProviderBadge = wrapper
@@ -690,49 +578,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={dataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={mockOnDataProviderRemoved}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={dataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={mockOnDataProviderRemoved}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -762,49 +646,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={dataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                      onToggleDataProviderExcluded={noop}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={dataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+                onToggleDataProviderExcluded={jest.fn()}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper
@@ -838,49 +718,45 @@ describe('Timeline', () => {
         }));
 
         const wrapper = mount(
-          <I18nProvider>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={noop}>
-                  <MockedProvider mocks={mocks}>
-                    <Timeline
-                      addNoteToEvent={noop}
-                      id="foo"
-                      columnHeaders={allColumnsHaveTextFilters}
-                      columnRenderers={columnRenderers}
-                      dataProviders={dataProviders}
-                      eventIdToNoteIds={{}}
-                      flyoutHeight={testFlyoutHeight}
-                      flyoutHeaderHeight={flyoutHeaderHeight}
-                      getNotesByIds={mockGetNotesByIds}
-                      indexPattern={indexPattern}
-                      itemsPerPage={5}
-                      itemsPerPageOptions={[5, 10, 20]}
-                      kqlMode="search"
-                      kqlQuery=""
-                      onChangeDataProviderKqlQuery={noop}
-                      onChangeDroppableAndProvider={noop}
-                      onChangeItemsPerPage={noop}
-                      onColumnSorted={noop}
-                      onDataProviderRemoved={noop}
-                      onFilterChange={noop}
-                      onPinEvent={noop}
-                      onRangeSelected={noop}
-                      onToggleDataProviderEnabled={noop}
-                      onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-                      onUnPinEvent={noop}
-                      pinnedEventIds={{}}
-                      range={'1 Day'}
-                      rowRenderers={rowRenderers}
-                      show={true}
-                      sort={sort}
-                      updateNote={noop}
-                    />
-                  </MockedProvider>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </I18nProvider>
+          <TestProviders>
+            <MockedProvider mocks={mocks}>
+              <Timeline
+                addNoteToEvent={jest.fn()}
+                id="foo"
+                columnHeaders={allColumnsHaveTextFilters}
+                columnRenderers={columnRenderers}
+                dataProviders={dataProviders}
+                eventIdToNoteIds={{}}
+                flyoutHeight={testFlyoutHeight}
+                flyoutHeaderHeight={flyoutHeaderHeight}
+                getNotesByIds={mockGetNotesByIds}
+                indexPattern={indexPattern}
+                itemsPerPage={5}
+                itemsPerPageOptions={[5, 10, 20]}
+                kqlMode="search"
+                kqlQuery=""
+                onChangeDataProviderKqlQuery={jest.fn()}
+                onChangeDroppableAndProvider={jest.fn()}
+                onChangeItemsPerPage={jest.fn()}
+                onColumnRemoved={jest.fn()}
+                onColumnResized={jest.fn()}
+                onColumnSorted={jest.fn()}
+                onDataProviderRemoved={jest.fn()}
+                onFilterChange={jest.fn()}
+                onPinEvent={jest.fn()}
+                onRangeSelected={jest.fn()}
+                onToggleDataProviderEnabled={jest.fn()}
+                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+                onUnPinEvent={jest.fn()}
+                pinnedEventIds={{}}
+                range={'1 Day'}
+                rowRenderers={rowRenderers}
+                show={true}
+                sort={sort}
+                updateNote={jest.fn()}
+              />
+            </MockedProvider>
+          </TestProviders>
         );
 
         wrapper

@@ -6,6 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -22,6 +23,8 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
+export const addColumn = actionCreator<{ id: string; columns: ColumnHeader }>('ADD_COLUMN');
+
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
 export const applyDeltaToWidth = actionCreator<{
@@ -32,9 +35,24 @@ export const applyDeltaToWidth = actionCreator<{
   maxWidthPercent: number;
 }>('APPLY_DELTA_TO_WIDTH');
 
-export const createTimeline = actionCreator<{ id: string; show?: boolean }>('CREATE_TIMELINE');
+export const applyDeltaToColumnWidth = actionCreator<{
+  id: string;
+  columnId: string;
+  delta: number;
+}>('APPLY_DELTA_TO_COLUMN_WIDTH');
+
+export const createTimeline = actionCreator<{
+  id: string;
+  columns: ColumnHeader[];
+  show?: boolean;
+}>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
+
+export const removeColumn = actionCreator<{
+  id: string;
+  columnId: string;
+}>('REMOVE_COLUMN');
 
 export const removeProvider = actionCreator<{
   id: string;
@@ -45,6 +63,11 @@ export const removeProvider = actionCreator<{
 export const showTimeline = actionCreator<{ id: string; show: boolean }>('SHOW_TIMELINE');
 
 export const unPinEvent = actionCreator<{ id: string; eventId: string }>('UN_PIN_EVENT');
+
+export const updateColumns = actionCreator<{
+  id: string;
+  columns: ColumnHeader[];
+}>('UPDATE_COLUMNS');
 
 export const updateDataProviderEnabled = actionCreator<{
   id: string;

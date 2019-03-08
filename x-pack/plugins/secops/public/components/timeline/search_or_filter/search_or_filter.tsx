@@ -23,7 +23,7 @@ import { KueryFilterQuery } from '../../../store';
 import { KqlMode } from '../../../store/local/timeline/model';
 import { AutocompleteField } from '../../autocomplete_field';
 
-import { modes, options } from './helpers';
+import { getPlaceholderText, modes, options } from './helpers';
 import * as i18n from './translations';
 
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
@@ -100,7 +100,7 @@ export const SearchOrFilter = pure<Props>(
                   loadSuggestions={loadSuggestions}
                   onChange={setKqlFilterQueryDraft}
                   onSubmit={applyKqlFilterQuery}
-                  placeholder={i18n.SEARCH_KQL_PLACEHOLDER}
+                  placeholder={getPlaceholderText(kqlMode)}
                   suggestions={suggestions}
                   value={filterQueryDraft ? filterQueryDraft.expression : ''}
                 />

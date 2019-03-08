@@ -6,6 +6,8 @@
 
 import { getOr, omit, uniq } from 'lodash/fp';
 
+import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
+import { getColumnWidthFromType } from '../../../components/timeline/body/helpers';
 import { Sort } from '../../../components/timeline/body/sort';
 import { DataProvider } from '../../../components/timeline/data_providers/data_provider';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -93,12 +95,14 @@ export const addTimelineNoteToEvent = ({
 
 interface AddNewTimelineParams {
   id: string;
+  columns: ColumnHeader[];
   show?: boolean;
   timelineById: TimelineById;
 }
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
   id,
+  columns,
   show = false,
   timelineById,
 }: AddNewTimelineParams): TimelineById => ({
@@ -106,6 +110,7 @@ export const addNewTimeline = ({
   [id]: {
     id,
     ...timelineDefaults,
+    columns,
     show,
   },
 });
@@ -251,6 +256,107 @@ const addProviderToTimeline = (
     },
   };
 };
+
+interface AddTimelineColumnParams {
+  id: string;
+  column: ColumnHeader;
+  timelineById: TimelineById;
+}
+
+export const addTimelineColumn = ({
+  id,
+  column,
+  timelineById,
+}: AddTimelineColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const alreadyExistsAtIndex = timeline.columns.some(c => c.id === column.id);
+  const columns = alreadyExistsAtIndex
+    ? timeline.columns // return the same collection, unmodified
+    : [...timeline.columns, column]; // add the column to the end
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface RemoveTimelineColumnParams {
+  id: string;
+  columnId: string;
+  timelineById: TimelineById;
+}
+
+export const removeTimelineColumn = ({
+  id,
+  columnId,
+  timelineById,
+}: RemoveTimelineColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.filter(c => c.id !== columnId);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface ApplyDeltaToTimelineColumnWidth {
+  id: string;
+  columnId: string;
+  delta: number;
+  timelineById: TimelineById;
+}
+
+export const applyDeltaToTimelineColumnWidth = ({
+  id,
+  columnId,
+  delta,
+  timelineById,
+}: ApplyDeltaToTimelineColumnWidth): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columnIndex = timeline.columns.findIndex(c => c.id === columnId);
+  if (columnIndex === -1) {
+    // the column was not found
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+      },
+    };
+  }
+  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type);
+  const requestedWidth = timeline.columns[columnIndex].width + delta; // raw change in width
+  const width = Math.max(minWidthPixels, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const columnWithNewWidth = {
+    ...timeline.columns[columnIndex],
+    width,
+  };
+
+  const columns = [
+    ...timeline.columns.slice(0, columnIndex),
+    columnWithNewWidth,
+    ...timeline.columns.slice(columnIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
 interface AddTimelineProviderParams {
   id: string;
   provider: DataProvider;
@@ -339,6 +445,28 @@ export const updateKqlFilterQueryDraft = ({
         ...timeline.kqlQuery,
         filterQueryDraft,
       },
+    },
+  };
+};
+
+interface UpdateTimelineColumnsParams {
+  id: string;
+  columns: ColumnHeader[];
+  timelineById: TimelineById;
+}
+
+export const updateTimelineColumns = ({
+  id,
+  columns,
+  timelineById,
+}: UpdateTimelineColumnsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
     },
   };
 };

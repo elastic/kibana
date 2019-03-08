@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -13,6 +13,8 @@ import { Ecs } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
+  OnColumnRemoved,
+  OnColumnResized,
   OnColumnSorted,
   OnFilterChange,
   OnPinEvent,
@@ -36,7 +38,10 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;
+  isLoading: boolean;
   eventIdToNoteIds: { [eventId: string]: string[] };
+  onColumnRemoved: OnColumnRemoved;
+  onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
   onFilterChange: OnFilterChange;
   onPinEvent: OnPinEvent;
@@ -47,6 +52,7 @@ interface Props {
   rowRenderers: RowRenderer[];
   sort: Sort;
   updateNote: UpdateNote;
+  width: number;
 }
 
 const HorizontalScroll = styled.div<{
@@ -61,14 +67,13 @@ const HorizontalScroll = styled.div<{
 
 const VerticalScrollContainer = styled.div<{
   height: number;
-  width: number;
+  minWidth: number;
 }>`
   display: block;
   height: ${({ height }) => `${height - footerHeight - 12}px`};
   overflow-x: hidden;
   overflow-y: auto;
-  min-width: ${({ width }) => `${width}px`};
-  width: 100%;
+  min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
 
 export const defaultWidth = 1090;
@@ -84,6 +89,9 @@ export const Body = pure<Props>(
     getNotesByIds,
     height,
     id,
+    isLoading,
+    onColumnRemoved,
+    onColumnResized,
     onColumnSorted,
     onFilterChange,
     onPinEvent,
@@ -92,9 +100,10 @@ export const Body = pure<Props>(
     rowRenderers,
     sort,
     updateNote,
+    width,
   }) => {
     const columnWidths = columnHeaders.reduce(
-      (totalWidth, header) => totalWidth + header.minWidth,
+      (totalWidth, header) => totalWidth + header.width,
       ACTIONS_COLUMN_WIDTH
     );
 
@@ -104,20 +113,23 @@ export const Body = pure<Props>(
           <ColumnHeaders
             actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
             columnHeaders={columnHeaders}
+            isLoading={isLoading}
+            onColumnRemoved={onColumnRemoved}
+            onColumnResized={onColumnResized}
             onColumnSorted={onColumnSorted}
             onFilterChange={onFilterChange}
             sort={sort}
             timelineId={id}
+            minWidth={columnWidths}
           />
-
-          <EuiHorizontalRule margin="xs" />
 
           <VerticalScrollContainer
             data-test-subj="vertical-scroll-container"
             height={height}
-            width={columnWidths}
+            minWidth={columnWidths}
           >
             <Events
+              actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
               addNoteToEvent={addNoteToEvent}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
@@ -125,11 +137,14 @@ export const Body = pure<Props>(
               eventIdToNoteIds={eventIdToNoteIds}
               getNotesByIds={getNotesByIds}
               id={id}
+              onColumnResized={onColumnResized}
               onPinEvent={onPinEvent}
               onUnPinEvent={onUnPinEvent}
               pinnedEventIds={pinnedEventIds}
               rowRenderers={rowRenderers}
               updateNote={updateNote}
+              minWidth={columnWidths}
+              width={width}
             />
           </VerticalScrollContainer>
         </EuiText>

@@ -47,11 +47,11 @@ describe('empty_column_renderer', () => {
 
   test('should return an empty value', () => {
     delete mockDatum.source;
-    const emptyColumn = emptyColumnRenderer.renderColumn(
-      'source',
-      mockDatum,
-      allFieldsInSchemaByName.source
-    );
+    const emptyColumn = emptyColumnRenderer.renderColumn({
+      columnName: 'source',
+      data: mockDatum,
+      field: allFieldsInSchemaByName.source,
+    });
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
