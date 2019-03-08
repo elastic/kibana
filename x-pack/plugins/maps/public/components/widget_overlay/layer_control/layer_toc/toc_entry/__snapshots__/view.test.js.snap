@@ -67,7 +67,6 @@ exports[`TOCEntry is rendered 1`] = `
         className="mapTocEntry__grab"
       >
         <EuiIcon
-          size="m"
           type="grab"
         />
       </span>

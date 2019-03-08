@@ -46,6 +46,7 @@ export const SourceConfigurationFlyout = injectI18n(({ intl }: SourceConfigurati
                   fields: {
                     container: configuration.fields.container,
                     host: configuration.fields.host,
+                    message: configuration.fields.message,
                     pod: configuration.fields.pod,
                     tiebreaker: configuration.fields.tiebreaker,
                     timestamp: configuration.fields.timestamp,
