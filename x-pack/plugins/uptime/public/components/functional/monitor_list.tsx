@@ -58,7 +58,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, successColor }: Mo
       columns={[
         {
           field: 'ping.monitor.status',
-          width: 150,
+          width: '150px',
           name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
             defaultMessage: 'Status',
           }),
@@ -110,7 +110,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, successColor }: Mo
         },
         {
           field: 'upSeries',
-          width: 180,
+          width: '180px',
           align: 'right',
           name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
             defaultMessage: 'Downtime history',

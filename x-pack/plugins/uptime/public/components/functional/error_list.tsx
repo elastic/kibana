@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore missing typings
 import {
   EuiBadge,
   EuiCodeBlock,
@@ -39,7 +38,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
       columns={[
         {
           field: 'count',
-          width: 200,
+          width: '200px',
           name: i18n.translate('xpack.uptime.errorList.CountColumnLabel', {
             defaultMessage: 'Frequency',
           }),
@@ -85,14 +84,13 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           width: '40%',
           render: (message: string) => (
             <div>
-              <EuiCodeBlock
-                transparentBackground
-                // @ts-ignore "size" prop missing on type EuiCodeBlock
-                size="xs"
-                paddingSize="none"
-              >
-                {message}
-              </EuiCodeBlock>
+              {
+                // TODO: remove this ignore when prop is defined on type
+                // @ts-ignore size is not currently defined on the type for EuiCodeBlock
+                <EuiCodeBlock transparentBackground size="xs" paddingSize="none">
+                  {message}
+                </EuiCodeBlock>
+              }
             </div>
           ),
         },

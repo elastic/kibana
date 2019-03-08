@@ -20,7 +20,7 @@ export const formatSparklineCounts = (counts: PingCount[]) => {
     // wait for another point
     return [];
   }
-  return counts.map(({ x: x0, y }, index, array) => {
+  return counts.map(({ x: x0, y: yVal }, index, array) => {
     let x;
     const nextIndex = index + 1;
     if (nextIndex === array.length) {
@@ -29,6 +29,6 @@ export const formatSparklineCounts = (counts: PingCount[]) => {
       const { x: nextX } = array[nextIndex];
       x = nextX;
     }
-    return { x, x0, y };
+    return { x, x0, y: yVal || 0 };
   });
 };

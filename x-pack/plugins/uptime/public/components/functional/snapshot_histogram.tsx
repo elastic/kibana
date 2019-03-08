@@ -36,14 +36,14 @@ export const SnapshotHistogram = ({
     animateData={false}
   >
     <EuiHistogramSeries
-      data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount }))}
+      data={histogram.map(({ x, x0, downCount }) => ({ x, x0, y: downCount || 0 }))}
       name={i18n.translate('xpack.uptime.snapshotHistogram.series.downLabel', {
         defaultMessage: 'Down',
       })}
       color={dangerColor}
     />
     <EuiHistogramSeries
-      data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount }))}
+      data={histogram.map(({ x, x0, upCount }) => ({ x, x0, y: upCount || 0 }))}
       name={i18n.translate('xpack.uptime.snapshotHistogram.series.upLabel', {
         defaultMessage: 'Up',
       })}
