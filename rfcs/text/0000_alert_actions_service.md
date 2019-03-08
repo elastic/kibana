@@ -146,26 +146,21 @@ $ curl -X GET localhost:5601/api/actions
 
 # Drawbacks
 
-Why should we *not* do this? Please consider:
-
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
-
-There are tradeoffs to choosing any path. Attempt to identify them here.
-
-The relationship between *action types* and *connetors* is a bit complex as well
-as the supported parameter meta types.
+The relationship between **action types** and **connectors** is a bit complex as
+well as the supported parameter meta types.
 
 Another downside to this design is that an alert must be changed in order to support
-*action types*. So as new action types to meet user needs are discovered alerts
-will need to be changed if they are to be supported. This increases the code
-complexity of each alert and time to market for new integrations.
+**action types**. So as new action types are added to meet users needs are
+discovered alerts will require changes to support the new types. This increases
+the code complexity of each alert and time to market for new integrations. And
+increased risk of alerts for specific applications not having options to perform
+the same actions that other applications support. Also differences in UI and
+customizability for the action connectors may vary per application.
 
 This might lead to a poor user experience when a user tries to set up an alert
-in APM and APM does not yet support calling `webhooks` as it's task only
-supports `notifications`.
+in APM and APM does not yet support calling `webhooks` as it's alert only
+supports `notifications`. Or APM might allow a user to configure a template for
+an email message but Uptime does not.
 
 # Alternatives
 
