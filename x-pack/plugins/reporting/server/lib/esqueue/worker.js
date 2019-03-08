@@ -201,27 +201,32 @@ export class Worker extends events.EventEmitter {
       // run the worker's workerFn
       let isResolved = false;
       const cancellationToken = new CancellationToken();
-      Promise.resolve(this.workerFn.call(null, job._source.payload, cancellationToken))
-        .then((res) => {
+      const jobSource = job._source;
+
+      Promise.resolve(this.workerFn.call(null, jobSource.jobtype, jobSource.payload, cancellationToken))
+        .then(res => {
           isResolved = true;
           resolve(res);
         })
-        .catch((err) => {
+        .catch(err => {
           isResolved = true;
           reject(err);
         });
 
       // fail if workerFn doesn't finish before timeout
+      const { timeout } = jobSource;
       setTimeout(() => {
         if (isResolved) return;
 
         cancellationToken.cancel();
         this.warn(`Timeout processing job ${job._id}`);
-        reject(new WorkerTimeoutError(`Worker timed out, timeout = ${job._source.timeout}`, {
-          timeout: job._source.timeout,
-          jobId: job._id,
-        }));
-      }, job._source.timeout);
+        reject(
+          new WorkerTimeoutError(`Worker timed out, timeout = ${timeout}`, {
+            jobId: job._id,
+            timeout,
+          })
+        );
+      }, timeout);
     });
 
     return workerOutput.then((output) => {
@@ -357,7 +362,6 @@ export class Worker extends events.EventEmitter {
           filter: {
             bool: {
               minimum_should_match: 1,
-              must: { term: { jobtype: this.jobtype } },
               should: [
                 { term: { status: 'pending' } },
                 {
