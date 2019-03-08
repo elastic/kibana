@@ -221,27 +221,45 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
-    const visConfig = buildVisConfig.table(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.table(schemas),
+    };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const visConfig = buildVisConfig.metric(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.metric(schemas),
+    };
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = buildVisConfig.tagcloud(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tagcloud(schemas),
+    };
     return `tagcloud ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.region_map(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.region_map(schemas),
+    };
     return `regionmap ${prepareJson('visConfig', visConfig)}`;
   },
   tile_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.tile_map(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tile_map(schemas),
+    };
     return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
   pie: (visState, schemas) => {
-    const visConfig = buildVisConfig.pie(schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.pie(schemas),
+    };
     return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
