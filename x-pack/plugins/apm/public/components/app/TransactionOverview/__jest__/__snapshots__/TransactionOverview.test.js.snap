@@ -47,6 +47,17 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
     hasShadow={false}
     paddingSize="m"
   >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h3>
+        Transactions
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <TransactionListRequest
       render={[Function]}
       urlParams={
@@ -79,6 +90,17 @@ exports[`TransactionOverviewView should render without type filter controls if t
     hasShadow={false}
     paddingSize="m"
   >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h3>
+        Transactions
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <TransactionListRequest
       render={[Function]}
       urlParams={
