@@ -75,24 +75,17 @@ export class MBMapContainer extends React.Component {
     const targetFeature = features[0];
 
     if (this.props.tooltipState) {
-      const propertiesUnchanged = _.isEqual(this.props.tooltipState.activeFeature.properties, targetFeature.properties);
-      const geometryUnchanged = _.isEqual(this.props.tooltipState.activeFeature.geometry, targetFeature.geometry);
-      if (propertiesUnchanged && geometryUnchanged) {
+      if (targetFeature.featureId === this.props.tooltipState.featureId) {
         return;
       }
     }
 
     const layer = this._getLayer(targetFeature.layer.id);
-    const formattedProperties = await layer.getPropertiesForTooltip(targetFeature.properties);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
 
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.HOVER,
-      activeFeature: {
-        properties: targetFeature.properties,
-        geometry: targetFeature.geometry
-      },
-      formattedProperties: formattedProperties,
+      featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       layerId: layer.getId(),
       location: popupAnchorLocation
     });
@@ -238,19 +231,12 @@ export class MBMapContainer extends React.Component {
 
 
   async _showTooltip()  {
-
-    if (this.props.tooltipState.type === TOOLTIP_TYPE.HOVER) {
-      this._renderContentToTooltip(this.props.tooltipState.formattedProperties, this.props.tooltipState.location);
-    } else if (this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED) {
-
-      const tooltipLayer = this.props.layerList.find(layer => {
-        return layer.getId() === this.props.tooltipState.layerId;
-      });
-
-      const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
-      const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
-      this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
-    }
+    const tooltipLayer = this.props.layerList.find(layer => {
+      return layer.getId() === this.props.tooltipState.layerId;
+    });
+    const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
+    const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+    this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }
 
   _syncTooltipState() {
