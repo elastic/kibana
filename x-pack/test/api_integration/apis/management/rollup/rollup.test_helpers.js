@@ -77,12 +77,17 @@ export const registerHelpers = ({ supertest, es }) => {
       .send({ jobIds });
   };
 
-  const stopAllJobStarted = (jobIds = jobsStarted, attempt = 0) => (
-    supertest
+  const stopJob = (ids) => {
+    const jobIds = Array.isArray(ids) ? ids : [ids];
+
+    return supertest
       .post(`${API_BASE_PATH}/stop`)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobIds })
-      .catch(() => {})
+      .send({ jobIds });
+  };
+
+  const stopAllJobStarted = (jobIds = jobsStarted, attempt = 0) => (
+    stopJob(jobIds)
       .then(() => supertest.get(`${API_BASE_PATH}/jobs`))
       .then(({ body: { jobs } }) => {
         // We make sure that there are no more jobs started
@@ -144,6 +149,7 @@ export const registerHelpers = ({ supertest, es }) => {
     createJob,
     deleteJob,
     startJob,
+    stopJob,
     cleanUp,
   };
 };

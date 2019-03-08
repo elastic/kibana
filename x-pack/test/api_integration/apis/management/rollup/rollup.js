@@ -19,6 +19,7 @@ export default function ({ getService }) {
     createJob,
     deleteJob,
     startJob,
+    stopJob,
     cleanUp,
   } = registerHelpers({ supertest, es });
 
@@ -169,7 +170,7 @@ export default function ({ getService }) {
     });
 
     describe('Actions', () => {
-      describe('start job', () => {
+      describe('start', () => {
         let job;
 
         beforeEach(async () => {
@@ -191,11 +192,24 @@ export default function ({ getService }) {
 
         it('should throw a 400 Bad request if the job is already started', async () => {
           await startJob(job.config.id); // Start the job
-          const { body } = await startJob(job.config.id)
-            .expect(400);
 
+          const { body } = await startJob(job.config.id).expect(400);
           expect(body.error).to.eql('Bad Request');
           expect(body.message).to.contain('Cannot start task for Rollup Job');
+        });
+      });
+
+      describe('stop', () => {
+        it('should stop the job', async () => {
+          const indexName = await createIndexWithMappings();
+          const payload = getJobPayload(indexName);
+          const { id: jobId } = payload.job;
+
+          await createJob(payload);
+          await startJob(jobId);
+          const { body } = await stopJob(jobId).expect(200);
+
+          expect(body).to.eql({ success: true });
         });
       });
     });
