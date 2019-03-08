@@ -32,7 +32,11 @@ describe('suricata_row_renderer', () => {
   });
 
   test('should render children normally if it does not have a signature', () => {
-    const children = suricataRowRenderer.renderRow(nonSuricata, <span>some children</span>);
+    const children = suricataRowRenderer.renderRow({
+      data: nonSuricata,
+      width: 100,
+      children: <span>some children</span>,
+    });
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
@@ -42,7 +46,11 @@ describe('suricata_row_renderer', () => {
   });
 
   test('should render a suricata row', () => {
-    const children = suricataRowRenderer.renderRow(suricata, <span>some children </span>);
+    const children = suricataRowRenderer.renderRow({
+      data: suricata,
+      width: 100,
+      children: <span>some children </span>,
+    });
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
@@ -55,7 +63,11 @@ describe('suricata_row_renderer', () => {
 
   test('should render a suricata row even if it does not have a suricata signature', () => {
     delete suricata!.suricata!.eve!.alert!.signature;
-    const children = suricataRowRenderer.renderRow(suricata, <span>some children</span>);
+    const children = suricataRowRenderer.renderRow({
+      data: suricata,
+      width: 100,
+      children: <span>some children</span>,
+    });
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>

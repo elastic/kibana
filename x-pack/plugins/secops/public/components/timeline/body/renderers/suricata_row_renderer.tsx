@@ -8,9 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../graphql/types';
-
-import { RowRenderer } from '.';
+import { RowRenderer, RowRendererContainer } from '.';
 import { SuricataDetails } from './suricata_details';
 
 const SuricataRow = styled.div`
@@ -22,15 +20,17 @@ const SuricataRow = styled.div`
 `;
 
 export const suricataRowRenderer: RowRenderer = {
-  isInstance: (ecs: Ecs) => {
+  isInstance: ecs => {
     const module: string | null = get('event.module', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: (data: Ecs, children: React.ReactNode) => {
+  renderRow: ({ data, width, children }) => {
     return (
       <SuricataRow>
         {children}
-        <SuricataDetails data={data} />
+        <RowRendererContainer width={width}>
+          <SuricataDetails data={data} />
+        </RowRendererContainer>
       </SuricataRow>
     );
   },

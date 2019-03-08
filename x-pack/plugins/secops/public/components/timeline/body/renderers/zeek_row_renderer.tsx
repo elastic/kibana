@@ -8,9 +8,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../graphql/types';
-
-import { RowRenderer } from '.';
+import { RowRenderer, RowRendererContainer } from '.';
 import { ZeekDetails } from './zeek_details';
 
 const ZeekRow = styled.div`
@@ -22,14 +20,16 @@ const ZeekRow = styled.div`
 `;
 
 export const zeekRowRenderer: RowRenderer = {
-  isInstance: (ecs: Ecs) => {
+  isInstance: ecs => {
     const module: string | null = get('event.module', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },
-  renderRow: (data: Ecs, children: React.ReactNode) => (
+  renderRow: ({ data, width, children }) => (
     <ZeekRow>
       {children}
-      <ZeekDetails data={data} />
+      <RowRendererContainer width={width}>
+        <ZeekDetails data={data} />
+      </RowRendererContainer>
     </ZeekRow>
   ),
 };

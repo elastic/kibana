@@ -38,7 +38,11 @@ describe('zeek_row_renderer', () => {
   });
 
   test('should render children normally if it does not have a zeek object', () => {
-    const children = zeekRowRenderer.renderRow(nonZeek, <span>some children</span>);
+    const children = zeekRowRenderer.renderRow({
+      data: nonZeek,
+      width: 100,
+      children: <span>some children</span>,
+    });
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>
@@ -52,7 +56,11 @@ describe('zeek_row_renderer', () => {
   });
 
   test('should render a zeek row', () => {
-    const children = zeekRowRenderer.renderRow(zeek, <span>some children </span>);
+    const children = zeekRowRenderer.renderRow({
+      data: zeek,
+      width: 100,
+      children: <span>some children </span>,
+    });
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <ReduxStoreProvider store={store}>

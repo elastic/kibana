@@ -26,7 +26,11 @@ describe('get_column_renderer', () => {
 
   test('should render plain row data when it is a non suricata row', () => {
     const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
-    const row = rowRenderer.renderRow(nonSuricata, <span>some child</span>);
+    const row = rowRenderer.renderRow({
+      data: nonSuricata,
+      width: 100,
+      children: <span>some child</span>,
+    });
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
@@ -37,7 +41,11 @@ describe('get_column_renderer', () => {
 
   test('should render a suricata row data when it is a suricata row', () => {
     const rowRenderer = getRowRenderer(suricata, rowRenderers);
-    const row = rowRenderer.renderRow(suricata, <span>some child </span>);
+    const row = rowRenderer.renderRow({
+      data: suricata,
+      width: 100,
+      children: <span>some child </span>,
+    });
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>

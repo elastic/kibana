@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import styled from 'styled-components';
+
 import { Ecs } from '../../../../graphql/types';
+
+export const RowRendererContainer = styled.div<{ width: number }>`
+  width: ${({ width }) => `${width}px`};
+`;
 
 export interface RowRenderer {
   isInstance: (data: Ecs) => boolean;
-  renderRow: (data: Ecs, children: React.ReactNode) => React.ReactNode;
+  renderRow: (
+    { data, width, children }: { data: Ecs; width: number; children: React.ReactNode }
+  ) => React.ReactNode;
 }
