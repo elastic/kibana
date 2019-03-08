@@ -6,7 +6,7 @@
 
 import { Readable } from 'stream';
 
-jest.doMock('fs', () => ({
+jest.mock('fs', () => ({
   createReadStream(filepath: string): Readable {
     if (filepath === 'ERROR') {
       throw new Error('MOCK ERROR - Invalid Path');

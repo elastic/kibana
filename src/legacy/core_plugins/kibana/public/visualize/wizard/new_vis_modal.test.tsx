@@ -22,7 +22,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 const settingsGet = jest.fn();
 
-jest.doMock('ui/chrome', () => ({
+jest.mock('ui/chrome', () => ({
   getUiSettingsClient: () => ({
     get: settingsGet,
   }),
