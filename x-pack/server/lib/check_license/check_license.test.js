@@ -10,12 +10,13 @@ import {
   LICENSE_STATUS_UNAVAILABLE,
   LICENSE_STATUS_EXPIRED,
   LICENSE_STATUS_VALID,
+  LICENSE_TYPE_BASIC,
 } from '../../../common/constants';
 
 describe('check_license', function () {
 
   const pluginName = 'Foo';
-  const minimumLicenseRequired = 'basic';
+  const minimumLicenseRequired = LICENSE_TYPE_BASIC;
   let mockLicenseInfo;
   beforeEach(() => mockLicenseInfo = {});
 
@@ -46,7 +47,7 @@ describe('check_license', function () {
   describe('license information is available', () => {
     beforeEach(() => {
       mockLicenseInfo.isAvailable = () => true;
-      set(mockLicenseInfo, 'license.getType', () => 'basic');
+      set(mockLicenseInfo, 'license.getType', () => LICENSE_TYPE_BASIC);
     });
 
     describe('& license is trial, standard, gold, platinum', () => {

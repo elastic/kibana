@@ -6,7 +6,7 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Location } from 'history';
-import { first, get } from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 import {
   fromQuery,
@@ -15,21 +15,11 @@ import {
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
+import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
-  getPropertyTabNames,
-  PropertiesTable
-} from '../../../shared/PropertiesTable';
-import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
-
-// Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
-  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
-  return selectedTab ? selectedTab : first(tabs) || {};
-}
-
-function getTabs(transaction: Transaction) {
-  return getPropertyTabNames(transaction);
-}
+  getCurrentTab,
+  getTabsFromObject
+} from '../../../shared/PropertiesTable/tabConfig';
 
 interface Props {
   location: Location;
@@ -42,7 +32,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   transaction,
   urlParams
 }) => {
-  const tabs = getTabs(transaction);
+  const tabs = getTabsFromObject(transaction);
   const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
   const agentName = transaction.agent.name;
 
