@@ -68,7 +68,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 name: i18n.translate(
                   'kbn.visualize.newVisWizard.searchSelection.savedObjectType.search',
                   {
-                    defaultMessage: 'Saved Search',
+                    defaultMessage: 'Saved search',
                   }
                 ),
               },
