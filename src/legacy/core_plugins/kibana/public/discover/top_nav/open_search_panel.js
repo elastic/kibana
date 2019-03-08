@@ -84,7 +84,7 @@ export class OpenSearchPanel extends React.Component {
                 type: SEARCH_OBJECT_TYPE,
                 getIconForSavedObject: () => 'search',
                 name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
-                  defaultMessage: 'Saved Search',
+                  defaultMessage: 'Saved search',
                 }),
               },
             ]}
