@@ -139,7 +139,13 @@ export class TransactionDistribution extends Component<Props> {
               }
             )}{' '}
             <EuiIconTip
-              content="Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
+              content={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
+                {
+                  defaultMessage:
+                    "Each bucket will show a sample transaction. If there's no sample available, it's most likely because of the sampling limit set in the agent configuration."
+                }
+              )}
               position="top"
             />
           </h5>
