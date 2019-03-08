@@ -7,7 +7,9 @@ import { SecretService } from './secret_service';
 describe('The Secret Secret Store', async function TestSecretServiceObject() {
   const savedObjectsClient = {
     create: jest.fn(),
-    errors: jest.fn(),
+    errors: {
+      isConflictError: jest.fn(),
+    },
     bulkCreate: jest.fn(),
     bulkGet: jest.fn(),
     delete: jest.fn(),
@@ -79,7 +81,7 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
       someOtherProp: 'check me',
     };
     let insideJob: any = null;
-    let internalSavedObject: any = null;
+    const internalSavedObject: any = null;
     savedObjectsClient.create.mockImplementation((type: string, attributes: any, options?: any) => {
       insideJob = {
         id: 'testId',
@@ -88,18 +90,6 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
       };
       return insideJob;
     });
-    savedObjectsClient.update.mockImplementation(
-      (type: string, id: string, attributes: any, options?: any) => {
-        return (internalSavedObject = {
-          id,
-          type,
-          attributes: {
-            ...attributes,
-            ...insideJob.attributes,
-          },
-        });
-      }
-    );
     savedObjectsClient.get.mockImplementation((type: string, id: string, options?: any) => {
       internalSavedObject.anotherSecret = 'I am changing the message';
       internalSavedObject.addNewField = 'me';
@@ -117,8 +107,73 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
 
   describe('encryption key validation', async () => {
     it('should be valid if first time use', async () => {
+      let dummyObj: any;
+      savedObjectsClient.create.mockImplementation(
+        (type: string, attributes: any, options?: any) => {
+          dummyObj = {
+            id: options.id,
+            type,
+            attributes,
+          };
+          return dummyObj;
+        }
+      );
+      savedObjectsClient.get.mockImplementation((type: string, attributes: any, options?: any) => {
+        return dummyObj;
+      });
       const isValid = await subject.validateKey();
       expect(isValid).toBeTruthy();
+    });
+
+    it('should return false if decrypt fails', async () => {
+      let dummyObj: any;
+      savedObjectsClient.create.mockImplementation(
+        (type: string, attributes: any, options?: any) => {
+          attributes.secret = 'blah';
+          dummyObj = {
+            id: options.id,
+            type,
+            attributes,
+          };
+          return dummyObj;
+        }
+      );
+      savedObjectsClient.get.mockImplementation((type: string, attributes: any, options?: any) => {
+        return dummyObj;
+      });
+      const isValid = await subject.validateKey();
+      expect(isValid).toBeFalsy();
+    });
+
+    it('should return true if dummy already exists', async () => {
+      let dummyObj: any;
+      savedObjectsClient.create.mockImplementation(
+        (type: string, attributes: any, options?: any) => {
+          attributes.secret = 'blah';
+          dummyObj = {
+            id: options.id,
+            type,
+            attributes,
+          };
+          throw new Error('test error');
+        }
+      );
+      savedObjectsClient.get.mockImplementation((type: string, attributes: any, options?: any) => {
+        return dummyObj;
+      });
+      savedObjectsClient.errors.isConflictError.mockReturnValue(true);
+      const isValid = await subject.validateKey();
+      expect(isValid).toBeFalsy();
+    });
+
+    it('should throw any error other than conflict', async () => {
+      savedObjectsClient.create.mockImplementation(
+        (type: string, attributes: any, options?: any) => {
+          throw new Error('test error');
+        }
+      );
+      savedObjectsClient.errors.isConflictError.mockReturnValue(false);
+      await expect(subject.validateKey()).rejects.toThrow('test error');
     });
   });
 });
