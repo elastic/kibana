@@ -56,10 +56,7 @@
       "jest",
       "react",
       "@kbn/test/types/expect.js"
-    ],
-    // Disallow features that require cross-file information for emit.
-    // TODO: Maybe is more secure to just enable this
-    "isolatedModules": false
+    ]
   },
   "include": [
     "kibana.d.ts",
