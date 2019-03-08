@@ -63,11 +63,20 @@ describe('kbn-interpreter/interpreter', () => {
 
     const register = jest.fn();
 
+<<<<<<< HEAD
     await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register }));
+=======
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register },
+    });
+>>>>>>> 41e68ebbe9... [intepreter][Canvas] Dedupe server functions in batched requests (#32712)
 
     expect(register).toHaveBeenCalledTimes(2);
 
-    const [ hello, world ] = register.mock.calls.map(([fn]) => fn());
+    const [hello, world] = register.mock.calls.map(([fn]) => fn());
 
     expect(hello.name).toEqual('hello');
     expect(typeof hello.fn).toEqual('function');
@@ -85,14 +94,15 @@ describe('kbn-interpreter/interpreter', () => {
       pathname: FUNCTIONS_URL,
       method: 'POST',
       body: JSON.stringify({
-        functions: [{
-          id: 1,
-          functionName: 'hello',
-          args,
-          context,
-        }]
+        functions: [
+          {
+            functionName: 'hello',
+            args,
+            context,
+            id: 1,
+          },
+        ],
       }),
     });
   });
-
 });
