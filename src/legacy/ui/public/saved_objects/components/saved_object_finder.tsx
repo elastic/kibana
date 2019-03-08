@@ -84,7 +84,6 @@ interface SavedObjectFinderState {
 }
 
 interface BaseSavedObjectFinder {
-  callToActionButton?: React.ReactNode;
   onChoose?: (
     id: SimpleSavedObject<SavedObjectAttributes>['id'],
     type: SimpleSavedObject<SavedObjectAttributes>['type'],
@@ -108,7 +107,6 @@ type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFinderInit
 
 class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObjectFinderState> {
   public static propTypes = {
-    callToActionButton: PropTypes.node,
     onChoose: PropTypes.func,
     noItemsMessage: PropTypes.node,
     savedObjectMetaData: PropTypes.array.isRequired,
@@ -428,7 +426,6 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
             )}
           </EuiFilterGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{this.props.callToActionButton}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }

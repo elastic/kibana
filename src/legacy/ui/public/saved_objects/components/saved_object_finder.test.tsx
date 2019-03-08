@@ -325,15 +325,6 @@ describe('SavedObjectsFinder', () => {
     });
   });
 
-  it('should display passed in action button', () => {
-    const actionButton = <span id="myActionButton" />;
-    const wrapper = shallow(
-      <SavedObjectFinder callToActionButton={actionButton} savedObjectMetaData={searchMetaData} />
-    );
-
-    expect(wrapper.contains(actionButton)).toBe(true);
-  });
-
   it('should display no items message if there are no items', async () => {
     objectsClientStub.returns(Promise.resolve({ savedObjects: [] }));
     const noItemsMessage = <span id="myNoItemsMessage" />;
