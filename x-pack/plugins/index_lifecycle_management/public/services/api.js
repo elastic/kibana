@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import chrome from 'ui/chrome';
+import {
+  UA_POLICY_DELETE,
+} from '../../common/constants';
+import { trackUserRequest } from './track_user_action';
 
 let httpClient;
 export const setHttpClient = (client) => {
   httpClient = client;
 };
-const getHttpClient = () => {
+export const getHttpClient = () => {
   return httpClient;
 };
 const apiPrefix = chrome.addBasePath('/api/index_lifecycle_management');
@@ -43,7 +47,8 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
 }
 
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
-  const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
+  const request = httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
+  const response = await trackUserRequest(request, UA_POLICY_DELETE);
   return response.data;
 }
 
@@ -52,7 +57,6 @@ export async function saveLifecycle(lifecycle, httpClient = getHttpClient()) {
   return response.data;
 }
 
-
 export async function getAffectedIndices(indexTemplateName, policyName, httpClient = getHttpClient()) {
   const path = policyName
     ? `${apiPrefix}/indices/affected/${indexTemplateName}/${encodeURIComponent(policyName)}`
@@ -60,18 +64,22 @@ export async function getAffectedIndices(indexTemplateName, policyName, httpClie
   const response = await httpClient.get(path);
   return response.data;
 }
+
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   return response.data;
 };
+
 export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
   return response.data;
 };
+
 export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/add`, body);
   return response.data;
 };
+
 export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/template`, body);
   return response.data;
