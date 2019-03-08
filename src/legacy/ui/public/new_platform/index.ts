@@ -16,17 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { ConfigService, Env } from '../server/config';
-import { LoggerFactory } from '../server/logging';
-
-/**
- * Groups all main Kibana's core modules/systems/services that are consumed in a
- * variety of places within the core itself.
- * @internal
- */
-export interface CoreContext {
-  env: Env;
-  configService: ConfigService;
-  logger: LoggerFactory;
-}
+export { __newPlatformInit__, getNewPlatform } from './new_platform';

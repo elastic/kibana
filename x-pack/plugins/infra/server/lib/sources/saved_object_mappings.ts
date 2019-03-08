@@ -5,12 +5,12 @@
  */
 
 import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
-import { InfraSourceConfiguration } from './types';
+import { InfraSavedSourceConfiguration } from './types';
 
 export const infraSourceConfigurationSavedObjectType = 'infrastructure-ui-source';
 
 export const infraSourceConfigurationSavedObjectMappings: {
-  [infraSourceConfigurationSavedObjectType]: ElasticsearchMappingOf<InfraSourceConfiguration>;
+  [infraSourceConfigurationSavedObjectType]: ElasticsearchMappingOf<InfraSavedSourceConfiguration>;
 } = {
   [infraSourceConfigurationSavedObjectType]: {
     properties: {

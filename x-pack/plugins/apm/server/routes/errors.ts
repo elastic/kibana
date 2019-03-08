@@ -38,7 +38,7 @@ export function initErrorsApi(server: Server) {
       const { serviceName } = req.params;
       const { sortField, sortDirection } = req.query as {
         sortField: string;
-        sortDirection: 'desc' | 'asc';
+        sortDirection: string;
       };
 
       return getErrorGroups({
