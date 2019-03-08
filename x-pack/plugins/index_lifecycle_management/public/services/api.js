@@ -6,6 +6,9 @@
 import chrome from 'ui/chrome';
 import {
   UA_POLICY_DELETE,
+  UA_POLICY_ATTACH_INDEX,
+  UA_POLICY_ATTACH_INDEX_TEMPLATE,
+  UA_POLICY_DETACH_INDEX,
 } from '../../common/constants';
 import { trackUserRequest } from './track_user_action';
 
@@ -71,16 +74,19 @@ export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpCli
 };
 
 export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
-  const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
+  const request = httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
+  const response = await trackUserRequest(request, UA_POLICY_DETACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
-  const response = await httpClient.post(`${apiPrefix}/index/add`, body);
+  const request = httpClient.post(`${apiPrefix}/index/add`, body);
+  const response = await trackUserRequest(request, UA_POLICY_ATTACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
-  const response = await httpClient.post(`${apiPrefix}/template`, body);
+  const request = httpClient.post(`${apiPrefix}/template`, body);
+  const response = await trackUserRequest(request, UA_POLICY_ATTACH_INDEX_TEMPLATE);
   return response.data;
 };
