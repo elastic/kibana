@@ -42,15 +42,21 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
   <EuiSpacer
     size="l"
   />
-  <TransactionListRequest
-    render={[Function]}
-    urlParams={
-      Object {
-        "serviceName": "MyServiceName",
-        "transactionType": "test-type",
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <TransactionListRequest
+      render={[Function]}
+      urlParams={
+        Object {
+          "serviceName": "MyServiceName",
+          "transactionType": "test-type",
+        }
       }
-    }
-  />
+    />
+  </EuiPanel>
 </Fragment>
 `;
 
@@ -68,14 +74,20 @@ exports[`TransactionOverviewView should render without type filter controls if t
   <EuiSpacer
     size="l"
   />
-  <TransactionListRequest
-    render={[Function]}
-    urlParams={
-      Object {
-        "serviceName": "MyServiceName",
-        "transactionType": "test-type",
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <TransactionListRequest
+      render={[Function]}
+      urlParams={
+        Object {
+          "serviceName": "MyServiceName",
+          "transactionType": "test-type",
+        }
       }
-    }
-  />
+    />
+  </EuiPanel>
 </Fragment>
 `;
