@@ -173,7 +173,6 @@ exports[`render full suggestions component 1`] = `
                           className="euiToken euiToken--tokenTint07 euiToken--rectangle euiToken--small euiToken--fill"
                         >
                           <EuiIcon
-                            size="m"
                             type="tokenSymbol"
                           >
                             <tokenSymbol
@@ -263,7 +262,6 @@ exports[`render full suggestions component 1`] = `
                           className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
                         >
                           <EuiIcon
-                            size="m"
                             type="tokenClass"
                           >
                             <tokenClass
@@ -358,7 +356,6 @@ exports[`render full suggestions component 1`] = `
                           className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill"
                         >
                           <EuiIcon
-                            size="m"
                             type="tokenFile"
                           >
                             <tokenFile
@@ -495,7 +492,6 @@ exports[`render full suggestions component 1`] = `
                           className="euiToken euiToken--tokenTint05 euiToken--rectangle euiToken--small euiToken--fill"
                         >
                           <EuiIcon
-                            size="m"
                             type="tokenRepo"
                           >
                             <tokenRepo
