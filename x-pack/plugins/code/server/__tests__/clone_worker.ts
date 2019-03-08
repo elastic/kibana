@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Git from '@elastic/nodegit';
 import assert from 'assert';
 import fs from 'fs';
-import Git from 'nodegit';
 import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';

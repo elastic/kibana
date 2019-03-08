@@ -4,8 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import {
+  Blame,
+  Commit,
+  Error,
+  Object,
+  Oid,
+  Reference,
+  Repository,
+  Tree,
+  TreeEntry,
+} from '@elastic/nodegit';
 import Boom from 'boom';
-import { Blame, Commit, Error, Object, Oid, Reference, Repository, Tree, TreeEntry } from 'nodegit';
 import * as Path from 'path';
 import { GitBlame } from '../common/git_blame';
 import { CommitDiff, DiffKind } from '../common/git_diff';

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Reference } from '@elastic/nodegit';
+import { Commit, Revwalk } from '@elastic/nodegit';
 import Boom from 'boom';
 import fileType from 'file-type';
 import hapi, { RequestQuery } from 'hapi';
-import { Reference } from 'nodegit';
-import { Commit, Revwalk } from 'nodegit';
 import { ReferenceInfo } from '../../model/commit';
 import {
   commitInfo,

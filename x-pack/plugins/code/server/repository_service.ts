@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Git from '@elastic/nodegit';
 import del from 'del';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
-import Git from 'nodegit';
 import path from 'path';
 import { RepositoryUtils } from '../common/repository_utils';
 import {

@@ -6,7 +6,7 @@
 /* tslint:disable */
 
 import fs from 'fs';
-import Git from 'nodegit';
+import Git from '@elastic/nodegit';
 import rimraf from 'rimraf';
 
 import { TestConfig, Repo } from '../../model/test_config';
