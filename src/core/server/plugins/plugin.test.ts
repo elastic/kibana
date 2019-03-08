@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
@@ -27,11 +28,15 @@ import { Plugin, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
-jest.mock('plugin-with-initializer-path/server', () => ({ plugin: mockPluginInitializer }), {
+jest.doMock(
+  join('plugin-with-initializer-path', 'server'),
+  () => ({ plugin: mockPluginInitializer }),
+  { virtual: true }
+);
+jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
-jest.mock('plugin-without-initializer-path/server', () => ({}), { virtual: true });
-jest.mock('plugin-with-wrong-initializer-path/server', () => ({ plugin: {} }), {
+jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
   virtual: true,
 });
 

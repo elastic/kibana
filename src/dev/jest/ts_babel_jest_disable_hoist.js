@@ -24,31 +24,31 @@ const visitor = {
   // The idea behind this plugin is to hoist the `mock` prefixed variables
   // found in the babel-jest parsed tests in order to be able to use them
   // along with the jest.mock calls.
-  VariableDeclaration(path) {
-    const varNode = path && path.node;
-    const kind = varNode && varNode.kind;
-    const declarations = varNode && varNode.declarations;
-
-    if (!kind || !declarations) {
-      return;
-    }
-
-    // Return as soon as we found a mock prefixed var
-    const foundMockVarDeclaration = declarations.some((decl) => {
-      const declName = decl && decl.id && decl.id.name;
-      return /^mock/i.test(declName);
-    });
-
-    // If none mock prefixed var was found, just return
-    if (!foundMockVarDeclaration) {
-      return;
-    }
-
-    // If a mock prefixed var was found, hoist it with Infinity
-    // The same behaviour is found on babel-plugin-jest-hoist
-    // https://github.com/facebook/jest/blob/master/packages/babel-plugin-jest-hoist/src/index.ts#L180
-    path.node._blockHoist = Infinity;
-  },
+  // VariableDeclaration(path) {
+  //   const varNode = path && path.node;
+  //   const kind = varNode && varNode.kind;
+  //   const declarations = varNode && varNode.declarations;
+  //
+  //   if (!kind || !declarations) {
+  //     return;
+  //   }
+  //
+  //   // Return as soon as we found a mock prefixed var
+  //   const foundMockVarDeclaration = declarations.some((decl) => {
+  //     const declName = decl && decl.id && decl.id.name;
+  //     return /^mock/i.test(declName);
+  //   });
+  //
+  //   // If none mock prefixed var was found, just return
+  //   if (!foundMockVarDeclaration) {
+  //     return;
+  //   }
+  //
+  //   // If a mock prefixed var was found, hoist it with Infinity
+  //   // The same behaviour is found on babel-plugin-jest-hoist
+  //   // https://github.com/facebook/jest/blob/master/packages/babel-plugin-jest-hoist/src/index.ts#L180
+  //   path.node._blockHoist = Infinity;
+  // },
 };
 
 module.exports = () => {

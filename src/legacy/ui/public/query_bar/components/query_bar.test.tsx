@@ -48,13 +48,6 @@ const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
 const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 
-jest.mock('lodash', () => {
-  const _ = require.requireActual('lodash');
-  return {
-    ..._,
-    debounce: (func: () => any) => func,
-  };
-});
 jest.mock('ui/chrome', () => mockChromeFactory());
 jest.mock('../../chrome', () => mockChromeFactory());
 jest.mock('ui/persisted_log', () => ({
@@ -67,6 +60,13 @@ jest.mock('../../metadata', () => ({
 }));
 jest.mock('../../autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
+}));
+
+import _ from 'lodash';
+// Using doMock to avoid hoisting so that I can override only the debounce method in lodash
+jest.doMock('lodash', () => ({
+  ..._,
+  debounce: (func: () => any) => func,
 }));
 
 import { EuiFieldText } from '@elastic/eui';

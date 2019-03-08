@@ -17,20 +17,18 @@
  * under the License.
  */
 
-jest.mock('./cluster_client', () => ({ ClusterClient: jest.fn() }));
-
 import { first } from 'rxjs/operators';
+
+const MockClusterClient = jest.fn();
+jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { logger } from '../logging/__mocks__';
-import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
-
-const MockClusterClient = ClusterClient as jest.Mock;
 
 let elasticsearchService: ElasticsearchService;
 let configService: ConfigService;

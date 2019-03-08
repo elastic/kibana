@@ -17,12 +17,13 @@
  * under the License.
  */
 
+const mockReactDomRender = jest.fn();
+const mockReactDomUnmount = jest.fn();
 jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
+  render: mockReactDomRender,
+  unmountComponentAtNode: mockReactDomUnmount,
 }));
 
-import ReactDOM from 'react-dom';
 import { ToastsService } from './toasts_service';
 import { ToastsStart } from './toasts_start';
 
@@ -31,9 +32,6 @@ const mockI18n: any = {
     return '';
   },
 };
-
-const mockReactDomRender = ReactDOM.render as jest.Mock;
-const mockReactDomUnmount = ReactDOM.unmountComponentAtNode as jest.Mock;
 
 describe('#start()', () => {
   it('renders the GlobalToastList into the targetDomElement param', async () => {

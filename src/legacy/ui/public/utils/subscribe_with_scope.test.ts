@@ -17,15 +17,13 @@
  * under the License.
  */
 
+const mockFatalError = jest.fn();
 jest.mock('ui/notify/fatal_error', () => ({
-  fatalError: jest.fn(),
+  fatalError: mockFatalError,
 }));
 
 import * as Rx from 'rxjs';
-import { fatalError } from 'ui/notify/fatal_error';
 import { subscribeWithScope } from './subscribe_with_scope';
-
-const mockFatalError = fatalError as jest.Mock;
 
 let $rootScope: Scope;
 

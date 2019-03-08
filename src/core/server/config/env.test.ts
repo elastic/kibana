@@ -29,15 +29,11 @@ jest.mock('path', () => ({
   },
 }));
 
-jest.mock('../../../legacy/utils/package_json', () => ({
-  pkg: new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] }),
-}));
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
 import { Env } from '.';
-import { pkg } from '../../../legacy/utils/package_json';
 import { getEnvOptions } from './__mocks__/env';
-
-const mockPackage = pkg;
 
 test('correctly creates default environment in dev mode.', () => {
   mockPackage.raw = {

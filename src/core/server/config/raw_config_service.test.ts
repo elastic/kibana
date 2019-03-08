@@ -17,17 +17,17 @@
  * under the License.
  */
 
+const mockGetConfigFromFiles = jest.fn();
+
 jest.mock('./read_config', () => ({
-  getConfigFromFiles: jest.fn(),
+  getConfigFromFiles: mockGetConfigFromFiles,
 }));
 
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '.';
-import { getConfigFromFiles } from './read_config';
 
 const configFile = '/config/kibana.yml';
 const anotherConfigFile = '/config/kibana.dev.yml';
-const mockGetConfigFromFiles = getConfigFromFiles as jest.Mock;
 
 beforeEach(() => {
   mockGetConfigFromFiles.mockReset();

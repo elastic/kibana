@@ -17,10 +17,5 @@
  * under the License.
  */
 
-const babelJest = require('babel-jest');
-
-module.exports = babelJest.createTransformer({
-  presets: [
-    require.resolve('@kbn/babel-preset/node_preset')
-  ],
-});
+require('../../setup_node_env');
+module.exports = require('./ts_transform.ts');

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
-<EmptyState
+<Component
   intl={
     Object {
       "defaultFormats": Object {},
@@ -105,7 +105,7 @@ exports[`EmptyState component doesn't render child components when count is fals
     }
   }
 >
-  <EmptyIndex>
+  <Component>
     <EuiEmptyPrompt
       body={
         <React.Fragment>
@@ -246,8 +246,8 @@ exports[`EmptyState component doesn't render child components when count is fals
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </EmptyIndex>
-</EmptyState>
+  </Component>
+</Component>
 `;
 
 exports[`EmptyState component renders child components when count is truthy 1`] = `
@@ -265,7 +265,7 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 `;
 
 exports[`EmptyState component renders message while loading 1`] = `
-<EmptyState
+<Component
   count={1}
   intl={
     Object {
@@ -371,7 +371,7 @@ exports[`EmptyState component renders message while loading 1`] = `
   }
   loading={true}
 >
-  <EmptyStateLoading>
+  <Component>
     <EuiEmptyPrompt
       iconColor="subdued"
       title={
@@ -484,12 +484,12 @@ exports[`EmptyState component renders message while loading 1`] = `
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </EmptyStateLoading>
-</EmptyState>
+  </Component>
+</Component>
 `;
 
 exports[`EmptyState component renders the message when an error occurs 1`] = `
-<EmptyState
+<Component
   count={1}
   error="An error occurred"
   intl={
@@ -595,7 +595,7 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
     }
   }
 >
-  <EmptyStateError
+  <Component
     errorMessage="An error occurred"
   >
     <EuiEmptyPrompt
@@ -665,6 +665,6 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </EmptyStateError>
-</EmptyState>
+  </Component>
+</Component>
 `;

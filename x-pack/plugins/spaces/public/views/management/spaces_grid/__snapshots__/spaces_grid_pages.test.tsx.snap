@@ -129,7 +129,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
       sorting={false}
     />
   </EuiPageContent>
-  <SecureSpaceMessage
+  <Component
     userProfile={
       UserProfileClass {
         "capabilities": Object {
@@ -143,7 +143,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
-  <SpaceAvatar
+  <Component
     announceSpaceName={true}
     size="s"
     space={
@@ -183,8 +183,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </Component>,
+  <Component
     announceSpaceName={true}
     size="s"
     space={
@@ -223,8 +223,8 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
-  <SpaceAvatar
+  </Component>,
+  <Component
     announceSpaceName={true}
     size="s"
     space={
@@ -266,6 +266,6 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </SpaceAvatar>,
+  </Component>,
 ]
 `;

@@ -28,14 +28,13 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-jest.mock('fs', () => ({ createWriteStream: jest.fn() }));
+const mockCreateWriteStream = jest.fn();
+jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
 
-import { createWriteStream } from 'fs';
 import { LogLevel } from '../../log_level';
 import { LogRecord } from '../../log_record';
 import { FileAppender } from './file_appender';
 
-const mockCreateWriteStream = createWriteStream as jest.Mock;
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 beforeEach(() => {

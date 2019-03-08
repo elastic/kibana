@@ -17,30 +17,28 @@
  * under the License.
  */
 
-jest.mock('./discovery/plugins_discovery', () => ({ discover: jest.fn() }));
+import { ElasticsearchServiceStart } from '../elasticsearch';
+
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+
+const mockDiscover = jest.fn();
+jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
+
 jest.mock('./plugins_system');
-jest.mock('../../../legacy/utils/package_json', () => ({
-  pkg: new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] }),
-}));
 
 import { resolve } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 
-import { pkg } from '../../../legacy/utils/package_json';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { PluginDiscoveryError } from './discovery';
-import { discover } from './discovery/plugins_discovery';
-
-import { ElasticsearchServiceStart } from '../elasticsearch';
 import { logger } from '../logging/__mocks__';
+import { PluginDiscoveryError } from './discovery';
 import { Plugin } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 
-const mockDiscover = discover as jest.Mock;
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
-const mockPackage = pkg;
 
 let pluginsService: PluginsService;
 let configService: ConfigService;

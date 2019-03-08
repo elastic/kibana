@@ -28,7 +28,7 @@ describe('ReindexProgress', () => {
     );
 
     expect(wrapper).toMatchInlineSnapshot(`
-<StepProgress
+<Component
   steps={
     Array [
       Object {
@@ -127,7 +127,7 @@ describe('ReindexProgress', () => {
     );
 
     expect(wrapper).toMatchInlineSnapshot(`
-<StepProgress
+<Component
   steps={
     Array [
       Object {

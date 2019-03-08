@@ -17,33 +17,30 @@
  * under the License.
  */
 
+import { ElasticsearchConfig } from './elasticsearch_config';
+
+const MockClient = jest.fn();
 jest.mock('elasticsearch', () => ({
   // Jest types don't include `requireActual` right now.
   ...(jest as any).requireActual('elasticsearch'),
-  Client: jest.fn(),
+  Client: MockClient,
 }));
 
+const MockScopedClusterClient = jest.fn();
 jest.mock('./scoped_cluster_client', () => ({
-  ScopedClusterClient: jest.fn(),
+  ScopedClusterClient: MockScopedClusterClient,
 }));
 
+const mockParseElasticsearchClientConfig = jest.fn();
 jest.mock('./elasticsearch_client_config', () => ({
-  parseElasticsearchClientConfig: jest.fn(),
+  parseElasticsearchClientConfig: mockParseElasticsearchClientConfig,
 }));
 
-import { ElasticsearchConfig } from './elasticsearch_config';
-
-import { Client, errors } from 'elasticsearch';
+import { errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { Logger } from '../logging';
 import { logger } from '../logging/__mocks__';
 import { ClusterClient } from './cluster_client';
-import { parseElasticsearchClientConfig } from './elasticsearch_client_config';
-import { ScopedClusterClient } from './scoped_cluster_client';
-
-const MockClient = Client as jest.Mock;
-const MockScopedClusterClient = ScopedClusterClient as jest.Mock;
-const mockParseElasticsearchClientConfig = parseElasticsearchClientConfig as jest.Mock;
 
 afterEach(() => jest.clearAllMocks());
 

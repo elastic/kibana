@@ -4,30 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
 import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
-import { ReindexPollingService } from './polling_service';
-
-jest.mock('axios', () => ({
-  create: jest.fn().mockReturnValue({
-    post: jest.fn(),
-    get: jest.fn(),
-  }),
-}));
 
 const mockClient = {
-  get: (axios.create().get as jest.Mock).mockResolvedValue({
+  post: jest.fn().mockResolvedValue({
+    lastCompletedStep: ReindexStep.created,
+    status: ReindexStatus.inProgress,
+  }),
+  get: jest.fn().mockResolvedValue({
     status: 200,
     data: {
       warnings: [],
       reindexOp: null,
     },
   }),
-  post: (axios.create().post as jest.Mock).mockResolvedValue({
-    lastCompletedStep: 0,
-    status: 0,
-  }),
 };
+jest.mock('axios', () => ({
+  create: jest.fn().mockReturnValue(mockClient),
+}));
+
+import { ReindexPollingService } from './polling_service';
 
 describe('ReindexPollingService', () => {
   beforeEach(() => {

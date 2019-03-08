@@ -17,20 +17,19 @@
  * under the License.
  */
 
+const mockWriteFileAsync = jest.fn();
+const mockMakeDirAsync = jest.fn();
 jest.mock('./utils', () => ({
   // Jest typings don't define `requireActual` for some reason.
   ...(jest as any).requireActual('./utils'),
-  writeFileAsync: jest.fn(),
-  makeDirAsync: jest.fn(),
+  writeFileAsync: mockWriteFileAsync,
+  makeDirAsync: mockMakeDirAsync,
 }));
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';
 // @ts-ignore
-import { makeDirAsync, normalizePath, writeFileAsync } from './utils';
-
-const mockWriteFileAsync = writeFileAsync;
-const mockMakeDirAsync = makeDirAsync;
+import { normalizePath } from './utils';
 
 const localePath = path.resolve(__dirname, '__fixtures__', 'integrate_locale_files', 'fr.json');
 

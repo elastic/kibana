@@ -17,20 +17,21 @@
  * under the License.
  */
 
+const mockReaddir = jest.fn();
+const mockReadFile = jest.fn();
+const mockStat = jest.fn();
 jest.mock('fs', () => ({
-  readdir: jest.fn(),
-  readFile: jest.fn(),
-  stat: jest.fn(),
-}));
-jest.mock('../../../../legacy/utils/package_json', () => ({
-  pkg: new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] }),
+  readdir: mockReaddir,
+  readFile: mockReadFile,
+  stat: mockStat,
 }));
 
-import { readdir, readFile, stat } from 'fs';
+const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
-import { pkg } from '../../../../legacy/utils/package_json';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { logger } from '../../logging/__mocks__';
@@ -43,11 +44,6 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   emptyPlugins: resolve(process.cwd(), 'plugins'),
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
-
-const mockPackage = pkg;
-const mockReaddir = (readdir as unknown) as jest.Mock;
-const mockReadFile = (readFile as unknown) as jest.Mock;
-const mockStat = (stat as unknown) as jest.Mock;
 
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
