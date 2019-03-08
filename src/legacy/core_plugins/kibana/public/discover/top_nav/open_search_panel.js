@@ -26,6 +26,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -72,16 +74,20 @@ export function OpenSearchPanel(props) {
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton
-          fill
-          onClick={props.onClose}
-          href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
-        >
-          <FormattedMessage
-            id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-            defaultMessage="Manage searches"
-          />
-        </EuiButton>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              onClick={props.onClose}
+              href={`#/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`}
+            >
+              <FormattedMessage
+                id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+                defaultMessage="Manage searches"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

@@ -25,6 +25,8 @@ import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
@@ -86,16 +88,16 @@ export class DashboardAddPanel extends React.Component {
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton
-            fill
-            onClick={this.props.addNewVis}
-            data-test-subj="addNewSavedObjectLink"
-          >
-            <FormattedMessage
-              id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
-              defaultMessage="Create new visualization"
-            />
-          </EuiButton>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={this.props.addNewVis} data-test-subj="addNewSavedObjectLink">
+                <FormattedMessage
+                  id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+                  defaultMessage="Create new visualization"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
     );
