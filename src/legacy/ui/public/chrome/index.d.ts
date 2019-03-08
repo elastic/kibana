@@ -45,6 +45,7 @@ declare interface Chrome extends ChromeNavLinks {
   addApplicationClass(classNames: string | string[]): this;
   removeApplicationClass(classNames: string | string[]): this;
   getApplicationClasses(): string;
+  disableAutoAngularUrlEncodingFix(): this;
 }
 
 declare const chrome: Chrome;
