@@ -80,6 +80,7 @@ exports[`Header should mark the input as invalid 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}
@@ -196,6 +197,7 @@ exports[`Header should render normally 1`] = `
               values={Object {}}
             />
           }
+          labelType="label"
         >
           <EuiFieldText
             compressed={false}

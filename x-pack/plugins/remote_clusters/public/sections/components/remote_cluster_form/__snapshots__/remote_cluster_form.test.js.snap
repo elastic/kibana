@@ -42,13 +42,15 @@ Array [
             data-test-subj="remoteClusterFormNameFormRow"
             id="mockId-row"
           >
-            <label
-              aria-invalid="false"
-              class="euiFormLabel"
-              for="mockId"
-            >
-              Name
-            </label>
+            <div>
+              <label
+                aria-invalid="false"
+                class="euiFormLabel"
+                for="mockId"
+              >
+                Name
+              </label>
+            </div>
             <div
               class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
@@ -113,13 +115,15 @@ Array [
             data-test-subj="remoteClusterFormSeedNodesFormRow"
             id="mockId-row"
           >
-            <label
-              aria-invalid="false"
-              class="euiFormLabel"
-              for="mockId"
-            >
-              Seed nodes
-            </label>
+            <div>
+              <label
+                aria-invalid="false"
+                class="euiFormLabel"
+                for="mockId"
+              >
+                Seed nodes
+              </label>
+            </div>
             <div
               aria-describedby="mockId-help"
               aria-expanded="false"
@@ -338,13 +342,15 @@ Array [
     data-test-subj="remoteClusterFormNameFormRow"
     id="mockId-row"
   >
-    <label
-      aria-invalid="true"
-      class="euiFormLabel euiFormLabel-isInvalid"
-      for="mockId"
-    >
-      Name
-    </label>
+    <div>
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Name
+      </label>
+    </div>
     <div
       class="euiFormControlLayout euiFormControlLayout--fullWidth"
     >
@@ -379,13 +385,15 @@ Array [
     data-test-subj="remoteClusterFormSeedNodesFormRow"
     id="mockId-row"
   >
-    <label
-      aria-invalid="true"
-      class="euiFormLabel euiFormLabel-isInvalid"
-      for="mockId"
-    >
-      Seed nodes
-    </label>
+    <div>
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Seed nodes
+      </label>
+    </div>
     <div
       aria-describedby="mockId-help mockId-error-0"
       aria-expanded="false"

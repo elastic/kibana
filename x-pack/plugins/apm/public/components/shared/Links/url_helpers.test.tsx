@@ -23,99 +23,44 @@ describe('fromQuery', () => {
   it('should parse object to string', () => {
     expect(
       fromQuery({
-        foo: 'bar',
-        name: 'john doe'
-      } as any)
-    ).toEqual('foo=bar&name=john%20doe');
+        traceId: 'bar',
+        transactionId: 'john doe'
+      })
+    ).toEqual('traceId=bar&transactionId=john%20doe');
   });
 
-  it('should not encode _a and _g', () => {
+  it('should not encode range params', () => {
     expect(
       fromQuery({
-        g: 'john doe:',
-        _g: 'john doe:',
-        a: 'john doe:',
-        _a: 'john doe:'
-      } as any)
-    ).toEqual('g=john%20doe%3A&_g=john%20doe:&a=john%20doe%3A&_a=john%20doe:');
+        traceId: 'b/c',
+        rangeFrom: '2019-03-03T12:00:00.000Z',
+        rangeTo: '2019-03-05T12:00:00.000Z'
+      })
+    ).toEqual(
+      'traceId=b%2Fc&rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
+    );
   });
 });
 
 describe('getKibanaHref', () => {
-  it('should build correct url', () => {
-    const location = {} as Location;
-    const pathname = '/app/kibana';
-    const hash = '/discover';
-    const href = getKibanaHref({ location, pathname, hash });
-    expect(href).toBe(
-      '/app/kibana#/discover?_g=(time:(from:now-24h,mode:quick,to:now))'
+  it('should build correct URL for APM paths, include existing date range params', () => {
+    const location = { search: '?rangeFrom=now/w&rangeTo=now-24h' } as Location;
+    const pathname = '/app/apm';
+    const hash = '/services/x/transactions';
+    const query = { transactionId: 'something' };
+    const href = getKibanaHref({ location, pathname, hash, query });
+    expect(href).toEqual(
+      '/app/apm#/services/x/transactions?rangeFrom=now/w&rangeTo=now-24h&transactionId=something'
     );
   });
 
-  it('should rison encode _a', () => {
-    const location = {} as Location;
+  it('should build correct url for non-APM paths, ignoring date range params', () => {
+    const location = { search: '?rangeFrom=now/w&rangeTo=now-24h' } as Location;
     const pathname = '/app/kibana';
-    const hash = '/discover';
-    const query = {
-      _a: {
-        interval: 'auto',
-        query: {
-          language: 'lucene',
-          query: `context.service.name:"myServiceName" AND error.grouping_key:"myGroupId"`
-        },
-        sort: { '@timestamp': 'desc' }
-      }
-    };
-    const href = getKibanaHref({ query, location, pathname, hash });
-    const { _a } = getUrlQuery(href);
-    expect(_a).toEqual(
-      `(interval:auto,query:(language:lucene,query:'context.service.name:\"myServiceName\" AND error.grouping_key:\"myGroupId\"'),sort:('@timestamp':desc))`
-    );
-  });
-
-  describe('_g', () => {
-    it('should preserve _g from location', () => {
-      const location = {
-        search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-      } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-7d,mode:relative,to:now-1d))');
-    });
-
-    it('should use default time range when _g is empty', () => {
-      const location = {} as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-    });
-
-    it('should use default value when given invalid input', () => {
-      const location = { search: '?_g=H@whatever' } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const href = getKibanaHref({ location, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe('(time:(from:now-24h,mode:quick,to:now))');
-    });
-
-    it('should merge in _g query values', () => {
-      const location = {
-        search: '?_g=(time:(from:now-7d,mode:relative,to:now-1d))'
-      } as Location;
-      const pathname = '/app/kibana';
-      const hash = '/discover';
-      const query = { _g: { ml: { jobIds: [1337] } } };
-      const href = getKibanaHref({ location, query, pathname, hash });
-      const { _g } = getUrlQuery(href);
-      expect(_g).toBe(
-        '(ml:(jobIds:!(1337)),time:(from:now-7d,mode:relative,to:now-1d))'
-      );
-    });
+    const hash = '/outside';
+    const query = { transactionId: 'something' };
+    const href = getKibanaHref({ location, pathname, hash, query });
+    expect(href).toEqual('/app/kibana#/outside?transactionId=something');
   });
 
   describe('when location contains kuery', () => {

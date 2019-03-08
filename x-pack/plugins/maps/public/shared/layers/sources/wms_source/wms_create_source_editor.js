@@ -5,7 +5,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiCallOut,
@@ -107,13 +107,27 @@ export class WMSCreateSourceEditor extends Component {
             <EuiButton href="#" color="warning">Link button</EuiButton>
           </EuiCallOut>
 
-          <EuiFormRow label="Layers" helpText={'use comma separated list of layer names'}>
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.wms.layersLabel', {
+              defaultMessage: 'Layers'
+            })}
+            helpText={i18n.translate('xpack.maps.source.wms.layersHelpText', {
+              defaultMessage: 'use comma separated list of layer names'
+            })}
+          >
             <EuiFieldText
               onChange={(e) => this._handleLayersChange(e)}
             />
           </EuiFormRow>
 
-          <EuiFormRow label="Styles" helpText={'use comma separated list of style names'}>
+          <EuiFormRow
+            label={i18n.translate('xpack.maps.source.wms.stylesLabel', {
+              defaultMessage: 'Styles'
+            })}
+            helpText={i18n.translate('xpack.maps.source.wms.stylesHelpText', {
+              defaultMessage: 'use comma separated list of style names'
+            })}
+          >
             <EuiFieldText
               onChange={(e) => this._handleStylesChange(e)}
             />

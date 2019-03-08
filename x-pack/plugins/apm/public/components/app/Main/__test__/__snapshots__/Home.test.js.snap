@@ -31,10 +31,8 @@ exports[`Home component should render 1`] = `
       <SetupInstructionsLink />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
-  <Connect(KueryBarView) />
+  <EuiSpacer />
+  <FilterBar />
   <withRouter(HistoryTabsWithoutRouter)
     tabs={
       Array [

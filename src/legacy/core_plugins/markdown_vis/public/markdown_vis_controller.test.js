@@ -29,7 +29,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} visParams={vis.params} renderComplete={jest.fn()}/>);
     expect(wrapper.find('a').text()).toBe('markdown');
   });
 
@@ -40,7 +40,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = render(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
+    const wrapper = render(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={jest.fn()}/>);
     expect(wrapper.text()).toBe('Testing <a>html</a>\n');
   });
 
@@ -51,7 +51,7 @@ describe('markdown vis controller', () => {
       }
     };
 
-    const wrapper = mount(<MarkdownVisWrapper vis={vis} renderComplete={jest.fn()}/>);
+    const wrapper = mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={jest.fn()}/>);
     expect(wrapper.text().trim()).toBe('Initial');
     vis.params.markdown = 'Updated';
     wrapper.setProps({ vis });
@@ -66,7 +66,7 @@ describe('markdown vis controller', () => {
         }
       };
       const renderComplete = jest.fn();
-      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={renderComplete}/>);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
 
@@ -77,11 +77,11 @@ describe('markdown vis controller', () => {
         }
       };
       const renderComplete = jest.fn();
-      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={renderComplete}/>);
       expect(renderComplete.mock.calls.length).toBe(1);
       renderComplete.mockClear();
       vis.params.markdown = 'changed';
-      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={renderComplete}/>);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
 
@@ -92,10 +92,10 @@ describe('markdown vis controller', () => {
         }
       };
       const renderComplete = jest.fn();
-      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={renderComplete}/>);
       expect(renderComplete.mock.calls.length).toBe(1);
       renderComplete.mockClear();
-      mount(<MarkdownVisWrapper vis={vis} renderComplete={renderComplete}/>);
+      mount(<MarkdownVisWrapper vis={vis} visParams={vis.params}  renderComplete={renderComplete}/>);
       expect(renderComplete.mock.calls.length).toBe(1);
     });
   });
