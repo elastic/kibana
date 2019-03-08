@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiCallOut,
@@ -100,11 +101,12 @@ export class WMSCreateSourceEditor extends Component {
       return (
         <Fragment>
           <EuiCallOut
-            title="Unable to load service metadata"
+            title={i18n.translate('xpack.maps.source.wms.getCapabilitiesErrorCalloutTitle', {
+              defaultMessage: 'Unable to load service metadata'
+            })}
             color="warning"
           >
             <p>{this.state.getCapabilitiesError}</p>
-            <EuiButton href="#" color="warning">Link button</EuiButton>
           </EuiCallOut>
 
           <EuiFormRow
@@ -145,7 +147,9 @@ export class WMSCreateSourceEditor extends Component {
     return (
       <EuiForm>
         <EuiFormRow
-          label="Url"
+          label={i18n.translate('xpack.maps.source.wms.urlLabel', {
+            defaultMessage: 'Url'
+          })}
         >
           <EuiFieldText
             value={this.state.serviceUrl}
@@ -158,7 +162,10 @@ export class WMSCreateSourceEditor extends Component {
           isDisabled={!this.state.serviceUrl}
           isLoading={this.state.isLoadingCapabilities}
         >
-          Load capabilities
+          <FormattedMessage
+            id="xpack.maps.source.wms.getCapabilitiesButtonText"
+            defaultMessage="Load capabilities"
+          />
         </EuiButton>
 
         {this._renderLayerAndStyleInputs()}
