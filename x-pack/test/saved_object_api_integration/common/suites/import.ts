@@ -116,15 +116,15 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       });
 
       describe('unknown type', () => {
-        const data = createImportData(spaceId);
-        data.push({
-          type: 'wigwags',
-          id: '1',
-          attributes: {
-            title: 'Wigwags title',
-          },
-        });
         it(`should return ${tests.unknownType.statusCode}`, async () => {
+          const data = createImportData(spaceId);
+          data.push({
+            type: 'wigwags',
+            id: '1',
+            attributes: {
+              title: 'Wigwags title',
+            },
+          });
           await supertest
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
             .query({ overwrite: true })
