@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../graphql/types';
+import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { GoogleLink, TotalVirusLink } from '../../../links';
@@ -72,7 +73,7 @@ export const DraggableZeekElement = pure<{
           kqlQuery: '',
           queryMatch: {
             field,
-            value,
+            value: escapeQueryValue(value),
           },
         }}
         render={(dataProvider, _, snapshot) =>
