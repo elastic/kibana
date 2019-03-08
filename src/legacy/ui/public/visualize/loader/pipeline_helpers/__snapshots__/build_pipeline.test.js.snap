@@ -16,6 +16,10 @@ exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunct
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles region_map function without buckets 1`] = `"regionmap visConfig='{\\"metric\\":0}' "`;
 
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=false 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":false,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[1,2,4,5],\\"buckets\\":[0,3]}}' "`;
+
+exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with showPartialRows=true and showMetricsAtAllLevels=true 1`] = `"kibana_table visConfig='{\\"showMetricsAtAllLevels\\":true,\\"showPartialRows\\":true,\\"dimensions\\":{\\"metrics\\":[1,2,4,5],\\"buckets\\":[0,3]}}' "`;
+
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0],\\"buckets\\":[],\\"splitRow\\":[1,2]}}' "`;
 
 exports[`visualize loader pipeline helpers: build pipeline buildPipelineVisFunction handles table function with splits and buckets 1`] = `"kibana_table visConfig='{\\"foo\\":\\"bar\\",\\"dimensions\\":{\\"metrics\\":[0,1],\\"buckets\\":[3],\\"splitRow\\":[2,4]}}' "`;

@@ -2336,7 +2336,6 @@
     "statusPage.statusApp.statusTitle": "插件状态",
     "statusPage.statusTable.columns.idHeader": "ID",
     "statusPage.statusTable.columns.statusHeader": "状态",
-    "tableVis.params.calculateMetricsLabel": "计算每个桶/级别的指标",
     "tableVis.params.perPageLabel": "每页",
     "tableVis.params.showMetricsLabel": "显示每个桶/级别的指标",
     "tableVis.params.showPartialRowsLabel": "显示部分行",

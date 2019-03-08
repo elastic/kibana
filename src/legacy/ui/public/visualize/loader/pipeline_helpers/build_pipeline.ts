@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
@@ -51,7 +51,7 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
-type buildVisConfigFunction = (schemas: Schemas) => VisState;
+type buildVisConfigFunction = (schemas: Schemas, visState?: VisState) => VisState;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -268,14 +268,25 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: schemas => {
+  table: (schemas, visState) => {
     const visConfig = {} as any;
+    const metrics = schemas.metric;
+    const buckets = schemas.bucket || [];
     visConfig.dimensions = {
-      metrics: schemas.metric,
-      buckets: schemas.bucket || [],
+      metrics,
+      buckets,
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
+
+    const params = get(visState, 'params', {}) as any;
+    if (params.showMetricsAtAllLevels === false && params.showPartialRows === true) {
+      // Handle case where user wants to see partial rows but not metrics at all levels.
+      // This requires calculating how many metrics will come back in the tabified response,
+      // and removing all metrics from the dimensions except the last set.
+      const metricsPerBucket = metrics.length / buckets.length;
+      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
+    }
     return visConfig;
   },
   metric: schemas => {
@@ -355,7 +366,7 @@ export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
   if (buildVisConfig[vis.type.name]) {
     visConfig = {
       ...visConfig,
-      ...buildVisConfig[vis.type.name](schemas),
+      ...buildVisConfig[vis.type.name](schemas, visConfig),
     };
   } else if (vislibCharts.includes(vis.type.name)) {
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
@@ -392,7 +403,7 @@ export const buildPipeline = (
     pipeline += `esaggs
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.requiresPartialRows || false}
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
@@ -408,7 +419,7 @@ export const buildPipeline = (
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'} `;
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
       pipeline += `${prepareString('index', indexPattern.id)}`;
     }

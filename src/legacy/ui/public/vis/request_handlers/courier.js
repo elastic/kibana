@@ -38,7 +38,7 @@ const CourierRequestHandlerProvider = function () {
       filters,
       forceFetch,
       partialRows,
-      isHierarchical,
+      metricsAtAllLevels,
       inspectorAdapters,
       queryFilter
     }) {
@@ -67,7 +67,7 @@ const CourierRequestHandlerProvider = function () {
       });
 
       requestSearchSource.setField('aggs', function () {
-        return aggs.toDsl(isHierarchical);
+        return aggs.toDsl(metricsAtAllLevels);
       });
 
       requestSearchSource.onRequestStart((searchSource, searchRequest) => {
@@ -140,7 +140,7 @@ const CourierRequestHandlerProvider = function () {
 
       const parsedTimeRange = timeRange ? getTime(aggs.indexPattern, timeRange) : null;
       const tabifyParams = {
-        metricsAtAllLevels: isHierarchical,
+        metricsAtAllLevels,
         partialRows,
         timeRange: parsedTimeRange ? parsedTimeRange.range : undefined,
       };
