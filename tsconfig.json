@@ -46,7 +46,8 @@
     // Provide full support for iterables in for..of, spread and destructuring when targeting ES5 or ES3.
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
-    "importHelpers": true
+    "importHelpers": true,
+    "skipLibCheck": true
   },
   "include": [
     "kibana.d.ts",
