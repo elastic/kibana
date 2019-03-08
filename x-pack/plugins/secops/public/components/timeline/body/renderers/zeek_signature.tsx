@@ -157,7 +157,7 @@ export const extractStateValue = (state: string | null): string | null =>
 export const constructDroppedValue = (dropped: boolean | null): string | null =>
   dropped != null ? String(dropped) : null;
 
-export const ZeekSignature = pure(({ data }: { data: Ecs }) => {
+export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
   const sessionId: string | null = get('zeek.session_id', data);
 

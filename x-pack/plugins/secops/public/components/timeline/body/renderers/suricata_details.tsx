@@ -21,7 +21,7 @@ const Details = styled.div`
   margin-bottom: 10px;
 `;
 
-export const SuricataDetails = pure(({ data }: { data: Ecs }) => {
+export const SuricataDetails = pure<{ data: Ecs }>(({ data }) => {
   const signature: string | null = get('suricata.eve.alert.signature', data);
   const signatureId: string | null = get('suricata.eve.alert.signature_id', data);
   if (signatureId != null && signature != null) {
