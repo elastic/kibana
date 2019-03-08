@@ -1,10 +1,6 @@
 [[maps-getting-started]]
 == Getting started with Maps
 
-*Maps* is your place for analyzing geospatial data. For example, a map might 
-show the origin, destination,
-and average time of flights or web log requests by country.
-
 You work with *Maps* by adding layers. The data for a layer can come from 
 sources such as {es} documents, vector sources, tile map services, web map 
 services, and more. You can symbolize the data in different ways. 
@@ -29,7 +25,7 @@ to the {kib} home page.
 
 . In the maps list, click *[Logs] Total Requests and Bytes*.
 +
-This loads the map for the web logs data set. Check out each of the three layers of the map. As you move your mouse over the map,
+This loads the map for the web logs data set. Check out each of the four layers of the map. As you move your mouse over the map,
 note how the tooltips show property values. 
 
 You'll re-create the *[Logs] Total Requests and Bytes* map in this tutorial. 
@@ -70,7 +66,7 @@ and lighter shades symbolize countries with less traffic.
 . Set *Layer name* to `Total Requests by Country`.
 . Set *Layer transparency* to 0.5.
 
-===== Join the vector layer with the {es} index
+===== Join the vector layer with the sample web log index
 
 You must add the web log traffic property to the world countries so
 that the property is available for styling.
