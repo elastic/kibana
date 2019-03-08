@@ -44,6 +44,8 @@ export class MBMapContainer extends React.Component {
 
   _lockTooltip =  (e) => {
 
+    this._updateHoverTooltipState.cancel();//ignore any possible moves
+
     const features = this._getFeaturesUnderPointer(e.point);
     if (!features.length) {
       this.props.setTooltipState(null);
