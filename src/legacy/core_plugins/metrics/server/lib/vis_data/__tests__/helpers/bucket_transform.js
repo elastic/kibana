@@ -112,6 +112,28 @@ describe('bucketTransform', () => {
       });
     });
 
+    it('define a default 0 value if it was not provided', () => {
+      const metric = {
+        id: 'test',
+        type: 'percentile',
+        field: 'cpu.pct',
+        percentiles: [
+          { value: 50, mode: 'line' },
+          { mode: 'line' },
+          { value: undefined, mode: 'line' },
+          { value: '', mode: 'line' },
+          { value: null, mode: 'line' },
+          { value: 0, mode: 'line' }
+        ]
+      };
+      expect(bucketTransform.percentile(metric)).to.eql({
+        percentiles: {
+          field: 'cpu.pct',
+          percents: [50, 0, 0, 0, 0, 0]
+        }
+      });
+    });
+
     it('throws error if type is missing', () => {
       const run = () =>
         bucketTransform.percentile({
