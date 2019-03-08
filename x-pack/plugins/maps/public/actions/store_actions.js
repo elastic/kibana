@@ -391,7 +391,7 @@ export function updateSourceDataRequest(layerId, newData) {
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
   return (dispatch) => {
     dispatch(clearTooltipStateForLayer(layerId));
-    return ({
+    dispatch({
       type: LAYER_DATA_LOAD_ENDED,
       layerId,
       dataId,
