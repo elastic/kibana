@@ -5,109 +5,22 @@
  */
 
 import expect from 'expect.js';
-import { API_BASE_PATH } from './constants';
-import { initElasticsearchIndicesHelpers, getRandomString } from './lib';
+import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
 
-const INDEX_TO_ROLLUP_MAPPINGS = {
-  properties: {
-    testTotalField: { 'type': 'long'  },
-    testTagField: { 'type': 'keyword'  },
-    testCreatedField: { 'type': 'date'  },
-  }
-};
-
-const ROLLUP_INDEX_NAME = 'rollup_index';
+import { registerHelpers } from './rollup.test_helpers';
 
 export default function ({ getService }) {
-  const jobsCreated = [];
-
   const supertest = getService('supertest');
   const es = getService('es');
-  const { createIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
 
-  const getJobPayload = (indexName, id = getRandomString()) => ({
-    job: {
-      id,
-      index_pattern: indexName,
-      rollup_index: ROLLUP_INDEX_NAME,
-      cron: '0 0 0 ? * 7',
-      page_size: 1000,
-      groups: {
-        date_histogram: {
-          interval: '24h',
-          delay: '1d',
-          time_zone: 'UTC',
-          field: 'testCreatedField'
-        },
-        terms: {
-          fields: ['testTotalField', 'testTagField']
-        },
-        histogram: {
-          interval: '7',
-          fields: ['testTotalField']
-        }
-      },
-      metrics: [{
-        field: 'testTotalField',
-        metrics: ['avg', 'value_count']
-      }, {
-        field: 'testCreatedField',
-        metrics: ['max', 'min']
-      }]
-    }
-  });
-
-  const createJob = (payload) => {
-    jobsCreated.push(payload.job.id);
-
-    return supertest
-      .put(`${API_BASE_PATH}/create`)
-      .set('kbn-xsrf', 'xxx')
-      .send(payload);
-  };
-
-  const deleteJob = (id) => {
-    const jobIds = Array.isArray(id) ? id : [id];
-
-    return supertest
-      .post(`${API_BASE_PATH}/delete`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ jobIds });
-  };
-
-  const deleteJobsCreated = (ids = jobsCreated) => (
-    deleteJob(ids)
-      .then(() => supertest.get(`${API_BASE_PATH}/jobs`))
-      .then(({ body: { jobs } }) => {
-        if (jobs.length) {
-          // There are still some jobs left to delete. Call recursively
-          // until all rollup jobs are removed.
-          return deleteJobsCreated(jobs.map(job => job.id));
-        }
-      })
-  );
-
-  const deleteIndicesGeneratedByJobs = () => (
-    supertest.get(`${API_BASE_PATH}/indices`)
-      .then(({ body }) => {
-        const index = Object.keys(body);
-        if (!index.length) {
-          return;
-        }
-        return es.indices.delete({ index });
-      })
-  );
-
-  const cleanUp = () => (
-    Promise.all([
-      deleteAllIndices(),
-      deleteJobsCreated(),
-      deleteIndicesGeneratedByJobs(),
-    ]).catch(err => {
-      console.log('ERROR cleaning up!');
-      throw(err);
-    })
-  );
+  const {
+    createIndexWithMappings,
+    getJobPayload,
+    createJob,
+    deleteJob,
+    startJob,
+    cleanUp,
+  } = registerHelpers({ supertest, es });
 
   describe('Rollup jobs', () => {
     after(() => cleanUp());
@@ -126,8 +39,7 @@ export default function ({ getService }) {
 
     describe('Index patterns', () => {
       it('should return the date, numeric and keyword fields when an index (pattern) is found', async () => {
-        const indexCreateBody = { mappings: INDEX_TO_ROLLUP_MAPPINGS };
-        const indexName = await createIndex(undefined, indexCreateBody);
+        const indexName = await createIndexWithMappings();
 
         const uri = `${API_BASE_PATH}/index_pattern_validity/${indexName}`;
 
@@ -161,7 +73,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('Jobs (CRUD)', () => {
+    describe('Crud', () => {
       describe('list', () => {
         it('should return an empty array when there are no jobs', async () => {
           const { body } = await supertest
@@ -174,18 +86,14 @@ export default function ({ getService }) {
 
       describe('create', () => {
         it('should create a rollup job', async () => {
-          const body = { mappings: INDEX_TO_ROLLUP_MAPPINGS };
-          const indexName = await createIndex(undefined, body);
-
+          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
 
           return createJob(payload).expect(200);
         });
 
         it('should throw a 409 conflict when trying to create 2 jobs with the same id', async () => {
-          const body = { mappings: INDEX_TO_ROLLUP_MAPPINGS };
-          const indexName = await createIndex(undefined, body);
-
+          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
 
           await createJob(payload);
@@ -201,7 +109,7 @@ export default function ({ getService }) {
         });
 
         it('should list the newly created job', async () => {
-          const indexName = await createIndex(undefined, { mappings: INDEX_TO_ROLLUP_MAPPINGS });
+          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
@@ -214,7 +122,7 @@ export default function ({ getService }) {
         });
 
         it('should create the underlying rollup index with the correct aggregations', async () => {
-          const indexName = await createIndex(undefined, { mappings: INDEX_TO_ROLLUP_MAPPINGS });
+          const indexName = await createIndexWithMappings();
           await createJob(getJobPayload(indexName));
 
           const { body } = await supertest.get(`${API_BASE_PATH}/indices`);
@@ -238,25 +146,57 @@ export default function ({ getService }) {
       });
 
       describe('delete', () => {
-        it('should delete a job that was created', async () => {
-          const indexCreateBody = { mappings: INDEX_TO_ROLLUP_MAPPINGS };
-          const indexName = await createIndex(undefined, indexCreateBody);
-          const payload = getJobPayload(indexName);
-          await createJob(payload);
+        let jobId;
 
-          const { body } = await deleteJob(payload.job.id).expect(200);
+        beforeEach(async () => {
+          const indexName = await createIndexWithMappings();
+          const payload = getJobPayload(indexName);
+          jobId = payload.job.id;
+          await createJob(payload);
+        });
+
+        it('should delete a job that was created', async () => {
+          const { body } = await deleteJob(jobId).expect(200);
           expect(body).to.eql({ success: true });
+        });
+
+        it('should throw a 400 error if trying to delete a job that is started', async () => {
+          await startJob(jobId);
+          const { body } = await deleteJob(jobId).expect(400);
+          expect(body.message).to.contain('Job must be [STOPPED] before deletion');
         });
       });
     });
 
-    describe('Jobs (Actions)', () => {
-      describe('start', () => {
+    describe('Actions', () => {
+      describe('start job', () => {
+        let job;
 
-      });
+        beforeEach(async () => {
+          const indexName = await createIndexWithMappings();
+          const payload = getJobPayload(indexName);
+          await createJob(payload);
 
-      describe('stop', () => {
+          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          job = jobs.find(job => job.config.id === payload.job.id);
+        });
 
+        it('should start the job', async () => {
+          expect(job.status.job_state).to.eql('stopped');
+
+          const { body } = await startJob(job.config.id).expect(200);
+
+          expect(body).to.eql({ success: true });
+        });
+
+        it('should throw a 400 Bad request if the job is already started', async () => {
+          await startJob(job.config.id); // Start the job
+          const { body } = await startJob(job.config.id)
+            .expect(400);
+
+          expect(body.error).to.eql('Bad Request');
+          expect(body.message).to.contain('Cannot start task for Rollup Job');
+        });
       });
     });
   });

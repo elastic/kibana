@@ -5,3 +5,11 @@
  */
 
 export const API_BASE_PATH = '/api/rollup';
+export const ROLLUP_INDEX_NAME = 'rollup_index';
+export const INDEX_TO_ROLLUP_MAPPINGS = {
+  properties: {
+    testTotalField: { 'type': 'long'  },
+    testTagField: { 'type': 'keyword'  },
+    testCreatedField: { 'type': 'date'  },
+  }
+};
