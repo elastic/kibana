@@ -5,7 +5,6 @@ set -e
 # move to Kibana root
 cd "$(dirname "$0")/.."
 
-source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
 
 case "$JOB" in
