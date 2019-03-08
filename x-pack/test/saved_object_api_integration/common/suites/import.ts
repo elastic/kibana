@@ -17,6 +17,7 @@ interface ImportTest {
 
 interface ImportTests {
   default: ImportTest;
+  unknownType: ImportTest;
 }
 
 interface ImportTestDefinition {
@@ -52,11 +53,45 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
+  const expectUnknownType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      success: false,
+      successCount: 2,
+      errors: [
+        {
+          id: '1',
+          type: 'wigwags',
+          error: {
+            message: `Unsupported saved object type: 'wigwags': Bad Request`,
+            statusCode: 400,
+            error: 'Bad Request',
+          },
+        },
+      ],
+    });
+  };
+
   const expectRbacForbidden = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
       message: `Unable to bulk_create dashboard,globaltype, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create`,
+    });
+  };
+
+  const expectRbacForbiddenWithUnknownType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to bulk_create dashboard,globaltype,wigwags, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/wigwags/bulk_create`,
+    });
+  };
+
+  const expectRbacForbiddenForUnknownType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: `Unable to bulk_create dashboard,globaltype,wigwags, missing action:saved_objects/wigwags/bulk_create`,
     });
   };
 
@@ -79,6 +114,26 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .expect(tests.default.statusCode)
           .then(tests.default.response);
       });
+
+      describe('unknown type', () => {
+        const data = createImportData(spaceId);
+        data.push({
+          type: 'wigwags',
+          id: '1',
+          attributes: {
+            title: 'Wigwags title',
+          },
+        });
+        it(`should return ${tests.unknownType.statusCode}`, async () => {
+          await supertest
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import`)
+            .query({ overwrite: true })
+            .auth(user.username, user.password)
+            .attach('file', Buffer.from(JSON.stringify(data), 'utf8'), 'export.ndjson')
+            .expect(tests.unknownType.statusCode)
+            .then(tests.unknownType.response);
+        });
+      });
     });
   };
 
@@ -90,5 +145,8 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     importTest,
     createExpectResults,
     expectRbacForbidden,
+    expectUnknownType,
+    expectRbacForbiddenWithUnknownType,
+    expectRbacForbiddenForUnknownType,
   };
 }
