@@ -38,7 +38,6 @@ import {
   EuiLoadingSpinner,
   EuiPagination,
   EuiPopover,
-  EuiProgress,
   EuiSpacer,
   EuiTablePagination,
 } from '@elastic/eui';
@@ -341,10 +340,8 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
               );
             }}
             data-test-subj="savedObjectFinderSearchInput"
+            isLoading={this.state.isFetchingItems}
           />
-          {this.state.isFetchingItems && (
-            <EuiProgress size="xs" color="accent" className="savedObjectFinderLoadingBar" />
-          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>

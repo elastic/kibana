@@ -19,7 +19,7 @@ exports[`render 1`] = `
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Add Panels"
+          defaultMessage="Add panels"
           id="kbn.dashboard.topNav.addPanelsTitle"
           values={Object {}}
         />
