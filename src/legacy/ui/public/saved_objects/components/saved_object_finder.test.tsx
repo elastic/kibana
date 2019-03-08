@@ -461,7 +461,6 @@ describe('SavedObjectsFinder', () => {
         .simulate('change', { target: { value: 'abc' } });
 
       wrapper.update();
-      expect(wrapper).toMatchSnapshot();
 
       expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
     });
