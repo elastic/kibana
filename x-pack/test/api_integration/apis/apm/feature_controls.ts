@@ -15,9 +15,8 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
   const spaces: SpacesService = getService('spaces');
   const log = getService('log');
 
-  const endpoints = [
-    `/api/apm/services/foo/errors?start=${new Date().toISOString()}&end=${new Date().toISOString()}`,
-  ];
+  const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());
+  const end = encodeURIComponent(new Date().toISOString());
 
   const expect404 = (result: any) => {
     expect(result.error).to.be(undefined);
@@ -25,11 +24,124 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     expect(result.response).to.have.property('statusCode', 404);
   };
 
-  const expectResponse = (result: any) => {
+  const expect200 = (result: any) => {
     expect(result.error).to.be(undefined);
     expect(result.response).not.to.be(undefined);
     expect(result.response).to.have.property('statusCode', 200);
   };
+
+  const endpoints = [
+    {
+      url: `/api/apm/services/foo/errors?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/errors/bar?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/errors/bar/distribution?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: (result: any) => {
+        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response.body).to.have.property(
+          'message',
+          "Cannot read property 'distribution' of undefined"
+        );
+      },
+    },
+    {
+      url: `/api/apm/services/foo/errors/distribution?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: (result: any) => {
+        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response.body).to.have.property(
+          'message',
+          "Cannot read property 'distribution' of undefined"
+        );
+      },
+    },
+    {
+      url: `/api/apm/services/foo/metrics/charts?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: (result: any) => {
+        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response.body).to.have.property(
+          'message',
+          "Cannot destructure property `timeseriesData` of 'undefined' or 'null'."
+        );
+      },
+    },
+    {
+      url: `/api/apm/services?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/status/server`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/status/agent`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/traces?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/traces/foo?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: (result: any) => {
+        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response.body).to.have.property(
+          'message',
+          "Cannot read property 'transactions' of undefined"
+        );
+      },
+    },
+    {
+      url: `/api/apm/services/foo/transaction_groups/bar?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/transaction_groups/bar/charts?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/transaction_groups/charts?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/transaction_groups/bar/baz/charts?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: expect200,
+    },
+    {
+      url: `/api/apm/services/foo/transaction_groups/bar/baz/distribution?start=${start}&end=${end}`,
+      expectForbidden: expect404,
+      expectResponse: (result: any) => {
+        expect(result.response).to.have.property('statusCode', 400);
+        expect(result.response.body).to.have.property(
+          'message',
+          "Cannot read property 'stats' of undefined"
+        );
+      },
+    },
+  ];
 
   async function executeRequest(
     endpoint: string,
@@ -51,12 +163,16 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     username: string,
     password: string,
     spaceId: string,
-    expectation: (result: any) => void
+    expectation: 'forbidden' | 'response'
   ) {
     for (const endpoint of endpoints) {
       log.debug(`hitting ${endpoint}`);
-      const result = await executeRequest(endpoint, username, password, spaceId);
-      expectation(result);
+      const result = await executeRequest(endpoint.url, username, password, spaceId);
+      if (expectation === 'forbidden') {
+        endpoint.expectForbidden(result);
+      } else {
+        endpoint.expectResponse(result);
+      }
     }
   }
 
@@ -83,7 +199,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           full_name: 'a kibana user',
         });
 
-        await executeRequests(username, password, '', expect404);
+        await executeRequests(username, password, '', 'forbidden');
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -118,14 +234,14 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           full_name: 'a kibana user',
         });
 
-        await executeRequests(username, password, '', expectResponse);
+        await executeRequests(username, password, '', 'response');
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
       }
     });
 
-    // this could be any role which doesn't have access to the uptime feature
+    // this could be any role which doesn't have access to the APM feature
     it(`APIs can't be accessed by dashboard all with apm-* read privileges role`, async () => {
       const username = 'dashboard_all';
       const roleName = 'dashboard_all';
@@ -156,14 +272,14 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           full_name: 'a kibana user',
         });
 
-        await executeRequests(username, password, '', expect404);
+        await executeRequests(username, password, '', 'forbidden');
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
       }
     });
 
-    describe.skip('spaces', () => {
+    describe('spaces', () => {
       // the following tests create a user_1 which has uptime read access to space_1 and dashboard all access to space_2
       const space1Id = 'space_1';
       const space2Id = 'space_2';
@@ -195,7 +311,7 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           kibana: [
             {
               feature: {
-                uptime: ['read'],
+                apm: ['read'],
               },
               spaces: [space1Id],
             },
@@ -221,11 +337,11 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       });
 
       it('user_1 can access APIs in space_1', async () => {
-        await executeRequests(username, password, space1Id, expectResponse);
+        await executeRequests(username, password, space1Id, 'response');
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
-        await executeRequests(username, password, space2Id, expect404);
+        await executeRequests(username, password, space2Id, 'forbidden');
       });
     });
   });

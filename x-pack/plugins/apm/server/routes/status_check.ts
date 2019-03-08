@@ -27,7 +27,8 @@ export function initStatusApi(server: Server) {
         query: Joi.object().keys({
           _debug: Joi.bool()
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -43,7 +44,8 @@ export function initStatusApi(server: Server) {
         query: Joi.object().keys({
           _debug: Joi.bool()
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);

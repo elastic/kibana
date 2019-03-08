@@ -30,7 +30,8 @@ export function initServicesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: async req => {
       const setup = setupRequest(req);
@@ -53,7 +54,8 @@ export function initServicesApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);

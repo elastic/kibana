@@ -23,7 +23,8 @@ export function initMetricsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: async req => {
       const setup = setupRequest(req);

@@ -86,7 +86,7 @@ export function apm(kibana: any) {
         catalogue: ['apm'],
         privileges: {
           all: {
-            api: ['apm/'],
+            api: ['apm/apm'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -95,7 +95,7 @@ export function apm(kibana: any) {
             ui: []
           },
           read: {
-            api: ['apm/'],
+            api: ['apm/apm'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
