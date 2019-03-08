@@ -34,11 +34,15 @@ export default function (kbnServer, server, config) {
 
   // not using https? well that's easy!
   if (!useSsl) {
-    server.connection(connectionOptions);
+    const connection = server.connection(connectionOptions);
+
+    // revert to previous 2m keepalive timeout in Node < 6
+    connection.listener.keepAliveTimeout = 120e3;
+
     return;
   }
 
-  server.connection({
+  const connection = server.connection({
     ...connectionOptions,
     tls: true,
     listener: httpolyglot.createServer({
@@ -53,6 +57,9 @@ export default function (kbnServer, server, config) {
       secureOptions: secureOptions(config.get('server.ssl.supportedProtocols'))
     })
   });
+
+  // revert to previous 2m keepalive timeout in Node < 6
+  connection.listener.keepAliveTimeout = 120e3;
 
   server.ext('onRequest', function (req, reply) {
     // A request sent through a HapiJS .inject() doesn't have a socket associated with the request
