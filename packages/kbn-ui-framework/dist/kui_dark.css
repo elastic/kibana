@@ -331,14 +331,14 @@ main {
  */
 .kuiButton--warning {
   color: #FFF;
-  background-color: #FF977A; }
+  background-color: #FFCE7A; }
   .kuiButton--warning:not(a):enabled:focus {
     z-index: 1;
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FF977A;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FF977A;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):focus {
@@ -347,32 +347,32 @@ main {
     /* 1 */
     outline: none !important;
     /* 2 */
-    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FF977A;
-            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FF977A;
+    -webkit-box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
+            box-shadow: 0 0 0 1px #1D1E24, 0 0 0 2px #FFCE7A;
     /* 3 */
     color: #FFF; }
   .kuiButton--warning:enabled:hover {
     color: #FFF !important;
     /* 1 */
-    background-color: #ff6f47; }
+    background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #ff6f47; }
+    background-color: #ffbb47; }
   .kuiButton--warning:enabled:active {
     color: #FFF !important;
     /* 1 */
-    background-color: #ff6f47; }
+    background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #FFF !important;
     /* 1 */
-    background-color: #ff6f47; }
+    background-color: #ffbb47; }
   .kuiButton--warning:disabled {
-    background-color: #ffbfad; }
+    background-color: #ffe1ad; }
   a.kuiButton--warning.kuiButton-isDisabled {
-    background-color: #ffbfad; }
+    background-color: #ffe1ad; }
 
 /**
  * 1. Override Bootstrap.
@@ -885,7 +885,7 @@ main {
   color: #7DE2D1; }
 
 .kuiIcon--warning {
-  color: #FF977A; }
+  color: #FFCE7A; }
 
 .kuiIcon--error {
   color: #F66; }
@@ -894,7 +894,7 @@ main {
   color: #343741; }
 
 .kuiIcon--basic {
-  color: #D4DAE5; }
+  color: #98A2B3; }
 
 .kuiInfoPanel {
   padding: 14px 20px 18px;
@@ -919,7 +919,7 @@ main {
  * 1. TODO: Pick a hex value instead of making these colors translucent.
  */
 .kuiInfoPanel--warning {
-  border-color: rgba(255, 151, 122, 0.25);
+  border-color: rgba(255, 206, 122, 0.25);
   /* 1 */ }
 
 /**
@@ -1164,7 +1164,7 @@ main {
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isCurrent {
     color: #1BA9F5; }
   .kuiDatePickerRowCellContent.kuiDatePickerRowCellContent-isSelected {
-    background-color: #D4DAE5;
+    background-color: #98A2B3;
     color: #DFE5EF; }
   .kuiDatePickerRowCellContent:hover, .kuiDatePickerRowCellContent:active {
     cursor: pointer;
@@ -1286,7 +1286,7 @@ main {
 
 .kuiLocalDropdownFormNote {
   font-size: 14px;
-  color: #D4DAE5; }
+  color: #98A2B3; }
 
 .kuiLocalDropdownWarning {
   margin-bottom: 16px;
@@ -1299,7 +1299,7 @@ main {
 .kuiLocalDropdownHelpText {
   margin-bottom: 16px;
   font-size: 14px;
-  color: #D4DAE5; }
+  color: #98A2B3; }
 
 .kuiLocalMenu {
   display: -webkit-box;
@@ -1588,7 +1588,7 @@ main {
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
-  color: #F5F7FA;
+  color: #D4DAE5;
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
@@ -1847,7 +1847,7 @@ main {
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
-  color: #D4DAE5;
+  color: #98A2B3;
   background-color: transparent;
   line-height: 1;
   /* 2 */
@@ -1914,7 +1914,7 @@ main {
 .kuiPagerText {
   font-size: 16px;
   line-height: 1.5;
-  color: #D4DAE5;
+  color: #98A2B3;
   white-space: nowrap;
   /* 1 */ }
 
@@ -2213,7 +2213,7 @@ main {
 
 .kuiEmptyTablePrompt__message {
   font-size: 20px;
-  color: #D4DAE5;
+  color: #98A2B3;
   line-height: 1.5; }
 
 .kuiEmptyTablePrompt__actions {
@@ -2236,7 +2236,7 @@ main {
   color: #7DE2D1; }
 
 .kuiStatusText--warning {
-  color: #FF977A; }
+  color: #FFCE7A; }
 
 .kuiStatusText--error {
   color: #F66; }
@@ -2299,7 +2299,7 @@ main {
   max-width: 20px;
   /* 1 */
   line-height: 1.5;
-  color: #D4DAE5; }
+  color: #98A2B3; }
 
 .kuiTableHeaderCell__liner {
   display: inline-block;
@@ -2441,7 +2441,7 @@ main {
 .kuiTableInfo {
   padding: 30px;
   font-size: 20px;
-  color: #D4DAE5;
+  color: #98A2B3;
   line-height: 1.5; }
 
 .kuiTabs {
@@ -2466,7 +2466,7 @@ main {
   cursor: pointer;
   padding: 10px 30px;
   font-size: 16px;
-  color: #D4DAE5;
+  color: #98A2B3;
   background-color: transparent;
   /* 1 */
   border: 1px solid #343741;
@@ -2800,7 +2800,7 @@ main {
 .kuiToolBarText {
   font-size: 16px;
   line-height: 1.5;
-  color: #D4DAE5;
+  color: #98A2B3;
   white-space: nowrap;
   /* 1 */ }
 
@@ -2855,7 +2855,7 @@ main {
   font-size: 14px; }
 
 .kuiSubduedText {
-  color: #D4DAE5 !important; }
+  color: #98A2B3 !important; }
 
 .kuiVerticalRhythm + .kuiVerticalRhythm {
   margin-top: 16px; }

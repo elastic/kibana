@@ -820,10 +820,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.1.0.tgz#1c4d6aae583a9b900b2c40e2c76bbdac3aea13c0"
-  integrity sha512-9s8s8LqnEFHBzVNKlf8UODiMs/I/2T6KDWXzKFm+i+QjnCqYfLjjrzCQ/ZSn/qR1VPWXmkG2g9F6Db/MXSefRw==
+"@elastic/eui@9.2.0":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.2.0.tgz#cd19689cf7f794e71c1050fd68c2683d566f9383"
+  integrity sha512-w9Ye0g1nfkP0O1MP2H7e4yL1PKjXV1la73sSGMUr9HXjLSPjruS3/n2JYc147bzD/WfHcrIzxG9/gOpyX+KIYg==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
