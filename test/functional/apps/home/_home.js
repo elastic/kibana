@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       expect(url.includes('/app/kibana#/home')).to.be(true);
     });
 
-    it('clicking on console on homepage should take you to console app', async ()=> {
+    it('clicking on console on homepage should take you to console', async ()=> {
       await PageObjects.home.clickSynopsis('console');
       const url = await browser.getCurrentUrl();
       expect(url.includes('/app/kibana#/dev_tools/console')).to.be(true);
