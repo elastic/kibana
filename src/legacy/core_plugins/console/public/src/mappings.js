@@ -256,61 +256,64 @@ function clear() {
   templates = [];
 }
 
-function retrieveAutocompleteInfoFromServer() {
+function getPromise(settingsKey, changedFields) {
   const autocompleteSettings = settings.getAutocomplete();
-  let mappingPromise;
-  let aliasesPromise;
-  let templatesPromise;
-  if (autocompleteSettings.fields) {
-    mappingPromise = es.send('GET', '_mapping', null, null, true);
-  }
-  else {
-    mappingPromise = new $.Deferred();
-    mappingPromise.resolve();
-  }
-  if (autocompleteSettings.indices) {
-    aliasesPromise = es.send('GET', '_aliases', null, null, true);
-  }
-  else {
-    aliasesPromise = new $.Deferred();
-    aliasesPromise.resolve();
-  }
-  if (autocompleteSettings.templates) {
-    templatesPromise = es.send('GET', '_template', null, null, true);
+  const settingsMetadata = {
+    fields: { path: '_mapping' },
+    indices: { path: '_aliases' },
+    templates: { path: '_template' },
+  };
+  let settingsPromise;
+  // Fetch autocomplete info if setting is set to true, and if user has made changes
+  if (autocompleteSettings[settingsKey]
+    && ((changedFields && changedFields[settingsKey]) || typeof changedFields === 'undefined')) {
+    settingsPromise = es.send('GET', settingsMetadata[settingsKey].path, null, null, true);
   } else {
-    templatesPromise = new $.Deferred();
-    templatesPromise.resolve();
+    settingsPromise = new $.Deferred();
+    // If a user has saved settings, but a field remains true, no need to make changes
+    if (autocompleteSettings[settingsKey]) {
+      settingsPromise.resolveWith(this, [{ unchanged: true }]);
+    } else {
+      settingsPromise.resolveWith(this, [ [JSON.stringify({})] ]);
+    }
   }
+  return settingsPromise;
+}
+
+function retrieveAutocompleteInfoFromServer(changedFields) {
+  const mappingPromise = getPromise('fields', changedFields);
+  const aliasesPromise = getPromise('indices', changedFields);
+  const templatesPromise = getPromise('templates', changedFields);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise)
-    .done(function (mappings, aliases, templates) {
-      if (!mappings) {
-        mappings = {};
+    .done((mappings, aliases, templates) => {
+      const mappingsUnchanged = mappings && mappings.unchanged;
+      const aliasesUnchanged = aliases && aliases.unchanged;
+      const templatesUnchanged = templates && templates.unchanged;
+      if (!mappingsUnchanged) {
+        const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
+        if (maxMappingSize) {
+          console.warn(`Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`);
+          mappings = [{}];
+        } else {
+          mappings = JSON.parse(mappings[0]);
+        }
+        loadMappings(mappings);
       }
-      else if (mappings[0].length < 10 * 1024 * 1024) {
-        mappings = JSON.parse(mappings[0]);
-      }
-      else {
-        console.warn('mapping size is larger than 10MB (' + mappings[0].length / 1024 / 1024 + ' MB). ignoring..');
-        mappings = {};
-      }
-      loadMappings(mappings);
-      if (aliases) {
+
+      if (!aliasesUnchanged) {
         loadAliases(JSON.parse(aliases[0]));
-      } else {
-        aliases = [{}];
-        loadAliases({});
       }
-      if (templates) {
+
+      if (!templatesUnchanged) {
         loadTemplates(JSON.parse(templates[0]));
-      } else {
-        loadTemplates();
       }
-      // Trigger an update event with the mappings, aliases
-      $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
-    }
-    )
-  ;
+
+      if (!mappingsUnchanged && !aliasesUnchanged) {
+        // Trigger an update event with the mappings, aliases
+        $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
+      }
+    });
 }
 
 function autocompleteRetriever() {
