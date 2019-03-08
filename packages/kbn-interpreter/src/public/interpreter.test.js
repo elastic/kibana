@@ -36,7 +36,16 @@ describe('kbn-interpreter/interpreter', () => {
   it('loads server-side functions', async () => {
     const kfetch = jest.fn(async () => ({}));
 
+<<<<<<< HEAD
     await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
+=======
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register: () => {} },
+    });
+>>>>>>> 41e68ebbe9... [intepreter][Canvas] Dedupe server functions in batched requests (#32712)
 
     expect(kfetch).toHaveBeenCalledTimes(1);
     expect(kfetch).toHaveBeenCalledWith({ pathname: FUNCTIONS_URL });
