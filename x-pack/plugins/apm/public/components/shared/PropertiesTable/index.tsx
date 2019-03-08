@@ -8,16 +8,14 @@ import { EuiIcon } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { get, has, indexBy, uniq } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
 import { StringMap } from '../../../../typings/common';
 import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
-import { getAgentFeatureDocsUrl } from '../../../utils/documentation/agents';
-import { KeySorter, NestedKeyValueTable } from './NestedKeyValueTable';
-import { PROPERTY_CONFIG } from './propertyConfig';
+import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';
+import { NestedKeyValueTable } from './NestedKeyValueTable';
+import { PropertyTabKey } from './tabConfig';
 
 const TableContainer = styled.div`
   padding-bottom: ${px(units.double)};
@@ -40,14 +38,8 @@ const EuiIconWithSpace = styled(EuiIcon)`
   margin-right: ${px(units.half)};
 `;
 
-export function getPropertyTabNames(obj: Transaction | APMError) {
-  return PROPERTY_CONFIG.filter(
-    ({ key, required }) => required || has(obj, key)
-  ).map(({ key, label }) => ({ key, label }));
-}
-
-function getAgentFeatureText(featureName: string) {
-  switch (featureName) {
+function getTabHelpText(tabKey: PropertyTabKey) {
+  switch (tabKey) {
     case 'user':
       return i18n.translate(
         'xpack.apm.propertiesTable.userTab.agentFeatureText',
@@ -56,15 +48,16 @@ function getAgentFeatureText(featureName: string) {
             'You can configure your agent to add contextual information about your users.'
         }
       );
-    case 'tags':
+    case 'labels':
       return i18n.translate(
-        'xpack.apm.propertiesTable.tagsTab.agentFeatureText',
+        'xpack.apm.propertiesTable.labelsTab.agentFeatureText',
         {
           defaultMessage:
             'You can configure your agent to add filterable tags on transactions.'
         }
       );
-    case 'custom':
+    case 'transaction.custom':
+    case 'error.custom':
       return i18n.translate(
         'xpack.apm.propertiesTable.customTab.agentFeatureText',
         {
@@ -75,14 +68,17 @@ function getAgentFeatureText(featureName: string) {
   }
 }
 
-export function AgentFeatureTipMessage({
-  featureName,
+export function TabHelpMessage({
+  tabKey,
   agentName
 }: {
-  featureName: string;
-  agentName?: string;
+  tabKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
-  const docsUrl = getAgentFeatureDocsUrl(featureName, agentName);
+  if (!tabKey) {
+    return null;
+  }
+  const docsUrl = getAgentDocUrlForTab(tabKey, agentName);
   if (!docsUrl) {
     return null;
   }
@@ -90,7 +86,7 @@ export function AgentFeatureTipMessage({
   return (
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
-      {getAgentFeatureText(featureName)}{' '}
+      {getTabHelpText(tabKey)}{' '}
       <EuiLink target="_blank" rel="noopener" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
@@ -101,34 +97,19 @@ export function AgentFeatureTipMessage({
   );
 }
 
-export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
-  const presorted = get(
-    indexedPropertyConfig,
-    `${currentKey}.presortedKeys`,
-    []
-  );
-  return uniq([...presorted, ...Object.keys(object).sort()]);
-};
-
 export function PropertiesTable({
   propData,
   propKey,
   agentName
 }: {
   propData?: StringMap<any>;
-  propKey: string;
-  agentName?: string;
+  propKey?: PropertyTabKey;
+  agentName?: AgentName;
 }) {
   return (
     <TableContainer>
       {propData ? (
-        <NestedKeyValueTable
-          data={propData}
-          parentKey={propKey}
-          keySorter={sortKeysByConfig}
-          depth={1}
-        />
+        <NestedKeyValueTable data={propData} parentKey={propKey} depth={1} />
       ) : (
         <TableInfoHeader>
           {i18n.translate(
@@ -137,7 +118,8 @@ export function PropertiesTable({
           )}
         </TableInfoHeader>
       )}
-      <AgentFeatureTipMessage featureName={propKey} agentName={agentName} />
+
+      <TabHelpMessage tabKey={propKey} agentName={agentName} />
     </TableContainer>
   );
 }

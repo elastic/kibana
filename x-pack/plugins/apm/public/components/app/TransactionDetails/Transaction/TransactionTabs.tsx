@@ -7,7 +7,7 @@
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { first, get } from 'lodash';
+import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -18,11 +18,11 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
+import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
-  getPropertyTabNames,
-  PropertiesTable
-} from '../../../shared/PropertiesTable';
-import { Tab } from '../../../shared/PropertiesTable/propertyConfig';
+  getCurrentTab,
+  getTabsFromObject
+} from '../../../shared/PropertiesTable/tabConfig';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -30,41 +30,34 @@ const TableContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
-// Ensure the selected tab exists or use the first
-function getCurrentTab(tabs: Tab[] = [], selectedTabKey?: string) {
-  const selectedTab = tabs.find(({ key }) => key === selectedTabKey);
-
-  return selectedTab ? selectedTab : first(tabs) || {};
+interface TimelineTab {
+  key: 'timeline';
+  label: string;
 }
 
-const timelineTab = {
+const timelineTab: TimelineTab = {
   key: 'timeline',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
     defaultMessage: 'Timeline'
   })
 };
 
-function getTabs(transaction: Transaction) {
-  return [timelineTab, ...getPropertyTabNames(transaction)];
-}
-
-interface TransactionPropertiesTableProps {
+interface Props {
   location: Location;
   transaction: Transaction;
   urlParams: IUrlParams;
   waterfall: IWaterfall;
 }
 
-export function TransactionPropertiesTable({
+export function TransactionTabs({
   location,
   transaction,
   urlParams,
   waterfall
-}: TransactionPropertiesTableProps) {
-  const tabs = getTabs(transaction);
+}: Props) {
+  const tabs = [timelineTab, ...getTabsFromObject(transaction)];
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
   const agentName = transaction.agent.name;
-  const isTimelineTab = currentTab.key === timelineTab.key;
 
   return (
     <div>
@@ -92,7 +85,7 @@ export function TransactionPropertiesTable({
 
       <EuiSpacer />
 
-      {isTimelineTab ? (
+      {currentTab.key === timelineTab.key ? (
         <WaterfallContainer
           transaction={transaction}
           location={location}
