@@ -33,13 +33,13 @@ Required field for all events.",
   >
     <styled.p>
       <p
-        className="sc-cmthru ewyavj"
+        className="sc-bMVAic enUkmA"
       >
         <styled.span
           data-test-subj="category"
         >
           <span
-            className="sc-hMFtBS ftwRdJ"
+            className="sc-bAeIUo bGCZtc"
             data-test-subj="category"
           >
             Category
@@ -50,7 +50,7 @@ Required field for all events.",
           data-test-subj="category-value"
         >
           <span
-            className="sc-cLQEGU cTWBlC"
+            className="sc-iujRgT bQKmXq"
             data-test-subj="category-value"
           >
             base
@@ -60,13 +60,13 @@ Required field for all events.",
     </styled.p>
     <styled.p>
       <p
-        className="sc-cmthru ewyavj"
+        className="sc-bMVAic enUkmA"
       >
         <styled.span
           data-test-subj="field"
         >
           <span
-            className="sc-hMFtBS ftwRdJ"
+            className="sc-bAeIUo bGCZtc"
             data-test-subj="field"
           >
             Field
@@ -77,7 +77,7 @@ Required field for all events.",
           data-test-subj="field-value"
         >
           <span
-            className="sc-cLQEGU cTWBlC"
+            className="sc-iujRgT bQKmXq"
             data-test-subj="field-value"
           >
             @timestamp
@@ -87,13 +87,13 @@ Required field for all events.",
     </styled.p>
     <styled.p>
       <p
-        className="sc-cmthru ewyavj"
+        className="sc-bMVAic enUkmA"
       >
         <styled.span
           data-test-subj="type"
         >
           <span
-            className="sc-hMFtBS ftwRdJ"
+            className="sc-bAeIUo bGCZtc"
             data-test-subj="type"
           >
             Type
@@ -102,20 +102,20 @@ Required field for all events.",
         </styled.span>
         <styled.span>
           <span
-            className="sc-cLQEGU cTWBlC"
+            className="sc-iujRgT bQKmXq"
           >
             <Styled(EuiIcon)
               data-test-subj="type-icon"
               type="clock"
             >
               <EuiIcon
-                className="sc-esOvli hEZErG"
+                className="sc-hORach umuWR"
                 data-test-subj="type-icon"
                 size="m"
                 type="clock"
               >
                 <clock
-                  className="euiIcon euiIcon--medium sc-esOvli hEZErG"
+                  className="euiIcon euiIcon--medium sc-hORach umuWR"
                   data-test-subj="type-icon"
                   focusable="false"
                   height="16"
@@ -125,7 +125,7 @@ Required field for all events.",
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <svg
-                    className="euiIcon euiIcon--medium sc-esOvli hEZErG"
+                    className="euiIcon euiIcon--medium sc-hORach umuWR"
                     data-test-subj="type-icon"
                     focusable="false"
                     height="16"
@@ -153,13 +153,13 @@ Required field for all events.",
     </styled.p>
     <styled.p>
       <p
-        className="sc-cmthru ewyavj"
+        className="sc-bMVAic enUkmA"
       >
         <styled.span
           data-test-subj="description"
         >
           <span
-            className="sc-hMFtBS ftwRdJ"
+            className="sc-bAeIUo bGCZtc"
             data-test-subj="description"
           >
             Description
@@ -170,7 +170,7 @@ Required field for all events.",
           data-test-subj="description-value"
         >
           <span
-            className="sc-cLQEGU cTWBlC"
+            className="sc-iujRgT bQKmXq"
             data-test-subj="description-value"
           >
             Date/time when the event originated.

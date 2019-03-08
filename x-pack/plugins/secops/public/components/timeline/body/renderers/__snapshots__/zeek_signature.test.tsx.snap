@@ -262,12 +262,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-dqBHgY bEFQrQ"
+                      className="sc-dfVpRl fxliqD"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dfVpRl fxliqD"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -513,7 +513,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                     >
                                                       <div
                                                         aria-roledescription="Draggable item. Press space bar to lift"
-                                                        className="sc-hzDkRC koNYSi"
+                                                        className="sc-kEYyzF ljOknM"
                                                         data-react-beautiful-dnd-drag-handle="0"
                                                         data-react-beautiful-dnd-draggable="0"
                                                         data-test-subj="providerContainer"
@@ -533,61 +533,72 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                         }
                                                         tabIndex={0}
                                                       >
-                                                        <Styled(EuiBadge)
-                                                          color="hollow"
-                                                          iconType="tag"
+                                                        <EuiText
+                                                          data-test-subj="draggable-content"
+                                                          grow={true}
+                                                          size="s"
                                                         >
-                                                          <EuiBadge
-                                                            className="sc-kTUwUJ dZHAGC"
-                                                            color="hollow"
-                                                            iconSide="left"
-                                                            iconType="tag"
+                                                          <div
+                                                            className="euiText euiText--small"
+                                                            data-test-subj="draggable-content"
                                                           >
-                                                            <span
-                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
-                                                              style={null}
+                                                            <Styled(EuiBadge)
+                                                              color="hollow"
+                                                              iconType="tag"
                                                             >
-                                                              <span
-                                                                className="euiBadge__content"
+                                                              <EuiBadge
+                                                                className="sc-gxMtzJ bFIdSc"
+                                                                color="hollow"
+                                                                iconSide="left"
+                                                                iconType="tag"
                                                               >
-                                                                <EuiIcon
-                                                                  className="euiBadge__icon"
-                                                                  size="s"
-                                                                  type="tag"
-                                                                >
-                                                                  <tag
-                                                                    className="euiIcon euiIcon--small euiBadge__icon"
-                                                                    focusable="false"
-                                                                    height="16"
-                                                                    style={null}
-                                                                    viewBox="0 0 16 16"
-                                                                    width="16"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                  >
-                                                                    <svg
-                                                                      className="euiIcon euiIcon--small euiBadge__icon"
-                                                                      focusable="false"
-                                                                      height="16"
-                                                                      style={null}
-                                                                      viewBox="0 0 16 16"
-                                                                      width="16"
-                                                                      xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                      <path
-                                                                        d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
-                                                                      />
-                                                                    </svg>
-                                                                  </tag>
-                                                                </EuiIcon>
                                                                 <span
-                                                                  className="euiBadge__text"
+                                                                  className="euiBadge euiBadge--hollow sc-gxMtzJ bFIdSc"
+                                                                  style={null}
                                                                 >
-                                                                  C8DRTq362Fios6hw16
+                                                                  <span
+                                                                    className="euiBadge__content"
+                                                                  >
+                                                                    <EuiIcon
+                                                                      className="euiBadge__icon"
+                                                                      size="s"
+                                                                      type="tag"
+                                                                    >
+                                                                      <tag
+                                                                        className="euiIcon euiIcon--small euiBadge__icon"
+                                                                        focusable="false"
+                                                                        height="16"
+                                                                        style={null}
+                                                                        viewBox="0 0 16 16"
+                                                                        width="16"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                      >
+                                                                        <svg
+                                                                          className="euiIcon euiIcon--small euiBadge__icon"
+                                                                          focusable="false"
+                                                                          height="16"
+                                                                          style={null}
+                                                                          viewBox="0 0 16 16"
+                                                                          width="16"
+                                                                          xmlns="http://www.w3.org/2000/svg"
+                                                                        >
+                                                                          <path
+                                                                            d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
+                                                                          />
+                                                                        </svg>
+                                                                      </tag>
+                                                                    </EuiIcon>
+                                                                    <span
+                                                                      className="euiBadge__text"
+                                                                    >
+                                                                      C8DRTq362Fios6hw16
+                                                                    </span>
+                                                                  </span>
                                                                 </span>
-                                                              </span>
-                                                            </span>
-                                                          </EuiBadge>
-                                                        </Styled(EuiBadge)>
+                                                              </EuiBadge>
+                                                            </Styled(EuiBadge)>
+                                                          </div>
+                                                        </EuiText>
                                                       </div>
                                                     </styled.div>
                                                   </DragHandle>
@@ -625,12 +636,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-dqBHgY bEFQrQ"
+                      className="sc-dfVpRl fxliqD"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dfVpRl fxliqD"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -876,7 +887,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                     >
                                                       <div
                                                         aria-roledescription="Draggable item. Press space bar to lift"
-                                                        className="sc-hzDkRC koNYSi"
+                                                        className="sc-kEYyzF ljOknM"
                                                         data-react-beautiful-dnd-drag-handle="0"
                                                         data-react-beautiful-dnd-draggable="0"
                                                         data-test-subj="providerContainer"
@@ -896,61 +907,72 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                         }
                                                         tabIndex={0}
                                                       >
-                                                        <Styled(EuiBadge)
-                                                          color="hollow"
-                                                          iconType="tag"
+                                                        <EuiText
+                                                          data-test-subj="draggable-content"
+                                                          grow={true}
+                                                          size="s"
                                                         >
-                                                          <EuiBadge
-                                                            className="sc-kTUwUJ dZHAGC"
-                                                            color="hollow"
-                                                            iconSide="left"
-                                                            iconType="tag"
+                                                          <div
+                                                            className="euiText euiText--small"
+                                                            data-test-subj="draggable-content"
                                                           >
-                                                            <span
-                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
-                                                              style={null}
+                                                            <Styled(EuiBadge)
+                                                              color="hollow"
+                                                              iconType="tag"
                                                             >
-                                                              <span
-                                                                className="euiBadge__content"
+                                                              <EuiBadge
+                                                                className="sc-gxMtzJ bFIdSc"
+                                                                color="hollow"
+                                                                iconSide="left"
+                                                                iconType="tag"
                                                               >
-                                                                <EuiIcon
-                                                                  className="euiBadge__icon"
-                                                                  size="s"
-                                                                  type="tag"
-                                                                >
-                                                                  <tag
-                                                                    className="euiIcon euiIcon--small euiBadge__icon"
-                                                                    focusable="false"
-                                                                    height="16"
-                                                                    style={null}
-                                                                    viewBox="0 0 16 16"
-                                                                    width="16"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                  >
-                                                                    <svg
-                                                                      className="euiIcon euiIcon--small euiBadge__icon"
-                                                                      focusable="false"
-                                                                      height="16"
-                                                                      style={null}
-                                                                      viewBox="0 0 16 16"
-                                                                      width="16"
-                                                                      xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                      <path
-                                                                        d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
-                                                                      />
-                                                                    </svg>
-                                                                  </tag>
-                                                                </EuiIcon>
                                                                 <span
-                                                                  className="euiBadge__text"
+                                                                  className="euiBadge euiBadge--hollow sc-gxMtzJ bFIdSc"
+                                                                  style={null}
                                                                 >
-                                                                  connection
+                                                                  <span
+                                                                    className="euiBadge__content"
+                                                                  >
+                                                                    <EuiIcon
+                                                                      className="euiBadge__icon"
+                                                                      size="s"
+                                                                      type="tag"
+                                                                    >
+                                                                      <tag
+                                                                        className="euiIcon euiIcon--small euiBadge__icon"
+                                                                        focusable="false"
+                                                                        height="16"
+                                                                        style={null}
+                                                                        viewBox="0 0 16 16"
+                                                                        width="16"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                      >
+                                                                        <svg
+                                                                          className="euiIcon euiIcon--small euiBadge__icon"
+                                                                          focusable="false"
+                                                                          height="16"
+                                                                          style={null}
+                                                                          viewBox="0 0 16 16"
+                                                                          width="16"
+                                                                          xmlns="http://www.w3.org/2000/svg"
+                                                                        >
+                                                                          <path
+                                                                            d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
+                                                                          />
+                                                                        </svg>
+                                                                      </tag>
+                                                                    </EuiIcon>
+                                                                    <span
+                                                                      className="euiBadge__text"
+                                                                    >
+                                                                      connection
+                                                                    </span>
+                                                                  </span>
                                                                 </span>
-                                                              </span>
-                                                            </span>
-                                                          </EuiBadge>
-                                                        </Styled(EuiBadge)>
+                                                              </EuiBadge>
+                                                            </Styled(EuiBadge)>
+                                                          </div>
+                                                        </EuiText>
                                                       </div>
                                                     </styled.div>
                                                   </DragHandle>
@@ -1039,12 +1061,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-dqBHgY bEFQrQ"
+                      className="sc-dfVpRl fxliqD"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dfVpRl fxliqD"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -1290,7 +1312,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                     >
                                                       <div
                                                         aria-roledescription="Draggable item. Press space bar to lift"
-                                                        className="sc-hzDkRC koNYSi"
+                                                        className="sc-kEYyzF ljOknM"
                                                         data-react-beautiful-dnd-drag-handle="0"
                                                         data-react-beautiful-dnd-draggable="0"
                                                         data-test-subj="providerContainer"
@@ -1310,61 +1332,72 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                         }
                                                         tabIndex={0}
                                                       >
-                                                        <Styled(EuiBadge)
-                                                          color="hollow"
-                                                          iconType="tag"
+                                                        <EuiText
+                                                          data-test-subj="draggable-content"
+                                                          grow={true}
+                                                          size="s"
                                                         >
-                                                          <EuiBadge
-                                                            className="sc-kTUwUJ dZHAGC"
-                                                            color="hollow"
-                                                            iconSide="left"
-                                                            iconType="tag"
+                                                          <div
+                                                            className="euiText euiText--small"
+                                                            data-test-subj="draggable-content"
                                                           >
-                                                            <span
-                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
-                                                              style={null}
+                                                            <Styled(EuiBadge)
+                                                              color="hollow"
+                                                              iconType="tag"
                                                             >
-                                                              <span
-                                                                className="euiBadge__content"
+                                                              <EuiBadge
+                                                                className="sc-gxMtzJ bFIdSc"
+                                                                color="hollow"
+                                                                iconSide="left"
+                                                                iconType="tag"
                                                               >
-                                                                <EuiIcon
-                                                                  className="euiBadge__icon"
-                                                                  size="s"
-                                                                  type="tag"
-                                                                >
-                                                                  <tag
-                                                                    className="euiIcon euiIcon--small euiBadge__icon"
-                                                                    focusable="false"
-                                                                    height="16"
-                                                                    style={null}
-                                                                    viewBox="0 0 16 16"
-                                                                    width="16"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                  >
-                                                                    <svg
-                                                                      className="euiIcon euiIcon--small euiBadge__icon"
-                                                                      focusable="false"
-                                                                      height="16"
-                                                                      style={null}
-                                                                      viewBox="0 0 16 16"
-                                                                      width="16"
-                                                                      xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                      <path
-                                                                        d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
-                                                                      />
-                                                                    </svg>
-                                                                  </tag>
-                                                                </EuiIcon>
                                                                 <span
-                                                                  className="euiBadge__text"
+                                                                  className="euiBadge euiBadge--hollow sc-gxMtzJ bFIdSc"
+                                                                  style={null}
                                                                 >
-                                                                  REJ
+                                                                  <span
+                                                                    className="euiBadge__content"
+                                                                  >
+                                                                    <EuiIcon
+                                                                      className="euiBadge__icon"
+                                                                      size="s"
+                                                                      type="tag"
+                                                                    >
+                                                                      <tag
+                                                                        className="euiIcon euiIcon--small euiBadge__icon"
+                                                                        focusable="false"
+                                                                        height="16"
+                                                                        style={null}
+                                                                        viewBox="0 0 16 16"
+                                                                        width="16"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                      >
+                                                                        <svg
+                                                                          className="euiIcon euiIcon--small euiBadge__icon"
+                                                                          focusable="false"
+                                                                          height="16"
+                                                                          style={null}
+                                                                          viewBox="0 0 16 16"
+                                                                          width="16"
+                                                                          xmlns="http://www.w3.org/2000/svg"
+                                                                        >
+                                                                          <path
+                                                                            d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
+                                                                          />
+                                                                        </svg>
+                                                                      </tag>
+                                                                    </EuiIcon>
+                                                                    <span
+                                                                      className="euiBadge__text"
+                                                                    >
+                                                                      REJ
+                                                                    </span>
+                                                                  </span>
                                                                 </span>
-                                                              </span>
-                                                            </span>
-                                                          </EuiBadge>
-                                                        </Styled(EuiBadge)>
+                                                              </EuiBadge>
+                                                            </Styled(EuiBadge)>
+                                                          </div>
+                                                        </EuiText>
                                                       </div>
                                                     </styled.div>
                                                   </DragHandle>
@@ -1409,12 +1442,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-dqBHgY bEFQrQ"
+                      className="sc-dfVpRl fxliqD"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dfVpRl fxliqD"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -1660,7 +1693,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                     >
                                                       <div
                                                         aria-roledescription="Draggable item. Press space bar to lift"
-                                                        className="sc-hzDkRC koNYSi"
+                                                        className="sc-kEYyzF ljOknM"
                                                         data-react-beautiful-dnd-drag-handle="0"
                                                         data-react-beautiful-dnd-draggable="0"
                                                         data-test-subj="providerContainer"
@@ -1680,61 +1713,72 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                         }
                                                         tabIndex={0}
                                                       >
-                                                        <Styled(EuiBadge)
-                                                          color="hollow"
-                                                          iconType="tag"
+                                                        <EuiText
+                                                          data-test-subj="draggable-content"
+                                                          grow={true}
+                                                          size="s"
                                                         >
-                                                          <EuiBadge
-                                                            className="sc-kTUwUJ dZHAGC"
-                                                            color="hollow"
-                                                            iconSide="left"
-                                                            iconType="tag"
+                                                          <div
+                                                            className="euiText euiText--small"
+                                                            data-test-subj="draggable-content"
                                                           >
-                                                            <span
-                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
-                                                              style={null}
+                                                            <Styled(EuiBadge)
+                                                              color="hollow"
+                                                              iconType="tag"
                                                             >
-                                                              <span
-                                                                className="euiBadge__content"
+                                                              <EuiBadge
+                                                                className="sc-gxMtzJ bFIdSc"
+                                                                color="hollow"
+                                                                iconSide="left"
+                                                                iconType="tag"
                                                               >
-                                                                <EuiIcon
-                                                                  className="euiBadge__icon"
-                                                                  size="s"
-                                                                  type="tag"
-                                                                >
-                                                                  <tag
-                                                                    className="euiIcon euiIcon--small euiBadge__icon"
-                                                                    focusable="false"
-                                                                    height="16"
-                                                                    style={null}
-                                                                    viewBox="0 0 16 16"
-                                                                    width="16"
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                  >
-                                                                    <svg
-                                                                      className="euiIcon euiIcon--small euiBadge__icon"
-                                                                      focusable="false"
-                                                                      height="16"
-                                                                      style={null}
-                                                                      viewBox="0 0 16 16"
-                                                                      width="16"
-                                                                      xmlns="http://www.w3.org/2000/svg"
-                                                                    >
-                                                                      <path
-                                                                        d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
-                                                                      />
-                                                                    </svg>
-                                                                  </tag>
-                                                                </EuiIcon>
                                                                 <span
-                                                                  className="euiBadge__text"
+                                                                  className="euiBadge euiBadge--hollow sc-gxMtzJ bFIdSc"
+                                                                  style={null}
                                                                 >
-                                                                  Sr
+                                                                  <span
+                                                                    className="euiBadge__content"
+                                                                  >
+                                                                    <EuiIcon
+                                                                      className="euiBadge__icon"
+                                                                      size="s"
+                                                                      type="tag"
+                                                                    >
+                                                                      <tag
+                                                                        className="euiIcon euiIcon--small euiBadge__icon"
+                                                                        focusable="false"
+                                                                        height="16"
+                                                                        style={null}
+                                                                        viewBox="0 0 16 16"
+                                                                        width="16"
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                      >
+                                                                        <svg
+                                                                          className="euiIcon euiIcon--small euiBadge__icon"
+                                                                          focusable="false"
+                                                                          height="16"
+                                                                          style={null}
+                                                                          viewBox="0 0 16 16"
+                                                                          width="16"
+                                                                          xmlns="http://www.w3.org/2000/svg"
+                                                                        >
+                                                                          <path
+                                                                            d="M6.254 14.97L.996 9.712c-.315-.316-.397-.463-.45-.64a.909.909 0 0 1 0-.534c.053-.177.135-.324.45-.64L7.43 1.466c.182-.183.252-.24.338-.293a.87.87 0 0 1 .273-.113c.099-.023.188-.032.446-.032h5.173c.445 0 .607.046.77.133.162.087.29.214.377.377.088.162.134.324.136.769l.015 5.15c0 .259-.009.348-.032.448a.87.87 0 0 1-.112.273c-.054.087-.111.157-.294.34L8.067 14.97c-.315.315-.462.396-.639.45a.909.909 0 0 1-.535 0c-.176-.054-.324-.135-.639-.45zm1.106-.707l6.453-6.453c.092-.092.126-.128.141-.147.003-.025.004-.074.004-.204l-.015-5.15c0-.181-.003-.245-.009-.275a2.247 2.247 0 0 0-.274-.007H8.487c-.13 0-.179.001-.203.004-.02.015-.055.05-.147.141L1.703 8.606a2.248 2.248 0 0 0-.189.2c.017.024.061.07.19.198l5.257 5.259c.128.128.175.171.2.188.024-.017.071-.06.2-.188zm4.972-10.607a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zm-.707.707a1 1 0 1 0-1.414 1.414 1 1 0 0 0 1.414-1.414zM6.807 11.28L4.686 9.159a.5.5 0 1 1 .707-.707l2.121 2.12a.5.5 0 1 1-.707.708zm1.414-1.414l-2.12-2.122a.5.5 0 1 1 .706-.707L8.928 9.16a.5.5 0 1 1-.707.707z"
+                                                                          />
+                                                                        </svg>
+                                                                      </tag>
+                                                                    </EuiIcon>
+                                                                    <span
+                                                                      className="euiBadge__text"
+                                                                    >
+                                                                      Sr
+                                                                    </span>
+                                                                  </span>
                                                                 </span>
-                                                              </span>
-                                                            </span>
-                                                          </EuiBadge>
-                                                        </Styled(EuiBadge)>
+                                                              </EuiBadge>
+                                                            </Styled(EuiBadge)>
+                                                          </div>
+                                                        </EuiText>
                                                       </div>
                                                     </styled.div>
                                                   </DragHandle>
@@ -1818,12 +1862,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-gxMtzJ jldQeo"
+                      className="sc-gzOgki gLPSFk"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ jldQeo"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gzOgki gLPSFk"
                       >
                         <pure(Component)
                           link="REJ Connection attempt rejected"
