@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from 'lodash';
 import fetch from 'node-fetch';
 import { resolve } from 'path';
 import url from 'url';
@@ -187,6 +186,20 @@ export const actionsService = (kibana: any) => {
         method: 'GET',
         handler() {
           return [...connectors.values()].map(connector => JSON.stringify(connector));
+        },
+      });
+
+      server.route({
+        path: '/api/actions',
+        method: 'GET',
+        async handler(request: any) {
+          const savedObjects = request.getSavedObjectsClient();
+
+          return JSON.stringify(
+            (await savedObjects.find({ type: 'actionConfiguration' })).saved_objects.map(
+              (obj: any) => obj.attributes.name
+            )
+          );
         },
       });
 
