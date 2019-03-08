@@ -2,14 +2,21 @@
 
 set -e
 
+targetBranch="${PR_SOURCE_BRANCH:-${GIT_BRANCH#*/}}"
+bootstrapCache="$HOME/.kibana/bootstrap_cache/$targetBranch.tar"
+
 ###
 ### Extract the bootstrap cache that we create in the packer_cache.sh script
 ###
-bootstrapCache="$HOME/.kibana/bootstrap_cache/master.tar"
 if [ -f "$bootstrapCache" ]; then
   echo "extracting bootstrap_cache from $bootstrapCache";
   tar -xf "$bootstrapCache";
 else
-  echo "bootstrap_cache missing";
-  exit 1;
+  echo ""
+  echo ""
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+  echo "            bootstrap_cache missing";
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+  echo ""
+  echo ""
 fi
