@@ -14,7 +14,7 @@ describe('Transaction', () => {
   const transaction: Transaction = {
     '@timestamp': new Date().toString(),
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     http: {
@@ -59,7 +59,7 @@ describe('Span', () => {
   const span: Span = {
     '@timestamp': new Date().toString(),
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     processor: {
@@ -101,7 +101,7 @@ describe('Span', () => {
 describe('Error', () => {
   const errorDoc: APMError = {
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     error: {
