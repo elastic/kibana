@@ -63,16 +63,7 @@ describe('kbn-interpreter/interpreter', () => {
 
     const register = jest.fn();
 
-<<<<<<< HEAD
     await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register }));
-=======
-    await initializeInterpreter({
-      kfetch,
-      ajaxStream,
-      typesRegistry: { toJS: () => ({}) },
-      functionsRegistry: { register },
-    });
->>>>>>> 41e68ebbe9... [intepreter][Canvas] Dedupe server functions in batched requests (#32712)
 
     expect(register).toHaveBeenCalledTimes(2);
 
