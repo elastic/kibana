@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Request, Server } from 'hapi';
 import { PLUGIN } from '../common/constants';
+import { KibanaTelemetryAdapter } from './lib/adapters/telemetry';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
 
@@ -20,10 +21,16 @@ export interface KibanaRouteOptions {
 
 export interface KibanaServer extends Server {
   route: (options: KibanaRouteOptions) => void;
+  usage: {
+    collectorSet: {
+      register: (usageCollector: any) => any;
+    };
+  };
 }
 
 export const initServerWithKibana = (server: KibanaServer) => {
   const libs = compose(server);
+  server.usage.collectorSet.register(KibanaTelemetryAdapter.initUsageCollector(server));
   initUptimeServer(libs);
 
   const xpackMainPlugin = server.plugins.xpack_main;
