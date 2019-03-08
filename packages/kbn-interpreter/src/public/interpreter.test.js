@@ -36,7 +36,12 @@ describe('kbn-interpreter/interpreter', () => {
   it('loads server-side functions', async () => {
     const kfetch = jest.fn(async () => ({}));
 
-    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register: () => {} },
+    });
 
     expect(kfetch).toHaveBeenCalledTimes(1);
     expect(kfetch).toHaveBeenCalledWith({ pathname: FUNCTIONS_URL });
@@ -63,7 +68,12 @@ describe('kbn-interpreter/interpreter', () => {
 
     const register = jest.fn();
 
-    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register }));
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register },
+    });
 
     expect(register).toHaveBeenCalledTimes(2);
 
