@@ -13,10 +13,8 @@ import styled from 'styled-components';
 import { Ecs } from '../../../../graphql/types';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { GoogleLink, TotalVirusLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
-
-import { GoogleLink } from './google_link';
-import { TotalVirusLink } from './total_virus_link';
 
 import * as i18n from './translations';
 
@@ -26,6 +24,10 @@ const Badge = styled(EuiBadge)`
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
+`;
+
+const LinkFlexItem = styled(EuiFlexItem)`
+  margin-left: 6px;
 `;
 
 type StringRenderer = (value: string) => string;
@@ -99,15 +101,15 @@ export const Link = pure(({ value, link }: { value: string | null; link?: string
   if (value != null) {
     if (link != null) {
       return (
-        <EuiFlexItem grow={false}>
-          <GoogleLink link={link} value={value} />
-        </EuiFlexItem>
+        <LinkFlexItem grow={false}>
+          <GoogleLink link={link}>{value}</GoogleLink>
+        </LinkFlexItem>
       );
     } else {
       return (
-        <EuiFlexItem grow={false}>
-          <GoogleLink link={value} value={value} />
-        </EuiFlexItem>
+        <LinkFlexItem grow={false}>
+          <GoogleLink link={value} />
+        </LinkFlexItem>
       );
     }
   } else {
@@ -117,9 +119,9 @@ export const Link = pure(({ value, link }: { value: string | null; link?: string
 
 export const TotalVirusLinkSha = pure(({ value }: { value: string | null }) =>
   value != null ? (
-    <EuiFlexItem grow={false}>
-      <TotalVirusLink sha={value} value={value} />
-    </EuiFlexItem>
+    <LinkFlexItem grow={false}>
+      <TotalVirusLink link={value}>{value}</TotalVirusLink>
+    </LinkFlexItem>
   ) : null
 );
 

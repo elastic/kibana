@@ -11,9 +11,9 @@ import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { GoogleLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
 
-import { GoogleLink } from './google_link';
 import { getBeginningTokens } from './suricata_links';
 
 const SignatureFlexItem = styled(EuiFlexItem)`
@@ -26,6 +26,10 @@ const Badge = styled(EuiBadge)`
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
+`;
+
+const LinkFlexItem = styled(EuiFlexItem)`
+  margin-left: 6px;
 `;
 
 export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
@@ -79,13 +83,14 @@ export const SuricataSignature = pure(
       <EuiFlexGroup justifyContent="center" gutterSize="none">
         <DraggableSignatureId id={id} signatureId={signatureId} />
         <Tokens tokens={tokens} />
-        <GoogleLink
-          link={signature}
-          value={signature
-            .split(' ')
-            .splice(tokens.length)
-            .join(' ')}
-        />
+        <LinkFlexItem grow={false}>
+          <GoogleLink link={signature}>
+            {signature
+              .split(' ')
+              .splice(tokens.length)
+              .join(' ')}
+          </GoogleLink>
+        </LinkFlexItem>
       </EuiFlexGroup>
     );
   }

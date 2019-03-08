@@ -262,12 +262,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-gxMtzJ bcyXwS"
+                      className="sc-dqBHgY bEFQrQ"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ bcyXwS"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -538,13 +538,13 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                           iconType="tag"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-dqBHgY jMwCYE"
+                                                            className="sc-kTUwUJ dZHAGC"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="tag"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-dqBHgY jMwCYE"
+                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
                                                               style={null}
                                                             >
                                                               <span
@@ -625,12 +625,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-gxMtzJ bcyXwS"
+                      className="sc-dqBHgY bEFQrQ"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ bcyXwS"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -901,13 +901,13 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                           iconType="tag"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-dqBHgY jMwCYE"
+                                                            className="sc-kTUwUJ dZHAGC"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="tag"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-dqBHgY jMwCYE"
+                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
                                                               style={null}
                                                             >
                                                               <span
@@ -1039,12 +1039,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-gxMtzJ bcyXwS"
+                      className="sc-dqBHgY bEFQrQ"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ bcyXwS"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -1315,13 +1315,13 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                           iconType="tag"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-dqBHgY jMwCYE"
+                                                            className="sc-kTUwUJ dZHAGC"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="tag"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-dqBHgY jMwCYE"
+                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
                                                               style={null}
                                                             >
                                                               <span
@@ -1409,12 +1409,12 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-gxMtzJ bcyXwS"
+                      className="sc-dqBHgY bEFQrQ"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ bcyXwS"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-dqBHgY bEFQrQ"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -1685,13 +1685,13 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                                                           iconType="tag"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-dqBHgY jMwCYE"
+                                                            className="sc-kTUwUJ dZHAGC"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="tag"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-dqBHgY jMwCYE"
+                                                              className="euiBadge euiBadge--hollow sc-kTUwUJ dZHAGC"
                                                               style={null}
                                                             >
                                                               <span
@@ -1814,54 +1814,43 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
                   link="REJ Connection attempt rejected"
                   value="Connection attempt rejected"
                 >
-                  <EuiFlexItem
-                    component="div"
+                  <Styled(EuiFlexItem)
                     grow={false}
                   >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    <EuiFlexItem
+                      className="sc-gxMtzJ jldQeo"
+                      component="div"
+                      grow={false}
                     >
-                      <pure(Component)
-                        link="REJ Connection attempt rejected"
-                        value="Connection attempt rejected"
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-gxMtzJ jldQeo"
                       >
-                        <Component
+                        <pure(Component)
                           link="REJ Connection attempt rejected"
-                          value="Connection attempt rejected"
                         >
-                          <Styled(EuiFlexItem)
-                            grow={false}
+                          <Component
+                            link="REJ Connection attempt rejected"
                           >
-                            <EuiFlexItem
-                              className="sc-jwKygS jEeQns"
-                              component="div"
-                              grow={false}
+                            <EuiLink
+                              color="primary"
+                              href="https://www.google.com/search?q=REJ%20Connection%20attempt%20rejected"
+                              target="_blank"
+                              type="button"
                             >
-                              <div
-                                className="euiFlexItem euiFlexItem--flexGrowZero sc-jwKygS jEeQns"
+                              <a
+                                className="euiLink euiLink--primary"
+                                href="https://www.google.com/search?q=REJ%20Connection%20attempt%20rejected"
+                                rel="noopener noreferrer"
+                                target="_blank"
                               >
-                                <EuiLink
-                                  color="primary"
-                                  href="https://www.google.com/search?q=REJ%20Connection%20attempt%20rejected"
-                                  target="_blank"
-                                  type="button"
-                                >
-                                  <a
-                                    className="euiLink euiLink--primary"
-                                    href="https://www.google.com/search?q=REJ%20Connection%20attempt%20rejected"
-                                    rel="noopener noreferrer"
-                                    target="_blank"
-                                  >
-                                    Connection attempt rejected
-                                  </a>
-                                </EuiLink>
-                              </div>
-                            </EuiFlexItem>
-                          </Styled(EuiFlexItem)>
-                        </Component>
-                      </pure(Component)>
-                    </div>
-                  </EuiFlexItem>
+                                Connection attempt rejected
+                              </a>
+                            </EuiLink>
+                          </Component>
+                        </pure(Component)>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
                 </Component>
               </pure(Component)>
               <pure(Component)>

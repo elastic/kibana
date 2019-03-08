@@ -154,12 +154,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     grow={false}
                   >
                     <EuiFlexItem
-                      className="sc-btzYZH hFKPFq"
+                      className="sc-jwKygS jynuQh"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-btzYZH hFKPFq"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-jwKygS jynuQh"
                       >
                         <Connect(DraggableWrapperComponent)
                           dataProvider={
@@ -388,13 +388,13 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                                                           iconType="number"
                                                         >
                                                           <EuiBadge
-                                                            className="sc-lhVmIH bQfDtX"
+                                                            className="sc-btzYZH jBzfTi"
                                                             color="hollow"
                                                             iconSide="left"
                                                             iconType="number"
                                                           >
                                                             <span
-                                                              className="euiBadge euiBadge--hollow sc-lhVmIH bQfDtX"
+                                                              className="euiBadge euiBadge--hollow sc-btzYZH jBzfTi"
                                                               style={null}
                                                             >
                                                               <span
@@ -483,12 +483,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="ET"
                   >
                     <EuiFlexItem
-                      className="sc-bYSBpT eKLAFC"
+                      className="sc-lhVmIH krgDqk"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
                       >
                         <EuiBadge
                           color="hollow"
@@ -547,12 +547,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="SCAN"
                   >
                     <EuiFlexItem
-                      className="sc-bYSBpT eKLAFC"
+                      className="sc-lhVmIH krgDqk"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
                       >
                         <EuiBadge
                           color="hollow"
@@ -611,12 +611,12 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                     key="ATTACK"
                   >
                     <EuiFlexItem
-                      className="sc-bYSBpT eKLAFC"
+                      className="sc-lhVmIH krgDqk"
                       component="div"
                       grow={false}
                     >
                       <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT eKLAFC"
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-lhVmIH krgDqk"
                       >
                         <EuiBadge
                           color="hollow"
@@ -672,24 +672,22 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                   </Styled(EuiFlexItem)>
                 </Component>
               </pure(Component)>
-              <pure(Component)
-                link="ET SCAN ATTACK Hello"
-                value="Hello"
+              <Styled(EuiFlexItem)
+                grow={false}
               >
-                <Component
-                  link="ET SCAN ATTACK Hello"
-                  value="Hello"
+                <EuiFlexItem
+                  className="sc-bYSBpT kqevpY"
+                  component="div"
+                  grow={false}
                 >
-                  <Styled(EuiFlexItem)
-                    grow={false}
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero sc-bYSBpT kqevpY"
                   >
-                    <EuiFlexItem
-                      className="sc-jwKygS jEeQns"
-                      component="div"
-                      grow={false}
+                    <pure(Component)
+                      link="ET SCAN ATTACK Hello"
                     >
-                      <div
-                        className="euiFlexItem euiFlexItem--flexGrowZero sc-jwKygS jEeQns"
+                      <Component
+                        link="ET SCAN ATTACK Hello"
                       >
                         <EuiLink
                           color="primary"
@@ -706,11 +704,11 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                             Hello
                           </a>
                         </EuiLink>
-                      </div>
-                    </EuiFlexItem>
-                  </Styled(EuiFlexItem)>
-                </Component>
-              </pure(Component)>
+                      </Component>
+                    </pure(Component)>
+                  </div>
+                </EuiFlexItem>
+              </Styled(EuiFlexItem)>
             </div>
           </EuiFlexGroup>
         </Component>
