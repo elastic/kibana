@@ -45,7 +45,7 @@ export interface PanelData {
 
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
-  public static convertPanelDataPre_6_1(panel: PanelData): Partial<PanelState> {
+  public static convertPanelDataPre_6_1(panel: PanelData): Partial<PanelData> {
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
         throw new Error(

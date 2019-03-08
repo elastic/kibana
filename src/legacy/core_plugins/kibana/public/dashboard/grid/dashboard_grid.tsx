@@ -38,7 +38,6 @@ import { PanelUtils } from '../panel/panel_utils';
 
 import { GridData } from '../types';
 
-const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
 /**
@@ -46,7 +45,7 @@ let lastValidGridSize = 0;
  * taller than the current grid.
  * see https://github.com/elastic/kibana/issues/14710.
  */
-function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
+function ensureWindowScrollsToBottom(event: { clientY: number; pageY: number }) {
   // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
   // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
   const WINDOW_BUFFER = 10;
@@ -63,6 +62,14 @@ function ResponsiveGrid({
   children,
   maximizedPanelId,
   useMargins,
+}: {
+  size: { width: number };
+  isViewMode: boolean;
+  layout: any; // todo
+  onLayoutChange: () => void;
+  children: JSX.Element[];
+  maximizedPanelId: string;
+  useMargins: boolean;
 }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
@@ -95,8 +102,7 @@ function ResponsiveGrid({
       draggableHandle={isViewMode ? '.doesnt-exist' : '.dshPanel__dragger'}
       layout={layout}
       onLayoutChange={onLayoutChange}
-      measureBeforeMount={false}
-      onResize={ensureWindowScrollsToBottom}
+      onResize={({}, oldResizeItem, l, placeholder, event) => ensureWindowScrollsToBottom(event)}
     >
       {children}
     </ReactGridLayout>
@@ -105,31 +111,42 @@ function ResponsiveGrid({
 
 // Using sizeMe sets up the grid to be re-rendered automatically not only when the window size changes, but also
 // when the container size changes, so it works for Full Screen mode switches.
+const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 import { PanelData } from '../types';
 
 interface Props {
   panels: PanelData[];
-  getEmbeddableFactory: () => {};
+  getEmbeddableFactory: (panelType: string) => {};
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
   onPanelsUpdated: (updatedPanels: PanelData[]) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
+  intl: any; // todo
 }
 
 interface State {
-  focusedPanelIndex: number; // might be string
+  focusedPanelIndex: number | undefined; // might be string
   isLayoutInvalid: boolean;
-  layout: GridData[];
+  layout: GridData[] | undefined;
 }
 
 class DashboardGridUi extends React.Component<Props, State> {
+  // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
+  // item.
+  private gridItems = {};
+
+  // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
+  // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
+  // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
+  // https://github.com/elastic/kibana/issues/14802 for more info.
+  // This is probably a better implementation anyway so the handlers are cached.
+  // @type {Object.<string, EmbeddableFactory>}
+  private embeddableFactoryMap = {};
+
   constructor(props: Props) {
     super(props);
-    // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
-    // item.
-    this.gridItems = {};
 
     let isLayoutInvalid = false;
     let layout;
@@ -151,14 +168,6 @@ class DashboardGridUi extends React.Component<Props, State> {
       layout,
       isLayoutInvalid,
     };
-
-    // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
-    // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
-    // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
-    // https://github.com/elastic/kibana/issues/14802 for more info.
-    // This is probably a better implementation anyway so the handlers are cached.
-    // @type {Object.<string, EmbeddableFactory>}
-    this.embeddableFactoryMap = {};
   }
 
   public buildLayoutFromPanels(): GridData[] {
@@ -180,7 +189,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     });
   }
 
-  public createEmbeddableFactoriesMap(panels) {
+  public createEmbeddableFactoriesMap(panels: PanelData[]) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -192,7 +201,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     this.createEmbeddableFactoriesMap(this.props.panels);
   }
 
-  public componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps: Props) {
     this.createEmbeddableFactoriesMap(nextProps.panels);
   }
 
@@ -209,11 +218,11 @@ class DashboardGridUi extends React.Component<Props, State> {
     onPanelsUpdated(updatedPanels);
   };
 
-  public onPanelFocused = focusedPanelIndex => {
+  public onPanelFocused = (focusedPanelIndex: number): void => {
     this.setState({ focusedPanelIndex });
   };
 
-  public onPanelBlurred = blurredPanelIndex => {
+  public onPanelBlurred = (blurredPanelIndex: number): void => {
     if (this.state.focusedPanelIndex === blurredPanelIndex) {
       this.setState({ focusedPanelIndex: undefined });
     }

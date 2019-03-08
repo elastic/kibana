@@ -36,8 +36,8 @@ import { PanelHeader } from './panel_header';
 
 export interface DashboardPanelProps {
   viewOnlyMode: boolean;
-  onPanelFocused?: (panelIndex: PanelId) => {};
-  onPanelBlurred?: (panelIndex: PanelId) => {};
+  onPanelFocused?: (panelIndex: PanelId) => void;
+  onPanelBlurred?: (panelIndex: PanelId) => void;
   error?: string | object;
   destroy: () => void;
   containerState: ContainerState;

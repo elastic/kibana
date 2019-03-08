@@ -33,4 +33,5 @@ export interface PanelData {
   size_x: number;
   size_y: number;
   version: string;
+  type: string;
 }
