@@ -3,11 +3,11 @@
 
 // Snapshot and restore plugin styles
 
-// Prefix all styles with "snapshot" to avoid conflicts.
+// Prefix all styles with "ssr" to avoid conflicts.
 // Examples
-//   snapshot
-//   snapshot__legend
-//   snapshot__legend--small
-//   snapshot__legend-isLoading
+//   ssr
+//   ssr__legend
+//   ssr__legend--small
+//   ssr__legend-isLoading
 
 @import 'snapshot_restore';
