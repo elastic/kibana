@@ -6,7 +6,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
     alignItems="stretch"
     component="div"
     direction="row"
-    gutterSize="l"
+    gutterSize="s"
     justifyContent="flexStart"
     responsive={true}
     wrap={false}
@@ -15,43 +15,42 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       component="div"
       grow={true}
     >
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Monitor Duration ms"
-            description="The 'ms' is an abbreviation for milliseconds."
-            id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
       <EuiPanel
         grow={true}
         hasShadow={false}
-        paddingSize="m"
+        paddingSize="s"
         style={
           Object {
-            "maxHeight": 220,
-            "maxWidth": 520,
+            "height": 248,
           }
         }
       >
+        <EuiTitle
+          size="xs"
+          textTransform="none"
+        >
+          <h4>
+            <FormattedMessage
+              defaultMessage="Monitor duration in milliseconds"
+              description="The 'ms' is an abbreviation for milliseconds."
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+              values={Object {}}
+            />
+          </h4>
+        </EuiTitle>
         <FlexibleEuiSeriesChart
+          animateData={false}
           crosshairValue={150}
           height={200}
           margins={
             Object {
-              "bottom": 40,
-              "left": 60,
-              "right": 40,
-              "top": 10,
+              "bottom": 32,
+              "left": 64,
+              "right": 0,
+              "top": 16,
             }
           }
           onCrosshairUpdate={[MockFunction]}
-          width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
           yDomain={
@@ -62,7 +61,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           }
         >
           <EuiAreaSeries
-            color="secondaryColor"
+            color="range"
             curve="curveBasis"
             data={
               Array [
@@ -129,7 +128,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           />
           <EuiLineSeries
             borderOpacity={1}
-            color="primaryColor"
+            color="mean"
             curve="linear"
             data={
               Array [
@@ -180,7 +179,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               ]
             }
             lineMarkSize={0}
-            lineSize={1}
+            lineSize={2}
             name="Mean duration"
             showLineMarks={false}
           />
@@ -191,43 +190,42 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       component="div"
       grow={true}
     >
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Check status"
-            id="xpack.uptime.monitorCharts.checkStatus.title"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
       <EuiPanel
         grow={true}
         hasShadow={false}
-        paddingSize="m"
+        paddingSize="s"
         style={
           Object {
-            "maxHeight": 220,
-            "maxWidth": 520,
+            "height": 248,
           }
         }
       >
+        <EuiTitle
+          size="xs"
+          textTransform="none"
+        >
+          <h4>
+            <FormattedMessage
+              defaultMessage="Check status"
+              id="xpack.uptime.monitorCharts.checkStatus.title"
+              values={Object {}}
+            />
+          </h4>
+        </EuiTitle>
         <FlexibleEuiSeriesChart
+          animateData={false}
           crosshairValue={150}
           height={200}
           margins={
             Object {
-              "bottom": 40,
-              "left": 60,
-              "right": 40,
-              "top": 10,
+              "bottom": 32,
+              "left": 64,
+              "right": 0,
+              "top": 16,
             }
           }
           onCrosshairUpdate={[MockFunction]}
           stackBy="y"
-          width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
           yDomain={
@@ -238,8 +236,8 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           }
         >
           <EuiAreaSeries
-            color="primaryColor"
-            curve="curveBasis"
+            color="success"
+            curve="linear"
             data={
               Array [
                 Object {

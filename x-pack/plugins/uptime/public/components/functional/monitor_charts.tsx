@@ -58,7 +58,7 @@ export const MonitorCharts = ({
             <h4>
               <FormattedMessage
                 id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-                defaultMessage="Monitor duration in milleseconds"
+                defaultMessage="Monitor duration in milliseconds"
                 description="The 'ms' is an abbreviation for milliseconds."
               />
             </h4>
