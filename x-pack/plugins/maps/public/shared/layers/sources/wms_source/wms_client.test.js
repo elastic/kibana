@@ -171,4 +171,29 @@ describe('getCapabilities', () => {
       }
     ]);
   });
+
+  it('Should create not group common hierarchy when there is only a single layer', async () => {
+    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    wmsClient._fetch = () => {
+      return {
+        status: 200,
+        text: () => {
+          return `
+            <WMT_MS_Capabilities version="1.1.1">
+              <Capability>
+                <Layer>
+                  <Title>layer1</Title>
+                  <Name>1</Name>
+                </Layer>
+              </Capability>
+            </WMT_MS_Capabilities>
+          `;
+        }
+      };
+    };
+    const capabilities = await wmsClient.getCapabilities();
+    expect(capabilities.layers).toEqual([
+      { label: 'layer1', value: '1' },
+    ]);
+  });
 });

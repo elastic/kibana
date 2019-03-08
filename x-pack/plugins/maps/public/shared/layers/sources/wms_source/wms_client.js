@@ -100,7 +100,7 @@ export class WmsClient {
       }
     }
 
-    if (rootCommonPath.length === 0) {
+    if (rootCommonPath.length === 0 || list.length === 1) {
       return list.map(({ path, value }) => {
         return { label: path.join(' - '), value };
       });
