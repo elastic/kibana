@@ -72,11 +72,15 @@ function runServerFunctions(server) {
           .catch(err => {
             if (Boom.isBoom(err)) {
               return { err, statusCode: err.statusCode, message: err.output.payload };
+            } else if (err instanceof Error) {
+              return { err, statusCode: 500, message: err.message };
             }
+
+            server.log(['interpreter', 'error'], err);
             return { err: 'Internal Server Error', statusCode: 500, message: 'See server logs for details.' };
           });
 
-        if (result == null) {
+        if (typeof result === 'undefined') {
           const { functionName } = fnCall;
           return {
             id,
