@@ -16,6 +16,7 @@ export function installRoute(
   lspService: LspService,
   installManager: InstallManager
 ) {
+  const kibanaVersion = server.config().get('pkg.version') as string;
   const status = (def: LanguageServerDefinition) => ({
     name: def.name,
     status: lspService.languageServerStatus(def.name),
@@ -23,6 +24,9 @@ export function installRoute(
     build: def.build,
     languages: def.languages,
     installationType: def.installationType,
+    downloadUrl:
+      typeof def.downloadUrl === 'function' ? def.downloadUrl(def, kibanaVersion) : def.downloadUrl,
+    pluginName: def.pluginName,
   });
 
   server.route({

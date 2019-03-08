@@ -16,7 +16,7 @@ export interface LanguageServerDefinition extends LanguageServer {
   builtinWorkspaceFolders: boolean;
   launcher: LauncherConstructor;
   installationFolderName?: string;
-  downloadUrl?: (lang: LanguageServerDefinition) => string | string;
+  downloadUrl?: (lang: LanguageServerDefinition, version: string) => string | string;
   embedPath?: string;
   installationPluginName?: string;
 }
@@ -38,14 +38,10 @@ export const JAVA: LanguageServerDefinition = {
   languages: ['java'],
   launcher: JavaLauncher,
   installationType: InstallationType.Plugin,
-  installationPluginName: 'javaLanguageServer',
+  installationPluginName: 'java-langserver',
   installationFolderName: 'jdt',
-  version: '1.0.0-SNAPSHOT',
-  build: '201812040656',
-  downloadUrl: (lang: LanguageServerDefinition) =>
-    `https://github.com/Poytr1/eclipse.jdt.ls/releases/download/v${
-      lang.version
-    }/jdt-language-server-${lang.version}-${lang.build}.tar.gz`,
+  downloadUrl: (lang: LanguageServerDefinition, version: string) =>
+    `https://download.elasticsearch.org/code/java-langserver/release/java-langserver-${version}-$OS.zip`,
 };
 export const GO: LanguageServerDefinition = {
   name: 'Go',

@@ -86,7 +86,10 @@ export class InstallManager {
   }
 
   public async downloadFile(def: LanguageServerDefinition): Promise<string> {
-    const url = typeof def.downloadUrl === 'function' ? def.downloadUrl(def) : def.downloadUrl;
+    const url =
+      typeof def.downloadUrl === 'function'
+        ? def.downloadUrl(def, this.getKibanaVersion())
+        : def.downloadUrl;
 
     const res = await fetch(url!);
     if (!res.ok) {
@@ -150,12 +153,20 @@ export class InstallManager {
       }
       return undefined;
     } else {
-      let version = def.version!;
-      if (def.build) {
-        version += '-' + def.build;
+      let version = def.version;
+      if (version) {
+        if (def.build) {
+          version += '-' + def.build;
+        }
+      } else {
+        version = this.getKibanaVersion();
       }
       return path.join(this.basePath, def.installationFolderName || def.name, version);
     }
+  }
+
+  private getKibanaVersion(): string {
+    return this.server.config().get('pkg.version');
   }
 
   private async unPack(packageFile: string, def: LanguageServerDefinition) {
