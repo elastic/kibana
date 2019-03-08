@@ -66,7 +66,7 @@ export class DashboardAddPanel extends React.Component {
       >
         <FormattedMessage
           id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
-          defaultMessage="Add new Visualization"
+          defaultMessage="Create new visualization"
         />
       </EuiButtonEmpty>
     );
