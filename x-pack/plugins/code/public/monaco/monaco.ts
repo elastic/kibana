@@ -119,44 +119,28 @@ const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
   },
 };*/
 
-function getTheme() {
-  if (IS_DARK_THEME) {
-    return darkTheme;
-  } else {
-    return lightTheme;
-  }
-}
-
-const themeName = getTheme();
-
-function getHex(rgbString: string) {
-  const colorValues = rgbString.slice(4, -1);
-  const colorArray = colorValues.split(', ');
-
-  // @ts-ignore
-  return '#' + convert.rgb.hex(Number(colorArray[0]), Number(colorArray[1]), Number(colorArray[2]));
-}
+const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 
 const syntaxTheme = {
-  keyword: getHex(themeName.euiColorAccent),
-  comment: getHex(themeName.euiColorMediumShade),
-  delimiter: getHex(themeName.euiColorSecondary),
-  string: getHex(themeName.euiColorPrimary),
-  number: getHex(themeName.euiColorWarning),
-  regexp: getHex(themeName.euiColorPrimary),
-  types: `${IS_DARK_THEME ? getHex(themeName.euiColorVis5) : getHex(themeName.euiColorVis9)}`,
-  annotation: getHex(themeName.euiColorLightShade),
-  tag: getHex(themeName.euiColorAccent),
-  symbol: getHex(themeName.euiColorDanger),
-  foreground: getHex(themeName.euiColorDarkestShade),
-  editorBackground: getHex(themeName.euiColorLightestShade),
-  lineNumbers: getHex(themeName.euiColorDarkShade),
-  editorIndentGuide: getHex(themeName.euiColorLightShade),
-  selectionBackground: getHex(themeName.euiColorLightShade),
-  editorWidgetBackground: getHex(themeName.euiColorLightestShade),
-  editorWidgetBorder: getHex(themeName.euiColorLightShade),
-  findMatchBackground: getHex(themeName.euiColorWarning),
-  findMatchHighlightBackground: getHex(themeName.euiColorWarning),
+  keyword: themeName.euiColorAccent,
+  comment: themeName.euiColorMediumShade,
+  delimiter: themeName.euiColorSecondary,
+  string: themeName.euiColorPrimary,
+  number: themeName.euiColorWarning,
+  regexp: themeName.euiColorPrimary,
+  types: `${IS_DARK_THEME ? themeName.euiColorVis5 : themeName.euiColorVis9}`,
+  annotation: themeName.euiColorLightShade,
+  tag: themeName.euiColorAccent,
+  symbol: themeName.euiColorDanger,
+  foreground: themeName.euiColorDarkestShade,
+  editorBackground: themeName.euiColorLightestShade,
+  lineNumbers: themeName.euiColorDarkShade,
+  editorIndentGuide: themeName.euiColorLightShade,
+  selectionBackground: themeName.euiColorLightShade,
+  editorWidgetBackground: themeName.euiColorLightestShade,
+  editorWidgetBorder: themeName.euiColorLightShade,
+  findMatchBackground: themeName.euiColorWarning,
+  findMatchHighlightBackground: themeName.euiColorWarning,
 };
 
 monaco.editor.defineTheme('euiColors', {
