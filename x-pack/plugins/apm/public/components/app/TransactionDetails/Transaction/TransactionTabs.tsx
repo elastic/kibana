@@ -18,7 +18,6 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
-import { HeightRetainer } from '../../../shared/HeightRetainer';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import {
   getCurrentTab,
