@@ -38,7 +38,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
       name: 'search',
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
-          defaultMessage: 'Saved Search',
+          defaultMessage: 'Saved search',
         }),
         type: 'search',
         getIconForSavedObject: () => 'search',
