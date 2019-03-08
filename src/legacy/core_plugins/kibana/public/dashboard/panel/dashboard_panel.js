@@ -37,7 +37,7 @@ class DashboardPanelUi extends React.Component {
     this.state = {
       error: props.embeddableFactory ? null : props.intl.formatMessage({
         id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
-        defaultMessage: 'No factory found for embeddable',
+        defaultMessage: 'The feature to render this panel is missing.',
       }),
     };
 

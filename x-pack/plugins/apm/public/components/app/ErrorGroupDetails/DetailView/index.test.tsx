@@ -10,10 +10,9 @@ import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 // @ts-ignore
-import { mockMoment } from '../../../../../utils/testHelpers';
-import { DetailView } from '../index';
+import { mockMoment } from '../../../../utils/testHelpers';
+import { DetailView } from './index';
 
 describe('DetailView', () => {
   beforeEach(() => {
@@ -67,27 +66,7 @@ describe('DetailView', () => {
       status: 'SUCCESS',
       data: {
         occurrencesCount: 10,
-        transaction: {
-          http: { request: { method: 'GET' } },
-          url: { full: 'myUrl' },
-          trace: { id: 'traceId' },
-          transaction: {
-            type: 'myTransactionType',
-            name: 'myTransactionName',
-            id: 'myTransactionName'
-          },
-          service: { name: 'myService' },
-          user: { id: 'myUserId' }
-        } as Transaction,
-        error: {
-          '@timestamp': 'myTimestamp',
-          http: { request: { method: 'GET' } },
-          url: { full: 'myUrl' },
-          service: { name: 'myService' },
-          user: { id: 'myUserId' },
-          error: { exception: [{ handled: true }] },
-          transaction: { id: 'myTransactionId', sampled: true }
-        } as APMError
+        error: {} as APMError
       }
     };
     const wrapper = shallow(
@@ -96,10 +75,9 @@ describe('DetailView', () => {
         urlParams={{}}
         location={{} as Location}
       />
-    ).find('StickyProperties');
+    ).find('StickyErrorProperties');
 
     expect(wrapper.exists()).toBe(true);
-    expect(wrapper).toMatchSnapshot();
   });
 
   it('should render tabs', () => {

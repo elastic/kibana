@@ -177,7 +177,7 @@
     "graphql-fields": "^1.0.2",
     "graphql-tag": "^2.9.2",
     "graphql-tools": "^3.0.2",
-    "handlebars": "^4.0.10",
+    "handlebars": "^4.0.13",
     "hapi-auth-cookie": "^9.0.0",
     "history": "4.7.2",
     "history-extra": "^4.0.2",

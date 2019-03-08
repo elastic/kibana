@@ -19,6 +19,14 @@ See also <<release-highlights>> and <<release-notes>>.
 * <<breaking_70_advanced_settings_changes>>
 * <<breaking_70_UI_changes>>
 
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_70_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
+
+// end::notable-breaking-changes[]
 
 [float]
 [[breaking_70_api_changes]]
@@ -503,4 +511,16 @@ multiple split tables will now see those tables rendered differently.
 *Details:* Kibana 7.0 introduces a new default font for the application and also comes with several design changes in dashboards that slightly change padding and margin for dashboard panels. You may find you need to adjust grid layouts to compensate.
 
 *Impact:* Minimal. In most cases, the dashboards should render as they did previously. In some cases, panels might overflow and require scroll bars where they did not previously. Simply adjust the panel sizes and edit your dashboard layouts if these bother you.
+
+[float]
+==== Timelion no longer appears in the side navigation
+*Details:* Timelion sheets will continue to work in *Visualize*, but the 
+Timelion application no longer appears by default in the {kib} side navigation. 
+
+*Impact:* To create a Timelion visualization, go to *Visualize* and select 
+*Timelion* from the visualization types. If you have a lot of existing Timelion 
+visualizations and want to add Timelion back in the side
+navigation, set `timelion.ui.enabled` to `true` in `kibana.yml`.
+
+
 

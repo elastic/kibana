@@ -1283,6 +1283,7 @@ exports[`Field for json setting should render as read only with help text if ove
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"hello\\": \\"world\\"}"
             width="100%"
@@ -1384,6 +1385,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"foo\\": \\"bar\\"}"
             width="100%"
@@ -1520,6 +1522,7 @@ exports[`Field for json setting should render default value if there is no user 
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"foo\\": \\"bar\\"}"
             width="100%"
@@ -1656,6 +1659,7 @@ exports[`Field for json setting should render user value if there is user value 
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="{\\"hello\\": \\"world\\"}"
             width="100%"
@@ -1780,6 +1784,7 @@ exports[`Field for markdown setting should render as read only with help text if
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="**bold**"
             width="100%"
@@ -1881,6 +1886,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value=""
             width="100%"
@@ -1971,6 +1977,7 @@ exports[`Field for markdown setting should render default value if there is no u
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value=""
             width="100%"
@@ -2103,6 +2110,7 @@ exports[`Field for markdown setting should render user value if there is user va
                 "tabSize": 2,
               }
             }
+            showGutter={false}
             theme="textmate"
             value="**bold**"
             width="100%"

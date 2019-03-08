@@ -6,7 +6,6 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { getAutocompleteProvider } from 'ui/autocomplete_providers';
-// @ts-ignore
 import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { getAPMIndexPattern } from './rest/savedObjects';
 

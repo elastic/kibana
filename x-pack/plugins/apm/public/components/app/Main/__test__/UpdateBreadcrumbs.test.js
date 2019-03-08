@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { mount } from 'enzyme';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 import chrome from 'ui/chrome';
+import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 
 jest.mock(
   'ui/chrome',

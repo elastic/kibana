@@ -21,18 +21,23 @@ import { inspect } from 'util';
 
 const FAIL_TAG = Symbol('fail error');
 
-export function createFailError(reason, exitCode = 1) {
-  const error = new Error(reason);
-  error.exitCode = exitCode;
-  error[FAIL_TAG] = true;
-  return error;
+interface FailError extends Error {
+  exitCode: number;
+  [FAIL_TAG]: true;
 }
 
-export function isFailError(error) {
+export function createFailError(reason: string, exitCode = 1): FailError {
+  return Object.assign(new Error(reason), {
+    exitCode,
+    [FAIL_TAG]: true as true,
+  });
+}
+
+export function isFailError(error: any): error is FailError {
   return Boolean(error && error[FAIL_TAG]);
 }
 
-export function combineErrors(errors) {
+export function combineErrors(errors: Array<Error | FailError>) {
   if (errors.length === 1) {
     return errors[0];
   }
