@@ -42,7 +42,7 @@ function extendJestConfig(jestConfig: jest.ProjectConfig, filePath: string) {
     globals: {
       ...(jestConfig.globals || {}),
       'ts-jest': {
-        babelConfig: true,
+        babelConfig: false,
         tsConfig,
       },
     },
