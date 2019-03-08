@@ -53,6 +53,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<VisualizationA
             visTypes.byName[JSON.parse(savedObject.attributes.visState).type].icon || 'visualizeApp'
           );
         },
+        getTooltipForSavedObject: savedObject => {
+          const visType = visTypes.byName[JSON.parse(savedObject.attributes.visState).type].title;
+          return `${savedObject.attributes.title} (${visType})`;
+        },
         showSavedObject: savedObject => {
           if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
             return true;

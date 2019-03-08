@@ -28,6 +28,7 @@ declare module '@elastic/eui' {
   export const EuiFilterGroup: React.FunctionComponent<any>;
   export const EuiFilterSelectItem: React.FunctionComponent<any>;
   export const EuiListGroupItem: React.FunctionComponent<any>;
+  export const EuiFilterButton: React.FunctionComponent<any>;
 
   export interface EuiTableCriteria {
     page: { index: number; size: number };
