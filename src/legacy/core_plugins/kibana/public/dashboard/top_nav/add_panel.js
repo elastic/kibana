@@ -67,7 +67,7 @@ export class DashboardAddPanel extends React.Component {
             <h2>
               <FormattedMessage
                 id="kbn.dashboard.topNav.addPanelsTitle"
-                defaultMessage="Add Panels"
+                defaultMessage="Add panels"
               />
             </h2>
           </EuiTitle>
