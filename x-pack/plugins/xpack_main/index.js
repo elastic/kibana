@@ -22,7 +22,6 @@ import {
 import {
   CONFIG_TELEMETRY,
   getConfigTelemetryDesc,
-  CONFIG_ROLLUPS,
 } from './common/constants';
 import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
@@ -82,19 +81,7 @@ export const xpackMain = (kibana) => {
           }),
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
           value: null
-        },
-        [CONFIG_ROLLUPS]: {
-          name: i18n.translate('xpack.main.rollups.rollupIndexPatternsTitle', {
-            defaultMessage: 'Enable rollup index patterns',
-          }),
-          value: true,
-          description: i18n.translate('xpack.main.rollups.rollupIndexPatternsDescription', {
-            defaultMessage:
-              `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data.`,
-          }),
-          category: ['rollups'],
-        },
+        }
       },
       savedObjectSchemas: {
         telemetry: {
