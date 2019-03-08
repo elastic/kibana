@@ -114,4 +114,11 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
       expect(e).not.toBeNull();
     }
   });
+
+  describe('encryption key validation', async () => {
+    it('should be valid if first time use', async () => {
+      const isValid = await subject.validateKey();
+      expect(isValid).toBeTruthy();
+    });
+  });
 });

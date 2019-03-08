@@ -7,10 +7,9 @@
 // @ts-ignores
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
-// @ts-ignore
-import { AuditLogger } from 'src/legacy/server/lib/audit_logger';
 import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
-import { isConflictError } from 'src/legacy/server/saved_objects/service/lib/errors';
+// @ts-ignore
+import { AuditLogger } from '../../../server/lib/audit_logger';
 
 type SSEvents = 'secret_object_created' | 'secret_object_accessed' | 'secret_object_decrypt_failed';
 type SecretId = Promise<string>;
@@ -72,19 +71,17 @@ export class SecretService {
       try {
         const unhidden = await crypt.decrypt(toDecrypt);
 
-        // return the details only if the saved object was not modified
-        if (unhidden) {
-          logEvent(
-            'secret_object_accessed',
-            `Saved object id:${savedObject.id} accessed at ${new Date()}`
-          );
-          return {
-            ...savedObject,
-            attributes: {
-              ...unhidden,
-            },
-          };
-        }
+        logEvent(
+          'secret_object_accessed',
+          `Saved object id:${savedObject.id} accessed at ${new Date()}`
+        );
+
+        return {
+          ...savedObject,
+          attributes: {
+            ...unhidden,
+          },
+        };
       } catch (e) {
         logEvent(
           'secret_object_decrypt_failed',
@@ -94,8 +91,6 @@ export class SecretService {
         err.stack = e.stack;
         throw err;
       }
-
-      return undefined;
     };
 
     this.validateKey = async () => {
@@ -103,19 +98,25 @@ export class SecretService {
       const secret = 'Secret Service v1.0.0';
       let objToValidate;
       try {
+        // attempt to encrypt a specific saved object.
         objToValidate = await this.hideAttributeWithId(id, { version: secret });
       } catch (e) {
-        if (!isConflictError(e)) {
+        // creation failed for some reason
+        if (!savedObjectsClient.errors.isConflictError(e)) {
+          // because there was already a document with the id
           throw e;
         }
       }
 
       try {
+        // either we created a new one or we are checking the existing one.
         objToValidate = await this.unhideAttribute(id);
       } catch (e) {
+        // could not successfully decrypt either, so the key is not valid
         return false;
       }
 
+      // additionally we can validate the message we decrypted
       return objToValidate.attributes
         ? objToValidate.attributes.version === 'Secret Service v1.0.0'
         : false;
