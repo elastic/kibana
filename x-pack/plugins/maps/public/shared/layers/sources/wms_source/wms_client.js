@@ -41,18 +41,17 @@ export class WmsClient {
       layers: [],
       styles: [],
     };
-    function createOption(path, title, name) {
-      const label = [...path, title].join(' - ');
+    function createOption(optionPath, optionTitle, optionName) {
       return {
-        label,
-        value: name
+        path: [...optionPath, optionTitle],
+        value: optionName
       };
     }
 
     return layers.reduce((accumulatedCapabilities, layer) => {
       // Layer is hierarchical, continue traversing
       if (layer.Layer) {
-        const hierarchicalCapabilities  = this.reduceLayers([...path, layer.Title], layer.Layer);
+        const hierarchicalCapabilities  = this.reduceLayers([...path, layer.Title[0]], layer.Layer);
         return {
           layers: [...accumulatedCapabilities.layers, ...hierarchicalCapabilities.layers],
           styles: [...accumulatedCapabilities.styles, ...hierarchicalCapabilities.styles]
@@ -77,10 +76,53 @@ export class WmsClient {
     }, emptyCapabilities);
   }
 
+  // Avoid filling select box option label with text that is all the same
+  // Create a single group from common parts of Layer hierarchy
+  groupCapabilities(list) {
+    if (list.length === 0) {
+      return [];
+    }
+
+    let rootCommonPath = list[0].path;
+    for(let listIndex = 1; listIndex < list.length; listIndex++) {
+      if (rootCommonPath.length === 0) {
+        // No commonality in root path, nothing left to verify
+        break;
+      }
+
+      const path = list[listIndex].path;
+      for(let pathIndex = 0; pathIndex < path.length && pathIndex < rootCommonPath.length; pathIndex++) {
+        if (rootCommonPath[pathIndex] !== path[pathIndex]) {
+          // truncate root common path at location of divergence
+          rootCommonPath = rootCommonPath.slice(0, pathIndex);
+          break;
+        }
+      }
+    }
+
+    if (rootCommonPath.length === 0) {
+      return list.map(({ path, value }) => {
+        return { label: path.join(' - '), value };
+      });
+    }
+
+    return [{
+      label: rootCommonPath.join(' - '),
+      options: list.map(({ path, value }) => {
+        return { label: path.splice(rootCommonPath.length).join(' - '), value };
+      })
+    }];
+  }
+
   async getCapabilities() {
     const rawCapabilities = await this._fetchCapabilities();
 
-    return this.reduceLayers([], _.get(rawCapabilities, 'WMT_MS_Capabilities.Capability[0].Layer', []));
+    const { layers, styles } = this.reduceLayers([], _.get(rawCapabilities, 'WMT_MS_Capabilities.Capability[0].Layer', []));
+
+    return {
+      layers: this.groupCapabilities(layers),
+      styles: this.groupCapabilities(styles)
+    };
   }
 
 

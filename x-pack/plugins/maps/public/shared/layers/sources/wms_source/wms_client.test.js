@@ -106,4 +106,69 @@ describe('getCapabilities', () => {
       { label: 'hierarchyLevel1PathB - fancyStyle', value: 'fancy' }
     ]);
   });
+
+  it('Should create group from common parts of Layer hierarchy', async () => {
+    const wmsClient = new WmsClient({ serviceUrl: 'myWMSUrl' });
+    wmsClient._fetch = () => {
+      return {
+        status: 200,
+        text: () => {
+          return `
+            <WMT_MS_Capabilities version="1.1.1">
+              <Capability>
+                <Layer>
+                  <Title>hierarchyLevel1PathA</Title>
+                  <Layer>
+                    <Title>hierarchyLevel2</Title>
+                    <Layer>
+                      <Title>layer1</Title>
+                      <Name>1</Name>
+                      <Style>
+                        <Name>default</Name>
+                        <Title>defaultStyle</Title>
+                      </Style>
+                    </Layer>
+                  </Layer>
+                </Layer>
+                <Layer>
+                  <Title>hierarchyLevel1PathA</Title>
+                  <Layer>
+                    <Title>hierarchyLevel2</Title>
+                    <Layer>
+                    <Title>layer2</Title>
+                    <Name>2</Name>
+                    <Style>
+                      <Name>fancy</Name>
+                      <Title>fancyStyle</Title>
+                    </Style>
+                  </Layer>
+                  </Layer>
+
+                </Layer>
+              </Capability>
+            </WMT_MS_Capabilities>
+          `;
+        }
+      };
+    };
+    const capabilities = await wmsClient.getCapabilities();
+    expect(capabilities.layers).toEqual([
+      {
+        label: 'hierarchyLevel1PathA - hierarchyLevel2',
+        options: [
+          { label: 'layer1', value: '1' },
+          { label: 'layer2', value: '2' },
+        ]
+      }
+    ]);
+    expect(capabilities.styles).toEqual([
+      {
+        label: 'hierarchyLevel1PathA - hierarchyLevel2',
+        options: [
+          { label: 'defaultStyle', value: 'default' },
+          { label: 'fancyStyle', value: 'fancy' },
+        ]
+      }
+    ]);
+  });
 });
