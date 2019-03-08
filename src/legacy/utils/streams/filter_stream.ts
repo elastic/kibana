@@ -17,6 +17,17 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import { Transform } from 'stream';
 
-export function MockServer(config?: { [key: string]: any }): Hapi.Server;
+export function createFilterStream<T>(fn: (obj: T) => boolean) {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      const canPushDownStream = fn(obj);
+      if (canPushDownStream) {
+        this.push(obj);
+      }
+      done();
+    },
+  });
+}

@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+  EuiTitle
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -76,12 +82,18 @@ export class TransactionOverviewView extends React.Component<
 
         <EuiSpacer size="l" />
 
-        <TransactionListRequest
-          urlParams={urlParams}
-          render={({ data }) => (
-            <TransactionList items={data} serviceName={serviceName} />
-          )}
-        />
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h3>Transactions</h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <TransactionListRequest
+            urlParams={urlParams}
+            render={({ data }) => (
+              <TransactionList items={data} serviceName={serviceName} />
+            )}
+          />
+        </EuiPanel>
       </React.Fragment>
     );
   }
