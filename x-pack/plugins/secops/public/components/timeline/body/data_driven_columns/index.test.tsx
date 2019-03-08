@@ -8,8 +8,7 @@ import toJson from 'enzyme-to-json';
 
 import * as React from 'react';
 
-import { mockEcsData } from '../../../../mock';
-import { TestProviders } from '../../../../mock/test_providers';
+import { mockEcsData, TestProviders } from '../../../../mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { columnRenderers } from '../renderers';
 

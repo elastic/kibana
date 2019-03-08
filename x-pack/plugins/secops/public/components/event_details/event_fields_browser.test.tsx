@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { mockEcsData } from '../../mock/mock_ecs';
-import { createStore } from '../../store';
+import { mockEcsData, TestProviders } from '../../mock';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 
@@ -20,15 +15,10 @@ describe('EventFieldsBrowser', () => {
   describe('column headers', () => {
     ['Field', 'Value', 'Description'].forEach(header => {
       test(`it renders the ${header} column header`, () => {
-        const store = createStore();
         const wrapper = mountWithIntl(
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={jest.fn()}>
-                <EventFieldsBrowser data={mockEcsData[0]} />
-              </DragDropContext>
-            </ReduxStoreProvider>
-          </ThemeProvider>
+          <TestProviders>
+            <EventFieldsBrowser data={mockEcsData[0]} />
+          </TestProviders>
         );
 
         expect(wrapper.find('thead').containsMatchingElement(<span>{header}</span>)).toBeTruthy();
@@ -38,15 +28,10 @@ describe('EventFieldsBrowser', () => {
 
   describe('filter input', () => {
     test('it renders a filter input with the expected placeholder', () => {
-      const store = createStore();
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={jest.fn()}>
-              <EventFieldsBrowser data={mockEcsData[0]} />
-            </DragDropContext>
-          </ReduxStoreProvider>
-        </ThemeProvider>
+        <TestProviders>
+          <EventFieldsBrowser data={mockEcsData[0]} />
+        </TestProviders>
       );
 
       expect(wrapper.find('input[type="search"]').props().placeholder).toEqual(
@@ -57,15 +42,10 @@ describe('EventFieldsBrowser', () => {
 
   describe('field type icon', () => {
     test('it renders the expected icon type for the data provided', () => {
-      const store = createStore();
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={jest.fn()}>
-              <EventFieldsBrowser data={mockEcsData[0]} />
-            </DragDropContext>
-          </ReduxStoreProvider>
-        </ThemeProvider>
+        <TestProviders>
+          <EventFieldsBrowser data={mockEcsData[0]} />
+        </TestProviders>
       );
 
       expect(
@@ -81,15 +61,10 @@ describe('EventFieldsBrowser', () => {
 
   describe('field', () => {
     test('it renders the field name for the data provided', () => {
-      const store = createStore();
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={jest.fn()}>
-              <EventFieldsBrowser data={mockEcsData[0]} />
-            </DragDropContext>
-          </ReduxStoreProvider>
-        </ThemeProvider>
+        <TestProviders>
+          <EventFieldsBrowser data={mockEcsData[0]} />
+        </TestProviders>
       );
 
       expect(
@@ -104,15 +79,10 @@ describe('EventFieldsBrowser', () => {
 
   describe('value', () => {
     test('it renders the expected value for the data provided', () => {
-      const store = createStore();
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={jest.fn()}>
-              <EventFieldsBrowser data={mockEcsData[0]} />
-            </DragDropContext>
-          </ReduxStoreProvider>
-        </ThemeProvider>
+        <TestProviders>
+          <EventFieldsBrowser data={mockEcsData[0]} />
+        </TestProviders>
       );
 
       expect(
@@ -121,21 +91,16 @@ describe('EventFieldsBrowser', () => {
           .find('.euiTableRowCell')
           .at(2)
           .text()
-      ).toEqual('2018-11-05T19:03:25.937Z');
+      ).toEqual('Nov 5, 2018 @ 19:03:25.937');
     });
   });
 
   describe('description', () => {
     test('it renders the expected field description the data provided', () => {
-      const store = createStore();
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={jest.fn()}>
-              <EventFieldsBrowser data={mockEcsData[0]} />
-            </DragDropContext>
-          </ReduxStoreProvider>
-        </ThemeProvider>
+        <TestProviders>
+          <EventFieldsBrowser data={mockEcsData[0]} />
+        </TestProviders>
       );
 
       expect(

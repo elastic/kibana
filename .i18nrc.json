@@ -66,6 +66,7 @@
     "x-pack/plugins/secops/public/components/timeline/properties/index.tsx",
     "x-pack/plugins/secops/public/components/timeline/search_or_filter/search_or_filter.tsx",
     "x-pack/plugins/secops/public/lib/clipboard/clipboard.tsx",
-    "x-pack/plugins/secops/server/graphql/types.ts"
+    "x-pack/plugins/secops/server/graphql/types.ts",
+    "x-pack/plugins/secops/public/components/timeline/body/renderers/row_renderer.ts"
   ]
 }

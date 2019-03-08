@@ -4,42 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { mockGlobalState } from '../../../../mock';
-import { createStore, State } from '../../../../store';
-import { DragDropContextWrapper } from '../../../drag_and_drop/drag_drop_context_wrapper';
+import { TestProviders } from '../../../../mock';
 import { getEmptyString, getEmptyValue } from '../../../empty_value';
 
 import { createDraggable, getEuiDescriptionList, HostSummary } from './index';
 import { mockData } from './mock';
 
 describe('Host Summary Component', () => {
-  const state: State = mockGlobalState;
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-  let store = createStore(state);
-
-  beforeEach(() => {
-    store = createStore(state);
-  });
-
   describe('rendering', () => {
     test('it renders the default Host Summary', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+        <TestProviders>
           <HostSummary
             loading={false}
             data={mockData.Hosts.edges}
             startDate={552204000000}
             endDate={618472800000}
           />
-        </ReduxStoreProvider>
+        </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -55,13 +42,7 @@ describe('Host Summary Component', () => {
         618472800000,
         mockData.DateFields
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe('debian');
     });
 
@@ -73,13 +54,7 @@ describe('Host Summary Component', () => {
         618472800000,
         ['lastBeat']
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.find('FormattedRelative')).toHaveLength(1);
     });
 
@@ -91,13 +66,7 @@ describe('Host Summary Component', () => {
         618472800000,
         mockData.DateFields
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -109,13 +78,7 @@ describe('Host Summary Component', () => {
         618472800000,
         mockData.DateFields
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyString());
     });
 
@@ -127,13 +90,7 @@ describe('Host Summary Component', () => {
         618472800000,
         mockData.DateFields
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{draggable}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(' ');
     });
   });
@@ -145,13 +102,7 @@ describe('Host Summary Component', () => {
         552204000000,
         618472800000
       );
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{euiDescriptionList}</TestProviders>);
       expect(wrapper.text()).toBe(
         'Namesiem-kibanaLast Beat--Idaa7ca589f1b8220002f2fc61c64cfbf1IP Address10.142.0.7fe80::4001:aff:fe8e:7MAC Addr42:01:0a:8e:00:07Typeprojects/189716325846/machineTypes/n1-standard-1PlatformdebianOS NameDebian GNU/LinuxFamilydebianVersion9 (stretch)Architecturex86_64'
       );
@@ -159,13 +110,7 @@ describe('Host Summary Component', () => {
 
     test('if it creates an empty description list', () => {
       const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000);
-      const wrapper = mountWithIntl(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme}>
-            <DragDropContextWrapper>{euiDescriptionList}</DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
-      );
+      const wrapper = mountWithIntl(<TestProviders>{euiDescriptionList}</TestProviders>);
       expect(wrapper.text()).toBe(
         'Name--Last Beat--Id--IP Address--MAC Addr--Type--Platform--OS Name--Family--Version--Architecture--'
       );

@@ -7,8 +7,6 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Ecs } from '../../../../graphql/types';
-
 import { RowRenderer } from '.';
 
 const PlainRow = styled.div`
@@ -19,6 +17,6 @@ const PlainRow = styled.div`
 `;
 
 export const plainRowRenderer: RowRenderer = {
-  isInstance: (data: Ecs) => true,
-  renderRow: (data: Ecs, children: React.ReactNode) => <PlainRow>{children}</PlainRow>,
+  isInstance: _ => true,
+  renderRow: ({ children }) => <PlainRow>{children}</PlainRow>,
 };

@@ -25,3 +25,19 @@ export const IPDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
     </EuiLink>
   )
 );
+
+export const GoogleLink = pure<{ children?: React.ReactNode; link: string }>(
+  ({ children, link }) => (
+    <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
+      {children ? children : link}
+    </EuiLink>
+  )
+);
+
+export const TotalVirusLink = pure<{ children?: React.ReactNode; link: string }>(
+  ({ children, link }) => (
+    <EuiLink href={`https://www.virustotal.com/#/search/${encodeURI(link)}`} target="_blank">
+      {children ? children : link}
+    </EuiLink>
+  )
+);

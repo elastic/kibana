@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import { set } from 'lodash/fp';
 import * as React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { mockGlobalState } from '../../mock';
+import { mockGlobalState, TestProviders } from '../../mock';
 import { createStore, State } from '../../store';
-import { DragDropContextWrapper } from '../drag_and_drop/drag_drop_context_wrapper';
 import { mockDataProviders } from '../timeline/data_providers/mock/mock_data_providers';
 
 import { Flyout, FlyoutComponent, flyoutHeaderHeight } from '.';
@@ -25,29 +21,18 @@ const usersViewing = ['elastic'];
 
 describe('Flyout', () => {
   const state: State = mockGlobalState;
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
-  let store = createStore(state);
-
-  beforeEach(() => {
-    store = createStore(state);
-  });
 
   describe('rendering', () => {
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(
@@ -63,18 +48,14 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
-        <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeShowIsTrue}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(
@@ -90,18 +71,14 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
-        <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeShowIsTrue}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
@@ -112,20 +89,16 @@ describe('Flyout', () => {
       const storeShowIsTrue = createStore(stateShowIsTrue);
 
       const wrapper = mount(
-        <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              >
-                <p>Fake flyout body</p>
-              </Flyout>
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeShowIsTrue}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          >
+            <p>Fake flyout body</p>
+          </Flyout>
+        </TestProviders>
       );
 
       expect(
@@ -145,18 +118,14 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(stateWithDataProviders);
 
       const wrapper = mount(
-        <ReduxStoreProvider store={storeWithDataProviders}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeWithDataProviders}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(true);
@@ -171,18 +140,14 @@ describe('Flyout', () => {
       const storeWithDataProviders = createStore(stateWithDataProviders);
 
       const wrapper = mount(
-        <ReduxStoreProvider store={storeWithDataProviders}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeWithDataProviders}>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(
@@ -195,18 +160,14 @@ describe('Flyout', () => {
 
     test('it does NOT render the data providers badge when the number is equal to 0', () => {
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <Flyout
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="badge"]').exists()).toEqual(false);
@@ -215,21 +176,17 @@ describe('Flyout', () => {
     test('should call the onOpen when the mouse is clicked for rendering', () => {
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutComponent
-                dataProviders={mockDataProviders}
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                show={false}
-                showTimeline={showTimeline}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <FlyoutComponent
+            dataProviders={mockDataProviders}
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            show={false}
+            showTimeline={showTimeline}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       wrapper
@@ -246,21 +203,17 @@ describe('Flyout', () => {
 
       const showTimeline = (jest.fn() as unknown) as ActionCreator<{ id: string; show: boolean }>;
       const wrapper = mount(
-        <ReduxStoreProvider store={storeShowIsTrue}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutComponent
-                dataProviders={mockDataProviders}
-                flyoutHeight={testFlyoutHeight}
-                headerHeight={flyoutHeaderHeight}
-                show={true}
-                showTimeline={showTimeline}
-                timelineId="test"
-                usersViewing={usersViewing}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders store={storeShowIsTrue}>
+          <FlyoutComponent
+            dataProviders={mockDataProviders}
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            show={true}
+            showTimeline={showTimeline}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
       );
 
       wrapper
@@ -276,18 +229,14 @@ describe('Flyout', () => {
     test('should show the flyout button when show is true', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutButton
-                dataProviders={mockDataProviders}
-                show={true}
-                timelineId="test"
-                onOpen={openMock}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <FlyoutButton
+            dataProviders={mockDataProviders}
+            show={true}
+            timelineId="test"
+            onOpen={openMock}
+          />
+        </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(true);
     });
@@ -295,18 +244,14 @@ describe('Flyout', () => {
     test('should NOT show the flyout button when show is false', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutButton
-                dataProviders={mockDataProviders}
-                show={false}
-                timelineId="test"
-                onOpen={openMock}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <FlyoutButton
+            dataProviders={mockDataProviders}
+            show={false}
+            timelineId="test"
+            onOpen={openMock}
+          />
+        </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="flyoutButton"]').exists()).toEqual(false);
     });
@@ -314,18 +259,14 @@ describe('Flyout', () => {
     test('should return the flyout button with text', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutButton
-                dataProviders={mockDataProviders}
-                show={true}
-                timelineId="test"
-                onOpen={openMock}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <FlyoutButton
+            dataProviders={mockDataProviders}
+            show={true}
+            timelineId="test"
+            onOpen={openMock}
+          />
+        </TestProviders>
       );
       expect(
         wrapper
@@ -338,18 +279,14 @@ describe('Flyout', () => {
     test('should call the onOpen when it is clicked', () => {
       const openMock = jest.fn();
       const wrapper = mount(
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={theme()}>
-            <DragDropContextWrapper>
-              <FlyoutButton
-                dataProviders={mockDataProviders}
-                show={true}
-                timelineId="test"
-                onOpen={openMock}
-              />
-            </DragDropContextWrapper>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <TestProviders>
+          <FlyoutButton
+            dataProviders={mockDataProviders}
+            show={true}
+            timelineId="test"
+            onOpen={openMock}
+          />
+        </TestProviders>
       );
       wrapper
         .find('[data-test-subj="flyoutOverlay"]')

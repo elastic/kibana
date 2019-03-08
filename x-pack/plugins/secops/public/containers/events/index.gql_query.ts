@@ -69,6 +69,9 @@ export const eventsQuery = gql`
                 }
               }
             }
+            zeek {
+              session_id
+            }
           }
         }
       }

@@ -244,9 +244,17 @@ export interface Ecs {
 
   host?: HostEcsFields | null;
 
+  network?: NetworkEcsField | null;
+
   source?: SourceEcsFields | null;
 
   suricata?: SuricataEcsFields | null;
+
+  zeek?: ZeekEcsFields | null;
+
+  http?: HttpEcsFields | null;
+
+  url?: UrlEcsFields | null;
 
   timestamp?: Date | null;
 
@@ -275,12 +283,24 @@ export interface EventEcsFields {
   action?: string | null;
 
   type?: string | null;
+
+  dataset?: string | null;
 }
 
 export interface GeoEcsFields {
   country_iso_code?: string | null;
 
   region_name?: string | null;
+}
+
+export interface NetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface SuricataEcsFields {
@@ -299,6 +319,176 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface ZeekEcsFields {
+  session_id?: string | null;
+
+  connection?: ZeekConnectionData | null;
+
+  notice?: ZeekNoticeData | null;
+
+  dns?: ZeekDnsData | null;
+
+  http?: ZeekHttpData | null;
+
+  files?: ZeekFileData | null;
+
+  ssl?: ZeekSslData | null;
+}
+
+export interface ZeekConnectionData {
+  local_resp?: string | null;
+
+  local_orig?: string | null;
+
+  missed_bytes?: number | null;
+
+  state?: string | null;
+
+  history?: string | null;
+}
+
+export interface ZeekNoticeData {
+  suppress_for?: number | null;
+
+  msg?: string | null;
+
+  note?: string | null;
+
+  sub?: string | null;
+
+  dst?: string | null;
+
+  dropped?: boolean | null;
+
+  peer_descr?: string | null;
+}
+
+export interface ZeekDnsData {
+  AA?: boolean | null;
+
+  qclass_name?: string | null;
+
+  RD?: boolean | null;
+
+  qtype_name?: string | null;
+
+  rejected?: boolean | null;
+
+  qtype?: number | null;
+
+  query?: string | null;
+
+  trans_id?: number | null;
+
+  qclass?: number | null;
+
+  RA?: boolean | null;
+
+  TC?: boolean | null;
+}
+
+export interface ZeekHttpData {
+  resp_mime_types?: string[] | null;
+
+  trans_depth?: string | null;
+
+  status_msg?: string | null;
+
+  resp_fuids?: string[] | null;
+
+  tags?: string[] | null;
+}
+
+export interface ZeekFileData {
+  session_ids?: string[] | null;
+
+  timedout?: boolean | null;
+
+  local_orig?: boolean | null;
+
+  tx_host?: string | null;
+
+  source?: string | null;
+
+  is_orig?: boolean | null;
+
+  overflow_bytes?: number | null;
+
+  sha1?: string | null;
+
+  duration?: number | null;
+
+  depth?: number | null;
+
+  analyzers?: string[] | null;
+
+  mime_type?: string | null;
+
+  rx_host?: string | null;
+
+  total_bytes?: number | null;
+
+  fuid?: string | null;
+
+  seen_bytes?: number | null;
+
+  missing_bytes?: number | null;
+
+  md5?: string | null;
+}
+
+export interface ZeekSslData {
+  cipher?: string | null;
+
+  established?: boolean | null;
+
+  resumed?: boolean | null;
+
+  version?: string | null;
+}
+
+export interface HttpEcsFields {
+  version?: string | null;
+
+  request?: HttpRequestData | null;
+
+  response?: HttpResponseData | null;
+}
+
+export interface HttpRequestData {
+  method?: string | null;
+
+  body?: HttpBodyData | null;
+
+  referrer?: string | null;
+
+  bytes?: number | null;
+}
+
+export interface HttpBodyData {
+  content?: string | null;
+
+  bytes?: number | null;
+}
+
+export interface HttpResponseData {
+  status_code?: number | null;
+
+  body?: HttpBodyData | null;
+
+  bytes?: number | null;
+}
+
+export interface UrlEcsFields {
+  domain?: string | null;
+
+  original?: string | null;
+
+  username?: string | null;
+
+  password?: string | null;
 }
 
 export interface HostsData {
@@ -361,14 +551,6 @@ export interface TopNFlowItem {
   domain?: string[] | null;
 
   ip?: string | null;
-}
-
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface UncommonProcessesData {
@@ -542,6 +724,14 @@ export enum Direction {
   descending = 'descending',
 }
 
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  unknown = 'unknown',
+}
+
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -552,14 +742,6 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
 }
 
 // ====================================================
@@ -776,6 +958,8 @@ export namespace GetEventsQuery {
     geo?: Geo | null;
 
     suricata?: Suricata | null;
+
+    zeek?: Zeek | null;
   };
 
   export type Event = {
@@ -848,6 +1032,12 @@ export namespace GetEventsQuery {
     signature?: string | null;
 
     signature_id?: number | null;
+  };
+
+  export type Zeek = {
+    __typename?: 'ZeekEcsFields';
+
+    session_id?: string | null;
   };
 }
 
@@ -1379,6 +1569,14 @@ export namespace GetTimelineQuery {
     geo?: Geo | null;
 
     suricata?: Suricata | null;
+
+    network?: Network | null;
+
+    http?: Http | null;
+
+    url?: Url | null;
+
+    zeek?: Zeek | null;
   };
 
   export type Event = {
@@ -1393,6 +1591,8 @@ export namespace GetTimelineQuery {
     category?: string | null;
 
     id?: number | null;
+
+    dataset?: string | null;
   };
 
   export type Host = {
@@ -1451,6 +1651,210 @@ export namespace GetTimelineQuery {
     signature?: string | null;
 
     signature_id?: number | null;
+  };
+
+  export type Network = {
+    __typename?: 'NetworkEcsField';
+
+    transport?: string | null;
+  };
+
+  export type Http = {
+    __typename?: 'HttpEcsFields';
+
+    version?: string | null;
+
+    request?: Request | null;
+
+    response?: Response | null;
+  };
+
+  export type Request = {
+    __typename?: 'HttpRequestData';
+
+    method?: string | null;
+
+    body?: Body | null;
+
+    referrer?: string | null;
+  };
+
+  export type Body = {
+    __typename?: 'HttpBodyData';
+
+    bytes?: number | null;
+
+    content?: string | null;
+  };
+
+  export type Response = {
+    __typename?: 'HttpResponseData';
+
+    status_code?: number | null;
+
+    body?: _Body | null;
+  };
+
+  export type _Body = {
+    __typename?: 'HttpBodyData';
+
+    bytes?: number | null;
+
+    content?: string | null;
+  };
+
+  export type Url = {
+    __typename?: 'UrlEcsFields';
+
+    original?: string | null;
+
+    domain?: string | null;
+
+    username?: string | null;
+
+    password?: string | null;
+  };
+
+  export type Zeek = {
+    __typename?: 'ZeekEcsFields';
+
+    session_id?: string | null;
+
+    connection?: Connection | null;
+
+    notice?: Notice | null;
+
+    dns?: Dns | null;
+
+    http?: _Http | null;
+
+    files?: Files | null;
+
+    ssl?: Ssl | null;
+  };
+
+  export type Connection = {
+    __typename?: 'ZeekConnectionData';
+
+    local_resp?: string | null;
+
+    local_orig?: string | null;
+
+    missed_bytes?: number | null;
+
+    state?: string | null;
+
+    history?: string | null;
+  };
+
+  export type Notice = {
+    __typename?: 'ZeekNoticeData';
+
+    suppress_for?: number | null;
+
+    msg?: string | null;
+
+    note?: string | null;
+
+    sub?: string | null;
+
+    dst?: string | null;
+
+    dropped?: boolean | null;
+
+    peer_descr?: string | null;
+  };
+
+  export type Dns = {
+    __typename?: 'ZeekDnsData';
+
+    AA?: boolean | null;
+
+    qclass_name?: string | null;
+
+    RD?: boolean | null;
+
+    qtype_name?: string | null;
+
+    rejected?: boolean | null;
+
+    qtype?: number | null;
+
+    query?: string | null;
+
+    trans_id?: number | null;
+
+    qclass?: number | null;
+
+    RA?: boolean | null;
+
+    TC?: boolean | null;
+  };
+
+  export type _Http = {
+    __typename?: 'ZeekHttpData';
+
+    resp_mime_types?: string[] | null;
+
+    trans_depth?: string | null;
+
+    status_msg?: string | null;
+
+    resp_fuids?: string[] | null;
+
+    tags?: string[] | null;
+  };
+
+  export type Files = {
+    __typename?: 'ZeekFileData';
+
+    session_ids?: string[] | null;
+
+    timedout?: boolean | null;
+
+    local_orig?: boolean | null;
+
+    tx_host?: string | null;
+
+    source?: string | null;
+
+    is_orig?: boolean | null;
+
+    overflow_bytes?: number | null;
+
+    sha1?: string | null;
+
+    duration?: number | null;
+
+    depth?: number | null;
+
+    analyzers?: string[] | null;
+
+    mime_type?: string | null;
+
+    rx_host?: string | null;
+
+    total_bytes?: number | null;
+
+    fuid?: string | null;
+
+    seen_bytes?: number | null;
+
+    missing_bytes?: number | null;
+
+    md5?: string | null;
+  };
+
+  export type Ssl = {
+    __typename?: 'ZeekSslData';
+
+    cipher?: string | null;
+
+    established?: boolean | null;
+
+    resumed?: boolean | null;
+
+    version?: string | null;
   };
 }
 

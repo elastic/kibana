@@ -71,7 +71,7 @@ interface FlyoutButtonProps {
   timelineId: string;
 }
 
-export const FlyoutButton = pure(({ onOpen, show, dataProviders, timelineId }: FlyoutButtonProps) =>
+export const FlyoutButton = pure<FlyoutButtonProps>(({ onOpen, show, dataProviders, timelineId }) =>
   show ? (
     <Container>
       <DroppableWrapper droppableId={`${droppableTimelineFlyoutButtonPrefix}${timelineId}`}>

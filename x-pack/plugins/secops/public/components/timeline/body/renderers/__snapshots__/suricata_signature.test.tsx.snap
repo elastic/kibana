@@ -789,24 +789,22 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                       </Styled(EuiFlexItem)>
                     </Component>
                   </pure(Component)>
-                  <pure(Component)
-                    link="ET SCAN ATTACK Hello"
-                    value="Hello"
+                  <Styled(EuiFlexItem)
+                    grow={false}
                   >
-                    <Component
-                      link="ET SCAN ATTACK Hello"
-                      value="Hello"
+                    <EuiFlexItem
+                      className="sc-jtRfpW CwDOZ"
+                      component="div"
+                      grow={false}
                     >
-                      <Styled(EuiFlexItem)
-                        grow={false}
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero sc-jtRfpW CwDOZ"
                       >
-                        <EuiFlexItem
-                          className="sc-jtRfpW CwDOZ"
-                          component="div"
-                          grow={false}
+                        <pure(Component)
+                          link="ET SCAN ATTACK Hello"
                         >
-                          <div
-                            className="euiFlexItem euiFlexItem--flexGrowZero sc-jtRfpW CwDOZ"
+                          <Component
+                            link="ET SCAN ATTACK Hello"
                           >
                             <EuiLink
                               color="primary"
@@ -823,11 +821,11 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                                 Hello
                               </a>
                             </EuiLink>
-                          </div>
-                        </EuiFlexItem>
-                      </Styled(EuiFlexItem)>
-                    </Component>
-                  </pure(Component)>
+                          </Component>
+                        </pure(Component)>
+                      </div>
+                    </EuiFlexItem>
+                  </Styled(EuiFlexItem)>
                 </div>
               </EuiFlexGroup>
             </Component>

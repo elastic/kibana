@@ -26,7 +26,11 @@ describe('plain_row_renderer', () => {
   });
 
   test('should render a plain row', () => {
-    const children = plainRowRenderer.renderRow(mockDatum, <span>some children</span>);
+    const children = plainRowRenderer.renderRow({
+      data: mockDatum,
+      width: 100,
+      children: <span>some children</span>,
+    });
     const wrapper = mount(
       <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
         <span>{children}</span>

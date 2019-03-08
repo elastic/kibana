@@ -6,10 +6,11 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 
-import { HostDetailsLink, IPDetailsLink } from '.';
+import { GoogleLink, HostDetailsLink, IPDetailsLink, TotalVirusLink } from '.';
 
 describe('Custom Links', () => {
   const hostId = '133fd7715f1d47979ce817ba0df10c6e';
@@ -59,6 +60,58 @@ describe('Custom Links', () => {
         `#/link-to/network/ip/${encodeURIComponent(ipv6Encoded)}`
       );
       expect(wrapper.text()).toEqual(ipv6);
+    });
+  });
+
+  describe('GoogleLink', () => {
+    test('it renders text passed in as value', () => {
+      const wrapper = mountWithIntl(
+        <GoogleLink link={'http:/example.com/'}>{'Example Link'}</GoogleLink>
+      );
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders props passed in as link', () => {
+      const wrapper = mountWithIntl(
+        <GoogleLink link={'http:/example.com/'}>{'Example Link'}</GoogleLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://www.google.com/search?q=http:/example.com/'
+      );
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <GoogleLink link={"http:/example.com?q=<script>alert('XSS')</script>"}>
+          {'Example Link'}
+        </GoogleLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://www.google.com/search?q=http:/example.com?q=%3Cscript%3Ealert('XSS')%3C/script%3E"
+      );
+    });
+  });
+
+  describe('TotalVirusLink', () => {
+    test('it renders sha passed in as value', () => {
+      const wrapper = mountWithIntl(<TotalVirusLink link={'abc'}>{'Example Link'}</TotalVirusLink>);
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders sha passed in as link', () => {
+      const wrapper = mountWithIntl(
+        <TotalVirusLink link={'abc'}>{'Example Link'} </TotalVirusLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abc');
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <TotalVirusLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</TotalVirusLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C/script%3E"
+      );
     });
   });
 });

@@ -15,6 +15,7 @@ export const ecsSchema = gql`
     severity: Float
     action: String
     type: String
+    dataset: String
   }
 
   type GeoEcsFields {
@@ -84,6 +85,115 @@ export const ecsSchema = gql`
     eve: SuricataEveData
   }
 
+  type ZeekConnectionData {
+    local_resp: String
+    local_orig: String
+    missed_bytes: Float
+    state: String
+    history: String
+  }
+
+  type ZeekNoticeData {
+    suppress_for: Float
+    msg: String
+    note: String
+    sub: String
+    dst: String
+    dropped: Boolean
+    peer_descr: String
+  }
+
+  type ZeekDnsData {
+    AA: Boolean
+    qclass_name: String
+    RD: Boolean
+    qtype_name: String
+    rejected: Boolean
+    qtype: Float
+    query: String
+    trans_id: Float
+    qclass: Float
+    RA: Boolean
+    TC: Boolean
+  }
+
+  type ZeekHttpData {
+    resp_mime_types: [String!]
+    trans_depth: String
+    status_msg: String
+    resp_fuids: [String!]
+    tags: [String!]
+  }
+
+  type HttpBodyData {
+    content: String
+    bytes: Float
+  }
+
+  type HttpRequestData {
+    method: String
+    body: HttpBodyData
+    referrer: String
+    bytes: Float
+  }
+
+  type HttpResponseData {
+    status_code: Float
+    body: HttpBodyData
+    bytes: Float
+  }
+
+  type HttpEcsFields {
+    version: String
+    request: HttpRequestData
+    response: HttpResponseData
+  }
+
+  type UrlEcsFields {
+    domain: String
+    original: String
+    username: String
+    password: String
+  }
+
+  type ZeekFileData {
+    session_ids: [String!]
+    timedout: Boolean
+    local_orig: Boolean
+    tx_host: String
+    source: String
+    is_orig: Boolean
+    overflow_bytes: Float
+    sha1: String
+    duration: Float
+    depth: Float
+    analyzers: [String!]
+    mime_type: String
+    rx_host: String
+    total_bytes: Float
+    fuid: String
+    seen_bytes: Float
+    missing_bytes: Float
+    md5: String
+  }
+
+  type ZeekSslData {
+    cipher: String
+    established: Boolean
+    resumed: Boolean
+    version: String
+  }
+
+  type ZeekEcsFields {
+    session_id: String
+    connection: ZeekConnectionData
+    notice: ZeekNoticeData
+    dns: ZeekDnsData
+    http: ZeekHttpData
+    files: ZeekFileData
+    ssl: ZeekSslData
+  }
+
   type UserEcsFields {
     id: Float
     name: String
@@ -104,6 +214,7 @@ export const ecsSchema = gql`
   type NetworkEcsField {
     bytes: Float
     packets: Float
+    transport: String
     direction: [NetworkDirectionEcs!]
   }
 
@@ -114,8 +225,12 @@ export const ecsSchema = gql`
     event: EventEcsFields
     geo: GeoEcsFields
     host: HostEcsFields
+    network: NetworkEcsField
     source: SourceEcsFields
     suricata: SuricataEcsFields
+    zeek: ZeekEcsFields
+    http: HttpEcsFields
+    url: UrlEcsFields
     timestamp: Date
     user: UserEcsFields
   }

@@ -74,7 +74,7 @@ export const DraggableValue = pure<{ data: Ecs; fieldName: string }>(({ data, fi
   ) : null;
 });
 
-export const SourceIp = pure(({ data }: { data: Ecs }) =>
+export const SourceIp = pure<{ data: Ecs }>(({ data }) =>
   fieldExists({ data, fieldName: 'source.ip' }) ? (
     <>
       <EuiFlexItem grow={false}>
@@ -99,7 +99,7 @@ export const SourceIp = pure(({ data }: { data: Ecs }) =>
   ) : null
 );
 
-export const DestinationIp = pure(({ data }: { data: Ecs }) =>
+export const DestinationIp = pure<{ data: Ecs }>(({ data }) =>
   fieldExists({ data, fieldName: 'destination.ip' }) ? (
     <>
       <EuiFlexItem grow={false}>
@@ -124,7 +124,7 @@ export const DestinationIp = pure(({ data }: { data: Ecs }) =>
   ) : null
 );
 
-export const SourceDest = pure(({ data }: { data: Ecs }) => (
+export const SourceDest = pure<{ data: Ecs }>(({ data }) => (
   <EuiFlexGroup justifyContent="center">
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">

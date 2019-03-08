@@ -11,6 +11,7 @@ import { plainRowRenderer } from './plain_row_renderer';
 import { RowRenderer } from './row_renderer';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { unknownColumnRenderer } from './unknown_column_renderer';
+import { zeekRowRenderer } from './zeek_row_renderer';
 
 export * from './column_renderer';
 export * from './row_renderer';
@@ -21,8 +22,9 @@ export * from './plain_row_renderer';
 export * from './plain_column_renderer';
 export * from './suricata_row_renderer';
 export * from './unknown_column_renderer';
+export * from './zeek_row_renderer';
 
-export const rowRenderers: RowRenderer[] = [suricataRowRenderer, plainRowRenderer];
+export const rowRenderers: RowRenderer[] = [zeekRowRenderer, suricataRowRenderer, plainRowRenderer];
 
 export const columnRenderers: ColumnRenderer[] = [
   plainColumnRenderer,

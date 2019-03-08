@@ -943,24 +943,22 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                               </Styled(EuiFlexItem)>
                             </Component>
                           </pure(Component)>
-                          <pure(Component)
-                            link="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
-                            value="WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
+                          <Styled(EuiFlexItem)
+                            grow={false}
                           >
-                            <Component
-                              link="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
-                              value="WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
+                            <EuiFlexItem
+                              className="sc-jtRfpW CwDOZ"
+                              component="div"
+                              grow={false}
                             >
-                              <Styled(EuiFlexItem)
-                                grow={false}
+                              <div
+                                className="euiFlexItem euiFlexItem--flexGrowZero sc-jtRfpW CwDOZ"
                               >
-                                <EuiFlexItem
-                                  className="sc-jtRfpW CwDOZ"
-                                  component="div"
-                                  grow={false}
+                                <pure(Component)
+                                  link="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
                                 >
-                                  <div
-                                    className="euiFlexItem euiFlexItem--flexGrowZero sc-jtRfpW CwDOZ"
+                                  <Component
+                                    link="ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)"
                                   >
                                     <EuiLink
                                       color="primary"
@@ -977,11 +975,11 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                         WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)
                                       </a>
                                     </EuiLink>
-                                  </div>
-                                </EuiFlexItem>
-                              </Styled(EuiFlexItem)>
-                            </Component>
-                          </pure(Component)>
+                                  </Component>
+                                </pure(Component)>
+                              </div>
+                            </EuiFlexItem>
+                          </Styled(EuiFlexItem)>
                         </div>
                       </EuiFlexGroup>
                     </Component>
