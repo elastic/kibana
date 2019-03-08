@@ -58,6 +58,7 @@ export class CodeBlock extends React.PureComponent<Props> {
         selectOnLineNumbers: false,
         selectionHighlight: false,
         renderLineHighlight: 'none',
+        renderIndentGuides: false,
       });
       this.ed.onMouseDown((e: editor.IEditorMouseEvent) => {
         if (
