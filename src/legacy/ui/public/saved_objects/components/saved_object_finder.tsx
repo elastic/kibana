@@ -448,7 +448,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
           </EuiFlexGroup>
         )}
         {items.length > 0 ? (
-          <FixedEuiListGroup maxWidth={false}>
+          <FixedEuiListGroup data-test-subj="savedObjectFinderItemList" maxWidth={false}>
             {items.map(item => {
               const currentSavedObjectMetaData = savedObjectMetaData.find(
                 metaData => metaData.type === item.type

@@ -52,8 +52,8 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async addEveryEmbeddableOnCurrentPage() {
       log.debug('addEveryEmbeddableOnCurrentPage');
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      const embeddableRows = await addPanel.findAllByClassName('euiListGroupItem');
+      const itemList = await testSubjects.find('savedObjectFinderItemList');
+      const embeddableRows = await itemList.findAllByCssSelector('li');
       for (let i = 0; i < embeddableRows.length; i++) {
         await embeddableRows[i].click();
         await PageObjects.common.closeToast();
