@@ -368,7 +368,10 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                 </EuiFilterButton>
               }
             >
-              <FixedEuiContextMenuPanel watchedItemProps={['icon']} items={this.getSortOptions()} />
+              <FixedEuiContextMenuPanel
+                watchedItemProps={['icon', 'disabled']}
+                items={this.getSortOptions()}
+              />
             </EuiPopover>
             {this.props.showFilter && (
               <EuiPopover
@@ -398,7 +401,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                 }
               >
                 <FixedEuiContextMenuPanel
-                  watchedItemProps={['icon']}
+                  watchedItemProps={['icon', 'disabled']}
                   items={this.props.savedObjectMetaData.map(metaData => (
                     <EuiContextMenuItem
                       key={metaData.type}
