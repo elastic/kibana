@@ -109,7 +109,7 @@ class CodeProjectItem extends React.PureComponent<{
     const projectManagement = (
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} style={{ display: 'none' }}>
             <div
               className="code-project-button"
               data-test-subj="settingsRepositoryButton"
