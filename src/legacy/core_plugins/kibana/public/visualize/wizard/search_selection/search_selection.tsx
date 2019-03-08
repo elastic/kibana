@@ -55,6 +55,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
           <SavedObjectFinder
             key="searchSavedObjectFinder"
             onChoose={this.props.onSearchSelected}
+            showFilter
             noItemsMessage={i18n.translate(
               'kbn.visualize.newVisWizard.searchSelection.notFoundLabel',
               {

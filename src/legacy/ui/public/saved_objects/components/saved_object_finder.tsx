@@ -370,7 +370,7 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
             >
               <FixedEuiContextMenuPanel watchedItemProps={['icon']} items={this.getSortOptions()} />
             </EuiPopover>
-            {this.props.showFilter && availableSavedObjectMetaData.length > 1 && (
+            {this.props.showFilter && (
               <EuiPopover
                 id="addPanelFilterPopover"
                 panelClassName="euiFilterGroup__popoverPanel"
@@ -387,11 +387,9 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
                     iconType="arrowDown"
                     data-test-subj="savedObjectFinderFilterButton"
                     isSelected={this.state.filterOpen}
-                    numFilters={
-                      this.state.filteredTypes.length > 0
-                        ? this.state.filteredTypes.length
-                        : undefined
-                    }
+                    numFilters={this.props.savedObjectMetaData.length}
+                    hasActiveFilters={this.state.filteredTypes.length > 0}
+                    numActiveFilters={this.state.filteredTypes.length}
                   >
                     {i18n.translate('common.ui.savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
@@ -401,9 +399,10 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
               >
                 <FixedEuiContextMenuPanel
                   watchedItemProps={['icon']}
-                  items={availableSavedObjectMetaData.map(metaData => (
+                  items={this.props.savedObjectMetaData.map(metaData => (
                     <EuiContextMenuItem
                       key={metaData.type}
+                      disabled={!availableSavedObjectMetaData.includes(metaData)}
                       icon={this.state.filteredTypes.includes(metaData.type) ? 'check' : 'empty'}
                       data-test-subj={`savedObjectFinderFilter-${metaData.type}`}
                       onClick={() => {
