@@ -92,7 +92,6 @@ export class JavaLauncher implements ILanguageServerLauncher {
       return path.resolve(installationPath, JDKFound[0]);
     }
 
-    let config = 'config_mac';
     let bundledJavaHome = `${findJDK('osx')}/Contents/Home`;
     let javaPath = 'java';
     let javaHomePath = '';
@@ -102,11 +101,9 @@ export class JavaLauncher implements ILanguageServerLauncher {
         break;
       case 'win32':
         bundledJavaHome = `${findJDK('windows')}`;
-        config = 'config_win';
         break;
       case 'linux':
         bundledJavaHome = `${findJDK('linux')}`;
-        config = 'config_linux';
         break;
       default:
         log.error('Unable to find platform for this os');
@@ -139,7 +136,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
         '-jar',
         path.resolve(installationPath, launchersFound[0]),
         '-configuration',
-        path.resolve(installationPath, './repository', config),
+        this.options.jdtConfigPath,
         '-data',
         this.options.jdtWorkspacePath,
       ],
