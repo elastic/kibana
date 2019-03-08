@@ -139,6 +139,12 @@ export class TransactionDistribution extends Component<Props> {
               }
             )}{' '}
             <EuiIconTip
+              title={i18n.translate(
+                'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingLabel',
+                {
+                  defaultMessage: 'Sampling'
+                }
+              )}
               content={i18n.translate(
                 'xpack.apm.transactionDetails.transactionsDurationDistributionChartTooltip.samplingDescription',
                 {
