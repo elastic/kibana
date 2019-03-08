@@ -221,7 +221,13 @@ exports[`Relationships should render index patterns normally 1`] = `
             />
           }
         >
-          <p />
+          <p>
+            <FormattedMessage
+              defaultMessage="Here are some saved searches that use this index pattern. If you delete this index pattern, these saved searches will not longer work properly."
+              id="kbn.management.objects.objectsTable.relationships.indexPattern.searches.calloutText"
+              values={Object {}}
+            />
+          </p>
         </EuiCallOut>
       </EuiDescriptionListTitle>
       <EuiInMemoryTable
@@ -279,7 +285,13 @@ exports[`Relationships should render index patterns normally 1`] = `
             />
           }
         >
-          <p />
+          <p>
+            <FormattedMessage
+              defaultMessage="Here are some visualizations that use this index pattern. If you delete this index pattern, these visualizations will not longer work properly."
+              id="kbn.management.objects.objectsTable.relationships.indexPattern.visualizations.calloutText"
+              values={Object {}}
+            />
+          </p>
         </EuiCallOut>
       </EuiDescriptionListTitle>
       <EuiInMemoryTable
