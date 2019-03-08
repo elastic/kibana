@@ -7,9 +7,9 @@
 import { Location } from 'history';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 
-const transaction: Transaction = {
+export const transaction: Transaction = {
   agent: {
-    name: '227453131a17',
+    name: 'java',
     version: '7.0.0'
   },
   processor: {
@@ -77,15 +77,10 @@ const transaction: Transaction = {
   }
 };
 
-const location: Location = {
+export const location: Location = {
   state: '',
   pathname:
     '/opbeans-go/transactions/request/GET~20~2Fapi~2Fproducts~2F~3Aid~2Fcustomers',
   search: '?_g=()&flyoutDetailTab=undefined&waterfallItemId=8b60bd32ecc6e150',
   hash: ''
-};
-
-export const props = {
-  transaction,
-  location
 };
