@@ -10,11 +10,19 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiCallOut,
+  EuiComboBox,
   EuiFieldText,
   EuiFormRow,
   EuiForm,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
+
+const LAYERS_LABEL = i18n.translate('xpack.maps.source.wms.layersLabel', {
+  defaultMessage: 'Layers'
+});
+const STYLES_LABEL = i18n.translate('xpack.maps.source.wms.stylesLabel', {
+  defaultMessage: 'Styles'
+});
 
 export class WMSCreateSourceEditor extends Component {
 
@@ -25,6 +33,10 @@ export class WMSCreateSourceEditor extends Component {
     isLoadingCapabilities: false,
     getCapabilitiesError: null,
     hasAttemptedToLoadCapabilities: false,
+    layerOptions: [],
+    styleOptions: [],
+    selectedLayerOptions: [],
+    selectedStyleOptions: [],
   }
 
   componentDidMount() {
@@ -77,19 +89,39 @@ export class WMSCreateSourceEditor extends Component {
 
     this.setState({
       isLoadingCapabilities: false,
+      layerOptions: capabilities.layers,
+      styleOptions: capabilities.styles
     });
   }
 
-  _handleServiceUrlChange(e) {
+  _handleServiceUrlChange = (e) => {
     this.setState({ serviceUrl: e.target.value }, this._previewIfPossible);
   }
 
-  _handleLayersChange(e) {
+  _handleLayersChange = (e) => {
     this.setState({ layers: e.target.value }, this._previewIfPossible);
   }
 
-  _handleStylesChange(e) {
+  _handleLayerOptionsChange = (selectedOptions) => {
+    this.setState({
+      selectedLayerOptions: selectedOptions,
+      layers: selectedOptions.map(selectedOption => {
+        return selectedOption.value;
+      }).join(',')
+    }, this._previewIfPossible);
+  }
+
+  _handleStylesChange = (e) => {
     this.setState({ styles: e.target.value }, this._previewIfPossible);
+  }
+
+  _handleStyleOptionsChange = (selectedOptions) => {
+    this.setState({
+      selectedStyleOptions: selectedOptions,
+      styles: selectedOptions.map(selectedOption => {
+        return selectedOption.value;
+      }).join(',')
+    }, this._previewIfPossible);
   }
 
   _renderLayerAndStyleInputs() {
@@ -97,7 +129,7 @@ export class WMSCreateSourceEditor extends Component {
       return null;
     }
 
-    if (this.state.getCapabilitiesError) {
+    if (this.state.getCapabilitiesError || this.state.layerOptions.length === 0) {
       return (
         <Fragment>
           <EuiCallOut
@@ -110,28 +142,24 @@ export class WMSCreateSourceEditor extends Component {
           </EuiCallOut>
 
           <EuiFormRow
-            label={i18n.translate('xpack.maps.source.wms.layersLabel', {
-              defaultMessage: 'Layers'
-            })}
+            label={LAYERS_LABEL}
             helpText={i18n.translate('xpack.maps.source.wms.layersHelpText', {
               defaultMessage: 'use comma separated list of layer names'
             })}
           >
             <EuiFieldText
-              onChange={(e) => this._handleLayersChange(e)}
+              onChange={this._handleLayersChange}
             />
           </EuiFormRow>
 
           <EuiFormRow
-            label={i18n.translate('xpack.maps.source.wms.stylesLabel', {
-              defaultMessage: 'Styles'
-            })}
+            label={STYLES_LABEL}
             helpText={i18n.translate('xpack.maps.source.wms.stylesHelpText', {
               defaultMessage: 'use comma separated list of style names'
             })}
           >
             <EuiFieldText
-              onChange={(e) => this._handleStylesChange(e)}
+              onChange={this._handleStylesChange}
             />
           </EuiFormRow>
         </Fragment>
@@ -139,7 +167,26 @@ export class WMSCreateSourceEditor extends Component {
     }
 
     return (
-      <div>layers and styles drop down placeholder</div>
+      <Fragment>
+        <EuiFormRow
+          label={LAYERS_LABEL}
+        >
+          <EuiComboBox
+            options={this.state.layerOptions}
+            selectedOptions={this.state.selectedLayerOptions}
+            onChange={this._handleLayerOptionsChange}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={STYLES_LABEL}
+        >
+          <EuiComboBox
+            options={this.state.styleOptions}
+            selectedOptions={this.state.selectedStyleOptions}
+            onChange={this._handleStyleOptionsChange}
+          />
+        </EuiFormRow>
+      </Fragment>
     );
   }
 
@@ -153,7 +200,7 @@ export class WMSCreateSourceEditor extends Component {
         >
           <EuiFieldText
             value={this.state.serviceUrl}
-            onChange={(e) => this._handleServiceUrlChange(e)}
+            onChange={this._handleServiceUrlChange}
           />
         </EuiFormRow>
 

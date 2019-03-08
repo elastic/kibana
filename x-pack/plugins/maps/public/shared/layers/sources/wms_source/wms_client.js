@@ -41,28 +41,12 @@ export class WmsClient {
       layers: [],
       styles: [],
     };
-    function groupOption(groups, optionGroupName, optionLabel, optionValue) {
-      if (!optionLabel) {
-        return groups;
-      }
-
-      const newOption = { label: optionLabel, value: optionValue };
-      const matchingGroup = groups.find(group => {
-        return group.label === optionGroupName;
-      });
-
-      // no matching group found, create new group
-      if (!matchingGroup) {
-        const newGroup = {
-          label: optionGroupName,
-          options: [newOption]
-        };
-        return [...groups, newGroup];
-      }
-
-      // add option to matching group
-      matchingGroup.options.push(newOption);
-      return [...groups];
+    function createOption(path, title, name) {
+      const label = [...path, title].join(' - ');
+      return {
+        label,
+        value: name
+      };
     }
 
     return layers.reduce((accumulatedCapabilities, layer) => {
@@ -75,17 +59,20 @@ export class WmsClient {
         };
       }
 
-      return {
-        layers: groupOption(
-          accumulatedCapabilities.layers,
-          path.join(' - '),
-          layer.Title[0],
-          layer.Name[0]),
-        styles: groupOption(
-          accumulatedCapabilities.styles,
-          path.join(' - '),
+      const updatedStyles = [...accumulatedCapabilities.styles];
+      if (_.has(layer, 'Style[0]')) {
+        updatedStyles.push(createOption(
+          path,
           _.get(layer, 'Style[0].Title[0]'),
-          _.get(layer, 'Style[0].Name[0]'))
+          _.get(layer, 'Style[0].Name[0]')
+        ));
+      }
+      return {
+        layers: [
+          ...accumulatedCapabilities.layers,
+          createOption(path, layer.Title[0], layer.Name[0])
+        ],
+        styles: updatedStyles
       };
     }, emptyCapabilities);
   }

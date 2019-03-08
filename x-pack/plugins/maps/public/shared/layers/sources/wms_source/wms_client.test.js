@@ -40,22 +40,12 @@ describe('getCapabilities', () => {
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
-      {
-        label: '',
-        options: [
-          { label: 'layer1', value: '1' },
-          { label: 'layer2', value: '2' }
-        ]
-      }
+      { label: 'layer1', value: '1' },
+      { label: 'layer2', value: '2' }
     ]);
     expect(capabilities.styles).toEqual([
-      {
-        label: '',
-        options: [
-          { label: 'defaultStyle', value: 'default' },
-          { label: 'fancyStyle', value: 'fancy' }
-        ]
-      }
+      { label: 'defaultStyle', value: 'default' },
+      { label: 'fancyStyle', value: 'fancy' }
     ]);
   });
 
@@ -71,7 +61,7 @@ describe('getCapabilities', () => {
             <WMT_MS_Capabilities version="1.1.1">
               <Capability>
                 <Layer>
-                  <Title>hierarchyLevel1PathA</Title>
+                  <Title><![CDATA[hierarchyLevel1PathA]]></Title>
                   <Layer>
                     <Title>hierarchyLevel2</Title>
                     <Layer>
@@ -107,33 +97,13 @@ describe('getCapabilities', () => {
     };
     const capabilities = await wmsClient.getCapabilities();
     expect(capabilities.layers).toEqual([
-      {
-        label: 'hierarchyLevel1PathA - hierarchyLevel2',
-        options: [
-          { label: 'layer1', value: '1' },
-          { label: 'layer2', value: '2' }
-        ]
-      },
-      {
-        label: 'hierarchyLevel1PathB',
-        options: [
-          { label: 'layer3', value: '3' }
-        ]
-      }
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer1', value: '1' },
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - layer2', value: '2' },
+      { label: 'hierarchyLevel1PathB - layer3', value: '3' }
     ]);
     expect(capabilities.styles).toEqual([
-      {
-        label: 'hierarchyLevel1PathA - hierarchyLevel2',
-        options: [
-          { label: 'defaultStyle', value: 'default' }
-        ]
-      },
-      {
-        label: 'hierarchyLevel1PathB',
-        options: [
-          { label: 'fancyStyle', value: 'fancy' }
-        ]
-      }
+      { label: 'hierarchyLevel1PathA - hierarchyLevel2 - defaultStyle', value: 'default' },
+      { label: 'hierarchyLevel1PathB - fancyStyle', value: 'fancy' }
     ]);
   });
 });
