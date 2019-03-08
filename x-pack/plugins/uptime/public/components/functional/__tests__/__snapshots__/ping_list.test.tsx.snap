@@ -20,12 +20,14 @@ exports[`PingList component renders sorted list without errors 1`] = `
         component="div"
         grow={false}
       >
-        <EuiFormRow
-          describedByIds={Array []}
-          fullWidth={false}
-          hasEmptyLabelSpace={false}
-          label="Status"
-          labelType="label"
+        <EuiFlexGroup
+          alignItems="center"
+          component="div"
+          direction="row"
+          gutterSize="s"
+          justifyContent="flexStart"
+          responsive={false}
+          wrap={false}
         >
           <EuiFlexItem
             component="div"
@@ -128,7 +130,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "name": "IP",
           },
           Object {
-            "dataType": "number",
             "field": "monitor.duration.us",
             "name": "Duration",
             "render": [Function],

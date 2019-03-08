@@ -28,7 +28,7 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "field": "ping.monitor.status",
           "name": "Status",
           "render": [Function],
-          "width": 150,
+          "width": "150px",
         },
         Object {
           "field": "ping.monitor.id",
@@ -45,7 +45,7 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "field": "upSeries",
           "name": "Downtime history",
           "render": [Function],
-          "width": 180,
+          "width": "180px",
         },
       ]
     }

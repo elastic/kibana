@@ -25,7 +25,7 @@ exports[`ErrorList component renders the error list without errors 1`] = `
           "field": "count",
           "name": "Frequency",
           "render": [Function],
-          "width": 200,
+          "width": "200px",
         },
         Object {
           "field": "type",
