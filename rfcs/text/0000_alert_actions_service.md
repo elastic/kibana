@@ -62,7 +62,7 @@ below for details how to create them
 ## Creating Instances
 
 Instances are saved in the Kibana index and are used in order to `fire` an action with parameters. The
-`params` required are specific to the `actionType` that you specify. Changing the `actionType` also
+`params` required are specific to the `actionType`. Changing the `actionType` also
 changes what `connectorTypes` are available for it.
 
 
@@ -80,7 +80,7 @@ server.actions.instance({
 });
 ```
 
-*Note: instances are saved objects that are space specific*
+*Note: instances are saved objects that are space aware*
 
 ## The Connectors
 
@@ -182,22 +182,34 @@ easily be written to use this service from the front-end.
 
 # Adoption strategy
 
-Applications will need to provide a UI for the user to set-up the action
-instances that will be used in their alerts. They can use any action type
-that is currently provided by
+The future alerting service will be providing this service to the alerts that
+will be defined and used for user defined notifications. Other background tasks
+and jobs are free to call upon this service where desired to provide additional
+notifications.
+
+It is possible that this service could be extended to provide indexing
+operations and used from front-end apps.
 
 # How we teach this
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
+A common pattern in Kibana is that of a service which provides a `registry`
+that is completely pluggable by any consumers. New action types and connectors
+can be added or reused by any plugin. This is similar to the way the task
+manager is pluggable. Plugins will provide additional types and connectors. And
+users would then be able to create any number of instances.
 
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
+`fire` The actual execution of the action directly with the necessary parameters
+for the action type.
 
-How should this feature be taught to existing Kibana developers?
+`instance` An action instance that is a saved object which contains all the settings
+necessary to `fire` an action.
 
-# Unresolved questions
+`action types` A type of action that can be invoked by an alert or task with an
+action service context.
 
-Optional, but suggested for first drafts. What parts of the design are still
-TBD?
+`connectors` Code that performs the actual action connecting to an external
+service in the most likely case.
+
+There should be a readme and/or acceptable generated documentation for these
+exposed methods. Multiple examples for specific use cases should help teach how
+this interface should be used.
