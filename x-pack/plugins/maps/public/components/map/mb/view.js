@@ -218,6 +218,9 @@ export class MBMapContainer extends React.Component {
   }
 
   _renderContentToTooltip(content, location) {
+    if (!this._isMounted) {
+      return;
+    }
     ReactDOM.render(
       React.createElement(
         FeatureTooltip, {
