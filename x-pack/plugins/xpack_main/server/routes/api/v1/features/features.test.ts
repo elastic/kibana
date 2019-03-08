@@ -5,6 +5,7 @@
  */
 
 import { Server } from 'hapi';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { FeatureRegistry } from 'x-pack/plugins/xpack_main/server/lib/feature_registry';
 // @ts-ignore
 import { setupXPackMain } from '../../../../lib/setup_xpack_main';
@@ -23,7 +24,7 @@ describe('GET /api/features/v1', () => {
         get: (key: string) => {
           return config[key];
         },
-      };
+      } as KibanaConfig;
     };
     const featureRegistry = new FeatureRegistry();
     // @ts-ignore
