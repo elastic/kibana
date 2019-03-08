@@ -77,9 +77,9 @@ export function kbnChromeProvider(chrome, internals) {
           $rootScope.$on('$locationChangeStart', (e, newUrl) => {
             // This handler fixes issue #31238 where browser back navigation
             // fails due to angular 1.6 parsing url encoded params wrong.
-            const absUrlHash = url.parse($location.absUrl()).hash;
+            const absUrlHash = url.parse($location.absUrl()).hash.slice(1);
             const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
-            const hash = url.parse(newUrl).hash;
+            const hash = url.parse(newUrl).hash.slice(1);
             const decodedHash = decodeURIComponent(hash);
             if (absUrlHash !== hash && decodedHash === decodedAbsUrlHash) {
               // replace the urlencoded hash with the version that angular sees.
