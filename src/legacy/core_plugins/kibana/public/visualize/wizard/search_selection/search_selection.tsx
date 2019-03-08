@@ -78,7 +78,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                 name: i18n.translate(
                   'kbn.visualize.newVisWizard.searchSelection.savedObjectType.indexPattern',
                   {
-                    defaultMessage: 'Index Pattern',
+                    defaultMessage: 'Index pattern',
                   }
                 ),
               },
