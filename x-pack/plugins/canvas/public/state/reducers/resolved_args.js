@@ -95,6 +95,12 @@ export const resolvedArgsReducer = handleActions(
       return del(transientState, getFullPath(path));
     },
 
+    [actions.clearSome]: (transientState, { payload }) => {
+      return payload.reduce((transientState, path) => {
+        return del(transientState, getFullPath(path));
+      }, transientState);
+    },
+
     [actions.inFlightActive]: transientState => {
       return set(transientState, 'inFlight', true);
     },
