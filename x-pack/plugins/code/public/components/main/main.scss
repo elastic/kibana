@@ -134,7 +134,6 @@
 }
 
 .codeSearch__suggestion-item {
-  background: $euiColorLightestShade;
   height: 3rem;
   margin: 0 $euiSize;
   border-radius: $euiSizeXS;
@@ -146,7 +145,7 @@
   }
 }
 
-.codeSearch__suggestion--active {
+.codeSearch__suggestion-item--active {
   background: $euiColorLightShade;
 }
 
@@ -188,13 +187,22 @@
   overflow-x: hidden;
 }
 
-.codeSearch-suggestion__group-header {
-  padding: $euiSizeL;
+.codeSearch-suggestion__group {
   border-top: $euiBorderThin;
 }
+
+.codeSearch-suggestion__group-header {
+  padding: $euiSizeL;
+}
 .codeSearch-suggestion__group-title {
+  font-weight: bold;
   margin-left: $euiSizeS;
   display: inline-block;
+}
+
+.codeSearch-suggestion__group-result {
+  color: $euiColorDarkShade;
+  font-size: $euiFontSizeXS;
 }
 
 .codeSearch-suggestion__link {
