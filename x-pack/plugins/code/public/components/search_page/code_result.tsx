@@ -61,9 +61,9 @@ export class CodeResult extends React.PureComponent<Props> {
               <EuiBadge color="default">{hits}</EuiBadge>
             </EuiFlexItem>
             <EuiText size="s">
-              &nbsp;hits from
+              &nbsp;hits from&nbsp;
               <Link to={fileLinkUrl} data-test-subj="codeSearchResultFileItem">
-                &nbsp;{filePath}
+                {filePath}
               </Link>
             </EuiText>
           </EuiFlexGroup>
