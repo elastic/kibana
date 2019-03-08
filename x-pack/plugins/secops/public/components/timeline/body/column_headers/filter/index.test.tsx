@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { ColumnHeaderType } from '../column_header';
@@ -16,6 +17,16 @@ const textFilter: ColumnHeaderType = 'text-filter';
 const notFiltered: ColumnHeaderType = 'not-filtered';
 
 describe('Filter', () => {
+  test('renders correctly against snapshot', () => {
+    const textFilterColumnHeader = {
+      ...defaultHeaders[0],
+      columnHeaderType: textFilter,
+    };
+
+    const wrapper = shallow(<Filter header={textFilterColumnHeader} />);
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
   describe('rendering', () => {
     test('it renders a text filter when the columnHeaderType is "text-filter"', () => {
       const textFilterColumnHeader = {

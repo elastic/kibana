@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment-timezone';
 import * as React from 'react';
@@ -25,6 +26,16 @@ describe('plain_column_renderer', () => {
 
   beforeEach(() => {
     mockDatum = cloneDeep(mockEcsData[0]);
+  });
+
+  test('renders correctly against snapshot', () => {
+    const column = plainColumnRenderer.renderColumn({
+      columnName: 'event.category',
+      data: mockDatum,
+      field: allFieldsInSchemaByName['event.category'],
+    });
+    const wrapper = shallow(<span>{column}</span>);
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('should return isInstance false if source is empty', () => {

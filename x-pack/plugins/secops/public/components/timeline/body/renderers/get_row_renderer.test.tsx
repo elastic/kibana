@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
 
@@ -22,6 +23,18 @@ describe('get_column_renderer', () => {
   beforeEach(() => {
     nonSuricata = cloneDeep(mockEcsData[0]);
     suricata = cloneDeep(mockEcsData[2]);
+  });
+
+  test('renders correctly against snapshot', () => {
+    const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
+    const row = rowRenderer.renderRow({
+      data: nonSuricata,
+      width: 100,
+      children: <span>some child</span>,
+    });
+
+    const wrapper = shallow(<span>{row}</span>);
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('should render plain row data when it is a non suricata row', () => {

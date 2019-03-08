@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockEcsData } from '../../../../mock';
@@ -13,6 +14,13 @@ import { getEmptyValue } from '../../../empty_value';
 import { FormattedField } from './formatted_field';
 
 describe('Events', () => {
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(
+      <FormattedField data={mockEcsData[0]} fieldName="timestamp" fieldType="date" />
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {
     const wrapper = mount(
       <FormattedField data={mockEcsData[0]} fieldName="timestamp" fieldType="date" />

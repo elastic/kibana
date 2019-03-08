@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import {
@@ -17,6 +18,31 @@ import {
 
 describe('Properties', () => {
   const usersViewing = ['elastic'];
+
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(
+      <Properties
+        associateNote={jest.fn()}
+        createTimeline={jest.fn()}
+        isFavorite={false}
+        isLive={false}
+        title=""
+        description=""
+        getNotesByIds={jest.fn()}
+        noteIds={[]}
+        history={[]}
+        timelineId="abc"
+        updateDescription={jest.fn()}
+        updateIsFavorite={jest.fn()}
+        updateIsLive={jest.fn()}
+        updateTitle={jest.fn()}
+        updateNote={jest.fn()}
+        usersViewing={usersViewing}
+        width={1000}
+      />
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   test('it renders an empty star icon when it is NOT a favorite', () => {
     const wrapper = mount(

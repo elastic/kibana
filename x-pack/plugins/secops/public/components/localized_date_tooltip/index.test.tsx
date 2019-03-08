@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
@@ -24,6 +25,15 @@ describe('LocalizedDateTooltip', () => {
     'this content is typically the string representation of the date prop, but can be any valid react child';
 
   const SampleContent = () => <span data-test-subj="sample-content">{sampleContentText}</span>;
+
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(
+      <LocalizedDateTooltip date={date.toDate()}>
+        <SampleContent />
+      </LocalizedDateTooltip>
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   test('it renders the child content', () => {
     const wrapper = mount(

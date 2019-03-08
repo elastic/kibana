@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 
 import * as React from 'react';
@@ -18,7 +18,7 @@ describe('Columns', () => {
   const headersSansTimestamp = defaultHeaders.filter(h => h.id !== '@timestamp');
 
   test('it renders the expected columns', () => {
-    const wrapper = mount(
+    const wrapper = shallow(
       <TestProviders>
         <DataDrivenColumns
           columnHeaders={headersSansTimestamp}

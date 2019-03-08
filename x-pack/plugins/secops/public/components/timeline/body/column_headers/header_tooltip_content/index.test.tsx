@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -87,7 +87,7 @@ describe('HeaderToolTipContent', () => {
   });
 
   test('it renders the expected table content', () => {
-    const wrapper = mount(<HeaderToolTipContent header={header} />);
+    const wrapper = shallow(<HeaderToolTipContent header={header} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });

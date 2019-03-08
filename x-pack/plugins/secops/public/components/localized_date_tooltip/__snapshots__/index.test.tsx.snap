@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocalizedDateTooltip renders correctly against snapshot 1`] = `
+<Component
+  date={2019-02-19T11:21:00.000Z}
+>
+  <SampleContent />
+</Component>
+`;

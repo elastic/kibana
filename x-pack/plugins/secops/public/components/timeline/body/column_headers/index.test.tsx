@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
@@ -21,6 +22,23 @@ describe('ColumnHeaders', () => {
       columnId: 'fooColumn',
       sortDirection: Direction.descending,
     };
+
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <ColumnHeaders
+          actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
+          columnHeaders={defaultHeaders}
+          isLoading={false}
+          minWidth={1000}
+          onColumnSorted={jest.fn()}
+          onColumnRemoved={jest.fn()}
+          onColumnResized={jest.fn()}
+          sort={sort}
+          timelineId={'test'}
+        />
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
 
     test('it renders the field browser', () => {
       const wrapper = mount(

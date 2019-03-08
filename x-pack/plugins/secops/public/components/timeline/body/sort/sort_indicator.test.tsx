@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Direction } from '../../../../graphql/types';
@@ -13,6 +14,11 @@ import { getDirection, SortIndicator } from './sort_indicator';
 
 describe('SortIndicator', () => {
   describe('rendering', () => {
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(<SortIndicator sortDirection={Direction.descending} />);
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the sort indicator', () => {
       const wrapper = mount(<SortIndicator sortDirection={Direction.descending} />);
 

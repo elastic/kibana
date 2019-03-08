@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockEcsData, TestProviders } from '../../../../mock';
 
@@ -15,7 +15,7 @@ import { ZeekDetails } from './zeek_details';
 describe('ZeekDetails', () => {
   describe('rendering', () => {
     test('it renders the default ZeekDetails', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallowWithIntl(
         <TestProviders>
           <ZeekDetails data={mockEcsData[2]} />
         </TestProviders>

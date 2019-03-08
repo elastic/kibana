@@ -5,7 +5,8 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -17,6 +18,23 @@ import { DroppableWrapper } from './droppable_wrapper';
 
 describe('DroppableWrapper', () => {
   describe('rendering', () => {
+    test('it renders against the snapshot', () => {
+      const message = 'draggable wrapper content';
+      const store = createStore();
+
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <DragDropContextWrapper>
+              <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
+            </DragDropContextWrapper>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the children', () => {
       const message = 'draggable wrapper content';
       const store = createStore();

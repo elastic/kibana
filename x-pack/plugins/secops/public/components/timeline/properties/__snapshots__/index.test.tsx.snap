@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Properties renders correctly against snapshot 1`] = `
+<styled.div
+  data-test-subj="timeline-properties"
+>
+  <styled.div
+    data-test-subj="properties-left"
+  >
+    <pure(Component)
+      isFavorite={false}
+      timelineId="abc"
+      updateIsFavorite={[MockFunction]}
+    />
+    <pure(Component)
+      timelineId="abc"
+      title=""
+      updateTitle={[MockFunction]}
+    />
+    <pure(Component)
+      description=""
+      timelineId="abc"
+      updateDescription={[MockFunction]}
+    />
+  </styled.div>
+  <Styled(EuiFlexGroup)
+    alignItems="center"
+    data-test-subj="properties-right"
+    gutterSize="s"
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <pure(Component)
+        animate={true}
+        associateNote={[MockFunction]}
+        getNotesByIds={[MockFunction]}
+        noteIds={Array []}
+        showNotes={false}
+        size="l"
+        text="Notes"
+        toggleShowNotes={[Function]}
+        toolTip="Add and review notes about this Timeline. Notes may also be added to events."
+        updateNote={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <pure(Component)
+        history={Array []}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downRight"
+        button={
+          <EuiIcon
+            data-test-subj="settings-gear"
+            onClick={[Function]}
+            size="l"
+            type="gear"
+          />
+        }
+        closePopover={[Function]}
+        hasArrow={true}
+        id="timelineSettingsPopover"
+        isOpen={false}
+        ownFocus={false}
+        panelPaddingSize="m"
+      >
+        <EuiForm>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+          >
+            <pure(Component)
+              createTimeline={[MockFunction]}
+              onClosePopover={[Function]}
+              timelineId="abc"
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+          >
+            <pure(Component)
+              isLive={false}
+              timelineId="abc"
+              updateIsLive={[MockFunction]}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiPopover>
+    </EuiFlexItem>
+  </Styled(EuiFlexGroup)>
+</styled.div>
+`;

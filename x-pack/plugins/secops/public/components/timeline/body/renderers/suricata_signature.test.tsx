@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
 import { DraggableSignatureId, SuricataSignature, Tokens } from './suricata_signature';
@@ -14,7 +14,7 @@ import { DraggableSignatureId, SuricataSignature, Tokens } from './suricata_sign
 describe('SuricataSignature', () => {
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallowWithIntl(
         <TestProviders>
           <SuricataSignature
             id="doc-id-123"

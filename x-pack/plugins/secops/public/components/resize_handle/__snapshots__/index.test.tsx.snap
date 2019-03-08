@@ -1,110 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Resizeable it renders 1`] = `
-.c0 {
-  cursor: col-resize;
-  height: 100%;
-}
-
-.c2 {
-  cursor: col-resize;
-  height: 100%;
-  min-height: 20px;
-  width: 0;
-}
-
-.c1 {
-  border: 1px solid rgb(27,27,27);
-}
-
-<pure(Component)>
-  <Component>
-    <Provider
-      store={
-        Object {
-          "dispatch": [Function],
-          "getState": [Function],
-          "replaceReducer": [Function],
-          "subscribe": [Function],
-          Symbol(observable): [Function],
-        }
-      }
-    >
-      <ThemeProvider
-        theme={[Function]}
-      >
-        <DragDropContext
-          onDragEnd={[MockFunction]}
-        >
-          <Resizeable
-            handle={
-              <Styled(styled.div)
-                data-test-subj="test-resize-handle"
-              />
-            }
-            height="100%"
-            id="test"
-            onResize={[MockFunction]}
-            render={[Function]}
-          >
-            <styled.div
-              data-test-subj="resize-handle-container"
-              height="100%"
-              innerRef={
-                Object {
-                  "current": .c0 {
-  cursor: col-resize;
-  height: 100%;
-}
-
-.c2 {
-  cursor: col-resize;
-  height: 100%;
-  min-height: 20px;
-  width: 0;
-}
-
-.c1 {
-  border: 1px solid rgb(27,27,27);
-}
-
-<div
-                    class="c0"
-                    data-test-subj="resize-handle-container"
-                    height="100%"
-                  >
-                    <div
-                      class="c1 c2"
-                      data-test-subj="test-resize-handle"
-                    />
-                  </div>,
-                }
-              }
-            >
-              <div
-                className="c0"
-                data-test-subj="resize-handle-container"
-                height="100%"
-              >
-                <Styled(styled.div)
-                  data-test-subj="test-resize-handle"
-                >
-                  <styled.div
-                    className="c1"
-                    data-test-subj="test-resize-handle"
-                  >
-                    <div
-                      className="c1 c2"
-                      data-test-subj="test-resize-handle"
-                    />
-                  </styled.div>
-                </Styled(styled.div)>
-              </div>
-            </styled.div>
-          </Resizeable>
-        </DragDropContext>
-      </ThemeProvider>
-    </Provider>
-  </Component>
-</pure(Component)>
+<Component>
+  <Resizeable
+    handle={
+      <Styled(styled.div)
+        data-test-subj="test-resize-handle"
+      />
+    }
+    height="100%"
+    id="test"
+    onResize={[MockFunction]}
+    render={[Function]}
+  />
+</Component>
 `;

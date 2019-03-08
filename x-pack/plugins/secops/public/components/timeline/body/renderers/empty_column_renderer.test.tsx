@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
@@ -21,6 +22,17 @@ describe('empty_column_renderer', () => {
   let mockDatum: Ecs;
   beforeEach(() => {
     mockDatum = cloneDeep(mockEcsData[0]);
+  });
+
+  test('renders correctly against snapshot', () => {
+    delete mockDatum.source;
+    const emptyColumn = emptyColumnRenderer.renderColumn({
+      columnName: 'source',
+      data: mockDatum,
+      field: allFieldsInSchemaByName.source,
+    });
+    const wrapper = shallow(<span>{emptyColumn}</span>);
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('should return isInstance true if source is empty', () => {

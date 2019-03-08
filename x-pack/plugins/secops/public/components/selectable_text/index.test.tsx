@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
 
 import { SelectableText } from '.';
 
 describe('SelectableText', () => {
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(<SelectableText>You may select this text</SelectableText>);
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
+
   test('it applies the user-select: text style', () => {
     const wrapper = mount(<SelectableText>You may select this text</SelectableText>);
 

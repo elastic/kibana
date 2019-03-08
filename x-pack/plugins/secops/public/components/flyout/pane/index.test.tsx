@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
 
@@ -18,6 +19,24 @@ const testWidth = 640;
 const usersViewing = ['elastic'];
 
 describe('Pane', () => {
+  test('renders correctly against snapshot', () => {
+    const EmptyComponent = shallow(
+      <TestProviders>
+        <Pane
+          flyoutHeight={testFlyoutHeight}
+          headerHeight={flyoutHeaderHeight}
+          onClose={jest.fn()}
+          timelineId={'test'}
+          usersViewing={usersViewing}
+          width={testWidth}
+        >
+          <span>I am a child of flyout</span>,
+        </Pane>
+      </TestProviders>
+    );
+    expect(toJson(EmptyComponent)).toMatchSnapshot();
+  });
+
   test('it should NOT let the flyout expand to take up the full width of the element that contains it', () => {
     const wrapper = mount(
       <TestProviders>

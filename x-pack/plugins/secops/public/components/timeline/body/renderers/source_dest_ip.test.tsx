@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
 import { mockEcsData } from '../../../../mock';
@@ -16,7 +16,7 @@ import { SourceDest } from './source_dest_ip';
 describe('SuricataDestIp', () => {
   describe('rendering', () => {
     test('it renders the default SuricataDestIp', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallowWithIntl(
         <TestProviders>
           <SourceDest data={mockEcsData[2]} />
         </TestProviders>

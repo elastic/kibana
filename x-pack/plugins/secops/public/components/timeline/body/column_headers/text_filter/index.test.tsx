@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { DEFAULT_PLACEHOLDER, TextFilter } from '.';
 
 describe('TextFilter', () => {
   describe('rendering', () => {
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(<TextFilter columnId="foo" minWidth={100} />);
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     describe('placeholder', () => {
       test('it renders the default placeholder when no filter is specified, and a placeholder is NOT provided', () => {
         const wrapper = mount(<TextFilter columnId="foo" minWidth={100} />);

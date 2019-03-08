@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
@@ -77,7 +77,7 @@ describe('MarkdownHint', () => {
 
   describe('rendering', () => {
     test('it renders the expected hints', () => {
-      const wrapper = mount(<MarkdownHint show={true} />);
+      const wrapper = shallow(<MarkdownHint show={true} />);
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });

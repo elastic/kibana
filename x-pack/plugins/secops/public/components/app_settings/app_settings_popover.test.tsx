@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 
@@ -12,6 +13,14 @@ import { AppSettingsPopover } from './app_settings_popover';
 
 describe('AppSettingsPopover', () => {
   describe('rendering', () => {
+    test('it renders against snapshot', () => {
+      const wrapper = shallow(
+        <AppSettingsPopover onClick={noop} onClose={noop} showPopover={false} />
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders a settings gear icon', () => {
       const wrapper = mount(
         <AppSettingsPopover onClick={noop} onClose={noop} showPopover={false} />

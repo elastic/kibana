@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
 import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
@@ -27,6 +28,21 @@ describe('Header', () => {
     sortDirection: Direction.descending,
   };
   const timelineId = 'fakeId';
+
+  test('renders correctly against snapshot', () => {
+    const wrapper = shallow(
+      <Header
+        header={columnHeader}
+        isLoading={false}
+        onColumnRemoved={jest.fn()}
+        onColumnResized={jest.fn()}
+        onColumnSorted={jest.fn()}
+        sort={sort}
+        timelineId={timelineId}
+      />
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   describe('rendering', () => {
     test('it renders the header text', () => {

@@ -7,7 +7,7 @@
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock';
@@ -36,7 +36,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallowWithIntl(
         <TestProviders>
           <ZeekSignature data={zeek} />
         </TestProviders>
