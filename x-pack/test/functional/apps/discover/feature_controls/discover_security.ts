@@ -93,7 +93,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
 
-      it('Permalins shows create short-url button', async () => {
+      it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
       });
