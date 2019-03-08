@@ -18,6 +18,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../utils/kbn_field_types';
+import { get } from 'lodash';
 
 const filterableTypes = KBN_FIELD_TYPES.filter(type => type.filterable).map(type => type.name);
 
@@ -26,7 +27,7 @@ export function isFilterable(field) {
 }
 
 export function getFromSavedObject(savedObject) {
-  if (!savedObject) {
+  if (get(savedObject, 'attributes.fields') === undefined) {
     return null;
   }
 

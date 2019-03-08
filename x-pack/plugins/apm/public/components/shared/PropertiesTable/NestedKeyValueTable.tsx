@@ -10,13 +10,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
+import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
 const Table = styled.table`
   font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
+  font-size: ${fontSize};
   width: 100%;
 `;
 
@@ -41,7 +41,7 @@ const Cell = styled.td`
   }
 
   &:first-child {
-    width: ${px(units.unit * 20)};
+    width: ${px(units.unit * 12)};
     font-weight: bold;
   }
 `;
@@ -87,13 +87,14 @@ export function NestedValue({
   parentKey?: string;
   keySorter?: KeySorter;
 }): JSX.Element {
-  if (depth > 0 && isObject(value)) {
+  const MAX_LEVEL = 3;
+  if (depth < MAX_LEVEL && isObject(value)) {
     return (
       <NestedKeyValueTable
         data={value as StringMap}
         parentKey={parentKey}
         keySorter={keySorter}
-        depth={depth - 1}
+        depth={depth + 1}
       />
     );
   }
@@ -105,12 +106,12 @@ export function NestedKeyValueTable({
   data,
   parentKey,
   keySorter = Object.keys,
-  depth = 0
+  depth
 }: {
   data: StringMap;
   parentKey?: string;
   keySorter?: KeySorter;
-  depth?: number;
+  depth: number;
 }): JSX.Element {
   return (
     <Table>

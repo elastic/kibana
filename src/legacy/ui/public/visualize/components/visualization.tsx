@@ -48,6 +48,7 @@ interface VisualizationProps {
   uiState: PersistedState;
   vis: Vis;
   visData: any;
+  visParams: any;
 }
 
 export class Visualization extends React.Component<VisualizationProps> {
@@ -60,7 +61,7 @@ export class Visualization extends React.Component<VisualizationProps> {
   }
 
   public render() {
-    const { vis, visData, onInit, uiState, listenOnChange } = this.props;
+    const { vis, visData, visParams, onInit, uiState, listenOnChange } = this.props;
 
     const noResults = this.showNoResultsMessage(vis, visData);
     const requestError = shouldShowRequestErrorMessage(vis, visData);
@@ -75,6 +76,7 @@ export class Visualization extends React.Component<VisualizationProps> {
           <VisualizationChart
             vis={vis}
             visData={visData}
+            visParams={visParams}
             onInit={onInit}
             uiState={uiState}
             listenOnChange={listenOnChange}
