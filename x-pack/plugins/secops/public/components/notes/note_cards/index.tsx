@@ -13,9 +13,7 @@ import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
 
-const AddNoteContainer = styled.div`
-  padding: 5px;
-`;
+const AddNoteContainer = styled.div``;
 
 const NoteContainer = styled.div`
   margin-top: 5px;
@@ -27,7 +25,7 @@ const NoteCardsContainer = styled(EuiPanel)<{ width?: string }>`
 `;
 
 const NotesContainer = styled(EuiFlexGroup)`
-  padding-left: 5px;
+  padding: 0 5px;
   margin-bottom: 5px;
 `;
 

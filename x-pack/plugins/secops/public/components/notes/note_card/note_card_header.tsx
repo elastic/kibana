@@ -24,6 +24,7 @@ const Avatar = styled(EuiAvatar)`
 const HeaderContainer = styled.div`
   align-items: center;
   display: flex;
+  user-select: none;
 `;
 
 const User = styled.span`

@@ -4,13 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { ThemeProvider } from 'styled-components';
 
+import { TestProviders } from '../../../mock/test_providers';
 import { DroppableWrapper } from '../../drag_and_drop/droppable_wrapper';
 
 import { mockDataProviders } from './mock/mock_data_providers';
@@ -20,21 +17,19 @@ describe('Providers', () => {
   describe('rendering', () => {
     test('it renders the data providers', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       mockDataProviders.forEach(dataProvider =>
@@ -48,64 +43,54 @@ describe('Providers', () => {
   describe('#onDataProviderRemoved', () => {
     test('it invokes the onDataProviderRemoved callback when the close button is clicked', () => {
       const mockOnDataProviderRemoved = jest.fn();
-
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
       wrapper
         .find('[data-test-subj="providerBadge"] svg')
         .first()
         .simulate('click');
-
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
     });
 
     test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the provider menu', () => {
       const mockOnDataProviderRemoved = jest.fn();
-
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
-
       wrapper.update();
-
       wrapper
         .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
         .at(2)
         .simulate('click');
-
       expect(mockOnDataProviderRemoved.mock.calls[0][0]).toEqual('id-Provider 1');
     });
   });
@@ -121,37 +106,30 @@ describe('Providers', () => {
   describe('#onToggleDataProviderEnabled', () => {
     test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
-
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
-
       wrapper
         .find('[data-test-subj="providerBadge"]')
         .first()
         .simulate('click');
-
       wrapper.update();
-
       wrapper
         .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
         .at(1)
         .simulate('click');
-
       expect(mockOnToggleDataProviderEnabled.mock.calls[0][0]).toEqual({
         enabled: false,
         providerId: 'id-Provider 1',
@@ -164,21 +142,19 @@ describe('Providers', () => {
       const onToggleDataProviderExcluded = jest.fn();
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       wrapper
@@ -206,21 +182,19 @@ describe('Providers', () => {
       dataProviders[0].and = mockDataProviders.slice(1, 3);
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={dataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={dataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       const andProviderBadge = wrapper
@@ -236,21 +210,19 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={mockDataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={mockOnDataProviderRemoved}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={mockDataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={mockOnDataProviderRemoved}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       wrapper
@@ -274,21 +246,19 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={dataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
-                onToggleDataProviderExcluded={noop}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={dataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
+              onToggleDataProviderExcluded={jest.fn()}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       wrapper
@@ -316,21 +286,19 @@ describe('Providers', () => {
       const mockOnToggleDataProviderExcluded = jest.fn();
 
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <DragDropContext onDragEnd={noop}>
-            <DroppableWrapper droppableId="unitTest">
-              <Providers
-                id="foo"
-                dataProviders={dataProviders}
-                onChangeDataProviderKqlQuery={noop}
-                onChangeDroppableAndProvider={noop}
-                onDataProviderRemoved={noop}
-                onToggleDataProviderEnabled={noop}
-                onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
-              />
-            </DroppableWrapper>
-          </DragDropContext>
-        </ThemeProvider>
+        <TestProviders>
+          <DroppableWrapper droppableId="unitTest">
+            <Providers
+              id="foo"
+              dataProviders={dataProviders}
+              onChangeDataProviderKqlQuery={jest.fn()}
+              onChangeDroppableAndProvider={jest.fn()}
+              onDataProviderRemoved={jest.fn()}
+              onToggleDataProviderEnabled={jest.fn()}
+              onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
+            />
+          </DroppableWrapper>
+        </TestProviders>
       );
 
       wrapper

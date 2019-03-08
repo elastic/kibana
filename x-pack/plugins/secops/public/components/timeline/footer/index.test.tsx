@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
 
-import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { TestProviders } from '../../../mock/test_providers';
 
 import { Footer } from './index';
 import { mockData } from './mock';
@@ -25,7 +24,6 @@ describe('Footer Timeline Component', () => {
     test('it renders the default timeline footer', () => {
       const wrapper = shallow(
         <Footer
-          dataProviders={mockDataProviders}
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
           height={100}
@@ -45,33 +43,9 @@ describe('Footer Timeline Component', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it does NOT render footer if no dataprovider', () => {
-      const wrapper = mount(
-        <Footer
-          dataProviders={[]}
-          serverSideEventCount={mockData.Events.totalCount}
-          hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-          height={100}
-          isLoading={false}
-          itemsCount={mockData.Events.edges.length}
-          itemsPerPage={2}
-          itemsPerPageOptions={[1, 5, 10, 20]}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onLoadMore={loadMore}
-          nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
-          tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-          getUpdatedAt={getUpdatedAt}
-          width={width}
-        />
-      );
-
-      expect(wrapper.find('[data-test-subj="timeline-footer"]').exists()).toBeFalsy();
-    });
-
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
         <Footer
-          dataProviders={mockDataProviders}
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={false}
           height={100}
@@ -93,9 +67,8 @@ describe('Footer Timeline Component', () => {
 
     test('it renders the loadMore button if need to fetch more', () => {
       const wrapper = mount(
-        <I18nProvider>
+        <TestProviders>
           <Footer
-            dataProviders={mockDataProviders}
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
@@ -110,7 +83,7 @@ describe('Footer Timeline Component', () => {
             getUpdatedAt={getUpdatedAt}
             width={width}
           />
-        </I18nProvider>
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="TimelineMoreButton"]').exists()).toBeTruthy();
@@ -118,9 +91,8 @@ describe('Footer Timeline Component', () => {
 
     test('it renders the Loading... in the more load button when fetching new data', () => {
       const wrapper = mount(
-        <I18nProvider>
+        <TestProviders>
           <Footer
-            dataProviders={mockDataProviders}
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
@@ -135,7 +107,7 @@ describe('Footer Timeline Component', () => {
             getUpdatedAt={getUpdatedAt}
             width={width}
           />
-        </I18nProvider>
+        </TestProviders>
       );
       wrapper
         .find(Footer)
@@ -154,7 +126,6 @@ describe('Footer Timeline Component', () => {
     test('it does NOT render the loadMore button because there is nothing else to fetch', () => {
       const wrapper = mount(
         <Footer
-          dataProviders={mockDataProviders}
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={false}
           height={100}
@@ -176,9 +147,8 @@ describe('Footer Timeline Component', () => {
 
     test('it render popover to select new itemsPerPage in timeline', () => {
       const wrapper = mount(
-        <I18nProvider>
+        <TestProviders>
           <Footer
-            dataProviders={mockDataProviders}
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
@@ -193,7 +163,7 @@ describe('Footer Timeline Component', () => {
             getUpdatedAt={getUpdatedAt}
             width={width}
           />
-        </I18nProvider>
+        </TestProviders>
       );
 
       wrapper
@@ -207,9 +177,8 @@ describe('Footer Timeline Component', () => {
   describe('Events', () => {
     test('should call loadmore when clicking on the button load more', () => {
       const wrapper = mount(
-        <I18nProvider>
+        <TestProviders>
           <Footer
-            dataProviders={mockDataProviders}
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
@@ -224,7 +193,7 @@ describe('Footer Timeline Component', () => {
             getUpdatedAt={getUpdatedAt}
             width={width}
           />
-        </I18nProvider>
+        </TestProviders>
       );
 
       wrapper
@@ -237,9 +206,8 @@ describe('Footer Timeline Component', () => {
 
     test('Should call onChangeItemsPerPage when you pick a new limit', () => {
       const wrapper = mount(
-        <I18nProvider>
+        <TestProviders>
           <Footer
-            dataProviders={mockDataProviders}
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
@@ -254,7 +222,7 @@ describe('Footer Timeline Component', () => {
             getUpdatedAt={getUpdatedAt}
             width={width}
           />
-        </I18nProvider>
+        </TestProviders>
       );
 
       wrapper

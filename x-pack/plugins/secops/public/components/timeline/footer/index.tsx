@@ -20,7 +20,6 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { LoadingPanel } from '../../loading';
-import { DataProvider } from '../data_providers/data_provider';
 import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 
 import { LastUpdatedAt } from './last_updated';
@@ -61,7 +60,6 @@ export const footerHeight = 40; // px
 export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface FooterProps {
-  dataProviders: DataProvider[];
   itemsCount: number;
   isLoading: boolean;
   itemsPerPage: number;
@@ -174,7 +172,6 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
 
   public render() {
     const {
-      dataProviders,
       height,
       isLoading,
       itemsCount,
@@ -217,62 +214,60 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
       ));
     return (
       <>
-        {dataProviders.length !== 0 && (
-          <FooterContainer
-            data-test-subj="timeline-footer"
-            direction="column"
-            height={height}
+        <FooterContainer
+          data-test-subj="timeline-footer"
+          direction="column"
+          height={height}
+          gutterSize="none"
+          justifyContent="spaceAround"
+        >
+          <FooterFlexGroup
+            alignItems="center"
+            data-test-subj="footer-flex-group"
+            direction="row"
             gutterSize="none"
-            justifyContent="spaceAround"
+            justifyContent="spaceBetween"
           >
-            <FooterFlexGroup
-              alignItems="center"
-              data-test-subj="footer-flex-group"
-              direction="row"
-              gutterSize="none"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem data-test-subj="event-count-container" grow={false}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  data-test-subj="events-count"
-                  direction="row"
-                  gutterSize="none"
-                >
-                  <EventsCount
-                    closePopover={this.closePopover}
-                    isOpen={this.state.isPopoverOpen}
-                    items={rowItems}
-                    itemsCount={itemsCount}
-                    onClick={this.onButtonClick}
-                    serverSideEventCount={serverSideEventCount}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-
-              <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
-                <PagingControl
-                  data-test-subj="paging-control"
-                  hasNextPage={hasNextPage}
-                  isLoading={isLoading}
-                  loadMore={this.loadMore}
+            <EuiFlexItem data-test-subj="event-count-container" grow={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                data-test-subj="events-count"
+                direction="row"
+                gutterSize="none"
+              >
+                <EventsCount
+                  closePopover={this.closePopover}
+                  isOpen={this.state.isPopoverOpen}
+                  items={rowItems}
+                  itemsCount={itemsCount}
+                  onClick={this.onButtonClick}
+                  serverSideEventCount={serverSideEventCount}
                 />
-              </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
 
-              <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
-                <FixedWidthLastUpdated
-                  data-test-subj="fixed-width-last-updated"
+            <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
+              <PagingControl
+                data-test-subj="paging-control"
+                hasNextPage={hasNextPage}
+                isLoading={isLoading}
+                loadMore={this.loadMore}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem data-test-subj="last-updated-container" grow={false}>
+              <FixedWidthLastUpdated
+                data-test-subj="fixed-width-last-updated"
+                compact={isCompactFooter(width)}
+              >
+                <LastUpdatedAt
+                  updatedAt={this.state.updatedAt || getUpdatedAt()}
                   compact={isCompactFooter(width)}
-                >
-                  <LastUpdatedAt
-                    updatedAt={this.state.updatedAt || getUpdatedAt()}
-                    compact={isCompactFooter(width)}
-                  />
-                </FixedWidthLastUpdated>
-              </EuiFlexItem>
-            </FooterFlexGroup>
-          </FooterContainer>
-        )}
+                />
+              </FixedWidthLastUpdated>
+            </EuiFlexItem>
+          </FooterFlexGroup>
+        </FooterContainer>
       </>
     );
   }

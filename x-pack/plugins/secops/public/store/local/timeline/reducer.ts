@@ -11,14 +11,17 @@ import {
   addNote,
   addNoteToEvent,
   addProvider,
+  applyDeltaToColumnWidth,
   applyDeltaToWidth,
   applyKqlFilterQuery,
   createTimeline,
   pinEvent,
+  removeColumn,
   removeProvider,
   setKqlFilterQueryDraft,
   showTimeline,
   unPinEvent,
+  updateColumns,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
@@ -42,12 +45,15 @@ import {
   addTimelineNoteToEvent,
   addTimelineProvider,
   applyDeltaToCurrentWidth,
+  applyDeltaToTimelineColumnWidth,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
+  removeTimelineColumn,
   removeTimelineProvider,
   unPinTimelineEvent,
   updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
+  updateTimelineColumns,
   updateTimelineDescription,
   updateTimelineIsFavorite,
   updateTimelineIsLive,
@@ -84,9 +90,9 @@ export const initialTimelineState: TimelineState = {
 
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
-  .case(createTimeline, (state, { id, show }) => ({
+  .case(createTimeline, (state, { id, show, columns }) => ({
     ...state,
-    timelineById: addNewTimeline({ id, show, timelineById: state.timelineById }),
+    timelineById: addNewTimeline({ id, columns, show, timelineById: state.timelineById }),
   }))
   .case(addHistory, (state, { id, historyId }) => ({
     ...state,
@@ -120,6 +126,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
   }))
+  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
+    ...state,
+    timelineById: applyDeltaToTimelineColumnWidth({
+      id,
+      columnId,
+      delta,
+      timelineById: state.timelineById,
+    }),
+  }))
   .case(
     applyDeltaToWidth,
     (state, { id, delta, bodyClientWidthPixels, minWidthPixels, maxWidthPercent }) => ({
@@ -138,6 +153,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: pinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
   }))
+  .case(removeColumn, (state, { id, columnId }) => ({
+    ...state,
+    timelineById: removeTimelineColumn({
+      id,
+      columnId,
+      timelineById: state.timelineById,
+    }),
+  }))
   .case(removeProvider, (state, { id, providerId, andProviderId }) => ({
     ...state,
     timelineById: removeTimelineProvider({
@@ -150,6 +173,10 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(unPinEvent, (state, { id, eventId }) => ({
     ...state,
     timelineById: unPinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
+  }))
+  .case(updateColumns, (state, { id, columns }) => ({
+    ...state,
+    timelineById: updateTimelineColumns({ id, columns, timelineById: state.timelineById }),
   }))
   .case(updateDescription, (state, { id, description }) => ({
     ...state,

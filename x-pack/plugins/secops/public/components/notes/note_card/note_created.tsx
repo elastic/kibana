@@ -7,14 +7,18 @@
 import { FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 
 import { LocalizedDateTooltip } from '../../localized_date_tooltip';
-import { SelectableText } from '../../selectable_text';
+
+const NoteCreatedContainer = styled.span`
+  user-select: none;
+`;
 
 export const NoteCreated = pure<{ created: Date }>(({ created }) => (
-  <SelectableText data-test-subj="note-created">
+  <NoteCreatedContainer data-test-subj="note-created">
     <LocalizedDateTooltip date={created}>
       <FormattedRelative value={created} />
     </LocalizedDateTooltip>
-  </SelectableText>
+  </NoteCreatedContainer>
 ));

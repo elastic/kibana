@@ -28,21 +28,21 @@ describe('unknown_column_renderer', () => {
   });
 
   test('should return an empty value with a made up column name that does not have a valid data value', () => {
-    const emptyColumn = unknownColumnRenderer.renderColumn(
-      'a made up column name',
-      mockDatum,
-      allFieldsInSchemaByName['a made up column name']
-    );
+    const emptyColumn = unknownColumnRenderer.renderColumn({
+      columnName: 'a made up column name',
+      data: mockDatum,
+      field: allFieldsInSchemaByName['a made up column name'],
+    });
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
 
   test('should return an empty value with a column name that has valid id value', () => {
-    const emptyColumn = unknownColumnRenderer.renderColumn(
-      '_id',
-      mockDatum,
-      allFieldsInSchemaByName._id
-    );
+    const emptyColumn = unknownColumnRenderer.renderColumn({
+      columnName: '_id',
+      data: mockDatum,
+      field: allFieldsInSchemaByName._id,
+    });
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

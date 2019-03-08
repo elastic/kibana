@@ -5,7 +5,6 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -25,7 +24,7 @@ describe('EventFieldsBrowser', () => {
         const wrapper = mountWithIntl(
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <ReduxStoreProvider store={store}>
-              <DragDropContext onDragEnd={noop}>
+              <DragDropContext onDragEnd={jest.fn()}>
                 <EventFieldsBrowser data={mockEcsData[0]} />
               </DragDropContext>
             </ReduxStoreProvider>
@@ -43,7 +42,7 @@ describe('EventFieldsBrowser', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
+            <DragDropContext onDragEnd={jest.fn()}>
               <EventFieldsBrowser data={mockEcsData[0]} />
             </DragDropContext>
           </ReduxStoreProvider>
@@ -62,7 +61,7 @@ describe('EventFieldsBrowser', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
+            <DragDropContext onDragEnd={jest.fn()}>
               <EventFieldsBrowser data={mockEcsData[0]} />
             </DragDropContext>
           </ReduxStoreProvider>
@@ -86,7 +85,7 @@ describe('EventFieldsBrowser', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
+            <DragDropContext onDragEnd={jest.fn()}>
               <EventFieldsBrowser data={mockEcsData[0]} />
             </DragDropContext>
           </ReduxStoreProvider>
@@ -109,7 +108,7 @@ describe('EventFieldsBrowser', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
+            <DragDropContext onDragEnd={jest.fn()}>
               <EventFieldsBrowser data={mockEcsData[0]} />
             </DragDropContext>
           </ReduxStoreProvider>
@@ -132,7 +131,7 @@ describe('EventFieldsBrowser', () => {
       const wrapper = mountWithIntl(
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
           <ReduxStoreProvider store={store}>
-            <DragDropContext onDragEnd={noop}>
+            <DragDropContext onDragEnd={jest.fn()}>
               <EventFieldsBrowser data={mockEcsData[0]} />
             </DragDropContext>
           </ReduxStoreProvider>

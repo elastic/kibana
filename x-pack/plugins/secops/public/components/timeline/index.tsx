@@ -23,7 +23,7 @@ import {
 import { AddNoteToEvent, UpdateNote } from '../notes/helpers';
 
 import { ColumnHeader } from './body/column_headers/column_header';
-import { defaultHeaders } from './body/column_headers/headers';
+import { defaultHeaders } from './body/column_headers/default_headers';
 import { columnRenderers, rowRenderers } from './body/renderers';
 import { Sort } from './body/sort';
 import { DataProvider } from './data_providers/data_provider';
@@ -31,6 +31,8 @@ import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
   OnChangeItemsPerPage,
+  OnColumnRemoved,
+  OnColumnResized,
   OnColumnSorted,
   OnDataProviderRemoved,
   OnPinEvent,
@@ -38,6 +40,7 @@ import {
   OnToggleDataProviderEnabled,
   OnToggleDataProviderExcluded,
   OnUnPinEvent,
+  OnUpdateColumns,
 } from './events';
 import { Timeline } from './timeline';
 
@@ -71,13 +74,26 @@ interface DispatchProps {
     id: string;
     provider: DataProvider;
   }>;
+  applyDeltaToColumnWidth?: ActionCreator<{
+    id: string;
+    columnId: string;
+    delta: number;
+  }>;
   pinEvent?: ActionCreator<{
     id: string;
     eventId: string;
   }>;
+  removeColumn?: ActionCreator<{
+    id: string;
+    columnId: string;
+  }>;
   unPinEvent?: ActionCreator<{
     id: string;
     eventId: string;
+  }>;
+  updateColumns?: ActionCreator<{
+    id: string;
+    columns: ColumnHeader[];
   }>;
   updateProviders?: ActionCreator<{
     id: string;
@@ -139,6 +155,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     const { createTimeline, id } = this.props;
 
     createTimeline!({ id });
+    this.onUpdateColumns(defaultHeaders);
   }
 
   public render() {
@@ -181,6 +198,8 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             onChangeDataProviderKqlQuery={this.onChangeDataProviderKqlQuery}
             onChangeDroppableAndProvider={this.onChangeDroppableAndProvider}
             onChangeItemsPerPage={this.onChangeItemsPerPage}
+            onColumnResized={this.onColumnResized}
+            onColumnRemoved={this.onColumnRemoved}
             onColumnSorted={this.onColumnSorted}
             onDataProviderRemoved={this.onDataProviderRemoved}
             onFilterChange={noop} // TODO: this is the callback for column filters, which is out scope for this phase of delivery
@@ -209,8 +228,15 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     noteId: string;
   }) => this.props.addNoteToEvent!({ id: this.props.id, eventId, noteId });
 
-  private onColumnSorted: OnColumnSorted = sorted =>
+  private onColumnSorted: OnColumnSorted = sorted => {
     this.props.updateSort!({ id: this.props.id, sort: sorted });
+  };
+
+  private onColumnRemoved: OnColumnRemoved = columnId =>
+    this.props.removeColumn!({ id: this.props.id, columnId });
+
+  private onColumnResized: OnColumnResized = ({ columnId, delta }) =>
+    this.props.applyDeltaToColumnWidth!({ id: this.props.id, columnId, delta });
 
   private onDataProviderRemoved: OnDataProviderRemoved = (
     providerId: string,
@@ -259,6 +285,9 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     this.props.unPinEvent!({ id: this.props.id, eventId });
 
   private onUpdateNote: UpdateNote = (note: Note) => this.props.updateNote!({ note });
+
+  private onUpdateColumns: OnUpdateColumns = columns =>
+    this.props.updateColumns!({ id: this.props.id, columns });
 }
 
 const makeMapStateToProps = () => {
@@ -268,6 +297,7 @@ const makeMapStateToProps = () => {
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, id);
     const {
+      columns,
       dataProviders,
       eventIdToNoteIds,
       itemsPerPage,
@@ -281,7 +311,7 @@ const makeMapStateToProps = () => {
 
     return {
       dataProviders,
-      headers: defaultHeaders,
+      headers: columns,
       id,
       itemsPerPage,
       itemsPerPageOptions,
@@ -302,8 +332,10 @@ export const StatefulTimeline = connect(
   {
     addNoteToEvent: timelineActions.addNoteToEvent,
     addProvider: timelineActions.addProvider,
+    applyDeltaToColumnWidth: timelineActions.applyDeltaToColumnWidth,
     createTimeline: timelineActions.createTimeline,
     unPinEvent: timelineActions.unPinEvent,
+    updateColumns: timelineActions.updateColumns,
     updateProviders: timelineActions.updateProviders,
     updateRange: timelineActions.updateRange,
     updateSort: timelineActions.updateSort,
@@ -314,6 +346,7 @@ export const StatefulTimeline = connect(
     updateItemsPerPage: timelineActions.updateItemsPerPage,
     updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
     pinEvent: timelineActions.pinEvent,
+    removeColumn: timelineActions.removeColumn,
     removeProvider: timelineActions.removeProvider,
     updateNote: appActions.updateNote,
   }

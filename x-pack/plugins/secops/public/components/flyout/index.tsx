@@ -17,7 +17,7 @@ import { defaultWidth } from '../timeline/body';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 
 import { FlyoutButton } from './button';
-import { FlyoutPane } from './pane';
+import { Pane } from './pane';
 
 /** The height in pixels of the flyout header, exported for use in height calculations */
 export const flyoutHeaderHeight: number = 48;
@@ -84,7 +84,7 @@ export const FlyoutComponent = pure<Props>(
   }) => (
     <>
       <Visible show={show!}>
-        <FlyoutPane
+        <Pane
           flyoutHeight={flyoutHeight}
           headerHeight={headerHeight}
           onClose={() => showTimeline!({ id: timelineId, show: false })}
@@ -93,7 +93,7 @@ export const FlyoutComponent = pure<Props>(
           width={width!}
         >
           {children}
-        </FlyoutPane>
+        </Pane>
       </Visible>
       <FlyoutButton
         dataProviders={dataProviders!}

@@ -6,38 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIME = i18n.translate('xpack.secops.timeline.timeTitle', {
-  defaultMessage: 'Time',
-});
-
-export const SEVERITY = i18n.translate('xpack.secops.timeline.severityTitle', {
-  defaultMessage: 'Severity',
-});
-
-export const CATEGORY = i18n.translate('xpack.secops.timeline.categoryTitle', {
+export const CATEGORY = i18n.translate('xpack.secops.timeline.categoryTooltip', {
   defaultMessage: 'Category',
 });
 
-export const ACTION = i18n.translate('xpack.secops.timeline.actionTitle', {
-  defaultMessage: 'Action',
+export const DESCRIPTION = i18n.translate('xpack.secops.timeline.descriptionTooltip', {
+  defaultMessage: 'Description',
 });
 
-export const HOST_NAME = i18n.translate('xpack.secops.timeline.hostNameTitle', {
-  defaultMessage: 'Hostname',
+export const FIELD = i18n.translate('xpack.secops.timeline.fieldTooltip', {
+  defaultMessage: 'Field',
 });
 
-export const SOURCE_IP = i18n.translate('xpack.secops.timeline.sourceIpTitle', {
-  defaultMessage: 'Source IP',
+export const TYPE = i18n.translate('xpack.secops.timeline.typeTooltip', {
+  defaultMessage: 'Type',
 });
 
-export const DESTINATION_IP = i18n.translate('xpack.secops.timeline.destinationIpTitle', {
-  defaultMessage: 'Destination IP',
-});
-
-export const USER = i18n.translate('xpack.secops.timeline.userTitle', {
-  defaultMessage: 'User',
-});
-
-export const EVENT = i18n.translate('xpack.secops.timeline.eventTitle', {
-  defaultMessage: 'Event',
-});
+export const REMOVE_COLUMN = i18n.translate(
+  'xpack.secops.timeline.flyout.pane.removeColumnButtonLabel',
+  {
+    defaultMessage: 'Remove column',
+  }
+);

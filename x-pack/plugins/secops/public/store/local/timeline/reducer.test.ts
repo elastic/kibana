@@ -4,16 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { set } from 'lodash/fp';
+import { cloneDeep, set } from 'lodash/fp';
 
 import { defaultWidth } from '../../../components/timeline/body';
+import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
+import {
+  defaultColumnHeaderType,
+  defaultHeaders,
+} from '../../../components/timeline/body/column_headers/default_headers';
+import {
+  DEFAULT_COLUMN_MIN_WIDTH,
+  getColumnWidthFromType,
+} from '../../../components/timeline/body/helpers';
 import { Direction } from '../../../graphql/types';
 
 import { TimelineById } from '.';
 import {
   addNewTimeline,
+  addTimelineColumn,
   addTimelineProvider,
+  applyDeltaToTimelineColumnWidth,
+  removeTimelineColumn,
   removeTimelineProvider,
+  updateTimelineColumns,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -45,6 +58,7 @@ const timelineByIdMock: TimelineById = {
         kqlQuery: '',
       },
     ],
+    columns: [],
     description: '',
     eventIdToNoteIds: {},
     highlightedDropAndProviderId: '',
@@ -62,31 +76,50 @@ const timelineByIdMock: TimelineById = {
     range: '1 Day',
     show: true,
     sort: {
-      columnId: 'timestamp',
+      columnId: '@timestamp',
       sortDirection: Direction.descending,
     },
     width: defaultWidth,
   },
 };
 
+const columnsMock: ColumnHeader[] = [defaultHeaders[0], defaultHeaders[1], defaultHeaders[2]];
+
 describe('Timeline', () => {
   describe('#addNewTimeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = addNewTimeline({
         id: 'bar',
+        columns: defaultHeaders,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should add a new timeline to empty timeline', () => {
+    test('should add a new timeline', () => {
       const update = addNewTimeline({
         id: 'bar',
+        columns: [],
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual({
         foo: timelineByIdMock.foo,
         bar: set('id', 'bar', timelineDefaults),
+      });
+    });
+
+    test('should add the specified columns to the timeline', () => {
+      const barWithEmptyColumns = set('id', 'bar', timelineDefaults);
+      const barWithPopulatedColumns = set('columns', defaultHeaders, barWithEmptyColumns);
+
+      const update = addNewTimeline({
+        id: 'bar',
+        columns: defaultHeaders,
+        timelineById: timelineByIdMock,
+      });
+      expect(update).toEqual({
+        foo: timelineByIdMock.foo,
+        bar: barWithPopulatedColumns,
       });
     });
   });
@@ -108,6 +141,88 @@ describe('Timeline', () => {
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(set('foo.show', false, timelineByIdMock));
+    });
+  });
+
+  describe('#addTimelineColumn', () => {
+    const columnToAdd: ColumnHeader = {
+      category: 'event',
+      columnHeaderType: defaultColumnHeaderType,
+      description:
+        'The action captured by the event.\nThis describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
+      example: 'user-password-change',
+      id: 'event.action',
+      type: 'keyword',
+      width: DEFAULT_COLUMN_MIN_WIDTH,
+    };
+
+    test('should return a new reference and not the same reference', () => {
+      const update = addTimelineColumn({
+        id: 'foo',
+        column: columnToAdd,
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should add a new column to an empty collection of columns', () => {
+      const update = addTimelineColumn({
+        id: 'foo',
+        column: columnToAdd,
+        timelineById: timelineByIdMock,
+      });
+
+      const addedColumn = timelineByIdMock.foo.columns.concat(columnToAdd);
+      expect(update).toEqual(set('foo.columns', addedColumn, timelineByIdMock));
+    });
+
+    test('should add a new column to an existing collection of columns', () => {
+      const expectedColumns = columnsMock.concat(columnToAdd);
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = addTimelineColumn({
+        id: 'foo',
+        column: columnToAdd,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should NOT add an additional new column if it already exists', () => {
+      const expectedColumns = cloneDeep(columnsMock);
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+      const preExisting = cloneDeep(mockWithExistingColumns.foo.columns[1]);
+
+      const update = addTimelineColumn({
+        id: 'foo',
+        column: preExisting,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should NOT MODIFY an existing column if it already exists', () => {
+      const expectedColumns = cloneDeep(columnsMock);
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const differentDescription = {
+        ...mockWithExistingColumns.foo.columns[1],
+        description: 'this is a different description',
+      };
+
+      const update = addTimelineColumn({
+        id: 'foo',
+        column: differentDescription,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
     });
   });
 
@@ -210,6 +325,186 @@ describe('Timeline', () => {
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(set('foo.dataProviders[0].name', 'my name changed', timelineByIdMock));
+    });
+  });
+
+  describe('#removeTimelineColumn', () => {
+    test('should return a new reference and not the same reference', () => {
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = removeTimelineColumn({
+        id: 'foo',
+        columnId: columnsMock[0].id,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should remove just the first column when the id matches', () => {
+      const expectedColumns = [columnsMock[1], columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = removeTimelineColumn({
+        id: 'foo',
+        columnId: columnsMock[0].id,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should remove just the last column when the id matches', () => {
+      const expectedColumns = [columnsMock[0], columnsMock[1]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = removeTimelineColumn({
+        id: 'foo',
+        columnId: columnsMock[2].id,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should remove just the middle column when the id matches', () => {
+      const expectedColumns = [columnsMock[0], columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = removeTimelineColumn({
+        id: 'foo',
+        columnId: columnsMock[1].id,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should not modify the columns if the id to remove was not found', () => {
+      const expectedColumns = cloneDeep(columnsMock);
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = removeTimelineColumn({
+        id: 'foo',
+        columnId: 'does.not.exist',
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+  });
+
+  describe('#applyDeltaToColumnWidth', () => {
+    test('should return a new reference and not the same reference', () => {
+      const delta = 50;
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = applyDeltaToTimelineColumnWidth({
+        id: 'foo',
+        columnId: columnsMock[0].id,
+        delta,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should update (just) the specified column of type `date` when the id matches, and the result of applying the delta is greater than the min width for a date column', () => {
+      const aDateColumn = columnsMock[0];
+      const delta = 50;
+      const expectedToHaveNewWidth = {
+        ...aDateColumn,
+        width: getColumnWidthFromType(aDateColumn.type) + delta,
+      };
+      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = applyDeltaToTimelineColumnWidth({
+        id: 'foo',
+        columnId: aDateColumn.id,
+        delta,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should NOT update (just) the specified column of type `date` when the id matches, because the result of applying the delta is less than the min width for a date column', () => {
+      const aDateColumn = columnsMock[0];
+      const delta = -50; // this will be less than the min
+      const expectedToHaveNewWidth = {
+        ...aDateColumn,
+        width: getColumnWidthFromType(aDateColumn.type), // we expect the minimum
+      };
+      const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = applyDeltaToTimelineColumnWidth({
+        id: 'foo',
+        columnId: aDateColumn.id,
+        delta,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should update (just) the specified non-date column when the id matches, and the result of applying the delta is greater than the min width for the column', () => {
+      const aNonDateColumn = columnsMock[1];
+      const delta = 50;
+      const expectedToHaveNewWidth = {
+        ...aNonDateColumn,
+        width: getColumnWidthFromType(aNonDateColumn.type) + delta,
+      };
+      const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = applyDeltaToTimelineColumnWidth({
+        id: 'foo',
+        columnId: aNonDateColumn.id,
+        delta,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
+    });
+
+    test('should NOT update the specified non-date column when the id matches, because the result of applying the delta is less than the min width for the column', () => {
+      const aNonDateColumn = columnsMock[1];
+      const delta = -50;
+      const expectedToHaveNewWidth = {
+        ...aNonDateColumn,
+        width: getColumnWidthFromType(aNonDateColumn.type),
+      };
+      const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
+
+      // pre-populate a new mock with existing columns:
+      const mockWithExistingColumns = set('foo.columns', columnsMock, timelineByIdMock);
+
+      const update = applyDeltaToTimelineColumnWidth({
+        id: 'foo',
+        columnId: aNonDateColumn.id,
+        delta,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update).toEqual(set('foo.columns', expectedColumns, mockWithExistingColumns));
     });
   });
 
@@ -336,6 +631,26 @@ describe('Timeline', () => {
       const indexProvider = update.foo.dataProviders.findIndex(i => i.id === '567');
       expect(update.foo.dataProviders[indexProvider].and.length).toEqual(1);
       newTimeline.foo.highlightedDropAndProviderId = '';
+    });
+  });
+
+  describe('#updateTimelineColumns', () => {
+    test('should return a new reference and not the same reference', () => {
+      const update = updateTimelineColumns({
+        id: 'foo',
+        columns: columnsMock,
+        timelineById: timelineByIdMock,
+      });
+      expect(update).not.toBe(timelineByIdMock);
+    });
+
+    test('should update a timeline with new columns', () => {
+      const update = updateTimelineColumns({
+        id: 'foo',
+        columns: columnsMock,
+        timelineById: timelineByIdMock,
+      });
+      expect(update).toEqual(set('foo.columns', [...columnsMock], timelineByIdMock));
     });
   });
 
@@ -475,6 +790,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -506,7 +822,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -545,6 +861,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -592,7 +909,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -755,6 +1072,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -786,7 +1104,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -825,6 +1143,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -872,7 +1191,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -1023,6 +1342,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -1054,7 +1374,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -1085,6 +1405,7 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -1117,7 +1438,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
@@ -1174,6 +1495,7 @@ describe('Timeline', () => {
       });
       const expected: TimelineById = {
         foo: {
+          columns: [],
           dataProviders: [
             {
               and: [],
@@ -1206,7 +1528,7 @@ describe('Timeline', () => {
           range: '1 Day',
           show: true,
           sort: {
-            columnId: 'timestamp',
+            columnId: '@timestamp',
             sortDirection: Direction.descending,
           },
           pinnedEventIds: {},
