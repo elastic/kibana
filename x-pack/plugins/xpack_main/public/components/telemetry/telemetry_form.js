@@ -33,7 +33,6 @@ export class TelemetryForm extends Component {
   };
 
   state = {
-    processing: false,
     showExample: false,
     queryMatches: null,
   }
@@ -159,25 +158,9 @@ export class TelemetryForm extends Component {
     </Fragment>
   )
 
-  toggleOptIn = async () => {
+  toggleOptIn = () => {
     const newOptInValue = !this.props.telemetryOptInProvider.getOptIn();
-
-    return new Promise((resolve, reject) => {
-      this.setState({
-        enabled: newOptInValue,
-        processing: true
-      }, () => {
-        this.props.telemetryOptInProvider.setOptIn(newOptInValue).then(() => {
-          this.setState({ processing: false });
-          resolve();
-        }, (e) => {
-          // something went wrong
-          this.setState({ processing: false });
-          reject(e);
-        });
-      });
-    });
-
+    this.props.telemetryOptInProvider.setOptIn(newOptInValue);
   }
 
   toggleExample = () => {
