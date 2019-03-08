@@ -8,6 +8,7 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,28 +43,30 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
         )}
       />
 
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="l" />
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <ErrorDistributionRequest
-            urlParams={urlParams}
-            render={({ data }) => (
-              <ErrorDistribution
-                distribution={data}
-                title={i18n.translate(
-                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                  {
-                    defaultMessage: 'Error occurrences'
-                  }
-                )}
-              />
-            )}
-          />
+          <EuiPanel>
+            <ErrorDistributionRequest
+              urlParams={urlParams}
+              render={({ data }) => (
+                <ErrorDistribution
+                  distribution={data}
+                  title={i18n.translate(
+                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                    {
+                      defaultMessage: 'Error occurrences'
+                    }
+                  )}
+                />
+              )}
+            />
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="l" />
 
       <MetricsChartDataRequest
         urlParams={urlParams}
@@ -73,16 +76,20 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
               render={hoverXHandlers => (
                 <EuiFlexGrid columns={2}>
                   <EuiFlexItem>
-                    <CPUUsageChart
-                      data={data.cpu}
-                      hoverXHandlers={hoverXHandlers}
-                    />
+                    <EuiPanel>
+                      <CPUUsageChart
+                        data={data.cpu}
+                        hoverXHandlers={hoverXHandlers}
+                      />
+                    </EuiPanel>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <MemoryUsageChart
-                      data={data.memory}
-                      hoverXHandlers={hoverXHandlers}
-                    />
+                    <EuiPanel>
+                      <MemoryUsageChart
+                        data={data.memory}
+                        hoverXHandlers={hoverXHandlers}
+                      />
+                    </EuiPanel>
                   </EuiFlexItem>
                 </EuiFlexGrid>
               )}
