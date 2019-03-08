@@ -44,10 +44,20 @@ describe('tooltipFormatter', function () {
       yAxisFormatter: _.identity,
       zAxisLabel: 'top',
       zAxisFormatter: _.identity,
+      series: [
+        {
+          rawId: '1',
+          label: 'middle',
+          zLabel: 'top',
+          yAxisFormatter: _.identity,
+          zAxisFormatter: _.identity
+        }
+      ]
     },
     datum: {
       x: 3, y: 2, z: 1,
-      extraMetrics: []
+      extraMetrics: [],
+      seriesId: '1'
     }
   };
 
