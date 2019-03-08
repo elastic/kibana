@@ -8,3 +8,4 @@ export * from './global_state';
 export * from './index_pattern';
 export * from './kibana_config';
 export * from './mock_ecs';
+export * from './test_providers';

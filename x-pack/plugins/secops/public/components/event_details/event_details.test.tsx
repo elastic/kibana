@@ -7,8 +7,7 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { mockEcsData } from '../../mock/mock_ecs';
-import { TestProviders } from '../../mock/test_providers';
+import { mockEcsData, TestProviders } from '../../mock';
 
 import { EventDetails } from './event_details';
 

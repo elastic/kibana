@@ -3,16 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 
 import { getPopulatedMappedFields, virtualEcsSchema } from '../../../public/lib/ecs';
-import { mockEcsData } from '../../mock/mock_ecs';
-import { createStore } from '../../store';
+import { mockEcsData, TestProviders } from '../../mock';
 
 import { getExampleText, getIconFromType, getItems } from './helpers';
 
@@ -128,12 +123,6 @@ describe('helpers', () => {
     });
 
     describe('formatting data for display', () => {
-      let store = createStore();
-
-      beforeEach(() => {
-        store = createStore();
-      });
-
       const justDateFields = getItems({
         data,
         populatedFields: getPopulatedMappedFields({ data, schema: virtualEcsSchema }),
@@ -155,13 +144,9 @@ describe('helpers', () => {
       justDateFields.forEach(field => {
         test(`it should render a tooltip for the ${field.field} (${field.type}) field`, () => {
           const wrapper = mount(
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={jest.fn()}>
-                  <>{field.value}</>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
+            <TestProviders>
+              <>{field.value}</>
+            </TestProviders>
           );
 
           expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(true);
@@ -173,13 +158,9 @@ describe('helpers', () => {
           field.type
         }) field`, () => {
           const wrapper = mount(
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <DragDropContext onDragEnd={jest.fn()}>
-                  <>{field.value}</>
-                </DragDropContext>
-              </ThemeProvider>
-            </ReduxStoreProvider>
+            <TestProviders>
+              <>{field.value}</>
+            </TestProviders>
           );
 
           expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(

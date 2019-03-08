@@ -4,19 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import toJson from 'enzyme-to-json';
-import { cloneDeep, noop } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
-import { Provider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../graphql/types';
-import { mockGlobalState } from '../../../../mock';
+import { TestProviders } from '../../../../mock';
 import { mockEcsData } from '../../../../mock';
-import { createStore, State } from '../../../../store';
 
 import {
   constructDroppedValue,
@@ -33,26 +28,18 @@ import {
 } from './zeek_signature';
 
 describe('ZeekSignature', () => {
-  const state: State = mockGlobalState;
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
   let zeek: Ecs;
-  let store = createStore(state);
 
   beforeEach(() => {
-    store = createStore(state);
     zeek = cloneDeep(mockEcsData[13]);
   });
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <ZeekSignature data={zeek} />
-            </DragDropContext>
-          </Provider>
-        </ThemeProvider>
+        <TestProviders>
+          <ZeekSignature data={zeek} />
+        </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -125,44 +112,32 @@ describe('ZeekSignature', () => {
   describe('DraggableZeekElement', () => {
     test('it returns null if value is null', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
-            </DragDropContext>
-          </Provider>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(null);
     });
 
     test('it renders the default ZeekSignature', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
-            </DragDropContext>
-          </Provider>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
     });
 
     test('it renders with a custom string renderer', () => {
       const wrapper = mountWithIntl(
-        <ThemeProvider theme={theme}>
-          <Provider store={store}>
-            <DragDropContext onDragEnd={noop}>
-              <DraggableZeekElement
-                id="id-123"
-                field="zeek.notice"
-                value={'mynote'}
-                stringRenderer={value => `->${value}<-`}
-              />
-            </DragDropContext>
-          </Provider>
-        </ThemeProvider>
+        <TestProviders>
+          <DraggableZeekElement
+            id="id-123"
+            field="zeek.notice"
+            value={'mynote'}
+            stringRenderer={value => `->${value}<-`}
+          />
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('->mynote<-');
     });
