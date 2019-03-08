@@ -23,9 +23,12 @@ import { EventEmitter } from 'events';
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { Adapters } from '../../inspector/types';
 import { RequestHandlerParams, Vis } from '../../vis';
 import { VisResponseData } from './types';
+
+jest.mock('ui/notify', () => ({
+  toastNotifications: jest.fn(),
+}));
 
 jest.mock('./utils', () => ({
   queryGeohashBounds: jest.fn(),
@@ -39,12 +42,10 @@ jest.mock('./pipeline_helpers/utilities', () => ({
 const timefilter = new EventEmitter();
 jest.mock('../../timefilter', () => ({ timefilter }));
 
-const mockInspectorIsAvailable = jest.fn();
-const mockInspectorOpen = jest.fn();
 jest.mock('../../inspector', () => ({
   Inspector: {
-    open: (adapters: Adapters, opts: any) => mockInspectorOpen(adapters, opts),
-    isAvailable: (adapters: Adapters) => mockInspectorIsAvailable(adapters),
+    open: jest.fn(),
+    isAvailable: jest.fn(),
   },
 }));
 
@@ -70,6 +71,7 @@ jest.mock('./visualize_data_loader', () => ({
   VisualizeDataLoader: MockDataLoader,
 }));
 
+import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
 describe('EmbeddedVisualizeHandler', () => {
@@ -90,9 +92,7 @@ describe('EmbeddedVisualizeHandler', () => {
   };
 
   beforeEach(() => {
-    mockDataLoaderFetch.mockClear();
-    mockInspectorOpen.mockClear();
-    mockInspectorIsAvailable.mockClear();
+    jest.clearAllMocks();
 
     dataLoaderParams = {
       aggs: [],
@@ -121,6 +121,10 @@ describe('EmbeddedVisualizeHandler', () => {
         queryFilter: null,
       }
     );
+  });
+
+  afterEach(() => {
+    handler.destroy();
   });
 
   describe('autoFetch', () => {
@@ -240,16 +244,16 @@ describe('EmbeddedVisualizeHandler', () => {
   describe('openInspector', () => {
     it('calls Inspector.open()', () => {
       handler.openInspector();
-      expect(mockInspectorOpen).toHaveBeenCalledTimes(1);
-      expect(mockInspectorOpen).toHaveBeenCalledWith({}, { title: 'My Vis' });
+      expect(Inspector.open).toHaveBeenCalledTimes(1);
+      expect(Inspector.open).toHaveBeenCalledWith({}, { title: 'My Vis' });
     });
   });
 
   describe('hasInspector', () => {
     it('calls Inspector.isAvailable()', () => {
       handler.hasInspector();
-      expect(mockInspectorIsAvailable).toHaveBeenCalledTimes(1);
-      expect(mockInspectorIsAvailable).toHaveBeenCalledWith({});
+      expect(Inspector.isAvailable).toHaveBeenCalledTimes(1);
+      expect(Inspector.isAvailable).toHaveBeenCalledWith({});
     });
   });
 
