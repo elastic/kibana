@@ -330,7 +330,7 @@ class CodeContent extends React.PureComponent<Props> {
           );
         } else if (this.props.file!.isImage) {
           return (
-            <div className="autoMargin">
+            <div className="code-auto-margin">
               <img src={url} alt={url} />
             </div>
           );
