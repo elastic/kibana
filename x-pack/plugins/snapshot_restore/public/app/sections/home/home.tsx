@@ -12,8 +12,8 @@ import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } fro
 import { BASE_PATH } from '../../constants';
 import { AppContext, AppContextInterface } from '../../services/app_context';
 
-import { RepositoryList } from '../repository_list';
-import { SnapshotList } from '../snapshot_list';
+import { RepositoryList } from './repository_list';
+import { SnapshotList } from './snapshot_list';
 
 type Section = 'repositories' | 'snapshots';
 

@@ -6,13 +6,13 @@
 
 import React, { PureComponent } from 'react';
 
-import { AppContext } from '../../services/app_context';
+import { AppContext } from '../../../services/app_context';
 
-export class RepositoryList extends PureComponent {
+export class SnapshotList extends PureComponent {
   public static contextType = AppContext;
   public context!: React.ContextType<typeof AppContext>;
 
   public render() {
-    return <div>List of repositories</div>;
+    return <div>List of snapshots</div>;
   }
 }

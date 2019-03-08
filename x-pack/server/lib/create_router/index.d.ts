@@ -9,7 +9,7 @@ import { CallWithRequest } from './call_with_request_factory';
 
 export type RouterRouteHandler = (
   req: Request,
-  callWithRequest: CallWithRequest,
+  callWithRequest: ReturnType<CallWithRequest>,
   responseToolkit: ResponseToolkit
 ) => Promise<any>;
 
