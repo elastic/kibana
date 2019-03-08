@@ -21,6 +21,7 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React, { PureComponent } from 'react';
 import chrome from 'ui/chrome';
 
+// @ts-ignore
 import { KuiButton } from '@kbn/ui-framework/components';
 
 import { EuiScreenReaderOnly, keyCodes } from '@elastic/eui';
