@@ -45,7 +45,7 @@ export function OpenSearchPanel(props) {
           <h2>
             <FormattedMessage
               id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
-              defaultMessage="Open Search"
+              defaultMessage="Open search"
             />
           </h2>
         </EuiTitle>
