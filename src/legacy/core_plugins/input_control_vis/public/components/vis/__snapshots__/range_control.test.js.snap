@@ -13,12 +13,13 @@ exports[`disabled 1`] = `
     fullWidth={false}
     levels={Array []}
     max={100}
-    min={1}
+    min={0}
     showInput={false}
     showLabels={false}
     showRange={false}
     showTicks={false}
     showValue={false}
+    step={1}
   />
 </FormRow>
 `;
@@ -37,6 +38,7 @@ exports[`renders RangeControl 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={false}
+    labelType="label"
   >
     <EuiFlexGroup
       alignItems="center"

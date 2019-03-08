@@ -63,6 +63,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label="Status"
+          labelType="label"
         >
           <EuiComboBox
             compressed={false}

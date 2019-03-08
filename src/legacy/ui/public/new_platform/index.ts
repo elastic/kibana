@@ -16,10 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { ToolingLog } from '@kbn/dev-utils';
-
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+export { __newPlatformInit__, getNewPlatform } from './new_platform';
