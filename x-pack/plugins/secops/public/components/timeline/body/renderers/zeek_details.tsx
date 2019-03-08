@@ -19,7 +19,7 @@ const Details = styled.div`
   margin-bottom: 10px;
 `;
 
-export const ZeekDetails = pure(({ data }: { data: Ecs }) =>
+export const ZeekDetails = pure<{ data: Ecs }>(({ data }) =>
   data.zeek != null ? (
     <Details>
       <ZeekSignature data={data} />

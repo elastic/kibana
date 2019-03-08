@@ -32,7 +32,7 @@ const LinkFlexItem = styled(EuiFlexItem)`
   margin-left: 6px;
 `;
 
-export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
+export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
   <>
     {tokens.map(token => (
       <TokensFlexItem key={token} grow={false}>
@@ -44,8 +44,8 @@ export const Tokens = pure(({ tokens }: { tokens: string[] }) => (
   </>
 ));
 
-export const DraggableSignatureId = pure(
-  ({ id, signatureId }: { id: string; signatureId: string }) => (
+export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
+  ({ id, signatureId }) => (
     <SignatureFlexItem grow={false}>
       <DraggableWrapper
         dataProvider={{
@@ -76,8 +76,8 @@ export const DraggableSignatureId = pure(
   )
 );
 
-export const SuricataSignature = pure(
-  ({ id, signature, signatureId }: { id: string; signature: string; signatureId: string }) => {
+export const SuricataSignature = pure<{ id: string; signature: string; signatureId: string }>(
+  ({ id, signature, signatureId }) => {
     const tokens = getBeginningTokens(signature);
     return (
       <EuiFlexGroup justifyContent="center" gutterSize="none">

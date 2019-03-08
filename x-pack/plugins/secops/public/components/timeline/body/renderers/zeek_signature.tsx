@@ -54,50 +54,44 @@ export const md5StringRenderer: StringRenderer = (value: string) => `md5: ${valu
 export const sha1StringRenderer: StringRenderer = (value: string) =>
   `sha1: ${value.substr(0, 7)}...`;
 
-export const DraggableZeekElement = pure(
-  ({
-    id,
-    field,
-    value,
-    stringRenderer = defaultStringRenderer,
-  }: {
-    id: string;
-    field: string;
-    value: string | null;
-    stringRenderer?: StringRenderer;
-  }) =>
-    value != null ? (
-      <TokensFlexItem grow={false}>
-        <DraggableWrapper
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id: escapeDataProviderId(`zeek-${id}-${field}-${value}`),
-            name: value,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field,
-              value,
-            },
-          }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              <Badge iconType="tag" color="hollow">
-                {stringRenderer(value)}
-              </Badge>
-            )
-          }
-        />
-      </TokensFlexItem>
-    ) : null
+export const DraggableZeekElement = pure<{
+  id: string;
+  field: string;
+  value: string | null;
+  stringRenderer?: StringRenderer;
+}>(({ id, field, value, stringRenderer = defaultStringRenderer }) =>
+  value != null ? (
+    <TokensFlexItem grow={false}>
+      <DraggableWrapper
+        dataProvider={{
+          and: [],
+          enabled: true,
+          id: escapeDataProviderId(`zeek-${id}-${field}-${value}`),
+          name: value,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: {
+            field,
+            value,
+          },
+        }}
+        render={(dataProvider, _, snapshot) =>
+          snapshot.isDragging ? (
+            <DragEffects>
+              <Provider dataProvider={dataProvider} />
+            </DragEffects>
+          ) : (
+            <Badge iconType="tag" color="hollow">
+              {stringRenderer(value)}
+            </Badge>
+          )
+        }
+      />
+    </TokensFlexItem>
+  ) : null
 );
 
-export const Link = pure(({ value, link }: { value: string | null; link?: string | null }) => {
+export const Link = pure<{ value: string | null; link?: string | null }>(({ value, link }) => {
   if (value != null) {
     if (link != null) {
       return (
@@ -117,7 +111,7 @@ export const Link = pure(({ value, link }: { value: string | null; link?: string
   }
 });
 
-export const TotalVirusLinkSha = pure(({ value }: { value: string | null }) =>
+export const TotalVirusLinkSha = pure<{ value: string | null }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
       <TotalVirusLink link={value}>{value}</TotalVirusLink>
