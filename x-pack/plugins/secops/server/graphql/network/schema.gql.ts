@@ -66,6 +66,7 @@ export const networkSchema = gql`
     name: String
     queryCount: Float
     timestamp: Date
+    uniqueDomains: Float
   }
 
   type NetworkDnsEdges {
@@ -82,20 +83,20 @@ export const networkSchema = gql`
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     NetworkTopNFlow(
-      id: String
       direction: NetworkTopNFlowDirection!
+      filterQuery: String
+      id: String
+      pagination: PaginationInput!
       type: NetworkTopNFlowType!
       timerange: TimerangeInput!
-      pagination: PaginationInput!
-      filterQuery: String
     ): NetworkTopNFlowData!
     NetworkDns(
-      id: String
-      sort: NetworkDnsSortField!
-      isPtrIncluded: Boolean!
-      timerange: TimerangeInput!
-      pagination: PaginationInput!
       filterQuery: String
+      id: String
+      isPtrIncluded: Boolean!
+      pagination: PaginationInput!
+      sort: NetworkDnsSortField!
+      timerange: TimerangeInput!
     ): NetworkDnsData!
   }
 `;

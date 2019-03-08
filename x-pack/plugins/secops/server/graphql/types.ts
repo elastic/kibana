@@ -648,6 +648,8 @@ export interface NetworkDnsItem {
   queryCount?: number | null;
 
   timestamp?: Date | null;
+
+  uniqueDomains?: number | null;
 }
 
 export interface UncommonProcessesData {
@@ -786,30 +788,30 @@ export interface HostsSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
+  direction: NetworkTopNFlowDirection;
+
+  filterQuery?: string | null;
+
   id?: string | null;
 
-  direction: NetworkTopNFlowDirection;
+  pagination: PaginationInput;
 
   type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
-
-  pagination: PaginationInput;
-
-  filterQuery?: string | null;
 }
 export interface NetworkDnsSourceArgs {
-  id?: string | null;
+  filterQuery?: string | null;
 
-  sort: NetworkDnsSortField;
+  id?: string | null;
 
   isPtrIncluded: boolean;
 
-  timerange: TimerangeInput;
-
   pagination: PaginationInput;
 
-  filterQuery?: string | null;
+  sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -1020,17 +1022,17 @@ export namespace SourceResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context, NetworkTopNFlowArgs>;
   export interface NetworkTopNFlowArgs {
+    direction: NetworkTopNFlowDirection;
+
+    filterQuery?: string | null;
+
     id?: string | null;
 
-    direction: NetworkTopNFlowDirection;
+    pagination: PaginationInput;
 
     type: NetworkTopNFlowType;
 
     timerange: TimerangeInput;
-
-    pagination: PaginationInput;
-
-    filterQuery?: string | null;
   }
 
   export type NetworkDnsResolver<
@@ -1039,17 +1041,17 @@ export namespace SourceResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context, NetworkDnsArgs>;
   export interface NetworkDnsArgs {
-    id?: string | null;
+    filterQuery?: string | null;
 
-    sort: NetworkDnsSortField;
+    id?: string | null;
 
     isPtrIncluded: boolean;
 
-    timerange: TimerangeInput;
-
     pagination: PaginationInput;
 
-    filterQuery?: string | null;
+    sort: NetworkDnsSortField;
+
+    timerange: TimerangeInput;
   }
 
   export type UncommonProcessesResolver<
@@ -2924,6 +2926,8 @@ export namespace NetworkDnsItemResolvers {
     queryCount?: QueryCountResolver<number | null, TypeParent, Context>;
 
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    uniqueDomains?: UniqueDomainsResolver<number | null, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -2953,6 +2957,11 @@ export namespace NetworkDnsItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type TimestampResolver<
     R = Date | null,
+    Parent = NetworkDnsItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDomainsResolver<
+    R = number | null,
     Parent = NetworkDnsItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;

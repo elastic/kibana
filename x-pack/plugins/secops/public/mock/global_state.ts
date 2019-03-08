@@ -5,7 +5,12 @@
  */
 
 import { defaultWidth } from '../components/timeline/body';
-import { Direction, NetworkTopNFlowDirection, NetworkTopNFlowType } from '../graphql/types';
+import {
+  Direction,
+  NetworkDnsDirection,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../graphql/types';
 import { State } from '../store';
 
 import { defaultHeaders } from './header';
@@ -64,6 +69,14 @@ export const mockGlobalState: State = {
             limit: 10,
             topNFlowType: NetworkTopNFlowType.source,
             topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+          },
+          dns: {
+            limit: 10,
+            dnsSortField: {
+              field: NetworkDnsDirection.queryCount,
+              sort: Direction.descending,
+            },
+            isPtrIncluded: false,
           },
         },
         filterQuery: null,

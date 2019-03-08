@@ -135,6 +135,7 @@ const formatDnsEgdes = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
       dnsBytesOut: getOrNumber('dns_bytes_out.value', bucket),
       name: bucket.key,
       queryCount: bucket.doc_count,
+      uniqueDomains: getOrNumber('unique_domains.value', bucket),
     },
     cursor: {
       value: bucket.key,

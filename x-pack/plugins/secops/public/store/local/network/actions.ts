@@ -6,12 +6,30 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
+import {
+  NetworkDnsSortField,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { NetworkType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/secops/local/network');
+
+export const updateDnsLimit = actionCreator<{ limit: number; networkType: NetworkType }>(
+  'UPDATE_DNS_LIMIT'
+);
+
+export const updateDnsSort = actionCreator<{
+  dnsSortField: NetworkDnsSortField;
+  networkType: NetworkType;
+}>('UPDATE_DNS_SORT');
+
+export const updateIsPtrIncluded = actionCreator<{
+  isPtrIncluded: boolean;
+  networkType: NetworkType;
+}>('UPDATE_DNS_iS_PTR_INCLUDED');
 
 export const updateTopNFlowLimit = actionCreator<{ limit: number; networkType: NetworkType }>(
   'UPDATE_TOP_N_FLOW_LIMIT'

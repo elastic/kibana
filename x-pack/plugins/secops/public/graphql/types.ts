@@ -619,6 +619,8 @@ export interface NetworkDnsItem {
   queryCount?: number | null;
 
   timestamp?: Date | null;
+
+  uniqueDomains?: number | null;
 }
 
 export interface UncommonProcessesData {
@@ -757,30 +759,30 @@ export interface HostsSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
+  direction: NetworkTopNFlowDirection;
+
+  filterQuery?: string | null;
+
   id?: string | null;
 
-  direction: NetworkTopNFlowDirection;
+  pagination: PaginationInput;
 
   type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
-
-  pagination: PaginationInput;
-
-  filterQuery?: string | null;
 }
 export interface NetworkDnsSourceArgs {
-  id?: string | null;
+  filterQuery?: string | null;
 
-  sort: NetworkDnsSortField;
+  id?: string | null;
 
   isPtrIncluded: boolean;
 
-  timerange: TimerangeInput;
-
   pagination: PaginationInput;
 
-  filterQuery?: string | null;
+  sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -1410,6 +1412,85 @@ export namespace GetKpiNetworkQuery {
     uniqueFlowId: number;
 
     activeAgents?: number | null;
+  };
+}
+
+export namespace GetNetworkDnsQuery {
+  export type Variables = {
+    sourceId: string;
+    sort: NetworkDnsSortField;
+    isPtrIncluded: boolean;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkDns: NetworkDns;
+  };
+
+  export type NetworkDns = {
+    __typename?: 'NetworkDnsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkDnsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkDnsItem';
+
+    _id?: string | null;
+
+    dnsBytesIn?: number | null;
+
+    dnsBytesOut?: number | null;
+
+    name?: string | null;
+
+    queryCount?: number | null;
+
+    uniqueDomains?: number | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
   };
 }
 

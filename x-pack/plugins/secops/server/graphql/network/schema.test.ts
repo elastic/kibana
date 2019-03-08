@@ -16,8 +16,8 @@ import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../types';
 
-import { getNetworkTopNFlowQueryMock, mockNetworkTopNFlowData } from './network_top_n_flow.mock';
-import { networkTopNFlowSchema } from './schema.gql';
+import { getNetworkTopNFlowQueryMock, mockNetworkTopNFlowData } from './network.mock';
+import { networkSchema } from './schema.gql';
 
 const testCaseSource = {
   id: 'Test case to query Network Top N Flow',
@@ -108,7 +108,7 @@ describe('Test Source Schema', () => {
     sourcesSchema,
     sourceStatusSchema,
     ecsSchema,
-    networkTopNFlowSchema,
+    networkSchema,
     dateSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });

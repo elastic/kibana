@@ -32,7 +32,7 @@ export function compose(server: Server): AppBackendLibs {
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework), sources),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
-    networkTopNFlow: new Network(new ElasticsearchNetworkAdapter(framework)),
+    network: new Network(new ElasticsearchNetworkAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
   };

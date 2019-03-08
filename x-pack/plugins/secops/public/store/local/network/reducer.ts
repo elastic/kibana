@@ -6,12 +6,20 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
+import {
+  Direction,
+  NetworkDnsDirection,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyNetworkFilterQuery,
   setNetworkFilterQueryDraft,
+  updateDnsLimit,
+  updateDnsSort,
+  updateIsPtrIncluded,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowType,
@@ -29,6 +37,14 @@ export const initialNetworkState: NetworkState = {
         topNFlowType: NetworkTopNFlowType.source,
         topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
       },
+      dns: {
+        limit: DEFAULT_TABLE_LIMIT,
+        dnsSortField: {
+          field: NetworkDnsDirection.queryCount,
+          sort: Direction.descending,
+        },
+        isPtrIncluded: false,
+      },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -41,6 +57,45 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(updateDnsLimit, (state, { limit, networkType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        dns: {
+          ...state[networkType].queries!.dns,
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateDnsSort, (state, { dnsSortField, networkType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        dns: {
+          ...state[networkType].queries!.dns,
+          dnsSortField,
+        },
+      },
+    },
+  }))
+  .case(updateIsPtrIncluded, (state, { isPtrIncluded, networkType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        dns: {
+          ...state[networkType].queries!.dns,
+          isPtrIncluded,
+        },
+      },
+    },
+  }))
   .case(updateTopNFlowLimit, (state, { limit, networkType }) => ({
     ...state,
     [networkType]: {

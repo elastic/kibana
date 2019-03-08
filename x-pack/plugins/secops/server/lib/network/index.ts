@@ -14,6 +14,8 @@ import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
 import { NetworkAdapter } from './types';
 
+export * from './types';
+
 export interface NetworkTopNFlowRequestOptions extends RequestOptions {
   networkTopNFlowType: NetworkTopNFlowType;
   networkTopNFlowDirection: NetworkTopNFlowDirection;

@@ -7,16 +7,15 @@ import { GraphQLResolveInfo } from 'graphql';
 
 import { NetworkTopNFlowDirection, NetworkTopNFlowType, Source } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
-import { NetworkTopNFlow } from '../../lib/network_top_n_flow';
-import { NetworkTopNFlowAdapter } from '../../lib/network_top_n_flow/types';
+import { Network, NetworkAdapter } from '../../lib/network';
 import { SourceStatus } from '../../lib/source_status';
 import { Sources } from '../../lib/sources';
 import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
 
-import { mockNetworkTopNFlowData, mockNetworkTopNFlowFields } from './network_top_n_flow.mock';
-import { createNetworkTopNFlowResolvers, NetworkTopNFlowResolversDeps } from './resolvers';
+import { mockNetworkTopNFlowData, mockNetworkTopNFlowFields } from './network.mock';
+import { createNetworkResolvers, NetworkResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
 mockGetFields.mockResolvedValue({ fieldNodes: [mockNetworkTopNFlowFields] });
@@ -24,18 +23,19 @@ jest.mock('../../utils/build_query/fields', () => ({
   getFields: mockGetFields,
 }));
 
-const mockGetNetworkTopNFlow = jest.fn();
-mockGetNetworkTopNFlow.mockResolvedValue({
-  NetworkTopNFlow: {
+const mockGetNetwork = jest.fn();
+mockGetNetwork.mockResolvedValue({
+  Network: {
     ...mockNetworkTopNFlowData.NetworkTopNFlow,
   },
 });
-const mockNetworkTopNFlowAdapter: NetworkTopNFlowAdapter = {
-  getNetworkTopNFlow: mockGetNetworkTopNFlow,
+const mockNetworkAdapter: NetworkAdapter = {
+  getNetworkTopNFlow: mockGetNetwork,
+  getNetworkDns: jest.fn(),
 };
 
-const mockNetworkTopNFlowLibs: NetworkTopNFlowResolversDeps = {
-  networkTopNFlow: new NetworkTopNFlow(mockNetworkTopNFlowAdapter),
+const mockNetworkTopNFlowLibs: NetworkResolversDeps = {
+  network: new Network(mockNetworkAdapter),
 };
 
 const mockSrcLibs: SourcesResolversDeps = {
@@ -68,9 +68,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    const data = await createNetworkTopNFlowResolvers(
-      mockNetworkTopNFlowLibs
-    ).Source.NetworkTopNFlow(
+    const data = await createNetworkResolvers(mockNetworkTopNFlowLibs).Source.NetworkTopNFlow(
       source as Source,
       {
         timerange: {
@@ -88,7 +86,7 @@ describe('Test Source Resolvers', () => {
       context,
       {} as GraphQLResolveInfo
     );
-    expect(mockNetworkTopNFlowAdapter.getNetworkTopNFlow).toHaveBeenCalled();
+    expect(mockNetworkAdapter.getNetworkTopNFlow).toHaveBeenCalled();
     expect(data).toEqual(mockNetworkTopNFlowData);
   });
 });

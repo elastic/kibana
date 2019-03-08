@@ -19,6 +19,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { Direction } from '../../graphql/types';
 import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
@@ -28,18 +29,24 @@ export interface ItemsPerRow {
   numberOfRow: number;
 }
 
+export interface SortingBasicTable {
+  field: string;
+  direction: Direction;
+}
+
 interface BasicTableProps<T> {
-  // tslint:disable-next-line:no-any
-  pageOfItems: any[];
   columns: Array<Columns<T>>;
-  title: string | React.ReactNode;
+  hasNextPage: boolean;
+  limit: number;
   loading: boolean;
   loadingTitle?: string;
-  hasNextPage: boolean;
   loadMore: () => void;
-  updateLimitPagination: (limit: number) => void;
   itemsPerRow?: ItemsPerRow[];
-  limit: number;
+  // tslint:disable-next-line:no-any
+  pageOfItems: any[];
+  sorting?: SortingBasicTable;
+  title: string | React.ReactNode;
+  updateLimitPagination: (limit: number) => void;
 }
 
 interface BasicTableState {
@@ -87,11 +94,12 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       columns,
       hasNextPage,
       itemsPerRow,
+      limit,
       loading,
       loadingTitle,
       pageOfItems,
+      sorting,
       title,
-      limit,
       updateLimitPagination,
     } = this.props;
     const { isEmptyTable, paginationLoading } = this.state;
@@ -149,7 +157,20 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           </>
         )}
         <EuiTitle size="s">{title}</EuiTitle>
-        <EuiBasicTable items={pageOfItems} columns={columns} />
+        <EuiBasicTable
+          items={pageOfItems}
+          columns={columns}
+          sorting={
+            sorting
+              ? {
+                  sort: {
+                    field: sorting!.field,
+                    direction: sorting!.direction === Direction.ascending ? 'asc' : 'desc',
+                  },
+                }
+              : {}
+          }
+        />
         {hasNextPage && (
           <FooterAction>
             <EuiFlexGroup
