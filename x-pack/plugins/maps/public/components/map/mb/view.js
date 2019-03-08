@@ -42,7 +42,7 @@ export class MBMapContainer extends React.Component {
   }, 256);
 
 
-  _lockTooltip = async (e) => {
+  _lockTooltip =  (e) => {
 
     const features = this._getFeaturesUnderPointer(e.point);
     if (!features.length) {
@@ -62,7 +62,7 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _updateHoverTooltipState = _.debounce(async (e) => {
+  _updateHoverTooltipState = _.debounce((e) => {
 
     if (this.props.tooltipState && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED) {
       //ignore hover events when tooltip is locked
