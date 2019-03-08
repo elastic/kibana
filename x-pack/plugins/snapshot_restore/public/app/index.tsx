@@ -5,19 +5,16 @@
  */
 import React from 'react';
 import { render } from 'react-dom';
-import { AppCore, AppPlugins } from '../shim';
-import { AppContext, AppContextInterface } from './services/app_context';
-
-// import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 
+import { AppCore, AppPlugins } from '../shim';
 import { App } from './app';
-// import { srStore } from './store';
+import { AppContext, AppContextInterface } from './services/app_context';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
 export const renderReact = async (
-  elem: Element | null,
+  elem: Element,
   core: AppCore,
   plugins: AppPlugins
 ): Promise<void> => {
@@ -32,7 +29,6 @@ export const renderReact = async (
 
   render(
     <I18nContext>
-      {/*<Provider store={srStore}>*/}
       <HashRouter>
         <AppContext.Provider value={appContext}>
           <App />

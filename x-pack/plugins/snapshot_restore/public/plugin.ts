@@ -3,10 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { unmountComponentAtNode } from 'react-dom';
+
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
-import template from './index.html';
 import { AppCore, AppPlugins, Core, Plugins } from './shim';
+
+import template from './index.html';
 
 const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
@@ -26,17 +29,23 @@ export class Plugin {
       url: `#${CLIENT_BASE_PATH}/repositories`,
     });
 
+    const unmountReactApp = (elem: Element | undefined | null): void => {
+      if (elem) {
+        unmountComponentAtNode(elem);
+      }
+    };
+
     // Register react root
     routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id`, {
       template,
-      controller: ($scope: any, $route: any, $http: any, $q: any) => {
+      controller: ($scope: any, $route: any, $http: ng.IHttpService, $q: any) => {
         let elem: Element | null | undefined;
 
         // React-router's <Redirect> does not play well with the angular router. It will cause this controller
         // to re-execute without the $destroy handler being called. This means that the app will be mounted twice
         // creating a memory leak when leaving (only 1 app will be unmounted).
         // To avoid this, we unmount the React app each time we enter the controller.
-        routing.unmountReactApp(elem);
+        unmountReactApp(elem);
 
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
@@ -44,11 +53,13 @@ export class Plugin {
 
         $scope.$$postDigest(() => {
           elem = document.getElementById(REACT_ROOT_ID);
-          renderReact(
-            elem,
-            { i18n, chrome, notification } as AppCore,
-            { management } as AppPlugins
-          );
+          if (elem) {
+            renderReact(
+              elem,
+              { i18n, chrome, notification } as AppCore,
+              { management } as AppPlugins
+            );
+          }
 
           // Angular Lifecycle
           const appRoute = $route.current;
@@ -67,7 +78,7 @@ export class Plugin {
               if (stopListeningForLocationChange) {
                 stopListeningForLocationChange();
               }
-              routing.unmountReactApp(elem);
+              unmountReactApp(elem);
             });
           });
         });

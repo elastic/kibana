@@ -12,7 +12,6 @@ import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import routes from 'ui/routes';
 
-import { unmountComponentAtNode } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
 export interface AppCore {
@@ -39,7 +38,6 @@ export interface AppPlugins {
 export interface Core extends AppCore {
   routing: {
     registerAngularRoute(path: string, config: object): void;
-    unmountReactApp(elem: Element | undefined | null): void;
     registerRouter(router: HashRouter): void;
     getRouter(): HashRouter | undefined;
   };
@@ -54,7 +52,7 @@ export interface Plugins extends AppPlugins {} // tslint:disable-line no-empty-i
 export function createShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
-  let httpClient: any;
+  let httpClient: ng.IHttpService;
 
   let reactRouter: HashRouter | undefined;
 
@@ -68,11 +66,6 @@ export function createShim(): { core: Core; plugins: Plugins } {
       routing: {
         registerAngularRoute: (path: string, config: object): void => {
           routes.when(path, config);
-        },
-        unmountReactApp: (elem: Element | undefined | null): void => {
-          if (elem) {
-            unmountComponentAtNode(elem);
-          }
         },
         registerRouter: (router: HashRouter): void => {
           reactRouter = router;
