@@ -31,7 +31,8 @@ export function initErrorsApi(server: Server) {
           sortField: Joi.string(),
           sortDirection: Joi.string()
         })
-      }
+      },
+      tags: ['access:']
     },
     handler: req => {
       const setup = setupRequest(req);

@@ -1200,7 +1200,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 graph: ['all', 'read'],
                 monitoring: ['all'],
                 ml: ['all'],
-                apm: ['all'],
+                apm: ['all', 'read'],
                 maps: ['all', 'read'],
                 canvas: ['all', 'read'],
                 infrastructure: ['all', 'read'],

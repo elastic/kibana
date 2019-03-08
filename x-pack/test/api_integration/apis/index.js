@@ -20,5 +20,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
+    loadTestFile(require.resolve('./apm'));
   });
 }
