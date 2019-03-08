@@ -14,7 +14,11 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const { importTest, createExpectResults, expectUnknownType } = importTestSuiteFactory(es, esArchiver, supertest);
+  const { importTest, createExpectResults, expectUnknownType } = importTestSuiteFactory(
+    es,
+    esArchiver,
+    supertest
+  );
 
   describe('_import', () => {
     importTest('in the current space (space_1)', {
