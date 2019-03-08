@@ -10,6 +10,7 @@ import { mapValues, pick } from 'lodash';
 import qs from 'querystring';
 import chrome from 'ui/chrome';
 import url from 'url';
+import { TIMEPICKER_DEFAULTS } from 'x-pack/plugins/apm/public/store/urlParams';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
@@ -53,6 +54,7 @@ function getSearchString(
   const isApmLink = pathname.includes('app/apm') || pathname === '';
   if (isApmLink) {
     const nextQuery = {
+      ...TIMEPICKER_DEFAULTS,
       ...pick(currentQuery, PERSISTENT_APM_PARAMS),
       ...query
     };
