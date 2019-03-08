@@ -57,6 +57,9 @@ export class SideBar extends React.PureComponent<Props> {
             onClick={this.props.onRepositoryFilterToggled(item.name)}
             quantity={item.value}
             isSelected={true}
+            buttonRef={() => {
+              /* nothing */
+            }}
           >
             {RepositoryUtils.repoNameFromUri(item.name)}
           </FacetItem>
@@ -67,6 +70,9 @@ export class SideBar extends React.PureComponent<Props> {
             key={`repostats${index}`}
             onClick={this.props.onRepositoryFilterToggled(item.name)}
             quantity={item.value}
+            buttonRef={() => {
+              /* nothing */
+            }}
           >
             {RepositoryUtils.repoNameFromUri(item.name)}
           </FacetItem>
@@ -83,6 +89,9 @@ export class SideBar extends React.PureComponent<Props> {
             quantity={item.value}
             isSelected={true}
             data-test-subj="codeSearchLanguageFilterItem"
+            buttonRef={() => {
+              /* nothing */
+            }}
           >
             {item.name}
           </FacetItem>
@@ -94,6 +103,9 @@ export class SideBar extends React.PureComponent<Props> {
             onClick={this.props.onLanguageFilterToggled(item.name)}
             quantity={item.value}
             data-test-subj="codeSearchLanguageFilterItem"
+            buttonRef={() => {
+              /* nothing */
+            }}
           >
             {item.name}
           </FacetItem>

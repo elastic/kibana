@@ -19,7 +19,7 @@
 
 import { scanCopy, untar, deleteAll } from '../lib';
 import { createWriteStream } from 'fs';
-import binaryInfo from '../../../../x-pack/plugins/code/tasks/nodegit_info';
+import { binaryInfo } from '../../../../x-pack/plugins/code/tasks/nodegit_info';
 import wreck from 'wreck';
 import mkdirp from 'mkdirp';
 import { dirname, join, basename } from 'path';
@@ -61,9 +61,8 @@ async function downloadAndExtractTarball(url, dest, log, retry) {
 async function patchNodeGit(config, log, build, platform) {
   const plat = platform.isWindows() ? 'win32' : platform.getName();
   const arch = platform.getNodeArch().split('-')[1];
-  const info = binaryInfo(plat, arch);
-  const downloadUrl = info.hosted_tarball;
-  const packageName = info.package_name;
+  const { downloadUrl, packageName } = binaryInfo(plat, arch);
+
   const downloadPath =   build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
   const extractDir = await downloadAndExtractTarball(downloadUrl, downloadPath, log, 3);
 

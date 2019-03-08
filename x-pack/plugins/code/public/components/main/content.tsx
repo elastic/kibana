@@ -156,7 +156,7 @@ class CodeContent extends React.PureComponent<Props> {
   };
 
   public renderButtons = () => {
-    let buttonId = null;
+    let buttonId: string | undefined;
     switch (this.props.match.params.pathType) {
       case PathTypes.blame:
         buttonId = ButtonOption.Blame;
