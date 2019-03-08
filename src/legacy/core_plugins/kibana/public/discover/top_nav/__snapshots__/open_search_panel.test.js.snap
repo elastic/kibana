@@ -10,39 +10,24 @@ exports[`render 1`] = `
   ownFocus={true}
   size="m"
 >
-  <EuiFlyoutBody>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
-      size="s"
+      size="m"
       textTransform="none"
     >
-      <h1>
+      <h2>
         <FormattedMessage
           defaultMessage="Open Search"
           id="kbn.discover.topNav.openSearchPanel.openSearchTitle"
           values={Object {}}
         />
-      </h1>
+      </h2>
     </EuiTitle>
-    <EuiSpacer
-      size="m"
-    />
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
     <SavedObjectFinder
-      callToActionButton={
-        <EuiButtonEmpty
-          color="primary"
-          href="#/management/kibana/objects?_a=(tab:search)"
-          iconSide="left"
-          iconType="gear"
-          onClick={[Function]}
-          type="button"
-        >
-          <FormattedMessage
-            defaultMessage="Manage searches"
-            id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
-            values={Object {}}
-          />
-        </EuiButtonEmpty>
-      }
       noItemsMessage={
         <FormattedMessage
           defaultMessage="No matching searches found."
@@ -55,12 +40,28 @@ exports[`render 1`] = `
         Array [
           Object {
             "getIconForSavedObject": [Function],
-            "name": "Saved Search",
+            "name": "Saved search",
             "type": "search",
           },
         ]
       }
     />
   </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiButton
+      color="primary"
+      fill={true}
+      href="#/management/kibana/objects?_a=(tab:search)"
+      iconSide="left"
+      onClick={[Function]}
+      type="button"
+    >
+      <FormattedMessage
+        defaultMessage="Manage searches"
+        id="kbn.discover.topNav.openSearchPanel.manageSearchesButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiFlyoutFooter>
 </EuiFlyout>
 `;
