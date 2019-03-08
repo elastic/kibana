@@ -471,6 +471,18 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                 ],
+                read: [
+                  'login:',
+                  `version:${version}`,
+                  'app:apm',
+                  'app:kibana',
+                  'ui:catalogue/apm',
+                  'ui:navLinks/apm',
+                  'saved_object:config/bulk_get',
+                  'saved_object:config/get',
+                  'saved_object:config/find',
+                  'ui:savedObjectsManagement/config/read',
+                ],
               },
               maps: {
                 all: [
