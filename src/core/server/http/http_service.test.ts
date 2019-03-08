@@ -17,21 +17,21 @@
  * under the License.
  */
 
+const mockHttpServer = jest.fn();
+
 jest.mock('./http_server', () => ({
-  HttpServer: jest.fn(),
+  HttpServer: mockHttpServer,
 }));
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpConfig, HttpService, Router } from '.';
-import { logger } from '../logging/__mocks__';
-import { HttpServer } from './http_server';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
-const mockHttpServer = HttpServer as jest.Mock;
+const logger = loggingServiceMock.create();
 
-beforeEach(() => {
-  logger.mockClear();
-  mockHttpServer.mockClear();
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
 test('creates and starts http server', async () => {
@@ -76,7 +76,7 @@ test('logs error if already started', async () => {
 
   await service.start();
 
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -122,7 +122,7 @@ test('register route handler', () => {
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
   expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('throws if registering route handler after http server is started', () => {
@@ -144,7 +144,7 @@ test('throws if registering route handler after http server is started', () => {
   service.registerRouter(router);
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('returns http server contract on start', async () => {

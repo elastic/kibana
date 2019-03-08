@@ -54,18 +54,20 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start({
-    i18n,
-    injectedMetadata,
-    fatalErrors,
-    notifications,
-    http,
-    basePath,
-    uiSettings,
-    chrome,
-  }: Deps) {
+  public start(deps: Deps) {
+    const {
+      i18n,
+      injectedMetadata,
+      fatalErrors,
+      notifications,
+      http,
+      basePath,
+      uiSettings,
+      chrome,
+    } = deps;
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
+    require('ui/new_platform').__newPlatformInit__(deps);
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
