@@ -40,6 +40,16 @@ describe('fromQuery', () => {
       'traceId=b%2Fc&rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
     );
   });
+
+  it('should handle undefined, boolean, and number values without throwing errors', () => {
+    expect(
+      fromQuery({
+        flyoutDetailTab: undefined,
+        refreshPaused: true,
+        refreshInterval: 5000
+      })
+    ).toEqual('flyoutDetailTab=&refreshPaused=true&refreshInterval=5000');
+  });
 });
 
 describe('getKibanaHref', () => {

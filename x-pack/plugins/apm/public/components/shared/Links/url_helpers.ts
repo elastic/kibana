@@ -23,7 +23,10 @@ export function fromQuery(query: APMQueryParams) {
     if (['rangeFrom', 'rangeTo'].includes(key!)) {
       return value;
     }
-    return qs.escape(value.toString());
+    if (value === undefined) {
+      return undefined;
+    }
+    return qs.escape(String(value));
   });
 
   return qs.stringify(encoded, '&', '=', {
