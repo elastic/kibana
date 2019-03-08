@@ -108,7 +108,7 @@ Machine Learning::
 * Sets default number of shards to 1 when creating a new index for File data visualizer {pull}31567[#31567]
 * Adds missing error handling to annotations request {pull}32384[#32384]
 Management::
-* Fixes bug where Rollup job search would display an empty prompt if no jobs matched the search. {pull}31642[#31642]
+* Fixes bug where rollup job search would display an empty prompt if no jobs matched the search {pull}31642[#31642]
 Monitoring::
 * Ensures that bulk uploader only starts once {pull}31307[#31307]
 Operations::
