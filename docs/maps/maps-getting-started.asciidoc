@@ -1,98 +1,183 @@
 [[maps-getting-started]]
 == Getting started with Maps
 
-Your best bet to getting started with Maps is to check out one
-(or all) of the sample data sets that ship with {kib}.
+*Maps* is your place for analyzing geospatial data. For example, a map might 
+show the origin, destination,
+and average time of flights or web log requests by country.
 
-. Click the {kib} logo in the upper left hand corner of your browser to navigate
-to the {kib} home page.
-. Click *Load a data set and a Kibana dashboard*.
-. Pick a data set. Let’s go with the **Sample web logs** for this example, but while you're
-here, feel free to click *Add* on all of the available sample data sets.
-Adding sample data sets will also load maps to go with the data set.
-. Click the Maps icon in the left hand navigation menu.
-. Find the *[Logs] Total Requests and Bytes* map and click on its name to open it.
-Explore the map.
-
-This tutorial will walk you through the steps that will re-create the *[Logs] Total Requests and Bytes* map.
+You work with *Maps* by adding layers. The data for a layer can come from 
+sources such as {es} documents, vector sources, tile map services, web map 
+services, and more. You can symbolize the data in different ways. 
+For example, you might show which airports have the longest flight 
+delays by using circles from small to big. Or, 
+you might show the amount of web log traffic by shading countries from 
+light to dark. 
 
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
-Lets start by creating a new map.
+Your best bet to getting started with *Maps* is to add one of 
+the sample data sets that ship with {kib}. Adding a sample data set also 
+loads a map to go with the data.
 
-. Click *Maps* in the bread crumbs to return to the map listing page.
-. Click the *Create map* button.
+. In the upper left corner of your browser, click the {kib} logo to navigate
+to the {kib} home page.
+. Click *Load a data set and a {kib} dashboard*.
+. Add the *Sample web logs* data set.
 
-Lets create the *Total Requests by Country* layer that displays world countries shaded by web log origination.
-Darker shades symbolize countries with more web log traffic while ligther shades symbolize countries with less web log traffic.
+. In the side navigation, click *Maps*. 
 
-. Click *Add layer* in the map legend.
-. Click *Vector shapes* data source.
-. Select *World Countries* EMS vector shape.
-. Click *Add layer* button.
-. Set *Layer name* to "Total Requests by Country".
+. In the maps list, click *[Logs] Total Requests and Bytes*.
++
+This loads the map for the web logs data set. Check out each of the three layers of the map. As you move your mouse over the map,
+note how the tooltips show property values. 
+
+You'll re-create the *[Logs] Total Requests and Bytes* map in this tutorial. 
+You'll learn how to:
+
+* Create a multi-layer map
+* Connect a layer to a data source
+* Use symbols, colors, and labels to style a layer
+* Create layers for {es} data
+
+
+=== Creating a new map
+
+The first thing to do is to create a new map.
+
+. In the application header, click *Maps* to return to the list of maps.
+. Click *Create map*.
++
+A new map is created using a base tile layer.
++
+[role="screenshot"]
+image::maps/images/gs_create_new_map.png[]
+
+
+=== Adding a choropleth layer
+
+Now that you have a map, you'll want to add layers to it.
+The first layer you'll add is a choropleth layer to shade world countries 
+by web log traffic. Darker shades symbolize countries with more web log traffic, 
+and lighter shades symbolize countries with less traffic.
+
+==== Add a vector layer from the Elastic Maps Service source
+
+. In the map legend, click *Add layer*.
+. Click the *Vector shapes* data source.
+. From the *Layer* dropdown menu, select *World Countries*.
+. Click the *Add layer* button.
+. Set *Layer name* to `Total Requests by Country`.
 . Set *Layer transparency* to 0.5.
-. Click the "plus" icon to the right of *Term Joins* label.
+
+===== Join the vector layer with the {es} index
+
+You must add the web log traffic property to the world countries so
+that the property is available for styling.
+You'll create a <<terms-join, terms join>> to link the vector source *World Countries* to 
+the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src. 
+
+. Click plus image:maps/images/gs_plus_icon.png[] to the right of *Term Joins* label.
 . Click *Join --select--*
-. Set *Left field* to *ISO 3166-1 alpha-2 code*
-. Set *Right source* to *kibana_sample_data_logs*
+. Set *Left field* to *ISO 3166-1 alpha-2 code*.
+. Set *Right source* to *kibana_sample_data_logs*.
 . Set *Right field* to *geo.src*.
-. Click the "link" button to the right of *Fill color*.
-. Select the grey color ramp in the color ramp select input.
-. Select *count of kibana_sample_data_logs:geo.src* in the field select input.
-. Click *Save & close* button.
 
+===== Set the vector style
 
-Lets create the *Actual Requests* layer that displays web logs documents as points.
-This layer is only visible when the map is zoomed in past zoom level 9.
+The final step is to set the vector fill color to shade 
+the countries by web log traffic.
 
-. Click *Add layer* in the map legend.
-. Click *Documents* data source.
+. Click image:maps/images/gs_link_icon.png[] to the right of *Fill color*.
+. Select the grey color ramp.
+. In the field select input, select *count of kibana_sample_data_logs:geo.src*.
+. Click *Save & close*.
++
+Your map now looks like this:
++
+[role="screenshot"]
+image::maps/images/gs_add_cloropeth_layer.png[]
+
+=== Adding layers for {es} data
+
+You'll add two layers for {es} data. The first layer displays documents, and the
+second layer displays aggregated data.
+The raw documents appear when you zoom in the map to show smaller regions.
+The aggregated data 
+appears when you zoom out the map to show larger amounts of the globe.
+
+==== Add a vector layer from the document source
+
+This layer displays web log documents as points.
+The layer is only visible when you zoom in the map past zoom level 9.
+
+. In the map legend, click *Add layer*.
+. Click the *Documents* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
-. Click *Add layer* button.
-. Set *Layer name* to "Actual Requests".
+. Click the *Add layer* button.
+. Set *Layer name* to `Actual Requests`.
 . Set *Min zoom* to 9 and *Max zoom* to 24.
 . Set *Layer transparency* to 1.
 . Set *Fill color* to *#2200ff*.
-. Click *Save & close* button.
+. Click *Save & close*.
 
-Lets create the *Total Requests and Bytes* layer that displays aggregated data.
-This layer is only visible when the map is zoomed out past zoom level 9.
-This layer complements the *Actual Requests* layer created above.
-Aggregated results will be dispayed when the map is zoomed out to show large amounts of the globe.
-Raw documents will be displayed when the map is zoomed in to show smaller regions.
+==== Add a vector layer from the grid aggregation source
 
-. Click *Add layer* in the map legend.
-. Click *Grid aggregation* data source.
+Aggregations group {es} documents into grids. You can calculate metrics 
+for each gridded cell. 
+
+You'll create a layer for aggregated data and make it visible only when the map 
+is zoomed out past zoom level 9. Darker colors will symbolize grids 
+with more web log traffic, and lighter colors will symbolize grids with less 
+traffic. Larger circles will symbolize grids with 
+more total bytes transferred, and smaller circles will symbolize 
+grids with less bytes transferred.
+
+[role="screenshot"]
+image::maps/images/grid_metrics_both.png[]
+
+===== Add the layer
+
+. In the map legend, click *Add layer*.
+. Click the *Grid aggregation* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
-. Click *Add layer* button.
-. Set *Layer name* to "Total Requests and Bytes".
+. Click the *Add layer* button.
+. Set *Layer name* to `Total Requests and Bytes`.
 . Set *Min zoom* to 0 and *Max zoom* to 9.
 . Set *Layer transparency* to 1.
-. Click the "plus" icon to the right of *Metrics* label.
+
+===== Configure the aggregation metrics
+
+. Click plus image:maps/images/gs_plus_icon.png[] to the right of *Metrics* label.
 . Select *Sum* in the aggregation select.
 . Select *bytes* in the field select.
-. Set *Symbol size* style *Min size* to 1.
-. Set *Symbol size* style *Max size* to 25.
-. Select *sum of bytes* in the *Symbol size* field select input.
+
+===== Set the vector style
+
+. In *Vector style*, change *Symbol size*:
+  .. Set *Min size* to 1.
+  .. Set *Max size* to 25.
+  .. In the field select, select *sum of bytes*.
 . Click *Save & close* button.
-
-Aggregations group elasticsearch documents into grids. Metrics are calculated for each gridded cell.
-Darker colors symbolize grids with more web log traffic while lighter colors symbolize grids with less web log traffic.
-Larger circles symbolize grids with larger total bytes transferred
-while smaller circles symbolize grids with smaller total bytes transferred.
-
++
+Your map now looks like this:
++
 [role="screenshot"]
-image::maps/images/grid_metrics_large.png[]
+image::maps/images/gs_add_es_layer.png[]
 
-[role="screenshot"]
-image::maps/images/grid_metrics_small.png[]
+=== Saving the map
+Now that your map is complete, you'll want to save it so others can use it.
 
-Finally, lets save the map so it can be used by other users.
+. In the application toolbar, click *Save*.
+. Enter `Tutorial web logs map` for the title.
+. Click *Confirm Save*.
 
-. Click *Save* button in the application toolbar.
-. Set the *Title* to "Tutorial web logs map".
-. Click *Confirm Save* button.
+You're now ready to start creating maps using your own data. You might find 
+these resources helpful:
+
+* <<heatmap-layer, Heat map layer>>
+* <<tile-layer, Tile layer>>
+* <<vector-layer, Vector layer>>
+
 
 
