@@ -21,7 +21,7 @@ import Hapi from 'hapi';
 import Joi from 'joi';
 import stringify from 'json-stable-stringify';
 import { SavedObjectsClient } from '../';
-import { getSortedObjectsForExport } from '../lib/export';
+import { getSortedObjectsForExport } from '../lib';
 import { Prerequisites } from './types';
 
 const ALLOWED_TYPES = ['index-pattern', 'search', 'visualization', 'dashboard'];

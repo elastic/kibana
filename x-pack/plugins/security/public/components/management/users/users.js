@@ -145,6 +145,9 @@ class UsersUI extends Component {
         }),
         sortable: true,
         truncateText: true,
+        render: email => {
+          return <div data-test-subj="userRowEmail">{email}</div>;
+        },
       },
       {
         field: 'roles',

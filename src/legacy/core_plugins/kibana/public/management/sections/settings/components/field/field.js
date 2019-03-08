@@ -399,7 +399,7 @@ class FieldUI extends PureComponent {
               editorProps={{
                 $blockScrolling: Infinity
               }}
-
+              showGutter={false}
             />
           </div>
         );

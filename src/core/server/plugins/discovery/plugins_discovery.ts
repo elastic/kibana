@@ -21,7 +21,7 @@ import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { CoreContext } from '../../../types';
+import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
 import { Plugin } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
