@@ -32,7 +32,6 @@ const nextTick = () => new Promise(res => process.nextTick(res));
 import {
   EuiEmptyPrompt,
   EuiListGroup,
-  // @ts-ignore
   EuiListGroupItem,
   EuiLoadingSpinner,
   EuiPagination,
@@ -136,16 +135,13 @@ describe('SavedObjectsFinder', () => {
       expect(list.childAt(1).key()).toBe('1');
     });
 
-    it('should list items descending after sort click', async () => {
+    it('should list items descending', async () => {
       objectsClientStub.returns(Promise.resolve({ savedObjects: [doc, doc2] }));
 
       const wrapper = shallow(<SavedObjectFinder savedObjectMetaData={searchMetaData} />);
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderSortButton"]')
-        .first()
-        .simulate('click');
+      wrapper.setState({ sortDirection: 'desc' });
       const list = wrapper.find(EuiListGroup);
       expect(list.childAt(0).key()).toBe('1');
       expect(list.childAt(1).key()).toBe('2');
@@ -169,10 +165,6 @@ describe('SavedObjectsFinder', () => {
     );
     wrapper.instance().componentDidMount!();
     await nextTick();
-    wrapper
-      .find('[data-test-subj="savedObjectFinderSortButton"]')
-      .first()
-      .simulate('click');
     const list = wrapper.find(EuiListGroup);
     expect(list.childAt(0).key()).toBe('2');
     expect(list.children().length).toBe(1);
@@ -309,18 +301,12 @@ describe('SavedObjectsFinder', () => {
       );
       wrapper.instance().componentDidMount!();
       await nextTick();
-      wrapper
-        .find('[data-test-subj="savedObjectFinderFilter-vis"]')
-        .first()
-        .simulate('click');
+      wrapper.setState({ filteredTypes: ['vis'] });
       const list = wrapper.find(EuiListGroup);
       expect(list.childAt(0).key()).toBe('3');
       expect(list.children().length).toBe(1);
 
-      wrapper
-        .find('[data-test-subj="savedObjectFinderFilter-search"]')
-        .first()
-        .simulate('click');
+      wrapper.setState({ filteredTypes: ['vis', 'search'] });
       expect(wrapper.find(EuiListGroup).children().length).toBe(3);
     });
   });
@@ -438,7 +424,7 @@ describe('SavedObjectsFinder', () => {
   });
 
   describe('loading state', () => {
-    it('should display a spinner during loading', () => {
+    it('should display a spinner during initial loading', () => {
       const wrapper = shallow(<SavedObjectFinder savedObjectMetaData={searchMetaData} />);
 
       expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(true);
@@ -463,7 +449,7 @@ describe('SavedObjectsFinder', () => {
       expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
     });
 
-    it('should show the spinner again on search input', async () => {
+    it('should not show the spinner if there are already items', async () => {
       objectsClientStub.returns(Promise.resolve({ savedObjects: [doc] }));
 
       const wrapper = shallow(<SavedObjectFinder savedObjectMetaData={searchMetaData} />);
@@ -474,7 +460,10 @@ describe('SavedObjectsFinder', () => {
         .first()
         .simulate('change', { target: { value: 'abc' } });
 
-      expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(true);
+      wrapper.update();
+      expect(wrapper).toMatchSnapshot();
+
+      expect(wrapper.containsMatchingElement(<EuiLoadingSpinner />)).toBe(false);
     });
   });
 });
