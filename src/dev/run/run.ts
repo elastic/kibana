@@ -17,9 +17,33 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
+import { isFailError } from './fail';
+import { Flags, getFlags, getHelp } from './flags';
 
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+export async function run(body: (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void) {
+  const flags = getFlags(process.argv.slice(2));
+
+  if (flags.help) {
+    process.stderr.write(getHelp());
+    process.exit(1);
+  }
+
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(flags),
+    writeTo: process.stdout,
+  });
+
+  try {
+    await body({ log, flags });
+  } catch (error) {
+    if (isFailError(error)) {
+      log.error(error.message);
+      process.exit(error.exitCode);
+    } else {
+      log.error('UNHANDLED ERROR');
+      log.error(error);
+      process.exit(1);
+    }
+  }
+}

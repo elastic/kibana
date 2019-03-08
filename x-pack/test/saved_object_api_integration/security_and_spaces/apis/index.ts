@@ -26,6 +26,8 @@ export default function({ getService, loadTestFile }: TestInvoker) {
     loadTestFile(require.resolve('./export'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./import'));
+    loadTestFile(require.resolve('./resolve_import_conflicts'));
     loadTestFile(require.resolve('./update'));
   });
 }

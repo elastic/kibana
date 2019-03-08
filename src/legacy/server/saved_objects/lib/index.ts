@@ -17,33 +17,5 @@
  * under the License.
  */
 
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
-import { isFailError } from './fail';
-import { getFlags, getHelp } from './flags';
-
-export async function run(body) {
-  const flags = getFlags(process.argv.slice(2));
-
-  if (flags.help) {
-    process.stderr.write(getHelp());
-    process.exit(1);
-  }
-
-  const log = new ToolingLog({
-    level: pickLevelFromFlags(flags),
-    writeTo: process.stdout
-  });
-
-  try {
-    await body({ log, flags });
-  } catch (error) {
-    if (isFailError(error)) {
-      log.error(error.message);
-      process.exit(error.exitCode);
-    } else {
-      log.error('UNHANDLED ERROR');
-      log.error(error);
-      process.exit(1);
-    }
-  }
-}
+export { importSavedObjects, resolveImportConflicts } from './import';
+export { getSortedObjectsForExport } from './export';
