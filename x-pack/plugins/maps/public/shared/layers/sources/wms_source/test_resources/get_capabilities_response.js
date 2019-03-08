@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export getCapabilitesResponse = `
+export const getCapabilitesResponse = `
   <?xml version="1.0" encoding="UTF-8"?>
   <WMT_MS_Capabilities version="1.1.1">
     <Service>

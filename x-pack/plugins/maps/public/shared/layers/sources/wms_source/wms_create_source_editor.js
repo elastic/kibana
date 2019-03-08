@@ -58,9 +58,9 @@ export class WMSCreateSourceEditor extends Component {
 
     const wmsClient = new WmsClient({ serviceUrl: this.state.serviceUrl });
 
-    let layers;
+    let capabilities;
     try {
-      layers = await wmsClient.getLayers();
+      capabilities = await wmsClient.getCapabilities();
     } catch (error) {
       if (this._isMounted) {
         this.setState({

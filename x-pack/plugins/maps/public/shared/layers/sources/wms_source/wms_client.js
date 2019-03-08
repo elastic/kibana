@@ -11,11 +11,15 @@ import { parseString } from 'xml2js';
 export class WmsClient {
   constructor({ serviceUrl, version = '1.1.1' }) {
     this.serviceUrl = serviceUrl;
-    this.version = version
+    this.version = version;
   }
 
-  async _getCapabilities() {
-    const resp = await fetch(`${this.serviceUrl}?version=${this.version}&request=GetCapabilities&service=WMS`);
+  async _fetch(url) {
+    return window.fetch(url);
+  }
+
+  async _fetchCapabilities() {
+    const resp = await this._fetch(`${this.serviceUrl}?version=${this.version}&request=GetCapabilities&service=WMS`);
     if (resp.status >= 400) {
       throw new Error(`Unable to access ${this.state.serviceUrl}`);
     }
@@ -33,8 +37,8 @@ export class WmsClient {
     return await parsePromise;
   }
 
-  async getLayers() {
-    const capabilities = await this._getCapabilities();
+  async getCapabilities() {
+    const capabilities = await this._fetchCapabilities();
     console.log('capabilities', capabilities);
 
     return [];
