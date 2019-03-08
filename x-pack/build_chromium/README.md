@@ -45,7 +45,7 @@ The more cores the better, as the build makes effective use of each. For Linux, 
 
 ## Initializing each VM / environment
 
-You only need to initialize each environment once.
+You only need to initialize each environment once. NOTE: on Mac OS you'll need to install XCode and accept the license agreement.
 
 Create the build folder:
 
@@ -79,7 +79,7 @@ Find the Chromium revision (modify the following command to be wherever you have
 
 - `cat ~/dev/elastic/kibana/x-pack/node_modules/puppeteer-core/package.json | grep chromium_revision`
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
-  - (For example: https://crrev.com/575458)
+  - (For example: https://crrev.com/637110)
 - Grab the SHA from there
   - (For example, rev 575458 has sha 4747cc23ae334a57a35ed3c8e6adcdbc8a50d479)
 
