@@ -3371,7 +3371,6 @@
     "xpack.apm.propertiesTable.tabs.serviceLabel": "服务",
     "xpack.apm.propertiesTable.tabs.timelineLabel": "时间线",
     "xpack.apm.propertiesTable.tabs.userLabel": "用户",
-    "xpack.apm.propertiesTable.tagsTab.agentFeatureText": "您可以配置代理以添加有关事务上的可筛选标记。",
     "xpack.apm.propertiesTable.userTab.agentFeatureText": "您可以配置代理以添加有关用户的上下文信息。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription": "当前有 {serviceName}（{transactionType}）的作业正在运行。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText": "查看现有作业",
