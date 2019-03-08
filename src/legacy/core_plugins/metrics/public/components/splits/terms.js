@@ -142,7 +142,7 @@ const SplitByTermsUi = props => {
               options={dirOptions}
               selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}
               onChange={handleSelectChange('terms_direction')}
-              singleSelection={true}
+              singleSelection={{ asPlainText: true }}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -40,7 +40,7 @@ const mockPersistedLog = {
   get: jest.fn(() => ['response:200']),
 };
 
-const mockPersistedLogFactory = jest.fn(() => {
+const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedLog>, any>(() => {
   return mockPersistedLog;
 });
 

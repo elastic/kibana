@@ -84,7 +84,6 @@ fi
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
-hash -r
 
 ###
 ### downloading yarn
@@ -102,15 +101,27 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-hash -r
 
-# ###
-# ### use the chromedriver cache if it exists
-# ###
-# if [ -x "$dir/.chromedriver/master/chromedriver" ]; then
-#   export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver"
-#   export CHROMEDRIVER_SKIP_DOWNLOAD=true
-# fi
+###
+### use the chromedriver cache if it exists
+###
+if [ -d "$dir/.chromedriver/master" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
+  cachedPkgVersion="$(cat "$dir/.chromedriver/master/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver.zip"
+    export CHROMEDRIVER_SKIP_DOWNLOAD=true
+    echo " -- Using chromedriver cache at $CHROMEDRIVER_FILEPATH"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING CHROMEDRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  CHROMEDRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
 
 ###
 ### install dependencies

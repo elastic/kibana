@@ -14,9 +14,8 @@ import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-// @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
-import { Distribution } from './Distribution';
+import { FilterBar } from '../../shared/FilterBar';
+import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
@@ -34,7 +33,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <KueryBar />
+      <FilterBar />
 
       <EuiSpacer size="s" />
 
@@ -54,7 +53,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       <TransactionDistributionRequest
         urlParams={urlParams}
         render={({ data }) => (
-          <Distribution
+          <TransactionDistribution
             distribution={data}
             urlParams={urlParams}
             location={location}

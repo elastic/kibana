@@ -21,6 +21,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           aria-required={true}
@@ -48,6 +49,7 @@ exports[`BasicLoginForm renders as expected 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           aria-required={true}

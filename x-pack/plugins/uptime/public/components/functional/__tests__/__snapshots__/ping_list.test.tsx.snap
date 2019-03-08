@@ -20,14 +20,12 @@ exports[`PingList component renders sorted list without errors 1`] = `
         component="div"
         grow={false}
       >
-        <EuiFlexGroup
-          alignItems="center"
-          component="div"
-          direction="row"
-          gutterSize="s"
-          justifyContent="flexStart"
-          responsive={false}
-          wrap={false}
+        <EuiFormRow
+          describedByIds={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          label="Status"
+          labelType="label"
         >
           <EuiFlexItem
             component="div"

@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { KibanaLink } from '../KibanaLink';
-import { QueryParamsDecoded } from '../url_helpers';
+import { KibanaRisonLink } from '../KibanaRisonLink';
+import { RisonAPMQueryParams } from '../rison_helpers';
 import { QueryWithIndexPattern } from './QueryWithIndexPattern';
 
 interface Props {
-  query: QueryParamsDecoded;
+  query: RisonAPMQueryParams;
   children: React.ReactNode;
 }
 
@@ -18,7 +18,7 @@ export function DiscoverLink({ query, ...rest }: Props) {
   return (
     <QueryWithIndexPattern query={query}>
       {queryWithIndexPattern => (
-        <KibanaLink
+        <KibanaRisonLink
           pathname={'/app/kibana'}
           hash={'/discover'}
           query={queryWithIndexPattern}

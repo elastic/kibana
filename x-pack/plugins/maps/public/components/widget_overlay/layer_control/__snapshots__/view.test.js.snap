@@ -30,7 +30,11 @@ exports[`LayerControl is rendered 1`] = `
           textTransform="none"
         >
           <h2>
-            Layers
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -40,13 +44,18 @@ exports[`LayerControl is rendered 1`] = `
       >
         <EuiButtonEmpty
           color="primary"
+          data-test-subj="addLayerButton"
           flush="right"
           iconSide="left"
           onClick={[Function]}
           size="xs"
           type="button"
         >
-          Add layer
+          <FormattedMessage
+            defaultMessage="Add layer"
+            id="xpack.maps.layerControl.addLayerButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -91,7 +100,11 @@ exports[`LayerControl props isReadOnly 1`] = `
           textTransform="none"
         >
           <h2>
-            Layers
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>

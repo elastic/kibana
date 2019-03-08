@@ -45,6 +45,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -69,6 +70,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -91,6 +93,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -123,6 +126,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -387,6 +391,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -411,6 +416,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -433,6 +439,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -465,6 +472,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -729,6 +737,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -753,6 +762,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -775,6 +785,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -807,6 +818,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1067,6 +1079,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1089,6 +1102,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1121,6 +1135,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1399,6 +1414,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1423,6 +1439,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1445,6 +1462,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1477,6 +1495,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}
@@ -1737,6 +1756,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiFieldText
           compressed={false}
@@ -1759,6 +1779,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <div
           data-test-subj="acePipeline"
@@ -1791,6 +1812,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
 Default value: Number of the host’s CPU cores"
           />
         }
+        labelType="label"
       >
         <EuiFieldNumber
           compressed={false}

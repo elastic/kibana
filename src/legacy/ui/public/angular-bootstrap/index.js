@@ -5,6 +5,14 @@
  * TODO: Write custom components that address our needs to directly and deprecate these Bootstrap components.
  */
 
+import 'angular';
+
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana', [
+  'ui.bootstrap',
+]);
+
 /*
  * angular-ui-bootstrap
  * http://angular-ui.github.io/bootstrap/

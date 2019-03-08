@@ -24,6 +24,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 
 interface PingListProps {
   loading: boolean;
@@ -77,16 +78,7 @@ export const PingList = ({
       name: i18n.translate('xpack.uptime.pingList.durationMsColumnLabel', {
         defaultMessage: 'Duration',
       }),
-      dataType: 'number',
-      render: (duration: number) => (
-        <span>
-          <FormattedMessage
-            id="xpack.uptime.pingList.durationMsColumnLabel"
-            defaultMessage="{duration} ms"
-            values={{ duration: duration / 1000 }}
-          />
-        </span>
-      ),
+      render: (duration: number) => microsToMillis(duration),
     },
     {
       field: 'error.type',

@@ -18,6 +18,7 @@
  */
 
 import angular from 'angular';
+import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
 import * as columnActions from 'ui/doc_table/actions/columns';
 import {
@@ -86,7 +87,7 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
-      indexPattern: savedSearch.searchSource.getField('index'),
+      indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
     this.savedSearch = savedSearch;

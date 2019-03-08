@@ -30,7 +30,7 @@ jest.mock('path', () => ({
 }));
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../../package.json', () => mockPackage);
 
 import { Env } from '.';
 import { getEnvOptions } from './__mocks__/env';

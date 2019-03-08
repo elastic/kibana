@@ -132,7 +132,7 @@ FieldParamType.prototype.write = function (aggConfig, output) {
 
   if (field.scripted) {
     output.params.script = {
-      inline: field.script,
+      source: field.script,
       lang: field.lang,
     };
   } else {

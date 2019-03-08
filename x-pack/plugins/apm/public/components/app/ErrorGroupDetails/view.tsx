@@ -23,10 +23,9 @@ import {
   units
 } from '../../../style/variables';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { DetailView } from './DetailView';
-// @ts-ignore
-import Distribution from './Distribution';
+import { ErrorDistribution } from './Distribution';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -67,7 +66,7 @@ interface Props {
   location: Location;
 }
 
-export function ErrorGroupDetails({ urlParams, location }: Props) {
+export function ErrorGroupDetailsView({ urlParams, location }: Props) {
   return (
     <ErrorGroupDetailsRequest
       urlParams={urlParams}
@@ -109,7 +108,7 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
 
             <EuiSpacer size="m" />
 
-            <KueryBar />
+            <FilterBar />
 
             <EuiSpacer size="s" />
 
@@ -152,7 +151,17 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
             )}
             <ErrorDistributionRequest
               urlParams={urlParams}
-              render={({ data }) => <Distribution distribution={data} />}
+              render={({ data }) => (
+                <ErrorDistribution
+                  distribution={data}
+                  title={i18n.translate(
+                    'xpack.apm.errorGroupDetails.occurrencesChartLabel',
+                    {
+                      defaultMessage: 'Occurrences'
+                    }
+                  )}
+                />
+              )}
             />
             {showDetails && (
               <DetailView

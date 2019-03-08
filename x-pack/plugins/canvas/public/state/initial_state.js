@@ -14,6 +14,12 @@ export const getInitialState = path => {
     transient: {
       isFirstLoad: true,
       canUserWrite: true,
+      elementStats: {
+        total: 0,
+        ready: 0,
+        pending: 0,
+        error: 0,
+      },
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},
