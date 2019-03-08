@@ -23,7 +23,6 @@ import { readFileSync } from 'fs';
 
 import del from 'del';
 import execa from 'execa';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 import xml2js from 'xml2js';
 
 const MINUTE = 1000 * 60;
@@ -31,12 +30,6 @@ const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
 const XML_PATH = resolve(TARGET_DIR, 'junit/TEST-Jest Tests.xml');
-
-expect.addSnapshotSerializer(
-  createAbsolutePathSerializer(ROOT_DIR, {
-    global: true,
-  })
-);
 
 afterAll(async () => {
   await del(TARGET_DIR);
