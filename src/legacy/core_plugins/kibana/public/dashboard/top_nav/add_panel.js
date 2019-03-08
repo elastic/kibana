@@ -26,9 +26,10 @@ import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_find
 
 import {
   EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
   EuiFlyoutBody,
-  EuiButtonEmpty,
-  EuiSpacer,
+  EuiButton,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -57,41 +58,25 @@ export class DashboardAddPanel extends React.Component {
   };
 
   render() {
-    const addNewVisBtn = (
-      <EuiButtonEmpty
-        iconSide="left"
-        iconType="plusInCircle"
-        onClick={this.props.addNewVis}
-        data-test-subj="addNewSavedObjectLink"
-      >
-        <FormattedMessage
-          id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
-          defaultMessage="Create new visualization"
-        />
-      </EuiButtonEmpty>
-    );
-
     return (
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
-        <EuiFlyoutBody>
-          <EuiTitle size="s">
-            <h1>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
               <FormattedMessage
                 id="kbn.dashboard.topNav.addPanelsTitle"
                 defaultMessage="Add Panels"
               />
-            </h1>
+            </h2>
           </EuiTitle>
-
-          <EuiSpacer size="s" />
-
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
           <SavedObjectFinder
             onChoose={this.onAddPanel}
             savedObjectMetaData={this.props.embeddableFactories
               .filter(embeddableFactory => Boolean(embeddableFactory.savedObjectMetaData))
               .map(({ savedObjectMetaData }) => savedObjectMetaData)}
             showFilter={true}
-            callToActionButton={addNewVisBtn}
             noItemsMessage={i18n.translate(
               'kbn.dashboard.topNav.addPanel.noMatchingObjectsMessage',
               {
@@ -100,6 +85,18 @@ export class DashboardAddPanel extends React.Component {
             )}
           />
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiButton
+            fill
+            onClick={this.props.addNewVis}
+            data-test-subj="addNewSavedObjectLink"
+          >
+            <FormattedMessage
+              id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+              defaultMessage="Create new visualization"
+            />
+          </EuiButton>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

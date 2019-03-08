@@ -462,34 +462,35 @@ class SavedObjectFinder extends React.Component<SavedObjectFinderProps, SavedObj
         ) : (
           <EuiEmptyPrompt body={this.props.noItemsMessage} />
         )}
-        {this.props.fixedPageSize ? (
-          <EuiPagination
-            activePage={this.state.page}
-            pageCount={this.getPageCount()}
-            onPageClick={page => {
-              this.setState({
-                page,
-              });
-            }}
-          />
-        ) : (
-          <EuiTablePagination
-            activePage={this.state.page}
-            pageCount={this.getPageCount()}
-            onChangePage={page => {
-              this.setState({
-                page,
-              });
-            }}
-            onChangeItemsPerPage={perPage => {
-              this.setState({
-                perPage,
-              });
-            }}
-            itemsPerPage={this.state.perPage}
-            itemsPerPageOptions={[5, 10, 15, 25]}
-          />
-        )}
+        {this.getPageCount() > 1 &&
+          (this.props.fixedPageSize ? (
+            <EuiPagination
+              activePage={this.state.page}
+              pageCount={this.getPageCount()}
+              onPageClick={page => {
+                this.setState({
+                  page,
+                });
+              }}
+            />
+          ) : (
+            <EuiTablePagination
+              activePage={this.state.page}
+              pageCount={this.getPageCount()}
+              onChangePage={page => {
+                this.setState({
+                  page,
+                });
+              }}
+              onChangeItemsPerPage={perPage => {
+                this.setState({
+                  perPage,
+                });
+              }}
+              itemsPerPage={this.state.perPage}
+              itemsPerPageOptions={[5, 10, 15, 25]}
+            />
+          ))}
       </>
     );
   }

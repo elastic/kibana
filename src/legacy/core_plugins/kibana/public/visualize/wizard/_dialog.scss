@@ -7,7 +7,7 @@
 }
 
 .visNewVisSearchDialog {
-  min-width: $euiSizeL * 30;
+  width: $euiSizeL * 30;
   min-height: $euiSizeL * 20;
 }
 
@@ -91,10 +91,6 @@
 
   .visNewVisDialog__description {
     display: none;
-  }
-
-  .visNewVisSearchDialog {
-    min-width: 0;
   }
 }
 
