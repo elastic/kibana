@@ -3,18 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from 'hapi';
 import { Legacy } from 'kibana';
+import { CallWithRequest } from './call_with_request_factory';
 
-type CallWithRequest = (request: any, action: string, params: any) => any;
-type RouterRoute = (
-  path: string,
-  handler: (
-    req: Request,
-    callWithRequest: CallWithRequest,
-    responseToolkit: ResponseToolkit
-  ) => Promise<ResponseObject>
-) => Router;
+export type RouterRouteHandler = (
+  req: Request,
+  callWithRequest: CallWithRequest,
+  responseToolkit: ResponseToolkit
+) => Promise<any>;
+
+export type RouterRoute = (path: string, handler: RouterRouteHandler) => Router;
 
 export interface Router {
   get: RouterRoute;

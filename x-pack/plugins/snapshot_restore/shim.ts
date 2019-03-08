@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { createRouter, Router } from '../../server/lib/create_router';
 import { registerLicenseChecker } from '../../server/lib/register_license_checker';
@@ -11,6 +12,9 @@ import { registerLicenseChecker } from '../../server/lib/register_license_checke
 export interface Core {
   http: {
     createRouter(basePath: string): Router;
+  };
+  i18n: {
+    [i18nPackage: string]: any;
   };
 }
 
@@ -29,6 +33,7 @@ export function createShim(
       http: {
         createRouter: (basePath: string) => createRouter(server, pluginId, basePath),
       },
+      i18n,
     },
     plugins: {
       license: {

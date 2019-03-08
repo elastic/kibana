@@ -22,6 +22,7 @@ export function snapshotRestore(kibana: any) {
     },
     init(server: Legacy.Server) {
       const { core, plugins } = createShim(server, PLUGIN.ID);
+      const { i18n } = core;
       const snapshotRestorePlugin = new SnapshotRestorePlugin();
 
       // Start plugin
@@ -31,7 +32,7 @@ export function snapshotRestore(kibana: any) {
       plugins.license.registerLicenseChecker(
         server,
         PLUGIN.ID,
-        PLUGIN.NAME,
+        PLUGIN.getI18nName(i18n.translate),
         PLUGIN.MINIMUM_LICENSE_REQUIRED
       );
     },

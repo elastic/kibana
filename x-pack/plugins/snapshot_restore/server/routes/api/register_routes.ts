@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getAll, getOne } from './repositories';
+import { Router } from '../../../../../server/lib/create_router';
+import { registerRepositoriesRoutes } from './repositories';
 
-export const registerRoutes = (router: any): void => {
-  router[getAll.method](getAll.path, getAll.handler);
-  router[getOne.method](getOne.path, getOne.handler);
+export const registerRoutes = (router: Router): void => {
+  registerRepositoriesRoutes(router);
 };
