@@ -40,8 +40,9 @@ declare module 'react-sizeme' {
 
   export class SizeMe extends Component<SizeMeOptions> {}
 
-  // function sizeMeReturn(Component) : Component
-  // export function sizeMe(options?: SizeMeOptions): (component: ComponentType<P>) : ComponentType<Omit<P, 'size'>>
+  export function sizeMe(
+    options?: SizeMeOptions
+  ): <P extends SizeMeProps>(component: ComponentType<P>) => ComponentType<Omit<P, 'size'>>;
 
   export const withSize: (
     options?: SizeMeOptions

@@ -21,7 +21,7 @@ import { injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
-import ReactGridLayout from 'react-grid-layout';
+import ReactGridLayout, { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -36,6 +36,7 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
 
+// import { PanelsMap } from '../selectors/types';
 import { GridData } from '../types';
 
 let lastValidGridSize = 0;
@@ -65,7 +66,7 @@ function ResponsiveGrid({
 }: {
   size: { width: number };
   isViewMode: boolean;
-  layout: any; // todo
+  layout: Layout[];
   onLayoutChange: () => void;
   children: JSX.Element[];
   maximizedPanelId: string;
@@ -102,7 +103,7 @@ function ResponsiveGrid({
       draggableHandle={isViewMode ? '.doesnt-exist' : '.dshPanel__dragger'}
       layout={layout}
       onLayoutChange={onLayoutChange}
-      onResize={({}, oldResizeItem, l, placeholder, event) => ensureWindowScrollsToBottom(event)}
+      onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
     >
       {children}
     </ReactGridLayout>
@@ -117,19 +118,26 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 import { PanelData } from '../types';
 
 interface Props {
-  panels: PanelData[];
+  // panels: PanelData[];
+  panels: PanelsMap;
   getEmbeddableFactory: (panelType: string) => {};
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (updatedPanels: PanelData[]) => void;
+  // todo hash of panels?
+  onPanelsUpdated: (updatedPanels: PanelsMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
   intl: any; // todo
 }
 
 interface State {
-  focusedPanelIndex: number | undefined; // might be string
+  focusedPanelIndex: string | undefined; // might be string
   isLayoutInvalid: boolean;
   layout: GridData[] | undefined;
+}
+
+// todo this can't stay named this way. Need to disambiguate PanelsMap types
+interface PanelsMap {
+  readonly [panelId: string]: PanelData;
 }
 
 class DashboardGridUi extends React.Component<Props, State> {
@@ -143,7 +151,8 @@ class DashboardGridUi extends React.Component<Props, State> {
   // https://github.com/elastic/kibana/issues/14802 for more info.
   // This is probably a better implementation anyway so the handlers are cached.
   // @type {Object.<string, EmbeddableFactory>}
-  private embeddableFactoryMap = {};
+  // todo
+  private embeddableFactoryMap: { [s: string]: any } = {};
 
   constructor(props: Props) {
     super(props);
@@ -189,7 +198,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     });
   }
 
-  public createEmbeddableFactoriesMap(panels: PanelData[]) {
+  public createEmbeddableFactoriesMap(panels: PanelsMap) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -205,24 +214,25 @@ class DashboardGridUi extends React.Component<Props, State> {
     this.createEmbeddableFactoriesMap(nextProps.panels);
   }
 
-  public onLayoutChange = layout => {
+  public onLayoutChange = (layout: Layout[]) => {
     const { onPanelsUpdated, panels } = this.props;
     const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
+      // todo
       updatedPanelsAcc[panelLayout.i] = {
         ...panels[panelLayout.i],
         panelIndex: panelLayout.i,
         gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
       };
       return updatedPanelsAcc;
-    }, []);
+    }, {});
     onPanelsUpdated(updatedPanels);
   };
 
-  public onPanelFocused = (focusedPanelIndex: number): void => {
+  public onPanelFocused = (focusedPanelIndex: string): void => {
     this.setState({ focusedPanelIndex });
   };
 
-  public onPanelBlurred = (blurredPanelIndex: number): void => {
+  public onPanelBlurred = (blurredPanelIndex: string): void => {
     if (this.state.focusedPanelIndex === blurredPanelIndex) {
       this.setState({ focusedPanelIndex: undefined });
     }
@@ -233,7 +243,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(key => panels[key]);
+    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key]);
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
