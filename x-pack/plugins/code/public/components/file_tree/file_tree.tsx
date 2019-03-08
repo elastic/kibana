@@ -40,9 +40,11 @@ export class CodeFileTree extends React.Component<Props> {
   public componentDidUpdate(prevProps: Readonly<Props>): void {
     const { openedPaths, match, treeLoading } = this.props;
     const path = match.params.path;
-    if (prevProps.match.params.path !== path || prevProps.treeLoading !== treeLoading) {
-      if (!openedPaths.includes(path)) {
-        this.props.openTreePath(path);
+    if (path) {
+      if (prevProps.match.params.path !== path || prevProps.treeLoading !== treeLoading) {
+        if (!openedPaths.includes(path)) {
+          this.props.openTreePath(path);
+        }
       }
     }
   }
