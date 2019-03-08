@@ -34,6 +34,7 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
       const details = $tooltipScope.details = [];
 
+      const currentSeries = data.series.find(serie => serie.rawId === datum.seriesId);
       const addDetail = (label, value) => details.push({ label, value });
 
       if (datum.extraMetrics) {
@@ -47,10 +48,10 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
       }
       if (datum.y) {
         const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-        addDetail(data.yAxisLabel, data.yAxisFormatter(value));
+        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
       }
       if (datum.z) {
-        addDetail(data.zAxisLabel, data.zAxisFormatter(datum.z));
+        addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
       }
       if (datum.series && datum.parent) {
         const dimension = datum.parent;
