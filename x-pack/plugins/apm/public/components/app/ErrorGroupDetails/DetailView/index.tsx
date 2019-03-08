@@ -6,6 +6,7 @@
 
 import {
   EuiButtonEmpty,
+  EuiPanel,
   EuiSpacer,
   EuiTab,
   EuiTabs,
@@ -45,18 +46,10 @@ const PaddedContainer = styled.div`
   padding: ${px(units.plus)} ${px(units.plus)} 0;
 `;
 
-const Container = styled.div`
-  position: relative;
-  border: 1px solid ${theme.euiColorLightShade};
-  border-radius: ${borderRadius};
-  margin-top: ${px(units.plus)};
-`;
-
 const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
   margin-bottom: ${px(unit)};
 `;
 
@@ -80,7 +73,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
 
   return (
-    <Container>
+    <EuiPanel>
       <HeaderContainer>
         <EuiTitle size="s">
           <h3>
@@ -106,9 +99,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         </DiscoverErrorLink>
       </HeaderContainer>
 
-      <PaddedContainer>
-        <StickyErrorProperties error={error} transaction={transaction} />
-      </PaddedContainer>
+      <StickyErrorProperties error={error} transaction={transaction} />
 
       <EuiSpacer />
 
@@ -133,11 +124,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
           );
         })}
       </EuiTabs>
-
-      <PaddedContainer>
-        <TabContent error={error} currentTab={currentTab} />
-      </PaddedContainer>
-    </Container>
+      <EuiSpacer />
+      <TabContent error={error} currentTab={currentTab} />
+    </EuiPanel>
   );
 }
 
