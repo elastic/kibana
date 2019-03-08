@@ -60,5 +60,7 @@
  * option TypeScript will not emit declarations for this code.
  */
 
-export * from './core/server';
-export * from './core/public';
+import * as Public from './core/public';
+import * as Server from './core/server';
+
+export { Server, Public };
