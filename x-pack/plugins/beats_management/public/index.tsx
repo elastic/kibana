@@ -33,7 +33,6 @@ async function startApp(libs: FrontendLibs) {
               />
               <AppRouter libs={libs} />
             </Background>
-            )}
           </BreadcrumbProvider>
         </HashRouter>
       </I18nContext>

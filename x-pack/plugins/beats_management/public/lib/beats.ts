@@ -61,4 +61,12 @@ export class BeatsLib {
   ): Promise<ReturnTypeBulkAction['results']> => {
     return await this.adapter.assignTagsToBeats(assignments);
   };
+
+  public createBeatTagAssignments(beats: CMBeat[] | string[], tagId: string): BeatsTagAssignment[] {
+    if (typeof beats[0] === 'string') {
+      return (beats as string[]).map(id => ({ beatId: id, tag: tagId }));
+    } else {
+      return (beats as CMBeat[]).map(({ id }) => ({ beatId: id, tag: tagId }));
+    }
+  }
 }

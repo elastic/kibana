@@ -74,6 +74,10 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
       this.props.urlState.beatsSize || 25
     );
 
+    if (beats.total === 0) {
+      return this.props.goTo(`/walkthrough/initial`);
+    }
+
     const tags = await this.props.libs.tags.getTagsWithIds(
       flatten(beats.list.map(beat => beat.tags))
     );
@@ -209,18 +213,56 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 tags: this.state.assignmentOptions,
               }}
               actionHandler={async (action: AssignmentActionType, payload: any) => {
+                const selectedBeats = this.getSelectedBeats();
+                if (!selectedBeats.length) {
+                  return false;
+                }
+
                 switch (action) {
                   case AssignmentActionType.Assign:
-                    const status = await this.props.containers.beats.toggleTagAssignment(
-                      payload,
-                      this.getSelectedBeats()
+                    const assignments = this.props.libs.beats.createBeatTagAssignments(
+                      selectedBeats,
+                      payload
                     );
-                    await this.updateBeatsData();
-                    this.notifyUpdatedTagAssociation(status, this.getSelectedBeats(), payload);
+
+                    let status;
+                    let assignType: 'added' | 'removed';
+                    if (
+                      selectedBeats.some(
+                        beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
+                      )
+                    ) {
+                      status = await this.props.libs.beats.assignTagsToBeats(assignments);
+                      assignType = 'removed';
+                    } else {
+                      status = await this.props.libs.beats.assignTagsToBeats(assignments);
+                      assignType = 'added';
+                    }
+
+                    if (status && !status.find(s => !s.success)) {
+                      await this.updateBeatsData();
+                      this.notifyUpdatedTagAssociation(
+                        assignType,
+                        this.getSelectedBeats(),
+                        payload
+                      );
+                    } else if (status && status.find(s => !s.success)) {
+                      // @ts-ignore
+                      alert(status.find(s => !s.success).error.message);
+                    }
+
                     break;
                   case AssignmentActionType.Delete:
-                    await this.props.containers.beats.deactivate(this.getSelectedBeats());
-                    await this.updateBeatsData();
+                    for (const beat of selectedBeats) {
+                      await this.props.libs.beats.update(beat.id, { active: false });
+                    }
+
+                    // because the compile code above has a very minor race condition, we wait,
+                    // the max race condition time is really 10ms but doing 100 to be safe
+                    setTimeout(async () => {
+                      await this.updateBeatsData();
+                    }, 100);
+
                     this.notifyBeatDisenrolled(this.getSelectedBeats());
                     break;
                   case AssignmentActionType.Reload:
@@ -361,7 +403,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
     const beats: CMBeat[] = [];
     selectedIds.forEach((id: any) => {
-      const beat = this.props.containers.beats.state.list.find(b => b.id === id);
+      const beat = this.state.beats.list.find(b => b.id === id);
       if (beat) {
         beats.push(beat);
       }

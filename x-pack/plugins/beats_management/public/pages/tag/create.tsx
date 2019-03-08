@@ -129,7 +129,7 @@ class TagCreatePageComponent extends React.PureComponent<
   }
 
   private saveTag = async () => {
-    const newTag = await this.props.containers.tags.upsertTag(this.state.tag);
+    const newTag = await this.props.libs.tags.upsertTag(this.state.tag);
     if (!newTag) {
       return alert(
         i18n.translate('xpack.beatsManagement.createTag.errorSavingTagTitle', {

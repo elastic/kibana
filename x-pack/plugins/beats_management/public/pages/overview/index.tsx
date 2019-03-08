@@ -15,12 +15,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { Subscribe } from 'unstated';
 import { CMBeat } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { ChildRoutes } from '../../components/navigation/child_routes';
-import { BeatsContainer } from '../../containers/beats';
-import { TagsContainer } from '../../containers/tags';
 import { withUrlState } from '../../containers/with_url_state';
 import { AppPageProps } from '../../frontend_types';
 
@@ -65,41 +62,29 @@ class MainPageComponent extends React.PureComponent<AppPageProps, MainPagesState
         hideBreadcrumbs={this.props.libs.framework.versionGreaterThen('6.7.0')}
       >
         {(renderAction: any) => (
-          <Subscribe to={[BeatsContainer, TagsContainer]}>
-            {(beats: BeatsContainer, tags: TagsContainer) => (
-              <React.Fragment>
-                <EuiTabs>
-                  <EuiTab
-                    isSelected={`/overview/enrolled_beats` === this.props.history.location.pathname}
-                    onClick={this.onTabClicked(`/overview/enrolled_beats`)}
-                  >
-                    <FormattedMessage
-                      id="xpack.beatsManagement.beats.enrolledBeatsTabTitle"
-                      defaultMessage="Enrolled Beats"
-                    />
-                  </EuiTab>
-                  <EuiTab
-                    isSelected={
-                      `/overview/configuration_tags` === this.props.history.location.pathname
-                    }
-                    onClick={this.onTabClicked(`/overview/configuration_tags`)}
-                  >
-                    <FormattedMessage
-                      id="xpack.beatsManagement.beats.configurationTagsTabTitle"
-                      defaultMessage="Configuration tags"
-                    />
-                  </EuiTab>
-                </EuiTabs>
-                <ChildRoutes
-                  routes={this.props.routes}
-                  renderAction={renderAction}
-                  {...this.props}
-                  beatsContainer={beats}
-                  tagsContainer={tags}
+          <React.Fragment>
+            <EuiTabs>
+              <EuiTab
+                isSelected={`/overview/enrolled_beats` === this.props.history.location.pathname}
+                onClick={this.onTabClicked(`/overview/enrolled_beats`)}
+              >
+                <FormattedMessage
+                  id="xpack.beatsManagement.beats.enrolledBeatsTabTitle"
+                  defaultMessage="Enrolled Beats"
                 />
-              </React.Fragment>
-            )}
-          </Subscribe>
+              </EuiTab>
+              <EuiTab
+                isSelected={`/overview/configuration_tags` === this.props.history.location.pathname}
+                onClick={this.onTabClicked(`/overview/configuration_tags`)}
+              >
+                <FormattedMessage
+                  id="xpack.beatsManagement.beats.configurationTagsTabTitle"
+                  defaultMessage="Configuration tags"
+                />
+              </EuiTab>
+            </EuiTabs>
+            <ChildRoutes routes={this.props.routes} renderAction={renderAction} {...this.props} />
+          </React.Fragment>
         )}
       </PrimaryLayout>
     );

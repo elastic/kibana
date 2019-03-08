@@ -17,7 +17,11 @@ import { TagEdit } from '../../components/tag';
 import { AppPageProps } from '../../frontend_types';
 interface TagPageState {
   showFlyout: boolean;
-  attachedBeats: CMBeat[] | null;
+  attachedBeats: {
+    list: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
   tag: BeatTag;
   beatsTags: BeatTag[];
   configuration_blocks: {
@@ -38,7 +42,11 @@ class TagEditPageComponent extends React.PureComponent<
 
     this.state = {
       showFlyout: false,
-      attachedBeats: null,
+      attachedBeats: {
+        list: [],
+        page: 0,
+        total: 0,
+      },
       beatsTags: [],
       tag: {
         id: props.match.params.tagid,
@@ -80,7 +88,11 @@ class TagEditPageComponent extends React.PureComponent<
             tag={this.state.tag}
             configuration_blocks={this.state.configuration_blocks}
             onDetachBeat={async (beatIds: string[]) => {
-              await this.props.containers.beats.removeTagsFromBeats(beatIds, this.state.tag.id);
+              const assignments = this.props.libs.beats.createBeatTagAssignments(
+                beatIds,
+                this.state.tag.id
+              );
+              await this.props.libs.beats.removeTagsFromBeats(assignments);
               await this.loadAttachedBeats();
             }}
             onTagChange={(field: string, value: string | number) =>
@@ -88,14 +100,7 @@ class TagEditPageComponent extends React.PureComponent<
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
-            attachedBeats={
-              (this.state.attachedBeats || []).map(beat => ({
-                ...beat,
-                tags: flatten(
-                  beat.tags.map(tagId => this.state.beatsTags.filter(tag => tag.id === tagId))
-                ),
-              })) as any
-            }
+            attachedBeats={this.state.attachedBeats}
             onConfigListChange={(index: number) => {
               this.loadConfigBlocks(index);
             }}
@@ -180,17 +185,26 @@ class TagEditPageComponent extends React.PureComponent<
   };
 
   private loadAttachedBeats = async () => {
-    const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
+    const beats = await this.props.libs.beats.getBeatsWithTag(
+      this.props.match.params.tagid,
+      this.props.urlState.attachedBeatsPage || 0,
+      this.props.urlState.attachedBeatsSize || 25
+    );
     const beatsTags = await this.props.libs.tags.getTagsWithIds(
       flatten(beats.list.map((beat: CMBeat) => beat.tags))
     );
+    beats.list = beats.list.map(beat => ({
+      ...beat,
+      tags: flatten(beat.tags.map(tagId => this.state.beatsTags.filter(tag => tag.id === tagId))),
+    })) as any;
+
     this.setState({
       attachedBeats: beats,
       beatsTags,
     });
   };
   private saveTag = async () => {
-    await this.props.containers.tags.upsertTag(this.state.tag);
+    await this.props.libs.tags.upsertTag(this.state.tag);
     this.props.goTo(`/overview/configuration_tags`);
   };
   private getNumExclusiveConfigurationBlocks = () =>

@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
 import React from 'react';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
 import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
@@ -43,7 +43,12 @@ interface TagEditProps {
   onTagChange: (field: keyof BeatTag, value: string) => any;
   onConfigAddOrEdit: (block: ConfigurationBlock) => any;
   onConfigRemoved: (block: ConfigurationBlock) => any;
-  attachedBeats?: CMBeat[];
+  attachedBeats?: {
+    error?: string | undefined;
+    list: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
 }
 
 interface TagEditState {

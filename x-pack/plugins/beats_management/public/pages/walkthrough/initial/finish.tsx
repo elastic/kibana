@@ -118,11 +118,11 @@ class FinishWalkthrough extends React.Component<
         })
       );
     }
-
-    await this.props.containers.beats.assignTagsToBeats(
+    const assignments = this.props.libs.beats.createBeatTagAssignments(
       [beat as CMBeat],
       this.props.urlState.createdTag
     );
+    await this.props.libs.beats.assignTagsToBeats(assignments);
     this.props.setUrlState({
       createdTag: '',
       enrollmentToken: '',
