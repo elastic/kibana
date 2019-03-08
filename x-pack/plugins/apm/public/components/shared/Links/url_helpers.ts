@@ -6,7 +6,7 @@
 
 import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
-import { mapValues, pick } from 'lodash';
+import { pick } from 'lodash';
 import qs from 'querystring';
 import chrome from 'ui/chrome';
 import url from 'url';
@@ -17,22 +17,7 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 }
 
 export function fromQuery(query: APMQueryParams) {
-  // we have to avoid encoding range params because they cause
-  // Kibana angular to decode them and append them to the existing
-  // URL as an encoded hash /shrug
-  const encoded = mapValues(query, (value, key) => {
-    if (['rangeFrom', 'rangeTo'].includes(key!)) {
-      return value;
-    }
-    if (value === undefined) {
-      return undefined;
-    }
-    return qs.escape(String(value));
-  });
-
-  return qs.stringify(encoded, '&', '=', {
-    encodeURIComponent: (value: string) => value
-  });
+  return qs.stringify(query);
 }
 
 export const PERSISTENT_APM_PARAMS = [
