@@ -182,7 +182,7 @@ class TagEditPageComponent extends React.PureComponent<
   private loadAttachedBeats = async () => {
     const beats = await this.props.libs.beats.getBeatsWithTag(this.props.match.params.tagid);
     const beatsTags = await this.props.libs.tags.getTagsWithIds(
-      flatten(beats.map(beat => beat.tags))
+      flatten(beats.list.map((beat: CMBeat) => beat.tags))
     );
     this.setState({
       attachedBeats: beats,

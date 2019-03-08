@@ -59,7 +59,7 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
 
         <Table
           hideTableControls={true}
-          items={this.state.tags}
+          items={{ list: this.state.tags, page: -1, total: this.state.tags.length }}
           ref={this.tableRef}
           type={BeatDetailTagsTable}
         />

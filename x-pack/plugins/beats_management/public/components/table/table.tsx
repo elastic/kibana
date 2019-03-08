@@ -42,7 +42,11 @@ interface TableProps {
   };
   hideTableControls?: boolean;
   kueryBarProps?: KueryBarProps;
-  items: any[];
+  items: {
+    list: any[];
+    page: number;
+    total: number;
+  };
   onTableChange?: (index: number, size: number) => void;
   type: TableType;
   actionHandler?(action: AssignmentActionType, payload?: any): void;
@@ -87,7 +91,7 @@ export class Table extends React.Component<TableProps, TableState> {
     const { actionData, actions, hideTableControls, items, kueryBarProps, type } = this.props;
 
     const pagination = {
-      pageIndex: this.state.pageIndex,
+      pageIndex: this.props.items.page !== -1 ? this.props.items.page : this.state.pageIndex,
       pageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
       pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
     };
@@ -136,12 +140,15 @@ export class Table extends React.Component<TableProps, TableState> {
         <EuiSpacer size="m" />
 
         <EuiBasicTable
-          items={items}
+          items={items.list}
           itemId="id"
           isSelectable={true}
           selection={selectionOptions}
           columns={type.columnDefinitions}
-          pagination={{ ...pagination, totalItemCount: items.length }}
+          pagination={{
+            ...pagination,
+            totalItemCount: this.props.items.page !== -1 ? items.total : items.list.length,
+          }}
           onChange={this.onTableChange}
         />
       </TableContainer>

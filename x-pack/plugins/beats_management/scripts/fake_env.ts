@@ -83,13 +83,13 @@ const start = async (
     await sleep(2000);
     // tslint:disable-next-line
     console.error(`${numberOfBeats} fake beats are enrolled`);
-    const beats = await libs.beats.getAll();
+    const beats = await libs.beats.getAll(undefined, -1, 10000);
 
     // tslint:disable-next-line
     console.error(`Creating tags, configs, and assigning them...`);
     process.stdout.write(`creating tags/configs for beat... 0 of ${numberOfBeats}`);
     count = 0;
-    for (const beat of beats) {
+    for (const beat of beats.list) {
       count++;
       // @ts-ignore
       process.stdout.clearLine();

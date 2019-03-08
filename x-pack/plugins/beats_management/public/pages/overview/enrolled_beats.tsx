@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { flatten, sortBy } from 'lodash';
+import { flatten } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
@@ -36,7 +36,11 @@ interface PageProps extends AppPageProps {
 interface PageState {
   notifications: any[];
   tags: BeatTag[] | null;
-  beats: CMBeat[];
+  beats: {
+    list: CMBeat[];
+    page: number;
+    total: number;
+  };
   assignmentOptions: BeatTag[] | null;
 }
 
@@ -48,7 +52,11 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
     this.state = {
       notifications: [],
       tags: null,
-      beats: [],
+      beats: {
+        list: [],
+        page: 0,
+        total: 0,
+      },
       assignmentOptions: null,
     };
 
@@ -56,19 +64,30 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
   }
 
   public componentDidMount() {
-    if (this.props.urlState.beatsKBar) {
-      this.props.containers.beats.reload(this.props.urlState.beatsKBar);
-    }
     this.updateBeatsData(this.props.urlState.beatsKBar);
   }
 
   public async updateBeatsData(beatsKBar?: string) {
-    const beats = sortBy(await this.props.libs.beats.getAll(beatsKBar), 'id') || [];
-    const tags = await this.props.libs.tags.getTagsWithIds(flatten(beats.map(beat => beat.tags)));
+    const beats = await this.props.libs.beats.getAll(
+      beatsKBar,
+      this.props.urlState.beatsPage || 0,
+      this.props.urlState.beatsSize || 25
+    );
+
+    const tags = await this.props.libs.tags.getTagsWithIds(
+      flatten(beats.list.map(beat => beat.tags))
+    );
 
     this.setState({
       tags,
-      beats,
+      beats: {
+        list: beats.list.map(beat => ({
+          ...beat,
+          tags: (this.state.tags || []).filter(tag => beat.tags.includes(tag.id)),
+        })) as any[],
+        total: beats.total,
+        page: beats.page,
+      },
     });
   }
 
@@ -125,7 +144,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               <EnrollBeat
                 frameworkBasePath={this.props.libs.framework.info.basePath}
                 enrollmentToken={this.props.urlState.enrollmentToken}
-                getBeatWithToken={this.props.containers.beats.getBeatWithToken}
+                getBeatWithToken={this.props.libs.beats.getBeatWithToken}
                 createEnrollmentToken={async () => {
                   const enrollmentTokens = await this.props.libs.tokens.createEnrollmentTokens();
                   this.props.setUrlState({
@@ -212,10 +231,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                     break;
                 }
               }}
-              items={this.state.beats.map(beat => ({
-                ...beat,
-                tags: (this.state.tags || []).filter(tag => beat.tags.includes(tag.id)),
-              }))}
+              items={this.state.beats}
               ref={this.tableRef}
               type={BeatsTableType}
             />

@@ -8,6 +8,7 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { BeatTag } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType, Table, TagsTableType } from '../../components/table';
 import { tagListActions } from '../../components/table/action_schema';
@@ -21,18 +22,67 @@ interface PageProps extends AppPageProps {
 
 interface PageState {
   tableRef: any;
+  list: BeatTag[];
+  page: number;
+  size: number;
+  total: number;
 }
 
 class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
+  public static getDerivedStateFromProps(nextProps: PageProps, prevState: PageState) {
+    if (
+      nextProps.urlState.tagsPage !== prevState.page ||
+      nextProps.urlState.tagsSize !== prevState.size
+    ) {
+      return {
+        page: nextProps.urlState.tagsPage,
+        size: nextProps.urlState.tagsSize,
+      };
+    }
+
+    // No state update necessary
+    return null;
+  }
   constructor(props: PageProps) {
     super(props);
 
     this.state = {
       tableRef: React.createRef(),
+      list: [],
+      page: 0,
+      size: 25,
+      total: 0,
     };
 
-    props.containers.tags.reload(props.urlState.tagsKBar);
     props.renderAction(this.renderActionArea);
+  }
+
+  public async componentDidMount() {
+    const result = await this.props.libs.tags.getAll(
+      this.props.urlState.tagsKBar,
+      this.state.page,
+      this.state.size
+    );
+
+    this.setState({
+      list: result.list,
+      total: result.total,
+    });
+  }
+
+  public async componentDidUpdate(prevProps: PageProps, prevState: PageState) {
+    if (this.state.page === prevState.page || prevState.size !== this.state.size) {
+      const result = await this.props.libs.tags.getAll(
+        this.props.urlState.tagsKBar,
+        this.state.page,
+        this.state.size
+      );
+
+      this.setState({
+        list: result.list,
+        total: result.total,
+      });
+    }
   }
 
   public renderActionArea = () => (
@@ -70,7 +120,6 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
                 ),
                 onChange: (value: any) => {
                   this.props.setUrlState({ tagsKBar: value });
-                  this.props.containers.tags.reload(value);
                 },
                 onSubmit: () => null, // todo
                 value: this.props.urlState.tagsKBar || '',
@@ -78,7 +127,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
               actions={tagListActions}
               actionHandler={this.handleTagsAction}
               ref={this.state.tableRef}
-              items={this.props.containers.tags.state.list}
+              items={this.state}
               type={TagsTableType}
             />
           )}
@@ -91,7 +140,7 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
     const { intl } = this.props;
     switch (action) {
       case AssignmentActionType.Delete:
-        const success = await this.props.containers.tags.delete(this.getSelectedTags());
+        const success = await this.props.libs.tags.delete(this.getSelectedTags());
         if (!success) {
           alert(
             intl.formatMessage({
@@ -101,6 +150,16 @@ class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
             })
           );
         } else {
+          const result = await this.props.libs.tags.getAll(
+            this.props.urlState.tagsKBar,
+            this.state.page,
+            this.state.size
+          );
+
+          this.setState({
+            list: result.list,
+            total: result.total,
+          });
           if (this.state.tableRef && this.state.tableRef.current) {
             this.state.tableRef.current.resetSelection();
           }

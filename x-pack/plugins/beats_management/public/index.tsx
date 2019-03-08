@@ -10,13 +10,10 @@ import React from 'react';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { I18nContext } from 'ui/i18n';
-import { Provider as UnstatedProvider, Subscribe } from 'unstated';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
 import { BreadcrumbProvider } from './components/navigation/breadcrumb';
 import { Breadcrumb } from './components/navigation/breadcrumb/breadcrumb';
-import { BeatsContainer } from './containers/beats';
-import { TagsContainer } from './containers/tags';
 import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/types';
 import { AppRouter } from './router';
@@ -27,22 +24,17 @@ async function startApp(libs: FrontendLibs) {
     <ThemeProvider theme={{ eui: euiVars }}>
       <I18nContext>
         <HashRouter basename="/management/beats_management">
-          <UnstatedProvider inject={[new BeatsContainer(libs), new TagsContainer(libs)]}>
-            <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
-              <Subscribe to={[BeatsContainer, TagsContainer]}>
-                {(beats: BeatsContainer, tags: TagsContainer) => (
-                  <Background>
-                    <Breadcrumb
-                      title={i18n.translate('xpack.beatsManagement.management.breadcrumb', {
-                        defaultMessage: 'Management',
-                      })}
-                    />
-                    <AppRouter libs={libs} beatsContainer={beats} tagsContainer={tags} />
-                  </Background>
-                )}
-              </Subscribe>
-            </BreadcrumbProvider>
-          </UnstatedProvider>
+          <BreadcrumbProvider useGlobalBreadcrumbs={libs.framework.versionGreaterThen('6.7.0')}>
+            <Background>
+              <Breadcrumb
+                title={i18n.translate('xpack.beatsManagement.management.breadcrumb', {
+                  defaultMessage: 'Management',
+                })}
+              />
+              <AppRouter libs={libs} />
+            </Background>
+            )}
+          </BreadcrumbProvider>
         </HashRouter>
       </I18nContext>
     </ThemeProvider>,
