@@ -26,15 +26,6 @@ describe('LocalizedDateTooltip', () => {
 
   const SampleContent = () => <span data-test-subj="sample-content">{sampleContentText}</span>;
 
-  test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <LocalizedDateTooltip date={date.toDate()}>
-        <SampleContent />
-      </LocalizedDateTooltip>
-    );
-    expect(toJson(wrapper)).toMatchSnapshot();
-  });
-
   test('it renders the child content', () => {
     const wrapper = mount(
       <LocalizedDateTooltip date={date.toDate()}>
