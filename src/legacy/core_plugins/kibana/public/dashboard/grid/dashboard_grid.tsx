@@ -125,9 +125,9 @@ interface Props extends ReactIntl.InjectedIntlProps {
 }
 
 interface State {
-  focusedPanelIndex: string | undefined; // might be string
+  focusedPanelIndex?: string;
   isLayoutInvalid: boolean;
-  layout: GridData[] | undefined;
+  layout?: GridData[];
 }
 
 interface PanelsMap {
