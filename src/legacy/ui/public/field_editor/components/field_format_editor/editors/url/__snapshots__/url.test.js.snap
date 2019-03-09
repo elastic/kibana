@@ -21,6 +21,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -73,6 +74,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -109,6 +111,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -146,6 +149,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -198,6 +202,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -234,6 +239,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -271,6 +277,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -323,6 +330,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -359,6 +367,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

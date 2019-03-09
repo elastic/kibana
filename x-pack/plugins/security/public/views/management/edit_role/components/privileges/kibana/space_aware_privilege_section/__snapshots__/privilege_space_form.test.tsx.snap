@@ -33,6 +33,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
+          labelType="label"
         >
           <SpaceSelector
             intl={
@@ -163,6 +164,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Privilege"
+          labelType="label"
         >
           <EuiSuperSelect
             compressed={false}

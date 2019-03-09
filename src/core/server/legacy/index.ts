@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 import { LegacyService } from './legacy_service';
 
 /** @internal */
