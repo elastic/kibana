@@ -25,7 +25,7 @@ export interface GridData {
   i: string;
 }
 
-export interface PanelData {
+export interface Panel {
   panelIndex: string; // earlier versions allowed panelIndex to be a number or a string
   gridData: GridData;
   col: number;

@@ -35,8 +35,6 @@ import {
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
-
-// import { PanelsMap } from '../selectors/types';
 import { GridData } from '../types';
 
 let lastValidGridSize = 0;
@@ -115,7 +113,7 @@ function ResponsiveGrid({
 const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
-import { PanelData } from '../types';
+import { Panel } from '../types';
 
 interface Props extends ReactIntl.InjectedIntlProps {
   panels: PanelsMap;
@@ -132,9 +130,8 @@ interface State {
   layout: GridData[] | undefined;
 }
 
-// todo this can't stay named this way. Need to disambiguate PanelsMap types
 interface PanelsMap {
-  readonly [panelId: string]: PanelData;
+  readonly [panelId: string]: Panel;
 }
 
 class DashboardGridUi extends React.Component<Props, State> {
