@@ -25,6 +25,7 @@ import { Timeline } from './timeline';
 const testFlyoutHeight = 980;
 const mockGetNotesByIds = (eventId: string[]) => [];
 
+// TODO: This is for test only -- do not check in this line
 describe('Timeline', () => {
   const sort: Sort = {
     columnId: '@timestamp',
