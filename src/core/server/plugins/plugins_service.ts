@@ -19,7 +19,8 @@
 
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
-import { CoreContext, CoreService } from '../../types';
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_context';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';

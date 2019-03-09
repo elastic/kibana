@@ -5,6 +5,7 @@
  */
 
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -27,7 +28,11 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     } else if (geoFieldType === 'geo_shape') {
       geometries = geoShapeToGeometry(properties[geoFieldName]);
     } else {
-      throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
+      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldTypeErrorMessage', {
+        defaultMessage: 'Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}',
+        values: { geoFieldType }
+      });
+      throw new Error(errorMessage);
     }
 
     // don't include geometry field value in properties
@@ -63,8 +68,11 @@ export function geoPointToGeometry(value) {
   if (typeof value === 'string') {
     const commaSplit = value.split(',');
     if (commaSplit.length === 1) {
-      // Geo-point expressed as a geohash.
-      throw new Error(`Unable to convert to geojson, geohash not supported`);
+      const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.geohashIsUnsupportedErrorMessage', {
+        defaultMessage: `Unable to convert to geojson, geohash not supported`
+      });
+
+      throw new Error(errorMessage);
     }
     // Geo-point expressed as a string with the format: "lat,lon".
     const lat = parseFloat(commaSplit[0]);
@@ -78,7 +86,13 @@ export function geoPointToGeometry(value) {
   }
 
   if (!Array.isArray(value)) {
-    throw new Error(`Unsupported geo_point value: ${value}`);
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoPointValueErrorMessage', {
+      defaultMessage: `Unsupported geo_point value: {geoPointValue}`,
+      values: {
+        geoPointValue: value
+      }
+    });
+    throw new Error(errorMessage);
   }
 
   if (value.length === 2
@@ -116,7 +130,10 @@ export function geoShapeToGeometry(value) {
 
   // TODO handle case where value is WKT and convert to geojson
   if (typeof value === 'string') {
-    throw new Error(`Unable to convert WKT to geojson, not supported`);
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.wktIsUnsupportedErrorMessage', {
+      defaultMessage: `Unable to convert WKT to geojson, not supported`,
+    });
+    throw new Error(errorMessage);
   }
 
   const geoJson = _.cloneDeep(value);
@@ -180,7 +197,11 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
       }
     };
   } else {
-    throw new Error(`Unsupported field type, expected: geo_shape or geo_point, you provided: ${geoFieldType}`);
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldTypeErrorMessage', {
+      defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
+      values: { geoFieldType }
+    });
+    throw new Error(errorMessage);
   }
 }
 
