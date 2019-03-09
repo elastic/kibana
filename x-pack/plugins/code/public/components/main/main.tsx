@@ -33,6 +33,8 @@ const Container = styled.div`
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   isNotFound: boolean;
+  loadingFileTree: boolean;
+  loadingStructureTree: boolean;
 }
 
 class CodeMain extends React.Component<Props> {
@@ -65,14 +67,18 @@ class CodeMain extends React.Component<Props> {
   }
 
   public render() {
-    if (this.props.isNotFound) {
+    const { loadingFileTree, loadingStructureTree, isNotFound } = this.props;
+    if (isNotFound) {
       return <NotFound />;
     }
     return (
       <Root>
         <Container>
           <React.Fragment>
-            <SideTabs />
+            <SideTabs
+              loadingFileTree={loadingFileTree}
+              loadingStructureTree={loadingStructureTree}
+            />
             <Content />
           </React.Fragment>
         </Container>
@@ -84,6 +90,8 @@ class CodeMain extends React.Component<Props> {
 
 const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
+  loadingFileTree: state.file.loading,
+  loadingStructureTree: state.symbol.loading,
 });
 
 export const Main = connect(

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabbedContent } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent, EuiText } from '@elastic/eui';
 import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -19,7 +19,12 @@ enum Tabs {
   structure = 'structure',
 }
 
-class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRouteParams>> {
+interface Props extends RouteComponentProps<MainRouteParams> {
+  loadingFileTree: boolean;
+  loadingStructureTree: boolean;
+}
+
+class CodeSideTabs extends React.PureComponent<Props> {
   public get sideTab(): Tabs {
     const { search } = this.props.location;
     let qs = search;
@@ -30,6 +35,20 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
     return tab === Tabs.structure ? Tabs.structure : Tabs.file;
   }
 
+  public renderLoadingSpinner(text: string) {
+    return (
+      <div>
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="xl" />
+        <EuiText textAlign="center">Loading {text} tree</EuiText>
+        <EuiSpacer size="m" />
+        <EuiText textAlign="center">
+          <EuiLoadingSpinner size="xl" />
+        </EuiText>
+      </div>
+    );
+  }
+
   public get tabs() {
     return [
       {
@@ -37,7 +56,7 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
         name: 'File',
         content: (
           <div className="codeFileTree--container">
-            <FileTree />
+            {this.props.loadingFileTree ? this.renderLoadingSpinner('file') : <FileTree />}
           </div>
         ),
         isSelected: Tabs.file === this.sideTab,
@@ -46,7 +65,11 @@ class CodeSideTabs extends React.PureComponent<RouteComponentProps<MainRoutePara
       {
         id: Tabs.structure,
         name: 'Structure',
-        content: <SymbolTree />,
+        content: this.props.loadingFileTree ? (
+          this.renderLoadingSpinner('structure')
+        ) : (
+          <SymbolTree />
+        ),
         isSelected: Tabs.structure === this.sideTab,
         disabled: this.props.match.params.pathType === PathTypes.tree,
         'data-test-subj': 'codeStructureTreeTab',
