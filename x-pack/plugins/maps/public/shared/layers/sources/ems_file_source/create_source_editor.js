@@ -13,6 +13,7 @@ import {
 
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { getEmsUnavailableMessage } from '../ems_unavailable_message';
+import { i18n } from '@kbn/i18n';
 
 export class EMSFileCreateSourceEditor extends React.Component {
 
@@ -63,11 +64,19 @@ export class EMSFileCreateSourceEditor extends React.Component {
 
     return (
       <EuiFormRow
-        label="Layer"
+        label={
+          i18n.translate('xpack.maps.source.emsFile.layerLabel', {
+            defaultMessage: 'Layer'
+          })
+        }
         helpText={this.state.emsFileOptionsRaw.length === 0 ? getEmsUnavailableMessage() : null}
       >
         <EuiComboBox
-          placeholder="Select EMS vector shapes"
+          placeholder={
+            i18n.translate('xpack.maps.source.emsFile.selectPlaceholder', {
+              defaultMessage: 'Select EMS vector shapes'
+            })
+          }
           options={options}
           selectedOptions={this.state.selectedOption ? [this.state.selectedOption] : []}
           onChange={this._onChange}

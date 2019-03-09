@@ -6,17 +6,23 @@
 
 import _ from 'lodash';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { DECIMAL_DEGREES_PRECISION, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
+import { FeatureTooltip } from '../feature_tooltip';
 
 export class MBMapContainer extends React.Component {
 
   constructor() {
     super();
     this._mbMap = null;
-    this._listeners = new Map(); // key is mbLayerId, value eventHandlers map
+    this._tooltipContainer = document.createElement('div');
+    this._mbPopup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
   }
 
   _debouncedSync = _.debounce(() => {
@@ -25,6 +31,61 @@ export class MBMapContainer extends React.Component {
       this._syncMbMapWithInspector();
     }
   }, 256);
+
+  _updateTooltipState = _.debounce(async (e) => {
+
+    const mbLayerIds = this._getMbLayerIdsForTooltips();
+    const features = this._mbMap.queryRenderedFeatures(e.point, { layers: mbLayerIds });
+
+    if (!features.length) {
+      this.props.setTooltipState(null);
+      return;
+    }
+
+    const targetFeature = features[0];
+    if (this.props.tooltipState) {
+      const propertiesUnchanged = _.isEqual(this.props.tooltipState.activeFeature.properties, targetFeature.properties);
+      const geometryUnchanged = _.isEqual(this.props.tooltipState.activeFeature.geometry, targetFeature.geometry);
+      if(propertiesUnchanged && geometryUnchanged) {
+        return;
+      }
+    }
+
+    const layer = this._getLayer(targetFeature.layer.id);
+    const formattedProperties = await layer.getPropertiesForTooltip(targetFeature.properties);
+
+    let popupAnchorLocation = [e.lngLat.lng, e.lngLat.lat]; // default popup location to mouse location
+    if (targetFeature.geometry.type === 'Point') {
+      const coordinates = targetFeature.geometry.coordinates.slice();
+
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      popupAnchorLocation = coordinates;
+    }
+
+    this.props.setTooltipState({
+      activeFeature: {
+        properties: targetFeature.properties,
+        geometry: targetFeature.geometry
+      },
+      formattedProperties: formattedProperties,
+      layerId: layer.getId(),
+      location: popupAnchorLocation
+    });
+
+  }, 100);
+
+
+  _getMbLayerIdsForTooltips() {
+    return this.props.layerList.reduce((mbLayerIds, layer) => {
+      return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
+    }, []);
+  }
 
   _getMapState() {
     const zoom = this._mbMap.getZoom();
@@ -45,6 +106,13 @@ export class MBMapContainer extends React.Component {
     };
   }
 
+  componentDidUpdate() {
+    // do not debounce syncing of map-state and tooltip
+    this._syncMbMapWithMapState();
+    this._syncTooltipState();
+    this._debouncedSync();
+  }
+
   componentDidMount() {
     this._initializeMap();
     this._isMounted = true;
@@ -58,6 +126,7 @@ export class MBMapContainer extends React.Component {
     if (this._mbMap) {
       this._mbMap.remove();
       this._mbMap = null;
+      this._tooltipContainer = null;
     }
     this.props.onMapDestroyed();
   }
@@ -69,29 +138,6 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
-
-    // Override mapboxgl.Map "on" and "removeLayer" methods so we can track layer listeners
-    // Tracked layer listerners are used to clean up event handlers
-    const originalMbBoxOnFunc = this._mbMap.on;
-    const originalMbBoxRemoveLayerFunc = this._mbMap.removeLayer;
-    this._mbMap.on = (...args) => {
-      // args do not identify layer so there is nothing to track
-      if (args.length <= 2) {
-        originalMbBoxOnFunc.apply(this._mbMap, args);
-        return;
-      }
-
-      const eventType = args[0];
-      const mbLayerId = args[1];
-      const handler = args[2];
-      this._addListener(eventType, mbLayerId, handler);
-
-      originalMbBoxOnFunc.apply(this._mbMap, args);
-    };
-    this._mbMap.removeLayer = (id) => {
-      this._removeListeners(id);
-      originalMbBoxRemoveLayerFunc.apply(this._mbMap, [id]);
-    };
 
     this._initResizerChecker();
 
@@ -115,37 +161,10 @@ export class MBMapContainer extends React.Component {
       this.props.clearMouseCoordinates();
     });
 
+
+    this._mbMap.on('mousemove', this._updateTooltipState);
+
     this.props.onMapReady(this._getMapState());
-  }
-
-  _addListener(eventType, mbLayerId, handler) {
-    this._removeListener(eventType, mbLayerId);
-
-    const eventHandlers = !this._listeners.has(mbLayerId)
-      ? new Map()
-      : this._listeners.get(mbLayerId);
-    eventHandlers.set(eventType, handler);
-    this._listeners.set(mbLayerId, eventHandlers);
-  }
-
-  _removeListeners(mbLayerId) {
-    if (this._listeners.has(mbLayerId)) {
-      const eventHandlers = this._listeners.get(mbLayerId);
-      eventHandlers.forEach((value, eventType) => {
-        this._removeListener(eventType, mbLayerId);
-      });
-      this._listeners.delete(mbLayerId);
-    }
-  }
-
-  _removeListener(eventType, mbLayerId) {
-    if (this._listeners.has(mbLayerId)) {
-      const eventHandlers = this._listeners.get(mbLayerId);
-      if (eventHandlers.has(eventType)) {
-        this._mbMap.off(eventType, mbLayerId, eventHandlers.get(eventType));
-        eventHandlers.delete(eventType);
-      }
-    }
   }
 
   _initResizerChecker() {
@@ -153,6 +172,37 @@ export class MBMapContainer extends React.Component {
     this._checker.on('resize', () => {
       this._mbMap.resize();
     });
+  }
+
+  _hideTooltip() {
+    if (this._mbPopup.isOpen()) {
+      this._mbPopup.remove();
+      ReactDOM.unmountComponentAtNode(this._tooltipContainer);
+    }
+  }
+
+  _showTooltip()  {
+    //todo: can still be optimized. No need to rerender if content remains identical
+    ReactDOM.render(
+      React.createElement(
+        FeatureTooltip, {
+          properties: this.props.tooltipState.formattedProperties,
+        }
+      ),
+      this._tooltipContainer
+    );
+
+    this._mbPopup.setLngLat(this.props.tooltipState.location)
+      .setDOMContent(this._tooltipContainer)
+      .addTo(this._mbMap);
+  }
+
+  _syncTooltipState() {
+    if (this.props.tooltipState) {
+      this._showTooltip();
+    } else {
+      this._hideTooltip();
+    }
   }
 
   _syncMbMapWithMapState = () => {
@@ -188,21 +238,25 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _syncMbMapWithLayerList = () => {
-    const {
-      isMapReady,
-      layerList,
-    } = this.props;
+  _getLayer(mbLayerId) {
+    return this.props.layerList.find((layer) => {
+      const mbLayerIds = layer.getMbLayerIds();
+      return mbLayerIds.indexOf(mbLayerId) > -1;
+    });
+  }
 
-    if (!isMapReady) {
+  _syncMbMapWithLayerList = () => {
+
+    if (!this.props.isMapReady) {
       return;
     }
 
-    removeOrphanedSourcesAndLayers(this._mbMap, layerList);
-    layerList.forEach(layer => {
+    removeOrphanedSourcesAndLayers(this._mbMap, this.props.layerList);
+    this.props.layerList.forEach(layer => {
       layer.syncLayerWithMB(this._mbMap);
     });
-    syncLayerOrder(this._mbMap, layerList);
+
+    syncLayerOrder(this._mbMap, this.props.layerList);
   };
 
   _syncMbMapWithInspector = () => {
@@ -222,12 +276,7 @@ export class MBMapContainer extends React.Component {
   };
 
   render() {
-    // do not debounce syncing zoom and center
-    this._syncMbMapWithMapState();
-    this._debouncedSync();
-    return (
-      <div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>
-    );
+    return (<div id={'mapContainer'} className="mapContainer" ref="mapContainer"/>);
   }
 }
 

@@ -3,9 +3,9 @@
 exports[`UnconnectedKibanaLink should render correct markup 1`] = `
 <EuiLink
   color="primary"
-  href="/app/kibana#/discover?_g=(time:(from:now-24h,mode:quick,to:now))"
+  href="/app/kibana#/something?"
   type="button"
 >
-  Go to Discover
+  Some link text
 </EuiLink>
 `;

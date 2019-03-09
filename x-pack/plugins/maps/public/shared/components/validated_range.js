@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { EuiRange, EuiFormErrorText } from '@elastic/eui';
+import { FormattedText } from '@kbn/i18n/react';
 
 function isWithinRange(min, max, value) {
   if (value >= min && value <= max) {
@@ -68,7 +69,11 @@ export class ValidatedRange extends React.Component {
     if (!this.state.isValid) {
       errorMessage = (
         <EuiFormErrorText>
-          {`Must be between ${min} and ${max}`}
+          <FormattedText
+            id="xpack.maps.validatedRange.rangeErrorMessage"
+            defaultMessage="Must be between {min} and {max}"
+            values={{ min, max }}
+          />
         </EuiFormErrorText>
       );
     }

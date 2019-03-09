@@ -96,7 +96,17 @@ export function InspectorProvider({ getService }) {
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
       const $ = await tableBody.parseDomContent();
       return $('tr').toArray().map(tr => {
-        return $(tr).find('td').toArray().map(cell => $(cell).text().trim());
+        return $(tr).find('td').toArray().map(cell => {
+          // if this is an EUI table, filter down to the specific cell content
+          // otherwise this will include mobile-specific header information
+          const euiTableCellContent = $(cell).find('.euiTableCellContent');
+
+          if (euiTableCellContent.length > 0) {
+            return $(cell).find('.euiTableCellContent').text().trim();
+          } else {
+            return $(cell).text().trim();
+          }
+        });
       });
     }
 

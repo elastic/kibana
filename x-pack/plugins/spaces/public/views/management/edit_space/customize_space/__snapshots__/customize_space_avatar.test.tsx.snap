@@ -13,6 +13,7 @@ exports[`renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label="Initials (2 max)"
+      labelType="label"
     >
       <EuiFieldText
         compressed={false}
@@ -34,6 +35,7 @@ exports[`renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={false}
       label="Color"
+      labelType="label"
     >
       <EuiColorPicker
         aria-label="Select a color"

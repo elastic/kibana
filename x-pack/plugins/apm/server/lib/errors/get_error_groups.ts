@@ -38,7 +38,7 @@ export async function getErrorGroups({
 }: {
   serviceName: string;
   sortField: string;
-  sortDirection: 'desc' | 'asc';
+  sortDirection: string;
   setup: Setup;
 }): Promise<ErrorGroupListAPIResponse> {
   const { start, end, esFilterQuery, client, config } = setup;

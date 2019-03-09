@@ -28,7 +28,7 @@ exports[`Error PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
 
@@ -90,7 +90,7 @@ exports[`Span PARENT_ID 1`] = `"parentId"`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
-exports[`Span SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
 
@@ -152,7 +152,7 @@ exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
-exports[`Transaction SERVICE_AGENT_NAME 1`] = `"agent name"`;
+exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
 
