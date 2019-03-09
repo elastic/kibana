@@ -42,8 +42,8 @@ export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: b
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
+        <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiText size="xs" className="eui-textTruncate code-auto-margin">
             <EuiTextColor color="subdued">{moment(blame.commit.date).fromNow()}</EuiTextColor>
           </EuiText>
         </EuiFlexItem>
