@@ -80,7 +80,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
       }
       await input.pressKeys(browser.keys.NULL); // Release modifier keys
-      await input.pressKeys(browser.keys.BACKSPACE); // Delete all content
+      await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
     }
 
     public async getMarkdownText() {
