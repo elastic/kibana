@@ -12,7 +12,7 @@ node scripts/es snapshot --download-only;
 node scripts/es snapshot --license=oss --download-only;
 
 # download reporting browsers
-(cd x-pack && yarn gulp prepare);
+(cd "x-pack" && yarn gulp prepare);
 
 # cache the chromedriver bin
 chromedriverDistVersion="$(node -e "console.log(require('chromedriver').version)")"
@@ -41,9 +41,9 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
 
 if [ "$branch" == "master" ]; then
-  echo "Creatting bootstrap cache for 7.x";
+  echo "Creating bootstrap cache for 7.x";
 
   git clone https://github.com/elastic/kibana.git --branch 7.x --depth 1 /tmp/kibana-7.x
-  (cd /tmp/kibana-7.x; ./.ci/packer_cache.sh);
+  (cd /tmp/kibana-7.x && ./.ci/packer_cache.sh);
   rm -rf /tmp/kibana-7.x;
 fi
