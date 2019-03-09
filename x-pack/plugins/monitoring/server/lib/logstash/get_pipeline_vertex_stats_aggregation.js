@@ -127,10 +127,10 @@ function fetchPipelineVertexTimeSeriesStats(query, logstashIndexPattern, pipelin
     size: 0,
     ignoreUnavailable: true,
     filterPath: [
-      'aggregations.pipelines.timeseries.scoped.vertices.vertex_id.buckets.key',
-      'aggregations.pipelines.timeseries.scoped.vertices.vertex_id.buckets.events_in_total',
-      'aggregations.pipelines.timeseries.scoped.vertices.vertex_id.buckets.events_out_total',
-      'aggregations.pipelines.timeseries.scoped.vertices.vertex_id.buckets.duration_in_millis_total',
+      'aggregations.timeseries.buckets.key',
+      'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_in_total',
+      'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_out_total',
+      'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.duration_in_millis_total',
       'aggregations.pipelines.scoped.total_processor_duration_stats'
     ],
     body: {
