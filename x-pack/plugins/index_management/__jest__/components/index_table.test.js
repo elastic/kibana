@@ -67,6 +67,7 @@ const status = (rendered, row = 0) => {
   rendered.update();
   return findTestSubject(rendered, 'indexTableCell-status')
     .at(row)
+    .find('.euiTableCellContent')
     .text();
 };
 

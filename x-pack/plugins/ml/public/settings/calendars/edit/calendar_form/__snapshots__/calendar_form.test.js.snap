@@ -42,6 +42,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -64,6 +65,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -86,6 +88,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -109,6 +112,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiComboBox
       compressed={false}
@@ -136,6 +140,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <InjectIntl(EventsTable)
       canCreateCalendar={true}

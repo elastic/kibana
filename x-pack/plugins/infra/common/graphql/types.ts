@@ -60,6 +60,8 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
+  /** The fields to use as the log message */
+  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -943,6 +945,8 @@ export namespace SourceFields {
     container: string;
 
     host: string;
+
+    message: string[];
 
     pod: string;
 
