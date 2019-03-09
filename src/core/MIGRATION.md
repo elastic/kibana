@@ -5,13 +5,22 @@
   * Services
   * Integrating with other plugins
   * Challenges to overcome with legacy plugins
-* Plan of action
-  * TypeScript
-  * De-angular
-  * Architectural changes with legacy "shim"
+  * Plan of action
+* Server-side plan of action
+  * De-couple from hapi.js server and request objects
+  * Introduce new plugin definition shim
   * Switch to new platform services
-  * Migrate to the new platform
+  * Migrate to the new plugin system
+* Browser-side plan of action
+  * Decouple UI modules from angular.js
+  * Move UI modules into plugins
+  * Introduce new plugin definition shim
+  * Introduce application shim
+  * Switch to new platform services
+  * Migrate to the new plugin system
 * Frequently asked questions
+  * Is migrating a plugin an all-or-nothing thing?
+  * Do plugins need to be converted to TypeScript?
   * How is static code shared between plugins?
   * How is "common" code shared on both the client and server?
   * When does code go into a plugin, core, or packages?
@@ -240,6 +249,355 @@ When a legacy browser plugin needs to access functionality from another plugin, 
 Legacy browser plugins rely on the feature known as `uiExports/`, which integrates directly with our build system to ensure that plugin code is bundled together in such a way to enable that global singleton module state. There is no corresponding feature in the new platform, and in fact we intend down the line to build new platform plugins as immutable bundles that can not share state in this way.
 
 The key challenge to overcome with legacy browser-side plugins will be converting all imports from `plugin/`, `ui/`, `uiExports`, and relative imports from other plugins into a set of services that originate at runtime during plugin initialization and get passed around throughout the business logic of the plugin as function arguments.
+
+### Plan of action
+
+In order to move a legacy plugin to the new plugin system, the challenges on the server and in the browser must be addressed. Fortunately, **the hardest problems can be solved in legacy plugins today** without consuming the new plugin system at all.
+
+The approach and level of effort varies significantly between server and browser plugins, but at a high level the approach is the same.
+
+First, decouple your plugin's business logic from the dependencies that are not exposed through the new platform, hapi.js and angular.js. Then introduce plugin definitions that more accurately reflect how plugins are defined in the new platform. Finally, replace the functionality you consume from core and other plugins with their new platform equivalents.
+
+Once those things are finished for any given plugin, it can offically be switched to the new plugin system.
+
+## Server-side plan of action
+
+Legacy server-side plugins access functionality from core and other plugins at runtime via function arguments, which is similar to how they must be architected to use the new plugin system. This greatly simplifies the plan of action for migrating server-side plugins.
+
+### De-couple from hapi.js server and request objects
+
+Most integrations with core and other plugins occur through the hapi.js `server` and `request` objects, and neither of these things are exposed through the new platform, so tackle this problem first.
+
+Fortunately, decoupling from these objects is relatively straightforward.
+
+The server object is introduced to your plugin in its legacy `init` function, so in that function you will "pick" the functionality you actually use from `server` and attach it to a new interface, which you will then pass in all the places you had previously been passing `server`.
+
+The `request` object is introduced to your plugin in every route handler, so at the root of every route handler, you will create a new interface by "picking" the request information (e.g. body, headers) and core and plugin capabilities from the `request` object that you actually use and pass that in all the places you previously were passing `request`.
+
+Any calls to mutate either the server or request objects (e.g. server.decorate()) will be moved toward the root of the legacy `init` function if they aren't already there.
+
+Let's take a look at an example legacy plugin definition that uses both `server` and `request`.
+
+```ts
+// likely imported from another file
+function search(server, request) {
+  const { elasticsearch } = server.plugins;
+  return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+}
+
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      server.route({
+        path: '/api/demo_plugin/search',
+        method: 'POST',
+        async handler(request) {
+          search(server, request); // target acquired
+        }
+      });
+
+      server.expose('getDemoBar', () => {
+        return `Demo ${server.plugins.foo.getBar()}`;
+      });
+    }
+  });
+}
+```
+
+This example legacy plugin uses hapi's `server` object directly inside of its `init` function, which is something we can address in a later step. What we need to address in this step is when we pass the raw `server` and `request` objects into our custom `search` function.
+
+Instead, we identify which functionality we actually need from those objects and craft custom new interfaces for them, taking care not to leak hapi.js implementation details into their design.
+
+```ts
+import { ElasticsearchPlugin, Request } from '../elasticsearch';
+export interface ServerFacade {
+  plugins: {
+    elasticsearch: ElasticsearchPlugin
+  }
+}
+export interface RequestFacade extends Request {
+}
+
+// likely imported from another file
+function search(server: ServerFacade, request: RequestFacade) {
+  const { elasticsearch } = server.plugins;
+  return elasticsearch.getCluster('admin').callWithRequest(request, 'search');
+}
+
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      const serverFacade: ServerFacade = {
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch
+        }
+      }
+
+      server.route({
+        path: '/api/demo_plugin/search',
+        method: 'POST',
+        async handler(request) {
+          const requestFacade: RequestFacade = {
+            headers: request.headers
+          };
+          search(serverFacade, requestFacade);
+        }
+      });
+
+      server.expose('getDemoBar', () => {
+        return `Demo ${server.plugins.foo.getBar()}`;
+      });
+    }
+  });
+}
+```
+
+This change might seem trivial, but its important for two reasons.
+
+First, the business logic built into `search` is now coupled to an object you created manually and have complete control over rather than hapi itself. This will allow us in a future step to replace the dependency on hapi without necessarily having to modify the business logic of the plugin.
+
+Second, it forced you to clearly define the dependencies you have on capabilities provided by core and by other plugins. This will help in a future step when you must replace those capabilities with services provided through the new platform.
+
+### Introduce new plugin definition shim
+
+While most plugin logic is now decoupled from hapi, the plugin definition itself still uses hapi to expose functionality for other plugins to consume and accesses functionality from both core and a different plugin.
+
+```ts
+// index.ts
+
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      const serverFacade: ServerFacade = {
+        plugins: {
+          elasticsearch: server.plugins.elasticsearch
+        }
+      }
+
+      // HTTP functionality from core
+      server.route({
+        path: '/api/demo_plugin/search',
+        method: 'POST',
+        async handler(request) {
+          const requestFacade: RequestFacade = {
+            headers: request.headers
+          };
+          search(serverFacade, requestFacade);
+        }
+      });
+
+      // Exposing functionality for other plugins
+      server.expose('getDemoBar', () => {
+        return `Demo ${server.plugins.foo.getBar()}`; // Accessing functionality from another plugin
+      });
+    }
+  });
+}
+```
+
+We now move this logic into a new plugin definition, which is based off of the conventions used in real new platform plugins. While the legacy plugin definition is in the root of the plugin, this new plugin definition will be under the plugin's `server/` directory since it is only the server-side plugin definition.
+
+```ts
+// server/plugin.ts
+import { ElasticsearchPlugin } from '../elasticsearch';
+
+interface CoreSetup {
+  elasticsearch: ElasticsearchPlugin // note: we know elasticsearch will move to core
+}
+
+interface FooSetup {
+  getBar(): string
+}
+
+interface DependenciesSetup {
+  foo: FooSetup
+}
+
+export type DemoPluginSetup = ReturnType<Plugin['setup']>;
+
+export class Plugin {
+  public setup(core: CoreSetup, dependencies: DependenciesSetup) {
+    const serverFacade: ServerFacade = {
+      plugins: {
+        elasticsearch: core.elasticsearch
+      }
+    }
+
+    // HTTP functionality from core
+    core.http.route({ // note: we know routes will be created on core.http
+      path: '/api/demo_plugin/search',
+      method: 'POST',
+      async handler(request) {
+        const requestFacade: RequestFacade = {
+          headers: request.headers
+        };
+        search(serverFacade, requestFacade);
+      }
+    });
+
+    // Exposing functionality for other plugins
+    return {
+      getDemoBar() {
+        return `Demo ${dependencies.foo.getBar()}`; // Accessing functionality from another plugin
+      }
+    };
+  }
+}
+```
+
+The legacy plugin definition is still the one that is being executed, so we now "shim" this new plugin definition into the legacy world by instantiating it and wiring it up inside of the legacy `init` function.
+
+```ts
+// index.ts
+
+import { Plugin } from './server/plugin';
+
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup = {
+        elasticsearch: server.plugins.elasticsearch,
+        http: {
+          route: server.route
+        }
+      };
+      // plugins shim
+      const dependenciesSetup = {
+        foo: server.plugins.foo
+      };
+
+      const demoSetup = new Plugin().setup(coreSetup, dependenciesSetup);
+
+      // continue to expose functionality to legacy plugins
+      server.expose('getDemoBar', demoSetup.getDemoBar);
+    }
+  });
+}
+```
+
+This introduces a layer between the legacy plugin system with hapi.js and the logic you want to move to the new plugin system. The functionality exposed through that layer is still provided from the legacy world and in some cases is still technically powered directly by hapi, but building this layer forced you to identify the remaining touch points into the legacy world and it provides you with control when you start migrating to new platform-backed services.
+
+### Switch to new platform services
+
+At this point, your legacy server-side plugin is described in the shape and conventions of the new plugin system, and all of the touch points with the legacy world and hapi.js have been isolated to the shims in the legacy plugin definition.
+
+Now the goal is to replace the legacy services backing your shims with services provided by the new platform instead.
+
+For the first time in this guide, your progress here is limited by the migration efforts within core and other plugins.
+
+As core capabilities are migrated to services in the new platform, they are made available as lifecycle contracts to the legacy `init` function through `server.newPlatform`. This allows you to adopt the new platform service APIs directly in your legacy plugin as they get rolled out.
+
+For the most part, care has been taken when migrating services to the new platform to preserve the existing APIs as much as possible, but there will be times when new APIs differ from the legacy equivalents. Start things off by having your core shim extend the equivalent new platform contract.
+
+```ts
+// index.ts
+
+init(server) {
+  // core shim
+  const coreSetup = {
+    ...server.newPlatform.setup.core,
+
+    elasticsearch: server.plugins.elasticsearch,
+    http: {
+      route: server.route
+    }
+  };
+}
+```
+
+If a legacy API differs from its new platform equivalent, some refactoring will be required. The best outcome comes from updating the plugin code to use the new API, but if that's not practical now, you can also create a facade inside your new plugin definition that is shaped like the legacy API but powered by the new API. Once either of these things is done, that override can be removed from the shim.
+
+Eventually, all overrides will be removed and your `coreSetup` shim is entirely powered by `server.newPlatform.setup.core`.
+
+```ts
+init(server) {
+  // core shim
+  const coreSetup = {
+    ...server.newPlatform.setup.core
+  };
+}
+```
+
+At this point, your legacy server-side plugin's logic is no longer coupled to the legacy core.
+
+A similar approach can be taken for your plugins shim. First, update your plugin shim in `init` to extend `server.newPlatform.setup.plugins`.
+
+```ts
+init(server) {
+  // plugins shim
+  const dependenciesSetup = {
+    ...server.newPlatform.setup.plugins,
+    foo: server.plugins.foo
+  };
+}
+```
+
+As the plugins you depend on are migrated to the new platform, their contract will be exposed through `server.newPlatform`, so the legacy override should be removed. Like in core, plugins should take care to preserve their existing APIs to make this step as seamless as possible.
+
+It is much easier to reliably make breaking changes to plugin APIs in the new platform than it is in the legacy world, so if you're planning a big change, consider doing it after your dependent plugins have migrated rather than as part of your own migration.
+
+Eventually, all overrides will be removed and your `dependenciesSetup` shim is entirely powered by `server.newPlatform.setup.plugins`.
+
+```ts
+init(server) {
+  // plugins shim
+  const dependenciesSetup = {
+    ...server.newPlatform.setup.plugins
+  };
+}
+```
+
+At this point, your legacy server-side plugin's logic is no longer coupled to legacy plugins.
+
+### Migrate to the new plugin system
+
+With both shims converted, you are now ready to complete your migration to the new platform.
+
+Details to come...
+
+
+## Browser-side plan of action
+
+### Decouple UI modules from angular.js
+### Move UI modules into plugins
+### Introduce new plugin definition shim
+### Introduce application shim
+### Switch to new platform services
+### Migrate to the new plugin system
+
+With all of your shims converted, you are now ready to complete your migration to the new platform.
+
+Details to come...
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Old stuff below this line.
+
+Most of the stuff below is still relevant, but I'm mid-overhaul of the structure of this document and the content below is from a prior draft.
 
 ### Plan of action
 
