@@ -17,18 +17,13 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-import elasticsearch from 'elasticsearch';
+import { services as CommonServiceProviders } from '../common/services';
+import { pageObjects as FunctionalPageObjectProviders } from './page_objects';
+import { services as FunctionalServiceProviders } from './services';
 
-import { DEFAULT_API_VERSION } from '../../../src/legacy/core_plugins/elasticsearch/lib/default_api_version';
+type ServiceProviders = typeof CommonServiceProviders & typeof FunctionalServiceProviders;
+type PageObjectProviders = typeof FunctionalPageObjectProviders;
 
-export function EsProvider({ getService }) {
-  const config = getService('config');
-
-  return new elasticsearch.Client({
-    apiVersion: DEFAULT_API_VERSION,
-    host: formatUrl(config.get('servers.elasticsearch')),
-    requestTimeout: config.get('timeouts.esRequestTimeout'),
-  });
-}
+export type FtrProviderContext = GenericFtrProviderContext<ServiceProviders, PageObjectProviders>;

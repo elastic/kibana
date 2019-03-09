@@ -17,27 +17,14 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+import { Suite } from 'mocha';
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-  ]);
-};
+// tslint:disable-next-line:no-namespace We need to use the namespace here to match the Mocha definition
+declare module 'mocha' {
+  interface Suite {
+    /**
+     * Assign tags to the test suite to determine in which CI job it should be run.
+     */
+    tags(tags: string[] | string): void;
+  }
+}

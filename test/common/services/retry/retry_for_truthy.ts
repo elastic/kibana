@@ -17,7 +17,36 @@
  * under the License.
  */
 
-export { KibanaServerProvider } from './kibana_server';
-export { EsProvider } from './es';
-export { EsArchiverProvider } from './es_archiver';
-export { RetryProvider } from './retry';
+import { ToolingLog } from '@kbn/dev-utils';
+
+import { retryForSuccess } from './retry_for_success';
+
+interface Options {
+  timeout: number;
+  methodName: string;
+  description: string;
+  block: () => Promise<boolean>;
+}
+
+export async function retryForTruthy(
+  log: ToolingLog,
+  { timeout, methodName, description, block }: Options
+) {
+  log.debug(`Waiting up to ${timeout}ms for ${description}...`);
+
+  await retryForSuccess(log, {
+    timeout,
+    methodName,
+    block,
+    onFailure: lastError => {
+      let msg = `timed out waiting for ${description}`;
+
+      if (lastError) {
+        msg = `${msg} -- last error: ${lastError.stack || lastError.message}`;
+      }
+
+      throw new Error(msg);
+    },
+    accept: result => Boolean(result),
+  });
+}

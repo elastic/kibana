@@ -17,27 +17,15 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+import { EsProvider } from './es';
+import { EsArchiverProvider } from './es_archiver';
+// @ts-ignore not TS yet
+import { KibanaServerProvider } from './kibana_server';
+import { RetryProvider } from './retry';
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-  ]);
+export const services = {
+  es: EsProvider,
+  esArchiver: EsArchiverProvider,
+  kibanaServer: KibanaServerProvider,
+  retry: RetryProvider,
 };

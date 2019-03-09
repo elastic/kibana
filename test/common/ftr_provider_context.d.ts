@@ -17,27 +17,8 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-  grunt.registerTask('jenkins:unit', [
-    'run:eslint',
-    'run:tslint',
-    'run:sasslint',
-    'run:checkTsProjects',
-    'run:typeCheck',
-    'run:i18nCheck',
-    'run:checkFileCasing',
-    'licenses',
-    'verifyDependencyVersions',
-    'run:verifyNotice',
-    'test:server',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser-ci',
-    'run:apiIntegrationTests',
-  ]);
-};
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

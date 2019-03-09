@@ -21,11 +21,17 @@ import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
 import { isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
-export async function run(body: (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void) {
+type RunFn = (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void;
+
+export interface Options {
+  helpDescription?: string;
+}
+
+export async function run(fn: RunFn, options: Options = {}) {
   const flags = getFlags(process.argv.slice(2));
 
   if (flags.help) {
-    process.stderr.write(getHelp());
+    process.stderr.write(getHelp(options));
     process.exit(1);
   }
 
@@ -35,7 +41,7 @@ export async function run(body: (args: { log: ToolingLog; flags: Flags }) => Pro
   });
 
   try {
-    await body({ log, flags });
+    await fn({ log, flags });
   } catch (error) {
     if (isFailError(error)) {
       log.error(error.message);
