@@ -48,7 +48,7 @@ export const code = (kibana: any) =>
           detach: Joi.boolean().default(false),
           // whether we want to show more language server logs
           verbose: Joi.boolean().default(false),
-        }),
+        }).default(),
         repos: Joi.array().default([]),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
