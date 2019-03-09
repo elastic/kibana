@@ -41,3 +41,14 @@ tar -cf "$HOME/.kibana/bootstrap_cache/$branch.tar" \
   .chromedriver;
 
 echo "created $HOME/.kibana/bootstrap_cache/$branch.tar"
+
+if [ "$branch" == "master" ]; then
+  echo "Creatting bootstrap cache for 7.x";
+
+  git clone https://github.com/elastic/kibana.git --branch 7.x --depth 1 /tmp/kibana-7.x
+  cd /tmp/kibana-7.x;
+  rm -rf $KIBANA_DIR;
+  ./.ci/packer_cache.sh;
+  cd ~
+  rm -rf /tmp/kibana-7.x;
+fi
