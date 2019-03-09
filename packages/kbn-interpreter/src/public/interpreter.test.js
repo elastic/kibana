@@ -67,7 +67,7 @@ describe('kbn-interpreter/interpreter', () => {
 
     expect(register).toHaveBeenCalledTimes(2);
 
-    const [ hello, world ] = register.mock.calls.map(([fn]) => fn());
+    const [hello, world] = register.mock.calls.map(([fn]) => fn());
 
     expect(hello.name).toEqual('hello');
     expect(typeof hello.fn).toEqual('function');
@@ -85,14 +85,15 @@ describe('kbn-interpreter/interpreter', () => {
       pathname: FUNCTIONS_URL,
       method: 'POST',
       body: JSON.stringify({
-        functions: [{
-          id: 1,
-          functionName: 'hello',
-          args,
-          context,
-        }]
+        functions: [
+          {
+            functionName: 'hello',
+            args,
+            context,
+            id: 1,
+          },
+        ],
       }),
     });
   });
-
 });
