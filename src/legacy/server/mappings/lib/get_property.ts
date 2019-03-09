@@ -18,40 +18,27 @@
  */
 
 import toPath from 'lodash/internal/toPath';
+import { FieldMapping, IndexMapping } from '../types';
 
-/**
- *  Recursively read properties from the mapping object of type "object"
- *  until the `path` is resolved.
- *  @param  {EsObjectMapping} mapping
- *  @param  {Array<string>} path
- *  @return {Objects|undefined}
- */
-function getPropertyMappingFromObjectMapping(mapping, path) {
-  const props = mapping && (mapping.properties || mapping.fields);
+function getPropertyMappingFromObjectMapping(
+  mapping: IndexMapping | FieldMapping,
+  path: string[]
+): FieldMapping | undefined {
+  const props =
+    (mapping && (mapping as IndexMapping).properties) ||
+    (mapping && (mapping as FieldMapping).fields);
 
   if (!props) {
     return undefined;
   }
 
   if (path.length > 1) {
-    return getPropertyMappingFromObjectMapping(
-      props[path[0]],
-      path.slice(1)
-    );
+    return getPropertyMappingFromObjectMapping(props[path[0]], path.slice(1));
   } else {
     return props[path[0]];
   }
 }
 
-/**
- *  Get the mapping for a specific property within the root type of the EsMappingsDsl.
- *  @param  {EsMappingsDsl} mappings
- *  @param  {string|Array<string>} path
- *  @return {Object|undefined}
- */
-export function getProperty(mappings, path) {
-  return getPropertyMappingFromObjectMapping(
-    mappings,
-    toPath(path)
-  );
+export function getProperty(mappings: IndexMapping | FieldMapping, path: string | string[]) {
+  return getPropertyMappingFromObjectMapping(mappings, toPath(path));
 }

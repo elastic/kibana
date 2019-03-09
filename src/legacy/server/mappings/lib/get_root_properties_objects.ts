@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { IndexMapping, MappingProperties } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -34,20 +35,18 @@ import { getRootProperties } from './get_root_properties';
  *  @return {EsPropertyMappings}
  */
 
-const blacklist = [
-  'migrationVersion',
-  'references',
-];
+const blacklist = ['migrationVersion', 'references'];
 
-export function getRootPropertiesObjects(mappings) {
+export function getRootPropertiesObjects(mappings: IndexMapping) {
   const rootProperties = getRootProperties(mappings);
-  return Object.entries(rootProperties).reduce((acc, [key, value]) => {
-
-    // we consider the existence of the properties or type of object to designate that this is an object datatype
-    if (!blacklist.includes(key) && (value.properties || value.type === 'object')) {
-      acc[key] = value;
-    }
-
-    return acc;
-  }, {});
+  return Object.entries(rootProperties).reduce(
+    (acc, [key, value]) => {
+      // we consider the existence of the properties or type of object to designate that this is an object datatype
+      if (!blacklist.includes(key) && (value.properties || value.type === 'object')) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as MappingProperties
+  );
 }

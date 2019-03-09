@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { IndexMapping } from '../types';
+
 /**
  *  Get the property mappings for the root type in the EsMappingsDsl
  *
@@ -31,14 +33,11 @@
  *
  *  This data can be found at `{indexName}.mappings.{typeName}.properties`
  *  in the es indices.get() response.
- *
- *  @param  {EsMappingsDsl} mapping
- *  @return {EsPropertyMappings}
  */
-export function getRootProperties(mapping) {
-  if (mapping.type !== 'object' && !mapping.properties) {
+export function getRootProperties(mapping: IndexMapping) {
+  if (!mapping.properties) {
     throw new TypeError('Unable to get property names non-object root mapping');
   }
 
-  return mapping.properties || {};
+  return mapping.properties;
 }

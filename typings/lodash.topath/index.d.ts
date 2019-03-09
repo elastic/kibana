@@ -17,12 +17,8 @@
  * under the License.
  */
 
-/**
- *  Get the names of the types defined in the EsMappingsDsl
- *
- *  @param  {EsMappingsDsl} mappings
- *  @return {Array<string>}
- */
-export function getTypes(mappings) {
-  return Object.keys(mappings).filter(type => type !== '_default_');
+declare function toPath(value: string | string[]): string[]
+
+declare module 'lodash/internal/toPath' {
+  export = toPath;
 }
