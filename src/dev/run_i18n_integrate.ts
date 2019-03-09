@@ -47,9 +47,30 @@ run(
       );
     }
 
-    if (Array.isArray(target)) {
+    if (typeof target === 'boolean' || Array.isArray(target)) {
       throw createFailError(
-        `${chalk.white.bgRed(' I18N ERROR ')} --target should be specified only once.`
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --target should be specified only once and must have a value.`
+      );
+    }
+
+    if (typeof path === 'boolean' || typeof includeConfig === 'boolean') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
+      );
+    }
+
+    if (
+      typeof ignoreIncompatible !== 'boolean' ||
+      typeof ignoreUnused !== 'boolean' ||
+      typeof ignoreMissing !== 'boolean' ||
+      typeof dryRun !== 'boolean'
+    ) {
+      throw createFailError(
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} --ignore-incompatible, --ignore-unused, --ignore-missing, and --dry-run can't have values`
       );
     }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 
 const mockCreatePluginStartContext = jest.fn();
 jest.mock('./plugin_context', () => ({
@@ -27,11 +27,12 @@ jest.mock('./plugin_context', () => ({
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { logger } from '../logging/__mocks__';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { Plugin, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
 
+const logger = loggingServiceMock.create();
 function createPlugin(
   id: string,
   {
@@ -60,10 +61,9 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-let startDeps: { elasticsearch: ElasticsearchServiceStart };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
-  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),

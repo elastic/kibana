@@ -84,7 +84,6 @@ fi
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
-hash -r
 
 ###
 ### downloading yarn
@@ -102,7 +101,6 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-hash -r
 
 ###
 ### use the chromedriver cache if it exists

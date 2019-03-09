@@ -12,6 +12,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
       values={Object {}}
     />
   }
+  labelType="label"
 >
   <EuiBasicTable
     className="kbnFieldFormatEditor__samples"

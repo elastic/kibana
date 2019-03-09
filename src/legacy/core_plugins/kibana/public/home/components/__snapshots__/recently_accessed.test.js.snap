@@ -86,7 +86,6 @@ exports[`render 1`] = `
           >
             <EuiIcon
               color="subdued"
-              size="m"
               type="dot"
             />
           </EuiText>
