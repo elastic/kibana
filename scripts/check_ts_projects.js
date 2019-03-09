@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
-
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+require('../src/setup_node_env');
+require('../src/dev/typescript/run_check_ts_projects_cli').runCheckTsProjectsCli();

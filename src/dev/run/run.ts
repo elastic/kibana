@@ -17,37 +17,39 @@
  * under the License.
  */
 
-import { inspect } from 'util';
+import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
+import { isFailError } from './fail';
+import { Flags, getFlags, getHelp } from './flags';
 
-const FAIL_TAG = Symbol('fail error');
+type RunFn = (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void;
 
-export function createFailError(reason, exitCode = 1) {
-  const error = new Error(reason);
-  error.exitCode = exitCode;
-  error[FAIL_TAG] = true;
-  return error;
+export interface Options {
+  helpDescription?: string;
 }
 
-export function isFailError(error) {
-  return Boolean(error && error[FAIL_TAG]);
-}
+export async function run(fn: RunFn, options: Options = {}) {
+  const flags = getFlags(process.argv.slice(2));
 
-export function combineErrors(errors) {
-  if (errors.length === 1) {
-    return errors[0];
+  if (flags.help) {
+    process.stderr.write(getHelp(options));
+    process.exit(1);
   }
 
-  const exitCode = errors
-    .filter(isFailError)
-    .reduce((acc, error) => Math.max(acc, error.exitCode), 1);
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(flags),
+    writeTo: process.stdout,
+  });
 
-  const message = errors.reduce((acc, error) => {
+  try {
+    await fn({ log, flags });
+  } catch (error) {
     if (isFailError(error)) {
-      return acc + '\n' + error.message;
+      log.error(error.message);
+      process.exit(error.exitCode);
+    } else {
+      log.error('UNHANDLED ERROR');
+      log.error(error);
+      process.exit(1);
     }
-
-    return acc + `\nUNHANDLED ERROR\n${inspect(error)}`;
-  }, '');
-
-  return createFailError(`${errors.length} errors:\n${message}`, exitCode);
+  }
 }
