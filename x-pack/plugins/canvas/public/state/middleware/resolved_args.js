@@ -5,7 +5,7 @@
  */
 
 import { getAllElements } from '../selectors/workpad';
-import { clearSome } from '../actions/resolved_args';
+import { clearValues } from '../actions/resolved_args';
 
 /**
  * This middleware is responsible for keeping the resolved_args collection in transient state
@@ -26,6 +26,6 @@ export const resolvedArgs = ({ dispatch, getState }) => next => action => {
   // If we have some dead elements, we need to clear them from resolved_args collection
   // in transient state.
   if (deadIds.length > 0) {
-    dispatch(clearSome(deadIds));
+    dispatch(clearValues(deadIds));
   }
 };
