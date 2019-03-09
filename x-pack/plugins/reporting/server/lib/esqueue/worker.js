@@ -203,7 +203,7 @@ export class Worker extends events.EventEmitter {
       const cancellationToken = new CancellationToken();
       const jobSource = job._source;
 
-      Promise.resolve(this.workerFn.call(null, jobSource.jobtype, jobSource.payload, cancellationToken))
+      Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
         .then(res => {
           isResolved = true;
           resolve(res);
