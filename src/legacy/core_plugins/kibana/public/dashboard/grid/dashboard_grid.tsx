@@ -117,16 +117,13 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 import { PanelData } from '../types';
 
-interface Props {
-  // panels: PanelData[];
+interface Props extends ReactIntl.InjectedIntlProps {
   panels: PanelsMap;
   getEmbeddableFactory: (panelType: string) => {};
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  // todo hash of panels?
   onPanelsUpdated: (updatedPanels: PanelsMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
-  intl: any; // todo
 }
 
 interface State {

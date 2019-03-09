@@ -31,14 +31,14 @@ export function DashboardViewport({
   isFullScreenMode,
   onExitFullScreenMode,
 }: {
-  maximizedPanelId: string; // some of these may be optional
+  maximizedPanelId: string;
   getEmbeddableFactory: () => {}; // todo
   panelCount: number;
   title: string;
   description: string;
   useMargins: boolean;
   isFullScreenMode: boolean;
-  onExitFullScreenMode: () => {}; // todo
+  onExitFullScreenMode: () => void;
 }) {
   return (
     <div
