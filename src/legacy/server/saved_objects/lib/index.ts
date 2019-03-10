@@ -17,6 +17,5 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
-
-export function MockServer(config?: { [key: string]: any }): Hapi.Server;
+export { importSavedObjects, resolveImportConflicts } from './import';
+export { getSortedObjectsForExport } from './export';

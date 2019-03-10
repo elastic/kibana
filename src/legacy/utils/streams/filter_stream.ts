@@ -17,9 +17,17 @@
  * under the License.
  */
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { Transform } from 'stream';
 
-export function createFailError(msg: string, exitCode?: number): Error;
-export function run(
-  body: (args: { flags: Record<string, any>; log: ToolingLog }) => void
-): Promise<void>;
+export function createFilterStream<T>(fn: (obj: T) => boolean) {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      const canPushDownStream = fn(obj);
+      if (canPushDownStream) {
+        this.push(obj);
+      }
+      done();
+    },
+  });
+}

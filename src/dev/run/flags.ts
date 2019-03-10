@@ -21,8 +21,21 @@ import { relative } from 'path';
 
 import getopts from 'getopts';
 
-export function getFlags(argv) {
-  return getopts(argv, {
+import { Options } from './run';
+
+export interface Flags {
+  verbose: boolean;
+  quiet: boolean;
+  silent: boolean;
+  debug: boolean;
+  help: boolean;
+  _: string[];
+
+  [key: string]: undefined | boolean | string | string[];
+}
+
+export function getFlags(argv: string[]): Flags {
+  const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
     alias: {
       v: 'verbose',
     },
@@ -32,16 +45,25 @@ export function getFlags(argv) {
       silent: false,
       debug: false,
       help: false,
-    }
+    },
   });
+
+  return {
+    verbose,
+    quiet,
+    silent,
+    debug,
+    help,
+    _,
+    ...others,
+  };
 }
 
-export function getHelp() {
-  return (
-    `
-  node ${relative(process.cwd(), process.argv[1], '.js')}
+export function getHelp(options: Options) {
+  return `
+  node ${relative(process.cwd(), process.argv[1])}
 
-  Runs a dev task
+  ${options.helpDescription || 'Runs a dev task'}
 
   Options:
     --verbose, -v      Log verbosely
@@ -50,6 +72,5 @@ export function getHelp() {
     --silent           Don't log anything
     --help             Show this message
 
-`
-  );
+`;
 }

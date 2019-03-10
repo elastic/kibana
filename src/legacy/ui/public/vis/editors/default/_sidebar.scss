@@ -136,7 +136,6 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  line-height: 1.5;
   white-space: nowrap;
 
   + * {
@@ -158,6 +157,7 @@
   display: flex;
   align-items: center;
   margin-right: $euiSizeXS;
+  line-height: $euiLineHeight;
 }
 
 .visEditorSidebar__collapsibleTitleText {
