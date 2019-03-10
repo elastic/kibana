@@ -18,6 +18,7 @@
  */
 
 import React from 'react';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
 import { DashboardGrid } from '../grid';
 
@@ -32,7 +33,7 @@ export function DashboardViewport({
   onExitFullScreenMode,
 }: {
   maximizedPanelId: string;
-  getEmbeddableFactory: () => {}; // todo
+  getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   panelCount: number;
   title: string;
   description: string;
