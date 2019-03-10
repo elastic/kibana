@@ -28,9 +28,8 @@ export const buildPointSeriesData = (table, dimensions) => {
     aspects: getAspects(table, dimensions),
   };
 
-  initXAxis(chart);
+  initXAxis(chart, table);
   initYAxis(chart);
-
 
   if (chart.aspects.x[0].params.date) {
     orderedDateAxis(chart);

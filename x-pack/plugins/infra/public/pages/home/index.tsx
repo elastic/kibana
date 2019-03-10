@@ -14,6 +14,7 @@ import { HomeToolbar } from './toolbar';
 import { DocumentTitle } from '../../components/document_title';
 import { NoIndices } from '../../components/empty_states/no_indices';
 import { Header } from '../../components/header';
+import { HelpCenterContent } from '../../components/help_center_content';
 import { ColumnarPage } from '../../components/page';
 
 import { SourceConfigurationFlyout } from '../../components/source_configuration';
@@ -41,6 +42,13 @@ export const HomePage = injectI18n(
             title={intl.formatMessage({
               id: 'xpack.infra.homePage.documentTitle',
               defaultMessage: 'Infrastructure',
+            })}
+          />
+          <HelpCenterContent
+            feedbackLink="https://discuss.elastic.co/c/infrastructure"
+            feedbackLinkText={intl.formatMessage({
+              id: 'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
+              defaultMessage: 'Provide feedback for Infrastructure',
             })}
           />
           <Header
