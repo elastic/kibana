@@ -22,10 +22,8 @@ import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
-import { BeatsTableType, Table } from '../../components/table';
-import { beatsListActions } from '../../components/table/action_schema';
 import { AssignmentActionType } from '../../components/table/table';
-import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
+import { BeatsCMTable } from '../../connected_views/beats_table';
 import { AppPageProps } from '../../frontend_types';
 
 interface PageProps extends AppPageProps {
@@ -191,94 +189,14 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
           })}
           path={`/overview/enrolled_beats`}
         />
-        <WithKueryAutocompletion libs={this.props.libs} fieldPrefix="beat">
-          {autocompleteProps => (
-            <Table
-              kueryBarProps={{
-                ...autocompleteProps,
-                filterQueryDraft: 'false', // todo
-                isValid: this.props.libs.elasticsearch.isKueryValid(
-                  this.props.urlState.beatsKBar || ''
-                ),
-                onChange: (value: any) => {
-                  this.props.setUrlState({ beatsKBar: value });
+        <BeatsCMTable
+          hasSearch={true}
+          forAttachedTag="none"
+          actionHandler={async (action: AssignmentActionType, payload: any) => {
+            // Something
+          }}
+        />
 
-                  this.updateBeatsData(value);
-                },
-                onSubmit: () => null, // todo
-                value: this.props.urlState.beatsKBar || '',
-              }}
-              actions={beatsListActions}
-              actionData={{
-                tags: this.state.assignmentOptions,
-              }}
-              actionHandler={async (action: AssignmentActionType, payload: any) => {
-                const selectedBeats = this.getSelectedBeats();
-                if (!selectedBeats.length) {
-                  return false;
-                }
-
-                switch (action) {
-                  case AssignmentActionType.Assign:
-                    const assignments = this.props.libs.beats.createBeatTagAssignments(
-                      selectedBeats,
-                      payload
-                    );
-
-                    let status;
-                    let assignType: 'added' | 'removed';
-                    if (
-                      selectedBeats.some(
-                        beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
-                      )
-                    ) {
-                      status = await this.props.libs.beats.assignTagsToBeats(assignments);
-                      assignType = 'removed';
-                    } else {
-                      status = await this.props.libs.beats.assignTagsToBeats(assignments);
-                      assignType = 'added';
-                    }
-
-                    if (status && !status.find(s => !s.success)) {
-                      await this.updateBeatsData();
-                      this.notifyUpdatedTagAssociation(
-                        assignType,
-                        this.getSelectedBeats(),
-                        payload
-                      );
-                    } else if (status && status.find(s => !s.success)) {
-                      // @ts-ignore
-                      alert(status.find(s => !s.success).error.message);
-                    }
-
-                    break;
-                  case AssignmentActionType.Delete:
-                    for (const beat of selectedBeats) {
-                      await this.props.libs.beats.update(beat.id, { active: false });
-                    }
-
-                    // because the compile code above has a very minor race condition, we wait,
-                    // the max race condition time is really 10ms but doing 100 to be safe
-                    setTimeout(async () => {
-                      await this.updateBeatsData();
-                    }, 100);
-
-                    this.notifyBeatDisenrolled(this.getSelectedBeats());
-                    break;
-                  case AssignmentActionType.Reload:
-                    const assignmentOptions = await this.props.libs.tags.getassignableTagsForBeats(
-                      this.getSelectedBeats()
-                    );
-                    this.setState({ assignmentOptions });
-                    break;
-                }
-              }}
-              items={this.state.beats}
-              ref={this.tableRef}
-              type={BeatsTableType}
-            />
-          )}
-        </WithKueryAutocompletion>
         <EuiGlobalToastList
           toasts={this.state.notifications}
           dismissToast={() => this.setState({ notifications: [] })}

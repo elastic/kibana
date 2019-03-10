@@ -25,7 +25,6 @@ export enum AssignmentActionType {
 }
 
 export interface KueryBarProps {
-  filterQueryDraft: string;
   isLoadingSuggestions: boolean;
   isValid: boolean;
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
