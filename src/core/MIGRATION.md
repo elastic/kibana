@@ -567,6 +567,10 @@ Details to come...
 
 ## Browser-side plan of action
 
+It is generally a much greater challenge preparing legacy browser-side code for the new platform than it is server-side, and as such there are a few more steps. In general, the level of effort here is proportional to the extent to which a plugin is dependent on angular.js.
+
+To complicate matters further, a significant amount of the business logic in Kibana's client-side code exists inside the `ui/public` directory (aka ui modules), and all of that must be migrated as well. Unlike the server-side code where the order in which you migrated plugins was not particularly important, it's important that UI modules be addressed as soon as possible.
+
 ### Decouple UI modules from angular.js
 ### Move UI modules into plugins
 ### Introduce new plugin definition shim
