@@ -146,8 +146,7 @@ class DashboardGridUi extends React.Component<Props, State> {
   // https://github.com/elastic/kibana/issues/14802 for more info.
   // This is probably a better implementation anyway so the handlers are cached.
   // @type {Object.<string, EmbeddableFactory>}
-  // todo
-  private embeddableFactoryMap: { [s: string]: any } = {};
+  private embeddableFactoryMap: { [s: string]: EmbeddableFactory } = {};
 
   constructor(props: Props) {
     super(props);
