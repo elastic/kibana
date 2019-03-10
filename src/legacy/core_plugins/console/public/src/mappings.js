@@ -264,9 +264,9 @@ function getPromise(settingsKey, changedFields) {
     templates: { path: '_template' },
   };
   let settingsPromise;
+  changedFields = changedFields ? changedFields : autocompleteSettings;
   // Fetch autocomplete info if setting is set to true, and if user has made changes
-  if (autocompleteSettings[settingsKey]
-    && ((changedFields && changedFields[settingsKey]) || typeof changedFields === 'undefined')) {
+  if (autocompleteSettings[settingsKey] && changedFields[settingsKey]) {
     settingsPromise = es.send('GET', settingsMetadata[settingsKey].path, null, null, true);
   } else {
     settingsPromise = new $.Deferred();
