@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
 import { createSelector } from 'reselect';
@@ -18,6 +19,31 @@ import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
 export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
+export const TIMEPICKER_DEFAULTS = {
+  rangeFrom: 'now-24h',
+  rangeTo: 'now',
+  refreshPaused: 'true',
+  refreshInterval: '0'
+};
+
+function calculateTimePickerDefaults() {
+  const parsed = {
+    from: datemath.parse(TIMEPICKER_DEFAULTS.rangeFrom),
+    // roundUp: true is required for the quick select relative date values to work properly
+    to: datemath.parse(TIMEPICKER_DEFAULTS.rangeTo, { roundUp: true })
+  };
+
+  const result: IUrlParams = {};
+  if (parsed.from) {
+    result.start = parsed.from.toISOString();
+  }
+  if (parsed.to) {
+    result.end = parsed.to.toISOString();
+  }
+  return result;
+}
+
+const INITIAL_STATE: IUrlParams = calculateTimePickerDefaults();
 
 interface LocationAction {
   type: typeof LOCATION_UPDATE;
@@ -25,9 +51,9 @@ interface LocationAction {
 }
 interface TimepickerAction {
   type: typeof TIMEPICKER_UPDATE;
-  time: { min: number; max: number };
+  time: { min: string; max: string };
 }
-type Action = LocationAction | TimepickerAction;
+export type APMAction = LocationAction | TimepickerAction;
 
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
@@ -37,7 +63,7 @@ type Action = LocationAction | TimepickerAction;
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = {}, action: Action) {
+export function urlParamsReducer(state = INITIAL_STATE, action: APMAction) {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -74,7 +100,7 @@ export function urlParamsReducer(state = {}, action: Action) {
         detailTab: toString(detailTab),
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
-        kuery: legacyDecodeURIComponent(kuery as string | undefined),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
         processorEvent,
@@ -86,15 +112,19 @@ export function urlParamsReducer(state = {}, action: Action) {
     }
 
     case TIMEPICKER_UPDATE:
-      return { ...state, start: action.time.min, end: action.time.max };
+      return {
+        ...state,
+        start: action.time.min,
+        end: action.time.max
+      };
 
     default:
       return state;
   }
 }
 
-function toNumber(value?: string | string[]) {
-  if (value !== undefined && !Array.isArray(value)) {
+export function toNumber(value?: string) {
+  if (value !== undefined) {
     return parseInt(value, 10);
   }
 }
@@ -109,6 +139,10 @@ function toString(str?: string | string[]) {
     return;
   }
   return str;
+}
+
+export function toBoolean(value?: string) {
+  return value === 'true';
 }
 
 function getPathAsArray(pathname: string) {
@@ -147,8 +181,13 @@ function getPathParams(pathname: string) {
   }
 }
 
+interface TimeUpdate {
+  min: string;
+  max: string;
+}
+
 // ACTION CREATORS
-export function updateTimePicker(time: string) {
+export function updateTimePicker(time: TimeUpdate) {
   return { type: TIMEPICKER_UPDATE, time };
 }
 
@@ -173,14 +212,14 @@ export const getUrlParams = createSelector(
 
 export interface IUrlParams {
   detailTab?: string;
-  end?: number;
+  end?: string;
   errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
   serviceName?: string;
   sortField?: string;
-  sortDirection?: 'asc' | 'desc';
-  start?: number;
+  sortDirection?: string;
+  start?: string;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;
