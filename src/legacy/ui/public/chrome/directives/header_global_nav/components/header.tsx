@@ -45,11 +45,6 @@ import {
   // @ts-ignore
   EuiNavDrawer,
   // @ts-ignore
-  EuiNavDrawerFlyout,
-  // @ts-ignore
-  EuiNavDrawerMenu,
-  EuiOutsideClickDetector,
-  // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
 
@@ -116,15 +111,6 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 }
 
 interface State {
-  isCollapsed: boolean;
-  flyoutIsCollapsed: boolean;
-  flyoutIsAnimating: boolean;
-  navFlyoutTitle: string;
-  navFlyoutContent: [];
-  mobileIsHidden: boolean;
-  showScrollbar: boolean;
-  outsideClickDisabled: boolean;
-  isManagingFocus: boolean;
   navLinks: Array<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: Array<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
   forceNavigation: boolean;
@@ -132,23 +118,11 @@ interface State {
 
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
-  private timeoutID?: ReturnType<typeof setTimeout>;
-  private timeoutExpand?: ReturnType<typeof setTimeout>;
-  private timeoutScrollbar?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      isCollapsed: true,
-      flyoutIsCollapsed: true,
-      flyoutIsAnimating: false,
-      navFlyoutTitle: '',
-      navFlyoutContent: [],
-      mobileIsHidden: true,
-      showScrollbar: false,
-      outsideClickDisabled: true,
-      isManagingFocus: false,
       navLinks: [],
       recentlyAccessed: [],
       forceNavigation: false,
@@ -203,6 +177,8 @@ class HeaderUI extends Component<Props, State> {
     );
   }
 
+  public setNavDrawerRef = ref => (this.navDrawerRef = ref);
+
   public render() {
     const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$ } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
@@ -213,6 +189,24 @@ class HeaderUI extends Component<Props, State> {
 
     const leftNavControls = navControls.bySide[NavControlSide.Left];
     const rightNavControls = navControls.bySide[NavControlSide.Right];
+
+    let navLinksArray = navLinks.map(navLink =>
+      navLink.hidden
+        ? null
+        : {
+            key: navLink.id,
+            label: navLink.title,
+            href: navLink.href,
+            iconType: navLink.euiIconType,
+            size: 's',
+            style: { color: 'inherit' },
+            'aria-label': navLink.title,
+            isActive: navLink.active,
+            'data-test-subj': 'appLink',
+          }
+    );
+    // filter out the null items
+    navLinksArray = navLinksArray.filter(item => item !== null);
 
     return (
       <Fragment>
@@ -238,85 +232,39 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiOutsideClickDetector
-          onOutsideClick={() => this.collapseDrawer()}
-          isDisabled={this.state.outsideClickDisabled}
-        >
-          <EuiNavDrawer
-            isCollapsed={this.state.isCollapsed}
-            flyoutIsCollapsed={this.state.flyoutIsCollapsed}
-            flyoutIsAnimating={this.state.flyoutIsAnimating}
-            onMouseEnter={this.expandDrawer}
-            onFocus={this.expandDrawer}
-            onBlur={this.focusOut}
-            onMouseLeave={this.collapseDrawer}
-            mobileIsHidden={this.state.mobileIsHidden}
-            showScrollbar={this.state.showScrollbar}
-            data-test-subj={classNames(
-              'navDrawer',
-              this.state.flyoutIsAnimating
-                ? null
-                : this.state.isCollapsed
-                ? 'collapsed'
-                : 'expanded'
-            )}
-          >
-            <EuiNavDrawerMenu id="navDrawerMenu" onClick={this.onNavClick}>
-              <EuiListGroup>
-                <EuiListGroupItem
-                  label="Recently viewed"
-                  iconType="clock"
-                  size="s"
-                  style={{ color: 'inherit' }}
-                  aria-label="Recently viewed items"
-                  onClick={() => this.expandFlyout()}
-                  isDisabled={recentlyAccessed.length > 0 ? false : true}
-                  extraAction={{
-                    color: 'subdued',
-                    iconType: 'arrowRight',
-                    iconSize: 's',
-                    'aria-label': 'Expand to view recent apps and objects',
-                    onClick: () => this.expandFlyout(),
-                    alwaysShow: true,
-                  }}
-                />
-              </EuiListGroup>
-              <EuiHorizontalRule margin="none" />
-              <EuiListGroup data-test-subj="appsMenu">
-                {navLinks.map(navLink =>
-                  navLink.hidden ? null : (
-                    <EuiListGroupItem
-                      key={navLink.id}
-                      label={navLink.title}
-                      href={navLink.href}
-                      iconType={navLink.euiIconType}
-                      size="s"
-                      style={{ color: 'inherit' }}
-                      aria-label={navLink.title}
-                      isActive={navLink.active}
-                      data-test-subj="appLink"
-                    />
-                  )
-                )}
-              </EuiListGroup>
-            </EuiNavDrawerMenu>
-            <EuiNavDrawerFlyout
-              id="navDrawerFlyout"
-              title="Recent items"
-              isCollapsed={this.state.flyoutIsCollapsed}
-              listItems={recentlyAccessed.map(item => ({
-                label: item.label,
-                href: item.href,
-                iconType: item.euiIconType,
-                size: 's',
-                style: { color: 'inherit' },
-                'aria-label': item.label,
-              }))}
-              onMouseLeave={this.collapseFlyout}
-              wrapText={true}
+        <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj={classNames('navDrawer')}>
+          <EuiListGroup>
+            <EuiListGroupItem
+              label="Recently viewed"
+              iconType="clock"
+              size="s"
+              style={{ color: 'inherit' }}
+              aria-label="Recently viewed items"
+              isDisabled={recentlyAccessed.length > 0 ? false : true}
+              flyoutMenu={{
+                title: 'Recent items',
+                listItems: recentlyAccessed.map(item => ({
+                  label: item.label,
+                  href: item.href,
+                  iconType: item.euiIconType,
+                  size: 's',
+                  style: { color: 'inherit' },
+                  'aria-label': item.label,
+                })),
+              }}
+              extraAction={{
+                color: 'subdued',
+                iconType: 'arrowRight',
+                iconSize: 's',
+                'aria-label': 'Expand to view recent apps and objects',
+                onClick: this.expandFlyout,
+                alwaysShow: true,
+              }}
             />
-          </EuiNavDrawer>
-        </EuiOutsideClickDetector>
+          </EuiListGroup>
+          <EuiHorizontalRule margin="none" />
+          <EuiListGroup data-test-subj="appsMenu" listItems={navLinksArray} />
+        </EuiNavDrawer>
       </Fragment>
     );
   }
@@ -360,120 +308,6 @@ class HeaderUI extends Component<Props, State> {
       // starting a digest cycle/attempting to handle it in the router.
       event.stopPropagation();
     }
-  };
-
-  private toggleOpen = () => {
-    this.setState({
-      mobileIsHidden: !this.state.mobileIsHidden,
-    });
-
-    setTimeout(() => {
-      this.setState({
-        outsideClickDisabled: this.state.mobileIsHidden ? true : false,
-      });
-    }, this.getTimeoutMs(350));
-  };
-
-  private expandDrawer = () => {
-    this.timeoutExpand = setTimeout(() => {
-      this.setState({
-        isCollapsed: false,
-      });
-    }, this.getTimeoutMs(750));
-
-    this.timeoutScrollbar = setTimeout(() => {
-      this.setState({
-        showScrollbar: true,
-      });
-    }, this.getTimeoutMs(1200));
-
-    // This prevents the drawer from collapsing when tabbing through children
-    // by clearing the timeout thus cancelling the onBlur event (see focusOut).
-    // This means isManagingFocus remains true as long as a child element
-    // has focus. This is the case since React bubbles up onFocus and onBlur
-    // events from the child elements.
-
-    if (this.timeoutID) {
-      clearTimeout(this.timeoutID);
-    }
-
-    if (!this.state.isManagingFocus) {
-      this.setState({
-        isManagingFocus: true,
-      });
-    }
-  };
-
-  private collapseDrawer = () => {
-    // Stop the expand animation
-    if (this.timeoutExpand) {
-      clearTimeout(this.timeoutExpand);
-    }
-
-    if (this.timeoutScrollbar) {
-      clearTimeout(this.timeoutScrollbar);
-    }
-
-    this.setState({
-      flyoutIsAnimating: false,
-      isCollapsed: true,
-      flyoutIsCollapsed: true,
-      mobileIsHidden: true,
-      showScrollbar: false,
-      outsideClickDisabled: true,
-    });
-
-    // Scrolls the menu and flyout back to top when the nav drawer collapses
-    const menuEl = document.getElementById('navDrawerMenu');
-    if (menuEl) {
-      menuEl.scrollTop = 0;
-    }
-
-    const flyoutEl = document.getElementById('navDrawerFlyout');
-    if (flyoutEl) {
-      flyoutEl.scrollTop = 0;
-    }
-  };
-
-  private focusOut = () => {
-    // This collapses the drawer when no children have focus (i.e. tabbed out).
-    // In other words, if focus does not bubble up from a child element, then
-    // the drawer will collapse. See the corresponding block in expandDrawer
-    // (called by onFocus) which cancels this operation via clearTimeout.
-    this.timeoutID = setTimeout(() => {
-      if (this.state.isManagingFocus) {
-        this.setState({
-          isManagingFocus: false,
-        });
-
-        this.collapseDrawer();
-      }
-    }, 0);
-  };
-
-  private expandFlyout = () => {
-    this.setState(() => ({
-      flyoutIsCollapsed: !this.state.flyoutIsCollapsed,
-    }));
-
-    this.setState({
-      flyoutIsAnimating: true,
-    });
-  };
-
-  private collapseFlyout = () => {
-    this.setState({ flyoutIsAnimating: true });
-
-    setTimeout(() => {
-      this.setState({
-        flyoutIsCollapsed: true,
-      });
-    }, this.getTimeoutMs(250));
-  };
-
-  private getTimeoutMs = (defaultTimeout: number) => {
-    const uiSettings = chrome.getUiSettingsClient();
-    return uiSettings.get('accessibility:disableAnimations') ? 0 : defaultTimeout;
   };
 }
 
