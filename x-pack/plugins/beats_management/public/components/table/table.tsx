@@ -48,7 +48,7 @@ interface TableProps {
   };
   onTableChange?: (index: number, size: number) => void;
   type: TableType;
-  actionHandler?(action: AssignmentActionType, payload?: any): void;
+  actionHandler?(action: AssignmentActionType, payload?: any, selection?: any[]): void;
 }
 
 interface TableState {
@@ -81,8 +81,18 @@ export class Table extends React.Component<TableProps, TableState> {
   };
 
   public actionHandler = (action: AssignmentActionType, payload?: any): void => {
+    const selectedIds = this.state.selection.map((item: any) => item.id);
+
+    const selectedItems: any[] = [];
+    selectedIds.forEach((id: any) => {
+      const item = this.props.items.list.find(b => b.id === id);
+      if (item) {
+        selectedItems.push(item);
+      }
+    });
+
     if (this.props.actionHandler) {
-      this.props.actionHandler(action, payload);
+      this.props.actionHandler(action, payload, selectedItems);
     }
   };
 

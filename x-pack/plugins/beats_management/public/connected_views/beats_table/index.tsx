@@ -41,11 +41,21 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
   useEffect(
     () => {
       const load = async () => {
-        const loadedBeats = await libs.beats.getAll(
-          props.options.searchInput,
-          props.options.page || 0,
-          props.options.size || 25
-        );
+        let loadedBeats;
+
+        if (props.forAttachedTag) {
+          loadedBeats = await libs.beats.getBeatsWithTag(
+            props.forAttachedTag,
+            props.options.page || 0,
+            props.options.size || 25
+          );
+        } else {
+          loadedBeats = await libs.beats.getAll(
+            props.options.searchInput,
+            props.options.page || 0,
+            props.options.size || 25
+          );
+        }
 
         const tags = await libs.tags.getTagsWithIds(
           flatten(loadedBeats.list.map(beat => beat.tags))
@@ -74,12 +84,16 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
 
   return (
     <Table
-      kueryBarProps={{
-        ...autocompleteProps,
-        onChange: (value: any) => {
-          props.onOptionsChange({ ...props.options, searchInput: value });
-        },
-      }}
+      kueryBarProps={
+        props.hasSearch
+          ? {
+              ...autocompleteProps,
+              onChange: (value: any) => {
+                props.onOptionsChange({ ...props.options, searchInput: value });
+              },
+            }
+          : undefined
+      }
       actions={beatsListActions}
       actionData={{
         tags: assignmentOptions,

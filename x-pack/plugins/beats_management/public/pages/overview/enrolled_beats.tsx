@@ -43,7 +43,6 @@ interface PageState {
 }
 
 class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
-  private tableRef: React.RefObject<any> = React.createRef();
   constructor(props: PageProps) {
     super(props);
 
@@ -191,6 +190,18 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
         />
         <BeatsCMTable
           hasSearch={true}
+          options={{
+            searchInput: this.props.urlState.beatsKBar || '',
+            page: this.props.urlState.beatsPage || 0,
+            size: this.props.urlState.beatsSize || 25,
+          }}
+          onOptionsChange={newState => {
+            this.props.setUrlState({
+              beatsKBar: newState.searchInput,
+              beatsPage: newState.page.toString(),
+              beatsSize: newState.size.toString(),
+            });
+          }}
           forAttachedTag="none"
           actionHandler={async (action: AssignmentActionType, payload: any) => {
             // Something
@@ -312,21 +323,6 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
         title: notificationTitle,
       }),
     });
-  };
-
-  private getSelectedBeats = (): CMBeat[] => {
-    if (!this.tableRef.current) {
-      return [];
-    }
-    const selectedIds = this.tableRef.current.state.selection.map((beat: any) => beat.id);
-    const beats: CMBeat[] = [];
-    selectedIds.forEach((id: any) => {
-      const beat = this.state.beats.list.find(b => b.id === id);
-      if (beat) {
-        beats.push(beat);
-      }
-    });
-    return beats;
   };
 }
 

@@ -72,6 +72,8 @@ export const useKQLAutocomplete = (
   };
 
   return {
+    value,
+    isValid: isKueryValid(value),
     isLoadingSuggestions: state.currentRequest !== null,
     suggestions: state.suggestions,
     loadSuggestions: useCallback(
