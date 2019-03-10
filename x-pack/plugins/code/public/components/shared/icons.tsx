@@ -171,7 +171,7 @@ export const BinaryFileIcon = () => (
   </svg>
 );
 
-export const UnsupportedFileIcon = () => (
+export const ErrorIcon = () => (
   <svg
     width="320"
     height="160"

@@ -31,12 +31,12 @@ import {
 } from '../../selectors';
 import { history } from '../../utils/url';
 import { Editor } from '../editor/editor';
-import { UnsupportedFileIcon } from '../shared/icons';
 import { CloneStatus } from './clone_status';
 import { CommitHistory, CommitHistoryLoading } from './commit_history';
 import { Directory } from './directory';
+import { ErrorPanel } from './error_panel';
+import { NotFound } from './not_found';
 import { TopBar } from './top_bar';
-import { UnsupportedFile } from './unsupported_file';
 
 const ButtonsContainer = styled.div`
   display: flex;
@@ -70,6 +70,7 @@ const Root = styled.div`
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
+  isNotFound: boolean;
   repoStatus?: RepoStatus;
   tree: FileTree;
   file: FetchFileResponse | undefined;
@@ -267,6 +268,9 @@ class CodeContent extends React.PureComponent<Props> {
   }
 
   public renderContent() {
+    if (this.props.isNotFound) {
+      return <NotFound />;
+    }
     if (this.shouldRenderProgress()) {
       return this.renderProgress();
     }
@@ -306,8 +310,7 @@ class CodeContent extends React.PureComponent<Props> {
         const { lang: fileLanguage, content: fileContent, url, isUnsupported, isOversize } = file;
         if (isUnsupported) {
           return (
-            <UnsupportedFile
-              icon={<UnsupportedFileIcon />}
+            <ErrorPanel
               title={<h2>Unsupported File</h2>}
               content="Unfortunately that’s an unsupported file type and we’re unable to render it here."
             />
@@ -315,8 +318,7 @@ class CodeContent extends React.PureComponent<Props> {
         }
         if (isOversize) {
           return (
-            <UnsupportedFile
-              icon={<UnsupportedFileIcon />}
+            <ErrorPanel
               title={<h2>File is too big</h2>}
               content="Sorry about that, but we can’t show files that are this big right now."
             />
@@ -374,6 +376,7 @@ class CodeContent extends React.PureComponent<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
+  isNotFound: state.file.isNotFound,
   file: state.file.file,
   tree: state.file.tree,
   currentTree: currentTreeSelector(state),
