@@ -38,7 +38,8 @@ export function rollup(kibana) {
           description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
             defaultMessage:
               `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data.`,
+              which in turn enable visualizations based on rollup data. Refresh
+              the page to apply the changes.`,
           }),
           category: ['rollups'],
         },
