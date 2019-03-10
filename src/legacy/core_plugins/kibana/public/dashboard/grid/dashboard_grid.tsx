@@ -26,6 +26,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 import sizeMe from 'react-sizeme';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { toastNotifications } from 'ui/notify';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -117,7 +118,7 @@ import { Panel } from '../types';
 
 interface Props extends ReactIntl.InjectedIntlProps {
   panels: PanelsMap;
-  getEmbeddableFactory: (panelType: string) => {};
+  getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
   onPanelsUpdated: (updatedPanels: PanelsMap) => void;
   maximizedPanelId?: string;
