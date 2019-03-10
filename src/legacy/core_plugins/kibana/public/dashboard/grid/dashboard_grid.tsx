@@ -132,13 +132,13 @@ interface State {
 }
 
 interface PanelsMap {
-  readonly [panelId: string]: Panel;
+  [panelId: string]: Panel;
 }
 
 class DashboardGridUi extends React.Component<Props, State> {
   // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
   // item.
-  private gridItems = {};
+  private gridItems = {} as { [key: string]: HTMLDivElement | null };
 
   // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
   // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
@@ -210,15 +210,18 @@ class DashboardGridUi extends React.Component<Props, State> {
 
   public onLayoutChange = (layout: Layout[]) => {
     const { onPanelsUpdated, panels } = this.props;
-    const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
-      // todo
-      updatedPanelsAcc[panelLayout.i] = {
-        ...panels[panelLayout.i],
-        panelIndex: panelLayout.i,
-        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-      };
-      return updatedPanelsAcc;
-    }, {});
+    const updatedPanels = layout.reduce(
+      (updatedPanelsAcc, panelLayout) => {
+        // todo
+        updatedPanelsAcc[panelLayout.i] = {
+          ...panels[panelLayout.i],
+          panelIndex: panelLayout.i,
+          gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+        };
+        return updatedPanelsAcc;
+      },
+      {} as PanelsMap
+    );
     onPanelsUpdated(updatedPanels);
   };
 
