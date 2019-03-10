@@ -18,7 +18,8 @@ import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 
 const DirectoryNode = styled.span`
-  margin-left: ${theme.euiSizeXs};
+  color: ${theme.euiColorFullShade};
+  margin-left: ${theme.euiSizeS};
   vertical-align: middle;
 `;
 
@@ -118,16 +119,11 @@ export class CodeFileTree extends React.Component<Props> {
               onClick={onClick}
             >
               {forceOpen ? (
-                <EuiIcon type="arrowDown" size="s" color="subdued" className="codeFileTree--icon" />
+                <EuiIcon type="arrowDown" size="s" className="codeFileTree--icon" />
               ) : (
-                <EuiIcon
-                  type="arrowRight"
-                  size="s"
-                  color="subdued"
-                  className="codeFileTree--icon"
-                />
+                <EuiIcon type="arrowRight" size="s" className="codeFileTree--icon" />
               )}
-              <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} color="subdued" />
+              <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
               <DirectoryNode>
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {`${node.name}/`}
@@ -147,7 +143,7 @@ export class CodeFileTree extends React.Component<Props> {
               className={classes(className, 'code-file-tree-file')}
               role="button"
             >
-              <EuiIcon type="submodule" color="subdued" />
+              <EuiIcon type="submodule" />
               <DirectoryNode>
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {node.name}
@@ -167,7 +163,7 @@ export class CodeFileTree extends React.Component<Props> {
               className={classes(className, 'code-file-tree-file')}
               role="button"
             >
-              <EuiIcon type="symlink" color="subdued" />
+              <EuiIcon type="symlink" />
               <DirectoryNode>
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {node.name}
@@ -187,7 +183,7 @@ export class CodeFileTree extends React.Component<Props> {
               className={classes(className, 'code-file-tree-file')}
               role="button"
             >
-              <EuiIcon type="document" color="subdued" />
+              <EuiIcon type="document" />
               <DirectoryNode>
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {node.name}

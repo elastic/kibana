@@ -22,7 +22,7 @@ import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
 
 const Container = styled.div`
-  margin: 0 ${theme.euiSizeXl};
+  margin: 0 ${theme.euiSizeXL};
   flex-grow: 1;
 `;
 

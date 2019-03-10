@@ -62,17 +62,23 @@
 
 .code-directory__node {
   width: calc(200rem / 14);
-  margin: 0 $euiSizeXS $euiSizeS;
+  margin: 0 $euiSizeS $euiSizeS;
   padding: $euiSizeXS;
   border-radius: $euiBorderRadius;
-  a {
-    color: $euiColorDarkestShade;
-  }
+  white-space: nowrap;
+  color: $euiColorFullShade;
   &:hover {
     background-color: rgba($euiColorGhost, .10);
     cursor: pointer;
   }
 }
+
+.code-fileNodeName {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: $euiSizeS;
+}
+
 .code-timeline {
   border-left: $euiBorderThick;
   margin-left: $euiSizeXS;
