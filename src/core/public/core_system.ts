@@ -100,7 +100,7 @@ export class CoreSystem {
     });
   }
 
-  public start() {
+  public async start() {
     try {
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';
@@ -125,7 +125,7 @@ export class CoreSystem {
         notifications,
       });
 
-      this.legacyPlatform.start({
+      await this.legacyPlatform.start({
         i18n,
         injectedMetadata,
         fatalErrors,

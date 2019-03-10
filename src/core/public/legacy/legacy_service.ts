@@ -54,7 +54,7 @@ export interface LegacyPlatformParams {
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start(deps: Deps) {
+  public async start(deps: Deps) {
     const {
       i18n,
       injectedMetadata,
@@ -85,6 +85,28 @@ export class LegacyPlatformService {
     // Load the bootstrap module before loading the legacy platform files so that
     // the bootstrap module can modify the environment a bit first
     const bootstrapModule = this.loadBootstrapModule();
+
+    // emulates new platform-like loading cycle
+    // can replace hacks and chrome uiExports
+
+    // shim plugin instantiation
+    // @ts-ignore
+    const plugins = injectedMetadata.getSortedPluginNames().map((name: string) => {
+      const { shim } = require(`plugins/${name}/np_plugin`);
+      return { name, plugin: shim() };
+    });
+
+    // shim setup task
+    for (const { name, plugin } of plugins) {
+      const { shim } = require(`plugins/${name}/np_plugin_setup`);
+      await shim(plugin);
+    }
+
+    // shim start task
+    for (const { name, plugin } of plugins) {
+      const { shim } = require(`plugins/${name}/np_plugin_start`);
+      await shim(plugin);
+    }
 
     // require the files that will tie into the legacy platform
     this.params.requireLegacyFiles();
