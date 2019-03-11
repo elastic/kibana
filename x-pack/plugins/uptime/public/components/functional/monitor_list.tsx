@@ -86,12 +86,10 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
             render: (id: string, monitor: LatestMonitor) => {
               const name = get(monitor, 'ping.monitor.name');
               return (
-                <Link
-                  to={`/monitor/${id}`}
-                  title={`Name: ${name ? "'" + name + "'" : 'N/A'}, ID: '${id}'`}
-                >
-                  {name ? name : <em>{id}</em>}
-                </Link>
+                <div>
+                  <Link to={`/monitor/${id}`}>{name ? name : <em>[Unnamed]</em>}</Link>
+                  <div>{id}</div>
+                </div>
               );
             },
           },
