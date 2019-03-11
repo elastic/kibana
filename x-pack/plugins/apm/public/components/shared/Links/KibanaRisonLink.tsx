@@ -23,7 +23,7 @@ interface Props extends RisonHrefArgs {
  *
  * You must remember to pass in location in that case.
  */
-const UnconnectedKibanaRisonLink: React.FunctionComponent<Props> = ({
+const UnconnectedKibanaRisonLink: React.SFC<Props> = ({
   location,
   pathname,
   hash,

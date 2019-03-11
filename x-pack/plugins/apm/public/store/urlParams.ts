@@ -5,7 +5,6 @@
  */
 
 import datemath from '@elastic/datemath';
-import { Location } from 'history';
 import { compact, pick } from 'lodash';
 import { createSelector } from 'reselect';
 import {
@@ -13,7 +12,7 @@ import {
   toQuery
 } from '../components/shared/Links/url_helpers';
 // @ts-ignore
-import { LOCATION_UPDATE } from './location';
+import { LOCATION_UPDATE, LocationAction } from './location';
 import { getDefaultTransactionType } from './reactReduxRequest/serviceDetails';
 import { getDefaultDistributionSample } from './reactReduxRequest/transactionDistribution';
 import { IReduxState } from './rootReducer';
@@ -46,10 +45,6 @@ function calculateTimePickerDefaults() {
 
 const INITIAL_STATE: IUrlParams = calculateTimePickerDefaults();
 
-interface LocationAction {
-  type: typeof LOCATION_UPDATE;
-  location: Location;
-}
 interface TimepickerAction {
   type: typeof TIMEPICKER_UPDATE;
   time: { min: string; max: string };

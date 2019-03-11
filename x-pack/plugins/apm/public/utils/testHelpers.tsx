@@ -35,7 +35,7 @@ const defaultRoute = {
 };
 
 export function mountWithRouterAndStore(
-  Component: React.ReactElement<unknown>,
+  Component: React.ReactElement<{}>,
   storeState = {},
   route = defaultRoute
 ) {
