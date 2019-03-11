@@ -12,12 +12,16 @@ light to dark.
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
-Before you start this tutorial, add the web log sample data set. Each
-sample data set includes a map to go along with the data. Open *Maps* and 
-explore the different layers of the *[Logs] Total Requests and Bytes* map,
-which you'll re-create in this tutorial.
+[float]
+=== Prerequisites
+Before you start this tutorial, <<add-sample-data, add the web logs sample data set>>. Each
+sample data set includes a map to go along with the data. Once you've added the data, open *Maps* and 
+explore the different layers of the *[Logs] Total Requests and Bytes* map.
+You'll re-create this map in this tutorial.
 
-You'll learn to:
+[float]
+=== Take-away skills
+In this tutorial, you'll learn to:
 
 * Create a multi-layer map
 * Connect a layer to a data source
