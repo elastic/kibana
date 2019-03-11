@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
+import { Transform } from 'stream';
 
-export const VisTypesRegistryProvider = uiRegistry({
-  name: 'visTypes',
-  index: ['name'],
-  order: ['title']
-});
+export function createFilterStream<T>(fn: (obj: T) => boolean) {
+  return new Transform({
+    objectMode: true,
+    async transform(obj, enc, done) {
+      const canPushDownStream = fn(obj);
+      if (canPushDownStream) {
+        this.push(obj);
+      }
+      done();
+    },
+  });
+}
