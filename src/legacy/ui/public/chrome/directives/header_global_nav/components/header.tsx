@@ -171,7 +171,10 @@ class HeaderUI extends Component<Props, State> {
 
   public renderMenuTrigger() {
     return (
-      <EuiHeaderSectionItemButton aria-label="Toggle side navigation" onClick={this.toggleOpen}>
+      <EuiHeaderSectionItemButton
+        aria-label="Toggle side navigation"
+        onClick={() => this.navDrawerRef.toggleOpen()}
+      >
         <EuiIcon type="apps" size="m" />
       </EuiHeaderSectionItemButton>
     );
@@ -239,7 +242,7 @@ class HeaderUI extends Component<Props, State> {
               iconType="clock"
               size="s"
               style={{ color: 'inherit' }}
-              aria-label="Recently viewed items"
+              aria-label="Recently viewed"
               isDisabled={recentlyAccessed.length > 0 ? false : true}
               flyoutMenu={{
                 title: 'Recent items',
