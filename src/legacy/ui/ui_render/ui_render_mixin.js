@@ -217,7 +217,7 @@ export function uiRenderMixin(kbnServer, server, config) {
     // Convert the Map into an array of objects so it is JSON serializable and order is preserved.
     const uiPlugins = [
       ...kbnServer.newPlatform.start.plugins.uiPlugins.entries()
-    ].map(([id, { plugin }]) => ({ id, plugin }));
+    ].map(([id, plugin]) => ({ id, plugin }));
 
     const nonce = await generateCSPNonce();
 
