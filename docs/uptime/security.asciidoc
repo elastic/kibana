@@ -3,11 +3,12 @@
 
 == Use with Elasticsearch Security
 
-If you have Elasticsearch security enabled you'll need to enable certain privileges for users 
-that would like to access the Uptime app. In this document we'll show an example of creating 
+If you use Elasticsearch security, you'll need to enable certain privileges for users 
+that would like to access the Uptime app. Below is an example of creating 
 a user and support role to implement those privileges.
 
-=== Creating the Role
+[float]
+=== Create a role
 
 You'll need a role that lets you access the Heartbeat indices, which by default are `heartbeat-*`.
 You can create this with the following request:
@@ -48,11 +49,13 @@ PUT /_security/role/uptime
   }
 }
 ---------------------------------------------------------------
+// CONSOLE
 
-=== Creating the User
+[float]
+=== Assign the role to a user
 
-You will then need to create a user with both the `kibana_user`, and `uptime` roles. 
-You can do this with the following request.
+Next, you'll need to create a user with both the `kibana_user`, and `uptime` roles. 
+You can do this with the following request:
 
 ["source","sh",subs="attributes,callouts"]
 ---------------------------------------------------------------
@@ -67,3 +70,4 @@ PUT /_security/user/jacknich
   }
 }
 ---------------------------------------------------------------
+// CONSOLE
