@@ -26,11 +26,11 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
   const spaces: SpacesService = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');
 
-  const expectGraphQL404 = (result: any) => {
+  const expectGraphQL403 = (result: any) => {
     expect(result.response).to.be(undefined);
     expect(result.error).not.to.be(undefined);
     expect(result.error).to.have.property('networkError');
-    expect(result.error.networkError).to.have.property('statusCode', 404);
+    expect(result.error.networkError).to.have.property('statusCode', 403);
   };
 
   const expectGraphQLResponse = (result: any) => {
@@ -39,10 +39,10 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
     expect(result.response.data).to.be.an('object');
   };
 
-  const expectGraphIQL404 = (result: any) => {
+  const expectGraphIQL403 = (result: any) => {
     expect(result.error).to.be(undefined);
     expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
+    expect(result.response).to.have.property('statusCode', 403);
   };
 
   const expectGraphIQLResponse = (result: any) => {
@@ -106,10 +106,10 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphIQL403(graphQLIResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -187,10 +187,10 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphIQL403(graphQLIResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -285,10 +285,10 @@ const featureControlsTests: KbnTestProvider = ({ getService }) => {
 
       it(`user_1 can't access APIs in space_3`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space3Id);
-        expectGraphQL404(graphQLResult);
+        expectGraphQL403(graphQLResult);
 
         const graphQLIResult = await executeGraphIQLRequest(username, password, space3Id);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphIQL403(graphQLIResult);
       });
     });
   });
