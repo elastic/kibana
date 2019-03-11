@@ -825,26 +825,35 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     /**
-     * Shrinks the window and takes a small screenshot of a vis to compare against a baseline.
+     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
      * @param {string} name The name of the baseline image.
      * @param {object} opts Options object.
      * @param {number} opts.threshold Threshold for allowed variance when comparing images.
      */
     async expectVisToMatchScreenshot(name, opts = { threshold: 0.05 }) {
       log.debug(`expectVisToMatchScreenshot(${name})`);
-      // Expand the chart and use a small window size to minimize os/browser differences
+
+      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
       await this.clickEditorSidebarCollapse();
-      await browser.setWindowSize(700, 545);
       await this.waitForVisualizationRenderingStabilized();
-      // Scroll to the bottom so the chart is in view
       await browser.execute(`
-        var scrollingElement = document.scrollingElement || document.body;
-        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+        var el = document.createElement('style');
+        el.id = '__data-test-style';
+        el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
+        document.body.appendChild(el);
       `);
+
       const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+
       // Reset the chart to its original state
-      await browser.setWindowSize(1300, 900);
+      await browser.execute(`
+        var el = document.getElementById('__data-test-style');
+        document.body.removeChild(el);
+      `);
       await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
       expect(percentDifference).to.be.lessThan(opts.threshold);
     }
 
