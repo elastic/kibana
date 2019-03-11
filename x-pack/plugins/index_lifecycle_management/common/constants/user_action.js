@@ -6,6 +6,7 @@
 
 export const UA_APP_NAME = 'index-lifecycle-management';
 
+export const UA_APP_LOAD = 'app_load';
 export const UA_POLICY_CREATE = 'policy_create';
 export const UA_POLICY_UPDATE = 'policy_update';
 export const UA_POLICY_DELETE = 'policy_delete';
@@ -20,6 +21,7 @@ export const UA_CONFIG_FREEZE_INDEX = 'config_freeze_index';
 export const UA_INDEX_RETRY_STEP = 'index_retry_step';
 
 export const USER_ACTIONS = [
+  UA_APP_LOAD,
   UA_POLICY_CREATE,
   UA_POLICY_UPDATE,
   UA_POLICY_DELETE,

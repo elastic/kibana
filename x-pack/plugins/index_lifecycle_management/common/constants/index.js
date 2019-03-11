@@ -9,6 +9,7 @@ export const PLUGIN_ID = 'index_lifecycle_management';
 export {
   UA_APP_NAME,
   USER_ACTIONS,
+  UA_APP_LOAD,
   UA_POLICY_CREATE,
   UA_POLICY_UPDATE,
   UA_POLICY_DELETE,
