@@ -4675,7 +4675,6 @@
     "xpack.ml.anomaliesTable.linksMenu.configureRulesLabel": "配置规则",
     "xpack.ml.anomaliesTable.linksMenu.loadingDetailsErrorMessage": "无法查看示例，因为加载有关类别 ID {categoryId} 的详细信息时出错",
     "xpack.ml.anomaliesTable.linksMenu.noMappingCouldBeFoundErrorMessage": "无法查看 mlcategory 为 {categoryId} 的文档的示例，因为找不到分类字段 {categorizationFieldName} 的映射",
-    "xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel": "选择操作",
     "xpack.ml.anomaliesTable.linksMenu.unableToOpenLinkErrorMessage": "无法打开链接，因为加载有关类别 ID {categoryId} 的详细信息时出错",
     "xpack.ml.anomaliesTable.linksMenu.unableToViewExamplesErrorMessage": "无法查看示例，因为未找到作业 ID {jobId} 的详细信息",
     "xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel": "查看示例",
