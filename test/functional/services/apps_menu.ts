@@ -31,13 +31,15 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      */
     public async readLinks() {
       await this.ensureMenuOpen();
-      const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
+      const appMenu = await testSubjects.find(
+        'navDrawerExpandButton-isCollapsed navDrawerAppsMenu'
+      );
       const $ = await appMenu.parseDomContent();
 
       const links: Array<{
         text: string;
         href: string;
-      }> = $.findTestSubjects('appLink')
+      }> = $.findTestSubjects('navDrawerAppsMenuLink')
         .toArray()
         .map((link: any) => {
           return {
@@ -66,7 +68,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       try {
         log.debug(`click "${name}" app link`);
         await this.ensureMenuOpen();
-        const container = await testSubjects.find('navDrawer&expanded appsMenu');
+        const container = await testSubjects.find('navDrawer navDrawerAppsMenu');
         const link = await container.findByPartialLinkText(name);
         await link.click();
       } finally {
@@ -75,21 +77,21 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensureMenuClosed() {
-      await globalNav.moveMouseToLogo();
+      const link = await testSubjects.moveMouseTo('navDrawerExpandButton-isExpanded');
+      await link.click();
       await retry.waitFor(
         'apps drawer closed',
-        async () => await testSubjects.exists('navDrawer&collapsed')
+        async () => await testSubjects.exists('navDrawerExpandButton-isCollapsed')
       );
     }
 
     private async ensureMenuOpen() {
-      if (!(await testSubjects.exists('navDrawer&expanded'))) {
-        await testSubjects.moveMouseTo('navDrawer');
-        await retry.waitFor(
-          'apps drawer open',
-          async () => await testSubjects.exists('navDrawer&expanded')
-        );
-      }
+      const link = await testSubjects.moveMouseTo('navDrawerExpandButton-isCollapsed');
+      await link.click();
+      await retry.waitFor(
+        'apps drawer open',
+        async () => await testSubjects.exists('navDrawerExpandButton-isCollapsed')
+      );
     }
   }();
 }

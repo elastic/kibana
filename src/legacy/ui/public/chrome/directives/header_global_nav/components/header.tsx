@@ -205,7 +205,7 @@ class HeaderUI extends Component<Props, State> {
             style: { color: 'inherit' },
             'aria-label': navLink.title,
             isActive: navLink.active,
-            'data-test-subj': 'appLink',
+            'data-test-subj': 'navDrawerAppsMenuLink',
           }
     );
     // filter out the null items
@@ -235,7 +235,7 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj={classNames('navDrawer')}>
+        <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj="navDrawer">
           <EuiListGroup>
             <EuiListGroupItem
               label={intl.formatMessage({
@@ -267,7 +267,7 @@ class HeaderUI extends Component<Props, State> {
             />
           </EuiListGroup>
           <EuiHorizontalRule margin="none" />
-          <EuiListGroup data-test-subj="appsMenu" listItems={navLinksArray} />
+          <EuiListGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
         </EuiNavDrawer>
       </Fragment>
     );
