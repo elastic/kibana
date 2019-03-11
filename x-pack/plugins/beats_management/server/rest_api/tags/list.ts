@@ -13,7 +13,7 @@ import { CMServerLibs } from '../../lib/types';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/tags/{page}/{size?}',
+  path: '/api/beats/tags/all/{page}/{size?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
   validate: {

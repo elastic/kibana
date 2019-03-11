@@ -202,7 +202,6 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               beatsSize: newState.size.toString(),
             });
           }}
-          forAttachedTag="none"
           actionHandler={async (action: AssignmentActionType, payload: any) => {
             // Something
           }}

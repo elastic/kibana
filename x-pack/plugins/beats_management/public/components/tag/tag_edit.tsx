@@ -26,7 +26,6 @@ import 'brace/theme/github';
 import React from 'react';
 import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
-import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
@@ -68,7 +67,7 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats, configuration_blocks } = this.props;
+    const { tag, configuration_blocks } = this.props;
 
     return (
       <div>
@@ -179,27 +178,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        {attachedBeats && (
-          <div>
-            <EuiHorizontalRule />
-
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.beatsManagement.tag.beatsAssignedToTagTitle"
-                  defaultMessage="Beats with this tag"
-                />
-              </h3>
-            </EuiTitle>
-            <Table
-              actions={tagConfigActions}
-              actionHandler={this.handleAssignmentActions}
-              items={attachedBeats}
-              ref={this.state.tableRef}
-              type={BeatsTableType}
-            />
-          </div>
-        )}
         {this.state.showFlyout && (
           <ConfigView
             configBlock={this.state.selectedConfig}
@@ -221,16 +199,6 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
       });
     } else {
       return false;
-    }
-  };
-
-  private handleAssignmentActions = (action: AssignmentActionType) => {
-    switch (action) {
-      case AssignmentActionType.Delete:
-        const { selection } = this.state.tableRef.current.state;
-        if (this.props.onDetachBeat) {
-          this.props.onDetachBeat(selection.map((beat: any) => beat.id));
-        }
     }
   };
 

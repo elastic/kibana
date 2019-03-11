@@ -27,9 +27,8 @@ interface ComponentProps {
   actionHandler?(action: AssignmentActionType, payload: any, selected: CMBeat[]): void;
 }
 
-export const BeatsCMTable: React.SFC<ComponentProps> = props => {
+export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
   const libs = useContext(LibsContext);
-
   const tableRef = useRef(null);
   // the value of update does not matter, we just use it to force a re-render
   // by flipping it's value back and forth for lack of a built-in forceUpdate method
@@ -61,21 +60,22 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
       }
 
       const tags = await libs.tags.getTagsWithIds(flatten(loadedBeats.list.map(beat => beat.tags)));
+
       setBeats({
-        list: loadedBeats.list.map(beat => ({
+        list: beats.list.map(beat => ({
           ...beat,
           tags: (tags || []).filter(tag => beat.tags.includes(tag.id)),
         })) as any[],
-        total: loadedBeats.total,
-        page: loadedBeats.page,
+        total: beats.total,
+        page: beats.page,
       });
     },
     [update, props.options.page, props.options.size, props.options.searchInput]
   );
 
   const autocompleteProps = useKQLAutocomplete(
-    (...args) => libs.elasticsearch.getSuggestions(...args),
-    (...args) => libs.elasticsearch.isKueryValid(...args),
+    libs.elasticsearch.getSuggestions,
+    libs.elasticsearch.isKueryValid,
     props.options.searchInput || '',
     'beat'
   );
@@ -92,13 +92,6 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             }
           : undefined
       }
-      onTableChange={(index: number, size: number) => {
-        props.onOptionsChange({
-          searchInput: props.options.searchInput,
-          size,
-          page: index,
-        });
-      }}
       actions={props.forAttachedTag ? tagConfigActions : beatsListActions}
       actionData={{
         tags: assignmentOptions,

@@ -14,11 +14,10 @@ import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
 import { BreadcrumbProvider } from './components/navigation/breadcrumb';
 import { Breadcrumb } from './components/navigation/breadcrumb/breadcrumb';
-import { compose } from './lib/compose/kibana';
-import { FrontendLibs } from './lib/types';
+import { libs } from './context/libs';
 import { AppRouter } from './router';
 
-async function startApp(libs: FrontendLibs) {
+async function startApp() {
   libs.framework.renderUIAtPath(
     BASE_PATH,
     <ThemeProvider theme={{ eui: euiVars }}>
@@ -31,7 +30,7 @@ async function startApp(libs: FrontendLibs) {
                   defaultMessage: 'Management',
                 })}
               />
-              <AppRouter libs={libs} />
+              <AppRouter />
             </Background>
           </BreadcrumbProvider>
         </HashRouter>
@@ -61,4 +60,4 @@ async function startApp(libs: FrontendLibs) {
   }
 }
 
-startApp(compose());
+startApp();

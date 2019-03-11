@@ -164,12 +164,14 @@ export class Table extends React.Component<TableProps, TableState> {
     );
   }
 
-  private onTableChange = (page: { index: number; size: number } = { index: 0, size: 50 }) => {
+  private onTableChange = (
+    event: { page: { index: number; size: number } } = { page: { index: 0, size: 50 } }
+  ) => {
     if (this.props.onTableChange) {
-      this.props.onTableChange(page.index, page.size);
+      this.props.onTableChange(event.page.index, event.page.size);
     }
     this.setState({
-      pageIndex: page.index,
+      pageIndex: event.page.index,
     });
   };
 }

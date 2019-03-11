@@ -6,4 +6,5 @@
 import { createContext } from 'react';
 import { compose } from '../lib/compose/kibana';
 
-export const LibsContext = createContext(compose());
+export const libs = compose();
+export const LibsContext = createContext(libs);

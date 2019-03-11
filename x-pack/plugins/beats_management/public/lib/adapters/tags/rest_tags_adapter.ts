@@ -30,9 +30,12 @@ export class RestTagsAdapter implements CMTagsAdapter {
 
   public async getAll(ESQuery: string, page: number, size?: number) {
     try {
-      return await this.REST.get<ReturnTypeList<BeatTag>>(`/api/beats/tags/${page}/${size || 25}`, {
-        ESQuery,
-      });
+      return await this.REST.get<ReturnTypeList<BeatTag>>(
+        `/api/beats/tags/all/${page}/${size || 25}`,
+        {
+          ESQuery,
+        }
+      );
     } catch (e) {
       return {
         success: false,

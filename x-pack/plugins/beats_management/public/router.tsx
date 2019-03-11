@@ -5,78 +5,71 @@
  */
 
 import { get } from 'lodash';
-import React, { Component } from 'react';
+import React, { useContext } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { URLStateProps, WithURLState } from './containers/with_url_state';
-import { FrontendLibs } from './lib/types';
+import { LibsContext } from './context/libs';
 import { routeMap } from './pages/index';
 
-interface RouterProps {
-  libs: FrontendLibs;
-}
-interface RouterState {
-  loading: boolean;
-}
+export const AppRouter: React.SFC = () => {
+  const libs = useContext(LibsContext);
 
-export class AppRouter extends Component<RouterProps, RouterState> {
-  public render() {
-    return (
-      <React.Fragment>
-        {/* Redirects mapping */}
-        <Switch>
-          {/* License check (UI displays when license exists but is expired) */}
-          {get(this.props.libs.framework.info, 'license.expired', true) && (
-            <Route
-              render={props =>
-                !props.location.pathname.includes('/error') ? (
-                  <Redirect to="/error/invalid_license" />
-                ) : null
-              }
-            />
-          )}
+  return (
+    <React.Fragment>
+      {/* Redirects mapping */}
+      <Switch>
+        {/* License check (UI displays when license exists but is expired) */}
+        {get(libs.framework.info, 'license.expired', true) && (
+          <Route
+            render={routeProps =>
+              !routeProps.location.pathname.includes('/error') ? (
+                <Redirect to="/error/invalid_license" />
+              ) : null
+            }
+          />
+        )}
 
-          {/* Ensure security is eanabled for elastic and kibana */}
-          {!get(this.props.libs.framework.info, 'security.enabled', true) && (
-            <Route
-              render={props =>
-                !props.location.pathname.includes('/error') ? (
-                  <Redirect to="/error/enforce_security" />
-                ) : null
-              }
-            />
-          )}
+        {/* Ensure security is eanabled for elastic and kibana */}
+        {!get(libs.framework.info, 'security.enabled', true) && (
+          <Route
+            render={routeProps =>
+              !routeProps.location.pathname.includes('/error') ? (
+                <Redirect to="/error/enforce_security" />
+              ) : null
+            }
+          />
+        )}
 
-          {/* Make sure the user has correct permissions */}
-          {!this.props.libs.framework.currentUserHasOneOfRoles(
-            ['beats_admin'].concat(this.props.libs.framework.info.settings.defaultUserRoles)
-          ) && (
-            <Route
-              render={props =>
-                !props.location.pathname.includes('/error') ? (
-                  <Redirect to="/error/no_access" />
-                ) : null
-              }
-            />
-          )}
+        {/* Make sure the user has correct permissions */}
+        {!libs.framework.currentUserHasOneOfRoles(
+          ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
+        ) && (
+          <Route
+            render={routeProps =>
+              !routeProps.location.pathname.includes('/error') ? (
+                <Redirect to="/error/no_access" />
+              ) : null
+            }
+          />
+        )}
 
-          {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
-          <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
-        </Switch>
+        {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
+        <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
+      </Switch>
 
-        {/* Render routes from the FS */}
-        <WithURLState>
-          {(URLProps: URLStateProps) => (
-            <ChildRoutes
-              routes={routeMap}
-              {...URLProps}
-              {...{
-                libs: this.props.libs,
-              }}
-            />
-          )}
-        </WithURLState>
-      </React.Fragment>
-    );
-  }
-}
+      {/* Render routes from the FS */}
+      <WithURLState>
+        {(URLProps: URLStateProps) => (
+          <ChildRoutes
+            routes={routeMap}
+            {...URLProps}
+            {...{
+              libs,
+            }}
+          />
+        )}
+      </WithURLState>
+    </React.Fragment>
+  );
+};

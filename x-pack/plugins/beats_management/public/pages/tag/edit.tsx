@@ -4,16 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { flatten } from 'lodash';
 import React from 'react';
 import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
+import { BeatTag, ConfigurationBlock } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
+import { AssignmentActionType } from '../../components/table';
 import { TagEdit } from '../../components/tag';
+import { BeatsCMTable } from '../../connected_views/beats_table';
 import { AppPageProps } from '../../frontend_types';
 interface TagPageState {
   showFlyout: boolean;
@@ -64,7 +73,6 @@ class TagEditPageComponent extends React.PureComponent<
 
   public componentWillMount() {
     this.loadTag();
-    this.loadAttachedBeats();
     this.loadConfigBlocks();
   }
   public render() {
@@ -87,20 +95,11 @@ class TagEditPageComponent extends React.PureComponent<
           <TagEdit
             tag={this.state.tag}
             configuration_blocks={this.state.configuration_blocks}
-            onDetachBeat={async (beatIds: string[]) => {
-              const assignments = this.props.libs.beats.createBeatTagAssignments(
-                beatIds,
-                this.state.tag.id
-              );
-              await this.props.libs.beats.removeTagsFromBeats(assignments);
-              await this.loadAttachedBeats();
-            }}
             onTagChange={(field: string, value: string | number) =>
               this.setState(oldState => ({
                 tag: { ...oldState.tag, [field]: value },
               }))
             }
-            attachedBeats={this.state.attachedBeats}
             onConfigListChange={(index: number) => {
               this.loadConfigBlocks(index);
             }}
@@ -128,6 +127,34 @@ class TagEditPageComponent extends React.PureComponent<
                 .then(() => {
                   this.loadConfigBlocks(this.state.configuration_blocks.page);
                 });
+            }}
+          />
+          <EuiSpacer />
+
+          <EuiHorizontalRule />
+
+          <EuiTitle size="xs">
+            <h3>
+              <FormattedMessage
+                id="xpack.beatsManagement.tag.beatsAssignedToTagTitle"
+                defaultMessage="Beats with this tag"
+              />
+            </h3>
+          </EuiTitle>
+          <BeatsCMTable
+            forAttachedTag={this.state.tag.id}
+            options={{
+              page: this.props.urlState.attachedBeatsPage || 0,
+              size: this.props.urlState.attachedBeatsSize || 25,
+            }}
+            onOptionsChange={newState => {
+              this.props.setUrlState({
+                attachedBeatsPage: newState.page.toString(),
+                attachedBeatsSize: newState.size.toString(),
+              });
+            }}
+            actionHandler={async (action: AssignmentActionType, payload: any) => {
+              // Something
             }}
           />
           <EuiSpacer size="m" />
@@ -184,25 +211,6 @@ class TagEditPageComponent extends React.PureComponent<
     });
   };
 
-  private loadAttachedBeats = async () => {
-    const beats = await this.props.libs.beats.getBeatsWithTag(
-      this.props.match.params.tagid,
-      this.props.urlState.attachedBeatsPage || 0,
-      this.props.urlState.attachedBeatsSize || 25
-    );
-    const beatsTags = await this.props.libs.tags.getTagsWithIds(
-      flatten(beats.list.map((beat: CMBeat) => beat.tags))
-    );
-    beats.list = beats.list.map(beat => ({
-      ...beat,
-      tags: flatten(beat.tags.map(tagId => this.state.beatsTags.filter(tag => tag.id === tagId))),
-    })) as any;
-
-    this.setState({
-      attachedBeats: beats,
-      beatsTags,
-    });
-  };
   private saveTag = async () => {
     await this.props.libs.tags.upsertTag(this.state.tag);
     this.props.goTo(`/overview/configuration_tags`);
