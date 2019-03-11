@@ -9,7 +9,8 @@ import {
   EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
-  InfraOpsGraphQLProvider
+  InfraOpsGraphQLClientProvider,
+  InfraOpsGraphQLClientFactoryProvider,
 } from './services';
 
 import {
@@ -31,7 +32,8 @@ export default async function ({ readConfigFile }) {
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
-      infraOpsGraphQLClient: InfraOpsGraphQLProvider,
+      infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
+      infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
