@@ -26,6 +26,7 @@ uiModules
   .get('app/kibana', ['react'])
   .directive('stringSelect', reactDirective => reactDirective(wrapInI18nContext(StringSelect), [
     'onParamsChange',
+    'value',
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }]
   ]));

@@ -24,6 +24,7 @@ import { AggConfig } from 'ui/vis/agg_config';
 
 interface StringSelectProps {
   agg: AggConfig;
+  value: string;
   aggParam: any;
   onParamsChange: (
     type: string,
@@ -33,15 +34,16 @@ interface StringSelectProps {
   ) => void;
 }
 
-function StringSelect({ agg = {}, aggParam = {}, onParamsChange }: StringSelectProps) {
+function StringSelect({ agg = {}, aggParam = {}, value, onParamsChange }: StringSelectProps) {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value: string = get(e, 'target.value');
-    onParamsChange(aggParam.name, agg, value, { isSetFormDirty: true });
+    const fieldValue: string = get(e, 'target.value');
+    onParamsChange(aggParam.name, agg, fieldValue, { isSetFormDirty: true });
   };
 
   return (
     <EuiFormRow label={aggParam.displayName || aggParam.name} className="form-group">
       <EuiFieldText
+        value={value}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={onChange}
       />
