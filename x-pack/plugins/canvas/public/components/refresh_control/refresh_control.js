@@ -43,10 +43,11 @@ export const RefreshControl = ({
   setRefreshInterval,
   refreshInterval,
   doRefresh,
+  isFullscreen,
 }) => {
   const { pending } = elementStats;
 
-  if (inFlight || pending > 0) {
+  if (!isFullscreen && (inFlight || pending > 0)) {
     loadingIndicator.show();
   } else {
     loadingIndicator.hide();
@@ -94,4 +95,5 @@ RefreshControl.propTypes = {
   doRefresh: PropTypes.func.isRequired,
   refreshInterval: PropTypes.number,
   setRefreshInterval: PropTypes.func.isRequired,
+  isFullscreen: PropTypes.bool.isRequired,
 };
