@@ -212,7 +212,6 @@ class DashboardGridUi extends React.Component<Props, State> {
     const { onPanelsUpdated, panels } = this.props;
     const updatedPanels = layout.reduce(
       (updatedPanelsAcc, panelLayout) => {
-        // todo
         updatedPanelsAcc[panelLayout.i] = {
           ...panels[panelLayout.i],
           panelIndex: panelLayout.i,

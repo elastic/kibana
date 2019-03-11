@@ -20,20 +20,20 @@
 import _ from 'lodash';
 import { Reducer } from 'redux';
 import { PanelActions, PanelActionTypeKeys, SetPanelTitleActionPayload } from '../actions';
-import { PanelId, PanelsStateMap, PanelState } from '../selectors';
+import { PanelId, PanelState, PanelStateMap } from '../selectors';
 
-const deletePanel = (panels: PanelsStateMap, panelId: PanelId): PanelsStateMap => {
+const deletePanel = (panels: PanelStateMap, panelId: PanelId): PanelStateMap => {
   const panelsCopy = { ...panels };
   delete panelsCopy[panelId];
   return panelsCopy;
 };
 
-const updatePanel = (panels: PanelsStateMap, panelState: PanelState): PanelsStateMap => ({
+const updatePanel = (panels: PanelStateMap, panelState: PanelState): PanelStateMap => ({
   ...panels,
   [panelState.panelIndex]: panelState,
 });
 
-const updatePanels = (panels: PanelsStateMap, updatedPanels: PanelsStateMap): PanelsStateMap => {
+const updatePanels = (panels: PanelStateMap, updatedPanels: PanelStateMap): PanelStateMap => {
   const panelsCopy = { ...panels };
   Object.values(updatedPanels).forEach(panel => {
     panelsCopy[panel.panelIndex] = panel;
@@ -41,7 +41,7 @@ const updatePanels = (panels: PanelsStateMap, updatedPanels: PanelsStateMap): Pa
   return panelsCopy;
 };
 
-const resetPanelTitle = (panels: PanelsStateMap, panelId: PanelId) => ({
+const resetPanelTitle = (panels: PanelStateMap, panelId: PanelId) => ({
   ...panels,
   [panelId]: {
     ...panels[panelId],
@@ -49,7 +49,7 @@ const resetPanelTitle = (panels: PanelsStateMap, panelId: PanelId) => ({
   },
 });
 
-const setPanelTitle = (panels: PanelsStateMap, payload: SetPanelTitleActionPayload) => ({
+const setPanelTitle = (panels: PanelStateMap, payload: SetPanelTitleActionPayload) => ({
   ...panels,
   [payload.panelId]: {
     ...panels[payload.panelId],
@@ -57,9 +57,9 @@ const setPanelTitle = (panels: PanelsStateMap, payload: SetPanelTitleActionPaylo
   },
 });
 
-const setPanels = ({}, newPanels: PanelsStateMap) => _.cloneDeep(newPanels);
+const setPanels = ({}, newPanels: PanelStateMap) => _.cloneDeep(newPanels);
 
-export const panelsReducer: Reducer<PanelsStateMap> = (panels = {}, action): PanelsStateMap => {
+export const panelsReducer: Reducer<PanelStateMap> = (panels = {}, action): PanelStateMap => {
   switch ((action as PanelActions).type) {
     case PanelActionTypeKeys.DELETE_PANEL:
       return deletePanel(panels, action.payload);

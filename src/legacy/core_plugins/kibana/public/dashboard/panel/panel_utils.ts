@@ -22,7 +22,7 @@ import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { PanelState } from '../selectors';
-import { Panel } from '../types';
+import { GridData, Panel } from '../types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -69,7 +69,13 @@ export class PanelUtils {
   // 1) decrease column height from 100 to 20.
   // 2) increase rows from 12 to 48
   // Need to scale pre 6.3 panels so they maintain the same layout
-  public static convertPanelDataPre_6_3(panel: Panel, useMargins: boolean) {
+  public static convertPanelDataPre_6_3(
+    panel: {
+      gridData: GridData;
+      version: string;
+    },
+    useMargins: boolean
+  ) {
     ['w', 'x', 'h', 'y'].forEach(key => {
       if (!_.has(panel.gridData, key)) {
         throw new Error(
