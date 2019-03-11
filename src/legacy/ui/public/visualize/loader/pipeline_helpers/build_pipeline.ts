@@ -21,7 +21,7 @@ import { cloneDeep, get } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
-import { AggConfig, Vis, VisState } from 'ui/vis';
+import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 
 interface SchemaFormat {
   id: string;
@@ -51,7 +51,7 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
-type buildVisConfigFunction = (schemas: Schemas, visState?: VisState) => VisState;
+type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -226,7 +226,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   table: (visState, schemas) => {
     const visConfig = {
       ...visState.params,
-      ...buildVisConfig.table(schemas),
+      ...buildVisConfig.table(schemas, visState.params),
     };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
@@ -268,7 +268,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (schemas, visState) => {
+  table: (schemas, visParams = {}) => {
     const visConfig = {} as any;
     const metrics = schemas.metric;
     const buckets = schemas.bucket || [];
@@ -279,8 +279,7 @@ const buildVisConfig: BuildVisConfigFunction = {
       splitColumn: schemas.split_column,
     };
 
-    const params = get(visState, 'params', {}) as any;
-    if (params.showMetricsAtAllLevels === false && params.showPartialRows === true) {
+    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
       // Handle case where user wants to see partial rows but not metrics at all levels.
       // This requires calculating how many metrics will come back in the tabified response,
       // and removing all metrics from the dimensions except the last set.
