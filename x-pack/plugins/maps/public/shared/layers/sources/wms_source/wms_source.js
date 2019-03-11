@@ -33,8 +33,13 @@ export class WMSSource extends AbstractTMSSource {
   }
 
   static renderEditor({  onPreviewSource, inspectorAdapters }) {
-    const previewWMS = (options) => {
-      const sourceDescriptor = WMSSource.createDescriptor(options);
+    const previewWMS = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
+      const sourceDescriptor = WMSSource.createDescriptor(sourceConfig);
       const source = new WMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };

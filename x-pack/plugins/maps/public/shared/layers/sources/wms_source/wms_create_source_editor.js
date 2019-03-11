@@ -14,6 +14,7 @@ import {
   EuiFieldText,
   EuiFormRow,
   EuiForm,
+  EuiSpacer,
 } from '@elastic/eui';
 import { WmsClient } from './wms_client';
 
@@ -48,13 +49,16 @@ export class WMSCreateSourceEditor extends Component {
   }
 
   _previewIfPossible() {
-    if (this.state.serviceUrl && this.state.layers) {
-      this.props.previewWMS({
-        serviceUrl: this.state.serviceUrl,
-        layers: this.state.layers,
-        styles: this.state.styles
-      });
-    }
+    const {
+      serviceUrl,
+      layers,
+      styles
+    } = this.state;
+
+    const sourceConfig = (serviceUrl && layers)
+      ? { serviceUrl, layers, styles }
+      : null;
+    this.props.previewWMS(sourceConfig);
   }
 
   _loadCapabilities = async () => {
@@ -65,7 +69,7 @@ export class WMSCreateSourceEditor extends Component {
     this.setState({
       hasAttemptedToLoadCapabilities: true,
       isLoadingCapabilities: true,
-      getCapabilitiesError: null
+      getCapabilitiesError: null,
     });
 
     const wmsClient = new WmsClient({ serviceUrl: this.state.serviceUrl });
@@ -95,7 +99,16 @@ export class WMSCreateSourceEditor extends Component {
   }
 
   _handleServiceUrlChange = (e) => {
-    this.setState({ serviceUrl: e.target.value }, this._previewIfPossible);
+    this.setState({
+      serviceUrl: e.target.value,
+      hasAttemptedToLoadCapabilities: false,
+      layerOptions: [],
+      styleOptions: [],
+      selectedLayerOptions: [],
+      selectedStyleOptions: [],
+      layers: '',
+      styles: '',
+    }, this._previewIfPossible);
   }
 
   _handleLayersChange = (e) => {
@@ -190,6 +203,29 @@ export class WMSCreateSourceEditor extends Component {
     );
   }
 
+  _renderGetCapabilitiesButton() {
+    if (!this.state.isLoadingCapabilities && this.state.hasAttemptedToLoadCapabilities) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiButton
+          onClick={this._loadCapabilities}
+          isDisabled={!this.state.serviceUrl}
+          isLoading={this.state.isLoadingCapabilities}
+        >
+          <FormattedMessage
+            id="xpack.maps.source.wms.getCapabilitiesButtonText"
+            defaultMessage="Load capabilities"
+          />
+        </EuiButton>
+
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+  }
+
   render() {
     return (
       <EuiForm>
@@ -204,16 +240,7 @@ export class WMSCreateSourceEditor extends Component {
           />
         </EuiFormRow>
 
-        <EuiButton
-          onClick={this._loadCapabilities}
-          isDisabled={!this.state.serviceUrl}
-          isLoading={this.state.isLoadingCapabilities}
-        >
-          <FormattedMessage
-            id="xpack.maps.source.wms.getCapabilitiesButtonText"
-            defaultMessage="Load capabilities"
-          />
-        </EuiButton>
+        {this._renderGetCapabilitiesButton()}
 
         {this._renderLayerAndStyleInputs()}
 
