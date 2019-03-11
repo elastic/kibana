@@ -7,9 +7,18 @@
 import React from 'react';
 import styled from 'styled-components';
 import { fontSizes } from '../../style/variables';
+import { ErrorPanel } from './error_panel';
 
 const Container = styled.div`
   margin: auto;
   fontsize: ${fontSizes.xlarge};
 `;
-export const NotFound = () => <Container>404, Not Found</Container>;
+
+export const NotFound = () => (
+  <Container>
+    <ErrorPanel
+      title={<h2>404</h2>}
+      content="Unfortunately that page doesn’t exist. You can try searching to find what you’re looking for."
+    />
+  </Container>
+);

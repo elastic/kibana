@@ -14,7 +14,6 @@ import { MainRouteParams } from '../../common/types';
 import { RootState } from '../../reducers';
 import { ShortcutsProvider } from '../shortcuts';
 import { Content } from './content';
-import { NotFound } from './not_found';
 import { SideTabs } from './side_tabs';
 
 const Root = styled.div`
@@ -32,7 +31,6 @@ const Container = styled.div`
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
-  isNotFound: boolean;
   loadingFileTree: boolean;
   loadingStructureTree: boolean;
 }
@@ -67,10 +65,7 @@ class CodeMain extends React.Component<Props> {
   }
 
   public render() {
-    const { loadingFileTree, loadingStructureTree, isNotFound } = this.props;
-    if (isNotFound) {
-      return <NotFound />;
-    }
+    const { loadingFileTree, loadingStructureTree } = this.props;
     return (
       <Root>
         <Container>
@@ -89,7 +84,6 @@ class CodeMain extends React.Component<Props> {
 }
 
 const mapStateToProps = (state: RootState) => ({
-  isNotFound: state.file.isNotFound,
   loadingFileTree: state.file.loading,
   loadingStructureTree: state.symbol.loading,
 });

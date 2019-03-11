@@ -8,20 +8,23 @@ import { EuiButton, EuiPanel, EuiSpacer, EuiText, EuiTextColor } from '@elastic/
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
 import { history } from '../../utils/url';
+import { ErrorIcon } from '../shared/icons';
 
 const Root = styled.div`
   width: 31rem;
   margin: auto;
 `;
 
-export const UnsupportedFile = (props: { icon: ReactNode; title: ReactNode; content: string }) => {
+export const ErrorPanel = (props: { title: ReactNode; content: string }) => {
   return (
     <Root>
       <EuiPanel>
         <EuiSpacer />
         {/*
               // @ts-ignore */}
-        <EuiText textAlign="center">{props.icon}</EuiText>
+        <EuiText textAlign="center">
+          <ErrorIcon />
+        </EuiText>
         {/*
               // @ts-ignore */}
         <EuiText textAlign="center">{props.title}</EuiText>
