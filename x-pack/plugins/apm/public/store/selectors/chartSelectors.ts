@@ -28,7 +28,10 @@ import {
 import { IUrlParams } from '../urlParams';
 
 export const getEmptySerie = memoize(
-  (start = Date.now() - 3600000, end = Date.now()) => {
+  (
+    start: string | number = Date.now() - 3600000,
+    end: string | number = Date.now()
+  ) => {
     const dates = d3.time
       .scale()
       .domain([new Date(start), new Date(end)])
@@ -43,7 +46,7 @@ export const getEmptySerie = memoize(
       }
     ];
   },
-  (start: number, end: number) => [start, end].join('_')
+  (start: string, end: string) => [start, end].join('_')
 );
 
 interface IEmptySeries {

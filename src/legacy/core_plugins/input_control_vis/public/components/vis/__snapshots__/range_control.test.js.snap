@@ -42,15 +42,9 @@ exports[`renders RangeControl 1`] = `
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <input
@@ -67,7 +61,6 @@ exports[`renders RangeControl 1`] = `
       </EuiFlexItem>
       <EuiFlexItem
         className="icvInputRange__container"
-        component="div"
         grow={false}
       >
         <InputRange
@@ -104,7 +97,6 @@ exports[`renders RangeControl 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <input

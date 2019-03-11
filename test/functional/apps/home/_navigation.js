@@ -22,16 +22,18 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['dashboard', 'common', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'home', 'timePicker']);
   const appsMenu = getService('appsMenu');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const fromTime = '2015-09-19 06:31:44.000';
   const toTime = '2015-09-23 18:31:44.000';
 
   describe('Kibana browser back navigation should work', function describeIndexTests() {
 
     before(async () => {
-      await PageObjects.dashboard.initTests();
+      await esArchiver.loadIfNeeded('makelogs');
       await kibanaServer.uiSettings.disableToastAutohide();
       await browser.refresh();
     });
@@ -68,6 +70,18 @@ export default function ({ getService, getPageObjects }) {
       await browser.goBack();
       currUrl = await browser.getCurrentUrl();
       expect(currUrl).to.be(homeUrl);
+    });
+
+    it('encodes portions of the URL as necessary', async () => {
+      await browser.get('http://localhost:5620/app/kibana#/home', false);
+      await retry.waitFor('navigation to home app', async () => (
+        (await browser.getCurrentUrl()) === 'http://localhost:5620/app/kibana#/home?_g=()'
+      ));
+
+      await browser.get('http://localhost:5620/app/kibana#/home?_g=()&a=b/c', false);
+      await retry.waitFor('hash to be properly encoded', async () => (
+        (await browser.getCurrentUrl()) === 'http://localhost:5620/app/kibana#/home?_g=()&a=b%2Fc'
+      ));
     });
   });
 

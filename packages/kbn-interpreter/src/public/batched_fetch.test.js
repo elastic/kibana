@@ -19,19 +19,21 @@
 
 import { batchedFetch } from './batched_fetch';
 
-const serialize = (o) => JSON.stringify(o);
+const serialize = o => JSON.stringify(o);
+
+const ajaxStream = jest.fn(async ({ body, onResponse }) => {
+  const { functions } = JSON.parse(body);
+  functions.map(({ id, functionName, context, args }) =>
+    onResponse({
+      id,
+      statusCode: context,
+      result: context >= 400 ? { err: {} } : `${functionName}${context}${args}`,
+    })
+  );
+});
 
 describe('batchedFetch', () => {
   it('resolves the correct promise', async () => {
-    const ajaxStream = jest.fn(async ({ body, onResponse }) => {
-      const { functions } = JSON.parse(body);
-      functions.map(({ id, functionName, context, args }) => onResponse({
-        id,
-        statusCode: 200,
-        result: `${functionName}${context}${args}`,
-      }));
-    });
-
     const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
 
     const result = await Promise.all([
@@ -39,22 +41,24 @@ describe('batchedFetch', () => {
       ajax({ functionName: 'b', context: 2, args: 'bbb' }),
     ]);
 
-    expect(result).toEqual([
-      'a1aaa',
-      'b2bbb',
+    expect(result).toEqual(['a1aaa', 'b2bbb']);
+  });
+
+  it('dedupes duplicate calls', async () => {
+    const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
+
+    const result = await Promise.all([
+      ajax({ functionName: 'a', context: 1, args: 'aaa' }),
+      ajax({ functionName: 'b', context: 2, args: 'bbb' }),
+      ajax({ functionName: 'a', context: 1, args: 'aaa' }),
+      ajax({ functionName: 'a', context: 1, args: 'aaa' }),
     ]);
+
+    expect(result).toEqual(['a1aaa', 'b2bbb', 'a1aaa', 'a1aaa']);
+    expect(ajaxStream).toHaveBeenCalledTimes(2);
   });
 
   it('rejects responses whose statusCode is >= 300', async () => {
-    const ajaxStream = jest.fn(async ({ body, onResponse }) => {
-      const { functions } = JSON.parse(body);
-      functions.map(({ id, functionName, context, args }) => onResponse({
-        id,
-        statusCode: context,
-        result: context >= 400 ? { err: {} } : `${functionName}${context}${args}`,
-      }));
-    });
-
     const ajax = batchedFetch({ ajaxStream, serialize, ms: 1 });
 
     const result = await Promise.all([
@@ -63,10 +67,6 @@ describe('batchedFetch', () => {
       ajax({ functionName: 'c', context: 200, args: 'ccc' }),
     ]);
 
-    expect(result).toEqual([
-      'fail',
-      'fail',
-      'c200ccc'
-    ]);
+    expect(result).toEqual(['fail', 'fail', 'c200ccc']);
   });
 });
