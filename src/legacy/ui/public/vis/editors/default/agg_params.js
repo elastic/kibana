@@ -39,7 +39,8 @@ uiModules
       restrict: 'E',
       template: aggParamsTemplate,
       scope: true,
-      link: function ($scope, $el, attr) {
+      require: '^form',
+      link: function ($scope, $el, attr, aggForm) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
         $scope.$bind('indexPattern', attr.indexPattern);
@@ -55,6 +56,20 @@ uiModules
           updateAggParamEditor();
           updateEditorConfig('default');
         });
+
+        $scope.onParamsChange = (type, agg, value, options) => {
+          if(agg.params[type] !== value) {
+            agg.params[type] = value;
+          }
+
+          if (aggForm && aggForm[type]) {
+            aggForm[type].$setDirty();
+          }
+
+          if (options && typeof options.isValid === 'boolean') {
+            aggForm[type].$setValidity(type, options.isValid);
+          }
+        };
 
         function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
