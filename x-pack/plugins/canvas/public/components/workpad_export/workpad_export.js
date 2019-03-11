@@ -95,7 +95,7 @@ export class WorkpadExport extends React.PureComponent {
             iconType="copy"
             size="s"
             style={{ width: '100%' }}
-            aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Activate this button to copy the POST URL."
+            aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Hit Enter to copy the URL to clipboard."
           >
             Copy POST URL
           </EuiButton>
