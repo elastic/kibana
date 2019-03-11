@@ -144,8 +144,8 @@ class TagEditPageComponent extends React.PureComponent<
           <BeatsCMTable
             forAttachedTag={this.state.tag.id}
             options={{
-              page: this.props.urlState.attachedBeatsPage || 0,
-              size: this.props.urlState.attachedBeatsSize || 25,
+              page: parseInt(this.props.urlState.attachedBeatsPage || '0', 10),
+              size: parseInt(this.props.urlState.attachedBeatsSize || '25', 10),
             }}
             onOptionsChange={newState => {
               this.props.setUrlState({

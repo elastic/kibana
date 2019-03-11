@@ -67,8 +67,8 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
   public async updateBeatsData(beatsKBar?: string) {
     const beats = await this.props.libs.beats.getAll(
       beatsKBar,
-      this.props.urlState.beatsPage || 0,
-      this.props.urlState.beatsSize || 25
+      parseInt(this.props.urlState.beatsPage || '0', 10),
+      parseInt(this.props.urlState.beatsSize || '25', 10)
     );
 
     if (beats.total === 0) {
@@ -192,8 +192,8 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
           hasSearch={true}
           options={{
             searchInput: this.props.urlState.beatsKBar || '',
-            page: this.props.urlState.beatsPage || 0,
-            size: this.props.urlState.beatsSize || 25,
+            page: parseInt(this.props.urlState.beatsPage || '0', 10),
+            size: parseInt(this.props.urlState.beatsSize || '25', 10),
           }}
           onOptionsChange={newState => {
             this.props.setUrlState({

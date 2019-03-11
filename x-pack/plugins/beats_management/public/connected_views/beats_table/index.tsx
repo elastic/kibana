@@ -67,7 +67,8 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
           tags: (tags || []).filter(tag => beat.tags.includes(tag.id)),
         })) as any[],
         total: loadedBeats.total,
-        page: loadedBeats.page,
+        // I am not sure why, but sometimes page is returned as a string and others a number...
+        page: parseInt(`${loadedBeats.page}`, 10),
       });
     },
     [update, props.options.page, props.options.size, props.options.searchInput]

@@ -31,8 +31,8 @@ interface PageState {
 class TagsPageComponent extends React.PureComponent<PageProps, PageState> {
   public static getDerivedStateFromProps(nextProps: PageProps, prevState: PageState) {
     if (
-      nextProps.urlState.tagsPage !== prevState.page ||
-      nextProps.urlState.tagsSize !== prevState.size
+      parseInt(nextProps.urlState.tagsPage || '', 10) !== prevState.page ||
+      parseInt(nextProps.urlState.tagsSize || '', 10) !== prevState.size
     ) {
       return {
         page: nextProps.urlState.tagsPage,

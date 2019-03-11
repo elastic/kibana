@@ -11,12 +11,12 @@ export type FlatObject<T> = { [Key in keyof T]: string };
 
 export interface AppURLState {
   beatsKBar?: string;
-  beatsPage?: number;
-  beatsSize?: number;
-  attachedBeatsPage?: number;
-  attachedBeatsSize?: number;
-  tagsPage?: number;
-  tagsSize?: number;
+  beatsPage?: string;
+  beatsSize?: string;
+  attachedBeatsPage?: string;
+  attachedBeatsSize?: string;
+  tagsPage?: string;
+  tagsSize?: string;
   tagsKBar?: string;
   enrollmentToken?: string;
   createdTag?: string;
