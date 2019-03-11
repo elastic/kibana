@@ -42,10 +42,6 @@ import {
 } from './ErrorTabs';
 import { StickyErrorProperties } from './StickyErrorProperties';
 
-const PaddedContainer = styled.div`
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
-`;
-
 const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
