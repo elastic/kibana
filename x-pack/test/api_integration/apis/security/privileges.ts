@@ -471,6 +471,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'ui:apm/show',
                 ],
                 read: [
                   'login:',
