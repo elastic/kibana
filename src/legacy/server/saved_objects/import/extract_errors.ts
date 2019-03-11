@@ -17,5 +17,27 @@
  * under the License.
  */
 
-export { importSavedObjects, resolveImportConflicts } from './import';
-export { getSortedObjectsForExport } from './export';
+import { SavedObject } from '../service';
+
+export interface CustomError {
+  id: string;
+  type: string;
+  error: {
+    message: string;
+    statusCode: number;
+  };
+}
+
+export function extractErrors(savedObjects: SavedObject[]) {
+  const errors: CustomError[] = [];
+  for (const savedObject of savedObjects) {
+    if (savedObject.error) {
+      errors.push({
+        id: savedObject.id,
+        type: savedObject.type,
+        error: savedObject.error,
+      });
+    }
+  }
+  return errors;
+}
