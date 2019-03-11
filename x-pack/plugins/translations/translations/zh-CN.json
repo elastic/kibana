@@ -1214,7 +1214,6 @@
     "kbn.dashboard.stateManager.timeNotSavedWithDashboardErrorMessage": "时间未随此仪表板保存，因此无法同步。",
     "kbn.dashboard.strings.dashboardEditTitle": "编辑 {title}",
     "kbn.dashboard.strings.dashboardUnsavedEditTitle": "编辑 {title}（未保存）",
-    "kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel": "添加新的可视化",
     "kbn.dashboard.topNav.addPanelsTitle": "添加面板",
     "kbn.dashboard.topNav.cloneModal.cancelButtonLabel": "取消",
     "kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle": "克隆面板",

@@ -92,7 +92,7 @@ export class DashboardAddPanel extends React.Component {
             <EuiFlexItem grow={false}>
               <EuiButton fill onClick={this.props.addNewVis} data-test-subj="addNewSavedObjectLink">
                 <FormattedMessage
-                  id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+                  id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
                   defaultMessage="Create new visualization"
                 />
               </EuiButton>
