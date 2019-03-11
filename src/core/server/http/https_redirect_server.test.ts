@@ -27,7 +27,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig } from '.';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 const chance = new Chance();
@@ -50,12 +50,11 @@ beforeEach(() => {
     },
   } as HttpConfig;
 
-  server = new HttpsRedirectServer(logger.get());
+  server = new HttpsRedirectServer(loggingServiceMock.create().get());
 });
 
 afterEach(async () => {
   await server.stop();
-  logger.mockClear();
 });
 
 test('throws if SSL is not enabled', async () => {

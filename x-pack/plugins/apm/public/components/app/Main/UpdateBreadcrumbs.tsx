@@ -5,10 +5,14 @@
  */
 
 import { Location } from 'history';
-import { last } from 'lodash';
+import { last, pick } from 'lodash';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { toQuery } from '../../shared/Links/url_helpers';
+import {
+  fromQuery,
+  PERSISTENT_APM_PARAMS,
+  toQuery
+} from '../../shared/Links/url_helpers';
 import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
 import { routes } from './routeConfig';
 
@@ -19,10 +23,12 @@ interface Props {
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
   public updateHeaderBreadcrumbs() {
-    const { _g = '', kuery = '' } = toQuery(this.props.location.search);
+    const query = toQuery(this.props.location.search);
+    const persistentParams = pick(query, PERSISTENT_APM_PARAMS);
+    const search = fromQuery(persistentParams);
     const breadcrumbs = this.props.breadcrumbs.map(({ value, match }) => ({
       text: value,
-      href: `#${match.url}?_g=${_g}&kuery=${kuery}`
+      href: `#${match.url}?${search}`
     }));
 
     const current = last(breadcrumbs) || { text: '' };

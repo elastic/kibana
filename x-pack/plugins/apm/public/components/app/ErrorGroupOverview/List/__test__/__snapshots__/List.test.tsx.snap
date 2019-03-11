@@ -9,54 +9,65 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       className="euiTableHeaderMobile"
     >
       <div
-        className="euiTableSortMobile"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
       >
         <div
-          className="euiPopover euiPopover--anchorDownRight"
-          id="sortPopover"
-          onClick={[Function]}
-          onKeyDown={[Function]}
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiPopover__anchor"
+            className="euiTableSortMobile"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+            <div
+              className="euiPopover euiPopover--anchorDownRight"
+              id="sortPopover"
               onClick={[Function]}
-              type="button"
+              onKeyDown={[Function]}
             >
-              <span
-                className="euiButtonEmpty__content"
+              <div
+                className="euiPopover__anchor"
               >
-                <svg
-                  aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
-                  focusable="false"
-                  height="16"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                  onClick={[Function]}
+                  type="button"
                 >
-                  <defs>
-                    <path
-                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                      id="arrow_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    xlinkHref="#arrow_down-a"
-                  />
-                </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
-                  Sorting
-                </span>
-              </span>
-            </button>
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                      focusable="false"
+                      height="16"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_down-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#arrow_down-a"
+                      />
+                    </svg>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Sorting
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -324,54 +335,65 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       className="euiTableHeaderMobile"
     >
       <div
-        className="euiTableSortMobile"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
       >
         <div
-          className="euiPopover euiPopover--anchorDownRight"
-          id="sortPopover"
-          onClick={[Function]}
-          onKeyDown={[Function]}
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiPopover__anchor"
+            className="euiTableSortMobile"
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+            <div
+              className="euiPopover euiPopover--anchorDownRight"
+              id="sortPopover"
               onClick={[Function]}
-              type="button"
+              onKeyDown={[Function]}
             >
-              <span
-                className="euiButtonEmpty__content"
+              <div
+                className="euiPopover__anchor"
               >
-                <svg
-                  aria-hidden="true"
-                  className="euiIcon euiIcon--medium euiButtonEmpty__icon"
-                  focusable="false"
-                  height="16"
-                  style={null}
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
-                  xmlnsXlink="http://www.w3.org/1999/xlink"
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--iconRight euiButtonEmpty--flushRight"
+                  onClick={[Function]}
+                  type="button"
                 >
-                  <defs>
-                    <path
-                      d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
-                      id="arrow_down-a"
-                    />
-                  </defs>
-                  <use
-                    fillRule="nonzero"
-                    xlinkHref="#arrow_down-a"
-                  />
-                </svg>
-                <span
-                  className="euiButtonEmpty__text"
-                >
-                  Sorting
-                </span>
-              </span>
-            </button>
+                  <span
+                    className="euiButtonEmpty__content"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      className="euiIcon euiIcon--medium euiButtonEmpty__icon"
+                      focusable="false"
+                      height="16"
+                      style={null}
+                      viewBox="0 0 16 16"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      xmlnsXlink="http://www.w3.org/1999/xlink"
+                    >
+                      <defs>
+                        <path
+                          d="M13.069 5.157L8.384 9.768a.546.546 0 0 1-.768 0L2.93 5.158a.552.552 0 0 0-.771 0 .53.53 0 0 0 0 .759l4.684 4.61c.641.631 1.672.63 2.312 0l4.684-4.61a.53.53 0 0 0 0-.76.552.552 0 0 0-.771 0z"
+                          id="arrow_down-a"
+                        />
+                      </defs>
+                      <use
+                        fillRule="nonzero"
+                        xlinkHref="#arrow_down-a"
+                      />
+                    </svg>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Sorting
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -519,15 +541,19 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <td
             className="euiTableRowCell"
-            data-header="Group ID"
             width="96px"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Group ID
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?"
               >
                 a0ce2
               </a>
@@ -535,9 +561,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Error message and culprit"
             width="50%"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Error message and culprit
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
@@ -552,7 +582,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -579,7 +609,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header=""
           >
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -587,8 +616,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Occurrences"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Occurrences
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -597,8 +630,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Latest occurrence"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Latest occurrence
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -611,15 +648,19 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <td
             className="euiTableRowCell"
-            data-header="Group ID"
             width="96px"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Group ID
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?"
               >
                 f3ac9
               </a>
@@ -627,9 +668,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Error message and culprit"
             width="50%"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Error message and culprit
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
@@ -644,7 +689,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -671,7 +716,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header=""
           >
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -679,8 +723,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Occurrences"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Occurrences
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -689,8 +737,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Latest occurrence"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Latest occurrence
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -703,15 +755,19 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <td
             className="euiTableRowCell"
-            data-header="Group ID"
             width="96px"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Group ID
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?"
               >
                 e9086
               </a>
@@ -719,9 +775,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Error message and culprit"
             width="50%"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Error message and culprit
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
@@ -736,7 +796,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -763,7 +823,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header=""
           >
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -771,8 +830,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Occurrences"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Occurrences
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -781,8 +844,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Latest occurrence"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Latest occurrence
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -795,15 +862,19 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         >
           <td
             className="euiTableRowCell"
-            data-header="Group ID"
             width="96px"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Group ID
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?"
               >
                 8673d
               </a>
@@ -811,9 +882,13 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Error message and culprit"
             width="50%"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Error message and culprit
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--overflowingContent"
             >
@@ -828,7 +903,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -855,7 +930,6 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header=""
           >
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
@@ -863,8 +937,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Occurrences"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Occurrences
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >
@@ -873,8 +951,12 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
           </td>
           <td
             className="euiTableRowCell"
-            data-header="Latest occurrence"
           >
+            <div
+              className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+            >
+              Latest occurrence
+            </div>
             <div
               className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--overflowingContent"
             >

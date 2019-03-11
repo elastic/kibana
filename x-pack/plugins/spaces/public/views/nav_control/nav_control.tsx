@@ -19,7 +19,6 @@ import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-// @ts-ignore
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 // @ts-ignore
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';

@@ -20,7 +20,9 @@
 import { resolve } from 'path';
 import process from 'process';
 
-import { pkg } from '../../../legacy/utils/package_json';
+// `require` is necessary for this to work inside x-pack code as well
+// tslint:disable no-var-requires
+const pkg = require('../../../../package.json');
 
 export interface PackageInfo {
   version: string;

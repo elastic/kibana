@@ -56,21 +56,21 @@ export const routes = [
             try {
               const fetchedWorkpad = await workpadService.get(params.id);
 
-              const { assets, ...workpad } = fetchedWorkpad;
-              dispatch(setWorkpad(workpad));
-              dispatch(setAssets(assets));
-
               // tests if user has permissions to write to workpads
               // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
               // https://github.com/elastic/kibana/issues/20277
               if (firstLoad) {
-                workpadService.update(params.id, fetchedWorkpad).catch(err => {
+                await workpadService.update(params.id, fetchedWorkpad).catch(err => {
                   if (err.response && err.response.status === 403) {
                     dispatch(setCanUserWrite(false));
                   }
                 });
                 dispatch(setFirstLoad(false));
               }
+
+              const { assets, ...workpad } = fetchedWorkpad;
+              dispatch(setWorkpad(workpad));
+              dispatch(setAssets(assets));
             } catch (err) {
               notify.error(err, { title: `Couldn't load workpad with ID` });
               return router.redirectTo('home');

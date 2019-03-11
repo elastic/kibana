@@ -24,7 +24,13 @@ describe('Saved Objects Mixin', () => {
   let mockServer;
   const mockCallCluster = jest.fn();
   const stubCallCluster = jest.fn();
-  const stubConfig = jest.fn();
+  const config = {
+    'kibana.index': 'kibana.index',
+    'savedObjects.maxImportExportSize': 10000,
+  };
+  const stubConfig = jest.fn((key) => {
+    return config[key];
+  });
 
   beforeEach(() => {
     mockServer = {
@@ -96,9 +102,9 @@ describe('Saved Objects Mixin', () => {
   });
 
   describe('Routes', () => {
-    it('should create 7 routes', () => {
+    it('should create 10 routes', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
-      expect(mockServer.route).toHaveBeenCalledTimes(7);
+      expect(mockServer.route).toHaveBeenCalledTimes(10);
     });
     it('should add POST /api/saved_objects/_bulk_create', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
@@ -127,6 +133,19 @@ describe('Saved Objects Mixin', () => {
     it('should add PUT /api/saved_objects/{type}/{id}', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
       expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/{type}/{id}', method: 'PUT' }));
+    });
+    it('should add GET /api/saved_objects/_export', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_export', method: 'POST' }));
+    });
+    it('should add POST /api/saved_objects/_import', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_import', method: 'POST' }));
+    });
+    it('should add POST /api/saved_objects/_resolve_import_conflicts', () => {
+      savedObjectsMixin(mockKbnServer, mockServer);
+      expect(mockServer.route)
+        .toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_resolve_import_conflicts', method: 'POST' }));
     });
   });
 
@@ -211,7 +230,6 @@ describe('Saved Objects Mixin', () => {
             return [];
           }
         });
-        stubConfig.mockImplementation(() => 'kibana-index');
         const client = await service.getScopedSavedObjectsClient();
         await client.create('testtype');
         expect(stubCallCluster).toHaveBeenCalled();
