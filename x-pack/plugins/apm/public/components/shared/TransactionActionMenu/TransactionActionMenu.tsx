@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { getKibanaHref } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { getRisonHref } from 'x-pack/plugins/apm/public/components/shared/Links/rison_helpers';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
@@ -147,7 +147,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     ]
       .filter(({ target }) => Boolean(target))
       .map(({ icon, label, hash, query }, index) => {
-        const href = getKibanaHref({
+        const href = getRisonHref({
           location,
           pathname,
           hash,
@@ -174,7 +174,7 @@ export class TransactionActionMenu extends React.Component<Props, State> {
     return (
       <QueryWithIndexPattern query={getDiscoverQuery(transaction)}>
         {query => {
-          const discoverTransactionHref = getKibanaHref({
+          const discoverTransactionHref = getRisonHref({
             location,
             pathname: '/app/kibana',
             hash: '/discover',
