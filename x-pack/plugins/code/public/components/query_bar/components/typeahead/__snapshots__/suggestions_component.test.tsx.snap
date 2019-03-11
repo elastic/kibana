@@ -140,26 +140,16 @@ exports[`render full suggestions component 1`] = `
               role="listbox"
             >
               <EuiFlexGroup
-                alignItems="stretch"
                 className="codeSearch-suggestion__group-header"
-                component="div"
-                direction="row"
-                gutterSize="l"
                 justifyContent="spaceBetween"
-                responsive={true}
-                wrap={false}
               >
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
                   <EuiFlexGroup
                     alignItems="center"
-                    component="div"
                     direction="row"
                     gutterSize="none"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
                   >
                     <div
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -325,26 +315,16 @@ exports[`render full suggestions component 1`] = `
               role="listbox"
             >
               <EuiFlexGroup
-                alignItems="stretch"
                 className="codeSearch-suggestion__group-header"
-                component="div"
-                direction="row"
-                gutterSize="l"
                 justifyContent="spaceBetween"
-                responsive={true}
-                wrap={false}
               >
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
                   <EuiFlexGroup
                     alignItems="center"
-                    component="div"
                     direction="row"
                     gutterSize="none"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
                   >
                     <div
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -463,26 +443,16 @@ exports[`render full suggestions component 1`] = `
               role="listbox"
             >
               <EuiFlexGroup
-                alignItems="stretch"
                 className="codeSearch-suggestion__group-header"
-                component="div"
-                direction="row"
-                gutterSize="l"
                 justifyContent="spaceBetween"
-                responsive={true}
-                wrap={false}
               >
                 <div
                   className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive codeSearch-suggestion__group-header"
                 >
                   <EuiFlexGroup
                     alignItems="center"
-                    component="div"
                     direction="row"
                     gutterSize="none"
-                    justifyContent="flexStart"
-                    responsive={true}
-                    wrap={false}
                   >
                     <div
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"

@@ -21,19 +21,13 @@ exports[`render correctly with empty query string 1`] = `
   suggestionProviders={Array []}
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
     gutterSize="none"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--directionRow"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -525,10 +519,7 @@ exports[`render correctly with empty query string 1`] = `
           </ScopeSelector>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
@@ -759,19 +750,13 @@ exports[`render correctly with input query string changed 1`] = `
       }
     >
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
         gutterSize="none"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <div
           className="euiFlexGroup euiFlexGroup--directionRow"
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <div
@@ -1263,10 +1248,7 @@ exports[`render correctly with input query string changed 1`] = `
               </ScopeSelector>
             </div>
           </EuiFlexItem>
-          <EuiFlexItem
-            component="div"
-            grow={true}
-          >
+          <EuiFlexItem>
             <div
               className="euiFlexItem"
             >
