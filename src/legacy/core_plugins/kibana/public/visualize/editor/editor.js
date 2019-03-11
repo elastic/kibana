@@ -184,7 +184,7 @@ function VisEditor(
 
       const confirmButtonLabel = $scope.isAddToDashMode() ? (
         <FormattedMessage
-          id="kbn.visualize.saveDialog.saveAndAddToDashboard"
+          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
           defaultMessage="Save and add to dashboard"
         />
       ) : null;
