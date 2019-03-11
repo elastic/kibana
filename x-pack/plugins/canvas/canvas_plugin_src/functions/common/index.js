@@ -9,6 +9,7 @@ import { all } from './all';
 import { any } from './any';
 import { asFn } from './as';
 import { axisConfig } from './axisConfig';
+import { clear } from './clear';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
 import { context } from './context';
@@ -64,6 +65,7 @@ export const functions = [
   any,
   asFn,
   axisConfig,
+  clear,
   columns,
   compare,
   containerStyle,
