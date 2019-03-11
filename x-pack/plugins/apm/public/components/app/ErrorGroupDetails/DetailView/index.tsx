@@ -12,7 +12,6 @@ import {
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { get } from 'lodash';
@@ -29,7 +28,7 @@ import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { borderRadius, px, unit, units } from '../../../../style/variables';
+import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import { getCurrentTab } from '../../../shared/PropertiesTable/tabConfig';
