@@ -5,12 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RANKED_LICENSE_TYPES } from '../constants';
 import {
   LICENSE_STATUS_UNAVAILABLE,
   LICENSE_STATUS_INVALID,
   LICENSE_STATUS_EXPIRED,
   LICENSE_STATUS_VALID,
+  RANKED_LICENSE_TYPES,
 } from '../../../common/constants';
 
 export function checkLicense(pluginName, minimumLicenseRequired, xpackLicenseInfo) {

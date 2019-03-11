@@ -214,6 +214,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={true}
       helpText="No access to spaces"
+      labelType="label"
     >
       <PrivilegeSelector
         allowNone={true}
@@ -230,9 +231,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiTitle
     size="xs"
     textTransform="none"

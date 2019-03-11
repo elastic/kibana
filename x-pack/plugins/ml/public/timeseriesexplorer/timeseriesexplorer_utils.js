@@ -97,7 +97,36 @@ export function processRecordScoreResults(scoreData) {
 export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
-  timeFieldName) {
+  timeFieldName,
+  aggregationInterval) {
+
+  const timesToAddPointsFor = [];
+
+  // Iterate through the anomaly records making sure we have chart points for each anomaly.
+  const intervalMs = aggregationInterval.asMilliseconds();
+  let lastChartDataPointTime = undefined;
+  if (chartData !== undefined && chartData.length > 0) {
+    lastChartDataPointTime = chartData[chartData.length - 1].date.getTime();
+  }
+  anomalyRecords.forEach((record) => {
+    const recordTime = record[timeFieldName];
+    const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
+    if (chartPoint === undefined) {
+      const timeToAdd = (Math.floor(recordTime / intervalMs)) * intervalMs;
+      if (timesToAddPointsFor.indexOf(timeToAdd) === -1 && timeToAdd !== lastChartDataPointTime) {
+        timesToAddPointsFor.push(timeToAdd);
+      }
+    }
+  });
+
+  timesToAddPointsFor.sort((a, b) => a - b);
+
+  timesToAddPointsFor.forEach((time) => {
+    chartData.push({
+      date: new Date(time),
+      value: null
+    });
+  });
 
   // Iterate through the anomaly records adding the
   // various properties required for display.
@@ -106,20 +135,7 @@ export function processDataForFocusAnomalies(
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[timeFieldName];
-    let chartPoint = findChartPointForAnomalyTime(chartData, recordTime);
-
-    // TODO - handle case where there is an anomaly due to the absence of data
-    // and there is no model plot.
-    if (chartPoint === undefined && chartData !== undefined && chartData.length) {
-      // In case there is a record with a time after that of the last chart point, set the score
-      // for the last chart point to that of the last record, if that record has a higher score.
-      const lastChartPoint = chartData[chartData.length - 1];
-      const lastChartPointScore = lastChartPoint.anomalyScore || 0;
-      if (record.record_score > lastChartPointScore) {
-        chartPoint = lastChartPoint;
-      }
-    }
-
+    const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {
       // If chart aggregation interval > bucket span, there may be more than
       // one anomaly record in the interval, so use the properties from
@@ -222,7 +238,7 @@ export function findNearestChartPointToTime(chartData, time) {
 
 // Finds the chart point which corresponds to an anomaly with the
 // specified time.
-export function findChartPointForAnomalyTime(chartData, anomalyTime) {
+export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregationInterval) {
   let chartPoint;
   if(chartData === undefined) {
     return chartPoint;
@@ -240,10 +256,12 @@ export function findChartPointForAnomalyTime(chartData, anomalyTime) {
     // time of the anomaly. This is the start of the chart 'bucket'
     // which contains the anomalous bucket.
     let foundItem;
+    const intervalMs = aggregationInterval.asMilliseconds();
+    const anomalyTimeForAggInt = (Math.floor(anomalyTime / intervalMs)) * intervalMs;
     for (let i = 0; i < chartData.length; i++) {
       const itemTime = chartData[i].date.getTime();
-      if (itemTime > anomalyTime) {
-        foundItem = (i > 0) ? chartData[i - 1] : chartData[0];
+      if (itemTime === anomalyTimeForAggInt) {
+        foundItem = chartData[i];
         break;
       }
     }

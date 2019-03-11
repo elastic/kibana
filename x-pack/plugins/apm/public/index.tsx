@@ -24,8 +24,6 @@ import { history } from './components/shared/Links/url_helpers';
 import configureStore from './store/config/configureStore';
 import './style/global_overrides.css';
 import template from './templates/index.html';
-// @ts-ignore
-import { initTimepicker } from './utils/timepicker';
 
 // render APM feedback link in global help menu
 chrome.helpExtension.set(domElement => {
@@ -34,12 +32,25 @@ chrome.helpExtension.set(domElement => {
     ReactDOM.unmountComponentAtNode(domElement);
   };
 });
+const REACT_APP_ROOT_ID = 'react-apm-root';
+
+type PromiseResolver = (value?: {} | PromiseLike<{}> | undefined) => void;
 
 // @ts-ignore
 chrome.setRootTemplate(template);
+chrome.disableAutoAngularUrlEncodingFix();
 const store = configureStore();
+const checkForRoot = (resolve: PromiseResolver) => {
+  const ready = !!document.getElementById(REACT_APP_ROOT_ID);
+  if (ready) {
+    resolve();
+  } else {
+    setTimeout(() => checkForRoot(resolve), 10);
+  }
+};
+const waitForRoot = new Promise(resolve => checkForRoot(resolve));
 
-initTimepicker(history, store.dispatch).then(() => {
+waitForRoot.then(() => {
   ReactDOM.render(
     <I18nContext>
       <Provider store={store}>
@@ -51,6 +62,6 @@ initTimepicker(history, store.dispatch).then(() => {
         </Fragment>
       </Provider>
     </I18nContext>,
-    document.getElementById('react-apm-root')
+    document.getElementById(REACT_APP_ROOT_ID)
   );
 });
