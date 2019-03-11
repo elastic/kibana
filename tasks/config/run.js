@@ -110,6 +110,15 @@ module.exports = function (grunt) {
     },
 
     // used by the test and jenkins:unit tasks
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_ts_projects')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
     //    runs the i18n_check script to check i18n engine usage
     i18nCheck: {
       cmd: process.execPath,

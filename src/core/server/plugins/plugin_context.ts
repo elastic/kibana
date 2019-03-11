@@ -19,8 +19,8 @@
 
 import { Type } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
-import { CoreContext } from '../../types';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
+import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
 import { LoggerFactory } from '../logging';
 import { Plugin, PluginManifest } from './plugin';
