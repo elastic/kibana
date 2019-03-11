@@ -51,10 +51,10 @@ export class RangeControl extends Component {
       ? [nextProps.control.value.min, nextProps.control.value.max]
       : ['', ''];
 
-    if (nextProps.control.value.min == null) {
+    if (nextProps.control.hasValue() && nextProps.control.value.min == null) {
       nextValue[0] = '';
     }
-    if (nextProps.control.value.max == null) {
+    if (nextProps.control.hasValue() && nextProps.control.value.max == null) {
       nextValue[1] = '';
     }
 
