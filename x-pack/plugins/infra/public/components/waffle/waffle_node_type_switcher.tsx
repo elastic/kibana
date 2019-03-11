@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonGroup, EuiKeyPadMenu, EuiKeyPadMenuItemButton } from '@elastic/eui';
+import { EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import {
   InfraMetricInput,
@@ -48,8 +48,8 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
     );
   }
 
-  private handleClick = (nodeType: InfraNodeType) => {
-    this.props.changeNodeType(nodeType);
+  private handleClick = (nodeType: string) => {
+    this.props.changeNodeType(nodeType as InfraNodeType);
     this.props.changeGroupBy([]);
     this.props.changeMetric({ type: InfraMetricType.cpu });
   };

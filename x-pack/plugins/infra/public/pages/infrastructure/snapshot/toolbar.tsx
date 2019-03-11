@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-// import { i18n } from '@kbn/i18n';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AutocompleteField } from '../../../components/autocomplete_field';
@@ -21,28 +20,6 @@ import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_option
 import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
-import { InfraNodeType } from '../../../graphql/types';
-
-const getTitle = (nodeType: string) => {
-  const TITLES = {
-    [InfraNodeType.host as string]: (
-      <FormattedMessage id="xpack.infra.homePage.toolbar.hostsTitle" defaultMessage="Hosts" />
-    ),
-    [InfraNodeType.pod as string]: (
-      <FormattedMessage
-        id="xpack.infra.homePage.toolbar.kubernetesPodsTitle"
-        defaultMessage="Kubernetes Pods"
-      />
-    ),
-    [InfraNodeType.container as string]: (
-      <FormattedMessage
-        id="xpack.infra.homePage.toolbar.dockerContainersTitle"
-        defaultMessage="Docker Containers"
-      />
-    ),
-  };
-  return TITLES[nodeType];
-};
 
 export const HomeToolbar = injectI18n(({ intl }) => (
   <Toolbar>
