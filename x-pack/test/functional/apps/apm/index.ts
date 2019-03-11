@@ -7,7 +7,8 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
 // tslint:disable:no-default-export
 export default function({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
-  describe('APM', () => {
+  describe('APM', function() {
+    this.tags('ciGroup6');
     loadTestFile(require.resolve('./feature_controls'));
   });
 }
