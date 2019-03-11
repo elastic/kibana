@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc } from './APMDoc';
+import { APMBaseDoc } from './APMBaseDoc';
 import { Container } from './fields/Container';
 import { Context } from './fields/Context';
 import { Host } from './fields/Host';
@@ -20,8 +20,9 @@ interface Processor {
   event: 'transaction';
 }
 
-export interface Transaction extends APMDoc {
+export interface TransactionRaw extends APMBaseDoc {
   processor: Processor;
+  trace: { id: string }; // trace is required
   transaction: {
     duration: { us: number };
     id: string;
@@ -30,8 +31,9 @@ export interface Transaction extends APMDoc {
       agent?: {
         [name: string]: number;
       };
+      [key: string]: unknown;
     };
-    name: string; // name could be missing in ES but the UI will always only aggregate on transactions with a name
+    name?: string;
     result?: string;
     sampled: boolean;
     span_count?: {
@@ -39,7 +41,9 @@ export interface Transaction extends APMDoc {
       dropped?: number;
     };
     type: string;
+    [key: string]: unknown;
   };
+  [key: string]: unknown;
 
   // Shared by errors and transactions
   container?: Container;

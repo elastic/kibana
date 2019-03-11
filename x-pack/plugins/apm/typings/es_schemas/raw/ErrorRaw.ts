@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc } from './APMDoc';
+import { APMBaseDoc } from './APMBaseDoc';
+import { Container } from './fields/Container';
 import { Context } from './fields/Context';
 import { Host } from './fields/Host';
 import { Http } from './fields/Http';
+import { Kubernetes } from './fields/Kubernetes';
+import { Process } from './fields/Process';
 import { Service } from './fields/Service';
 import { IStackframe } from './fields/Stackframe';
 import { Url } from './fields/Url';
@@ -24,33 +27,40 @@ interface Exception {
   module?: string;
   handled?: boolean;
   stacktrace?: IStackframe[];
+  [key: string]: unknown;
 }
 
 interface Log {
   message: string;
   stacktrace?: IStackframe[];
+  [key: string]: unknown;
 }
 
-// Not calling it "Error" to avoid clashes with types for native Error
-export interface APMError extends APMDoc {
+export interface ErrorRaw extends APMBaseDoc {
   processor: Processor;
-  transaction: {
+  transaction?: {
     id: string;
     sampled?: boolean;
+    type: string;
   };
   error: {
     id: string;
-    culprit: string;
+    culprit?: string;
     grouping_key: string;
     // either exception or log are given
     exception?: Exception[];
     log?: Log;
+    [key: string]: unknown;
   };
+  [key: string]: unknown;
 
   // Shared by errors and transactions
+  container?: Container;
   context?: Context;
   host?: Host;
   http?: Http;
+  kubernetes?: Kubernetes;
+  process?: Process;
   service: Service;
   url?: Url;
   user?: User;
