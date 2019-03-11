@@ -12,24 +12,12 @@ light to dark.
 [role="screenshot"]
 image::maps/images/sample_data_web_logs.png[]
 
-Your best bet to getting started with *Maps* is to add one of 
-the sample data sets that ship with {kib}. Adding a sample data set also 
-loads a map to go with the data.
+Before you start this tutorial, add the web log sample data set. Each
+sample data set includes a map to go along with the data. Open *Maps* and 
+explore the different layers of the *[Logs] Total Requests and Bytes* map,
+which you'll re-create in this tutorial.
 
-. In the upper left corner of your browser, click the {kib} logo to navigate
-to the {kib} home page.
-. Click *Load a data set and a {kib} dashboard*.
-. Add the *Sample web logs* data set.
-
-. In the side navigation, click *Maps*. 
-
-. In the maps list, click *[Logs] Total Requests and Bytes*.
-+
-This loads the map for the web logs data set. Check out each of the four layers of the map. As you move your mouse over the map,
-note how the tooltips show property values. 
-
-You'll re-create the *[Logs] Total Requests and Bytes* map in this tutorial. 
-You'll learn how to:
+You'll learn to:
 
 * Create a multi-layer map
 * Connect a layer to a data source
@@ -41,8 +29,8 @@ You'll learn how to:
 
 The first thing to do is to create a new map.
 
-. In the application header, click *Maps* to return to the list of maps.
-. Click *Create map*.
+. If you haven't already, open *Maps*. 
+. On the maps list page, click *Create map*.
 +
 A new map is created using a base tile layer.
 +
