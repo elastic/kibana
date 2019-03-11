@@ -202,8 +202,30 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
               beatsSize: newState.size.toString(),
             });
           }}
-          actionHandler={async (action: AssignmentActionType, payload: any) => {
-            // Something
+          actionHandler={async (
+            action: AssignmentActionType,
+            payload: any,
+            selectedBeats: CMBeat[]
+          ) => {
+            switch (action) {
+              case AssignmentActionType.Assign:
+                let assignType: 'added' | 'removed';
+                if (
+                  selectedBeats.some(
+                    beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
+                  )
+                ) {
+                  assignType = 'removed';
+                } else {
+                  assignType = 'added';
+                }
+
+                this.notifyUpdatedTagAssociation(assignType, selectedBeats, payload);
+
+              case AssignmentActionType.Delete:
+                this.notifyBeatDisenrolled(selectedBeats);
+                break;
+            }
           }}
         />
 
