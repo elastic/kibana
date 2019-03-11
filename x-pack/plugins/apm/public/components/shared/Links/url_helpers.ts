@@ -6,29 +6,18 @@
 
 import { Location } from 'history';
 import createHistory from 'history/createHashHistory';
-import { mapValues, pick } from 'lodash';
+import { pick } from 'lodash';
 import qs from 'querystring';
 import chrome from 'ui/chrome';
 import url from 'url';
+import { TIMEPICKER_DEFAULTS } from 'x-pack/plugins/apm/public/store/urlParams';
 
 export function toQuery(search?: string): APMQueryParamsRaw {
   return search ? qs.parse(search.slice(1)) : {};
 }
 
 export function fromQuery(query: APMQueryParams) {
-  // we have to avoid encoding range params because they cause
-  // Kibana angular to decode them and append them to the existing
-  // URL as an encoded hash /shrug
-  const encoded = mapValues(query, (value, key) => {
-    if (['rangeFrom', 'rangeTo'].includes(key!)) {
-      return value;
-    }
-    return qs.escape(value.toString());
-  });
-
-  return qs.stringify(encoded, '&', '=', {
-    encodeURIComponent: (value: string) => value
-  });
+  return qs.stringify(query);
 }
 
 export const PERSISTENT_APM_PARAMS = [
@@ -50,6 +39,7 @@ function getSearchString(
   const isApmLink = pathname.includes('app/apm') || pathname === '';
   if (isApmLink) {
     const nextQuery = {
+      ...TIMEPICKER_DEFAULTS,
       ...pick(currentQuery, PERSISTENT_APM_PARAMS),
       ...query
     };
