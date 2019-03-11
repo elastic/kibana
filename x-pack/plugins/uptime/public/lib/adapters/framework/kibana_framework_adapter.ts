@@ -81,8 +81,9 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
            */
           const renderGlobalHelpControls = () =>
             // render Uptime feedback link in global help menu
-            chrome.helpExtension.set((element: HTMLDivElement) => () => {
+            chrome.helpExtension.set((element: HTMLDivElement) => {
               ReactDOM.render(renderUptimeKibanaGlobalHelp(), element);
+              return () => ReactDOM.unmountComponentAtNode(element);
             });
 
           const {
