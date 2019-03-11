@@ -57,11 +57,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }),
         path: routePath,
         route: {
-          auth: {
-            access: {
-              scope: 'infra',
-            },
-          },
+          tags: ['access:graphql'],
         },
       },
       plugin: graphqlHapi,
@@ -75,11 +71,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
         }),
         path: `${routePath}/graphiql`,
         route: {
-          auth: {
-            access: {
-              scope: 'infra',
-            },
-          },
+          tags: ['access:graphql'],
         },
       },
       plugin: graphiqlHapi,
