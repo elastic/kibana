@@ -101,7 +101,7 @@ export function apm(kibana: any) {
               all: [],
               read: ['config']
             },
-            ui: []
+            ui: ['show']
           }
         }
       });
