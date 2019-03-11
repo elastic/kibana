@@ -395,6 +395,7 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiRadioGroup
       idSelected="snapshot"
