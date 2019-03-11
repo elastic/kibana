@@ -861,13 +861,13 @@
     oppsy "2.x.x"
     pumpify "1.3.x"
 
-"@elastic/javascript-typescript-langserver@^0.1.16":
-  version "0.1.16"
-  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.16.tgz#17757840a50596b5afb7cbdf8f16edf24e79e9e5"
-  integrity sha512-cbKqQZQeanQtMdeCaLzPs5R3Kz6XguoOulFLsPOQ5VnKfkuQ+2fjyP+CKWAUAG+EpxObSmVZv0FR1KBhSYIIpA==
+"@elastic/javascript-typescript-langserver@^0.1.17":
+  version "0.1.17"
+  resolved "https://registry.yarnpkg.com/@elastic/javascript-typescript-langserver/-/javascript-typescript-langserver-0.1.17.tgz#e06f5bae83b48c272d0f8b3fab1ff207ab50963c"
+  integrity sha512-Ka6/hD7g0gNfv1G5ffsUzyQo5B8MxU0tWIe7emINWXVj+66j2yA2O5CQGfxZRowA7F5fcLFii3GlxNl1X7KYZw==
   dependencies:
     "@elastic/lsp-extension" "^0.1.1"
-    javascript-typescript-langserver "^2.11.2"
+    javascript-typescript-langserver "^2.11.3"
     rxjs "^5.5.0"
     typescript "~3.3.3333"
 
@@ -14012,10 +14012,10 @@ jaeger-client@^3.5.3:
     uuid "^3.2.1"
     xorshift "^0.2.0"
 
-javascript-typescript-langserver@^2.11.2:
-  version "2.11.2"
-  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.11.2.tgz#fb6539382943873963d03bd11361c754e16e5c82"
-  integrity sha512-ntxgW8oAKKGU+Gk21u7HK+/LG8+D4jekxPxOrJYov82CJRb/k/9MKX+gdk7Eh1VSaujwDKJIWzCOWpna4Vtw3A==
+javascript-typescript-langserver@^2.11.3:
+  version "2.11.3"
+  resolved "https://registry.yarnpkg.com/javascript-typescript-langserver/-/javascript-typescript-langserver-2.11.3.tgz#71bd0b08e43588f1d49a85eb774acc02a3d9a26d"
+  integrity sha512-j2dKPq5tgSUyM2AOXWh2O7pNWzXzKI/3W02X1OrEZnV3B9yt9IM+snuGt/mk1Nryxyy7OZnhdL0XqHe4xx7Qzw==
   dependencies:
     chai "^4.0.1"
     chai-as-promised "^7.0.0"
