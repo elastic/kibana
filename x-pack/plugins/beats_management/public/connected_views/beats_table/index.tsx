@@ -128,7 +128,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             }
 
             if (status && !status.find(s => !s.success)) {
-              forceUpdate(!!update);
+              forceUpdate(!update);
             } else if (status && status.find(s => !s.success)) {
               // @ts-ignore
               alert(status.find(s => !s.success).error.message);
@@ -143,7 +143,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
                   props.forAttachedTag
                 )
               );
-              return forceUpdate(!!update);
+              return forceUpdate(!update);
             }
 
             for (const beat of selectedItems) {
@@ -153,7 +153,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             // because the compile code above has a very minor race condition, we wait,
             // the max race condition time is really 10ms but doing 100 to be safe
             setTimeout(async () => {
-              forceUpdate(!!update);
+              forceUpdate(!update);
             }, 100);
             break;
           case AssignmentActionType.Reload:
