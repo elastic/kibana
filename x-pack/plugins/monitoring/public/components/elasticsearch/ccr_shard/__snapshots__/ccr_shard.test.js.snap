@@ -107,17 +107,9 @@ exports[`CcrShard that it renders normally 1`] = `
       size="s"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
       wrap={true}
     >
       <EuiFlexItem
-        component="div"
-        grow={true}
         key="0"
         style={
           Object {
@@ -134,8 +126,6 @@ exports[`CcrShard that it renders normally 1`] = `
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
-        grow={true}
         key="1"
         style={
           Object {

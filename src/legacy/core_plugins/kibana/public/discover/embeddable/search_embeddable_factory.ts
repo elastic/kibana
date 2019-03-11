@@ -19,6 +19,7 @@
 
 import 'ui/doc_table';
 
+import { i18n } from '@kbn/i18n';
 import { EmbeddableFactory } from 'ui/embeddable';
 import {
   EmbeddableInstanceConfiguration,
@@ -33,7 +34,16 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     private $rootScope: ng.IRootScopeService,
     private searchLoader: SavedSearchLoader
   ) {
-    super({ name: 'search' });
+    super({
+      name: 'search',
+      savedObjectMetaData: {
+        name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
+          defaultMessage: 'Saved search',
+        }),
+        type: 'search',
+        getIconForSavedObject: () => 'search',
+      },
+    });
   }
 
   public getEditPath(panelId: string) {

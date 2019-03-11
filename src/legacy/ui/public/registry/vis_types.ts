@@ -17,6 +17,17 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import { VisType } from '../vis';
+import { uiRegistry, UIRegistry } from './_registry';
 
-export function MockServer(config?: { [key: string]: any }): Hapi.Server;
+interface VisTypesRegistryAccessors {
+  byName: { [typeName: string]: VisType };
+}
+
+export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
+
+export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
+  name: 'visTypes',
+  index: ['name'],
+  order: ['title'],
+});
