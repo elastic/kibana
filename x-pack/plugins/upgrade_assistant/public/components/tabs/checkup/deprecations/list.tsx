@@ -39,10 +39,10 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      reindexIndexName={deprecation.message === OLD_INDEX_MESSAGE ? deprecation.index! : undefined}
-      deleteIndexName={
-        deprecation.message === DELETE_INDEX_MESSAGE ? deprecation.index! : undefined
-      }
+      indexName={deprecation.index}
+      reindex={deprecation.message === OLD_INDEX_MESSAGE}
+      deleteIndex={deprecation.message === DELETE_INDEX_MESSAGE}
+      needsDefaultFields={deprecation.message === NEEDS_DEFAULT_FIELD_MESSAGE}
       docUrl={deprecation.url}
       items={items}
     />
