@@ -12,17 +12,3 @@ export function trackUserAction(actionType) {
   const userActionUri = createUserActionUri(UA_APP_NAME, actionType);
   getHttpClient().post(userActionUri);
 }
-
-export function trackUserRequest(request, actionType) {
-  // Only track successful actions.
-  request.then(() => trackUserAction(actionType));
-  return request;
-}
-
-export function trackUserRequestBulk(request, itemCount, actionTypeSingle, actionTypeBulk) {
-  if (itemCount > 1) {
-    return trackUserRequest(request, actionTypeBulk);
-  }
-
-  return trackUserRequest(request, actionTypeSingle);
-}

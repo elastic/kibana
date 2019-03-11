@@ -5,31 +5,36 @@
  */
 
 import chrome from 'ui/chrome';
+
 import {
   UA_UPDATE_SETTINGS,
   UA_INDEX_CLEAR_CACHE,
-  UA_INDEX_CLEAR_CACHE_BULK,
-  UA_INDEX_DELETE,
-  UA_INDEX_DELETE_BULK,
-  UA_INDEX_FLUSH,
-  UA_INDEX_FLUSH_BULK,
-  UA_INDEX_FORCE_MERGE,
-  UA_INDEX_FORCE_MERGE_BULK,
+  UA_INDEX_CLEAR_CACHE_MANY,
   UA_INDEX_CLOSE,
-  UA_INDEX_CLOSE_BULK,
-  UA_INDEX_OPEN,
-  UA_INDEX_OPEN_BULK,
+  UA_INDEX_CLOSE_MANY,
+  UA_INDEX_DELETE,
+  UA_INDEX_DELETE_MANY,
+  UA_INDEX_FLUSH,
+  UA_INDEX_FLUSH_MANY,
+  UA_INDEX_FORCE_MERGE,
+  UA_INDEX_FORCE_MERGE_MANY,
   UA_INDEX_FREEZE,
-  UA_INDEX_FREEZE_BULK,
+  UA_INDEX_FREEZE_MANY,
+  UA_INDEX_OPEN,
+  UA_INDEX_OPEN_MANY,
+  UA_INDEX_REFRESH,
+  UA_INDEX_REFRESH_MANY,
   UA_INDEX_UNFREEZE,
-  UA_INDEX_UNFREEZE_BULK,
+  UA_INDEX_UNFREEZE_MANY,
 } from '../../common/constants';
+
 import {
   TAB_SETTINGS,
   TAB_MAPPING,
   TAB_STATS,
 } from '../constants';
-import { trackUserRequest, trackUserRequestBulk } from './track_user_action';
+
+import { trackUserAction } from './track_user_action';
 
 let httpClient;
 
@@ -60,8 +65,10 @@ export async function closeIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/close`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_CLOSE, UA_INDEX_CLOSE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/close`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_CLOSE_MANY : UA_INDEX_CLOSE;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -69,8 +76,10 @@ export async function deleteIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/delete`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_DELETE, UA_INDEX_DELETE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/delete`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_DELETE_MANY : UA_INDEX_DELETE;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -78,8 +87,10 @@ export async function openIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/open`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_OPEN, UA_INDEX_OPEN_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/open`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_OPEN_MANY : UA_INDEX_OPEN;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -88,6 +99,9 @@ export async function refreshIndices(indices) {
     indices
   };
   const response = await httpClient.post(`${apiPrefix}/indices/refresh`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_REFRESH_MANY : UA_INDEX_REFRESH;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -95,8 +109,10 @@ export async function flushIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/flush`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_FLUSH, UA_INDEX_FLUSH_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/flush`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_FLUSH_MANY : UA_INDEX_FLUSH;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -105,8 +121,10 @@ export async function forcemergeIndices(indices, maxNumSegments) {
     indices,
     maxNumSegments
   };
-  const request = httpClient.post(`${apiPrefix}/indices/forcemerge`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_FORCE_MERGE, UA_INDEX_FORCE_MERGE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/forcemerge`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_FORCE_MERGE_MANY : UA_INDEX_FORCE_MERGE;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -114,24 +132,30 @@ export async function clearCacheIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_CLEAR_CACHE, UA_INDEX_CLEAR_CACHE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_CLEAR_CACHE_MANY : UA_INDEX_CLEAR_CACHE;
+  trackUserAction(actionType);
   return response.data;
 }
 export async function freezeIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/freeze`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_FREEZE, UA_INDEX_FREEZE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_FREEZE_MANY : UA_INDEX_FREEZE;
+  trackUserAction(actionType);
   return response.data;
 }
 export async function unfreezeIndices(indices) {
   const body = {
     indices
   };
-  const request = httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
-  const response = await trackUserRequestBulk(request, indices.length, UA_INDEX_UNFREEZE, UA_INDEX_UNFREEZE_BULK);
+  const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
+  // Only track successful requests.
+  const actionType = indices.length > 1 ? UA_INDEX_UNFREEZE_MANY : UA_INDEX_UNFREEZE;
+  trackUserAction(actionType);
   return response.data;
 }
 
@@ -141,9 +165,10 @@ export async function loadIndexSettings(indexName) {
 }
 
 export async function updateIndexSettings(indexName, settings) {
-  const request = httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
-  trackUserRequest(request, UA_UPDATE_SETTINGS);
-  return await request;
+  const response = await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
+  // Only track successful requests.
+  trackUserAction(UA_UPDATE_SETTINGS);
+  return response;
 }
 
 export async function loadIndexStats(indexName) {
