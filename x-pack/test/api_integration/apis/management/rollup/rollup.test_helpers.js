@@ -17,11 +17,11 @@ export const registerHelpers = ({ supertest, es }) => {
     return createIndex(indexName, { mappings });
   };
 
-  const getJobPayload = (indexName, id = getRandomString()) => ({
+  const getJobPayload = (indexName, id = getRandomString(), rollupIndex = ROLLUP_INDEX_NAME) => ({
     job: {
       id,
       index_pattern: indexName,
-      rollup_index: ROLLUP_INDEX_NAME,
+      rollup_index: rollupIndex,
       cron: '0 0 0 ? * 7',
       page_size: 1000,
       groups: {
