@@ -21,7 +21,7 @@ import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
-import { CustomError, extractErrors } from './extract_errors';
+import { extractErrors, ImportError } from './extract_errors';
 
 interface ResolveImportErrorsOptions {
   readStream: Readable;
@@ -45,7 +45,7 @@ interface ResolveImportErrorsOptions {
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: CustomError[];
+  errors?: ImportError[];
 }
 
 export async function resolveImportErrors({
@@ -56,7 +56,7 @@ export async function resolveImportErrors({
   savedObjectsClient,
   replaceReferences,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
-  let errors: CustomError[] = [];
+  let errors: ImportError[] = [];
   const filter = createObjectsFilter(skips, overwrites, replaceReferences);
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 

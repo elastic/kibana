@@ -178,8 +178,7 @@ describe('POST /api/saved_objects/_import', () => {
           id: 'my-pattern',
           type: 'index-pattern',
           error: {
-            statusCode: 409,
-            message: 'version conflict, document already exists',
+            type: 'conflict',
           },
         },
       ],

@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
-import { CustomError, extractErrors } from './extract_errors';
+import { extractErrors, ImportError } from './extract_errors';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
@@ -32,7 +32,7 @@ interface ImportSavedObjectsOptions {
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: CustomError[];
+  errors?: ImportError[];
 }
 
 export async function importSavedObjects({

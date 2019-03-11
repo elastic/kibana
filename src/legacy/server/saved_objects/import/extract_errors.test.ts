@@ -51,8 +51,7 @@ describe('extractErrors()', () => {
 Array [
   Object {
     "error": Object {
-      "message": "Conflict",
-      "statusCode": 409,
+      "type": "conflict",
     },
     "id": "2",
     "type": "dashboard",
