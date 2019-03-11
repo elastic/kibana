@@ -246,13 +246,14 @@ export class WorkspaceHandler {
 
   private parseLocation(location: Location) {
     const uri = location.uri;
-    if (uri && uri.startsWith('file://')) {
-      const locationPath = fs.realpathSync(decodeURIComponent(uri.substring('file://'.length)));
+    const prefix = path.sep === '\\' ? 'file:///' : 'file://';
+    if (uri && uri.startsWith(prefix)) {
+      const locationPath = fs.realpathSync(decodeURIComponent(uri.substring(prefix.length)));
       const workspacePath = fs.realpathSync(decodeURIComponent(this.workspacePath));
       if (locationPath.startsWith(workspacePath)) {
-        const relativePath = path.relative(workspacePath, locationPath);
-        if (path.sep !== '/') {
-          relativePath.replace(path.sep, '/');
+        let relativePath = path.relative(workspacePath, locationPath);
+        if (path.sep === '\\') {
+          relativePath = relativePath.replace(/\\/gi, '/');
         }
         const regex = /^(.*?\/.*?\/.*?)\/(__.*?\/)?([^_]+?)\/(.*)$/;
         const m = relativePath.match(regex);
