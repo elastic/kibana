@@ -42,8 +42,7 @@ function StringSelect({ agg = {}, aggParam = {}, onParamsChange }: StringSelectP
   return (
     <EuiFormRow label={aggParam.displayName || aggParam.name} className="form-group">
       <EuiFieldText
-        id={`visEditorStringInput${agg.id}${aggParam.name}`}
-        name={`visEditorStringInput${agg.id}${aggParam.name}`}
+        data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={onChange}
       />
     </EuiFormRow>
