@@ -36,7 +36,7 @@ const CommitId = styled.span`
 
 const Addition = styled.div`
   padding: ${theme.paddingSizes.xs} ${theme.paddingSizes.s};
-  border-radius: ${theme.euiSizeXs};
+  border-radius: ${theme.euiSizeXS};
   color: white;
   margin-right: ${theme.euiSizeS};
   background-color: ${theme.euiColorDanger};

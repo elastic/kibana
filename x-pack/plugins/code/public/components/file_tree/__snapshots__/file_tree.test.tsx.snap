@@ -84,7 +84,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -106,7 +106,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -119,7 +119,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -143,7 +143,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -165,7 +165,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -178,7 +178,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -202,7 +202,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -223,7 +223,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -236,7 +236,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -262,7 +262,7 @@ exports[`render correctly 1`] = `
                   role="button"
                 >
                   <svg
-                    className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                    className="euiIcon euiIcon--small codeFileTree--icon"
                     focusable="false"
                     height="16"
                     style={null}
@@ -284,7 +284,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <svg
-                    className="euiIcon euiIcon--medium euiIcon--subdued"
+                    className="euiIcon euiIcon--medium"
                     focusable="false"
                     height="16"
                     style={null}
@@ -297,7 +297,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gCsRKE"
+                    className="sc-bdVaJa ePJeWw"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -321,7 +321,7 @@ exports[`render correctly 1`] = `
                   role="button"
                 >
                   <svg
-                    className="euiIcon euiIcon--medium euiIcon--subdued"
+                    className="euiIcon euiIcon--medium"
                     focusable="false"
                     height="16"
                     style={null}
@@ -341,7 +341,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gCsRKE"
+                    className="sc-bdVaJa ePJeWw"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -365,7 +365,7 @@ exports[`render correctly 1`] = `
                   role="button"
                 >
                   <svg
-                    className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                    className="euiIcon euiIcon--small codeFileTree--icon"
                     focusable="false"
                     height="16"
                     style={null}
@@ -386,7 +386,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <svg
-                    className="euiIcon euiIcon--medium euiIcon--subdued"
+                    className="euiIcon euiIcon--medium"
                     focusable="false"
                     height="16"
                     style={null}
@@ -399,7 +399,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gCsRKE"
+                    className="sc-bdVaJa ePJeWw"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -428,7 +428,7 @@ exports[`render correctly 1`] = `
                       role="button"
                     >
                       <svg
-                        className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                        className="euiIcon euiIcon--small codeFileTree--icon"
                         focusable="false"
                         height="16"
                         style={null}
@@ -450,7 +450,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <svg
-                        className="euiIcon euiIcon--medium euiIcon--subdued"
+                        className="euiIcon euiIcon--medium"
                         focusable="false"
                         height="16"
                         style={null}
@@ -463,7 +463,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa gCsRKE"
+                        className="sc-bdVaJa ePJeWw"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -487,7 +487,7 @@ exports[`render correctly 1`] = `
                       role="button"
                     >
                       <svg
-                        className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                        className="euiIcon euiIcon--small codeFileTree--icon"
                         focusable="false"
                         height="16"
                         style={null}
@@ -509,7 +509,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <svg
-                        className="euiIcon euiIcon--medium euiIcon--subdued"
+                        className="euiIcon euiIcon--medium"
                         focusable="false"
                         height="16"
                         style={null}
@@ -522,7 +522,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa gCsRKE"
+                        className="sc-bdVaJa ePJeWw"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -550,7 +550,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -572,7 +572,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -585,7 +585,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -609,7 +609,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -631,7 +631,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -644,7 +644,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -668,7 +668,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -690,7 +690,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -703,7 +703,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -727,7 +727,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -749,7 +749,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -762,7 +762,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -786,7 +786,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -808,7 +808,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -821,7 +821,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -845,7 +845,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--small euiIcon--subdued codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree--icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -867,7 +867,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -880,7 +880,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -904,7 +904,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -924,7 +924,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -948,7 +948,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -968,7 +968,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -992,7 +992,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1012,7 +1012,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1036,7 +1036,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1056,7 +1056,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1080,7 +1080,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1100,7 +1100,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1124,7 +1124,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1144,7 +1144,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1168,7 +1168,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1188,7 +1188,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1212,7 +1212,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1232,7 +1232,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1256,7 +1256,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1276,7 +1276,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1300,7 +1300,7 @@ exports[`render correctly 1`] = `
               role="button"
             >
               <svg
-                className="euiIcon euiIcon--medium euiIcon--subdued"
+                className="euiIcon euiIcon--medium"
                 focusable="false"
                 height="16"
                 style={null}
@@ -1320,7 +1320,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gCsRKE"
+                className="sc-bdVaJa ePJeWw"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"

@@ -92,7 +92,7 @@ enum ButtonOption {
 }
 
 const Title = styled(EuiTitle)`
-  margin: ${theme.euiSizeXs} 0 ${theme.euiSize};
+  margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {

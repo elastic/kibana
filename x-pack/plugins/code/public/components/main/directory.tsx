@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiText, EuiTitle, IconType } from '@elastic/eui';
+import { EuiIcon, EuiTitle, IconType } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
@@ -21,23 +21,8 @@ const DirectoryNodesContainer = styled.div`
   flex-wrap: wrap;
 `;
 
-const NodeName = styled.span`
-  margin-left: ${theme.euiSizeXs};
-  vertical-align: middle;
-  a {
-    :focus: {
-      border: none;
-      outline: none;
-    }
-    :hover {
-      border: none;
-      outline: none;
-    }
-  }
-`;
-
 const Title = styled(EuiTitle)`
-  margin: ${theme.euiSizeXs} 0 ${theme.euiSize};
+  margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
 `;
 
 const Container = styled.div`
@@ -60,21 +45,17 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
     [FileTreeItemType.Submodule]: 'submodule',
   };
   const nodes = props.nodes.map(n => (
-    <div className="code-directory__node" key={n.path}>
-      <Link
-        className="code-link"
-        key={n.path}
-        to={props.getUrl(n.path!)}
-        data-test-subj={`codeFileExplorerNode-${n.name}`}
-      >
-        <EuiIcon type={typeIconMap[n.type]} color="subdued" />
-        <NodeName>
-          <EuiText size="s" className="eui-displayInlineBlock">
-            {n.name}
-          </EuiText>
-        </NodeName>
-      </Link>
-    </div>
+    <Link
+      className="code-link"
+      key={n.path}
+      to={props.getUrl(n.path!)}
+      data-test-subj={`codeFileExplorerNode-${n.name}`}
+    >
+      <div className="code-directory__node">
+        <EuiIcon type={typeIconMap[n.type]} />
+        <span className="code-fileNodeName eui-textTruncate">{n.name}</span>
+      </div>
+    </Link>
   ));
   return (
     <Container>
