@@ -10,6 +10,7 @@ export * from './index_statuses';
 
 export {
   UA_APP_NAME,
+  UA_APP_LOAD,
   USER_ACTIONS,
   UA_UPDATE_SETTINGS,
   UA_INDEX_CLEAR_CACHE,
