@@ -20,25 +20,20 @@ configGetStub.withArgs('xpack.reporting.queue').returns({
 configGetStub.withArgs('server.name').returns('test-server-123');
 configGetStub.withArgs('server.uuid').returns('g9ymiujthvy6v8yrh7567g6fwzgzftzfr');
 
+const executeJobFactoryStub = sinon.stub();
+
+const getMockServer = (
+  exportTypes: any[] = [{ executeJobFactory: executeJobFactoryStub }]
+): Partial<KbnServer> => ({
+  log: sinon.stub(),
+  expose: sinon.stub(),
+  config: () => ({ get: configGetStub }),
+  plugins: { reporting: { exportTypesRegistry: { getAll: () => exportTypes } } },
+});
+
 describe('Create Worker', () => {
   let queue: Esqueue;
   let client: ClientMock;
-  const executeJobFactoryStub = sinon.stub();
-
-  const getMockServer = (): Partial<KbnServer> => ({
-    log: sinon.stub(),
-    expose: sinon.stub(),
-    config: () => ({ get: configGetStub }),
-    plugins: {
-      reporting: {
-        exportTypesRegistry: {
-          getAll: () => {
-            return [{ executeJobFactory: executeJobFactoryStub }];
-          },
-        },
-      },
-    },
-  });
 
   beforeEach(() => {
     client = new ClientMock();
@@ -49,8 +44,56 @@ describe('Create Worker', () => {
   test('Creates a single Esqueue worker for Reporting', async () => {
     const createWorker = createWorkerFactory(getMockServer());
     const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
+
     createWorker(queue);
-    sinon.assert.calledOnce(registerWorkerSpy);
-    sinon.assert.calledOnce(executeJobFactoryStub);
+
+    sinon.assert.callCount(executeJobFactoryStub, 1);
+    sinon.assert.callCount(registerWorkerSpy, 1);
+
+    const { firstCall } = registerWorkerSpy;
+    const [workerName, workerFn, workerOpts] = firstCall.args;
+
+    expect(workerName).toBe('reporting');
+    expect(workerFn).toMatchInlineSnapshot(`[Function]`);
+    expect(workerOpts).toMatchInlineSnapshot(`
+Object {
+  "interval": 3300,
+  "intervalErrorMultiplier": 10,
+  "kibanaId": "g9ymiujthvy6v8yrh7567g6fwzgzftzfr",
+  "kibanaName": "test-server-123",
+}
+`);
+  });
+
+  test('Creates a single Esqueue worker for Reporting, even if there are multiple export types', async () => {
+    const createWorker = createWorkerFactory(
+      getMockServer([
+        { executeJobFactory: executeJobFactoryStub },
+        { executeJobFactory: executeJobFactoryStub },
+        { executeJobFactory: executeJobFactoryStub },
+        { executeJobFactory: executeJobFactoryStub },
+        { executeJobFactory: executeJobFactoryStub },
+      ])
+    );
+    const registerWorkerSpy = sinon.spy(queue, 'registerWorker');
+
+    createWorker(queue);
+
+    sinon.assert.callCount(executeJobFactoryStub, 5);
+    sinon.assert.callCount(registerWorkerSpy, 1);
+
+    const { firstCall } = registerWorkerSpy;
+    const [workerName, workerFn, workerOpts] = firstCall.args;
+
+    expect(workerName).toBe('reporting');
+    expect(workerFn).toMatchInlineSnapshot(`[Function]`);
+    expect(workerOpts).toMatchInlineSnapshot(`
+Object {
+  "interval": 3300,
+  "intervalErrorMultiplier": 10,
+  "kibanaId": "g9ymiujthvy6v8yrh7567g6fwzgzftzfr",
+  "kibanaName": "test-server-123",
+}
+`);
   });
 });
