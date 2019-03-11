@@ -40,7 +40,7 @@ export function createSavedObjectsService(server, schema, serializer, migrator) 
         name: `kibana_index_template:${index}`,
         include_type_name: true,
         body: {
-          template: index,
+          index_patterns: [index],
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
