@@ -2,17 +2,8 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -29,7 +20,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiBadge
@@ -45,19 +35,8 @@ exports[`PingList component renders sorted list without errors 1`] = `
     hasShadow={false}
     paddingSize="l"
   >
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiFormRow
           describedByIds={Array []}
           fullWidth={false}

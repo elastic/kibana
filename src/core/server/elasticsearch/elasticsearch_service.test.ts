@@ -23,10 +23,10 @@ const MockClusterClient = jest.fn();
 jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
-import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { logger } from '../logging/__mocks__';
+import { CoreContext } from '../core_context';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 
@@ -34,6 +34,7 @@ let elasticsearchService: ElasticsearchService;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 

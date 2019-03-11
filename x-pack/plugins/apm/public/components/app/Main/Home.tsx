@@ -12,7 +12,7 @@ import {
   IHistoryTab
 } from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
@@ -50,7 +50,7 @@ export function Home() {
 
       <EuiSpacer />
 
-      <KueryBar />
+      <FilterBar />
       <HistoryTabs tabs={homeTabs} />
     </div>
   );
