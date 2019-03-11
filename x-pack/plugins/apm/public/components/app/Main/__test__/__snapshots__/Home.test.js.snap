@@ -3,9 +3,18 @@
 exports[`Home component should render 1`] = `
 <div>
   <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    direction="row"
+    gutterSize="l"
     justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
   >
-    <EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
+    >
       <EuiTitle
         size="l"
         textTransform="none"
@@ -16,6 +25,7 @@ exports[`Home component should render 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
+      component="div"
       grow={false}
     >
       <SetupInstructionsLink />
