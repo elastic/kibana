@@ -21,7 +21,7 @@ import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/publ
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
 
-export function VisualizePageProvider({ getService, getPageObjects }) {
+export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
@@ -29,6 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const inspector = getService('inspector');
+  const screenshot = getService('screenshots');
   const table = getService('table');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -821,6 +822,30 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yAxis = await find.byCssSelector('.visAxis__column--y.visAxis__column--left');
       const $ = await yAxis.parseDomContent();
       return $('.y > g > text').toArray().map(tick => $(tick).text().trim());
+    }
+
+    /**
+     * Shrinks the window and takes a small screenshot of a vis to compare against a baseline.
+     * @param {string} name The name of the baseline image.
+     * @param {object} opts Options object.
+     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
+     */
+    async expectVisToMatchScreenshot(name, opts = { threshold: 0.05 }) {
+      log.debug(`expectVisToMatchScreenshot(${name})`);
+      // Expand the chart and use a small window size to minimize os/browser differences
+      await this.clickEditorSidebarCollapse();
+      await browser.setWindowSize(700, 545);
+      await this.waitForVisualizationRenderingStabilized();
+      // Scroll to the bottom so the chart is in view
+      await browser.execute(`
+        var scrollingElement = document.scrollingElement || document.body;
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+      `);
+      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+      // Reset the chart to its original state
+      await browser.setWindowSize(1300, 900);
+      await this.clickEditorSidebarCollapse();
+      expect(percentDifference).to.be.lessThan(opts.threshold);
     }
 
     /*
