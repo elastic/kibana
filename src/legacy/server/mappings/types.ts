@@ -17,8 +17,17 @@
  * under the License.
  */
 
+// FieldMapping isn't 1:1 with the options available,
+// modify as needed.
 export interface FieldMapping {
-  [key: string]: any;
+  type?: string;
+  dynamic?: string;
+  properties?: MappingProperties;
+  fields?: {
+    [subfield: string]: {
+      type: string;
+    };
+  };
 }
 
 export interface MappingProperties {
