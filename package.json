@@ -203,7 +203,6 @@
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "react-sizeme": "^2.3.6",
-    "react-toggle": "4.0.2",
     "reactcss": "1.2.3",
     "redux": "4.0.0",
     "redux-actions": "2.2.1",
