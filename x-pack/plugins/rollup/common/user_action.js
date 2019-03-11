@@ -6,6 +6,7 @@
 
 export const UA_APP_NAME = 'rollup-job-wizard';
 
+export const UA_APP_LOAD = 'app_load';
 export const UA_JOB_CREATE = 'job_create';
 export const UA_JOB_DELETE = 'job_delete';
 export const UA_JOB_DELETE_MANY = 'job_delete_many';
@@ -21,6 +22,7 @@ export const UA_DETAIL_PANEL_METRICS_TAB_CLICK = 'detail_panel_metrics_tab_click
 export const UA_DETAIL_PANEL_JSON_TAB_CLICK = 'detail_panel_json_tab_click';
 
 export const USER_ACTIONS = [
+  UA_APP_LOAD,
   UA_JOB_CREATE,
   UA_JOB_DELETE,
   UA_JOB_DELETE_MANY,

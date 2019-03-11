@@ -11,6 +11,7 @@ export const PLUGIN = {
 export {
   UA_APP_NAME,
   USER_ACTIONS,
+  UA_APP_LOAD,
   UA_JOB_CREATE,
   UA_JOB_DELETE,
   UA_JOB_DELETE_MANY,
