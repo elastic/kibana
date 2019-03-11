@@ -58,7 +58,7 @@ exports[`render 1`] = `
         >
           <FormattedMessage
             defaultMessage="Create new visualization"
-            id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+            id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
             values={Object {}}
           />
         </EuiButton>
