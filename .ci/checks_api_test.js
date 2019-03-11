@@ -15,6 +15,7 @@ const getInstallation = async function(jwt){
 
 const start = async function(){
   console.log('hi from script');
+  console.log(Object.keys(process.env));
   const app = new App({
     id: 26774,
     privateKey: process.env.KIBANA_CI_REPORTER_KEY
