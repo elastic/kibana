@@ -87,6 +87,21 @@ export class LayerPanel extends React.Component {
     }
   }
 
+  _renderFilterSection() {
+    if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiPanel>
+
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
+
   _renderJoinSection() {
     if (!this.props.selectedLayer.isJoinable()) {
       return null;

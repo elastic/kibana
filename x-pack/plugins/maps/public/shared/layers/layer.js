@@ -54,6 +54,10 @@ export class AbstractLayer {
     return this._source.isJoinable();
   }
 
+  supportsElasticsearchFilters() {
+    return this._source.supportsElasticsearchFilters();
+  }
+
   async supportsFitToBounds() {
     return await this._source.supportsFitToBounds();
   }

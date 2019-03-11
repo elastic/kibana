@@ -37,6 +37,10 @@ export class AbstractESSource extends AbstractVectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  supportsElasticsearchFilters() {
+    return true;
+  }
+
   destroy() {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
