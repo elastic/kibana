@@ -31,7 +31,9 @@ exports[`Home component should render 1`] = `
       <SetupInstructionsLink />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer />
+  <EuiSpacer
+    size="l"
+  />
   <FilterBar />
   <withRouter(HistoryTabsWithoutRouter)
     tabs={
