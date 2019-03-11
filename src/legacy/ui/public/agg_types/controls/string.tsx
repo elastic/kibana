@@ -29,7 +29,7 @@ interface StringSelectProps {
     type: string,
     agg: AggConfig,
     field: any,
-    options?: { isValid?: boolean; isSetFormDirty: boolean }
+    options?: { isSetFormDirty: boolean }
   ) => void;
 }
 

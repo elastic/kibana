@@ -62,12 +62,8 @@ uiModules
             agg.params[type] = value;
           }
 
-          if (aggForm && aggForm[type]) {
+          if (aggForm && aggForm[type] && options.isSetFormDirty) {
             aggForm[type].$setDirty();
-          }
-
-          if (options && typeof options.isValid === 'boolean') {
-            aggForm[type].$setValidity(type, options.isValid);
           }
         };
 

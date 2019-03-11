@@ -499,7 +499,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async setCustomLabel(label, index = 1) {
-      const customLabel = await find.testSubjects(`visEditorStringInput${index}customLabel`);
+      const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
 
