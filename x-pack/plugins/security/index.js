@@ -247,11 +247,11 @@ export const security = (kibana) => new kibana.Plugin({
       if (path.startsWith('/api/')) {
         const { tags = [] } = req.route.settings;
 
-        const actionTags = tags.filter(tag => tag.startsWith('access:'));
+        const tagPrefix = 'access:';
+        const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
 
         if (actionTags.length > 0) {
-          const feature = path.split('/', 3)[2];
-          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
+          const apiActions = actionTags.map(tag => actions.api.get(tag.substring(tagPrefix.length)));
 
           const checkPrivilegesResponse = await checkPrivileges(apiActions);
           if (!checkPrivilegesResponse.hasAllRequested) {
