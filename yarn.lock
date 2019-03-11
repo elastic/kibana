@@ -1060,10 +1060,17 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
+<<<<<<< HEAD
 "@elastic/eui@9.4.0":
   version "9.4.0"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.4.0.tgz#e5f83c612674fc6f59e990f557e563be1409d25e"
   integrity sha512-cQnsU3UeQ1s6F427vY53lzlh7mvNoPmIvPL24B5jH3JYaWULhIL1xSJXJgDSOSdrdHCxkXDD9Q8Y7256x4Xf4Q==
+=======
+"@elastic/eui@9.2.1":
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.2.1.tgz#3860a7219f0ee8f33ec43447edb2eda3c96a00a7"
+  integrity sha512-U92s0nh6vBS6NBiHDCq6e+49Dam8It+Iy81b2NProf1OIRk/nB0RE781x6zgUzmOFpJ1T0xiThWiiDP776v0LQ==
+>>>>>>> 3ada0259cc... Eui/9.2.1 + better dark mode (#32728)
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
