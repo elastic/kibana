@@ -15,11 +15,8 @@ import 'ui/autoload/all';
 import 'uiExports/autocompleteProviders';
 import 'react-vis/dist/style.css';
 import './style/global_overrides.css';
-
 import template from './templates/index.html';
 import Main from './components/app/Main';
-
-import { initTimepicker } from './utils/timepicker';
 import configureStore from './store/config/configureStore';
 import GlobalProgress from './components/app/Main/GlobalProgress';
 import LicenseChecker from './components/app/Main/LicenseChecker';
@@ -36,11 +33,21 @@ chrome.helpExtension.set(domElement => {
     ReactDOM.unmountComponentAtNode(domElement);
   };
 });
+const REACT_APP_ROOT_ID = 'react-apm-root';
 
 chrome.setRootTemplate(template);
 const store = configureStore();
+const checkForRoot = resolve => {
+  const ready = !!document.getElementById(REACT_APP_ROOT_ID);
+  if (ready) {
+    resolve();
+  } else {
+    setTimeout(() => checkForRoot(resolve), 10);
+  }
+};
+const waitForRoot = new Promise(resolve => checkForRoot(resolve));
 
-initTimepicker(history, store.dispatch).then(() => {
+waitForRoot.then(() => {
   ReactDOM.render(
     <I18nContext>
       <Provider store={store}>
@@ -53,6 +60,6 @@ initTimepicker(history, store.dispatch).then(() => {
         </Fragment>
       </Provider>
     </I18nContext>,
-    document.getElementById('react-apm-root')
+    document.getElementById(REACT_APP_ROOT_ID)
   );
 });

@@ -29,7 +29,7 @@ export interface IManagedTableProps {
   hidePerPageOptions?: boolean;
   initialSort?: {
     field: string;
-    direction: 'asc' | 'desc';
+    direction: string;
   };
   noItemsMessage?: React.ReactNode;
 }

@@ -34,7 +34,7 @@ exports[`Home component should render 1`] = `
   <EuiSpacer
     size="l"
   />
-  <Connect(KueryBarView) />
+  <FilterBar />
   <withRouter(HistoryTabsWithoutRouter)
     tabs={
       Array [
