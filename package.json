@@ -258,6 +258,8 @@
     "@kbn/eslint-plugin-license-header": "1.0.0",
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
+    "@octokit/app": "^2.2.1",
+    "@octokit/request": "^2.4.0",
     "@octokit/rest": "^16.16.4",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",

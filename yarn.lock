@@ -1092,6 +1092,15 @@
     call-me-maybe "^1.0.1"
     glob-to-regexp "^0.3.0"
 
+"@octokit/app@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@octokit/app/-/app-2.2.1.tgz#69a0da2442fe1ba27da3860d9f250f39514fe49b"
+  integrity sha512-bngDco6DrPMn65mdcf+RhX8bdImrDaY1V/5VZFwYuYhZHRDFDecWSR6cusHwH7G2xjfXhNdIBxbb3PJPoRJxUw==
+  dependencies:
+    "@octokit/request" "^2.1.2"
+    jsonwebtoken "^8.3.0"
+    lru-cache "^5.1.1"
+
 "@octokit/endpoint@^3.1.1":
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/@octokit/endpoint/-/endpoint-3.1.3.tgz#f6e9c2521b83b74367600e474b24efec2b0471c4"
@@ -1102,7 +1111,7 @@
     universal-user-agent "^2.0.1"
     url-template "^2.0.8"
 
-"@octokit/request@2.4.0":
+"@octokit/request@2.4.0", "@octokit/request@^2.1.2", "@octokit/request@^2.4.0":
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/@octokit/request/-/request-2.4.0.tgz#729fc5ea7654ab7cb74e0ae1935f69462a33b5e6"
   integrity sha512-Bm2P0duVRUeKhyepNyFg5GX+yhCK71fqdtpsw5Rz+PQPjSha8HYwPMF5QfpzpD8b6/Xl3xhTgu3V90W362gZ1A==
@@ -15700,6 +15709,13 @@ lru-cache@^4.1.1, lru-cache@^4.1.3:
   dependencies:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
+
+lru-cache@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
+  integrity sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==
+  dependencies:
+    yallist "^3.0.2"
 
 lru-queue@0.1:
   version "0.1.0"
