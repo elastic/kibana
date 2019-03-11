@@ -44,7 +44,7 @@ describe('UnconnectedKibanaLink', () => {
       search: '?rangeFrom=now-5w&rangeTo=now-2w'
     });
     expect(wrapper.find('EuiLink').props().href).toEqual(
-      `/app/apm#/something?rangeFrom=now-5w&rangeTo=now-2w`
+      `/app/apm#/something?rangeFrom=now-5w&rangeTo=now-2w&refreshPaused=true&refreshInterval=0`
     );
   });
 
@@ -54,7 +54,7 @@ describe('UnconnectedKibanaLink', () => {
       search: '?rangeFrom=now-5w&rangeTo=now-2w'
     });
     expect(wrapper.find('EuiLink').props().href).toEqual(
-      `#/something?rangeFrom=now-5w&rangeTo=now-2w`
+      `#/something?rangeFrom=now-5w&rangeTo=now-2w&refreshPaused=true&refreshInterval=0`
     );
   });
 
