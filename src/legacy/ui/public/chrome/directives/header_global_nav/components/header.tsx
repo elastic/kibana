@@ -252,14 +252,6 @@ class HeaderUI extends Component<Props, State> {
                   'aria-label': item.label,
                 })),
               }}
-              extraAction={{
-                color: 'subdued',
-                iconType: 'arrowRight',
-                iconSize: 's',
-                'aria-label': 'Expand to view recent apps and objects',
-                onClick: this.expandFlyout,
-                alwaysShow: true,
-              }}
             />
           </EuiListGroup>
           <EuiHorizontalRule margin="none" />
