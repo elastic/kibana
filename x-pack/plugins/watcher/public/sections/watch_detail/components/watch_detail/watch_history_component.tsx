@@ -16,8 +16,11 @@ import { WATCH_STATES } from '../../../../../common/constants';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutHeader,
   EuiIcon,
   EuiInMemoryTable,
+  EuiLink,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -36,6 +39,7 @@ const stateToIcon: { [key: string]: JSX.Element } = {
 const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [history, setWatchHistory] = useState([]);
+  const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
 
   const pagination = {
     initialPageSize: 10,
@@ -51,7 +55,18 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       sortable: true,
       truncateText: true,
       render: (startTime: Moment) => {
-        return startTime.format();
+        const formattedDate = startTime.format();
+        // "#/management/elasticsearch/watcher/watches/watch/{{watchHistoryTable.watch.id}}/history-item/{{item.historyItem.id}}"
+        // href={`#/management/elasticsearch/watcher/watches/watch/${watchId}/history-item/${watchId}`}
+        return (
+          <EuiLink
+            className="indTable__link euiTableCellContent"
+            data-test-subj={`watchIdColumn-${formattedDate}`}
+            onClick={() => showDetailFlyout()}
+          >
+            {formattedDate}
+          </EuiLink>
+        );
       },
     },
     {
@@ -89,11 +104,38 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     setWatchHistory(loadedWatchHistory);
     setIsLoading(false);
   };
+
+  const hideDetailFlyout = async () => {
+    return setIsDetailVisible(false);
+  };
+
+  const showDetailFlyout = async () => {
+    return setIsDetailVisible(true);
+  };
+
   useEffect(() => {
     loadWatchHistory();
     // only run the first time the component loads
   }, []);
 
+  let flyout;
+
+  if (isDetailVisible) {
+    flyout = (
+      <EuiFlyout
+        data-test-subj="indexDetailFlyout"
+        onClose={hideDetailFlyout}
+        aria-labelledby="indexDetailsFlyoutTitle"
+      >
+        <EuiFlyoutHeader>
+          <EuiTitle size="m">
+            <h2>YO</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        YO2
+      </EuiFlyout>
+    );
+  }
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -123,6 +165,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {flyout}
     </EuiPageContent>
   );
 };
