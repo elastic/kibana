@@ -5,6 +5,7 @@
  */
 
 // @ts-ignore
+import { PLUGIN_ID } from '../../common/constants';
 import {
   ESQueueInstance,
   ESQueueWorkerExecuteFn,
@@ -26,7 +27,7 @@ function createWorkerFn(server: KbnServer) {
   const kibanaName = config.get('server.name');
   const kibanaId = config.get('server.uuid');
   const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
-  const logger = LevelLogger.createForServer(server, ['reporting', 'queue', 'worker']);
+  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue', 'worker']);
 
   // Once more document types are added, this will need to be passed in
   return function createWorker(queue: ESQueueInstance) {
@@ -52,7 +53,7 @@ function createWorkerFn(server: KbnServer) {
       interval: queueConfig.pollInterval,
       intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
-    const worker = queue.registerWorker('reporting', workerFn, workerOptions);
+    const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);
 
     worker.on(esqueueEvents.EVENT_WORKER_COMPLETE, (res: any) => {
       logger.debug(`Worker completed: (${res.job.id})`);
