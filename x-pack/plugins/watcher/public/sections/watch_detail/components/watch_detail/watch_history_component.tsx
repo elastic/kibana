@@ -24,7 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-//TODO: remove duplication, [pcs]
+// TODO: remove duplication, [pcs]
 const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
   [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="grey" />,
