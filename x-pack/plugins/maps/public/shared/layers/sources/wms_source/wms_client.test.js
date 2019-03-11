@@ -135,15 +135,14 @@ describe('getCapabilities', () => {
                   <Layer>
                     <Title>hierarchyLevel2</Title>
                     <Layer>
-                    <Title>layer2</Title>
-                    <Name>2</Name>
-                    <Style>
-                      <Name>fancy</Name>
-                      <Title>fancyStyle</Title>
-                    </Style>
+                      <Title>layer2</Title>
+                      <Name>2</Name>
+                      <Style>
+                        <Name>fancy</Name>
+                        <Title>fancyStyle</Title>
+                      </Style>
+                    </Layer>
                   </Layer>
-                  </Layer>
-
                 </Layer>
               </Capability>
             </WMT_MS_Capabilities>
