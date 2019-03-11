@@ -54,6 +54,14 @@ export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_JSON,
 ];
 
+const tabToUserActionMap = {
+  [JOB_DETAILS_TAB_SUMMARY]: UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  [JOB_DETAILS_TAB_TERMS]: UA_DETAIL_PANEL_TERMS_TAB_CLICK,
+  [JOB_DETAILS_TAB_HISTOGRAM]: UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  [JOB_DETAILS_TAB_METRICS]: UA_DETAIL_PANEL_METRICS_TAB_CLICK,
+  [JOB_DETAILS_TAB_JSON]: UA_DETAIL_PANEL_JSON_TAB_CLICK,
+};
+
 export class DetailPanelUi extends Component {
   static propTypes = {
     isOpen: PropTypes.bool.isRequired,
@@ -73,29 +81,15 @@ export class DetailPanelUi extends Component {
     super(props);
   }
 
-  handleTabClick = tab => {
-    const tabToUserActionMap = {
-      [JOB_DETAILS_TAB_SUMMARY]: UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
-      [JOB_DETAILS_TAB_TERMS]: UA_DETAIL_PANEL_TERMS_TAB_CLICK,
-      [JOB_DETAILS_TAB_HISTOGRAM]: UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
-      [JOB_DETAILS_TAB_METRICS]: UA_DETAIL_PANEL_METRICS_TAB_CLICK,
-      [JOB_DETAILS_TAB_JSON]: UA_DETAIL_PANEL_JSON_TAB_CLICK,
-    };
-
-    trackUserAction(tabToUserActionMap[tab]);
-
-    const { job: { id }, openDetailPanel } = this.props;
-    openDetailPanel({ panelType: tab, jobId: id });
-  };
-
   renderTabs() {
-    const { panelType, job } = this.props;
+    const { panelType, job, openDetailPanel } = this.props;
 
     if (!job) {
       return;
     }
 
     const {
+      id,
       terms,
       histogram,
       metrics,
@@ -119,7 +113,10 @@ export class DetailPanelUi extends Component {
       const isSelected = tab === panelType;
       renderedTabs.push(
         <EuiTab
-          onClick={() => this.handleTabClick(tab)}
+          onClick={() => {
+            trackUserAction(tabToUserActionMap[tab]);
+            openDetailPanel({ panelType: tab, jobId: id });
+          }}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}
