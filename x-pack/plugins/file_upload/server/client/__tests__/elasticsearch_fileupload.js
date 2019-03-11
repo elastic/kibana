@@ -11,7 +11,7 @@ import {
   elasticsearchJsPlugin
 } from '../elasticsearch_fileupload';
 
-describe('ML - Endpoints', () => {
+describe('File upload - Endpoints', () => {
 
   // Check all paths in the ML elasticsearchJsPlugin start with a leading forward slash
   // so they work if Kibana is run behind a reverse proxy

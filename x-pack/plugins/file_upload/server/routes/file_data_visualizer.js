@@ -7,7 +7,7 @@
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { importDataProvider } from '../models/file_data_visualizer';
-import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
+import { MAX_BYTES } from '../../common/constants/file_import';
 
 
 function importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data) {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_datavisualizer';
+import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_import';
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, settings, mappings, ingestPipeline, data) {
