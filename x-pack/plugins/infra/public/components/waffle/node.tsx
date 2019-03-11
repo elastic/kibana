@@ -79,6 +79,7 @@ export const Node = injectI18n(
         >
           <EuiToolTip position="top" content={`${node.name} | ${value}`}>
             <NodeContainer
+              data-test-subj="nodeContainer"
               style={{ width: squareSize || 0, height: squareSize || 0 }}
               onClick={this.togglePopover}
             >

@@ -34,18 +34,20 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     catalogue: ['infraops'],
     privileges: {
       all: {
+        api: ['infra/graphql'],
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'configureSource'],
       },
       read: {
+        api: ['infra/graphql'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: ['config', 'infrastructure-ui-source'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   });
@@ -61,18 +63,20 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     catalogue: ['infralogging'],
     privileges: {
       all: {
+        api: ['infra/graphql'],
         savedObject: {
-          all: [],
+          all: ['infrastructure-ui-source'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['show', 'configureSource'],
       },
       read: {
+        api: ['infra/graphql'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: ['config', 'infrastructure-ui-source'],
         },
-        ui: [],
+        ui: ['show'],
       },
     },
   });
