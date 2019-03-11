@@ -14,6 +14,7 @@ type SavedObjectClient = any;
 export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
+  expose: () => void;
   plugins: Record<string, any>;
   route: any;
   log: any;
