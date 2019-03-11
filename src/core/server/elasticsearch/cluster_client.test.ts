@@ -39,9 +39,10 @@ jest.mock('./elasticsearch_client_config', () => ({
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { Logger } from '../logging';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ClusterClient } from './cluster_client';
 
+const logger = loggingServiceMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('#constructor creates client with parsed config', () => {

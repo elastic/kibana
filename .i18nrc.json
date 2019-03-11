@@ -31,6 +31,7 @@
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.maps": "x-pack/plugins/maps",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
