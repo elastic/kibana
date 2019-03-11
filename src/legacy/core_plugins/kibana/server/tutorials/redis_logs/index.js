@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function redisLogsSpecProvider(server, context) {
   const moduleName = 'redis';
-  const geoipRequired = false;
-  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'redisLogs',
@@ -52,7 +50,7 @@ Note that the `slowlog` fileset is experimental. \
     artifacts: {
       dashboards: [
         {
-          id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b',
+          id: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.redisLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Redis logs dashboard',
           }),
@@ -65,7 +63,7 @@ Note that the `slowlog` fileset is experimental. \
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/redis_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

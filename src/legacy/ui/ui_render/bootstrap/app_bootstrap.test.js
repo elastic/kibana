@@ -20,7 +20,6 @@
 const mockTemplate = `
 {{appId}}
 {{regularBundlePath}}
-{{i18n 'foo' '{"defaultMessage": "bar"}'}}
 `;
 
 jest.mock('fs', () => ({

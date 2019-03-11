@@ -5,7 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { i18n } from '@kbn/i18n';
 import {
   extractReferences,

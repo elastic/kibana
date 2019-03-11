@@ -251,4 +251,9 @@ export default () => Joi.object({
     locale: Joi.string().default('en'),
   }).default(),
 
+  savedObjects: Joi.object({
+    maxImportPayloadBytes: Joi.number().default(10485760),
+    maxImportExportSize: Joi.number().default(10000),
+  }).default(),
+
 }).default();

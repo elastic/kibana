@@ -34,10 +34,12 @@
 .tvbVisMetric__label--primary {
   color: $tvbTextColor;
   text-align: center;
-  font-size: 0.5em; /* 1 */
-  margin-bottom: 0.25em; /* 1 */
+  font-size: .5em; /* 1 */
+  margin-bottom: .25em; /* 1 */
   line-height: 1em; /* 1 */
 
+  // sass-lint:disable-block mixins-before-declarations
+  // these need to come after the base/normal styles
   @include tvbVisMetricReversedColor {
     color: $tvbTextColorReversed;
   }
@@ -50,6 +52,8 @@
   font-weight: $euiFontWeightBold;
   line-height: 1em; /* 1 */
 
+  // sass-lint:disable-block mixins-before-declarations
+  // these need to come after the base/normal styles
   @include tvbVisMetricReversedColor {
     color: $tvbValueColorReversed;
   }
@@ -59,25 +63,29 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 0.05em; /* 1 */
+  margin-top: .05em; /* 1 */
 }
 
 .tvbVisMetric__label--secondary {
-  font-size: 0.35em; /* 1 */
-  margin-right: 0.3em; /* 1 */
+  font-size: .35em; /* 1 */
+  margin-right: .3em; /* 1 */
   color: $tvbTextColor;
   line-height: 1em; /* 1 */
 
+  // sass-lint:disable-block mixins-before-declarations
+  // these need to come after the base/normal styles
   @include tvbVisMetricReversedColor {
     color: $tvbTextColorReversed;
   }
 }
 
 .tvbVisMetric__value--secondary {
-  font-size: 0.35em; /* 1 */
+  font-size: .35em; /* 1 */
   color: $tvbValueColor;
   line-height: 1em; /* 1 */
 
+  // sass-lint:disable-block mixins-before-declarations
+  // these need to come after the base/normal styles
   @include tvbVisMetricReversedColor {
     color: $tvbValueColorReversed;
   }
@@ -90,12 +98,14 @@
 
 .tvbVisMetric__label--additional {
   @include euiTextTruncate;
-  font-size: 0.25em; /* 1 */
-  padding: $euiSizeXS/2 0 0 0;
+  font-size: .25em; /* 1 */
+  padding: ($euiSizeXS / 2) 0 0;
   text-align: center;
   color: $tvbValueColor;
   line-height: 1.2; // Ensure the descenders don't get cut off
 
+  // sass-lint:disable-block mixins-before-declarations
+  // these need to come after the base/normal styles
   @include tvbVisMetricReversedColor {
     color: $tvbValueColorReversed;
   }

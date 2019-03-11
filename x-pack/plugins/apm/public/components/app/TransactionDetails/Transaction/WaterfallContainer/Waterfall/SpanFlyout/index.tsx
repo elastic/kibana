@@ -9,7 +9,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -28,6 +27,7 @@ import { Stacktrace } from 'x-pack/plugins/apm/public/components/shared/Stacktra
 import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import { Span } from '../../../../../../../../typings/es_schemas/Span';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
@@ -55,8 +55,8 @@ export function SpanFlyout({
 
   const stackframes = span.span.stacktrace;
   const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
-  const dbContext = idx(span, _ => _.context.db);
-  const httpContext = idx(span, _ => _.context.http);
+  const dbContext = idx(span, _ => _.span.db);
+  const httpContext = idx(span, _ => _.span.http);
   const labels = span.labels;
   const tags = keys(labels).map(key => ({
     key,
@@ -65,7 +65,7 @@ export function SpanFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
@@ -100,6 +100,8 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <StickySpanProperties span={span} totalDuration={totalDuration} />
           <EuiHorizontalRule />
+          <HttpContext httpContext={httpContext} />
+          <DatabaseContext dbContext={dbContext} />
           <EuiTabbedContent
             tabs={[
               {
@@ -113,8 +115,6 @@ export function SpanFlyout({
                 content: (
                   <Fragment>
                     <EuiSpacer size="l" />
-                    <HttpContext httpContext={httpContext} />
-                    <DatabaseContext dbContext={dbContext} />
                     <Stacktrace
                       stackframes={stackframes}
                       codeLanguage={codeLanguage}
@@ -152,7 +152,7 @@ export function SpanFlyout({
             ]}
           />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }

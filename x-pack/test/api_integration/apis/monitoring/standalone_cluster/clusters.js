@@ -11,7 +11,10 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('clusters', () => {
+  describe('clusters', function () {
+    // TODO: https://github.com/elastic/stack-monitoring/issues/31
+    this.tags(['skipCloud']);
+
     const archive = 'monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',

@@ -63,6 +63,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label="Status"
+          labelType="label"
         >
           <EuiComboBox
             compressed={false}
@@ -101,13 +102,11 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.status",
             "name": "Status",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "timestamp",
             "name": "Timestamp",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "monitor.ip",
@@ -123,7 +122,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.duration.us",
             "name": "Duration ms",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "error.type",
@@ -347,7 +345,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
         }
       }
       responsive={true}
-      sorting={true}
+      sorting={false}
     />
   </EuiPanel>
 </Fragment>

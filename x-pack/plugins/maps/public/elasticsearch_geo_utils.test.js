@@ -12,6 +12,8 @@ import {
   convertMapExtentToPolygon,
 } from './elasticsearch_geo_utils';
 
+import { IndexPatternsFlattenHitProvider } from 'ui/index_patterns/_flatten_hit';
+
 const geoFieldName = 'location';
 const mapExtent = {
   maxLat: 39,
@@ -24,9 +26,7 @@ const flattenHitMock = hit => {
   const properties = {};
   for (const fieldName in hit._source) {
     if (hit._source.hasOwnProperty(fieldName)) {
-      if (fieldName !== geoFieldName) {
-        properties[fieldName] = hit._source[fieldName];
-      }
+      properties[fieldName] = hit._source[fieldName];
     }
   }
   return properties;
@@ -129,6 +129,69 @@ describe('hitsToGeoJson', () => {
       type: 'Feature',
     });
   });
+
+  describe('dot in geoFieldName', () => {
+    const configMock = {
+      get: (key) => {
+        if (key === 'metaFields') {
+          return [];
+        }
+        throw new Error(`Unexpected config key: ${key}`);
+      },
+      watch: () => {}
+    };
+    const flattenHitWrapper = IndexPatternsFlattenHitProvider(configMock); // eslint-disable-line new-cap
+    const indexPatternMock = {
+      fields: {
+        byName: {
+          ['my.location']: {
+            type: 'geo_point'
+          }
+        }
+      }
+    };
+    const indexPatternFlattenHit = flattenHitWrapper(indexPatternMock);
+
+    it('Should handle geoField being an object', () => {
+      const hits = [
+        {
+          _source: {
+            my: {
+              location: { lat: 20, lon: 100 },
+            }
+          }
+        }
+      ];
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      expect(geojson.features[0]).toEqual({
+        geometry: {
+          coordinates: [100, 20],
+          type: 'Point',
+        },
+        properties: {},
+        type: 'Feature',
+      });
+    });
+
+    it('Should handle geoField containing dot in the name', () => {
+      const hits = [
+        {
+          _source: {
+            ['my.location']: { lat: 20, lon: 100 },
+          }
+        }
+      ];
+      const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
+      expect(geojson.features[0]).toEqual({
+        geometry: {
+          coordinates: [100, 20],
+          type: 'Point',
+        },
+        properties: {},
+        type: 'Feature',
+      });
+    });
+  });
 });
 
 describe('geoPointToGeometry', () => {
@@ -167,8 +230,8 @@ describe('geoPointToGeometry', () => {
     const lon2 = -60;
     const value = [
       {
-        "lat": lat,
-        "lon": lon
+        'lat': lat,
+        'lon': lon
       },
       `${lat2},${lon2}`
     ];
@@ -218,10 +281,10 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
     expect(filter).toEqual({
-      "geo_bounding_box": {
-        "location": {
-          "bottom_right": [-83, 35],
-          "top_left": [-89, 39]
+      'geo_bounding_box': {
+        'location': {
+          'bottom_right': [-83, 35],
+          'top_left': [-89, 39]
         }
       }
     });
@@ -230,14 +293,14 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_shape filter for geo_shape field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      "geo_shape": {
-        "location": {
-          "relation": "INTERSECTS",
-          "shape": {
-            "coordinates": [
+      'geo_shape': {
+        'location': {
+          'relation': 'INTERSECTS',
+          'shape': {
+            'coordinates': [
               [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
             ],
-            "type": "polygon"
+            'type': 'polygon'
           }
         }
       }
@@ -253,14 +316,14 @@ describe('createExtentFilter', () => {
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      "geo_shape": {
-        "location": {
-          "relation": "INTERSECTS",
-          "shape": {
-            "coordinates": [
+      'geo_shape': {
+        'location': {
+          'relation': 'INTERSECTS',
+          'shape': {
+            'coordinates': [
               [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
             ],
-            "type": "polygon"
+            'type': 'polygon'
           }
         }
       }
@@ -277,8 +340,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 90,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]
       ]
     });
@@ -292,8 +355,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
     });
@@ -307,8 +370,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
     });
@@ -322,8 +385,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 170,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
     });
@@ -337,8 +400,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -190,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
     });

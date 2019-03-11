@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateEsPrivilegeResponse } from "./validate_es_response";
+import { validateEsPrivilegeResponse } from './validate_es_response';
 
 const resource1 = 'foo-resource';
 const resource2 = 'bar-resource';

@@ -20,9 +20,8 @@
 import './_saved_vis';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader } from 'ui/courier/saved_object/saved_object_loader';
+import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const app = uiModules.get('app/visualize');
 
@@ -37,7 +36,7 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
   const visTypes = Private(VisTypesRegistryProvider);
 
   const savedObjectClient = Private(SavedObjectsClientProvider);
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http, chrome, savedObjectClient);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnUrl, chrome, savedObjectClient);
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;

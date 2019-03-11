@@ -31,9 +31,16 @@ describe('setupRequest', () => {
 
   it('should call callWithRequest with correct args', async () => {
     const setup = setupRequest(mockReq);
-    await setup.client('myType', { body: 'foo' });
+    await setup.client('myType', { body: { foo: 'bar' } });
     expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
-      body: 'foo',
+      body: {
+        foo: 'bar',
+        query: {
+          bool: {
+            filter: [{ range: { 'observer.version_major': { gte: 7 } } }]
+          }
+        }
+      },
       ignore_throttled: true,
       rest_total_hits_as_int: true
     });
@@ -45,11 +52,39 @@ describe('setupRequest', () => {
       get: jest.fn(() => Promise.resolve(true))
     }));
     const setup = setupRequest(mockReq);
-    await setup.client('myType', { body: 'foo' });
-    expect(callWithRequestSpy).toHaveBeenCalledWith(mockReq, 'myType', {
-      body: 'foo',
-      ignore_throttled: false,
-      rest_total_hits_as_int: true
+    await setup.client('myType', {});
+    const params = callWithRequestSpy.mock.calls[0][2];
+    expect(params.ignore_throttled).toBe(false);
+  });
+
+  it('should set filter if none exists', async () => {
+    const setup = setupRequest(mockReq);
+    await setup.client('myType', {});
+    const params = callWithRequestSpy.mock.calls[0][2];
+    expect(params.body).toEqual({
+      query: {
+        bool: { filter: [{ range: { 'observer.version_major': { gte: 7 } } }] }
+      }
+    });
+  });
+
+  it('should merge filters if one exists', async () => {
+    const setup = setupRequest(mockReq);
+    await setup.client('myType', {
+      body: {
+        query: { bool: { filter: [{ term: 'someTerm' }] } }
+      }
+    });
+    const params = callWithRequestSpy.mock.calls[0][2];
+    expect(params.body).toEqual({
+      query: {
+        bool: {
+          filter: [
+            { term: 'someTerm' },
+            { range: { 'observer.version_major': { gte: 7 } } }
+          ]
+        }
+      }
     });
   });
 });

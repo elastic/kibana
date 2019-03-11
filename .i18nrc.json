@@ -31,6 +31,7 @@
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.maps": "x-pack/plugins/maps",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
@@ -41,6 +42,7 @@
     "xpack.searchProfiler": "x-pack/plugins/searchprofiler",
     "xpack.secops": "x-pack/plugins/secops",
     "xpack.security": "x-pack/plugins/security",
+    "xpack.server": "x-pack/server",
     "xpack.spaces": "x-pack/plugins/spaces",
     "xpack.upgradeAssistant": "x-pack/plugins/upgrade_assistant",
     "xpack.uptime": "x-pack/plugins/uptime",
@@ -67,6 +69,7 @@
     "x-pack/plugins/secops/public/components/timeline/search_or_filter/search_or_filter.tsx",
     "x-pack/plugins/secops/public/lib/clipboard/clipboard.tsx",
     "x-pack/plugins/secops/server/graphql/types.ts",
-    "x-pack/plugins/secops/public/components/timeline/body/renderers/row_renderer.ts"
+    "x-pack/plugins/secops/public/components/timeline/body/renderers/row_renderer.ts",
+    "src/legacy/ui/ui_render/ui_render_mixin.js"
   ]
 }

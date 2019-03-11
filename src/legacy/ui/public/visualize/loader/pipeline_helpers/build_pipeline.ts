@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
@@ -49,8 +50,8 @@ interface Schemas {
   [key: string]: any[] | undefined;
 }
 
-type buildVisFunction = (visState: VisState, schemas: Schemas) => string;
-type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
+type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
+type buildVisConfigFunction = (schemas: Schemas) => VisState;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -206,8 +207,11 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   input_control_vis: visState => {
     return `input_control_vis ${prepareJson('visConfig', visState.params)}`;
   },
-  metrics: visState => {
-    return `tsvb ${prepareJson('params', visState.params)}`;
+  metrics: (visState, schemas, uiState = {}) => {
+    const paramsJson = prepareJson('params', visState.params);
+    const uiStateJson = prepareJson('uiState', uiState);
+
+    return `tsvb ${paramsJson} ${uiStateJson}`;
   },
   timelion: visState => {
     const expression = prepareString('expression', visState.params.expression);
@@ -220,34 +224,52 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
-    const visConfig = buildVisConfig.table(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.table(schemas),
+    };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const visConfig = buildVisConfig.metric(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.metric(schemas),
+    };
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = buildVisConfig.tagcloud(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tagcloud(schemas),
+    };
     return `tagcloud ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.region_map(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.region_map(schemas),
+    };
     return `regionmap ${prepareJson('visConfig', visConfig)}`;
   },
   tile_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.tile_map(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tile_map(schemas),
+    };
     return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
   pie: (visState, schemas) => {
-    const visConfig = buildVisConfig.pie(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.pie(schemas),
+    };
     return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (visState, schemas) => {
-    const visConfig = visState.params;
+  table: schemas => {
+    const visConfig = {} as any;
     visConfig.dimensions = {
       metrics: schemas.metric,
       buckets: schemas.bucket || [],
@@ -256,32 +278,32 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
-  metric: (visState, schemas) => {
-    const visConfig = visState.params;
-    visConfig.metric.metrics = schemas.metric;
+  metric: schemas => {
+    const visConfig = { dimensions: {} } as any;
+    visConfig.dimensions.metrics = schemas.metric;
     if (schemas.group) {
-      visConfig.metric.bucket = schemas.group[0];
+      visConfig.dimensions.bucket = schemas.group[0];
     }
     return visConfig;
   },
-  tagcloud: (visState, schemas) => {
-    const visConfig = visState.params;
+  tagcloud: schemas => {
+    const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
     return visConfig;
   },
-  region_map: (visState, schemas) => {
-    const visConfig = visState.params;
+  region_map: schemas => {
+    const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
     return visConfig;
   },
-  tile_map: (visState, schemas) => {
-    const visConfig = visState.params;
+  tile_map: schemas => {
+    const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],
       geohash: schemas.segment ? schemas.segment[0] : null,
@@ -289,8 +311,8 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
-  pie: (visState, schemas) => {
-    const visConfig = visState.params;
+  pie: schemas => {
+    const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],
       buckets: schemas.segment,
@@ -327,15 +349,18 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
 
 // If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const decorateVisObject = (vis: Vis, params: { timeRange?: any }) => {
+export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
   const schemas = getSchemas(vis, params.timeRange);
-  let visConfig = vis.params;
+  let visConfig = cloneDeep(vis.params);
   if (buildVisConfig[vis.type.name]) {
-    visConfig = buildVisConfig[vis.type.name](vis, schemas);
-    vis.params = visConfig;
+    visConfig = {
+      ...visConfig,
+      ...buildVisConfig[vis.type.name](schemas),
+    };
   } else if (vislibCharts.includes(vis.type.name)) {
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
   }
+  return visConfig;
 };
 
 export const buildPipeline = (
@@ -347,6 +372,7 @@ export const buildPipeline = (
   const query = searchSource.getField('query');
   const filters = searchSource.getField('filter');
   const visState = vis.getCurrentState();
+  const uiState = vis.getUiState();
 
   // context
   let pipeline = `kibana | kibana_context `;
@@ -372,7 +398,7 @@ export const buildPipeline = (
 
   const schemas = getSchemas(vis, params.timeRange);
   if (buildPipelineVisFunction[vis.type.name]) {
-    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas);
+    pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);

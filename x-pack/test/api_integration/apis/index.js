@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('apis', function () {
-    this.tags('ciGroup5');
+export default function({ loadTestFile }) {
+  describe('apis', function() {
+    this.tags('ciGroup6');
 
     // These commented out tests are only for within the secops branch and should not be merged into master
     // loadTestFile(require.resolve('./es'));
