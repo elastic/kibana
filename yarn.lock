@@ -771,10 +771,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.0.2":
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.0.2.tgz#05f716021cdf482e17c4ffd35cbfb385e8b9c5e3"
-  integrity sha512-yWu4QqzdP3LtfdMZrdNGerebXrb+NlWbNDNOuXCX8SJIeek7nr12kDi10S6H97KCsGdgFzMozn1DfU5kbJcmww==
+"@elastic/eui@9.2.1":
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.2.1.tgz#3860a7219f0ee8f33ec43447edb2eda3c96a00a7"
+  integrity sha512-U92s0nh6vBS6NBiHDCq6e+49Dam8It+Iy81b2NProf1OIRk/nB0RE781x6zgUzmOFpJ1T0xiThWiiDP776v0LQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
