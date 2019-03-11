@@ -9,11 +9,21 @@ import chrome from 'ui/chrome';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
+import { i18n } from '@kbn/i18n';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
   constructor(gisMapSavedObjectLoader) {
-    super({ name: 'map' });
+    super({
+      name: 'map',
+      savedObjectMetaData: {
+        name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
+          defaultMessage: 'Map',
+        }),
+        type: 'map',
+        getIconForSavedObject: () => 'gisApp',
+      },
+    });
     this._savedObjectLoader = gisMapSavedObjectLoader;
   }
 
