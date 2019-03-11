@@ -27,7 +27,7 @@ export function getGithubClient() {
   client.authenticate({
     auth: {
       clientId: 26774,
-      clientSecret: process.env.kibana_ci_reporter_key
+      privateKey: process.env.kibana_ci_reporter_key
     }
   });
 
