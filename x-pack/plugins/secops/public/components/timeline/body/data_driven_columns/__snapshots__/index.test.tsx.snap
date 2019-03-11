@@ -10,7 +10,7 @@ exports[`Columns it renders the expected columns 1`] = `
           "getState": [Function],
           "replaceReducer": [Function],
           "subscribe": [Function],
-          Symbol(Symbol.observable): [Function],
+          Symbol(observable): [Function],
         }
       }
     >
@@ -220,7 +220,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach fxaOAR"
+                                    className="sc-hORach edUWhb"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -513,7 +513,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -668,7 +668,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -696,11 +696,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -776,7 +776,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach gTpkbw"
+                                    className="sc-hORach kFZDak"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -1069,7 +1069,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -1224,7 +1224,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -1252,11 +1252,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -1332,7 +1332,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach fxaOAR"
+                                    className="sc-hORach edUWhb"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -1625,7 +1625,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -1780,7 +1780,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -1808,11 +1808,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -1888,7 +1888,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach gTpkbw"
+                                    className="sc-hORach kFZDak"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -2181,7 +2181,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -2336,7 +2336,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -2364,11 +2364,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -2444,7 +2444,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach fxaOAR"
+                                    className="sc-hORach edUWhb"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -2737,7 +2737,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -2911,7 +2911,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -2939,11 +2939,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -3019,7 +3019,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach gTpkbw"
+                                    className="sc-hORach kFZDak"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -3312,7 +3312,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -3486,7 +3486,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -3514,11 +3514,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>
@@ -3594,7 +3594,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                   width="179px"
                                 >
                                   <div
-                                    className="sc-hORach fxaOAR"
+                                    className="sc-hORach edUWhb"
                                     data-test-subj="column-cell"
                                     width="179px"
                                   >
@@ -3887,7 +3887,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -4042,7 +4042,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                       class="euiFlexItem euiFlexItem--flexGrowZero sc-jKJlTe fBIDha"
                                     >
                                       <div
-                                        class="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                        class="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                         data-test-subj="cell-resize-handle"
                                       />
                                     </div>
@@ -4070,11 +4070,11 @@ Can be one or multiple IPv4 or IPv6 addresses.",
                                         data-test-subj="cell-resize-handle"
                                       >
                                         <styled.div
-                                          className="sc-jzJRlG jcYIxx"
+                                          className="sc-jzJRlG dQnjVc"
                                           data-test-subj="cell-resize-handle"
                                         >
                                           <div
-                                            className="sc-jzJRlG jcYIxx sc-fjdhpX eXVyoR"
+                                            className="sc-jzJRlG dQnjVc sc-fjdhpX eXVyoR"
                                             data-test-subj="cell-resize-handle"
                                           />
                                         </styled.div>

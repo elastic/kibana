@@ -14,7 +14,7 @@ exports[`Resizeable it renders 1`] = `
 }
 
 .c1 {
-  border: 1px solid rgb(27,27,27);
+  border: 1px solid #1b1b1b;
 }
 
 <pure(Component)>
@@ -65,7 +65,7 @@ exports[`Resizeable it renders 1`] = `
 }
 
 .c1 {
-  border: 1px solid rgb(27,27,27);
+  border: 1px solid #1b1b1b;
 }
 
 <div

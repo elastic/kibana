@@ -34,7 +34,7 @@ const toggleButtonDirection = [
 
 interface Props {
   selectedDirection: NetworkTopNFlowDirection;
-  onChangeDirection: (value: NetworkTopNFlowDirection) => void;
+  onChangeDirection: (value: string) => void;
 }
 
 export const SelectDirection = pure<Props>(({ onChangeDirection, selectedDirection }) => (

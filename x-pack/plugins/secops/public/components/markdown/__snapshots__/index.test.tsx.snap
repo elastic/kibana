@@ -109,6 +109,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                               <EuiTableRowCell
                                 align="left"
                                 data-test-subj="markdown-table-cell"
+                                mobileOptions={
+                                  Object {
+                                    "show": true,
+                                  }
+                                }
                                 textOnly={true}
                               >
                                 <td
@@ -141,6 +146,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                               <EuiTableRowCell
                                 align="left"
                                 data-test-subj="markdown-table-cell"
+                                mobileOptions={
+                                  Object {
+                                    "show": true,
+                                  }
+                                }
                                 textOnly={true}
                               >
                                 <td
@@ -173,6 +183,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                               <EuiTableRowCell
                                 align="left"
                                 data-test-subj="markdown-table-cell"
+                                mobileOptions={
+                                  Object {
+                                    "show": true,
+                                  }
+                                }
                                 textOnly={true}
                               >
                                 <td
@@ -205,6 +220,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                               <EuiTableRowCell
                                 align="left"
                                 data-test-subj="markdown-table-cell"
+                                mobileOptions={
+                                  Object {
+                                    "show": true,
+                                  }
+                                }
                                 textOnly={true}
                               >
                                 <td
@@ -274,6 +294,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -306,6 +331,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -338,6 +368,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -370,6 +405,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -424,6 +464,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -456,6 +501,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -488,6 +538,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td
@@ -520,6 +575,11 @@ exports[`Markdown markdown tables it renders the expected table content 1`] = `
                             <EuiTableRowCell
                               align="left"
                               data-test-subj="markdown-table-cell"
+                              mobileOptions={
+                                Object {
+                                  "show": true,
+                                }
+                              }
                               textOnly={true}
                             >
                               <td

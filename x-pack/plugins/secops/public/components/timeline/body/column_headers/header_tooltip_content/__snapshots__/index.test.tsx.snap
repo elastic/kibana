@@ -111,7 +111,6 @@ Required field for all events.",
               <EuiIcon
                 className="sc-bMVAic iCyJsw"
                 data-test-subj="type-icon"
-                size="m"
                 type="clock"
               >
                 <clock

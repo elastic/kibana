@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  // @ts-ignore
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';

@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSuperSelect } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiSuperSelect,
+} from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
 

@@ -42,7 +42,7 @@ interface NetworkTopNFlowTableReduxProps {
 
 interface NetworkTopNFlowTableDispatchProps {
   updateTopNFlowDirection: ActionCreator<{
-    topNFlowDirection: NetworkTopNFlowDirection;
+    topNFlowDirection: string;
     networkType: networkModel.NetworkType;
   }>;
   updateTopNFlowLimit: ActionCreator<{
@@ -146,7 +146,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
     this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
 
-  private onChangeTopNFlowDirection = (topNFlowDirection: NetworkTopNFlowDirection) =>
+  private onChangeTopNFlowDirection = (topNFlowDirection: string) =>
     this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
 }
 
