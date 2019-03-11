@@ -7,14 +7,20 @@
 import { AbstractVectorSource } from '../vector_source';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-
 import { getKibanaRegionList } from '../../../../meta';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
   static type = 'REGIONMAP_FILE';
-  static title = 'Custom vector shapes';
-  static description = 'Vector shapes from static files configured in kibana.yml';
+  static title = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
+    defaultMessage: 'Custom vector shapes'
+  });
+  static description = i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
+    defaultMessage: 'Vector shapes from static files configured in kibana.yml'
+  })
+  ;
   static icon = 'logoKibana';
 
   static createDescriptor(options) {
@@ -40,8 +46,15 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: KibanaRegionmapSource.title },
-      { label: 'Vector layer', value: this._descriptor.name },
+      {
+        label: getDataSourceLabel(),
+        value: KibanaRegionmapSource.title },
+      {
+        label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
+          defaultMessage: 'Vector layer'
+        }),
+        value: this._descriptor.name
+      },
     ];
   }
 
@@ -49,7 +62,13 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     const regionList = await getKibanaRegionList();
     const meta = regionList.find(source => source.name === this._descriptor.name);
     if (!meta) {
-      throw new Error(`Unable to find map.regionmap configuration for ${this._descriptor.name}`);
+      throw new Error(i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
+        defaultMessage: `Unable to find map.regionmap configuration for {name}`,
+        values: {
+          name: this._descriptor.name
+        }
+      })
+      );
     }
     return meta;
   }

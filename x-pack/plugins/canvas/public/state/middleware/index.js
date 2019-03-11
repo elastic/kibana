@@ -16,10 +16,14 @@ import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { workpadRefresh } from './workpad_refresh';
 import { appReady } from './app_ready';
+import { elementStats } from './element_stats';
+import { resolvedArgs } from './resolved_args';
 
 const middlewares = [
   applyMiddleware(
     thunkMiddleware,
+    elementStats,
+    resolvedArgs,
     esPersistMiddleware,
     historyMiddleware,
     aeroelastic,
