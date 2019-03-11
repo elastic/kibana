@@ -6,7 +6,7 @@ Sample data sets install prepackaged visualizations, dashboards,
 {kibana-ref}/canvas-getting-started.html[Canvas workpads],
 and {kibana-ref}/maps.html[Maps].
 
-The sample data sets show case a variety of use cases:
+The sample data sets showcase a variety of use cases:
 
 * *eCommerce orders* includes visualizations for product-related information,
 such as cost, revenue, and price.
