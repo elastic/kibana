@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { PluginName } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, Plugin } from './plugin';
+import { DiscoveredPlugin, Plugin, PluginName } from './plugin';
 import { createPluginStartContext } from './plugin_context';
 import { PluginsServiceStartDeps } from './plugins_service';
 
@@ -97,21 +96,23 @@ export class PluginsSystem {
   }
 
   /**
-   * Get a Map of all discovered plugins in topological order.
+   * Get a Map of all discovered UI plugins in topological order.
    */
-  public discoveredPlugins(): Map<PluginName, DiscoveredPlugin> {
+  public uiPlugins(): Map<PluginName, DiscoveredPlugin> {
     return new Map<PluginName, DiscoveredPlugin>(
-      [...this.getTopologicallySortedPluginNames().keys()].map(
-        pluginName =>
-          [
-            pluginName,
-            {
-              id: pluginName,
-              path: this.plugins.get(pluginName)!.path,
-              manifest: this.plugins.get(pluginName)!.manifest,
-            },
-          ] as [PluginName, DiscoveredPlugin]
-      )
+      [...this.getTopologicallySortedPluginNames().keys()].map(pluginName => {
+        const plugin = this.plugins.get(pluginName)!;
+        return [
+          pluginName,
+          {
+            id: pluginName,
+            path: plugin.path,
+            configPath: plugin.manifest.configPath,
+            requiredPlugins: plugin.manifest.requiredPlugins,
+            optionalPlugins: plugin.manifest.optionalPlugins,
+          },
+        ] as [PluginName, DiscoveredPlugin];
+      })
     );
   }
 

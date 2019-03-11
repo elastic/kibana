@@ -20,6 +20,7 @@
 import { PluginsModule } from './plugins';
 
 export { bootstrap } from './bootstrap';
+export { DiscoveredPlugin, PluginName } from './plugins';
 
 import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';

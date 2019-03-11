@@ -19,19 +19,19 @@
 
 import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
-import { CoreService, PluginName } from '../../types';
+import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, Plugin } from './plugin';
+import { DiscoveredPlugin, Plugin, PluginName } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
 export interface PluginsServiceStart {
-  pluginStarts: Map<PluginName, unknown>;
-  discoveredPlugins: Map<PluginName, DiscoveredPlugin>;
+  contracts: Map<PluginName, unknown>;
+  uiPlugins: Map<PluginName, DiscoveredPlugin>;
 }
 
 /** @internal */
@@ -64,14 +64,14 @@ export class PluginsService implements CoreService<PluginsServiceStart> {
     if (!config.initialize || this.coreContext.env.isDevClusterMaster) {
       this.log.info('Plugin initialization disabled.');
       return {
-        pluginStarts: new Map(),
-        discoveredPlugins: this.pluginsSystem.discoveredPlugins(),
+        contracts: new Map(),
+        uiPlugins: this.pluginsSystem.uiPlugins(),
       };
     }
 
     return {
-      pluginStarts: await this.pluginsSystem.startPlugins(deps),
-      discoveredPlugins: this.pluginsSystem.discoveredPlugins(),
+      contracts: await this.pluginsSystem.startPlugins(deps),
+      uiPlugins: this.pluginsSystem.uiPlugins(),
     };
   }
 

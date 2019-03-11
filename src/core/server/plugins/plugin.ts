@@ -19,9 +19,66 @@
 
 import { join } from 'path';
 import typeDetect from 'type-detect';
-import { PluginManifest, PluginName } from '../../types';
+import { ConfigPath } from '../config';
 import { Logger } from '../logging';
 import { PluginInitializerContext, PluginStartContext } from './plugin_context';
+
+/**
+ * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
+ * that use it as a key or value more obvious.
+ */
+export type PluginName = string;
+
+/**
+ * Describes the set of required and optional properties plugin can define in its
+ * mandatory JSON manifest file.
+ * @internal
+ */
+export interface PluginManifest {
+  /**
+   * Identifier of the plugin.
+   */
+  readonly id: PluginName;
+
+  /**
+   * Version of the plugin.
+   */
+  readonly version: string;
+
+  /**
+   * The version of Kibana the plugin is compatible with, defaults to "version".
+   */
+  readonly kibanaVersion: string;
+
+  /**
+   * Root configuration path used by the plugin, defaults to "id".
+   */
+  readonly configPath: ConfigPath;
+
+  /**
+   * An optional list of the other plugins that **must be** installed and enabled
+   * for this plugin to function properly.
+   */
+  readonly requiredPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * An optional list of the other plugins that if installed and enabled **may be**
+   * leveraged by this plugin for some additional functionality but otherwise are
+   * not required for this plugin to work properly.
+   */
+  readonly optionalPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * Specifies whether plugin includes some client/browser specific functionality
+   * that should be included into client bundle via `public/ui_plugin.js` file.
+   */
+  readonly ui: boolean;
+
+  /**
+   * Specifies whether plugin includes some server-side specific functionality.
+   */
+  readonly server: boolean;
+}
 
 /**
  * Small container object used to expose information about discovered plugins that may
@@ -29,11 +86,33 @@ import { PluginInitializerContext, PluginStartContext } from './plugin_context';
  * @internal
  */
 export interface DiscoveredPlugin {
+  /**
+   * Identifier of the plugin.
+   */
   readonly id: PluginName;
 
+  /**
+   * Path on the filesystem where plugin was loaded from.
+   */
   readonly path: string;
 
-  readonly manifest: PluginManifest;
+  /**
+   * Root configuration path used by the plugin, defaults to "id".
+   */
+  readonly configPath: ConfigPath;
+
+  /**
+   * An optional list of the other plugins that **must be** installed and enabled
+   * for this plugin to function properly.
+   */
+  readonly requiredPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * An optional list of the other plugins that if installed and enabled **may be**
+   * leveraged by this plugin for some additional functionality but otherwise are
+   * not required for this plugin to work properly.
+   */
+  readonly optionalPlugins: ReadonlyArray<PluginName>;
 }
 
 type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (

@@ -64,8 +64,8 @@ beforeEach(() => {
       options: { someOption: 'foo', someAnotherOption: 'bar' },
     },
     plugins: {
-      pluginStarts: new Map([['plugin-id', 'plugin-value']]),
-      discoveredPlugins: new Map([['plugin-id', {} as DiscoveredPlugin]]),
+      contracts: new Map([['plugin-id', 'plugin-value']]),
+      uiPlugins: new Map([['plugin-id', {} as DiscoveredPlugin]]),
     },
   };
 
@@ -345,7 +345,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
 
     await devClusterLegacyService.start({
       elasticsearch: startDeps.elasticsearch,
-      plugins: { pluginStarts: new Map(), discoveredPlugins: new Map() },
+      plugins: { contracts: new Map(), uiPlugins: new Map() },
     });
 
     expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
@@ -367,7 +367,7 @@ describe('once LegacyService is started in `devClusterMaster` mode', () => {
 
     await devClusterLegacyService.start({
       elasticsearch: startDeps.elasticsearch,
-      plugins: { pluginStarts: new Map(), discoveredPlugins: new Map() },
+      plugins: { contracts: new Map(), uiPlugins: new Map() },
     });
 
     expect(MockClusterManager.create.mock.calls).toMatchSnapshot(

@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { PluginManifest, PluginName } from '../../types';
+import { DiscoveredPlugin, PluginName } from 'src/core/server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
@@ -34,8 +34,8 @@ export interface InjectedMetadataParams {
       [key: string]: unknown;
     };
     uiPlugins: Array<{
-      name: PluginName;
-      manifest: PluginManifest;
+      id: PluginName;
+      plugin: DiscoveredPlugin;
     }>;
     legacyMetadata: {
       app: unknown;

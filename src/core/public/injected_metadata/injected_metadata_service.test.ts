@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginManifest } from '../../types';
+import { DiscoveredPlugin } from 'src/core/server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('#getKibanaVersion', () => {
@@ -81,27 +81,18 @@ describe('start.getPlugins()', () => {
   it('returns injectedMetadata.uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [
-          { plugin: 'plugin-1', dependencies: [] },
-          { plugin: 'plugin-2', dependencies: ['plugin-1'] },
-        ],
+        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
       },
     } as any);
 
     const plugins = injectedMetadata.start().getPlugins();
-    expect(plugins).toEqual([
-      { plugin: 'plugin-1', dependencies: [] },
-      { plugin: 'plugin-2', dependencies: ['plugin-1'] },
-    ]);
+    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
   });
 
   it('returns frozen version of uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
-        uiPlugins: [
-          { plugin: 'plugin-1', dependencies: [] },
-          { plugin: 'plugin-2', dependencies: ['plugin-1'] },
-        ],
+        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
       },
     } as any);
 
@@ -110,7 +101,7 @@ describe('start.getPlugins()', () => {
       plugins.pop();
     }).toThrowError();
     expect(() => {
-      plugins.push({ name: 'new-plugin', manifest: {} as PluginManifest });
+      plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
     }).toThrowError();
     expect(() => {
       // @ts-ignore TS knows this shouldn't be possible
