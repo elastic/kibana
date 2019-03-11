@@ -13,15 +13,11 @@ const getInstallation = async function(jwt){
 });
 }
 
-
-
-
-
 const start = async function(){
   console.log('hi from script');
   const app = new App({
     id: 26774,
-    privateKey: process.env.kibana_ci_reporter_key
+    privateKey: process.env.KIBANA_CI_REPORTER_KEY
   });
 
   const jwt = app.getSignedJsonWebToken();
