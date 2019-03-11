@@ -92,10 +92,10 @@ export class WorkpadExport extends React.PureComponent {
           }}
         >
           <EuiButton
-            aria-label="Copy to clipboard"
             iconType="copy"
             size="s"
             style={{ width: '100%' }}
+            aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Activate this button to copy the POST URL."
           >
             Copy POST URL
           </EuiButton>
