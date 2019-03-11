@@ -9,9 +9,9 @@ import { Location } from 'history';
 import React from 'react';
 import { connect } from 'react-redux';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { getKibanaHref, KibanaHrefArgs } from './url_helpers';
+import { getRisonHref, RisonHrefArgs } from './rison_helpers';
 
-interface Props extends KibanaHrefArgs {
+interface Props extends RisonHrefArgs {
   disabled?: boolean;
   to?: StringMap;
   className?: string;
@@ -23,14 +23,14 @@ interface Props extends KibanaHrefArgs {
  *
  * You must remember to pass in location in that case.
  */
-const UnconnectedKibanaLink: React.FunctionComponent<Props> = ({
+const UnconnectedKibanaRisonLink: React.FunctionComponent<Props> = ({
   location,
   pathname,
   hash,
   query,
   ...props
 }) => {
-  const href = getKibanaHref({
+  const href = getRisonHref({
     location,
     pathname,
     hash,
@@ -44,6 +44,6 @@ const withLocation = connect(
   {}
 );
 
-const KibanaLink = withLocation(UnconnectedKibanaLink);
+const KibanaRisonLink = withLocation(UnconnectedKibanaRisonLink);
 
-export { UnconnectedKibanaLink, KibanaLink };
+export { UnconnectedKibanaRisonLink, KibanaRisonLink };
