@@ -183,7 +183,7 @@ class HeaderUI extends Component<Props, State> {
   public setNavDrawerRef = ref => (this.navDrawerRef = ref);
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$ } = this.props;
+    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -238,14 +238,23 @@ class HeaderUI extends Component<Props, State> {
         <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj={classNames('navDrawer')}>
           <EuiListGroup>
             <EuiListGroupItem
-              label="Recently viewed"
+              label={intl.formatMessage({
+                id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
+                defaultMessage: 'Recently viewed',
+              })}
               iconType="clock"
               size="s"
               style={{ color: 'inherit' }}
-              aria-label="Recently viewed"
+              aria-label={intl.formatMessage({
+                id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
+                defaultMessage: 'Recently viewed',
+              })}
               isDisabled={recentlyAccessed.length > 0 ? false : true}
               flyoutMenu={{
-                title: 'Recent items',
+                title: intl.formatMessage({
+                  id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
+                  defaultMessage: 'Recent items',
+                }),
                 listItems: recentlyAccessed.map(item => ({
                   label: item.label,
                   href: item.href,
