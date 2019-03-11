@@ -25,14 +25,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 uiModules
   .get('app/kibana', ['react'])
   .directive('stringSelect', reactDirective => reactDirective(wrapInI18nContext(StringSelect), [
-    'config',
-    'editor',
-    'onChange',
     'onParamsChange',
-    'setFormDirty',
-    'setFormValidity',
     ['agg', { watchDepth: 'collection' }],
-    ['aggParam', { watchDepth: 'reference' }],
-    ['vis', { watchDepth: 'reference' }],
-    ['indexedFields', { watchDepth: 'collection' }]
+    ['aggParam', { watchDepth: 'reference' }]
   ]));
