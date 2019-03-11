@@ -114,7 +114,7 @@ export const supportedConfigLabelsMap = new Map<string, string>([
   [
     'metricbeatModuleConfig.period.error',
     i18n.translate('xpack.beatsManagement.metricbeatModuleConfig.periodErrorMessage', {
-      defaultMessage: 'Invalid format. Use `10s` for 10 seconds, with no ending period.',
+      defaultMessage: 'Invalid period. Use `10s` for 10 seconds, with no ending period.',
     }),
   ],
   [
