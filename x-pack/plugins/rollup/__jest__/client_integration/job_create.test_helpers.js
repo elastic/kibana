@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed } from '../utils';
+import { registerTestBed } from '../../../../test_utils';
 import { rollupJobsStore } from '../../public/crud_app/store';
 import {
   setHttp,
