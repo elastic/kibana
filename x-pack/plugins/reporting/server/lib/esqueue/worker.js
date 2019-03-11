@@ -69,8 +69,8 @@ export class Worker extends events.EventEmitter {
       pollFrequencyErrorMultiplier: opts.intervalErrorMultiplier,
     });
 
-    this._running = true;
     this._startJobPolling();
+    this._running = true;
     this.debug(`Created worker for ${this.jobtype} jobs`);
   }
 
