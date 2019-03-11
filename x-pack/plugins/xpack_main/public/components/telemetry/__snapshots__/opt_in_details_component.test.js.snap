@@ -10,9 +10,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     ownFocus={true}
     size="m"
   >
-    <EuiFlyoutHeader
-      hasBorder={false}
-    >
+    <EuiFlyoutHeader>
       <EuiTitle
         size="m"
         textTransform="none"

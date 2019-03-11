@@ -18,6 +18,7 @@
  */
 
 import { FUNCTIONS_URL } from './consts';
+import _ from 'lodash';
 
 /**
  * Create a function which executes an Expression function on the
@@ -51,12 +52,30 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }) {
       timeout = setTimeout(runBatch, ms);
     }
 
-    const id = nextId();
+    const request = {
+      functionName,
+      args,
+      context: serialize(context),
+    };
+
+    // Check to see if this is a duplicate server function.
+    const duplicate = Object.values(batch).find(batchedRequest =>
+      _.isMatch(batchedRequest.request, request)
+    );
+
+    // If it is, just return the promise of the duplicated request.
+    if (duplicate) {
+      return duplicate.future.promise;
+    }
+
+    // If not, create a new promise, id, and add it to the batched collection.
     const future = createFuture();
+    const id = nextId();
+    request.id = id;
 
     batch[id] = {
       future,
-      request: { id, functionName, args, context: serialize(context) },
+      request,
     };
 
     return future.promise;
@@ -101,7 +120,7 @@ async function processBatch(ajaxStream, batch) {
         } else {
           future.resolve(result);
         }
-      }
+      },
     });
   } catch (err) {
     Object.values(batch).forEach(({ future }) => {
