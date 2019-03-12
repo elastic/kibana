@@ -11,6 +11,7 @@ import { beatsListActions, tagConfigActions } from '../../components/table/actio
 import { AssignmentActionType } from '../../components/table/table';
 import { LibsContext } from '../../context/libs';
 import { useAsyncEffect } from '../../hooks/use_async_effect';
+import { useInterval } from '../../hooks/use_interval';
 import { useKQLAutocomplete } from '../../hooks/use_kql_autocompletion';
 
 interface TableOptionsState {
@@ -31,9 +32,13 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
   const libs = useContext(LibsContext);
 
   const tableRef = useRef<any>(null);
-  // the value of update does not matter, we just use it to force a re-render
-  // by flipping it's value back and forth for lack of a built-in forceUpdate method
-  const [update, forceUpdate] = useState(true);
+
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  // reload the table every min
+  useInterval(() => {
+    setLastUpdate(new Date());
+  }, 60000);
 
   const [assignmentOptions, setAssignmentOptions] = useState([] as BeatTag[]);
   const [beats, setBeats] = useState({
@@ -71,7 +76,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
         page: parseInt(`${loadedBeats.page}`, 10),
       });
     },
-    [update, props.options.page, props.options.size, props.options.searchInput]
+    [lastUpdate, props.options.page, props.options.size, props.options.searchInput]
   );
 
   const autocompleteProps = useKQLAutocomplete(
@@ -129,7 +134,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             }
 
             if (status && !status.find(s => !s.success)) {
-              forceUpdate(!update);
+              setLastUpdate(new Date());
             } else if (status && status.find(s => !s.success)) {
               // @ts-ignore
               alert(status.find(s => !s.success).error.message);
@@ -144,7 +149,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
                   props.forAttachedTag
                 )
               );
-              return forceUpdate(!update);
+              return setLastUpdate(new Date());
             }
 
             for (const beat of selectedItems) {
@@ -155,7 +160,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             // the max race condition time is really 10ms but doing 100 to be safe
             setTimeout(async () => {
               tableRef.current.resetSelection();
-              forceUpdate(!update);
+              setLastUpdate(new Date());
             }, 100);
             break;
           case AssignmentActionType.Reload:
