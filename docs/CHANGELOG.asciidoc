@@ -17,6 +17,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.6.2>>
 * <<release-notes-6.6.1>>
 * <<release-notes-6.6.0>>
 * <<release-notes-6.5.4>>
@@ -85,6 +86,38 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+[[release-notes-6.6.2]]
+== {kib} 6.6.2
+
+See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of Kibana to another.
+
+
+[float]
+[[bug-6.6.2]]
+=== Bug fixes
+APM::
+* Avoids crashing the transaction details page if trace duration is 0 {pull}31799[#31799]
+Canvas::
+* Provides a valid `axisconfig` position default {pull}32335[#32335]
+Kibana App::
+* Removes the use of 's' regex flag in {kib} query language {pull}31292[#31292]
+Machine Learning::
+* Sets default number of shards to 1 when creating a new index for File data visualizer {pull}31567[#31567]
+* Adds missing error handling to annotations request {pull}32384[#32384]
+Management::
+* Fixes bug where rollup job search would display an empty prompt if no jobs matched the search {pull}31642[#31642]
+Monitoring::
+* Ensures that bulk uploader only starts once {pull}31307[#31307]
+Operations::
+* Bumps Node to 10.15.2 {pull}32200[#32200]
+Visualizations::
+* Formats Time Series Visual Builder error message {pull}31569[#31569]
+
+
+
+
+
 [[release-notes-6.6.1]]
 == {kib} 6.6.1
 
@@ -130,7 +163,6 @@ Security::
 * Fixes an issue with a cross-site scripting (XSS) vulnerability (CVE-2019-7608). See https://www.elastic.co/community/security[Security issues].
 * Fixes an arbitrary  code execution flaw in the Timelion visualizer (CVE-2019-7609). See https://www.elastic.co/community/security[Security issues].
 * Fixes an arbitrary  code execution flaw in the security audit logger (CVE-2019-7610). See https://www.elastic.co/community/security[Security issues].
-
 Visualizations::
 * Fixes standard deviation aggregation to prevent crash of Time Series Visual Builder {pull}30798[#30798]
 * Fixes Time Series Visual Builder flot chart render after index pattern change {pull}29949[#29949]
