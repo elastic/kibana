@@ -110,7 +110,7 @@ input[type="checkbox"],
 
 // We apply brute force focus states to anything not coming from Eui
 // which has focus states designed at the component level.
-// You can also use "kbn-resetFocus" to not apply the default focus
+// You can also use "kbn-resetFocusState" to not apply the default focus
 // state. This is useful when you've already hand crafted your own
 // focus states in Kibana.
 :focus {
