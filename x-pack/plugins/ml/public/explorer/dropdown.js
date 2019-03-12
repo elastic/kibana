@@ -20,25 +20,29 @@ const getOptions = () => {
   const fields = ['rating', 'age', 'influence', 'comments'].sort();
 
   const options = [];
+  const optionsData = {};
 
   fields.forEach((field) => {
     const o = { label: field, options: [] };
     aggs.forEach((agg) => {
-      o.options.push({
-        label: `${agg}(${field})`
-      });
+      const label = `${agg}(${field})`;
+      o.options.push({ label });
+      const formRowLabel = `${agg}_${field}`;
+      optionsData[label] = { agg, field, formRowLabel };
     });
     options.push(o);
   });
 
-  return options;
+  return { options, optionsData };
 };
 
 class DropDown extends Component {
   constructor(props) {
     super(props);
 
-    this.options = getOptions();
+    const { options, optionsData } = getOptions();
+    this.options = options;
+    this.optionsData = optionsData;
 
     this.state = {
       list: [],
@@ -69,10 +73,8 @@ class DropDown extends Component {
         {list.length > 0 && (
           <EuiSpacer size="l" />
         )}
-        <List list={list} deleteHandler={this.deleteHandler} />
-        {list.length > 0 && (
-          <EuiSpacer size="l" />
-        )}
+        <List list={list} optionsData={this.optionsData} deleteHandler={this.deleteHandler} />
+        <EuiSpacer size="l" />
         <EuiComboBox
           placeholder="Enter an aggregation ..."
           singleSelection={{ asPlainText: true }}

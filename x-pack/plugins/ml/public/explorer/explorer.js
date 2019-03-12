@@ -1032,7 +1032,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
     render() {
       return (
-        <div style={{ textAlign: 'center', margin: 'auto', width: '600px' }}>
+        <div style={{ textAlign: 'center', margin: 'auto', width: '1200px' }}>
           <br />
           <br />
           <br />
