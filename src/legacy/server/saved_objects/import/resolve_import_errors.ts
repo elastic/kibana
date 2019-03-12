@@ -21,7 +21,8 @@ import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
-import { extractErrors, ImportError } from './extract_errors';
+import { extractErrors } from './extract_errors';
+import { ImportError } from './types';
 
 interface ResolveImportErrorsOptions {
   readStream: Readable;
