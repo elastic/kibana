@@ -30,6 +30,7 @@ import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord } from '../../util/custom_url_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 import { getIndexPatterns } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
 
@@ -374,8 +375,8 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
         iconType="gear"
         aria-label={intl.formatMessage({
           id: 'xpack.ml.anomaliesTable.linksMenu.selectActionAriaLabel',
-          defaultMessage: 'Select action',
-        })}
+          defaultMessage: 'Select action for anomaly at {time}',
+        }, { time: formatHumanReadableDateTimeSeconds(anomaly.time) })}
       />
     );
 

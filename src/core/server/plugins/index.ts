@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 import { PluginsService } from './plugins_service';
 
 /** @internal */

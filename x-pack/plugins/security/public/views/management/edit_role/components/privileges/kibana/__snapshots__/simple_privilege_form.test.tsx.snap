@@ -29,6 +29,7 @@ exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <PrivilegeSelector
         allowNone={true}

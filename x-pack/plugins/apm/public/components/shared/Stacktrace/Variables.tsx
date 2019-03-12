@@ -66,7 +66,7 @@ export class Variables extends React.Component<Props> {
         </VariablesToggle>
         {this.state.isVisible && (
           <VariablesTableContainer>
-            <PropertiesTable propData={this.props.vars} propKey={'custom'} />
+            <PropertiesTable propData={this.props.vars} />
           </VariablesTableContainer>
         )}
       </VariablesContainer>
