@@ -29,25 +29,6 @@ import { routes } from './server/routes';
 import { Legacy } from '../../../../kibana';
 
 export async function init(server: Legacy.Server /*options*/) {
-  server.injectUiAppVars('canvas', () => {
-    const config = server.config();
-    const basePath = config.get('server.basePath');
-    const reportingBrowserType = (() => {
-      const configKey = 'xpack.reporting.capture.browser.type';
-      if (!config.has(configKey)) {
-        return null;
-      }
-      return config.get(configKey);
-    })();
-
-    return {
-      kbnIndex: config.get('kibana.index'),
-      serverFunctions: registries.serverFunctions.toArray(),
-      basePath,
-      reportingBrowserType,
-    };
-  });
-
   // Expose server.plugins.interpreter.register(specs) and
   // server.plugins.interpreter.registries() (a getter).
   server.expose(registryFactory(registries));
