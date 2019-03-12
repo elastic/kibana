@@ -12,6 +12,7 @@ export const defaultSourceConfiguration = {
   fields: {
     container: 'container.id',
     host: 'host.name',
+    message: ['message', '@message'],
     pod: 'kubernetes.pod.uid',
     tiebreaker: '_doc',
     timestamp: '@timestamp',

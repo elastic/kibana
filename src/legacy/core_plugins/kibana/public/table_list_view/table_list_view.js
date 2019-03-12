@@ -62,8 +62,6 @@ class TableListViewUi extends React.Component {
       showLimitError: false,
       filter: this.props.initialFilter,
       selectedIds: [],
-      sortField: 'title',
-      sortDirection: 'asc',
       page: 0,
       perPage: 20,
     };
@@ -92,11 +90,12 @@ class TableListViewUi extends React.Component {
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
+    // Also, in case filter is empty, items are being pre-sorted alphabetically.
     if (filter === this.state.filter) {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: response.hits,
+        items: (!filter ? _.sortBy(response.hits, 'title') : response.hits),
         totalItems: response.total,
         showLimitError: response.total > this.props.listingLimit,
       });
@@ -336,14 +335,6 @@ class TableListViewUi extends React.Component {
       onClick: this.props.editItem
     }];
 
-    const sorting = {};
-    if (this.state.sortField) {
-      sorting.sort = {
-        field: this.state.sortField,
-        direction: this.state.sortDirection,
-      };
-    }
-
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
@@ -382,7 +373,7 @@ class TableListViewUi extends React.Component {
         message={noItemsMessage}
         selection={selection}
         search={search}
-        sorting={sorting}
+        sorting={true}
         hasActions={!this.state.hideWriteControls}
         data-test-subj="itemsInMemTable"
       />

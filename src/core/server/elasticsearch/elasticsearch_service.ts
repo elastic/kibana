@@ -19,7 +19,8 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { filter, map, publishReplay, switchMap } from 'rxjs/operators';
-import { CoreContext, CoreService } from '../../types';
+import { CoreService } from '../../types';
+import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchClientConfig } from './elasticsearch_client_config';

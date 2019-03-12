@@ -12,7 +12,6 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 export const timeService = timefilter;
 export let indexPatternService;
 export let SearchSource;
-export let emsServiceSettings;
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(
@@ -40,5 +39,4 @@ uiModules.get('app/maps').run(($injector) => {
   indexPatternService = $injector.get('indexPatterns');
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
-  emsServiceSettings = $injector.get('serviceSettings');
 });

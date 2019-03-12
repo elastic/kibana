@@ -9,31 +9,19 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -63,9 +51,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   ...
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <p>
         <FormattedMessage
@@ -88,31 +74,19 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -147,9 +121,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   id =&gt; "mySpecialId"
 }
         </EuiCodeBlock>
-        <EuiSpacer
-          size="l"
-        />
+        <EuiSpacer />
       </div>
       <EuiTable
         responsive={true}
@@ -160,6 +132,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -170,6 +147,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -208,6 +190,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               0.23 ms/e
@@ -218,6 +205,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -228,6 +220,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -266,6 +263,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               N/A
@@ -276,6 +278,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -286,6 +293,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -324,6 +336,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               203 events
@@ -334,6 +351,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -344,6 +366,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -382,6 +409,11 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               200 events
@@ -403,31 +435,19 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -470,6 +490,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -480,6 +505,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -518,6 +548,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               0.23 ms/e
@@ -528,6 +563,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -538,6 +578,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -576,6 +621,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               N/A
@@ -586,6 +636,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -596,6 +651,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -634,6 +694,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               203 events
@@ -644,6 +709,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           >
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <FormattedMessage
@@ -654,6 +724,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               <div
@@ -692,6 +767,11 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
             </EuiTableRowCell>
             <EuiTableRowCell
               align="left"
+              mobileOptions={
+                Object {
+                  "show": true,
+                }
+              }
               textOnly={true}
             >
               200 events
@@ -713,31 +793,19 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -782,31 +850,19 @@ exports[`DetailDrawer component shows vertex title 1`] = `
   ownFocus={false}
   size="s"
 >
-  <EuiFlyoutHeader
-    hasBorder={false}
-  >
+  <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
-          size="m"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"

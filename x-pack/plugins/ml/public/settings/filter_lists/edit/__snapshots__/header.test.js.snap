@@ -4,28 +4,17 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiTitle
@@ -41,10 +30,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiTextColor
             color="subdued"
             component="span"
@@ -81,6 +67,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -94,15 +81,10 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
@@ -115,7 +97,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -135,28 +116,17 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiTitle
@@ -172,10 +142,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiTextColor
             color="subdued"
             component="span"
@@ -216,6 +183,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -229,15 +197,10 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
@@ -257,7 +220,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -276,28 +238,17 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiTitle
@@ -317,10 +268,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiTextColor
             color="subdued"
             component="span"
@@ -346,15 +294,10 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
@@ -374,7 +317,6 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -408,28 +350,17 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiTitle
@@ -449,10 +380,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiTextColor
             color="subdued"
             component="span"
@@ -478,15 +406,10 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
@@ -499,7 +422,6 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
