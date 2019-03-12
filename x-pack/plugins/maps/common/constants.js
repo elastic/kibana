@@ -6,6 +6,8 @@
 
 export const GIS_API_PATH = 'api/maps';
 
+export const MAP_SAVED_OBJECT_TYPE = 'map';
+
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
