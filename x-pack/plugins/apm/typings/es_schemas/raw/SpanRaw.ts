@@ -40,7 +40,7 @@ export interface SpanRaw extends APMBaseDoc {
     };
     [key: string]: unknown;
   };
-  transaction: {
+  transaction?: {
     id: string;
   };
 }
