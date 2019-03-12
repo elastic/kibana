@@ -36,11 +36,11 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
-echo "-> KIBANA_DIR='$KIBANA_DIR'"
-echo "-> XPACK_DIR='$XPACK_DIR'"
-echo "-> PARENT_DIR='$PARENT_DIR'"
-echo "-> KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
-echo "-> TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+echo " -- XPACK_DIR='$XPACK_DIR'"
+echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
