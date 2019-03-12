@@ -16,7 +16,7 @@ import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithOptions } from '../../../containers/with_options';
 import { WithSource } from '../../../containers/with_source';
 
-export const HomePageContent: React.SFC = () => (
+export const SnapshotPageContent: React.SFC = () => (
   <PageContent>
     <WithSource>
       {({ configuration, derivedIndexPattern, sourceId }) => (

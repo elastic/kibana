@@ -12,7 +12,7 @@ import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
 import { ColumnarPage } from '../../components/page';
 import { MetricsExplorerPage } from './metrics_explorer';
-import { HomePage as SnapshotPage } from './snapshot';
+import { SnapshotPage } from './snapshot';
 
 interface InfrastructurePageProps extends RouteComponentProps {
   intl: InjectedIntl;

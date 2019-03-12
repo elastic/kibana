@@ -21,7 +21,7 @@ import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
 import { WithKueryAutocompletion } from '../../../containers/with_kuery_autocompletion';
 import { WithSource } from '../../../containers/with_source';
 
-export const HomeToolbar = injectI18n(({ intl }) => (
+export const SnapshotToolbar = injectI18n(({ intl }) => (
   <Toolbar>
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
       <EuiFlexItem>

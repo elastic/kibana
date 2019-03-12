@@ -9,8 +9,8 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { HomePageContent } from './page_content';
-import { HomeToolbar } from './toolbar';
+import { SnapshotPageContent } from './page_content';
+import { SnapshotToolbar } from './toolbar';
 
 import { DocumentTitle } from '../../../components/document_title';
 import { NoIndices } from '../../../components/empty_states/no_indices';
@@ -25,13 +25,13 @@ import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_t
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../../containers/with_source';
 
-interface HomePageProps extends RouteComponentProps {
+interface SnapshotPageProps extends RouteComponentProps {
   intl: InjectedIntl;
 }
 
-export const HomePage = injectI18n(
-  class extends React.Component<HomePageProps, {}> {
-    public static displayName = 'HomePage';
+export const SnapshotPage = injectI18n(
+  class extends React.Component<SnapshotPageProps, {}> {
+    public static displayName = 'SnapshotPage';
 
     public render() {
       const { intl } = this.props;
@@ -79,8 +79,8 @@ export const HomePage = injectI18n(
                   <WithWaffleTimeUrlState />
                   <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
                   <WithWaffleOptionsUrlState />
-                  <HomeToolbar />
-                  <HomePageContent />
+                  <SnapshotToolbar />
+                  <SnapshotPageContent />
                 </>
               ) : hasFailed ? (
                 <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />
