@@ -39,7 +39,7 @@ export function extractErrors(savedObjects: SavedObject[]) {
         type: savedObject.type,
         error: {
           ...savedObject.error,
-          type: 'conflict',
+          type: 'unknown',
         },
       });
     }
