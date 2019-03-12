@@ -5,11 +5,12 @@
  */
 
 import Boom from 'boom';
+import Joi from 'joi';
 import { Legacy } from 'kibana';
 import _ from 'lodash';
 
 import { EsVersionPrecheck } from '../lib/es_version_precheck';
-import { fixMetricbeatIndex, isMetricbeatIndex } from '../lib/metricbeat_default_field';
+import { addDefaultField } from '../lib/query_default_field';
 
 /**
  * Adds routes for detecting and fixing 6.x Metricbeat indices that need the
@@ -17,41 +18,41 @@ import { fixMetricbeatIndex, isMetricbeatIndex } from '../lib/metricbeat_default
  *
  * @param server
  */
-export function registerMetricbeatSettingsRoutes(server: Legacy.Server) {
+export function registerQueryDefaultFieldRoutes(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
 
   server.route({
-    path: '/api/upgrade_assistant/metricbeat/{indexName}',
-    method: 'GET',
-    options: {
-      pre: [EsVersionPrecheck],
-    },
-    async handler(request) {
-      try {
-        const { indexName } = request.params;
-        return await isMetricbeatIndex(callWithRequest, request, indexName);
-      } catch (e) {
-        if (e.status === 403) {
-          return Boom.forbidden(e.message);
-        }
-
-        return Boom.boomify(e, {
-          statusCode: 500,
-        });
-      }
-    },
-  });
-
-  server.route({
-    path: '/api/upgrade_assistant/metricbeat/{indexName}/fix',
+    path: '/api/upgrade_assistant/add_query_default_field/{indexName}',
     method: 'POST',
     options: {
       pre: [EsVersionPrecheck],
+      validate: {
+        params: Joi.object({
+          indexName: Joi.string().required(),
+        }),
+        payload: Joi.object({
+          fieldTypes: Joi.array()
+            .items(Joi.string())
+            .required(),
+          otherFields: Joi.array().items(Joi.string()),
+        }),
+      },
     },
     async handler(request) {
       try {
         const { indexName } = request.params;
-        return await fixMetricbeatIndex(callWithRequest, request, indexName);
+        const { fieldTypes, otherFields } = request.payload as {
+          fieldTypes: string[];
+          otherFields?: string[];
+        };
+
+        return await addDefaultField(
+          callWithRequest,
+          request,
+          indexName,
+          new Set(fieldTypes),
+          otherFields ? new Set(otherFields) : undefined
+        );
       } catch (e) {
         if (e.status === 403) {
           return Boom.forbidden(e.message);

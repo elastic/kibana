@@ -11,18 +11,24 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { kfetch } from 'ui/kfetch';
 import { LoadingState } from '../../../../types';
 
+/**
+ * Field types used by Metricbeat to generate the default_field setting.
+ * Matches Beats code here:
+ * https://github.com/elastic/beats/blob/eee127cb59b56f2ed7c7e317398c3f79c4158216/libbeat/template/processor.go#L104
+ */
+const METRICBEAT_DEFAULT_FIELD_TYPES: ReadonlySet<string> = new Set(['keyword', 'text', 'ip']);
+const METRICBEAT_OTHER_DEFAULT_FIELDS: ReadonlySet<string> = new Set(['fields.*']);
+
 interface FixDefaultFieldsButtonProps {
   indexName: string;
 }
 
 interface FixDefaultFieldsButtonState {
-  isMetrecbeatLoadingState: LoadingState;
-  isMetricbeatIndex?: boolean;
   fixLoadingState?: LoadingState;
 }
 
 /**
- * Renders a button if given index is a valid Metricbeat index to repair its default_fieldssetting.
+ * Renders a button if given index is a valid Metricbeat index to add a default_field setting.
  */
 export class FixDefaultFieldsButton extends React.Component<
   FixDefaultFieldsButtonProps,
@@ -30,26 +36,13 @@ export class FixDefaultFieldsButton extends React.Component<
 > {
   constructor(props: FixDefaultFieldsButtonProps) {
     super(props);
-
-    this.state = {
-      isMetrecbeatLoadingState: LoadingState.Loading,
-    };
-  }
-
-  public async componentDidMount() {
-    this.loadIsMetricbeatIndex();
-  }
-
-  public componentDidUpdate(prevProps: FixDefaultFieldsButtonProps) {
-    if (prevProps.indexName !== this.props.indexName) {
-      this.loadIsMetricbeatIndex();
-    }
+    this.state = {};
   }
 
   public render() {
-    const { isMetricbeatIndex, fixLoadingState } = this.state;
+    const { fixLoadingState } = this.state;
 
-    if (!isMetricbeatIndex) {
+    if (!this.isMetricbeatIndex()) {
       return null;
     }
 
@@ -101,32 +94,12 @@ export class FixDefaultFieldsButton extends React.Component<
     return <EuiButton {...buttonProps}>{buttonContent}</EuiButton>;
   }
 
-  private loadIsMetricbeatIndex = async () => {
-    this.setState({
-      isMetrecbeatLoadingState: LoadingState.Loading,
-      isMetricbeatIndex: undefined,
-      fixLoadingState: undefined,
-    });
-
-    try {
-      const isMetricbeatIndex = await kfetch({
-        pathname: `/api/upgrade_assistant/metricbeat/${this.props.indexName}`,
-        method: 'GET',
-      });
-
-      this.setState({
-        isMetrecbeatLoadingState: LoadingState.Success,
-        isMetricbeatIndex,
-      });
-    } catch (e) {
-      this.setState({
-        isMetrecbeatLoadingState: LoadingState.Error,
-      });
-    }
+  private isMetricbeatIndex = () => {
+    return this.props.indexName.startsWith('metricbeat-');
   };
 
   private fixMetricbeatIndex = async () => {
-    if (!this.state.isMetricbeatIndex) {
+    if (!this.isMetricbeatIndex()) {
       return;
     }
 
@@ -136,8 +109,12 @@ export class FixDefaultFieldsButton extends React.Component<
 
     try {
       await kfetch({
-        pathname: `/api/upgrade_assistant/metricbeat/${this.props.indexName}/fix`,
+        pathname: `/api/upgrade_assistant/add_query_default_field/${this.props.indexName}`,
         method: 'POST',
+        body: JSON.stringify({
+          fieldTypes: [...METRICBEAT_DEFAULT_FIELD_TYPES],
+          otherFields: [...METRICBEAT_OTHER_DEFAULT_FIELDS],
+        }),
       });
 
       this.setState({

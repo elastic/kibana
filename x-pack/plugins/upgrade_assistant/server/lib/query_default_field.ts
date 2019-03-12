@@ -12,86 +12,65 @@ import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 import { MappingProperties } from './reindexing/types';
 
 /**
- * Returns whether or not this is a metricbeat index that needs the index.query.default_field
- * index setting.
- *
- * @param callWithRequest
- * @param request
- * @param indexName
- */
-export const isMetricbeatIndex = async (
-  callWithRequest: CallClusterWithRequest,
-  request: Request,
-  indexName: string
-) => {
-  if (!indexName.startsWith('metricbeat-')) {
-    return false;
-  }
-
-  const settings = await callWithRequest(request, 'indices.getSettings', {
-    index: indexName,
-  });
-
-  return get(settings, `${indexName}.settings.index.query.default_field`) === undefined;
-};
-
-/**
  * Adds the index.query.default_field setting, generated from the index's mapping.
  *
  * @param callWithRequest
  * @param request
  * @param indexName
+ * @param fieldTypes - Elasticsearch field types that should be used to generate the default_field from the index mapping
+ * @param otherFields - Other fields that should be included in the generated default_field that do not match `fieldTypes`
  */
-export const fixMetricbeatIndex = async (
+export const addDefaultField = async (
   callWithRequest: CallClusterWithRequest,
   request: Request,
-  indexName: string
+  indexName: string,
+  fieldTypes: ReadonlySet<string>,
+  otherFields: ReadonlySet<string> = new Set()
 ) => {
-  if (!(await isMetricbeatIndex(callWithRequest, request, indexName))) {
-    throw Boom.badRequest(`Index must be a 6.x index created by Metricbeat`);
+  // Verify index.query.default_field is not already set.
+  const settings = await callWithRequest(request, 'indices.getSettings', {
+    index: indexName,
+  });
+  if (get(settings, `${indexName}.settings.index.query.default_field`)) {
+    throw Boom.badRequest(`Index ${indexName} already has index.query.default_field set`);
   }
 
-  // TODO: handle typed-API calls in 6.7
+  // Get the mapping and generate the default_field based on `fieldTypes`
+  // TODO: handle typless-API calls in 7.0
   const mappingResp = await callWithRequest(request, 'indices.getMapping', {
     index: indexName,
     include_type_name: true,
   });
   const typeName = Object.getOwnPropertyNames(mappingResp[indexName].mappings)[0];
   const mapping = mappingResp[indexName].mappings[typeName].properties as MappingProperties;
+  const generatedDefaultFields = new Set(generateDefaultFields(mapping, fieldTypes));
 
-  const defaultFieldList = getDefaultFieldList(mapping);
-  // This wildcard field should always be present.
-  defaultFieldList.push('fields.*');
-
+  // Update the setting with the generated default_field
   return await callWithRequest(request, 'indices.putSettings', {
     index: indexName,
     body: {
-      index: { query: { default_field: defaultFieldList } },
+      index: { query: { default_field: [...generatedDefaultFields, ...otherFields] } },
     },
   });
 };
-
-/**
- * Field types used by Metricbeat to generate the default_field setting.
- * Matches Beats code here:
- * https://github.com/elastic/beats/blob/eee127cb59b56f2ed7c7e317398c3f79c4158216/libbeat/template/processor.go#L104
- */
-const DEFAULT_FIELD_TYPES: ReadonlySet<string> = new Set(['keyword', 'text', 'ip']);
 
 /**
  * Recursively walks an index mapping and returns a flat array of dot-delimited
  * strings represent all fields that are of a type included in `DEFAULT_FIELD_TYPES`
  * @param mapping
  */
-export const getDefaultFieldList = (mapping: MappingProperties): string[] =>
+export const generateDefaultFields = (
+  mapping: MappingProperties,
+  fieldTypes: ReadonlySet<string>
+): string[] =>
   Object.getOwnPropertyNames(mapping).reduce(
     (defaultFields, fieldName) => {
       const { type, properties } = mapping[fieldName];
 
-      if (type && DEFAULT_FIELD_TYPES.has(type)) {
+      if (type && fieldTypes.has(type)) {
         defaultFields.push(fieldName);
       } else if (properties) {
-        getDefaultFieldList(properties).forEach(subField =>
+        generateDefaultFields(properties, fieldTypes).forEach(subField =>
           defaultFields.push(`${fieldName}.${subField}`)
         );
       }
