@@ -20,7 +20,6 @@ source src/dev/ci_setup/checkout_sibling_es.sh
 node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
 
