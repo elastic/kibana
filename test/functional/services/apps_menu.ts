@@ -67,7 +67,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       try {
         log.debug(`click "${name}" app link`);
         await this.ensureMenuOpen();
-        const container = await testSubjects.find('navDrawer navDrawerAppsMenu');
+        const container = await testSubjects.find('navDrawer');
         const link = await container.findByPartialLinkText(name);
         await link.click();
       } finally {
