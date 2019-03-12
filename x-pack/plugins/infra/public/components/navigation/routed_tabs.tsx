@@ -17,6 +17,8 @@ interface RoutedTabsProps {
   tabs: TabConfiguration[];
 }
 
+const noop = () => undefined;
+
 export class RoutedTabs extends React.Component<RoutedTabsProps> {
   public render() {
     return <EuiTabs>{this.renderTabs()}</EuiTabs>;
@@ -29,13 +31,7 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
           key={`${tab.path}${tab.title}`}
           path={tab.path}
           children={({ match }) => (
-            <EuiTab
-              onClick={() => {
-                return;
-              }}
-              isSelected={match ? true : false}
-              disabled={match !== null}
-            >
+            <EuiTab onClick={noop} isSelected={match !== null}>
               <Link to={tab.path}>{tab.title}</Link>
             </EuiTab>
           )}
