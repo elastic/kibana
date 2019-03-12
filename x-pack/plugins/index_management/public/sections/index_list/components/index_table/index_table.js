@@ -8,9 +8,6 @@ import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
-import { NoMatch } from '../../../no_match';
-import { healthToColor } from '../../../../services';
-import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 
 import {
   EuiButton,
@@ -38,13 +35,17 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
-import { IndexActionsContextMenu } from '../../components';
+import { UA_SHOW_DETAILS_CLICK } from '../../../../../common/constants';
+import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
+import { healthToColor, trackUserAction } from '../../../../services';
 import {
   getBannerExtensions,
   getFilterExtensions,
   getToggleExtensions,
 } from '../../../../index_management_extensions';
 import { renderBadges } from '../../../../lib/render_badges';
+import { NoMatch } from '../../../no_match';
+import { IndexActionsContextMenu } from '../../components';
 
 const HEADERS = {
   name: i18n.translate('xpack.idxMgmt.indexTable.headers.nameHeader', {
@@ -223,6 +224,7 @@ export class IndexTableUi extends Component {
             className="indTable__link"
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
+              trackUserAction(UA_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >
