@@ -15,6 +15,7 @@ import {
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { timefilter } from 'ui/timefilter/timefilter';
 import { i18n } from '@kbn/i18n';
+import { filterPropertiesForTooltip } from '../util';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -211,5 +212,10 @@ export class ESJoinSource extends AbstractESSource {
   async getDisplayName() {
     //no need to localize. this is never rendered.
     return `es_table ${this._descriptor.indexPatternId}`;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    const metricFields = this.getMetricFields();
+    return filterPropertiesForTooltip(metricFields, properties);
   }
 }
