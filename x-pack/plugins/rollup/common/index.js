@@ -8,6 +8,8 @@ export const PLUGIN = {
   ID: 'rollup'
 };
 
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+
 export {
   UA_APP_NAME,
   USER_ACTIONS,
