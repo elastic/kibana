@@ -36,7 +36,6 @@ export const addDefaultField = async (
   }
 
   // Get the mapping and generate the default_field based on `fieldTypes`
-  // TODO: handle typless-API calls in 7.0
   const mappingResp = await callWithRequest(request, 'indices.getMapping', {
     index: indexName,
     include_type_name: true,
