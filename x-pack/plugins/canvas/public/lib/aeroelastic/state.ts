@@ -32,28 +32,6 @@ export const shallowEqual = (a: any, b: any): boolean => {
 
 const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
 
-export const selectReduce = (fun: NodeFunction, previousValue: NodeResult): NodeFunction => (
-  ...inputs: NodeFunction[]
-): NodeResult => {
-  // last-value memoizing version of this single line function:
-  // (fun, previousValue) => (...inputs) => state => previousValue = fun(previousValue, ...inputs.map(input => input(state)))
-  let argumentValues = [] as NodeResult[];
-  let value = previousValue;
-  let prevValue = previousValue;
-  return (state: NodeResult) => {
-    if (
-      shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state)))) &&
-      value === prevValue
-    ) {
-      return value;
-    }
-
-    prevValue = value;
-    value = fun(prevValue, ...argumentValues);
-    return value;
-  };
-};
-
 export const select = (fun: NodeFunction): NodeFunction => (
   ...inputs: NodeFunction[]
 ): NodeResult => {

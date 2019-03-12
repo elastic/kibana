@@ -18,6 +18,7 @@ import {
   mouseIsDown,
   optionHeld,
   shiftHeld,
+  gestureState,
 } from './gestures';
 
 import {
@@ -231,5 +232,6 @@ export const nextScene = select(getNextScene)(
   cursor,
   selectionState,
   mouseTransformState,
-  groupedSelectedShapes
+  groupedSelectedShapes,
+  gestureState
 );

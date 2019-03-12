@@ -1411,7 +1411,8 @@ export const getNextScene = (
   cursor,
   selectionState,
   mouseTransformState,
-  selectedShapes
+  selectedShapes,
+  gestureState
 ) => {
   const selectedLeafShapes = getLeafs(
     shape => shape.type === config.groupName,
@@ -1433,6 +1434,7 @@ export const getNextScene = (
     draggedShape,
     cursor,
     selectionState,
+    gestureState,
     mouseTransformState,
     selectedShapeObjects: selectedShapes,
   };
