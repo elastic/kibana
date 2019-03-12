@@ -12,6 +12,7 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorListItem } from '../../../common/graphql/types';
+import { MonitorNameID } from './monitor_name_id';
 
 interface ErrorListProps {
   loading: boolean;
@@ -41,7 +42,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
               defaultMessage: 'Monitor ID',
             }),
-            render: (id: string) => <Link to={`/monitor/${id}`}>{id}</Link>,
+            render: MonitorNameID,
             width: '25%',
           },
           {

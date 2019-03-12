@@ -7,8 +7,8 @@
 import { get, set } from 'lodash';
 
 export const getFilteredQuery = (
-  dateRangeStart: string,
-  dateRangeEnd: string,
+  dateRangeStart: string | null,
+  dateRangeEnd: string | null,
   filters?: string | null | any
 ) => {
   let filtersObj;
@@ -24,14 +24,20 @@ export const getFilteredQuery = (
     filtersObj.bool.filter = [...userFilters];
   }
   const query = { ...filtersObj };
-  const rangeSection = {
-    range: {
-      '@timestamp': {
-        gte: dateRangeStart,
-        lte: dateRangeEnd,
-      },
-    },
-  };
+
+  if (!dateRangeStart && !dateRangeEnd) {
+    return query;
+  }
+
+  const timestampRange: { lte?: string; gte?: string } = {};
+  if (dateRangeStart) {
+    timestampRange.gte = dateRangeStart;
+  }
+  if (dateRangeEnd) {
+    timestampRange.lte = dateRangeEnd;
+  }
+  const rangeSection = { range: { '@timestamp': timestampRange } };
+
   if (get(query, 'bool.filter', undefined)) {
     query.bool.filter.push(rangeSection);
   } else {

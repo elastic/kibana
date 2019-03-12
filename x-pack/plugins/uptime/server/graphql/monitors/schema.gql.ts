@@ -108,6 +108,7 @@ export const monitorsSchema = gql`
   type ErrorListItem {
     latestMessage: String
     monitorId: String
+    latestMonitor: LatestMonitor
     type: String!
     count: Int
     statusCode: String

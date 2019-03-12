@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
+import { get, set, flatten } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,
@@ -216,6 +216,33 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   }
 
   /**
+   * Fetches the latest version of each monitor, regardless of time picker settings
+   * This is important because we usually want to display the latest name and other info
+   * for a given monitor
+   * @param request Kibana Request
+   * @param monitorIds List of monitor IDs
+   */
+  public async getLatestMonitors(
+    request: any,
+    monitorIds: string[]
+  ): Promise<{ [key: string]: LatestMonitor }> {
+    const filter = {
+      bool: {
+        should: monitorIds.map(id => {
+          return { should: id };
+        }),
+      },
+    };
+
+    const monitors = await this.getMonitors(request, null, null, JSON.stringify(filter));
+
+    return monitors.reduce((acc: { [key: string]: LatestMonitor }, monitor: LatestMonitor) => {
+      acc[monitor.id.key] = monitor;
+      return acc;
+    }, {});
+  }
+
+  /**
    * Fetch the latest status for a monitors list
    * @param request Kibana request
    * @param dateRangeStart timestamp bounds
@@ -224,8 +251,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
    */
   public async getMonitors(
     request: any,
-    dateRangeStart: string,
-    dateRangeEnd: string,
+    dateRangeStart: string | null,
+    dateRangeEnd: string | null,
     filters?: string | null
   ): Promise<LatestMonitor[]> {
     const { statusFilter, query } = getFilteredQueryAndStatusFilter(
@@ -465,7 +492,20 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    const buckets = get(result, 'aggregations.error_type.buckets', []);
+    const buckets: any[] = get(result, 'aggregations.error_type.buckets', []);
+
+    const monitorIds = flatten(buckets.map(
+      ({
+        key: errorType,
+        by_id: { buckets: monitorBuckets },
+      }: {
+        key: string;
+        by_id: { buckets: any[] };
+      }) => {
+        return monitorBuckets.map(({ key: monitorId }) => monitorId);
+      }
+    ));
+    const latestmonitors = this.getMonitors(request, dateRangeStart, dateRangeEnd);
 
     const errorsList: ErrorListItem[] = [];
     buckets.forEach(

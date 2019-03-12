@@ -31,9 +31,9 @@ const getMonitorsListFilteredQuery = (filters: any): string | undefined => {
  * @param filters additional filters, if any
  */
 export const getFilteredQueryAndStatusFilter = (
-  dateRangeStart: string,
-  dateRangeEnd: string,
-  filters?: string | null
+  dateRangeStart: string | null,
+  dateRangeEnd: string | null,
+  filters?: string | any | null
 ) => {
   let statusFilter: string | undefined;
   let filterObject: any;

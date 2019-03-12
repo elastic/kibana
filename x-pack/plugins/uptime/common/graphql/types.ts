@@ -410,6 +410,8 @@ export interface ErrorListItem {
 
   monitorId?: string | null;
 
+  monitorName?: string | null;
+
   type: string;
 
   count?: number | null;
