@@ -34,6 +34,7 @@ const wrapWithSharedState = () => {
     }
 
     public componentDidUpdate() {
+      this.pushTitle(this.getTitle(this.props.title));
       this.updateDocumentTitle();
     }
 
