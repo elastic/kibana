@@ -167,7 +167,7 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatProperties(properties) {
+  async filterAndFormatPropertiesToHtml(properties) {
     const filteredProperties = {};
     this._descriptor.tooltipProperties.forEach(propertyName => {
       filteredProperties[propertyName] = _.get(properties, propertyName, '-');
