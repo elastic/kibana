@@ -17,9 +17,27 @@
  * under the License.
  */
 
-import { VisType } from '../vis';
-import { UIRegistry } from './_registry';
+import { SavedObject } from '../service';
 
-declare type VisTypesRegistryProvider = UIRegistry<VisType> & {
-  byName: { [typeName: string]: VisType };
-};
+export interface CustomError {
+  id: string;
+  type: string;
+  error: {
+    message: string;
+    statusCode: number;
+  };
+}
+
+export function extractErrors(savedObjects: SavedObject[]) {
+  const errors: CustomError[] = [];
+  for (const savedObject of savedObjects) {
+    if (savedObject.error) {
+      errors.push({
+        id: savedObject.id,
+        type: savedObject.type,
+        error: savedObject.error,
+      });
+    }
+  }
+  return errors;
+}

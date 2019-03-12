@@ -23,7 +23,7 @@ import Joi from 'joi';
 import { extname } from 'path';
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../';
-import { resolveImportConflicts } from '../lib';
+import { resolveImportConflicts } from '../import';
 import { Prerequisites } from './types';
 
 interface HapiReadableStream extends Readable {

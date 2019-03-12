@@ -105,11 +105,11 @@ export PATH="$PATH:$yarnGlobalDir"
 ###
 ### use the chromedriver cache if it exists
 ###
-if [ -d "$dir/.chromedriver/master" ]; then
+if [ -d "$dir/.chromedriver" ]; then
   branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
-  cachedPkgVersion="$(cat "$dir/.chromedriver/master/pkgVersion")"
+  cachedPkgVersion="$(cat "$dir/.chromedriver/pkgVersion")"
   if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
-    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver.zip"
+    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/chromedriver.zip"
     export CHROMEDRIVER_SKIP_DOWNLOAD=true
     echo " -- Using chromedriver cache at $CHROMEDRIVER_FILEPATH"
   else
