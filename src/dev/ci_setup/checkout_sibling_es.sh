@@ -48,12 +48,12 @@ function checkout_sibling {
         return 0
       fi
 
-      cloneBranch="${PR_TARGET_BRANCH:-master}"
+      cloneBranch="${PR_TARGET_BRANCH:-$KIBANA_PKG_BRANCH}"
       if clone_target_is_valid ; then
         return 0
       fi
 
-      cloneBranch="master"
+      cloneBranch="$KIBANA_PKG_BRANCH"
       if clone_target_is_valid; then
         return 0
       fi
@@ -64,7 +64,7 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
-      if [[ $cloneBranch = "master"  && $cloneAuthor = "elastic" ]]; then
+      if [[ $cloneBranch = "$KIBANA_PKG_BRANCH"  && $cloneAuthor = "elastic" ]]; then
         export TEST_ES_FROM=snapshot
       fi
 
