@@ -39,6 +39,7 @@ export const createListRoute = () => ({
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           overviewDashboard: sampleDataset.overviewDashboard,
+          appLinks: sampleDataset.appLinks,
           defaultIndex: sampleDataset.defaultIndex,
           dataIndices: sampleDataset.dataIndices.map(dataIndexConfig => {
             return { id: dataIndexConfig.id };
