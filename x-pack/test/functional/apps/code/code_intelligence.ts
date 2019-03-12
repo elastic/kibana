@@ -113,13 +113,14 @@ export default function codeIntelligenceFunctonalTests({
           await browser.moveMouseTo(userModelSpan);
           // Expect the go to defintion button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
-        });
 
-        await testSubjects.click('codeGoToDefinitionButton');
-        await retry.tryForTime(30000, async () => {
-          const currentUrl: string = await browser.getCurrentUrl();
-          // Expect to jump to src/models/User.ts file on line 5.
-          expect(currentUrl.indexOf('src/models/User.ts!L5:13')).to.greaterThan(0);
+          await testSubjects.click('codeGoToDefinitionButton');
+          await retry.tryForTime(5000, async () => {
+            const currentUrl: string = await browser.getCurrentUrl();
+            log.info(`Jump to url: ${currentUrl}`);
+            // Expect to jump to src/models/User.ts file on line 5.
+            expect(currentUrl.indexOf('src/models/User.ts!L5:13')).to.greaterThan(0);
+          });
         });
       });
 
@@ -158,18 +159,19 @@ export default function codeIntelligenceFunctonalTests({
           await browser.moveMouseTo(userModelSpan);
           // Expect the go to defintion button show up eventually.
           expect(await testSubjects.exists('codeFindReferenceButton')).to.be(true);
-        });
 
-        await testSubjects.click('codeFindReferenceButton');
-        await retry.tryForTime(30000, async () => {
-          // Expect the find references panel show up and having highlights.
-          const spans = await find.allByCssSelector('.code-search-highlight', FIND_TIME);
-          expect(spans.length).to.greaterThan(0);
-          const firstReference = spans[0];
-          await firstReference.click();
-          const currentUrl: string = await browser.getCurrentUrl();
-          // Expect to jump to src/controllers/user.ts file on line 42.
-          expect(currentUrl.indexOf('src/controllers/user.ts!L42:0')).to.greaterThan(0);
+          await testSubjects.click('codeFindReferenceButton');
+          await retry.tryForTime(5000, async () => {
+            // Expect the find references panel show up and having highlights.
+            const highlightSpans = await find.allByCssSelector('.code-search-highlight', FIND_TIME);
+            expect(highlightSpans.length).to.greaterThan(0);
+            const firstReference = highlightSpans[0];
+            await firstReference.click();
+            const currentUrl: string = await browser.getCurrentUrl();
+            log.info(`Jump to url: ${currentUrl}`);
+            // Expect to jump to src/controllers/user.ts file on line 42.
+            expect(currentUrl.indexOf('src/controllers/user.ts!L42:0')).to.greaterThan(0);
+          });
         });
       });
 
@@ -204,7 +206,7 @@ export default function codeIntelligenceFunctonalTests({
         });
 
         // Hover on the 'async' reference on line 1.
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const spans = await find.allByCssSelector('.mtk17', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const asyncSpan = spans[1];
@@ -212,18 +214,19 @@ export default function codeIntelligenceFunctonalTests({
           await browser.moveMouseTo(asyncSpan);
           // Expect the go to defintion button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
-        });
 
-        await testSubjects.click('codeGoToDefinitionButton');
-        // TODO: figure out why jenkins will fail the following test while locally it
-        // passes.
-        // await retry.tryForTime(30000, async () => {
-        //   const currentUrl: string = await browser.getCurrentUrl();
-        //   // Expect to jump to repository github.com/DefinitelyTyped/DefinitelyTyped.
-        //   expect(currentUrl.indexOf('github.com/DefinitelyTyped/DefinitelyTyped')).to.greaterThan(
-        //     0
-        //   );
-        // });
+          await testSubjects.click('codeGoToDefinitionButton');
+          // TODO: figure out why jenkins will fail the following test while locally it
+          // passes.
+          // await retry.tryForTime(5000, async () => {
+          //   const currentUrl: string = await browser.getCurrentUrl();
+          //   log.error(`Jump to url: ${currentUrl}`);
+          //   // Expect to jump to repository github.com/DefinitelyTyped/DefinitelyTyped.
+          //   expect(currentUrl.indexOf('github.com/DefinitelyTyped/DefinitelyTyped')).to.greaterThan(
+          //     0
+          //   );
+          // });
+        });
       });
     });
   });
