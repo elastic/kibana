@@ -3,16 +3,9 @@
 exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = `
 <Fragment>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <AddItemPopover
@@ -23,15 +16,9 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="xl"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -49,10 +36,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
         />
       </EuiButton>
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiSearchBar
         onChange={[MockFunction]}
       />
@@ -64,16 +48,9 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
 exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = `
 <Fragment>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <AddItemPopover
@@ -84,15 +61,9 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
   </EuiFlexGroup>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="xl"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -110,10 +81,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
         />
       </EuiButton>
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiSearchBar
         onChange={[MockFunction]}
       />

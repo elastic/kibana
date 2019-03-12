@@ -9,22 +9,15 @@ exports[`LayerControl is rendered 1`] = `
 >
   <EuiFlexItem
     className="mapWidgetControl__header"
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
       responsive={false}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="xs"
           textTransform="none"
@@ -39,7 +32,6 @@ exports[`LayerControl is rendered 1`] = `
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -62,8 +54,6 @@ exports[`LayerControl is rendered 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     className="mapLayerControl"
-    component="div"
-    grow={true}
   >
     <LayerTOC />
   </EuiFlexItem>
@@ -79,22 +69,15 @@ exports[`LayerControl props isReadOnly 1`] = `
 >
   <EuiFlexItem
     className="mapWidgetControl__header"
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
       responsive={false}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="xs"
           textTransform="none"
@@ -112,8 +95,6 @@ exports[`LayerControl props isReadOnly 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     className="mapLayerControl"
-    component="div"
-    grow={true}
   >
     <LayerTOC />
   </EuiFlexItem>
