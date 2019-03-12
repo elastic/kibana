@@ -44,10 +44,6 @@
       overflow: visible;
     }
 
-    .ace_scroller {
-      border-left: $euiBorderThin;
-    }
-
     .ace_warning {
       color: $euiColorDanger;
     }
@@ -70,6 +66,7 @@
     .ace_gutter {
       background-color: $euiColorEmptyShade;
       color: $euiColorDarkShade;
+      border-left: 1px solid $aceBackground;
     }
 
     .ace_print-margin {
