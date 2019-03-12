@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { register } from '@kbn/interpreter/common';
-import { initializeInterpreter, registries } from '@kbn/interpreter/public';
+import { register, registryFactory } from '@kbn/interpreter/common';
+import { initializeInterpreter } from './lib/interpreter';
+import { registries } from './registries';
 import { kfetch } from 'ui/kfetch';
 import { ajaxStream } from 'ui/ajax_stream';
 import { functions } from './functions';
 import { visualization } from './renderers/visualization';
+
+// Expose kbnInterpreter.register(specs) and kbnInterpreter.registries() globally so that plugins
+// can register without a transpile step.
+global.kbnInterpreter = Object.assign(global.kbnInterpreter || {}, registryFactory(registries));
 
 register(registries, {
   browserFunctions: functions,

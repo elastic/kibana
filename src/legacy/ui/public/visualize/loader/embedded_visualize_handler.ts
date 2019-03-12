@@ -18,7 +18,10 @@
  */
 
 // @ts-ignore untyped dependency
-import { registries } from '@kbn/interpreter/public';
+// import { registries } from 'plugins/interpreter/registries';
+// hack to import registries from interpreter plugin (we can no longer import if this moves to plugin
+// todo: check how it worked before registries were moved inside package.
+const registries = global.kbnInterpreter.registries();
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';

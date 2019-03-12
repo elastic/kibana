@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { browserFunctions } from './index';
+import { TypesRegistry } from '@kbn/interpreter/common';
 
-// eslint-disable-next-line no-undef
-browserFunctions.forEach(canvas.register);
+export const typesRegistry = new TypesRegistry();
