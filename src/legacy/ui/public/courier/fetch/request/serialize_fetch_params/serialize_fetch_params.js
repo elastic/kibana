@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import { toJson } from '../../../../../../core_plugins/kibana/common/utils/aggressive_parse';
 
 function emptySearch() {
   return {
@@ -106,7 +105,7 @@ export function serializeFetchParams(
           header.preference = config.get('courier:customRequestPreference');
         }
 
-        return `${JSON.stringify(header)}\n${toJson(body, JSON.stringify)}`;
+        return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
       });
   });
 

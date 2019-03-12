@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from "react-redux";
-import { ShowJson as PresentationComponent } from "./show_json";
-import { loadIndexData, closeDetailPanel } from "../../../../../store/actions";
+import { connect } from 'react-redux';
+import { ShowJson as PresentationComponent } from './show_json';
+import { loadIndexData, closeDetailPanel } from '../../../../../store/actions';
 
 import {
   getDetailPanelData,
@@ -14,7 +14,7 @@ import {
   getDetailPanelIndexName,
   getDetailPanelType,
   getIndexStatusByIndexName
-} from "../../../../../store/selectors";
+} from '../../../../../store/selectors';
 
 const mapStateToProps = state => {
   const indexName = getDetailPanelIndexName(state);

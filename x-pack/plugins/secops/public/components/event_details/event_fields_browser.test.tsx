@@ -84,12 +84,10 @@ describe('EventFieldsBrowser', () => {
           <EventFieldsBrowser data={mockEcsData[0]} />
         </TestProviders>
       );
-
       expect(
         wrapper
-          .find('.euiTableRow')
-          .find('.euiTableRowCell')
-          .at(2)
+          .find('[data-test-subj="draggable-content"]')
+          .at(0)
           .text()
       ).toEqual('Nov 5, 2018 @ 19:03:25.937');
     });

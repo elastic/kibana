@@ -16,7 +16,11 @@ import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_priv
 
 import uiRoutes from 'ui/routes';
 
-const template = `<ml-nav-menu name="datavisualizer" /><datavisualizer-selector class="ml-datavisualizer-selector"/>`;
+const template = `
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
+  <datavisualizer-selector />
+`;
 
 uiRoutes
   .when('/datavisualizer', {

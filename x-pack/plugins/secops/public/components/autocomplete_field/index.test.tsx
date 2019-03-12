@@ -184,7 +184,7 @@ describe('Autocomplete', () => {
 
   describe('events', () => {
     test('OnChange should have been called', () => {
-      const onChange = jest.fn((evt: React.ChangeEvent<HTMLInputElement>) => evt);
+      const onChange = jest.fn((value: string) => value);
 
       const wrapper = mount(
         <AutocompleteField
@@ -198,14 +198,14 @@ describe('Autocomplete', () => {
           value={''}
         />
       );
-      const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-      wrapperFixedEuiFieldSearch.props().onChange({ currentTarget: { value: test } });
+      const wrapperFixedEuiFieldSearch = wrapper.find('input');
+      wrapperFixedEuiFieldSearch.simulate('change', { target: { value: 'test' } });
       expect(onChange).toHaveBeenCalled();
     });
   });
 
   test('OnSubmit should have been called by keying enter on the search input', () => {
-    const onSubmit = jest.fn((evt: React.ChangeEvent<HTMLInputElement>) => evt);
+    const onSubmit = jest.fn((value: string) => value);
 
     const wrapper = mount(
       <AutocompleteField
@@ -221,13 +221,13 @@ describe('Autocomplete', () => {
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
     wrapperAutocompleteField.setState({ selectedIndex: null });
-    const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-    wrapperFixedEuiFieldSearch.props().onKeyDown({ key: 'Enter', preventDefault: noop });
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Enter', preventDefault: noop });
     expect(onSubmit).toHaveBeenCalled();
   });
 
   test('OnSubmit should have been called by onSearch event on the input', () => {
-    const onSubmit = jest.fn((evt: React.ChangeEvent<HTMLInputElement>) => evt);
+    const onSubmit = jest.fn((value: string) => value);
 
     const wrapper = mount(
       <AutocompleteField
@@ -244,12 +244,13 @@ describe('Autocomplete', () => {
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
     wrapperAutocompleteField.setState({ selectedIndex: null });
     const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-    wrapperFixedEuiFieldSearch.props().onSearch();
+    // tslint:disable-next-line:no-any -- TODO: FixedEuiFieldSearch fails to import
+    (wrapperFixedEuiFieldSearch as any).props().onSearch();
     expect(onSubmit).toHaveBeenCalled();
   });
 
   test('OnChange should have been called if keying enter on a suggested item selected', () => {
-    const onChange = jest.fn((evt: React.ChangeEvent<HTMLInputElement>) => evt);
+    const onChange = jest.fn((value: string) => value);
 
     const wrapper = mount(
       <AutocompleteField
@@ -265,8 +266,8 @@ describe('Autocomplete', () => {
     );
     const wrapperAutocompleteField = wrapper.find(AutocompleteField);
     wrapperAutocompleteField.setState({ selectedIndex: 1 });
-    const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-    wrapperFixedEuiFieldSearch.props().onKeyDown({ key: 'Enter', preventDefault: noop });
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Enter', preventDefault: noop });
     expect(onChange).toHaveBeenCalled();
   });
 
@@ -285,8 +286,8 @@ describe('Autocomplete', () => {
         value={''}
       />
     );
-    const wrapperFixedEuiFieldSearch = wrapper.find(EuiFieldSearch);
-    wrapperFixedEuiFieldSearch.props().onKeyDown({ key: 'ArrowDown', preventDefault: noop });
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'ArrowDown', preventDefault: noop });
     expect(loadSuggestions).toHaveBeenCalled();
   });
 });

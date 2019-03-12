@@ -65,7 +65,7 @@ describe('CloudService', () => {
       // invalid JSON
       expect(() => service._stringToJson('{"xyz"}')).to.throwException();
       // (single quotes are not actually valid in serialized JSON)
-      expect(() => service._stringToJson("{'a': 'xyz'}")).to.throwException();
+      expect(() => service._stringToJson('{\'a\': \'xyz\'}')).to.throwException();
       expect(() => service._stringToJson('{{}')).to.throwException();
       expect(() => service._stringToJson('{}}')).to.throwException();
     });

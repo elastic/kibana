@@ -26,11 +26,12 @@ jest.mock('./http_server', () => ({
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpConfig, HttpService, Router } from '.';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
-beforeEach(() => {
-  logger.mockClear();
-  mockHttpServer.mockClear();
+const logger = loggingServiceMock.create();
+
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
 test('creates and starts http server', async () => {
@@ -75,7 +76,7 @@ test('logs error if already started', async () => {
 
   await service.start();
 
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -121,7 +122,7 @@ test('register route handler', () => {
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
   expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('throws if registering route handler after http server is started', () => {
@@ -143,22 +144,22 @@ test('throws if registering route handler after http server is started', () => {
   service.registerRouter(router);
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('returns http server contract on start', async () => {
-  const httpServerContract = {
+  const httpServer = {
     server: {},
     options: { someOption: true },
   };
 
   mockHttpServer.mockImplementation(() => ({
     isListening: () => false,
-    start: jest.fn().mockReturnValue(httpServerContract),
+    start: jest.fn().mockReturnValue(httpServer),
     stop: noop,
   }));
 
   const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
 
-  expect(await service.start()).toBe(httpServerContract);
+  expect(await service.start()).toBe(httpServer);
 });

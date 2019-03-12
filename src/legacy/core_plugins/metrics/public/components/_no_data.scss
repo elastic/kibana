@@ -11,7 +11,7 @@
   background-color: $tempBackgroundColor;
 
   .tvbNoData__title {
-    @include euiTitle("xs");
+    @include euiTitle('xs');
     color: makeHighContrastColor($euiColorPrimary, $tempBackgroundColor);
   }
 }

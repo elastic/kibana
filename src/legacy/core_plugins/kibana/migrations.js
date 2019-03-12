@@ -58,6 +58,13 @@ function migrateIndexPattern(doc) {
 }
 
 export const migrations = {
+  'index-pattern': {
+    '6.5.0': (doc) => {
+      doc.attributes.type = doc.attributes.type || undefined;
+      doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
+      return doc;
+    }
+  },
   visualization: {
     '7.0.0': (doc) => {
       // Set new "references" attribute
@@ -76,6 +83,33 @@ export const migrations = {
         });
         doc.attributes.savedSearchRefName = 'search_0';
         delete doc.attributes.savedSearchId;
+      }
+
+      // Migrate controls
+      const visStateJSON = get(doc, 'attributes.visState');
+      if (visStateJSON) {
+        let visState;
+        try {
+          visState = JSON.parse(visStateJSON);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+        }
+        if (visState) {
+          const controls = get(visState, 'params.controls') || [];
+          controls.forEach((control, i) => {
+            if (!control.indexPattern) {
+              return;
+            }
+            control.indexPatternRefName = `control_${i}_index_pattern`;
+            doc.references.push({
+              name: control.indexPatternRefName,
+              type: 'index-pattern',
+              id: control.indexPattern,
+            });
+            delete control.indexPattern;
+          });
+          doc.attributes.visState = JSON.stringify(visState);
+        }
       }
 
       // Migrate table splits

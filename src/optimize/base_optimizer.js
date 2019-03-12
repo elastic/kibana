@@ -356,12 +356,11 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.(png|jpg|gif|jpeg|svg)$/,
-            loader: ['url-loader'],
-          },
-          {
-            test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-            loader: 'file-loader'
+            test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
           },
           {
             resource: createSourceFileResourceSelector(/\.js$/),
@@ -399,7 +398,10 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.uiBundles.getAliases()
+        alias: {
+          ...this.uiBundles.getAliases(),
+          'dll/set_csp_nonce$': require.resolve('./dynamic_dll_plugin/public/set_csp_nonce')
+        }
       },
 
       performance: {

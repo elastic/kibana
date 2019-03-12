@@ -100,7 +100,7 @@ const VisFiltersProvider = (Private, getAppState) => {
     const dataPoints = event.data;
     const filters = [];
 
-    dataPoints.forEach(val => {
+    dataPoints.filter(point => point).forEach(val => {
       const { table, column, row, value } = val;
       const filter = createFilter(event.aggConfigs, table, column, row, value);
       if (filter) {

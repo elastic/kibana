@@ -27,14 +27,14 @@ jest.mock('fs', () => ({
 }));
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../../../package.json', () => mockPackage);
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { first, map, toArray } from 'rxjs/operators';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
-import { logger } from '../../logging/__mocks__';
+import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { Plugin } from '../plugin';
 import { PluginsConfig } from '../plugins_config';
 import { discover } from './plugins_discovery';
@@ -45,6 +45,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
 
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockReaddir.mockImplementation((path, cb) => {
     if (path === TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins) {

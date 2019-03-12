@@ -13,12 +13,16 @@ export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 export function scheduleTask(server, taskManager) {
   const { kbnServer } = server.plugins.xpack_main.status.plugin;
 
-  kbnServer.afterPluginsInit(() => {
-    taskManager.schedule({
-      id: TASK_ID,
-      taskType: TELEMETRY_TASK_TYPE,
-      state: { stats: {}, runs: 0 },
-    });
+  kbnServer.afterPluginsInit(async () => {
+    try {
+      await taskManager.schedule({
+        id: TASK_ID,
+        taskType: TELEMETRY_TASK_TYPE,
+        state: { stats: {}, runs: 0 },
+      });
+    }catch(e) {
+      server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
+    }
   });
 }
 

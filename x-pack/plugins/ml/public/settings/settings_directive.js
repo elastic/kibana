@@ -22,10 +22,9 @@ import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 
 const template = `
+  <div class="euiSpacer euiSpacer--s" />
   <ml-nav-menu name="settings" />
-  <div class="mlSettingsPage">
-    <ml-settings />
-  </div>
+  <ml-settings />
 `;
 
 uiRoutes

@@ -77,7 +77,7 @@ export class TaskPool {
         task
           .run()
           .catch(err => {
-            this.logger.warning(`Task ${task} failed in attempt to run: ${err}`);
+            this.logger.warning(`Task ${task} failed in attempt to run: ${err.message}`);
           })
           .then(() => this.running.delete(task));
       }

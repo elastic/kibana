@@ -106,7 +106,7 @@ class EditPolicyUi extends Component {
       const errorRowId = `${firstError.replace('.', '-')}-row`;
       const element = document.getElementById(errorRowId);
       if (element) {
-        element.scrollIntoView({ block: "center", inline: "nearest" });
+        element.scrollIntoView({ block: 'center', inline: 'nearest' });
       }
     } else {
       const success = await saveLifecyclePolicy(lifecycle, saveAsNewPolicy);

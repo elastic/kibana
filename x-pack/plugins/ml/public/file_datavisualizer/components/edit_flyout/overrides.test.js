@@ -46,7 +46,7 @@ describe('Overrides', () => {
 
     expect(component.state('overrides').format).toEqual(FORMAT_1);
 
-    component.instance().onFormatChange(FORMAT_2);
+    component.instance().onFormatChange([{ label: FORMAT_2 }]);
 
     expect(component.state('overrides').format).toEqual(FORMAT_2);
 

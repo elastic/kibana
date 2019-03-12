@@ -54,13 +54,14 @@ describe('UncommonProcess Table Component', () => {
           />
         </TestProviders>
       );
-
       expect(
         wrapper
-          .find('[data-header="Hosts"]')
+          .find('.euiTableRow')
           .at(0)
+          .find('.euiTableRowCell')
+          .at(5)
           .text()
-      ).toBe(getEmptyValue());
+      ).toBe(`Hosts${getEmptyValue()}`);
     });
 
     test('it has a single host without any extra comma when the number of hosts exactly 1', () => {
@@ -81,10 +82,12 @@ describe('UncommonProcess Table Component', () => {
 
       expect(
         wrapper
-          .find('[data-header="Hosts"]')
+          .find('.euiTableRow')
           .at(1)
+          .find('.euiTableRowCell')
+          .at(5)
           .text()
-      ).toBe('hello-world');
+      ).toBe('Hostshello-world');
     });
 
     test('it has a comma separated list of hosts when the number of hosts is greater than 1', () => {
@@ -105,10 +108,12 @@ describe('UncommonProcess Table Component', () => {
 
       expect(
         wrapper
-          .find('[data-header="Hosts"]')
+          .find('.euiTableRow')
           .at(2)
+          .find('.euiTableRowCell')
+          .at(5)
           .text()
-      ).toBe('hello-world,\u00a0hello-world-2');
+      ).toBe('Hostshello-world,\u00a0hello-world-2');
     });
 
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
@@ -126,13 +131,14 @@ describe('UncommonProcess Table Component', () => {
           />
         </TestProviders>
       );
-
       expect(
         wrapper
-          .find('[data-header="Hosts"]')
+          .find('.euiTableRow')
           .at(3)
+          .find('.euiTableRowCell')
+          .at(5)
           .text()
-      ).toBe(getEmptyValue());
+      ).toBe(`Hosts${getEmptyValue()}`);
     });
 
     test('it is returns two hosts when others are invalid because they do not contain an id and a name', () => {
@@ -150,13 +156,14 @@ describe('UncommonProcess Table Component', () => {
           />
         </TestProviders>
       );
-
       expect(
         wrapper
-          .find('[data-header="Hosts"]')
+          .find('.euiTableRow')
           .at(4)
+          .find('.euiTableRowCell')
+          .at(5)
           .text()
-      ).toBe('hello-world,\u00a0hello-world-2');
+      ).toBe('Hostshello-world,\u00a0hello-world-2');
     });
   });
 });

@@ -23,10 +23,9 @@ import { EditFilterList } from './edit_filter_list';
 import uiRoutes from 'ui/routes';
 
 const template = `
-  <ml-nav-menu name="settings"></ml-nav-menu>
-  <div class="ml-filter-lists">
-    <ml-edit-filter-list></ml-edit-filter-list>
-  </div>
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="settings" />
+  <ml-edit-filter-list />
 `;
 
 uiRoutes
