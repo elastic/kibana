@@ -137,7 +137,7 @@ export class StatefulEvent extends React.PureComponent<Props, State> {
               <ExpandableEvent
                 id={event._id}
                 event={detailsData || []}
-                forceExpand={!!this.state.expanded[event._id]}
+                forceExpand={!!this.state.expanded[event._id] && !loading}
                 hideExpandButton={true}
                 stringifiedEvent={stringifyEvent(event)}
                 timelineId={timelineId}
