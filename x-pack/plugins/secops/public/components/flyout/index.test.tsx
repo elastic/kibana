@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { set } from 'lodash/fp';
 import * as React from 'react';
 import { ActionCreator } from 'typescript-fsa';
@@ -23,6 +24,20 @@ describe('Flyout', () => {
   const state: State = mockGlobalState;
 
   describe('rendering', () => {
+    test('it renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <TestProviders>
+          <Flyout
+            flyoutHeight={testFlyoutHeight}
+            headerHeight={flyoutHeaderHeight}
+            timelineId="test"
+            usersViewing={usersViewing}
+          />
+        </TestProviders>
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the default flyout state as a button', () => {
       const wrapper = mount(
         <TestProviders>

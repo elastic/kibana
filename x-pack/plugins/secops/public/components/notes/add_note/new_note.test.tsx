@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import * as i18n from '../translations';
@@ -13,6 +14,13 @@ import { NewNote } from './new_note';
 
 describe('NewNote', () => {
   const note = 'The contents of a new note';
+
+  test('renders correctly', () => {
+    const wrapper = shallow(
+      <NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   test('it renders a tab labeled "Note"', () => {
     const wrapper = mount(<NewNote noteInputHeight={200} note={note} updateNewNote={jest.fn()} />);

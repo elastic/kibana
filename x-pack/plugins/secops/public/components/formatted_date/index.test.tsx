@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import moment from 'moment-timezone';
 import * as React from 'react';
 
@@ -26,6 +27,11 @@ describe('PreferenceFormattedDate', () => {
           config.dateFormatTz! === 'Browser' ? config.timezone! : config.dateFormatTz!
         )
         .format(config.dateFormat);
+
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(<PreferenceFormattedDate value={isoDateString} />);
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
 
     test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
       const wrapper = mount(

@@ -6,7 +6,8 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -99,6 +100,24 @@ const mockAutoCompleteData: AutocompleteSuggestion[] = [
 
 describe('Autocomplete', () => {
   describe('rendering', () => {
+    test('it renders against snapshot', () => {
+      const placeholder = 'myPlaceholder';
+
+      const wrapper = shallow(
+        <AutocompleteField
+          isLoadingSuggestions={false}
+          isValid={false}
+          loadSuggestions={noop}
+          onChange={noop}
+          onSubmit={noop}
+          placeholder={placeholder}
+          suggestions={[]}
+          value={''}
+        />
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it is rendering with placeholder', () => {
       const placeholder = 'myPlaceholder';
 

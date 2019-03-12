@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -45,6 +46,47 @@ describe('Timeline', () => {
   ];
 
   describe('rendering', () => {
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <Timeline
+          addNoteToEvent={jest.fn()}
+          id="foo"
+          columnHeaders={defaultHeaders}
+          columnRenderers={columnRenderers}
+          dataProviders={mockDataProviders}
+          eventIdToNoteIds={{}}
+          flyoutHeight={testFlyoutHeight}
+          flyoutHeaderHeight={flyoutHeaderHeight}
+          getNotesByIds={mockGetNotesByIds}
+          indexPattern={indexPattern}
+          itemsPerPage={5}
+          itemsPerPageOptions={[5, 10, 20]}
+          kqlMode="search"
+          kqlQuery=""
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onChangeItemsPerPage={jest.fn()}
+          onColumnResized={jest.fn()}
+          onColumnRemoved={jest.fn()}
+          onColumnSorted={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onFilterChange={jest.fn()}
+          onPinEvent={jest.fn()}
+          onRangeSelected={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
+          onUnPinEvent={jest.fn()}
+          pinnedEventIds={{}}
+          range={'1 Day'}
+          rowRenderers={rowRenderers}
+          show={true}
+          sort={sort}
+          updateNote={jest.fn()}
+        />
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the timeline header', () => {
       const wrapper = mount(
         <TestProviders>

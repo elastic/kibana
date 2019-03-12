@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
@@ -15,6 +16,23 @@ import { getDraggableId, Providers } from './providers';
 
 describe('Providers', () => {
   describe('rendering', () => {
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <DroppableWrapper droppableId="unitTest">
+          <Providers
+            id="foo"
+            dataProviders={mockDataProviders}
+            onChangeDataProviderKqlQuery={jest.fn()}
+            onChangeDroppableAndProvider={jest.fn()}
+            onDataProviderRemoved={jest.fn()}
+            onToggleDataProviderEnabled={jest.fn()}
+            onToggleDataProviderExcluded={jest.fn()}
+          />
+        </DroppableWrapper>
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
@@ -24,6 +25,19 @@ describe('get_column_renderer', () => {
 
   beforeEach(() => {
     nonSuricata = cloneDeep(mockEcsData[0]);
+  });
+
+  test('renders correctly against snapshot', () => {
+    const columnName = 'event.id';
+    const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
+    const column = columnRenderer.renderColumn({
+      columnName,
+      data: nonSuricata,
+      field: allFieldsInSchemaByName[columnName],
+    });
+
+    const wrapper = shallow(<span>{column}</span>);
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('should render event id when dealing with data that is not suricata', () => {

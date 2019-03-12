@@ -1,0 +1,943 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Body rendering renders correctly against snapshot 1`] = `
+<Component
+  addNoteToEvent={[MockFunction]}
+  columnHeaders={
+    Array [
+      Object {
+        "category": "base",
+        "columnHeaderType": "not-filtered",
+        "description": "Date/time when the event originated.
+For log events this is the date/time when the event was generated, and not when it was read.
+Required field for all events.",
+        "example": "2016-05-23T08:05:34.853Z",
+        "id": "@timestamp",
+        "type": "date",
+        "width": 240,
+      },
+      Object {
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "Severity describes the severity of the event. What the different severity values mean can very different between use cases. It's up to the implementer to make sure severities are consistent across events.",
+        "example": "7",
+        "id": "event.severity",
+        "type": "long",
+        "width": 180,
+      },
+      Object {
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "Event category.
+This contains high-level information about the contents of the event. It is more generic than \`event.action\`, in the sense that typically a category contains multiple actions. Warning: In future versions of ECS, we plan to provide a list of acceptable values for this field, please use with caution.",
+        "example": "user-management",
+        "id": "event.category",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "category": "event",
+        "columnHeaderType": "not-filtered",
+        "description": "The action captured by the event.
+This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
+        "example": "user-password-change",
+        "id": "event.action",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "category": "host",
+        "columnHeaderType": "not-filtered",
+        "description": "Name of the host.
+It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
+        "example": "",
+        "id": "host.name",
+        "type": "keyword",
+        "width": 180,
+      },
+      Object {
+        "category": "source",
+        "columnHeaderType": "not-filtered",
+        "description": "IP address of the source.
+Can be one or multiple IPv4 or IPv6 addresses.",
+        "example": "",
+        "id": "source.ip",
+        "type": "ip",
+        "width": 180,
+      },
+      Object {
+        "category": "destination",
+        "columnHeaderType": "not-filtered",
+        "description": "IP address of the destination.
+Can be one or multiple IPv4 or IPv6 addresses.",
+        "example": "",
+        "id": "destination.ip",
+        "type": "ip",
+        "width": 180,
+      },
+      Object {
+        "category": "user",
+        "columnHeaderType": "not-filtered",
+        "description": "Short name or login of the user.",
+        "example": "albert",
+        "id": "user.name",
+        "type": "keyword",
+        "width": 180,
+      },
+    ]
+  }
+  columnRenderers={
+    Array [
+      Object {
+        "isInstance": [Function],
+        "renderColumn": [Function],
+      },
+      Object {
+        "isInstance": [Function],
+        "renderColumn": [Function],
+      },
+      Object {
+        "isInstance": [Function],
+        "renderColumn": [Function],
+      },
+    ]
+  }
+  data={
+    Array [
+      Object {
+        "_id": "1",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "action": "Action",
+          "category": "Access",
+          "id": 1,
+          "module": "nginx",
+          "severity": 3,
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "apache",
+        },
+        "source": Object {
+          "ip": "192.168.0.1",
+          "port": 80,
+        },
+        "timestamp": "2018-11-05T19:03:25.937Z",
+        "user": Object {
+          "id": 1,
+          "name": "john.dee",
+        },
+      },
+      Object {
+        "_id": "3",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 3,
+          "module": "nginx",
+          "severity": 1,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "nginx",
+        },
+        "source": Object {
+          "ip": "192.168.0.3",
+          "port": 443,
+        },
+        "timestamp": "2018-11-07T19:03:25.937Z",
+        "user": Object {
+          "id": 3,
+          "name": "evan.davis",
+        },
+      },
+      Object {
+        "_id": "4",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Attempted Administrator Privilege Gain",
+          "id": 4,
+          "module": "suricata",
+          "severity": 1,
+          "type": "Alert",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "suricata",
+        },
+        "source": Object {
+          "ip": "192.168.0.3",
+          "port": 53,
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
+              "signature_id": 4,
+            },
+            "flow_id": 4,
+            "proto": "",
+          },
+        },
+        "timestamp": "2018-11-08T19:03:25.937Z",
+        "user": Object {
+          "id": 4,
+          "name": "jenny.jones",
+        },
+      },
+      Object {
+        "_id": "5",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 5,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.3",
+          "port": 80,
+        },
+        "timestamp": "2018-11-09T19:03:25.937Z",
+        "user": Object {
+          "id": 5,
+          "name": "becky.davis",
+        },
+      },
+      Object {
+        "_id": "6",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 6,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "braden.davis",
+        },
+        "source": Object {
+          "ip": "192.168.0.6",
+          "port": 80,
+        },
+        "timestamp": "2018-11-10T19:03:25.937Z",
+      },
+      Object {
+        "_id": "8",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Web Application Attack",
+          "id": 8,
+          "module": "suricata",
+          "severity": 2,
+          "type": "Alert",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.8",
+          "port": 80,
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": "ET WEB_SERVER Possible CVE-2014-6271 Attempt in HTTP Cookie",
+              "signature_id": 8,
+            },
+            "flow_id": 8,
+            "proto": "",
+          },
+        },
+        "timestamp": "2018-11-12T19:03:25.937Z",
+        "user": Object {
+          "id": 8,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "7",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 7,
+          "module": "apache",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.7",
+          "port": 80,
+        },
+        "timestamp": "2018-11-11T19:03:25.937Z",
+        "user": Object {
+          "id": 7,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "9",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 9,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.9",
+          "port": 80,
+        },
+        "timestamp": "2018-11-13T19:03:25.937Z",
+        "user": Object {
+          "id": 9,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "10",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 10,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.10",
+          "port": 80,
+        },
+        "timestamp": "2018-11-14T19:03:25.937Z",
+        "user": Object {
+          "id": 10,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "11",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 11,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.11",
+          "port": 80,
+        },
+        "timestamp": "2018-11-15T19:03:25.937Z",
+        "user": Object {
+          "id": 11,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "12",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Access",
+          "id": 12,
+          "module": "nginx",
+          "severity": 3,
+          "type": "HTTP Request",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.12",
+          "port": 80,
+        },
+        "timestamp": "2018-11-16T19:03:25.937Z",
+        "user": Object {
+          "id": 12,
+          "name": "jone.doe",
+        },
+      },
+      Object {
+        "_id": "2",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Authentication",
+          "id": 2,
+          "module": "authlog",
+          "severity": 3,
+          "type": "Authentication Success",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.2",
+          "port": 80,
+        },
+        "timestamp": "2018-11-06T19:03:25.937Z",
+        "user": Object {
+          "id": 1,
+          "name": "joe.bob",
+        },
+      },
+      Object {
+        "_id": "13",
+        "destination": Object {
+          "ip": "192.168.0.3",
+          "port": 6343,
+        },
+        "event": Object {
+          "category": "Web Application Attack",
+          "id": 13,
+          "module": "suricata",
+          "severity": 1,
+          "type": "Alert",
+        },
+        "geo": Object {
+          "country_iso_code": "xx",
+          "region_name": "xx",
+        },
+        "host": Object {
+          "ip": Array [
+            "192.168.0.1",
+          ],
+          "name": "joe.computer",
+        },
+        "source": Object {
+          "ip": "192.168.0.8",
+          "port": 80,
+        },
+        "suricata": Object {
+          "eve": Object {
+            "alert": Object {
+              "signature": "ET WEB_SERVER Possible Attempt in HTTP Cookie",
+              "signature_id": 13,
+            },
+            "flow_id": 13,
+            "proto": "",
+          },
+        },
+        "timestamp": "2018-13-12T19:03:25.937Z",
+      },
+      Object {
+        "_id": "14",
+        "destination": Object {
+          "ip": "207.154.238.205",
+          "port": 11568,
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.connection",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": Object {
+          "country_iso_code": "US",
+          "region_name": "New York",
+        },
+        "host": Object {
+          "id": "37c81253e0fc4c46839c19b981be5177",
+          "ip": Array [
+            "207.154.238.205",
+            "10.19.0.5",
+            "fe80::d82b:9aff:fe0d:1e12",
+          ],
+          "name": "zeek-franfurt",
+        },
+        "http": null,
+        "network": Object {
+          "transport": "tcp",
+        },
+        "source": Object {
+          "ip": "185.176.26.101",
+          "port": 44059,
+        },
+        "suricata": null,
+        "timestamp": "2019-03-07T05:06:51.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": Object {
+            "history": "Sr",
+            "local_orig": "false",
+            "local_resp": "false",
+            "missed_bytes": 0,
+            "state": "REJ",
+          },
+          "dns": null,
+          "files": null,
+          "http": null,
+          "notice": null,
+          "session_id": "C8DRTq362Fios6hw16",
+          "ssl": null,
+        },
+      },
+      Object {
+        "_id": "15",
+        "destination": Object {
+          "ip": "67.207.67.3",
+          "port": 53,
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.dns",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": Object {
+          "country_iso_code": "US",
+          "region_name": "New York",
+        },
+        "host": Object {
+          "id": "af3fddf15f1d47979ce817ba0df10c6e",
+          "ip": Array [
+            "206.189.35.240",
+            "10.15.0.5",
+            "fe80::98c7:eff:fe29:4455",
+          ],
+          "name": "suricata-zeek-singapore",
+        },
+        "http": null,
+        "network": Object {
+          "transport": "udp",
+        },
+        "source": Object {
+          "ip": "206.189.35.240",
+          "port": 57475,
+        },
+        "suricata": null,
+        "timestamp": "2019-03-07T00:51:28.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": null,
+          "dns": Object {
+            "AA": false,
+            "RA": false,
+            "RD": false,
+            "TC": false,
+            "qclass": null,
+            "qclass_name": null,
+            "qtype": null,
+            "qtype_name": null,
+            "query": null,
+            "rejected": null,
+            "trans_id": 65252,
+          },
+          "files": null,
+          "http": null,
+          "notice": null,
+          "session_id": "CyIrMA1L1JtLqdIuol",
+          "ssl": null,
+        },
+      },
+      Object {
+        "_id": "16",
+        "_index": "filebeat-8.0.0-2019.02.19-000001",
+        "destination": Object {
+          "ip": "192.241.164.26",
+          "port": 80,
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.http",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": Object {
+          "country_iso_code": "US",
+          "region_name": "New York",
+        },
+        "host": Object {
+          "id": "af3fddf15f1d47979ce817ba0df10c6e",
+          "ip": Array [
+            "206.189.35.240",
+            "10.15.0.5",
+            "fe80::98c7:eff:fe29:4455",
+          ],
+          "name": "suricata-zeek-singapore",
+        },
+        "http": Object {
+          "request": Object {
+            "body": Object {
+              "bytes": 0,
+              "content": null,
+            },
+            "method": null,
+            "referrer": null,
+          },
+          "response": Object {
+            "body": Object {
+              "bytes": 154,
+              "content": null,
+            },
+            "status_code": 302,
+          },
+          "version": "1.1",
+        },
+        "network": null,
+        "source": Object {
+          "ip": "206.189.35.240",
+          "port": 36220,
+        },
+        "suricata": null,
+        "timestamp": "2019-03-05T07:00:20.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": null,
+          "dns": null,
+          "files": null,
+          "http": Object {
+            "resp_fuids": Array [
+              "FzeujEPP7GTHmYPsc",
+            ],
+            "resp_mime_types": Array [
+              "text/html",
+            ],
+            "status_msg": "Moved Temporarily",
+            "tags": Array [],
+            "trans_depth": "3",
+          },
+          "notice": null,
+          "session_id": "CZLkpC22NquQJOpkwe",
+          "ssl": null,
+        },
+      },
+      Object {
+        "_id": "17",
+        "destination": null,
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.notice",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "37c81253e0fc4c46839c19b981be5177",
+          "ip": Array [
+            "207.154.238.205",
+            "10.19.0.5",
+            "fe80::d82b:9aff:fe0d:1e12",
+          ],
+          "name": "zeek-franfurt",
+        },
+        "http": null,
+        "network": null,
+        "source": Object {
+          "ip": "8.42.77.171",
+          "port": null,
+        },
+        "suricata": null,
+        "timestamp": "2019-02-28T22:36:28.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": null,
+          "dns": null,
+          "files": null,
+          "http": null,
+          "notice": Object {
+            "dropped": false,
+            "dst": "207.154.238.205",
+            "msg": "8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0s",
+            "note": "Scan::Port_Scan",
+            "peer_descr": "bro",
+            "sub": "remote",
+            "suppress_for": 3600,
+          },
+          "session_id": null,
+          "ssl": null,
+        },
+      },
+      Object {
+        "_id": "18",
+        "destination": Object {
+          "ip": "91.189.95.15",
+          "port": 443,
+        },
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.ssl",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": Object {
+          "country_iso_code": "GB",
+          "region_name": "England",
+        },
+        "host": Object {
+          "id": "2ce8b1e7d69e4a1d9c6bcddc473da9d9",
+          "ip": null,
+          "name": "zeek-sensor-amsterdam",
+        },
+        "http": null,
+        "network": null,
+        "source": Object {
+          "ip": "188.166.66.184",
+          "port": 34514,
+        },
+        "suricata": null,
+        "timestamp": "2019-02-22T21:12:13.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": null,
+          "dns": null,
+          "files": null,
+          "http": null,
+          "notice": null,
+          "session_id": "CmTxzt2OVXZLkGDaRe",
+          "ssl": Object {
+            "cipher": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "established": false,
+            "resumed": false,
+            "version": "TLSv12",
+          },
+        },
+      },
+      Object {
+        "_id": "19",
+        "destination": null,
+        "event": Object {
+          "action": null,
+          "category": null,
+          "dataset": "zeek.files",
+          "id": null,
+          "module": "zeek",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "af3fddf15f1d47979ce817ba0df10c6e",
+          "ip": Array [
+            "206.189.35.240",
+            "10.15.0.5",
+            "fe80::98c7:eff:fe29:4455",
+          ],
+          "name": "suricata-zeek-singapore",
+        },
+        "http": null,
+        "network": null,
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-03T04:26:38.000Z",
+        "url": null,
+        "zeek": Object {
+          "connection": null,
+          "dns": null,
+          "files": Object {
+            "analyzers": Array [
+              "MD5",
+              "SHA1",
+            ],
+            "depth": 0,
+            "duration": 0,
+            "fuid": "FePz1uVEVCZ3I0FQi",
+            "is_orig": false,
+            "local_orig": false,
+            "md5": "f7653f1951693021daa9e6be61226e32",
+            "mime_type": "text/plain",
+            "missing_bytes": 0,
+            "overflow_bytes": 0,
+            "rx_host": "206.189.35.240",
+            "seen_bytes": 1198,
+            "session_ids": Array [
+              "Cu0n232QMyvNtzb75j",
+            ],
+            "sha1": "fa5195a5dfacc9d1c68d43600f0e0262cad14dde",
+            "source": "HTTP",
+            "timedout": false,
+            "total_bytes": 88722,
+            "tx_host": "5.101.111.50",
+          },
+          "http": null,
+          "notice": null,
+          "session_id": "Cu0n232QMyvNtzb75j",
+          "ssl": null,
+        },
+      },
+    ]
+  }
+  eventIdToNoteIds={Object {}}
+  getNotesByIds={[Function]}
+  height={700}
+  id="timeline-test"
+  isLoading={false}
+  onColumnRemoved={[MockFunction]}
+  onColumnResized={[MockFunction]}
+  onColumnSorted={[MockFunction]}
+  onFilterChange={[MockFunction]}
+  onPinEvent={[MockFunction]}
+  onRangeSelected={[MockFunction]}
+  onUnPinEvent={[MockFunction]}
+  pinnedEventIds={Object {}}
+  range="1 Day"
+  rowRenderers={
+    Array [
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
+    ]
+  }
+  sort={
+    Object {
+      "columnId": "@timestamp",
+      "sortDirection": "descending",
+    }
+  }
+  updateNote={[MockFunction]}
+  width={100}
+/>
+`;

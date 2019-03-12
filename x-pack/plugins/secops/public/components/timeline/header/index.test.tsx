@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Direction } from '../../../graphql/types';
@@ -18,6 +19,27 @@ describe('Header', () => {
   const indexPattern = mockIndexPattern;
 
   describe('rendering', () => {
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <TimelineHeader
+          id="foo"
+          indexPattern={indexPattern}
+          dataProviders={mockDataProviders}
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
+          show={true}
+          sort={{
+            columnId: '@timestamp',
+            sortDirection: Direction.descending,
+          }}
+        />
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
     test('it renders the data providers', () => {
       const wrapper = mount(
         <TestProviders>

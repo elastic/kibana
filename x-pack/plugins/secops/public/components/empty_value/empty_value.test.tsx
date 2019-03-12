@@ -6,9 +6,10 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import {
   defaultToEmptyTag,
@@ -21,6 +22,15 @@ import {
 
 describe('EmptyValue', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
+
+  test('it renders against snapshot', () => {
+    const wrapper = shallowWithIntl(
+      <ThemeProvider theme={theme}>
+        <p>{getEmptyString()}</p>
+      </ThemeProvider>
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   describe('#getEmptyValue', () =>
     test('should return an empty value', () => expect(getEmptyValue()).toBe('--')));

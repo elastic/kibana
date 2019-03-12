@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
 
@@ -12,6 +13,20 @@ import { AddNote } from '.';
 
 describe('AddNote', () => {
   const note = 'The contents of a new note';
+
+  test('renders correctly', () => {
+    const wrapper = shallow(
+      <AddNote
+        associateNote={jest.fn()}
+        getNewNoteId={jest.fn()}
+        newNote={note}
+        onCancelAddNote={jest.fn()}
+        updateNewNote={jest.fn()}
+        updateNote={jest.fn()}
+      />
+    );
+    expect(toJson(wrapper)).toMatchSnapshot();
+  });
 
   test('it renders the Cancel button when onCancelAddNote is provided', () => {
     const wrapper = mount(

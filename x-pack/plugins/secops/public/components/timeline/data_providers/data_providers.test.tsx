@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
@@ -16,6 +17,22 @@ import { mockDataProviders } from './mock/mock_data_providers';
 describe('DataProviders', () => {
   describe('rendering', () => {
     const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
+
+    test('renders correctly against snapshot', () => {
+      const wrapper = shallow(
+        <DataProviders
+          id="foo"
+          dataProviders={mockDataProviders}
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
+          show={true}
+        />
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
 
     test('it should render a placeholder when there are zero data providers', () => {
       const dataProviders: DataProvider[] = [];

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
@@ -20,6 +21,17 @@ describe('zeek_row_renderer', () => {
   beforeEach(() => {
     nonZeek = cloneDeep(mockEcsData[0]);
     zeek = cloneDeep(mockEcsData[13]);
+  });
+
+  test('renders correctly against snapshot', () => {
+    const children = zeekRowRenderer.renderRow({
+      data: nonZeek,
+      width: 100,
+      children: <span>some children</span>,
+    });
+
+    const wrapper = shallow(<span>{children}</span>);
+    expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('should return false if not a zeek datum', () => {

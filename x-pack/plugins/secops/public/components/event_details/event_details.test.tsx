@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockEcsData, TestProviders } from '../../mock';
@@ -12,6 +13,17 @@ import { mockEcsData, TestProviders } from '../../mock';
 import { EventDetails } from './event_details';
 
 describe('EventDetails', () => {
+  describe('rendering', () => {
+    test('should match snapshot', () => {
+      const wrapper = shallow(
+        <TestProviders>
+          <EventDetails data={mockEcsData[0]} view="table-view" onViewSelected={jest.fn()} />
+        </TestProviders>
+      );
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+
   describe('tabs', () => {
     ['Table', 'JSON View'].forEach(tab => {
       test(`it renders the ${tab} tab`, () => {

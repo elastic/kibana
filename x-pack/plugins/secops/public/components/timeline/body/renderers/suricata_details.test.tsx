@@ -6,7 +6,7 @@
 
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockEcsData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
@@ -16,7 +16,7 @@ import { SuricataDetails } from './suricata_details';
 describe('SuricataDetails', () => {
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = shallowWithIntl(
         <TestProviders>
           <SuricataDetails data={mockEcsData[2]} />
         </TestProviders>

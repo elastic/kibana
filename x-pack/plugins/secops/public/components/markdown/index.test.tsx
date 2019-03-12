@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -98,7 +98,7 @@ describe('Markdown', () => {
     });
 
     test('it renders the expected table content', () => {
-      const wrapper = mount(<Markdown raw={rawTable} />);
+      const wrapper = shallow(<Markdown raw={rawTable} />);
 
       expect(toJson(wrapper)).toMatchSnapshot();
     });
