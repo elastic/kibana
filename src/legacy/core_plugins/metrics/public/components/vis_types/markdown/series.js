@@ -161,6 +161,8 @@ function MarkdownSeriesUi(props) {
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
@@ -196,7 +198,8 @@ MarkdownSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
 };
 
 const MarkdownSeries = injectI18n(MarkdownSeriesUi);
