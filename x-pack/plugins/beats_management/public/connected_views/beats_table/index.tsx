@@ -30,7 +30,7 @@ interface ComponentProps {
 export const BeatsCMTable: React.SFC<ComponentProps> = props => {
   const libs = useContext(LibsContext);
 
-  const tableRef = useRef(null);
+  const tableRef = useRef<any>(null);
   // the value of update does not matter, we just use it to force a re-render
   // by flipping it's value back and forth for lack of a built-in forceUpdate method
   const [update, forceUpdate] = useState(true);
@@ -154,6 +154,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             // because the compile code above has a very minor race condition, we wait,
             // the max race condition time is really 10ms but doing 100 to be safe
             setTimeout(async () => {
+              tableRef.current.resetSelection();
               forceUpdate(!update);
             }, 100);
             break;

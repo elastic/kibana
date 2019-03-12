@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { flatten } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { useContext, useRef, useState } from 'react';
-import { BeatTag, CMBeat } from 'x-pack/plugins/beats_management/common/domain_types';
-import { BeatsTableType, Table } from '../../components/table';
-import { beatsListActions, tagConfigActions } from '../../components/table/action_schema';
+import { BeatTag } from 'x-pack/plugins/beats_management/common/domain_types';
+import { BeatDetailTagsTable, Table, TagsTableType } from '../../components/table';
+import { tagListActions } from '../../components/table/action_schema';
 import { AssignmentActionType } from '../../components/table/table';
 import { LibsContext } from '../../context/libs';
 import { useAsyncEffect } from '../../hooks/use_async_effect';
@@ -21,64 +21,95 @@ interface TableOptionsState {
 
 interface ComponentProps {
   hasSearch?: boolean;
-  forAttachedTag?: string;
+  forBeat?: string;
   options: TableOptionsState;
   onOptionsChange: (newState: TableOptionsState) => void;
-  actionHandler?(action: AssignmentActionType, payload: any, selected: CMBeat[]): void;
+  actionHandler?(action: AssignmentActionType, payload: any, selected: BeatTag[]): void;
 }
 
 export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
   const libs = useContext(LibsContext);
-  const tableRef = useRef(null);
+
+  const tableRef = useRef<any>(null);
   // the value of update does not matter, we just use it to force a re-render
   // by flipping it's value back and forth for lack of a built-in forceUpdate method
   const [update, forceUpdate] = useState(true);
 
-  const [assignmentOptions, setAssignmentOptions] = useState([] as BeatTag[]);
-  const [beats, setBeats] = useState({
-    list: [] as CMBeat[],
+  const [tags, setTags] = useState({
+    list: [] as BeatTag[],
     page: 0,
     total: 0,
   });
 
   useAsyncEffect(
     async () => {
-      let loadedBeats;
+      let loadedTags;
 
-      if (props.forAttachedTag) {
-        loadedBeats = await libs.beats.getBeatsWithTag(
-          props.forAttachedTag,
-          props.options.page || 0,
-          props.options.size || 25
-        );
+      if (props.forBeat) {
+        const beat = await libs.beats.get(props.forBeat);
+        if (beat) {
+          loadedTags = await libs.tags.getTagsWithIds(beat.tags);
+        } else {
+          loadedTags = {
+            list: [],
+            total: 0,
+            page: props.options.page,
+          };
+        }
       } else {
-        loadedBeats = await libs.beats.getAll(
+        loadedTags = await libs.beats.getAll(
           props.options.searchInput,
           props.options.page || 0,
           props.options.size || 25
         );
       }
 
-      const tags = await libs.tags.getTagsWithIds(flatten(loadedBeats.list.map(beat => beat.tags)));
-
-      setBeats({
-        list: beats.list.map(beat => ({
-          ...beat,
-          tags: (tags || []).filter(tag => beat.tags.includes(tag.id)),
-        })) as any[],
-        total: beats.total,
-        page: beats.page,
+      setTags({
+        list: loadedTags.list,
+        total: loadedTags.total,
+        // I am not sure why, but sometimes page is returned as a string and others a number...
+        page: parseInt(`${loadedTags.page}`, 10),
       });
     },
     [update, props.options.page, props.options.size, props.options.searchInput]
   );
 
   const autocompleteProps = useKQLAutocomplete(
-    libs.elasticsearch.getSuggestions,
-    libs.elasticsearch.isKueryValid,
+    (...args) => libs.elasticsearch.getSuggestions(...args),
+    (...args) => libs.elasticsearch.isKueryValid(...args),
     props.options.searchInput || '',
-    'beat'
+    'tag'
   );
+
+  const actionHandler = async (
+    action: AssignmentActionType,
+    payload: any,
+    selectedItems: BeatTag[]
+  ) => {
+    if (!selectedItems.length) {
+      return false;
+    }
+
+    if (action === AssignmentActionType.Delete) {
+      const success = await libs.tags.delete(selectedItems.map(tag => tag.id));
+      if (!success) {
+        alert(
+          i18n.translate('xpack.beatsManagement.tags.someTagsMightBeAssignedToBeatsTitle', {
+            defaultMessage:
+              'Some of these tags might be assigned to beats. Please ensure tags being removed are not activly assigned',
+          })
+        );
+      } else {
+        tableRef.current.resetSelection();
+
+        forceUpdate(!update);
+      }
+    }
+
+    if (props.actionHandler) {
+      props.actionHandler(action, payload, selectedItems);
+    }
+  };
 
   return (
     <Table
@@ -92,75 +123,19 @@ export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
             }
           : undefined
       }
-      actions={props.forAttachedTag ? tagConfigActions : beatsListActions}
-      actionData={{
-        tags: assignmentOptions,
+      onTableChange={(index: number, size: number) => {
+        props.onOptionsChange({
+          searchInput: props.options.searchInput,
+          size,
+          page: index,
+        });
       }}
-      actionHandler={async (
-        action: AssignmentActionType,
-        payload: any,
-        selectedItems: CMBeat[]
-      ) => {
-        if (!selectedItems.length) {
-          return false;
-        }
-
-        switch (action) {
-          case AssignmentActionType.Assign:
-            const assignments = libs.beats.createBeatTagAssignments(selectedItems, payload);
-
-            let status;
-            if (
-              selectedItems.some(
-                beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
-              )
-            ) {
-              status = await libs.beats.assignTagsToBeats(assignments);
-            } else {
-              status = await libs.beats.assignTagsToBeats(assignments);
-            }
-
-            if (status && !status.find(s => !s.success)) {
-              forceUpdate(!!update);
-            } else if (status && status.find(s => !s.success)) {
-              // @ts-ignore
-              alert(status.find(s => !s.success).error.message);
-            }
-
-            break;
-          case AssignmentActionType.Delete:
-            if (props.forAttachedTag) {
-              await libs.beats.removeTagsFromBeats(
-                libs.beats.createBeatTagAssignments(
-                  selectedItems.map((beat: any) => beat.id),
-                  props.forAttachedTag
-                )
-              );
-              return forceUpdate(!!update);
-            }
-
-            for (const beat of selectedItems) {
-              await libs.beats.update(beat.id, { active: false });
-            }
-
-            // because the compile code above has a very minor race condition, we wait,
-            // the max race condition time is really 10ms but doing 100 to be safe
-            setTimeout(async () => {
-              forceUpdate(!!update);
-            }, 100);
-            break;
-          case AssignmentActionType.Reload:
-            setAssignmentOptions(await libs.tags.getassignableTagsForBeats(selectedItems));
-            break;
-        }
-
-        if (props.actionHandler) {
-          props.actionHandler(action, payload, selectedItems);
-        }
-      }}
-      items={beats}
+      hideTableControls={props.forBeat === undefined ? false : true}
+      actions={tagListActions}
+      actionHandler={actionHandler}
+      items={tags}
       ref={tableRef}
-      type={BeatsTableType}
+      type={props.forBeat === undefined ? TagsTableType : BeatDetailTagsTable}
     />
   );
 };
