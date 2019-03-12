@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
           await filterBar.removeAllFilters();
         });
 
-        it('should render different data in response to filter change', async function () {
+        it.skip('should render different data in response to filter change', async function () {
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart');
           await filterBar.addFilter('@tags.raw', 'is', 'error');
           await PageObjects.visualize.expectVisToMatchScreenshot('vega_chart_filtered');
