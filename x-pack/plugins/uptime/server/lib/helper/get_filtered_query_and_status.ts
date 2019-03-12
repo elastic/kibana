@@ -40,9 +40,10 @@ export const getFilteredQueryAndStatusFilter = (
   let nonStatusFiters;
   if (filters) {
     filterObject = JSON.parse(filters);
+    const must = get(filterObject, 'bool.must', []);
     nonStatusFiters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
       bool: {
-        must: filterObject.bool.must.filter((filter: any) => !filter.match['monitor.status']),
+        must: must.filter((filter: any) => !filter.match['monitor.status']),
       },
     });
     statusFilter = getMonitorsListFilteredQuery(filterObject);

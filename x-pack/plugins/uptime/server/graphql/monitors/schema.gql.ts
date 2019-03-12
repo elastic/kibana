@@ -93,6 +93,8 @@ export const monitorsSchema = gql`
   type LatestMonitor {
     "The ID of the monitor represented by this data."
     id: MonitorKey!
+    "The Name of the monitor"
+    name: String!
     "Information from the latest document."
     ping: Ping
     "Buckets of recent up count status data."

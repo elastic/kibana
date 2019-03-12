@@ -410,7 +410,7 @@ export interface ErrorListItem {
 
   monitorId?: string | null;
 
-  monitorName?: string | null;
+  latestMonitor?: LatestMonitor | null;
 
   type: string;
 

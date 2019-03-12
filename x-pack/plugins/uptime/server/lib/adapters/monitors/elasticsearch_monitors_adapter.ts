@@ -229,7 +229,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const filter = {
       bool: {
         should: monitorIds.map(id => {
-          return { should: id };
+          return { should: { term: id } };
         }),
       },
     };
@@ -494,18 +494,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const result = await this.database.search(request, params);
     const buckets: any[] = get(result, 'aggregations.error_type.buckets', []);
 
-    const monitorIds = flatten(buckets.map(
-      ({
-        key: errorType,
-        by_id: { buckets: monitorBuckets },
-      }: {
-        key: string;
-        by_id: { buckets: any[] };
-      }) => {
-        return monitorBuckets.map(({ key: monitorId }) => monitorId);
-      }
-    ));
-    const latestmonitors = this.getMonitors(request, dateRangeStart, dateRangeEnd);
+    const monitorIds = flatten(
+      buckets.map(
+        ({ by_id: { buckets: monitorBuckets } }: { key: string; by_id: { buckets: any[] } }) => {
+          return monitorBuckets.map(({ key: monitorId }) => monitorId);
+        }
+      )
+    );
+    const latestmonitors = await this.getLatestMonitors(request, monitorIds);
 
     const errorsList: ErrorListItem[] = [];
     buckets.forEach(
@@ -518,13 +514,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       }) => {
         monitorBuckets.forEach(bucket => {
           const count = get(bucket, 'doc_count', null);
-          const monitorId = get(bucket, 'key', null);
+          const monitorId: string = get(bucket, 'key');
           const source = get(bucket, 'latest.hits.hits[0]._source', null);
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
           errorsList.push({
             latestMessage: errorMessage,
+            latestMonitor: latestmonitors[monitorId],
             monitorId,
             type: errorType,
             count,
