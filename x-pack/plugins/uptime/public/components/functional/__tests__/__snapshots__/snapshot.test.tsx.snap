@@ -2,16 +2,9 @@
 
 exports[`Snapshot component renders without errors 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={4}
   >
     <EuiPanel
@@ -25,16 +18,9 @@ exports[`Snapshot component renders without errors 1`] = `
       }
     >
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiTitle
@@ -53,23 +39,12 @@ exports[`Snapshot component renders without errors 1`] = `
             size="s"
           />
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
             justifyContent="spaceEvenly"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiStat
                 description="Up"
                 reverse={false}
@@ -79,10 +54,7 @@ exports[`Snapshot component renders without errors 1`] = `
                 titleSize="l"
               />
             </EuiFlexItem>
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiStat
                 description="Down"
                 reverse={false}
@@ -92,10 +64,7 @@ exports[`Snapshot component renders without errors 1`] = `
                 titleSize="l"
               />
             </EuiFlexItem>
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiStat
                 description="Total"
                 reverse={false}
@@ -111,7 +80,6 @@ exports[`Snapshot component renders without errors 1`] = `
     </EuiPanel>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={8}
   >
     <EuiPanel

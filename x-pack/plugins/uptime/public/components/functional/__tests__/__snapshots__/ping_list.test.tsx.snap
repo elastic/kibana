@@ -8,29 +8,17 @@ exports[`PingList component renders sorted list without errors 1`] = `
     paddingSize="s"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiFlexGroup
           alignItems="center"
-          component="div"
-          direction="row"
           gutterSize="s"
-          justifyContent="flexStart"
           responsive={false}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <EuiTitle
@@ -47,7 +35,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <EuiBadge
@@ -60,21 +47,10 @@ exports[`PingList component renders sorted list without errors 1`] = `
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
-        <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
-        >
+        <EuiFlexGroup>
           <EuiFlexItem
-            component="div"
-            grow={true}
             style={
               Object {
                 "minWidth": 200,
