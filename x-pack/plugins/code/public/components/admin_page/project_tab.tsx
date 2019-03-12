@@ -134,6 +134,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
   public submitImportProject = () => {
     this.props.importRepo(this.state.repoURL);
+    this.setState({ repoURL: '' });
   };
 
   public renderImportModal = () => {
