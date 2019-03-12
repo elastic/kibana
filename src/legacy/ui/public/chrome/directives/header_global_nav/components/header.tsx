@@ -74,7 +74,10 @@ interface Props {
   intl: InjectedIntl;
 }
 
+// Providing a buffer between the limit and the cut off index
+// protects from truncating just the last couple (6) characters
 const TRUNCAT_LIMIT: number = 64;
+const TRUNCAT_AT: number = 58;
 
 function extendRecentlyAccessedHistoryItem(
   navLinks: NavLink[],
@@ -114,7 +117,7 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 
 function truncateRecentItemLabel(label: string): string {
   if (label.length > TRUNCAT_LIMIT) {
-    label = `${label.substring(0, TRUNCAT_LIMIT)}…`;
+    label = `${label.substring(0, TRUNCAT_AT)}…`;
   }
 
   return label;
