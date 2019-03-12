@@ -100,7 +100,11 @@ export const reporting = (kibana) => {
               otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
-              inspect: Joi.boolean().default(false),
+              inspect: Joi.boolean().when('$dev', {
+                is: false,
+                then: Joi.valid(false),
+                else: Joi.default(false),
+              }),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),

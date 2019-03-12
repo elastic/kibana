@@ -45,8 +45,7 @@ export class HeadlessChromiumDriver {
     {
       conditionalHeaders,
       waitForSelector,
-      pauseOnStart = false,
-    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string; pauseOnStart: boolean }
+    }: { conditionalHeaders: ConditionalHeaders; waitForSelector: string }
   ) {
     this.logger.debug(`opening url ${url}`);
     await this.page.setRequestInterception(true);
@@ -146,14 +145,17 @@ export class HeadlessChromiumDriver {
   }
 
   private async launchDebugger() {
-    // HACKY: Puppeteer doesn't expose a top-level API to set debug statements and get
-    // identifiers like a page's ID. These are required in order to have an effective debugging experience.
+    // In order to pause on execution we have to reach more deeply into Chromiums Devtools Protocol,
+    // and more specifically, for the page being used. _client is per-page, and puppeteer doesn't expose
+    // a page's client in their api, so we have to reach into internals to get this behavior.
+    // Finally, in order to get the inspector running, we have to know the page's internal ID (again, private)
+    // in order to construct the final debugging URL.
 
-    // @ts-ignore: _client is private, but the only way to interact with the low-level debugger API
+    // @ts-ignore
     await this.page._client.send('Debugger.enable');
-    // @ts-ignore: _client is private, but the only way to interact with the low-level debugger API
+    // @ts-ignore
     await this.page._client.send('Debugger.pause');
-    // @ts-ignore: _target is private
+    // @ts-ignore
     const targetId = this.page._target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
