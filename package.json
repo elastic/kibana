@@ -261,6 +261,7 @@
     "@kbn/plugin-generator": "1.0.0",
     "@kbn/test": "1.0.0",
     "@octokit/rest": "^15.10.0",
+    "@percy/agent": "^0.1.16",
     "@types/angular": "1.6.50",
     "@types/angular-mocks": "^1.7.0",
     "@types/babel-core": "^6.25.5",

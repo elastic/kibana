@@ -45,6 +45,7 @@ import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 // @ts-ignore not TS yet
 import { InspectorProvider } from './inspector';
+import { PercyProvider } from './percy';
 // @ts-ignore not TS yet
 import { QueryBarProvider } from './query_bar';
 // @ts-ignore not TS yet
@@ -86,4 +87,5 @@ export const services = {
   inspector: InspectorProvider,
   appsMenu: AppsMenuProvider,
   globalNav: GlobalNavProvider,
+  percy: PercyProvider,
 };
