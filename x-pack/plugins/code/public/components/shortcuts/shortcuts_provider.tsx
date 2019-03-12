@@ -20,29 +20,6 @@ import { toggleHelp } from '../../actions';
 import { RootState } from '../../reducers';
 import { HotKey, Modifier, OS } from './shortcut';
 
-const Key = styled.span`
-  background: #ffffff;
-  border: 1px solid #d3dae6;
-  box-sizing: border-box;
-  box-shadow: 0px 2px 0px #eeeeee;
-  border-radius: 4px;
-  min-width: 24px;
-  display: inline-block;
-  text-align: center;
-  margin: 4px;
-  line-height: 24px;
-  text-transform: uppercase;
-`;
-
-const HelpText = styled.span`
-  font-style: normal;
-  font-weight: normal;
-  line-height: 21px;
-  font-size: 14px;
-  margin-left: 12px;
-  color: #000000;
-`;
-
 interface Props {
   showHelp: boolean;
   shortcuts: HotKey[];
@@ -195,8 +172,8 @@ class ShortcutsComponent extends React.Component<Props> {
       return (
         <div key={'shortcuts_' + idx}>
           {this.renderModifier(s)}
-          <Key>{s.key}</Key>
-          <HelpText>{s.help}</HelpText>
+          <span className="codeShortcuts__key">{s.key}</span>
+          <span className="codeShortcuts__help-text">{s.help}</span>
         </div>
       );
     });

@@ -1,0 +1,24 @@
+.codeShortcuts__key {
+  background: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  box-sizing: border-box;
+  box-shadow: 0px 2px 0px $euiColorLightestShade;
+  border-radius: 4px;
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  display: inline-block;
+  text-align: center;
+  margin: 4px;
+  line-height: 24px;
+  text-transform: uppercase;
+}
+
+.codeShortcuts__help-text {
+  font-style: normal;
+  font-weight: normal;
+  line-height: 21px;
+  font-size: 14px;
+  margin-left: 12px;
+  color: $euiColorDarkestShade;
+}
