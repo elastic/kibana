@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { scene } from './dag_start';
 import { select } from './state';
-import { getScene } from './layout_functions';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
 // so it's OK that user agent strings are not reliable; in case it's spoofed, it'll just work with a slightly
@@ -37,7 +37,7 @@ const gestureStatePrev = select(
       mouseIsDown: false,
       mouseButtonState: { buttonState: 'up', downX: null, downY: null },
     }
-)(getScene);
+)(scene);
 
 /**
  * Gestures - derived selectors for transient state

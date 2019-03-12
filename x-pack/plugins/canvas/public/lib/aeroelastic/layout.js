@@ -12,24 +12,24 @@ import {
   dragging,
   dragVector,
   gestureEnd,
+  gestureState,
   metaHeld,
   mouseButton,
   mouseDowned,
   mouseIsDown,
   optionHeld,
   shiftHeld,
-  gestureState,
 } from './gestures';
 
 import {
   applyLocalTransforms,
   cascadeProperties,
-  configuration,
   draggingShape,
   getAdHocChildrenAnnotations,
   getAlignmentGuideAnnotations,
   getAlterSnapGesture,
   getAnnotatedShapes,
+  getConfiguration,
   getConstrainedShapesWithPreexistingAnnotations,
   getCursor,
   getDirectSelect,
@@ -40,6 +40,7 @@ import {
   getGroupedSelectedShapeIds,
   getGroupedSelectedShapes,
   getGrouping,
+  getGroupingTuple,
   getHoverAnnotations,
   getHoveredShape,
   getHoveredShapes,
@@ -52,7 +53,6 @@ import {
   getRestateShapesEvent,
   getRotationAnnotations,
   getRotationTooltipAnnotation,
-  getScene,
   getSelectedPrimaryShapeIds,
   getSelectedShapeObjects,
   getSelectedShapes,
@@ -61,21 +61,20 @@ import {
   getShapes,
   getSnappedShapes,
   getTransformIntents,
-  primaryUpdate,
   resizeAnnotationsFunction,
 } from './layout_functions';
 
-/**
- * Scenegraph update based on events, gestures...
- */
+import { primaryUpdate, scene } from './dag_start';
 
-export const shapes = select(getShapes)(getScene);
+export const shapes = select(getShapes)(scene);
+
+const configuration = select(getConfiguration)(scene);
 
 const hoveredShapes = select(getHoveredShapes)(configuration, shapes, cursorPosition);
 
 const hoveredShape = select(getHoveredShape)(hoveredShapes);
 
-const draggedShape = select(draggingShape)(getScene, hoveredShape, mouseIsDown, mouseDowned);
+const draggedShape = select(draggingShape)(scene, hoveredShape, mouseIsDown, mouseDowned);
 
 export const focusedShape = select(getFocusedShape)(draggedShape, hoveredShape);
 
@@ -83,7 +82,7 @@ const alterSnapGesture = select(getAlterSnapGesture)(metaHeld);
 
 const multiselectModifier = shiftHeld; // todo abstract out keybindings
 
-const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(getScene);
+const mouseTransformGesturePrev = select(getMouseTransformGesturePrev)(scene);
 
 const mouseTransformState = select(getMouseTransformState)(
   mouseTransformGesturePrev,
@@ -100,9 +99,9 @@ const restateShapesEvent = select(getRestateShapesEvent)(primaryUpdate);
 // directSelect is an API entry point (via the `shapeSelect` action) that lets the client directly specify what thing
 const directSelect = select(getDirectSelect)(primaryUpdate);
 
-const selectedShapeObjects = select(getSelectedShapeObjects)(getScene);
+const selectedShapeObjects = select(getSelectedShapeObjects)(scene);
 
-const selectedShapesPrev = select(getSelectedShapesPrev)(getScene);
+const selectedShapesPrev = select(getSelectedShapesPrev)(scene);
 
 const selectionState = select(getSelectionState)(
   selectedShapesPrev,
@@ -151,7 +150,7 @@ const alignmentGuideAnnotations = select(getAlignmentGuideAnnotations)(
 
 const hoverAnnotations = select(getHoverAnnotations)(
   configuration,
-  hoveredShape,
+  select(h => h.slice(0, 1))(hoveredShapes), // todo remove this slicing when box select arrives
   selectedPrimaryShapeIds,
   draggedShape
 );
@@ -184,11 +183,18 @@ const rotationTooltipAnnotation = select(getRotationTooltipAnnotation)(
 
 const groupAction = select(getGroupAction)(actionEvent);
 
+const groupingTuple = select(getGroupingTuple)(
+  configuration,
+  constrainedShapesWithPreexistingAnnotations,
+  selectedShapes
+);
+
 const grouping = select(getGrouping)(
   configuration,
   constrainedShapesWithPreexistingAnnotations,
   selectedShapes,
-  groupAction
+  groupAction,
+  groupingTuple
 );
 
 const groupedSelectedShapes = select(getGroupedSelectedShapes)(grouping);

@@ -5,7 +5,7 @@
  */
 
 import { nextScene } from './layout';
-import { primaryUpdate } from './layout_functions';
+import { primaryUpdate } from './dag_start';
 import { multiply, rotateZ, translate } from './matrix';
 import { createStore, select } from './state';
 
