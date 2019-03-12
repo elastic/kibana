@@ -26,6 +26,7 @@ export interface BaseOptions {
 export interface CreateOptions extends BaseOptions {
   id?: string;
   overwrite?: boolean;
+  migrationVersion?: MigrationVersion;
   references?: SavedObjectReference[];
 }
 
@@ -82,6 +83,10 @@ export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
 }
 
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
+}
+
 export interface SavedObject<T extends SavedObjectAttributes = any> {
   id: string;
   type: string;
@@ -89,6 +94,7 @@ export interface SavedObject<T extends SavedObjectAttributes = any> {
   updated_at?: string;
   error?: {
     message: string;
+    statusCode: number;
   };
   attributes: T;
   references: SavedObjectReference[];

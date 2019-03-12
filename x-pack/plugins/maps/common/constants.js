@@ -6,6 +6,8 @@
 
 export const GIS_API_PATH = 'api/maps';
 
+export const MAP_SAVED_OBJECT_TYPE = 'map';
+
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';
 export const ES_SEARCH = 'ES_SEARCH';
@@ -15,5 +17,9 @@ export const DECIMAL_DEGREES_PRECISION = 5; // meters precision
 export const ZOOM_PRECISION = 2;
 
 export const DEFAULT_EMS_TILE_LAYER = 'road_map';
+
+export const APP_ID = 'maps';
+
+export const APP_ICON = 'gisApp';
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';

@@ -20,15 +20,14 @@ export class HeatmapLayer extends AbstractLayer {
   static createDescriptor(options) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
     heatmapLayerDescriptor.type = HeatmapLayer.type;
-    const defaultStyle = HeatmapStyle.createDescriptor('coarse');
-    heatmapLayerDescriptor.style = defaultStyle;
+    heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;
   }
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
     if (!style) {
-      const defaultStyle = HeatmapStyle.createDescriptor('coarse');
+      const defaultStyle = HeatmapStyle.createDescriptor();
       this._style = new HeatmapStyle(defaultStyle);
     }
   }
@@ -46,10 +45,19 @@ export class HeatmapLayer extends AbstractLayer {
     return metricfields[0].propertyKey;
   }
 
+
+  _getMbLayerId() {
+    return this.getId() + '_heatmap';
+  }
+
+  getMbLayerIds() {
+    return [this._getMbLayerId()];
+  }
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
-    const mbLayerId = this.getId() + '_heatmap';
+    const mbLayerId = this._getMbLayerId();
 
     if (!mbSource) {
       mbMap.addSource(this.getId(), {

@@ -17,5 +17,11 @@
  * under the License.
  */
 
-export { CoreContext } from './core_context';
-export { CoreService } from './core_service';
+/**
+ * Use * syntax so that these exports do not break when internal
+ * types are stripped.
+ *
+ * No imports in this directory can import from ./server or ./public
+ * or else builds will not work correctly for both NodeJS and Webpack.
+ */
+export * from './core_service';

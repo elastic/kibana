@@ -26,9 +26,7 @@ import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
-import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import { fetchFields } from '../lib/fetch_fields';
-import chrome from 'ui/chrome';
+import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 class VisEditor extends Component {
   constructor(props) {
@@ -39,46 +37,24 @@ class VisEditor extends Component {
       model: props.visParams,
       dirty: false,
       autoApply: true,
-      visFields: {},
+      visFields: props.visFields
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
-    this.handleUiState = this.handleUiState.bind(this, props.vis);
-    this.getConfig = this.getConfig.bind(this);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
-  getConfig(...args) {
+  get uiState() {
+    return this.props.vis.getUiState();
+  }
+
+  getConfig = (...args) => {
     return this.props.config.get(...args);
-  }
+  };
 
-  handleUiState(vis, ...args) {
-    vis.uiStateVal(...args);
-  }
-
-  fetchIndexPatternFields = async () => {
-    const { params } = this.props.vis;
-    const { visFields } = this.state;
-    const indexPatterns = extractIndexPatterns(params, visFields);
-    const fields = await fetchFields(indexPatterns);
-    this.setState((previousState) => {
-      return {
-        visFields: {
-          ...previousState.visFields,
-          ...fields,
-        }
-      };
-    });
-  }
-
-  setDefaultIndexPattern = async () => {
-    const savedObjectsClient = chrome.getSavedObjectsClient();
-    const indexPattern = await savedObjectsClient.get('index-pattern', this.getConfig('defaultIndex'));
-
-    this.handleChange({
-      default_index_pattern: indexPattern.attributes.title
-    });
-  }
+  handleUiState = (field, value) =>  {
+    this.props.vis.uiStateVal(field, value);
+  };
 
   handleChange = async (partialModel) => {
     const nextModel = { ...this.state.model, ...partialModel };
@@ -88,23 +64,26 @@ class VisEditor extends Component {
     }
     this.setState({
       model: nextModel,
-      dirty: !this.state.autoApply,
+      dirty: !this.state.autoApply
     });
-    this.fetchIndexPatternFields();
-  }
+    const { params, fields } = this.props.vis;
+    fetchIndexPatternFields(params, fields).then(visFields => {
+      this.setState({ visFields });
+    });
+  };
 
   handleCommit = () => {
     this.props.vis.updateState();
     this.setState({ dirty: false });
-  }
+  };
 
   handleAutoApplyToggle = (event) => {
     this.setState({ autoApply: event.target.checked });
-  }
+  };
 
   onDataChange = ({ visData }) => {
     this.visDataSubject.next(visData);
-  }
+  };
 
   render() {
     if (!this.props.isEditorMode) {
@@ -116,8 +95,7 @@ class VisEditor extends Component {
           dateFormat={this.props.config.get('dateFormat')}
           onBrush={this.onBrush}
           onUiState={this.handleUiState}
-          uiState={this.props.vis.getUiState()}
-          fields={this.state.visFields}
+          uiState={this.uiState}
           model={this.props.visParams}
           visData={this.props.visData}
           getConfig={this.getConfig}
@@ -141,7 +119,7 @@ class VisEditor extends Component {
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
             onUiState={this.handleUiState}
-            uiState={this.props.vis.getUiState()}
+            uiState={this.uiState}
             onBrush={this.onBrush}
             onCommit={this.handleCommit}
             onToggleAutoApply={this.handleAutoApplyToggle}
@@ -168,9 +146,7 @@ class VisEditor extends Component {
     return null;
   }
 
-  async componentDidMount() {
-    await this.setDefaultIndexPattern();
-    await this.fetchIndexPatternFields();
+  componentDidMount() {
     this.props.renderComplete();
   }
 
@@ -186,6 +162,7 @@ VisEditor.defaultProps = {
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
+  visFields: PropTypes.object,
   renderComplete: PropTypes.func,
   config: PropTypes.object,
   isEditorMode: PropTypes.bool,

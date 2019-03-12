@@ -19,15 +19,16 @@
 
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
-import { CoreContext } from '../../types';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { logger } from '../logging/__mocks__';
+import { CoreContext } from '../core_context';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { Plugin, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
+const logger = loggingServiceMock.create();
 jest.mock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),
@@ -57,10 +58,9 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-let startDeps: { elasticsearch: ElasticsearchServiceStart };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
-  startDeps = { elasticsearch: { adminClient$: {}, dataClient$: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
