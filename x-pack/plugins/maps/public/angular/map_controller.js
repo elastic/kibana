@@ -42,6 +42,7 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -251,79 +252,70 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     return { id };
   }
 
-  function buildTopNavMenu() {
-    const navItems = [{
-      key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
-        defaultMessage: `full screen`
-      }),
-      description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
-        defaultMessage: `full screen`
-      }),
-      testId: 'mapsFullScreenMode',
-      run() {
-        store.dispatch(enableFullScreen());
-      }
-    }, {
-      key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
-        defaultMessage: `inspect`
-      }),
-      description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
-        defaultMessage: `Open Inspector`
-      }),
-      testId: 'openInspectorButton',
-      run() {
-        const inspectorAdapters = getInspectorAdapters(store.getState());
-        Inspector.open(inspectorAdapters, {});
-      }
-    }];
-
-    if (uiCapabilities.maps.save) {
-      navItems.push({
-        key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
-          defaultMessage: `save`
-        }),
-        description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
-          defaultMessage: `Save map`
-        }),
-        testId: 'mapSaveButton',
-        run: async () => {
-          const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
-            const currentTitle = savedMap.title;
-            savedMap.title = newTitle;
-            savedMap.copyOnSave = newCopyOnSave;
-            const saveOptions = {
-              confirmOverwrite: false,
-              isTitleDuplicateConfirmed,
-              onTitleDuplicate,
-            };
-            return doSave(saveOptions).then(({ id, error }) => {
-              // If the save wasn't successful, put the original values back.
-              if (!id || error) {
-                savedMap.title = currentTitle;
-              }
-              return { id, error };
-            });
-          };
-
-          const saveModal = (
-            <SavedObjectSaveModal
-              onSave={onSave}
-              onClose={() => {}}
-              title={savedMap.title}
-              showCopyOnSave={savedMap.id ? true : false}
-              objectType={'map'}
-            />);
-          showSaveModal(saveModal);
-        }
-      });
-    }
-    return navItems;
-  }
-
   // Hide angular timepicer/refresh UI from top nav
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
   $scope.showDatePicker = true; // used by query-bar directive to enable timepikcer in query bar
-  $scope.topNavMenu = buildTopNavMenu();
+  $scope.topNavMenu = [{
+    key: i18n.translate('xpack.maps.mapController.fullScreenButtonLabel', {
+      defaultMessage: `full screen`
+    }),
+    description: i18n.translate('xpack.maps.mapController.fullScreenDescription', {
+      defaultMessage: `full screen`
+    }),
+    testId: 'mapsFullScreenMode',
+    run() {
+      store.dispatch(enableFullScreen());
+    }
+  }, {
+    key: i18n.translate('xpack.maps.mapController.openInspectorButtonLabel', {
+      defaultMessage: `inspect`
+    }),
+    description: i18n.translate('xpack.maps.mapController.openInspectorDescription', {
+      defaultMessage: `Open Inspector`
+    }),
+    testId: 'openInspectorButton',
+    run() {
+      const inspectorAdapters = getInspectorAdapters(store.getState());
+      Inspector.open(inspectorAdapters, {});
+    }
+  }, ...(uiCapabilities.maps.save ? [{
+    key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
+      defaultMessage: `save`
+    }),
+    description: i18n.translate('xpack.maps.mapController.saveMapDescription', {
+      defaultMessage: `Save map`
+    }),
+    testId: 'mapSaveButton',
+    run: async () => {
+      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate }) => {
+        const currentTitle = savedMap.title;
+        savedMap.title = newTitle;
+        savedMap.copyOnSave = newCopyOnSave;
+        const saveOptions = {
+          confirmOverwrite: false,
+          isTitleDuplicateConfirmed,
+          onTitleDuplicate,
+        };
+        return doSave(saveOptions).then(({ id, error }) => {
+          // If the save wasn't successful, put the original values back.
+          if (!id || error) {
+            savedMap.title = currentTitle;
+          }
+          return { id, error };
+        });
+      };
+
+      const saveModal = (
+        <SavedObjectSaveModal
+          onSave={onSave}
+          onClose={() => {}}
+          title={savedMap.title}
+          showCopyOnSave={savedMap.id ? true : false}
+          objectType={MAP_SAVED_OBJECT_TYPE}
+        />);
+      showSaveModal(saveModal);
+    }
+  }] : [])];
 });
 
