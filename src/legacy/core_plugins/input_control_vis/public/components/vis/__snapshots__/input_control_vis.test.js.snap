@@ -307,7 +307,7 @@ exports[`Renders range control 1`] = `
         }
       }
     >
-      <InjectIntl(RangeControlUi)
+      <RangeControl
         control={
           Object {
             "format": [Function],

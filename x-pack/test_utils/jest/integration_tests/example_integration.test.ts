@@ -21,8 +21,7 @@ describe('example integration test with kbn server', async () => {
     await servers.stop();
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/32795#issuecomment-471585274
-  it.skip('should have started new platform server correctly', () => {
+  it('should have started new platform server correctly', () => {
     expect(servers.kbnServer).toBeDefined();
     expect(servers.kbnServer.server).toBeDefined();
     expect(servers.kbnServer.server.plugins).toBeDefined();
