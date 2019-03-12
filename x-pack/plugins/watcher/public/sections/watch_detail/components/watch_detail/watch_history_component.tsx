@@ -8,7 +8,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import React, { useEffect, useState } from 'react';
 
-import { fetchWatchHistory } from '../../../../lib/api';
+import { fetchWatchHistory, fetchWatchHistoryDetail } from '../../../../lib/api';
 
 import { i18n } from '@kbn/i18n';
 import { WATCH_STATES } from '../../../../../common/constants';
@@ -40,6 +40,9 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [history, setWatchHistory] = useState([]);
   const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
+  const [itemDetail, setItemDetail] = useState<{ id?: string; details?: any; watchId?: string }>(
+    {}
+  );
 
   const pagination = {
     initialPageSize: 10,
@@ -54,7 +57,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       }),
       sortable: true,
       truncateText: true,
-      render: (startTime: Moment) => {
+      render: (startTime: Moment, item: any) => {
         const formattedDate = startTime.format();
         // "#/management/elasticsearch/watcher/watches/watch/{{watchHistoryTable.watch.id}}/history-item/{{item.historyItem.id}}"
         // href={`#/management/elasticsearch/watcher/watches/watch/${watchId}/history-item/${watchId}`}
@@ -62,7 +65,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
           <EuiLink
             className="indTable__link euiTableCellContent"
             data-test-subj={`watchIdColumn-${formattedDate}`}
-            onClick={() => showDetailFlyout()}
+            onClick={() => showDetailFlyout(item)}
           >
             {formattedDate}
           </EuiLink>
@@ -106,10 +109,14 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   };
 
   const hideDetailFlyout = async () => {
+    setItemDetail({});
     return setIsDetailVisible(false);
   };
 
-  const showDetailFlyout = async () => {
+  const showDetailFlyout = async (item: { id: string }) => {
+    const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
+    // console.log(watchHistoryItemDetail);
+    setItemDetail(watchHistoryItemDetail);
     return setIsDetailVisible(true);
   };
 
@@ -120,7 +127,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
 
   let flyout;
 
-  if (isDetailVisible) {
+  if (isDetailVisible && Object.keys(itemDetail).length !== 0) {
     flyout = (
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
@@ -129,10 +136,10 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2>YO</h2>
+            <h2>{itemDetail.watchId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        YO2
+        {itemDetail.id}
       </EuiFlyout>
     );
   }
