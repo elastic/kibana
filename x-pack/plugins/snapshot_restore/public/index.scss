@@ -1,0 +1,13 @@
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+// Snapshot and restore plugin styles
+
+// Prefix all styles with "ssr" to avoid conflicts.
+// Examples
+//   ssr
+//   ssr__legend
+//   ssr__legend--small
+//   ssr__legend-isLoading
+
+@import 'snapshot_restore';
