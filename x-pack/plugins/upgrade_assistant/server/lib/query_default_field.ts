@@ -38,10 +38,8 @@ export const addDefaultField = async (
   // Get the mapping and generate the default_field based on `fieldTypes`
   const mappingResp = await callWithRequest(request, 'indices.getMapping', {
     index: indexName,
-    include_type_name: true,
   });
-  const typeName = Object.getOwnPropertyNames(mappingResp[indexName].mappings)[0];
-  const mapping = mappingResp[indexName].mappings[typeName].properties as MappingProperties;
+  const mapping = mappingResp[indexName].mappings.properties as MappingProperties;
   const generatedDefaultFields = new Set(generateDefaultFields(mapping, fieldTypes));
 
   // Update the setting with the generated default_field

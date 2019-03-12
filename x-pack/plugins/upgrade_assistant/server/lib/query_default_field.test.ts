@@ -42,7 +42,7 @@ Array [
 describe('fixMetricbeatIndex', () => {
   const mockMappings = {
     'metricbeat-1': {
-      mappings: { _doc: { properties: { field1: { type: 'text' }, field2: { type: 'float' } } } },
+      mappings: { properties: { field1: { type: 'text' }, field2: { type: 'float' } } },
     },
   };
   const mockSettings = {
