@@ -62,7 +62,7 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
-  const esFrom = process.env.TEST_ES_FROM || 'source';
+  const esFrom = process.env.TEST_ES_FROM || 'snapshot';
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors

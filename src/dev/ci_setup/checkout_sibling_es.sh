@@ -64,13 +64,15 @@ function checkout_sibling {
 
     function checkout_clone_target {
       pick_clone_target
-      if [[ $cloneBranch = "$KIBANA_PKG_BRANCH"  && $cloneAuthor = "elastic" ]]; then
-        export TEST_ES_FROM=snapshot
+
+      if [[ "$cloneAuthor/$cloneBranch" != "elastic/$KIBANA_PKG_BRANCH" ]]; then
+        echo " -> Setting TEST_ES_FROM=source so that ES in tests will be built from $cloneAuthor/$cloneBranch"
+        export TEST_ES_FROM=source
       fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
       git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
-      echo " -> checked out ${project} revision: $(git -C ${targetDir} rev-parse HEAD)"
+      echo " -> checked out ${project} revision: $(git -C "${targetDir}" rev-parse HEAD)"
       echo
     }
 
@@ -86,7 +88,7 @@ function checkout_sibling {
 }
 
 checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
+export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
 
 # Set the JAVA_HOME based on the Java property file in the ES repo
 # This assumes the naming convention used on CI (ex: ~/.java/java10)

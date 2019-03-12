@@ -35,7 +35,7 @@ export const esTestConfig = new class EsTestConfig {
   }
 
   getBuildFrom() {
-    return process.env.TEST_ES_FROM || 'snapshot';
+    return process.env.TEST_ES_FROM || 'source';
   }
 
   getUrlParts() {
