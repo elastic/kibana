@@ -262,7 +262,7 @@ export const mocksSource = [
                 aggregatable: true,
                 category: 'destination',
                 description:
-                  'IP address of the destination.\nCan be one or multiple IPv4 or IPv6 addresses.',
+                  'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
                 example: '',
                 indexes: ['auditbeat', 'filebeat', 'packetbeat'],
                 name: 'destination.ip',
@@ -283,7 +283,7 @@ export const mocksSource = [
                 aggregatable: true,
                 category: 'source',
                 description:
-                  'IP address of the source.\nCan be one or multiple IPv4 or IPv6 addresses.',
+                  'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
                 example: '',
                 indexes: ['auditbeat', 'filebeat', 'packetbeat'],
                 name: 'source.ip',
@@ -573,7 +573,7 @@ export const mockBrowserFields: BrowserFields = {
         aggregatable: true,
         category: 'destination',
         description:
-          'IP address of the destination.\nCan be one or multiple IPv4 or IPv6 addresses.',
+          'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
         example: '',
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.ip',
@@ -597,7 +597,7 @@ export const mockBrowserFields: BrowserFields = {
       'source.ip': {
         aggregatable: true,
         category: 'source',
-        description: 'IP address of the source.\nCan be one or multiple IPv4 or IPv6 addresses.',
+        description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
         example: '',
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'source.ip',

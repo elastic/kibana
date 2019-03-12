@@ -9,4 +9,5 @@ export * from './header';
 export * from './index_pattern';
 export * from './kibana_config';
 export * from './mock_ecs';
+export * from './mock_detail_item';
 export * from './test_providers';

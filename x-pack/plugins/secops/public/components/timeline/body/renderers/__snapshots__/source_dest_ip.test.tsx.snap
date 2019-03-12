@@ -411,8 +411,7 @@ exports[`SuricataDestIp rendering it renders the default SuricataDestIp 1`] = `
             "destination.ip": Object {
               "aggregatable": true,
               "category": "destination",
-              "description": "IP address of the destination.
-Can be one or multiple IPv4 or IPv6 addresses.",
+              "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
               "example": "",
               "indexes": Array [
                 "auditbeat",
@@ -444,8 +443,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
             "source.ip": Object {
               "aggregatable": true,
               "category": "source",
-              "description": "IP address of the source.
-Can be one or multiple IPv4 or IPv6 addresses.",
+              "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
               "example": "",
               "indexes": Array [
                 "auditbeat",

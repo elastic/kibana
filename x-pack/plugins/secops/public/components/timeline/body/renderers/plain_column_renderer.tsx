@@ -73,7 +73,9 @@ export const plainColumnRenderer: ColumnRenderer = {
   },
 };
 
-const parseQueryValue = (value: string | number | object | undefined | null): string | number => {
+export const parseQueryValue = (
+  value: string | number | object | undefined | null
+): string | number => {
   if (isNil(value)) {
     return '';
   } else if (isObject(value)) {
@@ -84,7 +86,7 @@ const parseQueryValue = (value: string | number | object | undefined | null): st
   return value!.toString();
 };
 
-const parseValue = (
+export const parseValue = (
   value: string | number | object | undefined | null
 ): string | number | undefined | null => {
   if (isObject(value)) {

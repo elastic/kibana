@@ -94,7 +94,7 @@ type StatefulBodyComponentProps = OwnProps & ReduxProps & DispatchProps;
 class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentProps> {
   public componentDidUpdate(prevProps: StatefulBodyComponentProps) {
     const { columnHeaders, browserFields } = this.props;
-    const newHeaders = this.getColumnHeaders(
+    const newHeaders = getColumnHeaders(
       isEmpty(columnHeaders) ? defaultHeaders : columnHeaders,
       browserFields
     );
@@ -151,16 +151,6 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
     );
   }
 
-  private getColumnHeaders(headers: ColumnHeader[], browserFields: BrowserFields): ColumnHeader[] {
-    return headers.map(header => {
-      const splitHeader = header.id.split('.');
-      if (splitHeader.length > 1) {
-        return { ...header, ...get([splitHeader[0], 'fields', header.id], browserFields) };
-      }
-      return { ...header, ...get(['base', 'fields', header.id], browserFields) };
-    });
-  }
-
   private onAddNoteToEvent: AddNoteToEvent = ({
     eventId,
     noteId,
@@ -192,6 +182,19 @@ class StatefulBodyComponent extends React.PureComponent<StatefulBodyComponentPro
   private onUpdateColumns: OnUpdateColumns = columns =>
     this.props.updateColumns!({ id: this.props.id, columns });
 }
+
+export const getColumnHeaders = (
+  headers: ColumnHeader[],
+  browserFields: BrowserFields
+): ColumnHeader[] => {
+  return headers.map(header => {
+    const splitHeader = header.id.split('.');
+    if (splitHeader.length > 1) {
+      return { ...header, ...get([splitHeader[0], 'fields', header.id], browserFields) };
+    }
+    return { ...header, ...get(['base', 'fields', header.id], browserFields) };
+  });
+};
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();

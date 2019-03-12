@@ -31,7 +31,7 @@ export const JsonView = pure<Props>(({ data }) => (
       mode="javascript"
       setOptions={{ fontSize: '12px' }}
       value={JSON.stringify(
-        buildBackJsonView(data),
+        buildJsonView(data),
         omitTypenameAndEmpty,
         2 // indent level
       )}
@@ -41,5 +41,5 @@ export const JsonView = pure<Props>(({ data }) => (
   </JsonEditor>
 ));
 
-const buildBackJsonView = (data: DetailItem[]) =>
+export const buildJsonView = (data: DetailItem[]) =>
   data.reduce((accumulator, item) => set(item.field, item.value, accumulator), {});
