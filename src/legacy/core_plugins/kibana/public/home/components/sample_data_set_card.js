@@ -33,7 +33,6 @@ export const UNINSTALLED_STATUS = 'not_installed';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
@@ -53,33 +52,6 @@ export class SampleDataSetCard extends React.Component {
 
   uninstall = () => {
     this.props.onUninstall(this.props.id);
-  }
-
-  renderViewDataButton = () => {
-    const dashboardPath = chrome.addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
-    if (this.props.appLinks.length === 0) {
-      return (
-        <EuiButton
-          href={dashboardPath}
-          data-test-subj={`launchSampleDataSet${this.props.id}`}
-          aria-label={i18n.translate('kbn.home.sampleDataSetCard.viewDataButtonAriaLabel', {
-            defaultMessage: 'View {datasetName}',
-            values: {
-              datasetName: this.props.name,
-            }
-          })}
-        >
-          <FormattedMessage
-            id="kbn.home.sampleDataSetCard.viewDataButtonLabel"
-            defaultMessage="View data"
-          />
-        </EuiButton>
-      );
-    }
-
-    return (
-      <div>now what</div>
-    );
   }
 
   renderBtn = () => {
