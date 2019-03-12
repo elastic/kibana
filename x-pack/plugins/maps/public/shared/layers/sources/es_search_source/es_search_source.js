@@ -186,8 +186,9 @@ export class ESSearchSource extends AbstractESSource {
       if (!field) {
         return;
       }
-
-      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+      const converter = field.format.getConverterFor('html');
+      filteredProperties[propertyName] = (converter) ? converter(filteredProperties[propertyName]) :
+        field.format.convert(filteredProperties[propertyName]);
     });
 
     return filteredProperties;
