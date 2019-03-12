@@ -29,9 +29,6 @@ export class MBMapContainer extends React.Component {
       closeButton: false,
       closeOnClick: false,
     });
-    this._mbPopup.on('close', () => {
-      this.props.setTooltipState(null);
-    });
   }
 
   _onTooltipClose = () => {
