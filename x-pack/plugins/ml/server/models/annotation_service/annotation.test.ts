@@ -81,7 +81,7 @@ describe('annotation_service', () => {
         message: 'mock error message',
       };
 
-      const callWithRequestSpyError = jest.fn(() => {
+      const callWithRequestSpyError: jest.Mock = jest.fn(() => {
         return Promise.resolve(mockEsError);
       });
 
