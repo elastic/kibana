@@ -123,6 +123,7 @@ exports[`AnnotationsTable Minimal initialization without props. 1`] = `
 <EuiCallOut
   color="primary"
   iconType="iInCircle"
+  role="alert"
   size="m"
   title={
     <FormattedMessage
