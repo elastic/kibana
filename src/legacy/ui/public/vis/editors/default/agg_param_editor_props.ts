@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import 'ngreact';
-import { uiModules } from '../../modules';
-import { StringSelect } from './string';
-import { wrapInI18nContext } from 'ui/i18n';
+import { AggParam } from '../../../agg_types';
+import { AggConfig } from '../../agg_config';
 
-uiModules
-  .get('app/kibana', ['react'])
-  .directive('stringSelect', reactDirective => reactDirective(wrapInI18nContext(StringSelect), [
-    'onParamsChange',
-    'value',
-    ['agg', { watchDepth: 'collection' }],
-    ['aggParam', { watchDepth: 'reference' }]
-  ]));
+interface AggParamEditorProps<T> {
+  agg: AggConfig;
+  aggParam: AggParam;
+  value: T;
+  setValue(value: T): void;
+}
+
+export { AggParamEditorProps };
