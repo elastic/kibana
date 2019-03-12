@@ -21,7 +21,7 @@ import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
-import React, { useState } from 'react';
+import React from 'react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
 
