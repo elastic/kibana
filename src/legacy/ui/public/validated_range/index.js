@@ -17,21 +17,4 @@
  * under the License.
  */
 
-import _ from 'lodash';
-const longString = Array(200).join('_');
-
-export function getFakeRowVals(type, id, mapping) {
-  return _.mapValues(mapping, function (f, c) {
-    return c + '_' + type + '_' + id + longString;
-  });
-}
-
-export function getFakeRow(id, mapping) {
-  return {
-    _id: id,
-    _index: 'test',
-    _source: getFakeRowVals('original', id, mapping),
-    _type: 'doc',
-    sort: [id],
-  };
-}
+export { ValidatedDualRange } from './validated_dual_range';
