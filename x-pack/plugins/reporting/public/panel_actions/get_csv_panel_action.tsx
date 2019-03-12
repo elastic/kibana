@@ -6,11 +6,11 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
+import { SearchEmbeddable } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
-import { SearchEmbeddable } from '../../../../../src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
 
 const API_BASE_URL = '/api/reporting/v1/generate/immediate/csv/saved-object/';
 

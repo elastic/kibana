@@ -64,10 +64,7 @@ export async function kfetch(
       return window.fetch(fullUrl, restOptions).then(async res => {
         const body = parseJson ? await getBodyAsJson(res) : null;
         if (res.ok) {
-          if (parseJson) {
-            return body;
-          }
-          return res;
+          return parseJson ? body : res;
         }
 
         throw new KFetchError(res, body);
