@@ -21,7 +21,6 @@ export const aeroelastic = {
     const updateScene = state.select((nextScene, primaryUpdate) => ({
       primaryUpdate,
       currentScene: nextScene,
-      configuration: nextScene.configuration,
     }))(layout.nextScene, layout.primaryUpdate);
 
     stores.get(page).setUpdater(updateScene);
