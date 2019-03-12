@@ -74,51 +74,61 @@ export class JavaLauncher implements ILanguageServerLauncher {
     });
   }
 
-  private async spawnJava(installationPath: string, port: number, log: Logger) {
-    const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
-      cwd: installationPath,
-    });
-    if (!launchersFound.length) {
-      log.error('cannot find executable jar for JavaLsp');
-    }
-
+  private async getJavaHome(installationPath: string, log: Logger) {
     function findJDK(platform: string) {
       const JDKFound = glob.sync(`**/jdks/*${platform}/jdk-*`, {
         cwd: installationPath,
       });
       if (!JDKFound.length) {
-        log.error('cannot find executable JDK');
+        log.error('Cannot find Java Home in Bundle installation for ' + platform);
+        return undefined;
       }
       return path.resolve(installationPath, JDKFound[0]);
     }
 
-    let bundledJavaHome = `${findJDK('osx')}/Contents/Home`;
-    let javaPath = 'java';
-    let javaHomePath = '';
+    let bundledJavaHome;
+
     // detect platform
-    switch (getOsPlatform()) {
+    const osPlatform = getOsPlatform();
+    switch (osPlatform) {
       case 'darwin':
+        bundledJavaHome = `${findJDK('osx')}/Contents/Home`;
         break;
       case 'win32':
         bundledJavaHome = `${findJDK('windows')}`;
         break;
+      case 'freebsd':
       case 'linux':
         bundledJavaHome = `${findJDK('linux')}`;
         break;
       default:
-        log.error('Unable to find platform for this os');
+        log.error('No Bundle JDK defined ' + osPlatform);
     }
 
     if (this.getSystemJavaHome()) {
-      javaHomePath = this.getSystemJavaHome();
-      if (!(await this.checkJavaVersion(javaHomePath))) {
-        javaHomePath = '';
+      const javaHomePath = this.getSystemJavaHome();
+      if (await this.checkJavaVersion(javaHomePath)) {
+        return javaHomePath;
       }
     }
-    if (javaHomePath === '') {
-      javaHomePath = bundledJavaHome;
+
+    return bundledJavaHome;
+  }
+
+  private async spawnJava(installationPath: string, port: number, log: Logger) {
+    const launchersFound = glob.sync('**/plugins/org.eclipse.equinox.launcher_*.jar', {
+      cwd: installationPath,
+    });
+    if (!launchersFound.length) {
+      throw new Error('Cannot find language server jar file');
     }
-    javaPath = path.resolve(
+
+    const javaHomePath = await this.getJavaHome(installationPath, log);
+    if (!javaHomePath) {
+      throw new Error('Cannot find Java Home');
+    }
+
+    const javaPath = path.resolve(
       javaHomePath,
       'bin',
       process.platform === 'win32' ? 'java.exe' : 'java'
