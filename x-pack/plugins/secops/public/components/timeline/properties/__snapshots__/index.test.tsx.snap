@@ -79,6 +79,7 @@ exports[`Properties renders correctly against snapshot 1`] = `
             describedByIds={Array []}
             fullWidth={false}
             hasEmptyLabelSpace={false}
+            labelType="label"
           >
             <pure(Component)
               createTimeline={[MockFunction]}
@@ -90,6 +91,7 @@ exports[`Properties renders correctly against snapshot 1`] = `
             describedByIds={Array []}
             fullWidth={false}
             hasEmptyLabelSpace={false}
+            labelType="label"
           >
             <pure(Component)
               isLive={false}
