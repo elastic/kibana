@@ -16,11 +16,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
-  reindexIndexName?: string;
+  indexName?: string;
+  reindex?: boolean;
+  needsDefaultFields?: boolean;
   docUrl?: string;
   headline?: string;
   healthColor?: string;
@@ -33,7 +36,9 @@ interface DeprecationCellProps {
 export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  reindexIndexName,
+  indexName,
+  reindex,
+  needsDefaultFields,
   docUrl,
   items = [],
   children,
@@ -75,9 +80,15 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
         ))}
       </EuiFlexItem>
 
-      {reindexIndexName && (
+      {reindex && (
         <EuiFlexItem grow={false}>
-          <ReindexButton indexName={reindexIndexName} />
+          <ReindexButton indexName={indexName!} />
+        </EuiFlexItem>
+      )}
+
+      {needsDefaultFields && (
+        <EuiFlexItem grow={false}>
+          <FixDefaultFieldsButton indexName={indexName!} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
