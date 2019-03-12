@@ -27,6 +27,7 @@ import { AggConfig } from 'ui/vis/agg_config';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
+  aggType: any;
   aggHelpLink: string;
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
@@ -44,16 +45,17 @@ function DefaultEditorAggSelect({
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
   // we added default value for agg and aggTypeOptions. It can be removed after 'agg_params' is converted to React
   agg = {},
+  aggType = {},
   aggTypeOptions = [],
   aggHelpLink,
   isSelectValid,
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
-  const initOptions: ComboBoxGroupedOption[] = agg.type
-    ? [{ label: agg.type.title, value: agg.type }]
+  const selectedOptions: ComboBoxGroupedOption[] = aggType
+    ? [{ label: aggType.title, value: aggType }]
     : [];
-  const [selectedOptions, setSelectedOptions] = useState(initOptions);
+
   const label = isSubAggregation ? (
     <FormattedMessage
       id="common.ui.vis.defaultEditor.aggSelect.subAggregationLabel"
@@ -82,7 +84,6 @@ function DefaultEditorAggSelect({
   );
 
   const onChange = (options: ComboBoxGroupedOption[]) => {
-    setSelectedOptions(options);
     onChangeAggType(agg, get(options, '0.value'));
   };
 

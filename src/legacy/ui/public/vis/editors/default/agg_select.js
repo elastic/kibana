@@ -30,5 +30,6 @@ uiModules
     'onChangeAggType',
     'isSelectValid',
     ['agg', { watchDepth: 'collection' }],
+    ['aggType', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }]
   ]));
