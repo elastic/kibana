@@ -78,6 +78,47 @@ export class AbstractESSource extends AbstractVectorSource {
     });
   }
 
+
+  async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
+    let indexPattern;
+    try {
+      indexPattern = await this._getIndexPattern();
+    } catch(error) {
+      console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
+      return properties;
+    }
+    const metricFields = this.getMetricFields();
+    const tooltipProps = {};
+    metricFields.forEach((field) => {
+      let value;
+      for (const key in properties) {
+        if (properties.hasOwnProperty(key)) {
+          if (field.propertyKey === key) {
+            if (field.type === 'count') {
+              value = properties[key];
+            } else {
+              const indexPatternField = indexPattern.fields.byName[field.field];
+              if (indexPatternField) {
+                const htmlConverter = indexPatternField.format.getConverterFor('html');
+                value = (htmlConverter) ? htmlConverter(properties[key]) :
+                  field.format.convert(properties[key]);
+              } else {
+                value = properties[key];
+              }
+            }
+            break;
+          }
+        }
+      }
+      if (typeof value === 'undefined') {
+        value = '-';
+      }
+      tooltipProps[field.propertyLabel] = value;
+    });
+    return tooltipProps;
+  }
+
+
   async _runEsQuery(layerName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
