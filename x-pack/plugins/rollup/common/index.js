@@ -14,3 +14,5 @@ export const UA_ROLLUP_JOB_CREATE = 'create';
 export const USER_ACTIONS = [
   UA_ROLLUP_JOB_CREATE,
 ];
+
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';

@@ -36,7 +36,7 @@ export interface RequestHandlerParams {
   uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters?: Adapters;
-  isHierarchical?: boolean;
+  metricsAtAllLevels?: boolean;
   visParams?: any;
 }
 
