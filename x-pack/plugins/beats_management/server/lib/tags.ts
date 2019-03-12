@@ -18,13 +18,22 @@ export class CMTagsDomain {
     private readonly beatsAdabter: CMBeatsAdapter
   ) {}
 
-  public async getAll(user: FrameworkUser, ESQuery?: any, page: number = 0, size: number = 10) {
+  public async getAll(user: FrameworkUser, ESQuery?: any, page: number = 0, size: number = 25) {
     const tags = await this.adapter.getAll(user, ESQuery, page, size);
     return tags;
   }
 
-  public async getWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
-    const tags = await this.adapter.getTagsWithIds(user, tagIds);
+  public async getWithIds(
+    user: FrameworkUser,
+    tagIds: string[],
+    page: number = 0,
+    size: number = 25
+  ): Promise<{
+    list: BeatTag[];
+    page: number;
+    total: number;
+  }> {
+    const tags = await this.adapter.getTagsWithIds(user, tagIds, page, size);
     return tags;
   }
 
@@ -38,9 +47,9 @@ export class CMTagsDomain {
   }
 
   public async getNonConflictingTags(user: FrameworkUser, existingTagIds: string[]) {
-    const tags = await this.adapter.getTagsWithIds(user, existingTagIds);
+    const tags = await this.adapter.getTagsWithIds(user, existingTagIds, 0, 10000);
     const existingUniqueBlockTypes = uniq(
-      tags.reduce(
+      tags.list.reduce(
         (existingUniqueTypes, tag) => {
           if (tag.hasConfigurationBlocksTypes) {
             existingUniqueTypes = existingUniqueTypes.concat(tag.hasConfigurationBlocksTypes);

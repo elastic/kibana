@@ -35,8 +35,8 @@ export class ConfigurationBlocksLib {
   }
 
   public async save(user: FrameworkUser, block: ConfigurationBlock) {
-    const tags = await this.tags.getWithIds(user, [block.tag]);
-    const tag = tags[0];
+    const tags = await this.tags.getWithIds(user, [block.tag], 0, 1);
+    const tag = tags.list[0];
 
     if (!tag) {
       return {

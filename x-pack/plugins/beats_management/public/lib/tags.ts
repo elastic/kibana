@@ -24,7 +24,12 @@ export class TagsLib {
     return await this.adapter.delete([...new Set(tagIds)]);
   }
 
-  // FIXME: This needs to be paginated https://github.com/elastic/kibana/issues/26022
+  /** Get an array of beats that have a given tag id assigned to it */
+  public getTagsForBeat = async (beatId: string, page: number, size?: number) => {
+    const tags = await this.adapter.getTagsForBeat(beatId, page, size);
+    return tags;
+  };
+
   public async getAll(kuery: string | undefined, page: number, size?: number) {
     let ESQuery;
     if (kuery) {

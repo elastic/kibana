@@ -9,6 +9,7 @@ import { ReturnTypeList } from '../../../../common/return_types';
 export interface CMTagsAdapter {
   getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;
   delete(tagIds: string[]): Promise<boolean>;
+  getTagsForBeat(beatId: string, page: number, size?: number): Promise<ReturnTypeList<BeatTag>>;
   getAll(
     ESQuery: string | undefined,
     page: number,

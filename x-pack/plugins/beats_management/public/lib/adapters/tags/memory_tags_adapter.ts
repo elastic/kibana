@@ -23,6 +23,15 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
+  public async getTagsForBeat(BeatId?: string) {
+    return {
+      success: true,
+      list: this.tagsDB,
+      page: -1,
+      total: this.tagsDB.length,
+    };
+  }
+
   public async getAll(ESQuery?: string) {
     return {
       success: true,

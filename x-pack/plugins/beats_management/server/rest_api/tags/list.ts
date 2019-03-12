@@ -5,7 +5,10 @@
  */
 
 import * as Joi from 'joi';
-import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
+import {
+  BaseReturnType,
+  ReturnTypeList,
+} from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
@@ -13,7 +16,7 @@ import { CMServerLibs } from '../../lib/types';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
-  path: '/api/beats/tags/all/{page}/{size?}',
+  path: '/api/beats/tags/{beatId}/{page}/{size?}',
   requiredRoles: ['beats_admin'],
   licenseRequired: REQUIRED_LICENSES,
   validate: {
@@ -26,9 +29,28 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
+  handler: async (request: FrameworkRequest): Promise<BaseReturnType | ReturnTypeList<BeatTag>> => {
+    const beatIdOrAll = request.params.beatId;
     const page = request.params.page;
     const size = request.params.size;
+
+    if (beatIdOrAll !== 'all') {
+      const beat = await libs.beats.getById(request.user, beatIdOrAll);
+      if (!beat) {
+        return {
+          success: false,
+          error: {
+            message: 'No beat with that ID exists',
+            code: 400,
+          },
+        };
+      }
+
+      return {
+        success: true,
+        ...(await libs.tags.getWithIds(request.user, beat.tags, page, size)),
+      };
+    }
     return {
       success: true,
       ...(await libs.tags.getAll(

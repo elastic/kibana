@@ -46,18 +46,18 @@ export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
       let loadedTags;
 
       if (props.forBeat) {
-        const beat = await libs.beats.get(props.forBeat);
-        if (beat) {
-          loadedTags = await libs.tags.getTagsWithIds(beat.tags);
-        } else {
-          loadedTags = {
-            list: [],
-            total: 0,
-            page: props.options.page,
-          };
-        }
+        loadedTags = await libs.tags.getTagsForBeat(
+          props.forBeat,
+          props.options.page || 0,
+          props.options.size || 25
+        );
+        loadedTags = {
+          list: [],
+          total: 0,
+          page: props.options.page,
+        };
       } else {
-        loadedTags = await libs.beats.getAll(
+        loadedTags = await libs.tags.getAll(
           props.options.searchInput,
           props.options.page || 0,
           props.options.size || 25

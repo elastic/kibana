@@ -28,6 +28,24 @@ export class RestTagsAdapter implements CMTagsAdapter {
     }
   }
 
+  public async getTagsForBeat(beatId: string, page: number, size?: number) {
+    try {
+      return await this.REST.get<ReturnTypeList<BeatTag>>(
+        `/api/beats/tags/${beatId}/${page}/${size || 25}`
+      );
+    } catch (e) {
+      return {
+        success: false,
+        error: {
+          message: e.message,
+        },
+        list: [],
+        page: 0,
+        total: 0,
+      };
+    }
+  }
+
   public async getAll(ESQuery: string, page: number, size?: number) {
     try {
       return await this.REST.get<ReturnTypeList<BeatTag>>(

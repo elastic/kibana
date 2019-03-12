@@ -22,7 +22,7 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     user: FrameworkUser,
     ESQuery?: any,
     page: number = 0,
-    size: number = 100
+    size: number = 25
   ): Promise<{
     list: BeatTag[];
     page: number;
@@ -126,29 +126,43 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
     return true;
   }
 
-  public async getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]> {
-    if (tagIds.length === 0) {
-      return [];
-    }
+  public async getTagsWithIds(
+    user: FrameworkUser,
+    tagIds: string[],
+    page: number = 0,
+    size: number = 25
+  ): Promise<{
+    list: BeatTag[];
+    page: number;
+    total: number;
+  }> {
     const ids = tagIds.map(tag => `tag:${tag}`);
 
     const params = {
       ignore: [404],
-      _source: true,
-      body: {
-        ids,
-      },
       index: INDEX_NAMES.BEATS,
+      body: {
+        from: page === -1 ? undefined : page * size,
+        size,
+        query: {
+          terms: { 'tag.id': ids },
+        },
+      },
     };
-    const response = await this.database.mget(user, params);
 
-    return get(response, 'docs', [])
-      .filter((b: any) => b.found)
-      .map((b: any) => ({
-        hasConfigurationBlocksTypes: [],
-        ...b._source.tag,
-        id: b._id.replace('tag:', ''),
-      }));
+    const response = await this.database.search(user, params);
+
+    const tags = get<BeatTag[]>(response, 'hits.hits', []);
+
+    return {
+      page,
+      total: response.hits ? ((response.hits.total as any).value as number) : 0,
+      list: tags.map((tag: any) => ({
+        hasConfigurationBlocksTypes: [] as string[],
+        ...tag._source.tag,
+        id: tag._id.replace('tag:', ''),
+      })) as BeatTag[],
+    };
   }
 
   public async upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string> {

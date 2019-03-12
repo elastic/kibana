@@ -18,7 +18,16 @@ export interface CMTagsAdapter {
     total: number;
   }>;
   delete(user: FrameworkUser, tagIds: string[]): Promise<boolean>;
-  getTagsWithIds(user: FrameworkUser, tagIds: string[]): Promise<BeatTag[]>;
+  getTagsWithIds(
+    user: FrameworkUser,
+    tagIds: string[],
+    page?: number,
+    size?: number
+  ): Promise<{
+    list: BeatTag[];
+    page: number;
+    total: number;
+  }>;
   upsertTag(user: FrameworkUser, tag: BeatTag): Promise<string>;
   getWithoutConfigTypes(user: FrameworkUser, blockTypes: string[]): Promise<BeatTag[]>;
 }

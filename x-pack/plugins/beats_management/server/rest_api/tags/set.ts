@@ -39,9 +39,9 @@ export const createSetTagRoute = (libs: CMServerLibs) => ({
     const config = { ...defaultConfig, ...get(request, 'payload', {}) };
 
     const id = await libs.tags.upsertTag(request.user, config);
-    const tag = await libs.tags.getWithIds(request.user, [id]);
+    const tag = await libs.tags.getWithIds(request.user, [id], 0, 1);
 
     // TODO the action needs to be surfaced
-    return { success: true, item: tag[0], action: 'created' };
+    return { success: true, item: tag.list[0], action: 'created' };
   },
 });

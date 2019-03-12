@@ -143,11 +143,11 @@ export class CMBeatsDomain {
     };
 
     const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getWithIds(user, tagIds);
+    const tags = await this.tags.getWithIds(user, tagIds, 0, 10000);
 
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
-    const nonExistentTags = await findNonExistentItems(tags, tagIds);
+    const nonExistentTags = await findNonExistentItems(tags.list, tagIds);
 
     addNonExistentItemToResponse(
       response,
@@ -184,10 +184,10 @@ export class CMBeatsDomain {
       assignments: assignments.map(() => ({ status: null })),
     };
     const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getWithIds(user, tagIds);
+    const tags = await this.tags.getWithIds(user, tagIds, 0, 10000);
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
-    const nonExistentTags = findNonExistentItems(tags, tagIds);
+    const nonExistentTags = findNonExistentItems(tags.list, tagIds);
 
     // FIXME break out back into route / function response
     // FIXME causes function to error if a beat or tag does not exist

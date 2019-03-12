@@ -19,11 +19,10 @@ export const createGetTagsWithIdsRoute = (libs: CMServerLibs) => ({
     const tagIdString: string = request.params.tagIds;
     const tagIds = tagIdString.split(',').filter((id: string) => id.length > 0);
 
-    let tags: BeatTag[];
-    tags = await libs.tags.getWithIds(request.user, tagIds);
+    const tags = await libs.tags.getWithIds(request.user, tagIds, 0, 10000);
 
     return {
-      items: tags,
+      items: tags.list,
       success: true,
     };
   },

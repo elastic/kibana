@@ -28,7 +28,12 @@ export class MemoryTagsAdapter implements CMTagsAdapter {
     return true;
   }
   public async getTagsWithIds(user: FrameworkUser, tagIds: string[]) {
-    return this.tagsDB.filter(tag => tagIds.includes(tag.id));
+    const tags = this.tagsDB.filter(tag => tagIds.includes(tag.id));
+    return {
+      list: tags,
+      page: -1,
+      total: tags.length,
+    };
   }
 
   public async upsertTag(user: FrameworkUser, tag: BeatTag) {
