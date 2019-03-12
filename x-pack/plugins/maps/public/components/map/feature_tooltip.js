@@ -14,12 +14,10 @@ export class FeatureTooltip extends React.Component {
 
   _renderProperties() {
     return Object.keys(this.props.properties).map(propertyName => {
+      const content = `<strong>${propertyName}</strong>` + ' ' + this.props.properties[propertyName];
       return (
-        <div key={propertyName}>
-          <strong>{propertyName}</strong>
-          {' '}
-          {this.props.properties[propertyName]}
-        </div>
+        // eslint-disable-next-line react/no-danger
+        <div key={propertyName} dangerouslySetInnerHTML={{ __html: content }} />
       );
     });
   }
