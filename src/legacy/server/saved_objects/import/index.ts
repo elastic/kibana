@@ -17,10 +17,5 @@
  * under the License.
  */
 
-import { uiRegistry } from './_registry';
-
-export const VisTypesRegistryProvider = uiRegistry({
-  name: 'visTypes',
-  index: ['name'],
-  order: ['title']
-});
+export { importSavedObjects } from './import_saved_objects';
+export { resolveImportConflicts } from './resolve_import_conflicts';
