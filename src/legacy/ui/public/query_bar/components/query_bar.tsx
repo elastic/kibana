@@ -90,6 +90,7 @@ interface Props {
   store: Storage;
   intl: InjectedIntl;
   prepend?: any;
+  showUpdateButton?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -181,6 +182,7 @@ export class QueryBarUI extends Component<Props, State> {
     dateRangeFrom: _.get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: _.get(this.props, 'dateRangeTo', 'now'),
     isDateRangeInvalid: false,
+    showUpdateButton: _.get(this.props, 'showUpdateButton', true),
   };
 
   public updateSuggestions = debounce(async () => {
@@ -634,6 +636,10 @@ export class QueryBarUI extends Component<Props, State> {
   }
 
   private renderUpdateButton() {
+    if (!this.state.showUpdateButton) {
+      return null;
+    }
+
     const button = (
       <EuiSuperUpdateButton
         needsUpdate={this.isDirty()}

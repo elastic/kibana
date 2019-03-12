@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
+import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
@@ -95,7 +96,7 @@ export class LayerPanel extends React.Component {
     return (
       <Fragment>
         <EuiPanel>
-
+          <FilterEditor/>
         </EuiPanel>
         <EuiSpacer size="s" />
       </Fragment>
@@ -192,6 +193,7 @@ export class LayerPanel extends React.Component {
         <EuiFlyoutBody className="mapLayerPanel__body">
           <SettingsPanel/>
           <EuiSpacer size="s" />
+          {this._renderFilterSection()}
           {this._renderJoinSection()}
           <StyleTabs layer={selectedLayer}/>
         </EuiFlyoutBody>
