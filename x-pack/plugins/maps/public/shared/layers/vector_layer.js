@@ -428,7 +428,7 @@ export class VectorLayer extends AbstractLayer {
 
   _setMbLinePolygonProperties(mbMap) {
     const sourceId = this.getId();
-    const fillLayerId = this._getMbFillLayerId();
+    const fillLayerId = this._getMbPolygonLayerId();
     const lineLayerId = this._getMbLineLayerId();
     if (!mbMap.getLayer(fillLayerId)) {
       mbMap.addLayer({
@@ -496,12 +496,12 @@ export class VectorLayer extends AbstractLayer {
     return this.getId() + '_line';
   }
 
-  _getMbFillLayerId() {
+  _getMbPolygonLayerId() {
     return this.getId() + '_fill';
   }
 
   getMbLayerIds() {
-    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbFillLayerId()];
+    return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
 
   async getPropertiesForTooltip(properties) {
