@@ -5,6 +5,7 @@
  */
 
 import { EuiButtonGroup } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import {
   InfraMetricInput,
@@ -14,29 +15,35 @@ import {
 } from '../../graphql/types';
 
 interface Props {
+  intl: InjectedIntl;
   nodeType: InfraNodeType;
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraPathInput[]) => void;
   changeMetric: (metric: InfraMetricInput) => void;
 }
 
-const nodeOptions = [
-  {
-    id: InfraNodeType.host,
-    label: 'Hosts',
-  },
-  {
-    id: InfraNodeType.pod,
-    label: 'Kubernetes',
-  },
-  {
-    id: InfraNodeType.container,
-    label: 'Docker',
-  },
-];
-
-export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
+export class WaffleNodeTypeSwitcherClass extends React.PureComponent<Props> {
   public render() {
+    const { intl } = this.props;
+
+    const nodeOptions = [
+      {
+        id: InfraNodeType.host,
+        label: intl.formatMessage({
+          id: 'xpack.infra.waffle.nodeTypeSwitcher.hostsLabel',
+          defaultMessage: 'Hosts',
+        }),
+      },
+      {
+        id: InfraNodeType.pod,
+        label: 'Kubernetes',
+      },
+      {
+        id: InfraNodeType.container,
+        label: 'Docker',
+      },
+    ];
+
     return (
       <EuiButtonGroup
         legend="Node type selection"
@@ -44,6 +51,7 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
         options={nodeOptions}
         idSelected={this.props.nodeType}
         onChange={this.handleClick}
+        buttonSize="m"
       />
     );
   }
@@ -54,3 +62,5 @@ export class WaffleNodeTypeSwitcher extends React.PureComponent<Props> {
     this.props.changeMetric({ type: InfraMetricType.cpu });
   };
 }
+
+export const WaffleNodeTypeSwitcher = injectI18n(WaffleNodeTypeSwitcherClass);
