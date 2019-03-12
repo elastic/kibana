@@ -170,7 +170,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     }
     if (schemaName === 'split') {
       schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
-      skipMetrics = true;
+      skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
       schemas[schemaName] = [];
