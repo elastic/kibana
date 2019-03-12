@@ -89,7 +89,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       await link.click();
       await retry.waitFor(
         'apps drawer open',
-        async () => await testSubjects.exists('navDrawerExpandButton-isCollapsed')
+        async () => await testSubjects.exists('navDrawerExpandButton-isExpanded')
       );
     }
   }();
