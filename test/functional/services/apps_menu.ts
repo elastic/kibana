@@ -66,7 +66,6 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     public async clickLink(name: string) {
       try {
         log.debug(`click "${name}" app link`);
-        await this.ensureMenuOpen();
         const container = await testSubjects.find('navDrawer');
         const link = await container.findByPartialLinkText(name);
         await link.click();
@@ -76,8 +75,6 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensureMenuClosed() {
-      const link = await testSubjects.moveMouseTo('navDrawerExpandButton-isExpanded');
-      await link.click();
       await retry.waitFor(
         'apps drawer closed',
         async () => await testSubjects.exists('navDrawerExpandButton-isCollapsed')
@@ -85,7 +82,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     }
 
     private async ensureMenuOpen() {
-      const link = await testSubjects.moveMouseTo('navDrawerExpandButton-isCollapsed');
+      const link = await testSubjects.find('navDrawerExpandButton-isCollapsed');
       await link.click();
       await retry.waitFor(
         'apps drawer open',
