@@ -581,12 +581,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      // The interval element will only interpret space as "select this" if there
-      // was a long enough gap from the typing above to the space click.  Hence the
-      // need for the sleep.
-      await PageObjects.common.sleep(500);
-      await input.pressKeys(browser.keys.SPACE);
+      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
+      await option.click();
     }
 
     async setCustomInterval(newValue) {
