@@ -15,7 +15,7 @@ const getInstallation = async function(jwt){
 
 const start = async function(){
   console.log('hi from script');
-  console.log('length', process.env.KIBANA_CI_REPORTER_KEY.length)
+  console.log('length', process.env.GITHUB_TOKEN.length)
   const app = new App({
     id: 26774,
     privateKey: process.env.KIBANA_CI_REPORTER_KEY
