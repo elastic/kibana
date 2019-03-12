@@ -96,6 +96,21 @@ export function displayHelp() {
 export function processOptions(userOptions, defaultConfigPaths) {
   validateOptions(userOptions);
 
+  // merge userOptions with defaults
+  userOptions = {
+    ...Object.entries(options).reduce(
+      (acc, [key, option]) =>
+        option.default === undefined
+          ? acc
+          : {
+              ...acc,
+              [key]: option.default,
+            },
+      {}
+    ),
+    ...userOptions,
+  };
+
   let configs;
   if (userOptions.config) {
     configs = [].concat(userOptions.config);

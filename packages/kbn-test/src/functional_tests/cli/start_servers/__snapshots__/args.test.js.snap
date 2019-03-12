@@ -72,6 +72,15 @@ Object {
 }
 `;
 
+exports[`process options for start servers CLI accepts source value for $TEST_ES_FROM 1`] = `
+Object {
+  "config": <absolute path>/foo,
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+}
+`;
+
 exports[`process options for start servers CLI accepts source value for esFrom 1`] = `
 Object {
   "config": <absolute path>/foo,
@@ -98,5 +107,14 @@ Object {
   "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "verbose": true,
+}
+`;
+
+exports[`process options for start servers CLI prioritizes source flag over $TEST_ES_FROM 1`] = `
+Object {
+  "config": <absolute path>/foo,
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
 }
 `;
