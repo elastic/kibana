@@ -182,7 +182,7 @@ class ShortcutsComponent extends React.Component<Props> {
   private renderModifier(hotKey: HotKey) {
     if (hotKey.modifier) {
       const modifiers = hotKey.modifier.get(this.os) || [];
-      return modifiers.map(m => <Key>{this.showModifier(m)}</Key>);
+      return modifiers.map(m => <div className="codeShortcuts__key">{this.showModifier(m)}</div>);
     } else {
       return null;
     }
