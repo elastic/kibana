@@ -20,9 +20,9 @@
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
-import { ensureReferencesExist } from './ensure_references_exist';
 import { extractErrors } from './extract_errors';
 import { ImportError } from './types';
+import { validateReferences } from './validate_references';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
@@ -46,7 +46,7 @@ export async function importSavedObjects({
   let objectsToImport = await collectSavedObjects(readStream, objectLimit);
 
   let errors: ImportError[] = [];
-  ({ filteredObjects: objectsToImport, errors } = await ensureReferencesExist(
+  ({ filteredObjects: objectsToImport, errors } = await validateReferences(
     objectsToImport,
     savedObjectsClient
   ));

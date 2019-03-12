@@ -22,7 +22,7 @@ import { ImportError } from './types';
 
 const ENFORCED_TYPES = ['index-pattern'];
 
-export async function ensureReferencesExist(
+export async function validateReferences(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClient
 ) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ensureReferencesExist } from './ensure_references_exist';
+import { validateReferences } from './validate_references';
 
 describe('ensureReferencesExist()', () => {
   const savedObjectsClient = {
@@ -45,7 +45,7 @@ describe('ensureReferencesExist()', () => {
     savedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
     });
-    const result = await ensureReferencesExist([], savedObjectsClient);
+    const result = await validateReferences([], savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "errors": Array [],
@@ -101,7 +101,7 @@ Object {
         ],
       },
     ];
-    const result = await ensureReferencesExist(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "errors": Array [
@@ -174,7 +174,7 @@ Object {
         ],
       },
     ];
-    const result = await ensureReferencesExist(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "errors": Array [],
@@ -221,7 +221,7 @@ Object {
         ],
       },
     ];
-    const result = await ensureReferencesExist(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Object {
   "errors": Array [],
