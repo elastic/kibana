@@ -174,7 +174,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 }
 
                 this.notifyUpdatedTagAssociation(assignType, selectedBeats, payload);
-
+                break;
               case AssignmentActionType.Delete:
                 this.notifyBeatDisenrolled(selectedBeats);
                 break;
