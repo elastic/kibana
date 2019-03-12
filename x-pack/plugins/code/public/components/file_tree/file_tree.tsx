@@ -18,7 +18,7 @@ import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 
 const DirectoryNode = styled.span`
-  color: ${theme.euiColorFullShade};
+  color: 'subdued';
   margin-left: ${theme.euiSizeS};
   vertical-align: middle;
 `;
