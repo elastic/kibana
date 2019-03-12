@@ -20,7 +20,9 @@
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
-import { extractErrors, ImportError } from './extract_errors';
+import { ensureReferencesExist } from './ensure_references_exist';
+import { extractErrors } from './extract_errors';
+import { ImportError } from './types';
 
 interface ImportSavedObjectsOptions {
   readStream: Readable;
@@ -41,19 +43,26 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  const objectsToImport = await collectSavedObjects(readStream, objectLimit);
+  let objectsToImport = await collectSavedObjects(readStream, objectLimit);
+
+  let errors: ImportError[] = [];
+  ({ filteredObjects: objectsToImport, errors } = await ensureReferencesExist(
+    objectsToImport,
+    savedObjectsClient
+  ));
 
   if (objectsToImport.length === 0) {
     return {
-      success: true,
+      success: errors.length === 0,
       successCount: 0,
+      ...(errors.length ? { errors } : {}),
     };
   }
 
   const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
     overwrite,
   });
-  const errors = extractErrors(bulkCreateResult.saved_objects);
+  errors = [...errors, ...extractErrors(bulkCreateResult.saved_objects)];
 
   return {
     success: errors.length === 0,
