@@ -13,6 +13,7 @@ export default function exploreRepositoryFunctonalTests({
   getPageObjects,
 }: TestInvoker) {
   // const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
@@ -147,18 +148,17 @@ export default function exploreRepositoryFunctonalTests({
         });
 
         // Click the structure tree tab
-        // TODO: figure out why jenkins will fail the following test while locally it
-        // passes.
-        // await testSubjects.click('codeStructureTreeTab');
-        // await retry.tryForTime(300000, async () => {
-        //   expect(await testSubjects.exists('codeStructureTreeNode-User')).to.be(true);
-        // });
+        await testSubjects.click('codeStructureTreeTab');
+        await retry.tryForTime(300000, async () => {
+          expect(await testSubjects.exists('codeStructureTreeNode-User')).to.be(true);
 
-        // await testSubjects.click('codeStructureTreeNode-User');
-        // await retry.tryForTime(300000, async () => {
-        //   const currentUrl: string = await browser.getCurrentUrl();
-        //   expect(currentUrl.indexOf('src/models/User.ts!L92:6') > 0).to.be(true);
-        // });
+          await testSubjects.click('codeStructureTreeNode-User');
+          await retry.tryForTime(5000, async () => {
+            const currentUrl: string = await browser.getCurrentUrl();
+            log.info(`Jump to url: ${currentUrl}`);
+            expect(currentUrl.indexOf('src/models/User.ts!L92:6') > 0).to.be(true);
+          });
+        });
       });
     });
   });
