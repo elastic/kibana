@@ -19,7 +19,7 @@
 
 import { validateReferences } from './validate_references';
 
-describe('ensureReferencesExist()', () => {
+describe('validateReferences()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
