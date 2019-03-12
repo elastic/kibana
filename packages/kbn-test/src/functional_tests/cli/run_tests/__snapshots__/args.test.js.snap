@@ -138,7 +138,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
-  "esFrom": "snapshot",
+  "esFrom": "source",
   "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],

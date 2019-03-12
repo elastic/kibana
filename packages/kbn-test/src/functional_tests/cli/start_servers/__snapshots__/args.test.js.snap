@@ -76,7 +76,7 @@ exports[`process options for start servers CLI accepts source value for $TEST_ES
 Object {
   "config": <absolute path>/foo,
   "createLogger": [Function],
-  "esFrom": "snapshot",
+  "esFrom": "source",
   "extraKbnOpts": undefined,
 }
 `;

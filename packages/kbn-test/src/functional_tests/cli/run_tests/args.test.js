@@ -23,10 +23,10 @@ import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 
 const INITIAL_TEST_ES_FROM = process.env.TEST_ES_FROM;
-beforeAll(() => {
+beforeEach(() => {
   process.env.TEST_ES_FROM = 'snapshot';
 });
-afterAll(() => {
+afterEach(() => {
   process.env.TEST_ES_FROM = INITIAL_TEST_ES_FROM;
 });
 
