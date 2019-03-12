@@ -77,7 +77,7 @@ export async function BrowserProvider({ getService }) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    async get(url, insertTimestamp = true) {
+    async get(url, insertTimestamp = false) {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           parsed.query._t = Date.now();
