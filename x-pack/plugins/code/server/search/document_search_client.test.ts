@@ -22,14 +22,15 @@ function initSearchClient() {
 }
 
 const mockSearchResults = [
-  // 1. The first response is a valid DocumentSearchResult with 1 doc
+  // 1. The first response is a valid DocumentSearchResult with 2 docs
   {
     took: 1,
     hits: {
       total: {
-        value: 1,
+        value: 2,
       },
       hits: [
+        // File content matching
         {
           _source: {
             repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
@@ -45,20 +46,34 @@ const mockSearchResults = [
             ],
           },
         },
+        // File path matching
+        {
+          _source: {
+            repoUri: 'github.com/Microsoft/TypeScript-Node-Starter',
+            path: 'src/types/string.d.ts',
+            content:
+              'no query in content;\nno query in content;\nno query in content;\nno query in content;\nno query in content;\n',
+            language: 'typescript',
+            qnames: ['express-flash'],
+          },
+          highlight: {
+            content: [],
+          },
+        },
       ],
     },
     aggregations: {
       repoUri: {
         buckets: [
           {
-            'github.com/Microsoft/TypeScript-Node-Starter': 1,
+            'github.com/Microsoft/TypeScript-Node-Starter': 2,
           },
         ],
       },
       language: {
         buckets: [
           {
-            typescript: 1,
+            typescript: 2,
           },
         ],
       },
@@ -105,12 +120,12 @@ beforeEach(() => {
   initSearchClient();
 });
 
-test('Repository search', async () => {
+test('Document search', async () => {
   // 1. The first response should have 1 result.
   const responseWithResult = await docSearchClient.search({ query: 'string', page: 1 });
   expect(responseWithResult).toEqual(
     expect.objectContaining({
-      total: 1,
+      total: 2,
       totalPage: 1,
       page: 1,
       query: 'string',
@@ -136,15 +151,29 @@ test('Repository search', async () => {
           language: 'typescript',
           hits: 1,
         },
+        {
+          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          filePath: 'src/types/string.d.ts',
+          compositeContent: {
+            // Content is shorted
+            content: 'no query in content;\nno query in content;\nno query in content;\n',
+            // Line mapping data is populated
+            lineMapping: ['1', '2', '3', '..'],
+            // Highlight ranges are calculated
+            ranges: [],
+          },
+          language: 'typescript',
+          hits: 0,
+        },
       ],
       repoAggregations: [
         {
-          'github.com/Microsoft/TypeScript-Node-Starter': 1,
+          'github.com/Microsoft/TypeScript-Node-Starter': 2,
         },
       ],
       langAggregations: [
         {
-          typescript: 1,
+          typescript: 2,
         },
       ],
     })
@@ -156,12 +185,12 @@ test('Repository search', async () => {
   expect(responseWithEmptyResult.total).toEqual(0);
 });
 
-test('Repository suggest', async () => {
+test('Document suggest', async () => {
   // 1. The first response should have 1 result.
   const responseWithResult = await docSearchClient.suggest({ query: 'string', page: 1 });
   expect(responseWithResult).toEqual(
     expect.objectContaining({
-      total: 1,
+      total: 2,
       totalPage: 1,
       page: 1,
       query: 'string',
@@ -169,6 +198,18 @@ test('Repository suggest', async () => {
         {
           uri: 'github.com/Microsoft/TypeScript-Node-Starter',
           filePath: 'src/types/express-flash.d.ts',
+          // compositeContent field is intended to leave empty.
+          compositeContent: {
+            content: '',
+            lineMapping: [],
+            ranges: [],
+          },
+          language: 'typescript',
+          hits: 0,
+        },
+        {
+          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          filePath: 'src/types/string.d.ts',
           // compositeContent field is intended to leave empty.
           compositeContent: {
             content: '',
