@@ -3,23 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { I18nContext } from 'ui/i18n';
 import { BASE_PATH } from '../common/constants';
 import { Background } from './components/layouts/background';
-import { BreadcrumbProvider } from './components/navigation/breadcrumb';
-import { Breadcrumb } from './components/navigation/breadcrumb/breadcrumb';
+import { Breadcrumb, BreadcrumbProvider } from './components/navigation/breadcrumb';
 import { libs } from './context/libs';
 import { AppRouter } from './router';
 
 async function startApp() {
-  libs.framework.renderUIAtPath(
+  await libs.framework.createUIAtPath(
     BASE_PATH,
+    libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
+  );
+  await libs.framework.waitUntilFrameworkReady();
+
+  render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <I18nContext>
         <HashRouter basename="/management/beats_management">
@@ -36,10 +40,8 @@ async function startApp() {
         </HashRouter>
       </I18nContext>
     </ThemeProvider>,
-    libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
+    libs.framework.DOMElement
   );
-
-  await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({

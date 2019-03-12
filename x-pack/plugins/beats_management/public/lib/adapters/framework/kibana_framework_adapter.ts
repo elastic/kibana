@@ -6,7 +6,6 @@
 
 import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { UIRoutes } from 'ui/routes';
 import { BufferedKibanaServiceCall, KibanaAdapterServiceRefs, KibanaUIConfig } from '../../types';
@@ -27,13 +26,16 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     if (this.xpackInfo) {
       return this.xpackInfo;
     } else {
-      throw new Error('framework adapter must have init called before anything else');
+      throw new Error(
+        'framework adapter must have waitUntilFrameworkReady called before anything else'
+      );
     }
   }
 
   public get currentUser() {
     return this.shieldUser!;
   }
+  public DOMElement: HTMLElement = document.createElement('div');
   private xpackInfo: FrameworkInfo | null = null;
   private adapterService: KibanaAdapterServiceProvider;
   private shieldUser: FrameworkUser | null = null;
@@ -114,12 +116,9 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self' = 'self'
-  ) {
+  public async createUIAtPath(path: string, toController: 'management' | 'self' = 'self') {
     const adapter = this;
+
     this.routes.when(
       `${path}${[...Array(6)].map((e, n) => `/:arg${n}?`).join('')}`, // Hack because angular 1 does not support wildcards
       {
@@ -127,22 +126,26 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           toController === 'self'
             ? `<${this.PLUGIN_ID}><div id="${this.PLUGIN_ID}ReactRoot"></div></${this.PLUGIN_ID}>`
             : `<kbn-management-app section="${this.PLUGIN_ID.replace('_', '-')}">
-                <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
-                <div id="${this.PLUGIN_ID}ReactRoot" />
-               </kbn-management-app>`,
+                  <div id="management-sidenav" class="euiPageSideBar" style="position: static;"></div>
+                  <div id="${this.PLUGIN_ID}ReactRoot" />
+                 </kbn-management-app>`,
         // tslint:disable-next-line: max-classes-per-file
         controller: ($scope: any, $route: any) => {
           try {
             $scope.$$postDigest(() => {
               const elem = document.getElementById(`${this.PLUGIN_ID}ReactRoot`);
-              ReactDOM.render(component, elem);
+              if (elem) {
+                elem.appendChild(this.DOMElement);
+              } else {
+                throw new Error(`Error mounting to the dom`);
+              }
               adapter.manageAngularLifecycle($scope, $route, elem);
             });
             $scope.$onInit = () => {
               $scope.topNavMenu = [];
             };
           } catch (e) {
-            throw new Error(`Error rendering Beats CM to the dom, ${e.message}`);
+            throw new Error(`Error rendering to the dom, ${e.message}`);
           }
         },
       }

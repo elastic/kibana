@@ -184,7 +184,8 @@ export class CMBeatsDomain {
       assignments: assignments.map(() => ({ status: null })),
     };
     const beats = await this.adapter.getWithIds(user, beatIds);
-    const tags = await this.tags.getWithIds(user, tagIds, 0, 10000);
+    const tags = await this.tags.getWithIds(user, tagIds, -1, 10000);
+
     // Handle assignments containing non-existing beat IDs or tags
     const nonExistentBeatIds = findNonExistentItems(beats, beatIds);
     const nonExistentTags = findNonExistentItems(tags.list, tagIds);
@@ -226,7 +227,7 @@ function addNonExistentItemToResponse(
   nonExistentTags: any,
   key: string
 ) {
-  assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: any) => {
+  assignments.forEach(({ beatId, tag }: BeatsTagAssignment, idx: number) => {
     const isBeatNonExistent = nonExistentBeatIds.includes(beatId);
 
     const isTagNonExistent = nonExistentTags.includes(tag);

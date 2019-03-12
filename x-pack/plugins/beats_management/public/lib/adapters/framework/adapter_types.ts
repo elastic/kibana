@@ -10,14 +10,11 @@ export interface FrameworkAdapter {
   // Instance vars
   info: FrameworkInfo;
   version: string;
+  DOMElement: HTMLElement;
   currentUser: FrameworkUser;
   // Methods
   waitUntilFrameworkReady(): Promise<void>;
-  renderUIAtPath(
-    path: string,
-    component: React.ReactElement<any>,
-    toController: 'management' | 'self'
-  ): void;
+  createUIAtPath(path: string, toController: 'management' | 'self'): void;
   registerManagementSection(settings: {
     id?: string;
     name: string;

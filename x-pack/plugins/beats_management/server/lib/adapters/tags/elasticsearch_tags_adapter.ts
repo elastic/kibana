@@ -145,7 +145,10 @@ export class ElasticsearchTagsAdapter implements CMTagsAdapter {
         from: page === -1 ? undefined : page * size,
         size,
         query: {
-          terms: { 'tag.id': ids },
+          ids: {
+            type: '_doc',
+            values: ids,
+          },
         },
       },
     };

@@ -51,11 +51,6 @@ export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
           props.options.page || 0,
           props.options.size || 25
         );
-        loadedTags = {
-          list: [],
-          total: 0,
-          page: props.options.page,
-        };
       } else {
         loadedTags = await libs.tags.getAll(
           props.options.searchInput,
