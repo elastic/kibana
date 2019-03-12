@@ -9,10 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
-import { BeatDetailTagsTable, Table } from '../../components/table';
+import { BeatsCMTagsTable } from '../../connected_views/tags_table';
+import { AppPageProps } from '../../frontend_types';
 import { FrontendLibs } from '../../lib/types';
 
-interface BeatTagsPageProps {
+interface BeatTagsPageProps extends AppPageProps {
   beat: CMBeat;
   libs: FrontendLibs;
   refreshBeat(): void;
@@ -24,7 +25,6 @@ interface BeatTagsPageState {
 }
 
 export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTagsPageState> {
-  private tableRef = React.createRef<Table>();
   constructor(props: BeatTagsPageProps) {
     super(props);
 
@@ -57,11 +57,19 @@ export class BeatTagsPage extends React.PureComponent<BeatTagsPageProps, BeatTag
           path={`/beat/${beat.id}/tags`}
         />
 
-        <Table
-          hideTableControls={true}
-          items={{ list: this.state.tags, page: -1, total: this.state.tags.length }}
-          ref={this.tableRef}
-          type={BeatDetailTagsTable}
+        <BeatsCMTagsTable
+          forBeat={beat.id}
+          hasSearch={false}
+          options={{
+            page: parseInt(this.props.urlState.beatTagsPage || '0', 10),
+            size: parseInt(this.props.urlState.beatTagsSize || '25', 10),
+          }}
+          onOptionsChange={newState => {
+            this.props.setUrlState({
+              beatTagsPage: newState.page.toString(),
+              beatTagsSize: newState.size.toString(),
+            });
+          }}
         />
 
         <EuiGlobalToastList

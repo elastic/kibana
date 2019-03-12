@@ -13,6 +13,8 @@ export interface AppURLState {
   beatsKBar?: string;
   beatsPage?: string;
   beatsSize?: string;
+  beatTagsPage?: string;
+  beatTagsSize?: string;
   attachedBeatsPage?: string;
   attachedBeatsSize?: string;
   tagsPage?: string;
