@@ -26,13 +26,17 @@ export class MBMapContainer extends React.Component {
     this._mbMap = null;
     this._tooltipContainer = document.createElement('div');
     this._mbPopup = new mapboxgl.Popup({
-      closeButton: true,
+      closeButton: false,
       closeOnClick: false,
     });
     this._mbPopup.on('close', () => {
       this.props.setTooltipState(null);
     });
   }
+
+  _onTooltipClose = () => {
+    this.props.setTooltipState(null);
+  };
 
   _debouncedSync = _.debounce(() => {
     if (this._isMounted) {
@@ -223,14 +227,7 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
-    ReactDOM.render(
-      React.createElement(
-        FeatureTooltip, {
-          properties: content,
-        }
-      ),
-      this._tooltipContainer
-    );
+    ReactDOM.render((<FeatureTooltip properties={content} onCloseClick={this._onTooltipClose}/>), this._tooltipContainer);
 
     this._mbPopup.setLngLat(location)
       .setDOMContent(this._tooltipContainer)
