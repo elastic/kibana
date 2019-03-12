@@ -19,9 +19,9 @@
 
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
-import { createResolveImportConflictsRoute } from './resolve_import_conflicts';
+import { createResolveImportErrorsRoute } from './resolve_import_errors';
 
-describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
+describe('POST /api/saved_objects/_resolve_import_errors', () => {
   let server: Hapi.Server;
   const savedObjectsClient = {
     errors: {} as any,
@@ -53,13 +53,13 @@ describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
       },
     };
 
-    server.route(createResolveImportConflictsRoute(prereqs, server));
+    server.route(createResolveImportErrorsRoute(prereqs, server));
   });
 
   test('formats successful response', async () => {
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_resolve_import_conflicts',
+      url: '/api/saved_objects/_resolve_import_errors',
       payload: [
         '--BOUNDARY',
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
@@ -83,7 +83,7 @@ describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_resolve_import_conflicts',
+      url: '/api/saved_objects/_resolve_import_errors',
       payload: [
         '--EXAMPLE',
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
@@ -152,7 +152,7 @@ describe('POST /api/saved_objects/_resolve_import_conflicts', () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
-      url: '/api/saved_objects/_resolve_import_conflicts',
+      url: '/api/saved_objects/_resolve_import_errors',
       payload: [
         '--EXAMPLE',
         'Content-Disposition: form-data; name="file"; filename="export.ndjson"',

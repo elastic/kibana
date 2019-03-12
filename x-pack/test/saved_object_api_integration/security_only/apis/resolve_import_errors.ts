@@ -6,7 +6,7 @@
 
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { TestInvoker } from '../../common/lib/types';
-import { resolveImportConflictsTestSuiteFactory } from '../../common/suites/resolve_import_conflicts';
+import { resolveImportErrorsTestSuiteFactory } from '../../common/suites/resolve_import_errors';
 
 // tslint:disable:no-default-export
 export default function({ getService }: TestInvoker) {
@@ -15,16 +15,16 @@ export default function({ getService }: TestInvoker) {
   const es = getService('es');
 
   const {
-    resolveImportConflictsTest,
+    resolveImportErrorsTest,
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
     expectRbacForbiddenWithUnknownType,
     expectRbacForbiddenForUnknownType,
-  } = resolveImportConflictsTestSuiteFactory(es, esArchiver, supertest);
+  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
-  describe('_resolve_import_conflicts', () => {
-    resolveImportConflictsTest(`user with no access`, {
+  describe('_resolve_import_errors', () => {
+    resolveImportErrorsTest(`user with no access`, {
       user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         default: {
@@ -38,7 +38,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`superuser`, {
+    resolveImportErrorsTest(`superuser`, {
       user: AUTHENTICATION.SUPERUSER,
       tests: {
         default: {
@@ -52,7 +52,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`legacy user`, {
+    resolveImportErrorsTest(`legacy user`, {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
@@ -66,7 +66,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`dual-privileges user`, {
+    resolveImportErrorsTest(`dual-privileges user`, {
       user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
       tests: {
         default: {
@@ -80,7 +80,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`dual-privileges readonly user`, {
+    resolveImportErrorsTest(`dual-privileges readonly user`, {
       user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
       tests: {
         default: {
@@ -94,7 +94,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac user with all globally`, {
+    resolveImportErrorsTest(`rbac user with all globally`, {
       user: AUTHENTICATION.KIBANA_RBAC_USER,
       tests: {
         default: {
@@ -108,7 +108,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac readonly user`, {
+    resolveImportErrorsTest(`rbac readonly user`, {
       user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
       tests: {
         default: {
@@ -122,7 +122,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac user with all at default space`, {
+    resolveImportErrorsTest(`rbac user with all at default space`, {
       user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
       tests: {
         default: {
@@ -136,7 +136,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac user with read at default space`, {
+    resolveImportErrorsTest(`rbac user with read at default space`, {
       user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
       tests: {
         default: {
@@ -150,7 +150,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac user with all at space_1`, {
+    resolveImportErrorsTest(`rbac user with all at space_1`, {
       user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
       tests: {
         default: {
@@ -164,7 +164,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest(`rbac user with read at space_1`, {
+    resolveImportErrorsTest(`rbac user with read at space_1`, {
       user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
       tests: {
         default: {
