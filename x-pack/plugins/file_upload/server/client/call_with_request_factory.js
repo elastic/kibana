@@ -7,12 +7,9 @@
 
 
 import { once } from 'lodash';
-import { elasticsearchJsPlugin } from './elasticsearch_fileupload';
 
 const callWithRequest = once((server) => {
-  const config = { plugins: [ elasticsearchJsPlugin ] };
-  const cluster = server.plugins.elasticsearch.createCluster('fileupload', config);
-
+  const cluster = server.plugins.elasticsearch.createCluster('fileupload');
   return cluster.callWithRequest;
 });
 
