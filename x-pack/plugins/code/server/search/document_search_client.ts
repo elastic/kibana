@@ -31,6 +31,7 @@ const MAX_HIT_NUMBER = 5;
 
 export class DocumentSearchClient extends AbstractSearchClient {
   private HIGHLIGHT_TAG = '_@_';
+  private LINE_SEPARATOR = '\n';
 
   constructor(protected readonly client: EsClient, protected readonly log: Logger) {
     super(client, log);
@@ -302,24 +303,29 @@ export class DocumentSearchClient extends AbstractSearchClient {
   }
 
   private getSourceContent(hitsContent: SourceHit[], doc: Document) {
+    const docInLines = doc.content.split(this.LINE_SEPARATOR);
+    let slicedRanges: LineRange[] = [];
     if (hitsContent.length === 0) {
-      return {
-        content: '',
-        lineMapping: [],
-        ranges: [],
-      };
+      // Always add a placeholder range of the first line so that for filepath
+      // matching search result, we will render some file content.
+      slicedRanges = [
+        {
+          startLine: 0,
+          endLine: 0,
+        },
+      ];
+    } else {
+      const slicedHighlights = hitsContent.slice(0, MAX_HIT_NUMBER);
+      slicedRanges = slicedHighlights.map(hit => ({
+        startLine: hit.range.startLoc.line,
+        endLine: hit.range.endLoc.line,
+      }));
     }
-
-    const slicedHighlights = hitsContent.slice(0, MAX_HIT_NUMBER);
-    const slicedRanges: LineRange[] = slicedHighlights.map(hit => ({
-      startLine: hit.range.startLoc.line,
-      endLine: hit.range.endLoc.line,
-    }));
 
     const expandedRanges = expandRanges(slicedRanges, HIT_MERGE_LINE_INTERVAL);
     const mergedRanges = mergeRanges(expandedRanges);
     const lineMapping = new LineMapping();
-    const result = extractSourceContent(mergedRanges, doc.content.split('\n'), lineMapping);
+    const result = extractSourceContent(mergedRanges, docInLines, lineMapping);
     const ranges: IRange[] = hitsContent
       .filter(hit => lineMapping.hasLine(hit.range.startLoc.line))
       .map(hit => ({
@@ -329,7 +335,7 @@ export class DocumentSearchClient extends AbstractSearchClient {
         endLineNumber: lineMapping.lineNumber(hit.range.endLoc.line),
       }));
     return {
-      content: result.join('\n'),
+      content: result.join(this.LINE_SEPARATOR),
       lineMapping: lineMapping.toStringArray(),
       ranges,
     };
