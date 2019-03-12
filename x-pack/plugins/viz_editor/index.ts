@@ -35,13 +35,75 @@ export function vizEditor(kibana: any) {
     },
 
     init(server: Legacy.Server) {
+      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+
       server.route({
-        path: `${API_PREFIX}/example`,
-        method: 'GET',
-        handler: () => {
-          return { time: new Date() };
+        path: `${API_PREFIX}/search`,
+        method: 'POST',
+        async handler(req) {
+          const { payload } = req;
+          const result = await callWithRequest(req, 'search', payload);
+
+          if (result.aggregations) {
+            return tablify(
+              result.aggregations.groupBy.buckets.map(({ key, ...agg }: any) => ({
+                ...key,
+                ...agg,
+              }))
+            );
+          }
+
+          if (!result.hits || !result.hits.hits) {
+            return {
+              columns: [],
+              rows: [],
+            };
+          }
+
+          return tablify(result.hits.hits);
         },
       });
     },
   });
+}
+
+function tablify(docs: any) {
+  const cols = new Set<string>();
+  const sanitizeFieldName = (field: string) => field.replace(/^_source\./, '');
+
+  function toTable(rawDoc: any, prefix = '') {
+    const table: any = {};
+    const flatten = (path: string, doc: any) => {
+      Object.keys(doc).forEach(prop => {
+        const val = doc[prop];
+
+        // We're not supporting arrays for now...
+        if (Array.isArray(val)) {
+          return;
+        }
+
+        // If we've got a nested object, recur
+        if (val && typeof val === 'object') {
+          return flatten(path + prop + '.', val);
+        }
+
+        // If we're at a leaf, add it to the result
+        const field = sanitizeFieldName(path + prop);
+
+        cols.add(field);
+        table[field] = val;
+      });
+    };
+
+    flatten(prefix, rawDoc);
+
+    return table;
+  }
+
+  const rows = docs.map((doc: any) => toTable(doc));
+
+  return {
+    columns: Array.from(cols).map(name => ({ name })),
+    rows,
+  };
 }

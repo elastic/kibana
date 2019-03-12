@@ -5,17 +5,19 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageHeader,
-  EuiText,
-  EuiTitle,
+  EuiPageSideBar,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Dispatch, useEffect, useReducer } from 'react';
+import { API_PREFIX } from '../../../common';
+import * as ds from '../../lib/es_data_source';
+import { FieldPanel } from '../field_panel';
+
+const emptyRawData = { cols: [], rows: [] };
 
 interface Props {
   kfetch: (opts: any) => Promise<any>;
@@ -23,17 +25,21 @@ interface Props {
 
 interface State {
   loading: boolean;
-  time: Date;
   errorMessage: string;
+  dataSource: ds.DataSource;
+  rawData: any; // TODO: Properly type this...
 }
 
-type Action = { type: 'loaded'; time: Date } | { type: 'loadError'; message: string };
+type Action =
+  | { type: 'loaded'; dataSource: ds.DataSource; rawData: any }
+  | { type: 'loadError'; message: string };
 
 function initialState(): State {
   return {
     loading: true,
-    time: new Date(),
     errorMessage: '',
+    dataSource: ds.empty(),
+    rawData: emptyRawData,
   };
 }
 
@@ -43,7 +49,8 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         loading: false,
-        time: action.time,
+        dataSource: action.dataSource,
+        rawData: action.rawData,
       };
     case 'loadError':
       return {
@@ -56,29 +63,34 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-function fetchInitialState(kfetch: any, dispatch: Dispatch<Action>) {
-  return kfetch({
-    pathname: '/api/viz_editor/example',
-  })
-    .then((data: any) =>
-      dispatch({
-        type: 'loaded',
-        time: new Date(data.time),
-      })
-    )
-    .catch(({ message }: any) =>
-      dispatch({
-        type: 'loadError',
-        message,
-      })
-    );
+async function fetchInitialState(kfetch: any, dispatch: Dispatch<Action>) {
+  const dataSource = await ds.load();
+  let rawData: any = emptyRawData;
+
+  if (dataSource.fields.length) {
+    rawData = await kfetch({
+      pathname: `${API_PREFIX}/search`,
+      method: 'POST',
+      body: JSON.stringify({ index: dataSource.name, size: 25 }),
+    });
+
+    rawData.columns = rawData.columns.sort((a: any, b: any) => a.name.localeCompare(b.name));
+  }
+
+  dispatch({
+    type: 'loaded',
+    dataSource,
+    rawData,
+  });
 }
 
 export function Main({ kfetch }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState());
-  const { time, loading, errorMessage } = state;
+  const { dataSource, loading, rawData } = state;
 
-  useEffect(() => fetchInitialState(kfetch, dispatch), []);
+  useEffect(() => {
+    fetchInitialState(kfetch, dispatch);
+  }, []);
 
   if (loading) {
     return <h1>Loading...</h1>;
@@ -86,53 +98,46 @@ export function Main({ kfetch }: Props) {
 
   return (
     <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiTitle size="l">
-            <h1>
-              <FormattedMessage
-                id="vizEditor.helloWorldText"
-                defaultMessage="{title} Hello World!"
-                values={{ title: 'New Visualization Editor' }}
-              />
-            </h1>
-          </EuiTitle>
-          {!!errorMessage ? (
-            <p>
-              <span className="euiTextColor euiTextColor--danger">{errorMessage}</span>
-            </p>
-          ) : null}
-        </EuiPageHeader>
+      <EuiPageSideBar>
+        <EuiButtonEmpty className="vzDataSource-link" size="l">
+          {dataSource.name}
+        </EuiButtonEmpty>
+        <FieldPanel fields={dataSource.fields} />
+      </EuiPageSideBar>
+      <EuiPageBody className="vzBody">
         <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="vizEditor.congratulationsTitle"
-                  defaultMessage="Congratulations"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <EuiText>
-              <h3>
-                <FormattedMessage
-                  id="vizEditor.congratulationsText"
-                  defaultMessage="You have successfully created your first Kibana Plugin!"
-                />
-              </h3>
-              <p>
-                <FormattedMessage
-                  id="vizEditor.serverTimeText"
-                  defaultMessage="The server time (via API call) is {time}"
-                  values={{ time }}
-                />
-              </p>
-            </EuiText>
+          <EuiPageContentBody className="vzTableContainer">
+            <DataTable {...rawData} />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
+  );
+}
+
+function DataTable({ rows, columns }: any) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          {columns.map(({ name }: any) => (
+            <th className="vzTableCell" key={name}>
+              <span className="vzTableCell-content">{name}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row: any) => (
+          <tr key={row._id}>
+            {columns.map(({ name }: any, i: number) => (
+              <td key={name} className="vzTableCell">
+                <span className="vzTableCell-content">{row[name]}</span>
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }

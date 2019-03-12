@@ -1,0 +1,21 @@
+@import '@elastic/eui/src/global_styling/variables/index';
+@import './components//field_panel/field_panel.scss';
+@import './components/main/main.scss';
+
+.vzBody {
+  overflow: auto;
+}
+
+.vzTableContainer {
+  overflow-x: auto;
+}
+.vzTableCell {
+  // max-width: 150px;
+  padding: 4px;
+}
+.vzTableCell-content {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
