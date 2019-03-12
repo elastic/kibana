@@ -5,6 +5,21 @@
  */
 
 import { handleActions } from 'redux-actions';
+import {
+  UA_DETAIL_PANEL_SUMMARY_TAB,
+  UA_DETAIL_PANEL_SETTINGS_TAB,
+  UA_DETAIL_PANEL_MAPPING_TAB,
+  UA_DETAIL_PANEL_STATS_TAB,
+  UA_DETAIL_PANEL_EDIT_SETTINGS_TAB,
+} from '../../../common/constants';
+import {
+  TAB_SUMMARY,
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../constants';
+import { trackUserAction } from '../../services';
 import { openDetailPanel, closeDetailPanel } from '../actions/detail_panel';
 import { loadIndexDataSuccess } from '../actions/load_index_data';
 import { updateIndexSettingsSuccess, updateIndexSettingsError } from '../actions/update_index_settings';
@@ -29,8 +44,21 @@ export const detailPanel = handleActions(
         indexName,
         title
       } = action.payload;
+
+      const panelTypeToUserActionMap = {
+        [TAB_SUMMARY]: UA_DETAIL_PANEL_SUMMARY_TAB,
+        [TAB_SETTINGS]: UA_DETAIL_PANEL_SETTINGS_TAB,
+        [TAB_MAPPING]: UA_DETAIL_PANEL_MAPPING_TAB,
+        [TAB_STATS]: UA_DETAIL_PANEL_STATS_TAB,
+        [TAB_EDIT_SETTINGS]: UA_DETAIL_PANEL_EDIT_SETTINGS_TAB,
+      };
+
+      if (panelTypeToUserActionMap[panelType]) {
+        trackUserAction(panelTypeToUserActionMap[panelType]);
+      }
+
       return {
-        panelType: panelType || state.panelType || 'Summary',
+        panelType: panelType || state.panelType || TAB_SUMMARY,
         indexName,
         title
       };
