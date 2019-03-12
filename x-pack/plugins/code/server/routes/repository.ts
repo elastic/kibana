@@ -151,14 +151,13 @@ export function repositoryRoute(
         try {
           gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
         } catch (error) {
-          log.error(`Get repository git status ${repoUri} error: ${error}`);
+          log.debug(`Get repository git status ${repoUri} error: ${error}`);
         }
 
         let indexStatus = null;
         try {
           indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
         } catch (error) {
-          // index status won't exist if during clone, so suppress the error log to debug level.
           log.debug(`Get repository index status ${repoUri} error: ${error}`);
         }
 
@@ -166,7 +165,6 @@ export function repositoryRoute(
         try {
           deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
         } catch (error) {
-          // delete status is not always there, so suppress the error log to debug level.
           log.debug(`Get repository delete status ${repoUri} error: ${error}`);
         }
         return {

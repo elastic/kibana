@@ -189,6 +189,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         openSettings={this.openSettingModal}
         key={repo.uri}
         project={repo}
+        showStatus={true}
         status={status[repo.uri]}
         enableManagement={isAdmin}
       />

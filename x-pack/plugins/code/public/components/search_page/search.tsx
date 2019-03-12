@@ -147,7 +147,12 @@ class SearchPage extends React.PureComponent<Props, State> {
         repos &&
         repos.map((repo: any) => (
           <EuiFlexItem key={repo.uri}>
-            <ProjectItem key={repo.uri} project={repo} enableManagement={false} />
+            <ProjectItem
+              key={repo.uri}
+              project={repo}
+              showStatus={false}
+              enableManagement={false}
+            />
           </EuiFlexItem>
         ));
       const to = from + repos.length;
