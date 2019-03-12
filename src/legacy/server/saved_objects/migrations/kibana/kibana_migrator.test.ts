@@ -74,7 +74,6 @@ describe('KibanaMigrator', () => {
       kbnServer.server.plugins.elasticsearch = {
         waitUntilReady,
         getCluster() {
-          expect(kbnServer.ready as any).toHaveBeenCalledTimes(1);
           expect(waitUntilReady).toHaveBeenCalledTimes(1);
 
           return {
