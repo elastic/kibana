@@ -333,7 +333,7 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = (vis: any, timeRange?: any) => {
+export const buildVislibDimensions = async (vis: any, timeRange?: any, searchSource: any) => {
   const schemas = getSchemas(vis, timeRange);
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
@@ -351,6 +351,12 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
       dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
+    } else if (xAgg.type.name === 'histogram' && searchSource) {
+      const intervalParam = xAgg.type.params.byName.interval;
+      const output = { params: {} };
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, searchSource);
+      intervalParam.write(xAgg, output);
+      dimensions.x.params.interval = output.params.interval;
     }
   }
 
@@ -359,7 +365,10 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
 
 // If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
+export const getVisParams = async (
+  vis: Vis,
+  params: { searchSource: SearchSource; timeRange?: any }
+) => {
   const schemas = getSchemas(vis, params.timeRange);
   let visConfig = cloneDeep(vis.params);
   if (buildVisConfig[vis.type.name]) {
@@ -368,12 +377,12 @@ export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
       ...buildVisConfig[vis.type.name](schemas, visConfig),
     };
   } else if (vislibCharts.includes(vis.type.name)) {
-    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+    visConfig.dimensions = await buildVislibDimensions(vis, params.timeRange, params.searchSource);
   }
   return visConfig;
 };
 
-export const buildPipeline = (
+export const buildPipeline = async (
   vis: Vis,
   params: { searchSource: SearchSource; timeRange?: any }
 ) => {
@@ -411,7 +420,7 @@ export const buildPipeline = (
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
-    visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
+    visConfig.dimensions = await buildVislibDimensions(vis, params.timeRange, params.searchSource);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {
