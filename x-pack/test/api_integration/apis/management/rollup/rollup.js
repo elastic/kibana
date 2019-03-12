@@ -39,7 +39,7 @@ export default function ({ getService }) {
     });
 
     describe('Index patterns', () => {
-      it('should return the date, numeric and keyword fields when an index (pattern) is found', async () => {
+      it('should return the date, numeric and keyword fields when an index pattern matches indices', async () => {
         const indexName = await createIndexWithMappings();
 
         const uri = `${API_BASE_PATH}/index_pattern_validity/${indexName}`;
@@ -57,7 +57,7 @@ export default function ({ getService }) {
         });
       });
 
-      it('should not return any fields when no index (pattern) is found', async () => {
+      it('should not return any fields when the index pattern doesn\'t match any indices', async () => {
         const uri = `${API_BASE_PATH}/index_pattern_validity/index-does-not-exist`;
 
         const { body } = await supertest
@@ -86,15 +86,19 @@ export default function ({ getService }) {
       });
 
       describe('create', () => {
+        let indexName;
+
+        beforeEach(async () => {
+          indexName = await createIndexWithMappings();
+        });
+
         it('should create a rollup job', async () => {
-          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
 
           return createJob(payload).expect(200);
         });
 
         it('should throw a 409 conflict when trying to create 2 jobs with the same id', async () => {
-          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
 
           await createJob(payload);
@@ -110,7 +114,6 @@ export default function ({ getService }) {
         });
 
         it('should list the newly created job', async () => {
-          const indexName = await createIndexWithMappings();
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
@@ -123,26 +126,60 @@ export default function ({ getService }) {
         });
 
         it('should create the underlying rollup index with the correct aggregations', async () => {
-          const indexName = await createIndexWithMappings();
           await createJob(getJobPayload(indexName));
 
           const { body } = await supertest.get(`${API_BASE_PATH}/indices`);
 
           expect(body[ROLLUP_INDEX_NAME]).to.not.be(undefined);
 
-          // Those are all the aggregations that we defined in the getJobPayload() above
-          const expectedAggregations = [
-            'date_histogram',
-            'max',
-            'min',
-            'terms',
-            'histogram',
-            'avg',
-            'value_count',
-          ];
-
-          const aggregations = Object.keys(body[ROLLUP_INDEX_NAME].aggs);
-          expect(aggregations).to.eql(expectedAggregations);
+          expect(body).to.eql({
+            'rollup_index': {
+              'aggs': {
+                'date_histogram': {
+                  'testCreatedField': {
+                    'agg': 'date_histogram',
+                    'delay': '1d',
+                    'interval': '24h',
+                    'time_zone': 'UTC'
+                  }
+                },
+                'max': {
+                  'testCreatedField': {
+                    'agg': 'max'
+                  }
+                },
+                'min': {
+                  'testCreatedField': {
+                    'agg': 'min'
+                  }
+                },
+                'terms': {
+                  'testTagField': {
+                    'agg': 'terms'
+                  },
+                  'testTotalField': {
+                    'agg': 'terms'
+                  }
+                },
+                'histogram': {
+                  'testTotalField': {
+                    'agg': 'histogram',
+                    'interval': 7
+                  }
+                },
+                'avg': {
+                  'testTotalField': {
+                    'agg': 'avg'
+                  }
+                },
+                'value_count': {
+                  'testTotalField': {
+                    'agg': 'value_count'
+                  }
+                }
+              }
+            }
+          });
         });
       });
 
@@ -188,6 +225,12 @@ export default function ({ getService }) {
           const { body } = await startJob(job.config.id).expect(200);
 
           expect(body).to.eql({ success: true });
+
+          // Fetch the job to make sure it has been started
+          const jobId = job.config.id;
+          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          job = jobs.find(job => job.config.id === jobId);
+          expect(job.status.job_state).to.eql('started');
         });
 
         it('should throw a 400 Bad request if the job is already started', async () => {
@@ -210,6 +253,11 @@ export default function ({ getService }) {
           const { body } = await stopJob(jobId).expect(200);
 
           expect(body).to.eql({ success: true });
+
+          // Fetch the job to make sure it has been stopped
+          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          const job = jobs.find(job => job.config.id === jobId);
+          expect(job.status.job_state).to.eql('stopped');
         });
       });
     });
