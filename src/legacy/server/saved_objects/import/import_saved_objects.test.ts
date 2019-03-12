@@ -76,6 +76,7 @@ describe('importSavedObjects()', () => {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -143,6 +144,7 @@ Object {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -210,6 +212,7 @@ Object {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.map(savedObject => ({
         type: savedObject.type,
