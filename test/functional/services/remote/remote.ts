@@ -24,8 +24,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
   const log = getService('log');
   const config = getService('config');
-  const possibleBrowsers = ['chrome', 'firefox', 'ie'];
-  const browserType = 'firefox';
+  const browserType = process.env.TEST_BROWSER_TYPE || 'chrome';
 
   if (browserType !== 'chrome' && browserType !== 'firefox') {
     throw new Error(
