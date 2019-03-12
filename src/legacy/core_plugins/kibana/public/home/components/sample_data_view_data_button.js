@@ -105,18 +105,20 @@ export class SampleDataViewDataButton extends React.Component {
       <EuiButton
         aria-label={viewDataButtonAriaLabel}
         onClick={this.togglePopoverVisibility}
+        iconType="arrowDown"
+        iconSide="right"
       >
         {viewDataButtonLabel}
       </EuiButton>
     );
     return (
       <EuiPopover
-        id="contextMenu"
+        id={`sampleDataLinks${this.props.id}`}
         button={popoverButton}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         panelPaddingSize="none"
-        anchorPosition="leftCenter"
+        anchorPosition="downCenter"
       >
         <EuiContextMenu
           initialPanelId={0}
