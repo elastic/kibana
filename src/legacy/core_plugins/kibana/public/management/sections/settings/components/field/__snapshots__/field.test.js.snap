@@ -77,17 +77,9 @@ exports[`Field for array setting should render as read only if saving is disable
 
 exports[`Field for array setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -178,7 +170,6 @@ exports[`Field for array setting should render as read only with help text if ov
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -186,17 +177,9 @@ exports[`Field for array setting should render as read only with help text if ov
 
 exports[`Field for array setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -264,7 +247,6 @@ exports[`Field for array setting should render custom setting icon if it is cust
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -272,17 +254,9 @@ exports[`Field for array setting should render custom setting icon if it is cust
 
 exports[`Field for array setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -339,7 +313,6 @@ exports[`Field for array setting should render default value if there is no user
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -347,17 +320,9 @@ exports[`Field for array setting should render default value if there is no user
 
 exports[`Field for array setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -456,7 +421,6 @@ exports[`Field for array setting should render user value if there is user value
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -543,17 +507,9 @@ exports[`Field for boolean setting should render as read only if saving is disab
 
 exports[`Field for boolean setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -648,7 +604,6 @@ exports[`Field for boolean setting should render as read only with help text if 
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -656,17 +611,9 @@ exports[`Field for boolean setting should render as read only with help text if 
 
 exports[`Field for boolean setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -738,7 +685,6 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -746,17 +692,9 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
 
 exports[`Field for boolean setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -817,7 +755,6 @@ exports[`Field for boolean setting should render default value if there is no us
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -825,17 +762,9 @@ exports[`Field for boolean setting should render default value if there is no us
 
 exports[`Field for boolean setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -938,7 +867,6 @@ exports[`Field for boolean setting should render user value if there is user val
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1019,17 +947,9 @@ exports[`Field for image setting should render as read only if saving is disable
 
 exports[`Field for image setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1117,7 +1037,6 @@ exports[`Field for image setting should render as read only with help text if ov
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1125,17 +1044,9 @@ exports[`Field for image setting should render as read only with help text if ov
 
 exports[`Field for image setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1201,7 +1112,6 @@ exports[`Field for image setting should render custom setting icon if it is cust
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1209,17 +1119,9 @@ exports[`Field for image setting should render custom setting icon if it is cust
 
 exports[`Field for image setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1274,7 +1176,6 @@ exports[`Field for image setting should render default value if there is no user
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1282,17 +1183,9 @@ exports[`Field for image setting should render default value if there is no user
 
 exports[`Field for image setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1403,7 +1296,6 @@ exports[`Field for image setting should render user value if there is user value
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1530,17 +1422,9 @@ exports[`Field for json setting should render as read only if saving is disabled
 
 exports[`Field for json setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1652,7 +1536,6 @@ exports[`Field for json setting should render as read only with help text if ove
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1660,17 +1543,9 @@ exports[`Field for json setting should render as read only with help text if ove
 
 exports[`Field for json setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1755,7 +1630,6 @@ exports[`Field for json setting should render custom setting icon if it is custo
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1763,17 +1637,9 @@ exports[`Field for json setting should render custom setting icon if it is custo
 
 exports[`Field for json setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -1893,7 +1759,6 @@ exports[`Field for json setting should render default value if there is no user 
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -1901,17 +1766,9 @@ exports[`Field for json setting should render default value if there is no user 
 
 exports[`Field for json setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2123,7 +1980,6 @@ exports[`Field for markdown setting should render as read only if saving is disa
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2131,17 +1987,9 @@ exports[`Field for markdown setting should render as read only if saving is disa
 
 exports[`Field for markdown setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2249,7 +2097,6 @@ exports[`Field for markdown setting should render as read only with help text if
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2257,17 +2104,9 @@ exports[`Field for markdown setting should render as read only with help text if
 
 exports[`Field for markdown setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2352,7 +2191,6 @@ exports[`Field for markdown setting should render custom setting icon if it is c
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2360,17 +2198,9 @@ exports[`Field for markdown setting should render custom setting icon if it is c
 
 exports[`Field for markdown setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2444,7 +2274,6 @@ exports[`Field for markdown setting should render default value if there is no u
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2452,17 +2281,9 @@ exports[`Field for markdown setting should render default value if there is no u
 
 exports[`Field for markdown setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2578,7 +2399,6 @@ exports[`Field for markdown setting should render user value if there is user va
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2661,17 +2481,9 @@ exports[`Field for number setting should render as read only if saving is disabl
 
 exports[`Field for number setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2762,7 +2574,6 @@ exports[`Field for number setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2770,17 +2581,9 @@ exports[`Field for number setting should render as read only with help text if o
 
 exports[`Field for number setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2848,7 +2651,6 @@ exports[`Field for number setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2856,17 +2658,9 @@ exports[`Field for number setting should render custom setting icon if it is cus
 
 exports[`Field for number setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -2923,7 +2717,6 @@ exports[`Field for number setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -2931,17 +2724,9 @@ exports[`Field for number setting should render default value if there is no use
 
 exports[`Field for number setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3040,7 +2825,6 @@ exports[`Field for number setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3140,17 +2924,9 @@ exports[`Field for select setting should render as read only if saving is disabl
 
 exports[`Field for select setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3258,7 +3034,6 @@ exports[`Field for select setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3266,17 +3041,9 @@ exports[`Field for select setting should render as read only with help text if o
 
 exports[`Field for select setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3361,7 +3128,6 @@ exports[`Field for select setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3369,17 +3135,9 @@ exports[`Field for select setting should render custom setting icon if it is cus
 
 exports[`Field for select setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3453,7 +3211,6 @@ exports[`Field for select setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3461,17 +3218,9 @@ exports[`Field for select setting should render default value if there is no use
 
 exports[`Field for select setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3587,7 +3336,6 @@ exports[`Field for select setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3670,17 +3418,9 @@ exports[`Field for string setting should render as read only if saving is disabl
 
 exports[`Field for string setting should render as read only with help text if overridden 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3771,7 +3511,6 @@ exports[`Field for string setting should render as read only with help text if o
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3779,17 +3518,9 @@ exports[`Field for string setting should render as read only with help text if o
 
 exports[`Field for string setting should render custom setting icon if it is custom 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3857,7 +3588,6 @@ exports[`Field for string setting should render custom setting icon if it is cus
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3865,17 +3595,9 @@ exports[`Field for string setting should render custom setting icon if it is cus
 
 exports[`Field for string setting should render default value if there is no user value set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -3932,7 +3654,6 @@ exports[`Field for string setting should render default value if there is no use
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
@@ -3940,17 +3661,9 @@ exports[`Field for string setting should render default value if there is no use
 
 exports[`Field for string setting should render user value if there is user value is set 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="mgtAdvancedSettings__field"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiDescribedFormGroup
@@ -4049,7 +3762,6 @@ exports[`Field for string setting should render user value if there is user valu
     </EuiDescribedFormGroup>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   />
 </EuiFlexGroup>
