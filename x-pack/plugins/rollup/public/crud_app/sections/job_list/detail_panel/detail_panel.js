@@ -27,6 +27,15 @@ import {
 } from '@elastic/eui';
 
 import {
+  UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  UA_DETAIL_PANEL_TERMS_TAB_CLICK,
+  UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UA_DETAIL_PANEL_METRICS_TAB_CLICK,
+  UA_DETAIL_PANEL_JSON_TAB_CLICK,
+} from '../../../../../common';
+import { trackUserAction } from '../../../services';
+
+import {
   JobActionMenu,
   JobDetails,
   JOB_DETAILS_TAB_SUMMARY,
@@ -44,6 +53,14 @@ export const JOB_DETAILS_TABS = [
   JOB_DETAILS_TAB_METRICS,
   JOB_DETAILS_TAB_JSON,
 ];
+
+const tabToUserActionMap = {
+  [JOB_DETAILS_TAB_SUMMARY]: UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  [JOB_DETAILS_TAB_TERMS]: UA_DETAIL_PANEL_TERMS_TAB_CLICK,
+  [JOB_DETAILS_TAB_HISTOGRAM]: UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  [JOB_DETAILS_TAB_METRICS]: UA_DETAIL_PANEL_METRICS_TAB_CLICK,
+  [JOB_DETAILS_TAB_JSON]: UA_DETAIL_PANEL_JSON_TAB_CLICK,
+};
 
 export class DetailPanelUi extends Component {
   static propTypes = {
@@ -96,7 +113,10 @@ export class DetailPanelUi extends Component {
       const isSelected = tab === panelType;
       renderedTabs.push(
         <EuiTab
-          onClick={() => openDetailPanel({ panelType: tab, jobId: id })}
+          onClick={() => {
+            trackUserAction(tabToUserActionMap[tab]);
+            openDetailPanel({ panelType: tab, jobId: id });
+          }}
           isSelected={isSelected}
           data-test-subj={`detailPanelTab${isSelected ? 'Selected' : ''}`}
           key={index}
