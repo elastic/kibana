@@ -48,6 +48,7 @@ export class SavedObjectsRepository {
     //
     // The migrator performs double-duty, and validates the documents prior
     // to returning them.
+    this.errors = errors;
     this._migrator = migrator;
     this._index = index;
     this._mappings = mappings;

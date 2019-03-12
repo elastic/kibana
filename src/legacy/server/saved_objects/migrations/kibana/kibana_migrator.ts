@@ -74,9 +74,6 @@ export class KibanaMigrator {
   public awaitMigration = once(async () => {
     const { server } = this.kbnServer;
 
-    // Wait until the plugins have been found an initialized...
-    await this.kbnServer.ready();
-
     // We can't do anything if the elasticsearch plugin has been disabled.
     if (!server.plugins.elasticsearch) {
       server.log(

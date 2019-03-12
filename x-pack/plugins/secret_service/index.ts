@@ -68,17 +68,12 @@ export const secretService = (kibana: any) => {
       // validate key used
       const invalidMessage =
         'Could not validate encryption key, please make sure that the right key is in the keystore!';
-      service
-        .validateKey()
-        .then(valid => {
-          if (!valid) {
-            this.status.red(invalidMessage);
-          }
-        })
-        .catch(e => {
-          this.status.red(`Error trying to validate the encryption key ${e.message}`);
-        });
 
+      const valid = await service.validateKey();
+
+      if (!valid) {
+        throw new Error(invalidMessage);
+      }
       server.expose('secretService', service);
     },
   });
