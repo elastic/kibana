@@ -45,7 +45,7 @@ function DefaultEditorAggSelect({
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
   // we added default value for agg and aggTypeOptions. It can be removed after 'agg_params' is converted to React
   agg = {},
-  aggType = {},
+  aggType = { title: '' },
   aggTypeOptions = [],
   aggHelpLink,
   isSelectValid,
