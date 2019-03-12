@@ -34,7 +34,9 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      reindexIndexName={deprecation.reindex ? deprecation.index! : undefined}
+      indexName={deprecation.index}
+      reindex={deprecation.reindex}
+      needsDefaultFields={deprecation.needsDefaultFields}
       docUrl={deprecation.url}
       items={items}
     />
@@ -89,6 +91,7 @@ export const DeprecationList: StatelessComponent<{
       index: dep.index!,
       details: dep.details,
       reindex: dep.reindex === true,
+      needsDefaultFields: dep.needsDefaultFields === true,
     }));
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
