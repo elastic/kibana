@@ -17,8 +17,6 @@
  * under the License.
  */
 
-export { bootstrap } from './bootstrap';
-export { Server } from './server';
 export { CallAPIOptions, ClusterClient } from './elasticsearch';
 export { Logger, LoggerFactory } from './logging';
 export { PluginInitializerContext, PluginName, PluginStartContext } from './plugins';
