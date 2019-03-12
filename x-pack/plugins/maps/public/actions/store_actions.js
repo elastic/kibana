@@ -389,18 +389,22 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return ({
-    type: LAYER_DATA_LOAD_ENDED,
-    layerId,
-    dataId,
-    data,
-    meta,
-    requestToken
-  });
+  return (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
+    dispatch({
+      type: LAYER_DATA_LOAD_ENDED,
+      layerId,
+      dataId,
+      data,
+      meta,
+      requestToken
+    });
+  };
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return async (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
