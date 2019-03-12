@@ -8,6 +8,10 @@ cd "$(dirname "$0")/.."
 source src/dev/ci_setup/extract_bootstrap_cache.sh
 source src/dev/ci_setup/setup.sh
 
+echo "############# HELLO HELLO HELLO"
+echo $ghprbActualCommit | wc -m
+echo $GITHUB_TOKEN | wc -m
+
 case "$JOB" in
 kibana-intake)
   ./test/scripts/jenkins_unit.sh
