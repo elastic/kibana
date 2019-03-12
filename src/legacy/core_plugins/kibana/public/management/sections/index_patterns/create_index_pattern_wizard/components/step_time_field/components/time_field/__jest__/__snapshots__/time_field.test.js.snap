@@ -56,6 +56,7 @@ exports[`TimeField should render a loading state 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -143,6 +144,7 @@ exports[`TimeField should render a selected time field 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -232,6 +234,7 @@ exports[`TimeField should render normally 1`] = `
         </EuiFlexItem>
       </EuiFlexGroup>
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}

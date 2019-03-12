@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter } from 'react-router-dom';
 
 // @ts-ignore Prevent auto-format from deleting - needed for 'chrome/ui' imports in host_details/ip_details
 jest.mock('ui/chrome', () => ({
@@ -68,6 +68,7 @@ describe('Navigation Breadcrumbs', () => {
           <HeaderBreadcrumbs />
         </MemoryRouter>
       );
+      wrapper.update();
       expect(wrapper.find('Navigation').length).toEqual(1);
       expect(wrapper.find('EuiBreadcrumbs').length).toEqual(0);
     });
@@ -79,6 +80,7 @@ describe('Navigation Breadcrumbs', () => {
           <HeaderBreadcrumbs />
         </MemoryRouter>
       );
+      wrapper.update();
       expect(wrapper.find('Navigation').length).toEqual(0);
       expect(wrapper.find('EuiBreadcrumbs').length).toEqual(1);
     });

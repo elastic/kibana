@@ -469,7 +469,7 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
                                                         >
                                                           <div
                                                             aria-roledescription="Draggable item. Press space bar to lift"
-                                                            className="sc-kEYyzF ljOknM"
+                                                            className="sc-kEYyzF dkUeNK"
                                                             data-react-beautiful-dnd-drag-handle="0"
                                                             data-react-beautiful-dnd-draggable="0"
                                                             data-test-subj="providerContainer"

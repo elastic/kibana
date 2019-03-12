@@ -8,6 +8,7 @@ import { resolve } from 'path';
 import { PLUGIN } from './common';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { rollupDataEnricher } from './rollup_data_enricher';
+import { registerRollupSearchStrategy } from './server/lib/search_strategies';
 import {
   registerIndicesRoute,
   registerFieldsForWildcardRoute,
@@ -38,15 +39,6 @@ export function rollup(kibana) {
       search: [
         'plugins/rollup/search',
       ],
-      migrations: {
-        'index-pattern': {
-          '6.5.0': (doc) => {
-            doc.attributes.type = doc.attributes.type || undefined;
-            doc.attributes.typeMeta = doc.attributes.typeMeta || undefined;
-            return doc;
-          }
-        },
-      }
     },
     init: function (server) {
       registerLicenseChecker(server);
@@ -61,6 +53,8 @@ export function rollup(kibana) {
       ) {
         server.plugins.index_management.addIndexManagementDataEnricher(rollupDataEnricher);
       }
+
+      registerRollupSearchStrategy(this.kbnServer, server);
     }
   });
 }

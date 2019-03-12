@@ -99,7 +99,7 @@ export class TaskManager {
           })
           .catch((err: Error) => {
             // FIXME: check the type of error to make sure it's actually an ES error
-            logger.warning(err.message);
+            logger.warning(`PollError ${err.message}`);
 
             // rety again to initialize store and poller, using the timing of
             // task_manager's configurable poll interval

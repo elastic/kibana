@@ -216,7 +216,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
           "getState": [Function],
           "replaceReducer": [Function],
           "subscribe": [Function],
-          Symbol(Symbol.observable): [Function],
+          Symbol(observable): [Function],
         }
       }
     >
@@ -623,7 +623,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                 >
                                                                   <div
                                                                     aria-roledescription="Draggable item. Press space bar to lift"
-                                                                    className="sc-kEYyzF ljOknM"
+                                                                    className="sc-kEYyzF dkUeNK"
                                                                     data-react-beautiful-dnd-drag-handle="0"
                                                                     data-react-beautiful-dnd-draggable="0"
                                                                     data-test-subj="providerContainer"
@@ -1630,7 +1630,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                   >
                                                                                     <div
                                                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                                                      className="sc-kEYyzF ljOknM"
+                                                                                      className="sc-kEYyzF dkUeNK"
                                                                                       data-react-beautiful-dnd-drag-handle="0"
                                                                                       data-react-beautiful-dnd-draggable="0"
                                                                                       data-test-subj="providerContainer"
@@ -2173,7 +2173,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                   >
                                                                                     <div
                                                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                                                      className="sc-kEYyzF ljOknM"
+                                                                                      className="sc-kEYyzF dkUeNK"
                                                                                       data-react-beautiful-dnd-drag-handle="0"
                                                                                       data-react-beautiful-dnd-draggable="0"
                                                                                       data-test-subj="providerContainer"
@@ -2847,7 +2847,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                   >
                                                                                     <div
                                                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                                                      className="sc-kEYyzF ljOknM"
+                                                                                      className="sc-kEYyzF dkUeNK"
                                                                                       data-react-beautiful-dnd-drag-handle="0"
                                                                                       data-react-beautiful-dnd-draggable="0"
                                                                                       data-test-subj="providerContainer"
@@ -3390,7 +3390,7 @@ exports[`SuricataDetails rendering it renders the default SuricataDetails 1`] = 
                                                                                   >
                                                                                     <div
                                                                                       aria-roledescription="Draggable item. Press space bar to lift"
-                                                                                      className="sc-kEYyzF ljOknM"
+                                                                                      className="sc-kEYyzF dkUeNK"
                                                                                       data-react-beautiful-dnd-drag-handle="0"
                                                                                       data-react-beautiful-dnd-draggable="0"
                                                                                       data-test-subj="providerContainer"

@@ -261,6 +261,7 @@ class TutorialUi extends React.Component {
       return (
         <InstructionSet
           title={instructionSet.title}
+          callOut={instructionSet.callOut}
           instructionVariants={instructionSet.instructionVariants}
           statusCheckConfig={instructionSet.statusCheck}
           statusCheckState={this.state.statusCheckStates[index]}

@@ -5,7 +5,7 @@
  */
 
 import expect from 'expect.js';
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -21,7 +21,6 @@ export default function ({ getService }) {
     it('should return no configurations for the beat without tags', async () => {
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:empty`,
         body: {
           type: 'beat',

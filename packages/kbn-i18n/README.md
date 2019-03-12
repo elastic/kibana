@@ -175,7 +175,7 @@ export function getGreetingMessage(userName) {
   return i18n.translate('hello.wonderful.world', {
     defaultMessage: 'Greetings, {name}!',
     values: { name: userName },
-    context: 'This is greeting message for main screen.'
+    description: 'This is greeting message for main screen.'
   });
 }
 ```

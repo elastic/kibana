@@ -145,7 +145,7 @@ export class EditSettingsJson extends React.PureComponent {
         <EuiLink
           href={settingsDocumentationLink}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
         >
           <FormattedMessage
             id="xpack.idxMgmt.editSettingsJSON.settingsReferenceLinkText"

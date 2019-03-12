@@ -44,12 +44,12 @@ $kbnTypeaheadTypes: (
     }
 
     .kbnTypeahead__item:last-child {
-      border-bottom: 0px;
+      border-bottom: none;
       border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
     }
 
     .kbnTypeahead__item:first-child {
-      border-bottom: 0px;
+      border-bottom: none;
       border-radius: $euiBorderRadius $euiBorderRadius 0 0;
     }
 
@@ -82,7 +82,6 @@ $kbnTypeaheadTypes: (
 
 .kbnSuggestionItem {
   display: flex;
-  align-items: stretch;
   flex-grow: 1;
   align-items: center;
   font-size: $euiFontSizeXS;
@@ -109,7 +108,9 @@ $kbnTypeaheadTypes: (
   }
 }
 
-.kbnSuggestionItem__text, .kbnSuggestionItem__type, .kbnSuggestionItem__description {
+.kbnSuggestionItem__text,
+.kbnSuggestionItem__type,
+.kbnSuggestionItem__description {
   flex-grow: 1;
   flex-basis: 0%;
   display: flex;

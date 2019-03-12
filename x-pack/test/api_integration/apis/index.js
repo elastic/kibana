@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('apis', function () {
-    this.tags('ciGroup5');
+    this.tags('ciGroup6');
 
     // These commented out tests are only for within the secops branch and should not be merged into master
     // loadTestFile(require.resolve('./es'));
@@ -24,5 +24,6 @@ export default function ({ loadTestFile }) {
     // loadTestFile(require.resolve('./beats'));
     // loadTestFile(require.resolve('./management'));
     // loadTestFile(require.resolve('./uptime'));
+    // loadTestFile(require.resolve('./maps'));
   });
 }

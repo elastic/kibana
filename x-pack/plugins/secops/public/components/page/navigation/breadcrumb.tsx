@@ -10,7 +10,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';

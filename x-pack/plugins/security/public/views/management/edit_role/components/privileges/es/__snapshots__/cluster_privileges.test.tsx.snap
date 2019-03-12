@@ -103,6 +103,10 @@ exports[`it renders without crashing 1`] = `
             "isGroupLabelOption": false,
             "label": "manage_saml",
           },
+          Object {
+            "isGroupLabelOption": false,
+            "label": "create_snapshot",
+          },
         ]
       }
       selectedOptions={Array []}

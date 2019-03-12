@@ -146,7 +146,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
     this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
 
-  private onChangeTopNFlowDirection = (topNFlowDirection: NetworkTopNFlowDirection) =>
+  private onChangeTopNFlowDirection = (id: string, topNFlowDirection: NetworkTopNFlowDirection) =>
     this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
 }
 

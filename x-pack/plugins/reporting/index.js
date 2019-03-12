@@ -7,8 +7,7 @@
 import { resolve } from 'path';
 import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { main as mainRoutes } from './server/routes/main';
-import { jobs as jobRoutes } from './server/routes/jobs';
+import { registerRoutes } from './server/routes';
 
 import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
@@ -95,10 +94,10 @@ export const reporting = (kibana) => {
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
             type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
-            autoDownload: Joi.boolean().when('$dev', {
+            autoDownload: Joi.boolean().when('$dist', {
               is: true,
-              then: Joi.default(true),
-              otherwise: Joi.default(false),
+              then: Joi.default(false),
+              otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
@@ -174,16 +173,15 @@ export const reporting = (kibana) => {
       server.expose('queue', createQueueFactory(server));
 
       // Reporting routes
-      mainRoutes(server);
-      jobRoutes(server);
+      registerRoutes(server);
     },
 
     deprecations: function ({ unused }) {
       return [
-        unused("capture.concurrency"),
-        unused("capture.timeout"),
-        unused("capture.settleTime"),
-        unused("kibanaApp"),
+        unused('capture.concurrency'),
+        unused('capture.timeout'),
+        unused('capture.settleTime'),
+        unused('kibanaApp'),
       ];
     },
   });
