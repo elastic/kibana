@@ -11,6 +11,7 @@ import { makeUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeleteTasksRoutes } from './routes/delete_tasks';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
+import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
 import { registerTelemetryRoutes } from './routes/telemetry';
 
@@ -18,6 +19,7 @@ export function initServer(server: Legacy.Server) {
   registerClusterCheckupRoutes(server);
   registerDeleteTasksRoutes(server);
   registerDeprecationLoggingRoutes(server);
+  registerQueryDefaultFieldRoutes(server);
 
   // The ReindexWorker uses a map of request headers that contain the authentication credentials
   // for a given reindex. We cannot currently store these in an the .kibana index b/c we do not
