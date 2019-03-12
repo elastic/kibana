@@ -66,8 +66,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
       },
       toMatchSnapshot: async () => {
         const pipelineResponse = await handler.getResponse();
-        const diff = await snapshots.compareAgainstBaseline(name, pipelineResponse, updateBaselines);
-        expect(diff).to.be.lessThan(0.05);
+        await snapshots.compareAgainstBaseline(name, pipelineResponse, updateBaselines);
         return handler;
       },
       toMatchScreenshot: async () => {

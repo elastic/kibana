@@ -19,7 +19,6 @@
 
 import expect from 'expect.js';
 import { expectExpressionProvider } from './helpers';
-import { delay } from 'bluebird';
 
 export default function ({ getService, updateBaselines }) {
 
@@ -27,10 +26,6 @@ export default function ({ getService, updateBaselines }) {
   describe('basic visualize loader pipeline expression tests', () => {
     before(() => {
       expectExpression = expectExpressionProvider({ getService, updateBaselines });
-    });
-
-    after(async () => {
-      await delay(50000);
     });
 
     // we should not use this for tests like the ones below. this should be unit tested.

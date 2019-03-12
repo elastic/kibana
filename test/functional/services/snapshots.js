@@ -39,8 +39,9 @@ export async function SnapshotsProvider({ getService }) {
     /**
      *
      * @param name {string} name of the file to use for comparison
+     * @param value {object} value to compare to baseline.
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
-     * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
+     * @return {Promise.<number>} returns 0 if successful.
      */
     async compareAgainstBaseline(name, value, updateBaselines) {
       log.debug('compareAgainstBaseline');

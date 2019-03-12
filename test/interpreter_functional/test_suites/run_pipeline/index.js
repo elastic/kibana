@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
-
 export default function ({ getService, getPageObjects, loadTestFile }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
@@ -34,7 +32,6 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Run Pipeline');
-      await delay(5000);
     });
 
     loadTestFile(require.resolve('./basic'));
