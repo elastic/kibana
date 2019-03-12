@@ -333,8 +333,11 @@ const buildVisConfig: BuildVisConfigFunction = {
   },
 };
 
-export const buildVislibDimensions = async (vis: any, timeRange?: any, searchSource: any) => {
-  const schemas = getSchemas(vis, timeRange);
+export const buildVislibDimensions = async (
+  vis: any,
+  params: { searchSource: any; timeRange?: any }
+) => {
+  const schemas = getSchemas(vis, params.timeRange);
   const dimensions = {
     x: schemas.segment ? schemas.segment[0] : null,
     y: schemas.metric,
@@ -351,10 +354,10 @@ export const buildVislibDimensions = async (vis: any, timeRange?: any, searchSou
       dimensions.x.params.interval = xAgg.buckets.getInterval().asMilliseconds();
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
-    } else if (xAgg.type.name === 'histogram' && searchSource) {
+    } else if (xAgg.type.name === 'histogram') {
       const intervalParam = xAgg.type.params.byName.interval;
-      const output = { params: {} };
-      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, searchSource);
+      const output = { params: {} as any };
+      await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, params.searchSource);
       intervalParam.write(xAgg, output);
       dimensions.x.params.interval = output.params.interval;
     }
@@ -377,7 +380,7 @@ export const getVisParams = async (
       ...buildVisConfig[vis.type.name](schemas, visConfig),
     };
   } else if (vislibCharts.includes(vis.type.name)) {
-    visConfig.dimensions = await buildVislibDimensions(vis, params.timeRange, params.searchSource);
+    visConfig.dimensions = await buildVislibDimensions(vis, params);
   }
   return visConfig;
 };
@@ -420,7 +423,7 @@ export const buildPipeline = async (
     pipeline += buildPipelineVisFunction[vis.type.name](visState, schemas, uiState);
   } else if (vislibCharts.includes(vis.type.name)) {
     const visConfig = visState.params;
-    visConfig.dimensions = await buildVislibDimensions(vis, params.timeRange, params.searchSource);
+    visConfig.dimensions = await buildVislibDimensions(vis, params);
 
     pipeline += `vislib ${prepareJson('visConfig', visState.params)}`;
   } else {
