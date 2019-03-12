@@ -43,7 +43,7 @@ export function natsLogsSpecProvider(server, context) {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-nats.html',
       },
     }),
-    euiIconType: 'logoNats',
+    // euiIconType: 'logoNats',
     artifacts: {
       application: {
         label: i18n.translate('kbn.server.tutorials.natsLogs.artifacts.application.label', {
