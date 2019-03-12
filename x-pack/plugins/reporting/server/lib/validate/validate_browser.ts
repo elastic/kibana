@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as puppeteer from 'puppeteer-core';
-import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { KbnServer, Logger } from '../../../types';
 import { CHROMIUM } from '../../browsers/browser_types';
-
-const API_STATS_ENDPOINT = '/api/stats';
 
 /*
  * Validate the Reporting headless browser can launch, and that it can connect
@@ -23,18 +20,6 @@ export const validateBrowser = async (server: KbnServer, browserFactory: any, lo
         },
         logger
       )
-      .then(async (browser: puppeteer.Browser | null) => {
-        if (browser && browser.newPage) {
-          const getAbsoluteUrl = getAbsoluteUrlFactory(server);
-          const page = await browser.newPage();
-          const url = getAbsoluteUrl({ path: API_STATS_ENDPOINT });
-          logger.debug(`Opening page ${url}`);
-          await page.goto(url, { waitUntil: 'networkidle0' }); // see if this fails
-        } else {
-          throw new Error('Could not get handle to browser client!');
-        }
-        return browser;
-      })
       .then((browser: puppeteer.Browser | null) => {
         if (browser && browser.close) {
           browser.close();
