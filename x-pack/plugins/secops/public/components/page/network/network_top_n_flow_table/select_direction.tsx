@@ -21,26 +21,29 @@ type MyEuiButtonGroupProps = Pick<
 
 const MyEuiButtonGroup: React.SFC<MyEuiButtonGroupProps> = EuiButtonGroup;
 
-const toggleButtonDirection = [
+const getToggleButtonDirection = (id: string) => [
   {
-    id: NetworkTopNFlowDirection.uniDirectional,
+    id: `${id}-${NetworkTopNFlowDirection.uniDirectional}`,
     label: i18n.UNIDIRECTIONAL,
+    value: NetworkTopNFlowDirection.uniDirectional,
   },
   {
-    id: NetworkTopNFlowDirection.biDirectional,
+    id: `${id}-${NetworkTopNFlowDirection.biDirectional}`,
     label: i18n.BIDIRECTIONAL,
+    value: NetworkTopNFlowDirection.biDirectional,
   },
 ];
 
 interface Props {
+  id: string;
   selectedDirection: NetworkTopNFlowDirection;
   onChangeDirection: (id: string, value: NetworkTopNFlowDirection) => void;
 }
 
-export const SelectDirection = pure<Props>(({ onChangeDirection, selectedDirection }) => (
+export const SelectDirection = pure<Props>(({ id, onChangeDirection, selectedDirection }) => (
   <MyEuiButtonGroup
     name="direction"
-    options={toggleButtonDirection}
+    options={getToggleButtonDirection(id)}
     idSelected={selectedDirection}
     onChange={onChangeDirection}
     color="primary"
