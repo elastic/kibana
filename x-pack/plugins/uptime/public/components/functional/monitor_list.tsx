@@ -87,8 +87,10 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               const name = get(monitor, 'ping.monitor.name');
               return (
                 <div>
-                  <Link to={`/monitor/${id}`}>{name ? name : <em>[Unnamed]</em>}</Link>
-                  <div>{id}</div>
+                  <Link to={`/monitor/${id}`} className="ut-monitor-name">
+                    {name ? name : <em>[Unnamed]</em>}
+                  </Link>
+                  <div className="ut-monitor-id">{id}</div>
                 </div>
               );
             },
