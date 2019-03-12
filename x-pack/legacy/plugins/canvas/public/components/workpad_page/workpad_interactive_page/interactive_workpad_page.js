@@ -7,6 +7,7 @@
 import React, { PureComponent } from 'react';
 import { ElementWrapper } from '../../element_wrapper';
 import { AlignmentGuide } from '../../alignment_guide';
+import { DragBoxAnnotation } from '../../dragbox_annotation';
 import { HoverAnnotation } from '../../hover_annotation';
 import { TooltipAnnotation } from '../../tooltip_annotation';
 import { RotationHandle } from '../../rotation_handle';
@@ -107,6 +108,8 @@ export class InteractiveWorkpadPage extends PureComponent {
                 case 'adHocChildAnnotation': // now sharing aesthetics but may diverge in the future
                 case 'hoverAnnotation': // fixme: with the upcoming TS work, use enumerative types here
                   return <HoverAnnotation {...props} />;
+                case 'dragBoxAnnotation':
+                  return <DragBoxAnnotation {...props} />;
                 case 'rotationHandle':
                   return <RotationHandle {...props} />;
                 case 'resizeHandle':
@@ -123,6 +126,16 @@ export class InteractiveWorkpadPage extends PureComponent {
             }
           })
           .filter(element => !!element)}
+        <div
+          style={{
+            width: 2000,
+            height: 2000,
+            left: -500,
+            top: -500,
+            position: 'absolute',
+            backgroundColor: 'rgba(255, 255, 255, 0.01)',
+          }}
+        />
       </div>
     );
   }
