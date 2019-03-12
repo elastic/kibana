@@ -14,9 +14,6 @@ export const UptimeProvider = ({ getService }: KibanaFunctionalTestDefaultProvid
         throw new Error(`Couldn't find expected element with key "${key}".`);
       }
     },
-    async navigateToPlugin() {
-      await testSubjects.click('homeSynopsisLinkuptime');
-    },
     async monitorIdExists(key: string) {
       await testSubjects.existOrFail(key);
     },
