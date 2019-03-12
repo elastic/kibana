@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, createRef, Fragment } from 'react';
 import * as Rx from 'rxjs';
 
 import {
@@ -131,6 +131,7 @@ interface State {
 
 class HeaderUI extends Component<Props, State> {
   private subscription?: Rx.Subscription;
+  private navDrawerRef = createRef<EuiNavDrawer>();
 
   constructor(props: Props) {
     super(props);
@@ -186,14 +187,12 @@ class HeaderUI extends Component<Props, State> {
     return (
       <EuiHeaderSectionItemButton
         aria-label="Toggle side navigation"
-        onClick={() => this.navDrawerRef.toggleOpen()}
+        onClick={() => this.navDrawerRef.current.toggleOpen()}
       >
         <EuiIcon type="apps" size="m" />
       </EuiHeaderSectionItemButton>
     );
   }
-
-  public setNavDrawerRef = ref => (this.navDrawerRef = ref);
 
   public render() {
     const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
@@ -270,7 +269,7 @@ class HeaderUI extends Component<Props, State> {
           </EuiHeaderSection>
         </EuiHeader>
 
-        <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj="navDrawer">
+        <EuiNavDrawer ref={this.navDrawerRef} data-test-subj="navDrawer">
           <EuiNavDrawerGroup listItems={recentLinksArray} />
           <EuiHorizontalRule margin="none" />
           <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
