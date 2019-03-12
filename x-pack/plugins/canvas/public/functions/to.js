@@ -5,7 +5,7 @@
  */
 
 import { castProvider } from '@kbn/interpreter/common';
-import { registries } from '@kbn/interpreter/server';
+import { registries } from '@kbn/interpreter/public';
 
 export const to = () => ({
   name: 'to',
