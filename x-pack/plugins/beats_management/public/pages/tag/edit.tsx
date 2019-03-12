@@ -26,13 +26,7 @@ import { BeatsCMTable } from '../../connected_views/beats_table';
 import { AppPageProps } from '../../frontend_types';
 interface TagPageState {
   showFlyout: boolean;
-  attachedBeats: {
-    list: ConfigurationBlock[];
-    page: number;
-    total: number;
-  };
   tag: BeatTag;
-  beatsTags: BeatTag[];
   configuration_blocks: {
     error?: string | undefined;
     list: ConfigurationBlock[];
@@ -51,12 +45,6 @@ class TagEditPageComponent extends React.PureComponent<
 
     this.state = {
       showFlyout: false,
-      attachedBeats: {
-        list: [],
-        page: 0,
-        total: 0,
-      },
-      beatsTags: [],
       tag: {
         id: props.match.params.tagid,
         name: '',
