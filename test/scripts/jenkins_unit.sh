@@ -14,4 +14,4 @@ trap report EXIT
 
 export TEST_BROWSER_HEADLESS=1
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source --dev;
+"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;
