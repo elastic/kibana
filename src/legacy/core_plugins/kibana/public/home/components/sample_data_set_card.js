@@ -55,8 +55,6 @@ export class SampleDataSetCard extends React.Component {
     this.props.onUninstall(this.props.id);
   }
 
-  //launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
-
   renderViewDataButton = () => {
     const dashboardPath = chrome.addBasePath(`/app/kibana#/dashboard/${this.props.overviewDashboard}`);
     if (this.props.appLinks.length === 0) {
