@@ -9,6 +9,7 @@ import React from 'react';
 
 import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { FixDefaultFieldsButton } from './default_fields/button';
 import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
@@ -16,6 +17,7 @@ const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 export interface IndexDeprecationDetails {
   index: string;
   reindex: boolean;
+  needsDefaultFields: boolean;
   details?: string;
 }
 
@@ -135,7 +137,9 @@ export class IndexDeprecationTableUI extends React.Component<
     // NOTE: this naive implementation assumes all indices in the table are
     // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.reindex === true)) {
+    const showReindexButton = indices.find(i => i.reindex === true);
+    const showNeedsDefaultFieldsButton = indices.find(i => i.needsDefaultFields === true);
+    if (!showReindexButton && !showNeedsDefaultFieldsButton) {
       return null;
     }
 
@@ -143,7 +147,11 @@ export class IndexDeprecationTableUI extends React.Component<
       actions: [
         {
           render(indexDep: IndexDeprecationDetails) {
-            return <ReindexButton indexName={indexDep.index!} />;
+            if (showReindexButton) {
+              return <ReindexButton indexName={indexDep.index!} />;
+            } else {
+              return <FixDefaultFieldsButton indexName={indexDep.index!} />;
+            }
           },
         },
       ],
