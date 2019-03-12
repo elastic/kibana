@@ -89,8 +89,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.6.2]]
 == {kib} 6.6.2
 
-coming[6.6.2]
-
 See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of 
 when migrating your application from one version of Kibana to another.
 
@@ -113,7 +111,6 @@ Monitoring::
 * Ensures that bulk uploader only starts once {pull}31307[#31307]
 Operations::
 * Bumps Node to 10.15.2 {pull}32200[#32200]
-* Fixes navbar icons missing directives {pull}31450[#31450]
 Visualizations::
 * Formats Time Series Visual Builder error message {pull}31569[#31569]
 
