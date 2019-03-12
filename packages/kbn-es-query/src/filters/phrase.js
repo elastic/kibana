@@ -40,7 +40,7 @@ export function getPhraseScript(field, value) {
 
   return {
     script: {
-      inline: script,
+      source: script,
       lang: field.lang,
       params: {
         value: convertedValue

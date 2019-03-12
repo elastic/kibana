@@ -19,7 +19,7 @@ export interface InfraSource {
   /** The id of the source */
   id: string;
   /** The version number the source configuration was last persisted with */
-  version?: number | null;
+  version?: string | null;
   /** The timestamp the source configuration was last persisted at */
   updatedAt?: number | null;
   /** The raw configuration of the source */
@@ -34,6 +34,8 @@ export interface InfraSource {
   logEntriesBetween: InfraLogEntryInterval;
   /** A consecutive span of summary buckets within an interval */
   logSummaryBetween: InfraLogSummaryInterval;
+
+  logItem: InfraLogItem;
   /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
   map?: InfraResponse | null;
 
@@ -179,6 +181,22 @@ export interface InfraLogSummaryBucket {
   entriesCount: number;
 }
 
+export interface InfraLogItem {
+  /** The ID of the document */
+  id: string;
+  /** The index where the document was found */
+  index: string;
+  /** An array of flattened fields and values */
+  fields: InfraLogItemField[];
+}
+
+export interface InfraLogItemField {
+  /** The flattened field name */
+  field: string;
+  /** The value for the Field as a string */
+  value: string;
+}
+
 export interface InfraResponse {
   nodes: InfraNode[];
 }
@@ -199,6 +217,10 @@ export interface InfraNodeMetric {
   name: InfraMetricType;
 
   value: number;
+
+  avg: number;
+
+  max: number;
 }
 
 export interface InfraMetricData {
@@ -397,6 +419,9 @@ export interface LogSummaryBetweenInfraSourceArgs {
   /** The query to filter the log entries by */
   filterQuery?: string | null;
 }
+export interface LogItemInfraSourceArgs {
+  id: string;
+}
 export interface MapInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
@@ -458,6 +483,7 @@ export enum InfraPathType {
   hosts = 'hosts',
   pods = 'pods',
   containers = 'containers',
+  custom = 'custom',
 }
 
 export enum InfraMetricType {
@@ -522,6 +548,45 @@ export type InfraLogMessageSegment = InfraLogMessageFieldSegment | InfraLogMessa
 // ====================================================
 // Documents
 // ====================================================
+
+export namespace FlyoutItemQuery {
+  export type Variables = {
+    sourceId: string;
+    itemId: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logItem: LogItem;
+  };
+
+  export type LogItem = {
+    __typename?: 'InfraLogItem';
+
+    id: string;
+
+    index: string;
+
+    fields: Fields[];
+  };
+
+  export type Fields = {
+    __typename?: 'InfraLogItemField';
+
+    field: string;
+
+    value: string;
+  };
+}
 
 export namespace MetadataQuery {
   export type Variables = {
@@ -660,6 +725,10 @@ export namespace WaffleNodesQuery {
     name: InfraMetricType;
 
     value: number;
+
+    avg: number;
+
+    max: number;
   };
 }
 
@@ -847,7 +916,7 @@ export namespace SourceFields {
 
     id: string;
 
-    version?: number | null;
+    version?: string | null;
 
     updatedAt?: number | null;
 

@@ -34,7 +34,7 @@ exports[`FilterBar component renders without errors 1`] = `
           Object {
             "field": "monitor.id",
             "multiSelect": false,
-            "name": "Host",
+            "name": "ID",
             "options": Array [
               Object {
                 "value": "http@http://localhost:12349/",

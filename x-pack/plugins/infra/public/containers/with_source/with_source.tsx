@@ -89,15 +89,28 @@ const createContainerProps = memoizeLast((sourceId: string, apolloClient: Apollo
       undefined,
     getDerivedIndexPattern: () => getDerivedIndexPattern,
     getVersion: () => state => (state && state.source && state.source.version) || undefined,
-    getExists: () => state =>
-      (state && state.source && typeof state.source.version === 'number') || false,
+    getExists: () => state => (state && state.source && !!state.source.version) || false,
   });
 
   const effects = inferEffectMap<State>()({
     create: (sourceConfiguration: CreateSourceInput) => ({ setState }) => {
       const variables = {
         sourceId,
-        sourceConfiguration,
+        sourceConfiguration: {
+          name: sourceConfiguration.name,
+          description: sourceConfiguration.description,
+          metricAlias: sourceConfiguration.metricAlias,
+          logAlias: sourceConfiguration.logAlias,
+          fields: sourceConfiguration.fields
+            ? {
+                container: sourceConfiguration.fields.container,
+                host: sourceConfiguration.fields.host,
+                pod: sourceConfiguration.fields.pod,
+                tiebreaker: sourceConfiguration.fields.tiebreaker,
+                timestamp: sourceConfiguration.fields.timestamp,
+              }
+            : undefined,
+        },
       };
 
       setState(actions.startOperation({ name: 'create', parameters: variables }));
@@ -219,7 +232,7 @@ interface WithSourceProps {
     metricIndicesExist?: boolean;
     sourceId: string;
     update: (changes: UpdateSourceInput[]) => Promise<any>;
-    version?: number;
+    version?: string;
   }>;
 }
 
