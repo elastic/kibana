@@ -27,15 +27,10 @@ exports[`TimeField should render a loading state 1`] = `
     label={
       <EuiFlexGroup
         alignItems="center"
-        component="div"
-        direction="row"
         gutterSize="xs"
         justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <span>
@@ -47,7 +42,6 @@ exports[`TimeField should render a loading state 1`] = `
           </span>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiLoadingSpinner
@@ -106,15 +100,10 @@ exports[`TimeField should render a selected time field 1`] = `
     label={
       <EuiFlexGroup
         alignItems="center"
-        component="div"
-        direction="row"
         gutterSize="xs"
         justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <span>
@@ -126,7 +115,6 @@ exports[`TimeField should render a selected time field 1`] = `
           </span>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiLink
@@ -196,15 +184,10 @@ exports[`TimeField should render normally 1`] = `
     label={
       <EuiFlexGroup
         alignItems="center"
-        component="div"
-        direction="row"
         gutterSize="xs"
         justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <span>
@@ -216,7 +199,6 @@ exports[`TimeField should render normally 1`] = `
           </span>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiLink
