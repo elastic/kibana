@@ -74,6 +74,8 @@ interface Props {
   intl: InjectedIntl;
 }
 
+const TRUNCAT_LIMIT: number = 64;
+
 function extendRecentlyAccessedHistoryItem(
   navLinks: NavLink[],
   recentlyAccessed: RecentlyAccessedHistoryItem
@@ -108,6 +110,14 @@ function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
 
     current = current.parentElement;
   }
+}
+
+function truncateRecentItemLabel(label: string): string {
+  if (label.length > TRUNCAT_LIMIT) {
+    label = `${label.substring(0, TRUNCAT_LIMIT)}…`;
+  }
+
+  return label;
 }
 
 interface State {
@@ -201,7 +211,6 @@ class HeaderUI extends Component<Props, State> {
             label: navLink.title,
             href: navLink.href,
             iconType: navLink.euiIconType,
-            'aria-label': navLink.title,
             isActive: navLink.active,
             'data-test-subj': 'navDrawerAppsMenuLink',
           }
@@ -216,10 +225,6 @@ class HeaderUI extends Component<Props, State> {
           defaultMessage: 'Recently viewed',
         }),
         iconType: 'clock',
-        'aria-label': intl.formatMessage({
-          id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
-          defaultMessage: 'Recently viewed',
-        }),
         isDisabled: recentlyAccessed.length > 0 ? false : true,
         flyoutMenu: {
           title: intl.formatMessage({
@@ -227,10 +232,12 @@ class HeaderUI extends Component<Props, State> {
             defaultMessage: 'Recent items',
           }),
           listItems: recentlyAccessed.map(item => ({
-            label: item.label,
+            label: truncateRecentItemLabel(item.label),
+            // TODO: Add what type of app/saved object to title attr
+            title: `${item.label}`,
+            'aria-label': item.label,
             href: item.href,
             iconType: item.euiIconType,
-            'aria-label': item.label,
           })),
         },
       },
