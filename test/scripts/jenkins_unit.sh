@@ -12,8 +12,6 @@ function report {
 
 trap report EXIT
 
-source src/dev/ci_setup/checkout_sibling_es.sh
-
 export TEST_BROWSER_HEADLESS=1
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source --dev;
