@@ -26,12 +26,14 @@ else
   exit 1
 fi
 
-kbnBranch="$(jq -r .version "$KIBANA_DIR/package.json")"
-parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
+
+parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
+
+kbnBranch="$(jq -r .version "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
 echo "-> KIBANA_DIR='$KIBANA_DIR'"
