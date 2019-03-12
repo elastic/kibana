@@ -23,7 +23,6 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const retry = getService('retry');
-  const globalNav = getService('globalNav');
 
   return new class AppsMenu {
     /**
