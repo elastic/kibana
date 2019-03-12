@@ -23,13 +23,7 @@ import { idx } from 'x-pack/plugins/apm/common/idx';
 import { ErrorDistributionRequest } from '../../../store/reactReduxRequest/errorDistribution';
 import { ErrorGroupDetailsRequest } from '../../../store/reactReduxRequest/errorGroup';
 import { IUrlParams } from '../../../store/urlParams';
-import {
-  fontFamilyCode,
-  fontSizes,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 // @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';
 import { DetailView } from './DetailView';
