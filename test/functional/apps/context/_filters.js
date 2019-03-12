@@ -27,6 +27,7 @@ const TEST_ANCHOR_FILTER_VALUE = 'IN';
 const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'context']);
@@ -59,10 +60,10 @@ export default function ({ getService, getPageObjects }) {
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       expect(hasOnlyFilteredRows).to.be(true);
-    });
 
-    it('should be toggleable via the filter bar', async function () {
-      const table = await docTable.getTable();
+      //TODO: Change the variables in the second assertion to something better than adding a 2 on the end.
+      log.info('sub_it: should be toggleable via the filter bar');
+      const table2 = await docTable.getTable();
       await filterBar.addFilter(TEST_ANCHOR_FILTER_FIELD, 'IS', TEST_ANCHOR_FILTER_VALUE);
       await PageObjects.context.waitUntilContextLoadingHasFinished();
       // disable filter
@@ -71,13 +72,13 @@ export default function ({ getService, getPageObjects }) {
 
       expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
 
-      const rows = await docTable.getBodyRows(table);
-      const hasOnlyFilteredRows = (
-        await Promise.all(rows.map(
+      const rows2 = await docTable.getBodyRows(table2);
+      const hasOnlyFilteredRows2 = (
+        await Promise.all(rows2.map(
           async (row) => await (await docTable.getFields(row))[2].getVisibleText()
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-      expect(hasOnlyFilteredRows).to.be(false);
+      expect(hasOnlyFilteredRows2).to.be(false);
     });
   });
 }

@@ -26,6 +26,7 @@ const TEST_DEFAULT_CONTEXT_SIZE = 7;
 const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
@@ -54,29 +55,28 @@ export default function ({ getService, getPageObjects }) {
         const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
         expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
-    });
 
-    it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
+
+      log.info('sub_it: should increase according to the `context:step` setting when clicking the `load newer` button');
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
-      const table = await docTable.getTable();
+      const table2 = await docTable.getTable();
       await PageObjects.context.clickPredecessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        expect(await docTable.getBodyRows(table2)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });
-    });
 
-    it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
+      log.info('should increase according to the `context:step` setting when clicking the `load older` button');
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_TYPE, TEST_ANCHOR_ID);
 
-      const table = await docTable.getTable();
+      const table3 = await docTable.getTable();
       await PageObjects.context.clickSuccessorLoadMoreButton();
 
       await retry.try(async function () {
-        expect(await docTable.getBodyRows(table)).to.have.length(
+        expect(await docTable.getBodyRows(table3)).to.have.length(
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });

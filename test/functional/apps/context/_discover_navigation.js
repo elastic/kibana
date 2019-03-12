@@ -25,6 +25,7 @@ const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [['extension', 'jpg'], ['geo.src', 'IN']];
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }) {
       }));
     });
 
-    it('should open the context view with the selected document as anchor', async function () {
+    it('should use context view in different scenarios', async function () {
       const discoverDocTable = await docTable.getTable();
       const firstRow = (await docTable.getBodyRows(discoverDocTable))[0];
 
@@ -64,9 +65,9 @@ export default function ({ getService, getPageObjects }) {
           .getVisibleText();
         expect(anchorTimestamp).to.equal(firstTimestamp);
       });
-    });
 
-    it('should open the context view with the same columns', async function () {
+
+      log.info('sub_it: open the context view with the same columns');
       const table = await docTable.getTable();
       await retry.try(async () => {
         const headerFields = await docTable.getHeaderFields(table);
@@ -78,9 +79,8 @@ export default function ({ getService, getPageObjects }) {
           ...TEST_COLUMN_NAMES,
         ]);
       });
-    });
 
-    it('should open the context view with the filters disabled', async function () {
+      log.info('dub_it: open the context view with the filters disabled');
       const hasDisabledFilters = (
         await Promise.all(TEST_FILTER_COLUMN_NAMES.map(
           ([columnName, value]) => filterBar.hasFilter(columnName, value, false)
