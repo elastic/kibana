@@ -206,6 +206,7 @@ export class FollowerIndicesList extends PureComponent {
             />
           </EuiButton>
         }
+        data-test-subj="ccrFollowerIndexEmptyPrompt"
       />
     );
   }
@@ -221,7 +222,7 @@ export class FollowerIndicesList extends PureComponent {
 
     if (apiStatus === API_STATUS.LOADING) {
       return (
-        <SectionLoading>
+        <SectionLoading dataTestSubj="ccrFollowerIndexLoading">
           <FormattedMessage
             id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
             defaultMessage="Loading follower indices..."

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerTestBed } from './testbed';
-export { getRandomString, nextTick } from './lib';
+
+export const nextTick = async (time = 0) => new Promise((resolve) => setTimeout(resolve), time);

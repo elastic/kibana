@@ -11,11 +11,12 @@ import {
 } from '@elastic/eui';
 
 export function SectionError({ title, error }) {
+  const data = error.data ? error.data : error;
   const {
     error: errorString,
     cause, // wrapEsError() on the server add a "cause" array
     message,
-  } = error.data;
+  } = data;
 
   return (
     <EuiCallOut

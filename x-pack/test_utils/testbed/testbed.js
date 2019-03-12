@@ -11,10 +11,16 @@ import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test'
 
 const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
 
+const history = {
+  location: { search: '' },
+  replace: () => {}
+};
+
 export const registerTestBed = (Component, defaultProps, store = {}) => (props) => {
   const component = mountWithIntl(
     <Provider store={store}>
       <Component
+        history={history}
         {...defaultProps}
         {...props}
       />

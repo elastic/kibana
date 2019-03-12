@@ -14,12 +14,13 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-export function SectionLoading({ children }) {
+export function SectionLoading({ children, dataTestSubj = '' }) {
   return (
     <EuiFlexGroup
       justifyContent="flexStart"
       alignItems="center"
       gutterSize="s"
+      data-test-subj={dataTestSubj}
     >
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="m" />
