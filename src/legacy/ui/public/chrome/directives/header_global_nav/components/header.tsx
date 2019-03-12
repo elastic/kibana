@@ -19,7 +19,6 @@
 
 import Url from 'url';
 
-import classNames from 'classnames';
 import React, { Component, Fragment } from 'react';
 import * as Rx from 'rxjs';
 
@@ -39,11 +38,12 @@ import {
   EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  EuiListGroup,
   // @ts-ignore
   EuiListGroupItem,
   // @ts-ignore
   EuiNavDrawer,
+  // @ts-ignore
+  EuiNavDrawerGroup,
   // @ts-ignore
   EuiShowFor,
 } from '@elastic/eui';
@@ -201,8 +201,6 @@ class HeaderUI extends Component<Props, State> {
             label: navLink.title,
             href: navLink.href,
             iconType: navLink.euiIconType,
-            size: 's',
-            style: { color: 'inherit' },
             'aria-label': navLink.title,
             isActive: navLink.active,
             'data-test-subj': 'navDrawerAppsMenuLink',
@@ -210,6 +208,33 @@ class HeaderUI extends Component<Props, State> {
     );
     // filter out the null items
     navLinksArray = navLinksArray.filter(item => item !== null);
+
+    const recentLinksArray = [
+      {
+        label: intl.formatMessage({
+          id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
+          defaultMessage: 'Recently viewed',
+        }),
+        iconType: 'clock',
+        'aria-label': intl.formatMessage({
+          id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
+          defaultMessage: 'Recently viewed',
+        }),
+        isDisabled: recentlyAccessed.length > 0 ? false : true,
+        flyoutMenu: {
+          title: intl.formatMessage({
+            id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
+            defaultMessage: 'Recent items',
+          }),
+          listItems: recentlyAccessed.map(item => ({
+            label: item.label,
+            href: item.href,
+            iconType: item.euiIconType,
+            'aria-label': item.label,
+          })),
+        },
+      },
+    ];
 
     return (
       <Fragment>
@@ -236,38 +261,9 @@ class HeaderUI extends Component<Props, State> {
         </EuiHeader>
 
         <EuiNavDrawer ref={this.setNavDrawerRef} data-test-subj="navDrawer">
-          <EuiListGroup>
-            <EuiListGroupItem
-              label={intl.formatMessage({
-                id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
-                defaultMessage: 'Recently viewed',
-              })}
-              iconType="clock"
-              size="s"
-              style={{ color: 'inherit' }}
-              aria-label={intl.formatMessage({
-                id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsLabel',
-                defaultMessage: 'Recently viewed',
-              })}
-              isDisabled={recentlyAccessed.length > 0 ? false : true}
-              flyoutMenu={{
-                title: intl.formatMessage({
-                  id: 'common.ui.chrome.sideGlobalNav.viewRecentItemsFlyoutTitle',
-                  defaultMessage: 'Recent items',
-                }),
-                listItems: recentlyAccessed.map(item => ({
-                  label: item.label,
-                  href: item.href,
-                  iconType: item.euiIconType,
-                  size: 's',
-                  style: { color: 'inherit' },
-                  'aria-label': item.label,
-                })),
-              }}
-            />
-          </EuiListGroup>
+          <EuiNavDrawerGroup listItems={recentLinksArray} />
           <EuiHorizontalRule margin="none" />
-          <EuiListGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
+          <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
         </EuiNavDrawer>
       </Fragment>
     );
