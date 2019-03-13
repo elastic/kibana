@@ -56,7 +56,7 @@ a given remote cluster, and monitor whether the replication is active.
 Before you use these features, you should be familiar with the following concepts:
 
 * {xpack-ref}/ccr-requirements.html[Requirements for leader indices] 
-* {xpack-ref}/ccr-auto-follow.html[Automatically following indices]
+* {stack-ov}/ccr-auto-follow.html[Automatically following indices]
 
 To get started, go to *Management > Elasticsearch > {ccr-cap}*. 
 
