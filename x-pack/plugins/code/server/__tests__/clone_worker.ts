@@ -6,6 +6,7 @@
 
 import Git from '@elastic/nodegit';
 import assert from 'assert';
+import { delay } from 'bluebird';
 import fs from 'fs';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -175,10 +176,13 @@ describe('clone_worker_tests', () => {
       }
     );
 
-    assert.ok(enqueueJobSpy.calledOnce);
     // EsClient update got called twice. One for updating default branch and revision
     // of a repository. The other for update git clone status.
     assert.ok(updateSpy.calledTwice);
+
+    // Index request is issued after a 1s delay.
+    await delay(1000);
+    assert.ok(enqueueJobSpy.calledOnce);
   });
 
   it('On clone job enqueued.', async () => {
@@ -208,5 +212,42 @@ describe('clone_worker_tests', () => {
 
     // Expect EsClient index to be called to update the progress to 0.
     assert.ok(indexSpy.calledOnce);
+  });
+
+  it('Skip clone job for invalid git url', async () => {
+    // Setup RepositoryService
+    const cloneSpy = sinon.spy();
+    const repoService = {
+      clone: emptyAsyncFunc,
+    };
+    repoService.clone = cloneSpy;
+    const repoServiceFactory = {
+      newInstance: (): void => {
+        return;
+      },
+    };
+    const newInstanceSpy = sinon.fake.returns(repoService);
+    repoServiceFactory.newInstance = newInstanceSpy;
+
+    const cloneWorker = new CloneWorker(
+      esQueue as Esqueue,
+      log,
+      {} as EsClient,
+      serverOptions,
+      {} as IndexWorker,
+      (repoServiceFactory as any) as RepositoryServiceFactory
+    );
+
+    const result = await cloneWorker.executeJob({
+      payload: {
+        url: 'file:///foo/bar.git',
+      },
+      options: {},
+      timestamp: 0,
+    });
+
+    assert.ok(result.repo === null);
+    assert.ok(newInstanceSpy.notCalled);
+    assert.ok(cloneSpy.notCalled);
   });
 });

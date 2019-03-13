@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { RepositoryConfig } from '../../model';
+import { RepositoryConfig, RepositoryUri } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
 import { Logger } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -233,32 +233,24 @@ export function repositoryRoute(
     method: 'PUT',
     async handler(req, h) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
-      const repoUrl: string = config.uri;
-
+      const repoUri: RepositoryUri = config.uri;
       const log = new Logger(req.server);
-
-      // Reject the request if the url is an invalid git url.
-      if (!isValidGitUrl(repoUrl)) {
-        return Boom.badRequest(`Invalid git url: ${repoUrl}`);
-      }
-
-      const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
         // Check if the repository exists
-        await repoObjectClient.getRepository(repo.uri);
+        await repoObjectClient.getRepository(repoUri);
       } catch (error) {
-        return Boom.badRequest(`Repository not existed for ${repoUrl}`);
+        return Boom.badRequest(`Repository not existed for ${repoUri}`);
       }
 
       try {
         // Persist to elasticsearch
-        await repoObjectClient.setRepositoryConfig(repo.uri, config);
-        repoConfigController.resetConfigCache(repo.uri);
+        await repoObjectClient.setRepositoryConfig(repoUri, config);
+        repoConfigController.resetConfigCache(repoUri);
         return {};
       } catch (error) {
-        const msg = `Issue repository clone request for ${repoUrl} error`;
+        const msg = `Update repository config for ${repoUri} error`;
         log.error(msg);
         log.error(error);
         return Boom.badRequest(msg);
