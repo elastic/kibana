@@ -17,5 +17,8 @@
  * under the License.
  */
 
-export { makeSampleDataTelemetryCollector } from './collector';
-export { TelemetryKeeper } from './keeper';
+export function fetchFactoryFn(index: string) {
+  return async (callCluster: any) => ({
+    test: true,
+  });
+}

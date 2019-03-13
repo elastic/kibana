@@ -17,5 +17,17 @@
  * under the License.
  */
 
-export { makeSampleDataTelemetryCollector } from './collector';
-export { TelemetryKeeper } from './keeper';
+import * as Hapi from 'hapi';
+
+interface KbnServer extends Hapi.Server {
+  usage: any;
+}
+
+export function makeSampleDataTelemetryCollector(server: KbnServer) {
+  server.usage.collectorSet.register(
+    server.usage.collectorSet.makeUsageCollector({
+      type: 'sample-data',
+      fetch: () => ({ progress: 'wip' }),
+    })
+  );
+}
