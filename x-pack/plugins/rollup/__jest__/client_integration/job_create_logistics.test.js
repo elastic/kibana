@@ -10,7 +10,7 @@ import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/leg
 import { initTestBed, mockServerResponses } from './job_create.test_helpers';
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('ui/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
