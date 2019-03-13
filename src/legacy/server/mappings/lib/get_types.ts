@@ -17,9 +17,11 @@
  * under the License.
  */
 
-export { DocumentMigrator } from './document_migrator';
-export { IndexMigrator } from './index_migrator';
-export { buildActiveMappings } from './build_active_mappings';
-export { CallCluster } from './call_cluster';
-export { LogFn } from './migration_logger';
-export { MigrationResult } from './migration_coordinator';
+import { IndexMapping } from '../types';
+
+/**
+ *  Get the names of the types defined in the EsMappingsDsl
+ */
+export function getTypes(mappings: IndexMapping) {
+  return Object.keys(mappings).filter(type => type !== '_default_');
+}
