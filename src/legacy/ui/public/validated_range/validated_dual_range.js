@@ -18,6 +18,7 @@
  */
 
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { isRangeValid } from './is_range_valid';
 
 import {
@@ -35,20 +36,22 @@ export class ValidatedDualRange extends Component {
       const { isValid, errorMessage } = isRangeValid(
         nextProps.value,
         nextProps.min,
-        nextProps.max);
+        nextProps.max,
+        nextProps.allowEmptyRange
+      );
       return {
         value: nextProps.value,
         prevValue: nextProps.value,
         isValid,
-        errorMessage,
+        errorMessage
       };
     }
 
     return null;
   }
 
-  onChange = (value) => {
-    const { isValid, errorMessage } = isRangeValid(value, this.props.min, this.props.max);
+  _onChange = (value) => {
+    const { isValid, errorMessage } = isRangeValid(value, this.props.min, this.props.max, this.props.allowEmptyRange);
 
     this.setState({
       value,
@@ -68,6 +71,7 @@ export class ValidatedDualRange extends Component {
       ...rest
     } = this.props;
 
+
     return (
       <EuiFormRow
         isInvalid={!this.state.isValid}
@@ -75,10 +79,18 @@ export class ValidatedDualRange extends Component {
       >
         <EuiDualRange
           value={this.state.value}
-          onChange={this.onChange}
+          onChange={this._onChange}
           {...rest}
         />
       </EuiFormRow>
     );
   }
 }
+
+ValidatedDualRange.propTypes = {
+  allowEmptyRange: PropTypes.bool,
+};
+
+ValidatedDualRange.defaultProps = {
+  allowEmptyRange: true
+};

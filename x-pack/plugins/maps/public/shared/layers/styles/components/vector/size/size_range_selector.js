@@ -44,6 +44,7 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
             showInput
             showRange
             onChange={onSizeChange}
+            allowEmptyRange={false}
           />
         </EuiFormRow>
       </EuiFlexItem>

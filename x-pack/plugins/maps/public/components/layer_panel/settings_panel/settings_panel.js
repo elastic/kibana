@@ -32,10 +32,10 @@ export function SettingsPanel(props) {
     props.updateLabel(props.layerId, label);
   };
 
-  const onZoomChange = (event) => {
-    const minZoom = Math.max(MIN_ZOOM, parseInt(event[0], 10));
+  const onZoomChange = (value) => {
+    const minZoom = Math.max(MIN_ZOOM, parseInt(value[0], 10));
     props.updateMinZoom(props.layerId, minZoom);
-    const maxZoom = Math.min(MAX_ZOOM, parseInt(event[1], 10));
+    const maxZoom = Math.min(MAX_ZOOM, parseInt(value[1], 10));
     props.updateMaxZoom(props.layerId, maxZoom);
   };
 
@@ -95,6 +95,7 @@ export function SettingsPanel(props) {
                 showInput
                 showRange
                 onChange={onZoomChange}
+                allowEmptyRange={false}
               />
             </EuiFormRow>
           </EuiFlexItem>
