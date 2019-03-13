@@ -19,7 +19,6 @@ const VECTOR_SOURCE_ID = 'n1t6f';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
-  const log = getService('log');
 
   describe('layer with joins', () => {
     before(async () => {
@@ -54,7 +53,7 @@ export default function ({ getPageObjects, getService }) {
         if (properties.name === 'tango') {
           //left join, which means we won't rescale joins that do not match
           expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
-        }else {
+        } else {
           expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
         }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
@@ -64,10 +63,6 @@ export default function ({ getPageObjects, getService }) {
 
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      mapboxStyle.layers.forEach((mbLayer) => {
-        log.debug('layer', JSON.stringify(mbLayer));
-      });
-
       const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
@@ -86,8 +81,6 @@ export default function ({ getPageObjects, getService }) {
       expect(layersForVectorSource[2]).to.eql({ 'id': 'n1t6f_line', 'type': 'line', 'source': 'n1t6f', 'minzoom': 0, 'maxzoom': 24, 'filter': ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon'], ['==', ['geometry-type'], 'LineString'], ['==', ['geometry-type'], 'MultiLineString']], 'paint': { 'line-color': '#FFFFFF', 'line-opacity': 0.75, 'line-width': 1 } });
 
     });
-
-
 
     describe('inspector', () => {
       afterEach(async () => {
