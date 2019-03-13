@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import Joi from 'joi';
+import { TelemetryKeeper } from '../telemetry';
 import { createIndexName } from './lib/create_index_name';
 
 export const createUninstallRoute = () => ({
@@ -69,6 +70,9 @@ export const createUninstallRoute = () => ({
             .code(403);
         }
       }
+
+      const telemetry = new TelemetryKeeper(request);
+      telemetry.addUninstall(params.id); // no await necessary
 
       return {};
     },

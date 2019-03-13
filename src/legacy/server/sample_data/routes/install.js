@@ -19,6 +19,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
+import { TelemetryKeeper } from '../telemetry';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import {
@@ -170,6 +171,9 @@ export const createInstallRoute = () => ({
           .response(`Unable to load kibana saved objects, see kibana logs for details`)
           .code(403);
       }
+
+      const telemetry = new TelemetryKeeper(request);
+      telemetry.addInstall(params.id); // no await necessary
 
       return h.response({
         elasticsearchIndicesCreated: counts,
