@@ -17,27 +17,4 @@
  * under the License.
  */
 
-import * as Hapi from 'hapi';
-
-const SAVED_OBJECT_ID = 'sample-data-telemetry';
-
-export class TelemetryKeeper {
-  public addInstall: (dataSet: string) => void;
-  public addUninstall: (dataSet: string) => void;
-
-  constructor(request: Hapi.Request) {
-    const { server } = request;
-    const {
-      savedObjects: { getSavedObjectsRepository },
-    } = server;
-    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-    this.addInstall = (dataSet: string) => {
-      internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
-    };
-    this.addUninstall = (dataSet: string) => {
-      internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
-    };
-  }
-}
+export { TelemetryKeeper } from './keeper';
