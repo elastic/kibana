@@ -11,7 +11,7 @@ const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
   charlie: 12,
-  tango: -1
+  tango: undefined
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
