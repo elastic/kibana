@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { FunctionsRegistry } from '@kbn/interpreter/common';
+import { FunctionsRegistry } from '../../common/functions_registry';
 
 export const functionsRegistry = new FunctionsRegistry();

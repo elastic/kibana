@@ -17,6 +17,6 @@
  * under the License.
  */
 
-import { TypesRegistry } from '@kbn/interpreter/common';
+import { TypesRegistry } from '../../common/types_registry';
 
 export const typesRegistry = new TypesRegistry();

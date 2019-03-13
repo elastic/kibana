@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { typeSpecs as types } from '../plugin/types';
-import { register, TypesRegistry, FunctionsRegistry } from '../common';
+import { get, identity } from 'lodash';
+import { getType } from '@kbn/interpreter/common';
 
-export const registries = {
-  types: new TypesRegistry(),
-  serverFunctions: new FunctionsRegistry(),
-};
+export function serializeProvider(types) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
 
-register(registries, {
-  types,
-});
+  function provider(key) {
+    return context => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn = get(typeDef, key) || identity;
+      return fn(context);
+    };
+  }
+}
