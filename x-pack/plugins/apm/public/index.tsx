@@ -38,7 +38,6 @@ type PromiseResolver = (value?: {} | PromiseLike<{}> | undefined) => void;
 
 // @ts-ignore
 chrome.setRootTemplate(template);
-chrome.disableAutoAngularUrlEncodingFix();
 const store = configureStore();
 const checkForRoot = (resolve: PromiseResolver) => {
   const ready = !!document.getElementById(REACT_APP_ROOT_ID);
