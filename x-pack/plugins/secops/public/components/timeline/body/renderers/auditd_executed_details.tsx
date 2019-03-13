@@ -34,7 +34,7 @@ export const DraggableAuditdExecutedElement = pure<{
   id: string;
   name?: string;
   field: string;
-  value: string | null;
+  value?: string | null;
   queryValue?: string | null;
 }>(({ id, name, field, value, queryValue }) =>
   value != null ? (
@@ -64,48 +64,68 @@ export const DraggableAuditdExecutedElement = pure<{
   ) : null
 );
 
+export const AuditdExecutedCommandLine = pure<{
+  id: string;
+  hostName?: string | null;
+  userName?: string | null;
+  processName?: string | null;
+  processTitle?: string | null;
+  workingDirectory?: string | null;
+  args?: string | null;
+}>(({ id, hostName, userName, processName, processTitle, workingDirectory, args }) => (
+  <Details>
+    <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <DraggableAuditdExecutedElement id={id} field="user.name" value={userName} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>@</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DraggableAuditdExecutedElement id={id} field="host.name" value={hostName} />
+      </EuiFlexItem>
+      <MarginRightFlexItem grow={false}>:</MarginRightFlexItem>
+      <EuiFlexItem grow={false}>
+        <DraggableAuditdExecutedElement
+          id={id}
+          field="process.working_directory"
+          value={workingDirectory}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>></EuiFlexItem>
+      <MarginLeftFlexItem grow={false}>
+        <DraggableAuditdExecutedElement id={id} field="process.name" value={processName} />
+      </MarginLeftFlexItem>
+      <MarginLeftFlexItem grow={false}>
+        <DraggableAuditdExecutedElement
+          id={id}
+          field="process.title"
+          queryValue={processTitle != null ? processTitle : ''}
+          value={args}
+        />
+      </MarginLeftFlexItem>
+    </EuiFlexGroup>
+  </Details>
+));
+
 export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
-  const hostName: string | null = get('host.name', data);
-  const userName: string | null = get('user.name', data);
-  const processName: string | null = get('process.name', data);
-  const processTitle: string | null = get('process.title', data);
-  const workingDirectory: string | null = get('process.working_directory', data);
-  const args: string[] | null = get('process.args', data);
-  const argsWithoutProcess: string = args != null ? args.slice(1).join(' ') : '';
+  const hostName: string | null | undefined = get('host.name', data);
+  const userName: string | null | undefined = get('user.name', data);
+  const processName: string | null | undefined = get('process.name', data);
+  const processTitle: string | null | undefined = get('process.title', data);
+  const workingDirectory: string | null | undefined = get('process.working_directory', data);
+  const rawArgs: string[] | null | undefined = get('process.args', data);
+  const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
   if (data.process != null) {
     return (
-      <Details>
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <DraggableAuditdExecutedElement id={id} field="user.name" value={userName} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>@</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DraggableAuditdExecutedElement id={id} field="host.name" value={hostName} />
-          </EuiFlexItem>
-          <MarginRightFlexItem grow={false}>:</MarginRightFlexItem>
-          <EuiFlexItem grow={false}>
-            <DraggableAuditdExecutedElement
-              id={id}
-              field="process.working_directory"
-              value={workingDirectory}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>></EuiFlexItem>
-          <MarginLeftFlexItem grow={false}>
-            <DraggableAuditdExecutedElement id={id} field="process.name" value={processName} />
-          </MarginLeftFlexItem>
-          <MarginLeftFlexItem grow={false}>
-            <DraggableAuditdExecutedElement
-              id={id}
-              field="process.title"
-              queryValue={processTitle != null ? processTitle : ''}
-              value={argsWithoutProcess}
-            />
-          </MarginLeftFlexItem>
-        </EuiFlexGroup>
-      </Details>
+      <AuditdExecutedCommandLine
+        id={id}
+        hostName={hostName}
+        userName={userName}
+        processName={processName}
+        processTitle={processTitle}
+        workingDirectory={workingDirectory}
+        args={args}
+      />
     );
   } else {
     return null;
