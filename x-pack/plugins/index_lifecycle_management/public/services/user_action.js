@@ -36,12 +36,6 @@ export function trackUserAction(actionType) {
   getHttpClient().post(userActionUri);
 }
 
-export function trackUserRequest(request, actionType) {
-  // Only track successful actions.
-  request.then(() => trackUserAction(actionType));
-  return request;
-}
-
 export function getUserActionsForPhases(phases) {
   const possibleUserActions = [{
     action: UA_CONFIG_COLD_PHASE,
