@@ -22,6 +22,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { QueryBar } from 'ui/query_bar';
 import { indexPatternService } from '../../../kibana_services';
+import { Storage } from 'ui/storage';
+
+const localStorage = new Storage(window.localStorage);
 
 export class FilterEditor extends Component {
 
@@ -70,7 +73,7 @@ export class FilterEditor extends Component {
   }
 
   _onQueryChange = ({ query }) => {
-
+    this._closeModal();
   }
 
   _renderModal() {
@@ -98,9 +101,19 @@ export class FilterEditor extends Component {
               query={this.state.query}
               onSubmit={this._onQueryChange}
               appName="maps"
-              showUpdateButton={false}
               showDatePicker={false}
               indexPatterns={this.state.indexPatterns}
+              store={localStorage}
+              customSubmitButton={
+                <EuiButton
+                  fill
+                >
+                  <FormattedMessage
+                    id="xpack.maps.layerPanel.filterEditor.modal.saveButtonLabel"
+                    defaultMessage="Add filter"
+                  />
+                </EuiButton>
+              }
             />
           </EuiModalBody>
 
@@ -114,15 +127,6 @@ export class FilterEditor extends Component {
               />
             </EuiButtonEmpty>
 
-            <EuiButton
-              onClick={this._closeModal}
-              fill
-            >
-              <FormattedMessage
-                id="xpack.maps.layerPanel.filterEditor.modal.saveButtonLabel"
-                defaultMessage="Add filter"
-              />
-            </EuiButton>
           </EuiModalFooter>
         </EuiModal>
       </EuiOverlayMask>
