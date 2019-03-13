@@ -25,10 +25,11 @@ interface KbnServer extends Hapi.Server {
 }
 
 export function makeSampleDataUsageCollector(server: KbnServer) {
+  const index = server.config().get('kibana.index') as string;
   server.usage.collectorSet.register(
     server.usage.collectorSet.makeUsageCollector({
       type: 'sample-data',
-      fetch: fetchProvider('.kibana'),
+      fetch: fetchProvider(index),
     })
   );
 }

@@ -49,6 +49,7 @@ export function fetchProvider(index: string) {
         _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
       },
       filterPath: ['hits.hits._id', 'hits.hits._source'],
+      ignore: [404],
     });
 
     const getLast = (
