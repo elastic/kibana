@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
+  const percy = getService('percy');
 
   describe('embed mode', async () => {
     before(async () => {
@@ -43,6 +44,7 @@ export default function ({ getService, getPageObjects }) {
         isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(false);
       });
+      await percy.snapshot();
     });
 
     after(async function () {

@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
-
-export default function ({ getService, getPageObjects, updateBaselines }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
-  const screenshot = getService('screenshots');
   const browser = getService('browser');
+  const percy = getService('percy');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -54,11 +52,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
-
+      await percy.snapshot();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
-      expect(percentDifference).to.be.lessThan(0.05);
     });
 
     it('compare area chart snapshot', async () => {
@@ -75,12 +70,8 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
-
+      await percy.snapshot();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-
-      // Testing some OS/browser differences were shown to cause .009 percent difference.
-      expect(percentDifference).to.be.lessThan(0.05);
     });
   });
 }
