@@ -68,6 +68,7 @@ export class ValidatedDualRange extends Component {
     const {
       value, // eslint-disable-line no-unused-vars
       onChange, // eslint-disable-line no-unused-vars
+      allowEmptyRange, // eslint-disable-line no-unused-vars
       ...rest
     } = this.props;
 
