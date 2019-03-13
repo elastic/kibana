@@ -314,9 +314,9 @@ export interface LatestMonitor {
   /** Information from the latest document. */
   ping?: Ping | null;
   /** Buckets of recent up count status data. */
-  upSeries?: (MonitorSeriesPoint | null)[] | null;
+  upSeries?: MonitorSeriesPoint[] | null;
   /** Buckets of recent down count status data. */
-  downSeries?: (MonitorSeriesPoint | null)[] | null;
+  downSeries?: MonitorSeriesPoint[] | null;
 }
 
 export interface MonitorKey {

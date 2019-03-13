@@ -1600,7 +1600,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1612,7 +1616,11 @@
             "type": {
               "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "OBJECT", "name": "MonitorSeriesPoint", "ofType": null }
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null

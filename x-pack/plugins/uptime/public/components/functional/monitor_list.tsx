@@ -26,8 +26,8 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LatestMonitor } from '../../../common/graphql/types';
-import { formatSparklineCounts } from './format_sparkline_counts';
+import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types';
+import { MonitorSparkline } from './monitor_sparkline';
 
 interface MonitorListProps {
   successColor: string;
@@ -43,7 +43,7 @@ const monitorListPagination = {
   pageSizeOptions: [5, 10, 20, 50],
 };
 
-export const MonitorList = ({ dangerColor, loading, monitors, successColor }: MonitorListProps) => (
+export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -115,31 +115,9 @@ export const MonitorList = ({ dangerColor, loading, monitors, successColor }: Mo
           name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
             defaultMessage: 'Downtime history',
           }),
-          // @ts-ignore TODO fix typing
-          render: (upSeries, monitor) => {
-            const { downSeries } = monitor;
-            return (
-              <EuiSeriesChart
-                animateData={false}
-                showDefaultAxis={false}
-                width={180}
-                height={70}
-                stackBy="y"
-                // TODO: style hack
-                style={{ marginBottom: -24 }}
-                xType={EuiSeriesChartUtils.SCALE.TIME}
-                xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-              >
-                <EuiHistogramSeries
-                  data={formatSparklineCounts(downSeries)}
-                  name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
-                    defaultMessage: 'Down',
-                  })}
-                  color={dangerColor}
-                />
-              </EuiSeriesChart>
-            );
-          },
+          render: (downSeries: MonitorSeriesPoint, monitor: LatestMonitor) => (
+            <MonitorSparkline dangerColor={dangerColor} monitor={monitor} />
+          ),
         },
       ]}
       loading={loading}
