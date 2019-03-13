@@ -10,7 +10,7 @@ import React from 'react';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 
@@ -23,39 +23,36 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
   public render() {
     const { urlParams, location } = this.props;
     return (
-      <ServiceDetailsRequest
-        urlParams={urlParams}
-        render={({ data }) => {
-          return (
-            <React.Fragment>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiTitle size="l">
-                    <h1>{urlParams.serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIntegrations
-                    location={this.props.location}
-                    urlParams={urlParams}
-                    serviceTransactionTypes={data.types}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+      <React.Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>{urlParams.serviceName}</h1>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ServiceIntegrations
+              location={this.props.location}
+              urlParams={urlParams}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-              <EuiSpacer />
+        <EuiSpacer />
 
-              <KueryBar />
+        <FilterBar />
 
-              <ServiceDetailTabs
-                location={location}
-                urlParams={urlParams}
-                transactionTypes={data.types}
-              />
-            </React.Fragment>
-          );
-        }}
-      />
+        <ServiceDetailsRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <ServiceDetailTabs
+              location={location}
+              urlParams={urlParams}
+              transactionTypes={data.types}
+            />
+          )}
+        />
+      </React.Fragment>
     );
   }
 }

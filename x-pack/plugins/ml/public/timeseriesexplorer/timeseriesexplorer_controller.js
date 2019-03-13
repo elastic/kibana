@@ -403,7 +403,8 @@ module.controller('MlTimeSeriesExplorerController', function (
         refreshFocusData.focusChartData = processDataForFocusAnomalies(
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
-          $scope.timeFieldName);
+          $scope.timeFieldName,
+          $scope.focusAggregationInterval);
 
         refreshFocusData.focusChartData = processScheduledEventsForChart(
           refreshFocusData.focusChartData,

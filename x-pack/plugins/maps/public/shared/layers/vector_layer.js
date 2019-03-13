@@ -8,7 +8,7 @@ import turf from 'turf';
 import { AbstractLayer } from './layer';
 import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
-import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
 
 const EMPTY_FEATURE_COLLECTION = {
@@ -285,17 +285,26 @@ export class VectorLayer extends AbstractLayer {
     try {
       startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, searchFilters);
       const layerName = await this.getDisplayName();
-      const { data, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
-      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, data, meta);
+      const { data: featureCollection, meta } = await this._source.getGeoJsonWithMeta(layerName, searchFilters);
+      this._assignIdsToFeatures(featureCollection);
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, featureCollection, meta);
       return {
         refreshed: true,
-        featureCollection: data
+        featureCollection: featureCollection
       };
     } catch (error) {
       onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
       return  {
         refreshed: false
       };
+    }
+  }
+
+
+  _assignIdsToFeatures(featureCollection) {
+    for (let i = 0; i < featureCollection.features.length; i++) {
+      const feature = featureCollection.features[i];
+      feature.properties[FEATURE_ID_PROPERTY_NAME] = (typeof feature.id === 'string' || typeof feature.id === 'number')  ? feature.id : i;
     }
   }
 
@@ -507,6 +516,17 @@ export class VectorLayer extends AbstractLayer {
 
   canShowTooltip() {
     return this._source.canFormatFeatureProperties();
+  }
+
+  getFeatureByFeatureById(id) {
+    const featureCollection = this._getSourceFeatureCollection(id);
+    if (!featureCollection) {
+      return;
+    }
+
+    return featureCollection.features.find((feature) => {
+      return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
+    });
   }
 
 }
