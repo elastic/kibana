@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { to } from './to';
-
-export const commonFunctions = [to];
+export const TAB_SUMMARY = 'TAB_SUMMARY';
+export const TAB_SETTINGS = 'TAB_SETTINGS';
+export const TAB_MAPPING = 'TAB_MAPPING';
+export const TAB_STATS = 'TAB_STATS';
+export const TAB_EDIT_SETTINGS = 'TAB_EDIT_SETTINGS';
