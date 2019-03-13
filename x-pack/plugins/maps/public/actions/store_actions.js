@@ -490,7 +490,6 @@ export function setLayerQuery(id, query) {
       newValue: query,
     });
 
-    // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(id));
   };
 }
