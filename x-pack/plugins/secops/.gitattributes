@@ -3,3 +3,4 @@
 x-pack/plugins/secops/public/graphql/types.ts linguist-generated=true
 x-pack/plugins/secops/server/graphql/types.ts linguist-generated=true
 x-pack/plugins/secops/public/graphql/introspection.json linguist-generated=true
+

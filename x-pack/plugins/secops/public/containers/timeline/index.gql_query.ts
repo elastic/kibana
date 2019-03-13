@@ -91,6 +91,18 @@ export const timelineQuery = gql`
               username
               password
             }
+            user {
+              name
+            }
+            process {
+              pid
+              name
+              ppid
+              args
+              executable
+              title
+              working_directory
+            }
             zeek {
               session_id
               connection {

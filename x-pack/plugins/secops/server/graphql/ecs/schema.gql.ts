@@ -233,6 +233,7 @@ export const ecsSchema = gql`
     url: UrlEcsFields
     timestamp: Date
     user: UserEcsFields
+    process: ProcessEcsFields
   }
 
   type EcsEdges {
