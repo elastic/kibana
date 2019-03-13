@@ -94,12 +94,17 @@ export const reporting = (kibana) => {
           concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
           browser: Joi.object({
             type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
-            autoDownload: Joi.boolean().when('$dev', {
+            autoDownload: Joi.boolean().when('$dist', {
               is: true,
-              then: Joi.default(true),
-              otherwise: Joi.default(false),
+              then: Joi.default(false),
+              otherwise: Joi.default(true),
             }),
             chromium: Joi.object({
+              inspect: Joi.boolean().when('$dev', {
+                is: false,
+                then: Joi.valid(false),
+                else: Joi.default(false),
+              }),
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),
