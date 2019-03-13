@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
@@ -107,9 +107,19 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   return <EuiIcon type="merge" />;
 }
 
-function Duration({ item }: { item: IWaterfallItem }) {
+function Duration({
+  item,
+  isVisible
+}: {
+  item: IWaterfallItem;
+  isVisible: boolean;
+}) {
   return (
-    <EuiText color="subdued" size="xs">
+    <EuiText
+      color="subdued"
+      size="xs"
+      style={{ visibility: isVisible ? 'visible' : 'hidden' }}
+    >
       {asTime(item.duration)}
     </EuiText>
   );
@@ -157,12 +167,20 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
+  const [isHovering, setIsHovering] = useState(false);
+
   return (
     <Container
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       onClick={onClick}
+      onMouseEnter={() => {
+        setIsHovering(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovering(false);
+      }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={{ left: `${left}%`, width: `${width}%` }}
@@ -175,13 +193,13 @@ export function WaterfallItem({
         <PrefixIcon item={item} />
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
-        <Duration item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
           <ErrorsOverviewLink
             errorCount={errorCount}
             transaction={item.transaction}
           />
         ) : null}
+        <Duration item={item} isVisible={isHovering} />
       </ItemText>
     </Container>
   );

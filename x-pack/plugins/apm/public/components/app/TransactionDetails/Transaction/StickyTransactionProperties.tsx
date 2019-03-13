@@ -88,7 +88,7 @@ export function StickyTransactionProperties({
       }),
       fieldName: TRANSACTION_RESULT,
       val: idx(transaction, _ => _.transaction.result) || NOT_AVAILABLE_LABEL,
-      width: '10%'
+      width: '14%'
     },
     {
       label: i18n.translate(
@@ -106,7 +106,7 @@ export function StickyTransactionProperties({
       ) : (
         noErrorsText
       ),
-      width: '20%'
+      width: '18%'
     },
     {
       label: i18n.translate('xpack.apm.transactionDetails.userIdLabel', {
@@ -115,7 +115,7 @@ export function StickyTransactionProperties({
       fieldName: USER_ID,
       val: idx(transaction, _ => _.user.id) || NOT_AVAILABLE_LABEL,
       truncated: true,
-      width: '20%'
+      width: '18%'
     }
   ];
 
