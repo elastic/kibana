@@ -113,6 +113,8 @@ export const FilterBar = ({
   ];
   return (
     <EuiSearchBar
+      box={{ incremental: true }}
+      className="euiFlexGroup--gutterSmall"
       // TODO: update typing
       onChange={({ query }: { query?: { text: string } }) => {
         try {
@@ -125,7 +127,6 @@ export const FilterBar = ({
           updateQuery(undefined);
         }
       }}
-      className="euiFlexGroup--gutterSmall"
       filters={filters}
       schema={filterBarSearchSchema}
     />

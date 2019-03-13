@@ -2,6 +2,11 @@
 
 exports[`FilterBar component renders the component without errors 1`] = `
 <EuiSearchBar
+  box={
+    Object {
+      "incremental": true,
+    }
+  }
   className="euiFlexGroup--gutterSmall"
   filters={
     Array [
