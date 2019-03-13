@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FieldMapping, IndexMapping } from '../types';
 import { getProperty } from './get_property';
 
 const MAPPINGS = {
@@ -24,12 +25,12 @@ const MAPPINGS = {
     foo: {
       properties: {
         name: {
-          type: 'text'
+          type: 'text',
         },
         description: {
-          type: 'text'
-        }
-      }
+          type: 'text',
+        },
+      },
     },
     bar: {
       properties: {
@@ -37,16 +38,16 @@ const MAPPINGS = {
           type: 'text',
           fields: {
             box: {
-              type: 'keyword'
-            }
-          }
-        }
-      }
-    }
-  }
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
-function runTest(key, mapping) {
+function runTest(key: string | string[], mapping: IndexMapping | FieldMapping) {
   expect(typeof key === 'string' || Array.isArray(key)).toBeTruthy();
   expect(typeof mapping).toBe('object');
 
