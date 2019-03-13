@@ -142,5 +142,18 @@ fi
 ###
 ### find commonly used bins from kibana node_modules
 ###
-export PERCY_BIN="$(FORCE_COLOR=0 yarn bin)/percy"
-export GRUNT_BIN="$(FORCE_COLOR=0 yarn bin)/grunt"
+yarnBin="$(FORCE_COLOR=0 yarn bin)"
+export PERCY_BIN="$yarnBin/percy"
+export GRUNT_BIN="$yarnBin/grunt"
+
+###
+### Set Percy parallel build support environment vars
+###
+gitCommit="$(git rev-parse HEAD)"
+ciGroupCount="$(node ./src/dev/ci_setup/count_ci_groups)"
+export PERCY_PULL_REQUEST="$ghprbPullId"
+export PERCY_PARALLEL_NONCE="$gitCommit/$BUILD_TAG"
+export PERCY_PARALLEL_TOTAL="$ciGroupCount"
+echo " -- PERCY_PULL_REQUEST='$ghprbPullId'"
+echo " -- PERCY_PARALLEL_NONCE='$PERCY_PARALLEL_NONCE'"
+echo " -- PERCY_PARALLEL_TOTAL='$PERCY_PARALLEL_TOTAL'"

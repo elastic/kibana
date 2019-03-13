@@ -249,6 +249,7 @@ module.exports = {
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*',
+        'src/dev/ci_setup/count_ci_groups.js',
       ],
       rules: {
         'import/no-commonjs': 'off',
