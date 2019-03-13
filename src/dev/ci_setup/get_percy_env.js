@@ -21,8 +21,19 @@
 const { readFileSync } = require('fs');
 const { resolve } = require('path');
 
+const execa = require('execa');
 const jsYaml = require('js-yaml');
 
-const { JOB } = jsYaml.safeLoad(readFileSync(resolve(__dirname, '../../../.ci/jobs.yml'), 'utf8'));
-console.log(JOB.filter(id => id.includes('ciGroup')).length);
+const ROOT_DIR = resolve(__dirname, '../../..');
+const pkg = require('../../../package.json');
 
+const { JOB } = jsYaml.safeLoad(readFileSync(resolve(ROOT_DIR, '.ci/jobs.yml'), 'utf8'));
+const ciGroupCount = JOB.filter(id => id.includes('ciGroup')).length;
+
+const { stdout: commit } = execa.sync('git', ['rev-parse', 'HEAD']);
+const shortCommit = commit.slice(0, 8);
+
+const isPr = process.env.JOB_NAME.includes('elastic+kibana+pull-request');
+
+console.log(`export PERCY_PARALLEL_TOTAL="${ciGroupCount}"`);
+console.log(`export PERCY_PARALLEL_NONCE="${shortCommit}/${isPr ? 'PR' : pkg.branch}/${process.env.JOB}/${process.env.BUILD_ID}"`);
