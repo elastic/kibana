@@ -6,86 +6,93 @@
 
 import { uniq } from 'lodash';
 
-import React, { Component } from 'react';
+import React, { useReducer } from 'react';
 
 import {
   EuiComboBox,
   EuiSpacer,
 } from '@elastic/eui';
 
-import List from './list';
+import { List } from './list';
 
-const getOptions = () => {
-  const aggs = ['sum', 'avg', 'median', 'value_count', 'min', 'max', ].sort();
-  const fields = ['rating', 'age', 'influence', 'comments'].sort();
+const aggs = ['sum', 'avg', 'median', 'value_count', 'min', 'max', ].sort();
+const fields = ['rating', 'age', 'influence', 'comments'].sort();
 
-  const options = [];
-  const optionsData = {};
+const options = [];
+const optionsData = {};
 
-  fields.forEach((field) => {
-    const o = { label: field, options: [] };
-    aggs.forEach((agg) => {
-      const label = `${agg}(${field})`;
-      o.options.push({ label });
-      const formRowLabel = `${agg}_${field}`;
-      optionsData[label] = { agg, field, formRowLabel };
-    });
-    options.push(o);
+fields.forEach((field) => {
+  const o = { label: field, options: [] };
+  aggs.forEach((agg) => {
+    const label = `${agg}(${field})`;
+    o.options.push({ label });
+    const formRowLabel = `${agg}_${field}`;
+    optionsData[label] = { agg, field, formRowLabel };
   });
+  options.push(o);
+});
 
-  return { options, optionsData };
+export const actions = {
+  'ADD_ITEM': 'addItem',
+  'DELETE_ITEM': 'deleteItem',
 };
 
-class DropDown extends Component {
-  constructor(props) {
-    super(props);
+export function createAddAction(dispatch) {
+  return (d) => dispatch({ type: actions.ADD_ITEM, payload: d[0].label });
+}
 
-    const { options, optionsData } = getOptions();
-    this.options = options;
-    this.optionsData = optionsData;
+export function createDeleteAction(dispatch) {
+  return (payload) => dispatch({ type: actions.DELETE_ITEM, payload });
+}
 
-    this.state = {
-      list: [],
-      selectedOptions: [],
-    };
-  }
+export const initialState = {
+  list: [],
+  selectedOptions: [],
+};
 
-  deleteHandler = (d) => {
-    console.warn('outer delete', d);
-    const list = this.state.list.filter(l => l !== d);
-    this.setState({ list });
-  }
-
-  addHandler = (selectedOptions) => {
-    // We should only get back either 0 or 1 options.
-    console.warn('selectedOptions', selectedOptions);
-    const list = uniq([ ...this.state.list, selectedOptions[0].label]);
-    this.setState({ list });
-  };
-
-  render() {
-    const { list, selectedOptions } = this.state;
-    console.warn('list', list);
-
-    return (
-      <div style={{ textAlign: 'left' }}>
-        <h3>Aggregations</h3>
-        {list.length > 0 && (
-          <EuiSpacer size="l" />
-        )}
-        <List list={list} optionsData={this.optionsData} deleteHandler={this.deleteHandler} />
-        <EuiSpacer size="l" />
-        <EuiComboBox
-          placeholder="Enter an aggregation ..."
-          singleSelection={{ asPlainText: true }}
-          options={this.options}
-          selectedOptions={selectedOptions}
-          onChange={this.addHandler}
-          isClearable={false}
-        />
-      </div>
-    );
+export function reducer(state, action) {
+  switch(action.type) {
+    case actions.ADD_ITEM:
+      return {
+        ...state,
+        list: uniq([ ...state.list, action.payload])
+      };
+    case actions.DELETE_ITEM:
+      return {
+        ...state,
+        list: state.list.filter(l => l !== action.payload)
+      };
   }
 }
 
-export { DropDown };
+export const DropDown = () => {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const { list, selectedOptions } = state;
+
+  const addAction = createAddAction(dispatch);
+  const deleteAction = createDeleteAction(dispatch);
+
+  return (
+    <div style={{ textAlign: 'left' }}>
+      <h3>Aggregations</h3>
+      {list.length > 0 && (
+        <EuiSpacer size="l" />
+      )}
+      <List
+        list={list}
+        optionsData={optionsData}
+        deleteHandler={deleteAction}
+      />
+      <EuiSpacer size="l" />
+      <EuiComboBox
+        placeholder="Add an aggregation ..."
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={addAction}
+        isClearable={false}
+      />
+    </div>
+  );
+};
