@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('rollup', () => {
-    loadTestFile(require.resolve('./rollup'));
-  });
-}
+export { WMSSource } from './wms_source';

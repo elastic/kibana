@@ -23,10 +23,10 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers({ supertest, es });
 
-  describe('jobs', () => {
+  describe('Rollup jobs', () => {
     after(() => cleanUp());
 
-    describe('indices', () => {
+    describe('Rollup indices', () => {
       it('should return an empty object when there are no rollup indices', async () => {
         const uri = `${API_BASE_PATH}/indices`;
 
@@ -74,7 +74,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('crud', () => {
+    describe('Crud', () => {
       describe('list', () => {
         it('should return an empty array when there are no jobs', async () => {
           const { body } = await supertest
@@ -206,7 +206,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('actions', () => {
+    describe('Actions', () => {
       describe('start', () => {
         let job;
 
