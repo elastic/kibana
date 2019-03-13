@@ -17,6 +17,7 @@ import { KibanaConfigContext, PreferenceFormattedDate } from '.';
 describe('PreferenceFormattedDate', () => {
   describe('rendering', () => {
     const isoDateString = '2019-02-25T22:27:05.000Z';
+    const isoDate = new Date(isoDateString);
     const configFormattedDateString = (
       dateString: string,
       config: Partial<AppTestingFrameworkAdapter>
@@ -29,14 +30,14 @@ describe('PreferenceFormattedDate', () => {
         .format(config.dateFormat);
 
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<PreferenceFormattedDate value={isoDateString} />);
+      const wrapper = shallow(<PreferenceFormattedDate value={isoDate} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it renders the UTC ISO8601 date string supplied when no configuration exists', () => {
       const wrapper = mount(
         <KibanaConfigContext.Provider value={{}}>
-          <PreferenceFormattedDate value={isoDateString} />
+          <PreferenceFormattedDate value={isoDate} />
         </KibanaConfigContext.Provider>
       );
       expect(wrapper.text()).toEqual(isoDateString);
@@ -45,7 +46,7 @@ describe('PreferenceFormattedDate', () => {
     test('it renders the UTC ISO8601 date supplied when the default configuration exists', () => {
       const wrapper = mount(
         <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
-          <PreferenceFormattedDate value={isoDateString} />
+          <PreferenceFormattedDate value={isoDate} />
         </KibanaConfigContext.Provider>
       );
       expect(wrapper.text()).toEqual(
@@ -56,7 +57,7 @@ describe('PreferenceFormattedDate', () => {
     test('it renders the correct tz when the default browser configuration exists', () => {
       const wrapper = mount(
         <KibanaConfigContext.Provider value={mockFrameworks.default_browser}>
-          <PreferenceFormattedDate value={isoDateString} />
+          <PreferenceFormattedDate value={isoDate} />
         </KibanaConfigContext.Provider>
       );
       expect(wrapper.text()).toEqual(
@@ -67,7 +68,7 @@ describe('PreferenceFormattedDate', () => {
     test('it renders the correct tz when a non-UTC configuration exists', () => {
       const wrapper = mount(
         <KibanaConfigContext.Provider value={mockFrameworks.default_MT}>
-          <PreferenceFormattedDate value={isoDateString} />
+          <PreferenceFormattedDate value={isoDate} />
         </KibanaConfigContext.Provider>
       );
       expect(wrapper.text()).toEqual(

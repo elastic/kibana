@@ -7,6 +7,8 @@
 import gql from 'graphql-tag';
 
 export const eventsSchema = gql`
+  scalar DetailItemValue
+
   type KpiItem {
     value: String!
     count: Float!
@@ -19,6 +21,19 @@ export const eventsSchema = gql`
     pageInfo: PageInfo!
   }
 
+  type DetailItem {
+    category: String!
+    description: String
+    example: String
+    field: String!
+    type: String!
+    value: DetailItemValue!
+  }
+
+  type EventDetailsData {
+    data: [DetailItem!]
+  }
+
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
@@ -27,5 +42,6 @@ export const eventsSchema = gql`
       timerange: TimerangeInput
       filterQuery: String
     ): EventsData!
+    EventDetails(eventId: String!, indexName: String!): EventDetailsData!
   }
 `;

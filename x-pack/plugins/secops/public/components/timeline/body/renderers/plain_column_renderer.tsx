@@ -4,24 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-import { has } from 'lodash/fp';
+import { has, isNil, isNumber, isObject } from 'lodash/fp';
 import React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
-import {
-  EcsField,
-  getMappedEcsValue,
-  getMappedFieldName,
-  mappedEcsSchemaFieldNames,
-} from '../../../../lib/ecs';
+import { getMappedFieldName } from '../../../../lib/ecs';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { Provider } from '../../data_providers/provider';
+import { ColumnHeader } from '../column_headers/column_header';
 
 import { ColumnRenderer } from '.';
-import { FormattedField } from './formatted_field';
+import { FormattedFieldValue } from './formatted_field';
 
 export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean =>
   has(getMappedFieldName(columnName), data);
@@ -31,41 +26,33 @@ export const plainColumnRenderer: ColumnRenderer = {
 
   renderColumn: ({
     columnName,
-    data,
+    eventId,
+    value,
     field,
     width,
   }: {
     columnName: string;
-    data: Ecs;
-    field?: EcsField;
+    eventId: string;
+    value: string | number | object | undefined | null;
+    field: ColumnHeader;
     width?: string;
   }) => {
     const itemDataProvider = {
       enabled: true,
-      id: escapeDataProviderId(`id-timeline-column-${columnName}-for-event-${data._id}`),
-      name: `${columnName}: ${getMappedEcsValue({
-        data,
-        fieldName: columnName,
-      })}`,
+      id: escapeDataProviderId(`id-timeline-column-${columnName}-for-event-${eventId}`),
+      name: `${columnName}: ${parseQueryValue(value)}`,
       queryMatch: {
-        field: getOr(columnName, columnName, mappedEcsSchemaFieldNames),
-        value: escapeQueryValue(
-          getMappedEcsValue({
-            data,
-            fieldName: columnName,
-          })
-        ),
+        field: field.id,
+        value: escapeQueryValue(parseQueryValue(value)),
       },
       excluded: false,
       kqlQuery: '',
       and: [],
     };
 
-    const fieldType = field != null ? field.type : '';
-
     return (
       <DraggableWrapper
-        key={`timeline-draggable-column-${columnName}-for-event-${data._id}`}
+        key={`timeline-draggable-column-${columnName}-for-event-${eventId}`}
         dataProvider={itemDataProvider}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
@@ -73,11 +60,37 @@ export const plainColumnRenderer: ColumnRenderer = {
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <FormattedField data={data} fieldName={columnName} fieldType={fieldType} />
+            <FormattedFieldValue
+              value={parseValue(value)}
+              fieldName={columnName}
+              fieldType={field.type || ''}
+            />
           )
         }
         width={width}
       />
     );
   },
+};
+
+export const parseQueryValue = (
+  value: string | number | object | undefined | null
+): string | number => {
+  if (isNil(value)) {
+    return '';
+  } else if (isObject(value)) {
+    return JSON.stringify(value);
+  } else if (isNumber(value)) {
+    return value;
+  }
+  return value!.toString();
+};
+
+export const parseValue = (
+  value: string | number | object | undefined | null
+): string | number | undefined | null => {
+  if (isObject(value)) {
+    return JSON.stringify(value);
+  }
+  return value as string | number | undefined | null;
 };

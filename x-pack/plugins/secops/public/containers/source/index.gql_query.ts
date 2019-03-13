@@ -23,6 +23,10 @@ export const sourceQuery = gql`
         filebeatAliasExists
         filebeatIndices
         indexFields(indexTypes: $indexTypes) {
+          category
+          description
+          example
+          indexes
           name
           searchable
           type

@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -25,6 +32,7 @@ interface Props {
   eventId: string;
   eventIsPinned: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
+  loading: boolean;
   noteIds: string[];
   onEventToggled: () => void;
   onPinClicked: () => void;
@@ -43,6 +51,11 @@ const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
 const ExpandEventContainer = styled.div`
   height: 25px;
   width: 25px;
+`;
+
+const ActionLoading = styled(EuiLoadingSpinner)`
+  margin-top: 3px;
+  margin-left: 6px;
 `;
 
 const PinContainer = styled.div`
@@ -69,6 +82,7 @@ export const Actions = pure<Props>(
     eventId,
     eventIsPinned,
     getNotesByIds,
+    loading = false,
     noteIds,
     onEventToggled,
     onPinClicked,
@@ -98,14 +112,17 @@ export const Actions = pure<Props>(
 
         <EuiFlexItem grow={false}>
           <ExpandEventContainer>
-            <EuiButtonIcon
-              aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-              color="text"
-              iconType={expanded ? 'arrowDown' : 'arrowRight'}
-              data-test-subj="expand-event"
-              id={eventId}
-              onClick={onEventToggled}
-            />
+            {loading && <ActionLoading size="m" />}
+            {!loading && (
+              <EuiButtonIcon
+                aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
+                color="text"
+                iconType={expanded ? 'arrowDown' : 'arrowRight'}
+                data-test-subj="expand-event"
+                id={eventId}
+                onClick={onEventToggled}
+              />
+            )}
           </ExpandEventContainer>
         </EuiFlexItem>
 

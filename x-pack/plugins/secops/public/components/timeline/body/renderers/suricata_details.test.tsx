@@ -8,6 +8,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { mockEcsData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
 
@@ -18,7 +19,7 @@ describe('SuricataDetails', () => {
     test('it renders the default SuricataDetails', () => {
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <SuricataDetails data={mockEcsData[2]} />
+          <SuricataDetails data={mockEcsData[2]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -27,7 +28,7 @@ describe('SuricataDetails', () => {
     test('it returns text if the data does contain suricata data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <SuricataDetails data={mockEcsData[2]} />
+          <SuricataDetails data={mockEcsData[2]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
@@ -38,7 +39,7 @@ describe('SuricataDetails', () => {
     test('it returns null for text if the data contains no suricata data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <SuricataDetails data={mockEcsData[0]} />
+          <SuricataDetails data={mockEcsData[0]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(null);

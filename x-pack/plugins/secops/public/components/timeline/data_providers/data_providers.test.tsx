@@ -16,7 +16,7 @@ import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
   describe('rendering', () => {
-    const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
+    const dropMessage = ['Drop', 'query', 'build', 'here'];
 
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(

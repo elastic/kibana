@@ -6,17 +6,14 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, get } from 'lodash/fp';
 import React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
-import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
-import { mockEcsData } from '../../../../mock';
+import { defaultHeaders, mockEcsData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
 import { emptyColumnRenderer } from '.';
-
-const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('empty_column_renderer', () => {
   let mockDatum: Ecs;
@@ -27,9 +24,10 @@ describe('empty_column_renderer', () => {
   test('renders correctly against snapshot', () => {
     delete mockDatum.source;
     const emptyColumn = emptyColumnRenderer.renderColumn({
-      columnName: 'source',
-      data: mockDatum,
-      field: allFieldsInSchemaByName.source,
+      columnName: 'source.ip',
+      eventId: mockDatum._id,
+      value: get('source.ip', mockDatum),
+      field: defaultHeaders.find(h => h.id === 'source.ip')!,
     });
     const wrapper = shallow(<span>{emptyColumn}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -60,9 +58,10 @@ describe('empty_column_renderer', () => {
   test('should return an empty value', () => {
     delete mockDatum.source;
     const emptyColumn = emptyColumnRenderer.renderColumn({
-      columnName: 'source',
-      data: mockDatum,
-      field: allFieldsInSchemaByName.source,
+      columnName: 'source.ip',
+      eventId: mockDatum._id,
+      value: null,
+      field: defaultHeaders.find(h => h.id === 'source.ip')!,
     });
     const wrapper = mount(<span>{emptyColumn}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());

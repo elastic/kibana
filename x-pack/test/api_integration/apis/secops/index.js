@@ -13,6 +13,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./network_top_n_flow'));
     loadTestFile(require.resolve('./sources'));
     loadTestFile(require.resolve('./timeline'));
+    loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
     loadTestFile(require.resolve('./kpi_network'));
   });

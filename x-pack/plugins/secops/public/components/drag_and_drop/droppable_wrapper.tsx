@@ -28,20 +28,23 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
       ? `
     .drop-and-provider-timeline {
       &:hover {
-        background: repeating-linear-gradient(
-          -55deg,
-          ${props.theme.eui.euiColorDarkestShade},
-          ${props.theme.eui.euiColorDarkestShade} 10px,
-          ${props.theme.eui.euiColorEmptyShade} 10px,
-          ${props.theme.eui.euiColorEmptyShade} 20px
-        );
+        background-color: ${props.theme.eui.euiColorEmptyShade};
       }
     }
+  > div.timeline-drop-area-empty {
+     background-color: ${props.theme.eui.euiColorLightShade};
+  }
   > div.timeline-drop-area {
     background-color: ${props.theme.eui.euiColorLightShade};
     .provider-item-filter-container div:first-child{
       // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
       transform: none !important;
+    }
+    .drop-and-provider-timeline {
+      display: block !important;
+      + div {
+        display: none;
+      }
     }
   }
   .flyout-overlay {
@@ -53,10 +56,12 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean }>`
       display: none !important;
     }
   }
-
   `
       : ''}
   > div.timeline-drop-area {
+    .drop-and-provider-timeline {
+      display: none;
+    }
     & + div {
       // Override dragNdrop beautiful so we do not have our droppable moving around for no good reason
       display: none !important;

@@ -5,20 +5,22 @@
  */
 
 import { Ecs } from '../../../../graphql/types';
-import { EcsField } from '../../../../lib/ecs';
+import { ColumnHeader } from '../column_headers/column_header';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: Ecs) => boolean;
   renderColumn: (
     {
       columnName,
-      data,
+      eventId,
+      value,
       field,
       width,
     }: {
       columnName: string;
-      data: Ecs;
-      field?: EcsField;
+      eventId: string;
+      value: string | number | object | undefined | null;
+      field: ColumnHeader;
       width?: string;
     }
   ) => React.ReactNode;

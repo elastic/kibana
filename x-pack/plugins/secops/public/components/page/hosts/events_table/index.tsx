@@ -122,12 +122,14 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     render: ({ node }) => {
       const hostName: string | null = get('host.name', node);
       if (hostName != null) {
+        const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`),
+              id,
               name: hostName,
               excluded: false,
               kqlQuery: '',

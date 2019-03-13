@@ -10,6 +10,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 
 import { SourceDest } from './source_dest_ip';
@@ -17,23 +18,24 @@ import { SuricataRefs } from './suricata_refs';
 import { SuricataSignature } from './suricata_signature';
 
 const Details = styled.div`
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0;
 `;
 
-export const SuricataDetails = pure<{ data: Ecs }>(({ data }) => {
-  const signature: string | null = get('suricata.eve.alert.signature', data);
-  const signatureId: string | null = get('suricata.eve.alert.signature_id', data);
-  if (signatureId != null && signature != null) {
-    return (
-      <Details>
-        <SuricataSignature id={data._id} signature={signature} signatureId={signatureId} />
-        <SuricataRefs signatureId={signatureId} />
-        <EuiSpacer size="s" />
-        <SourceDest data={data} />
-      </Details>
-    );
-  } else {
-    return null;
+export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
+  ({ browserFields, data }) => {
+    const signature: string | null = get('suricata.eve.alert.signature', data);
+    const signatureId: string | null = get('suricata.eve.alert.signature_id', data);
+    if (signatureId != null && signature != null) {
+      return (
+        <Details>
+          <SuricataSignature id={data._id} signature={signature} signatureId={signatureId} />
+          <SuricataRefs signatureId={signatureId} />
+          <EuiSpacer size="s" />
+          <SourceDest data={data} browserFields={browserFields} />
+        </Details>
+      );
+    } else {
+      return null;
+    }
   }
-});
+);

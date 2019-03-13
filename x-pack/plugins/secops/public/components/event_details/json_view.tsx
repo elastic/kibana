@@ -8,15 +8,16 @@ import {
   // @ts-ignore
   EuiCodeEditor,
 } from '@elastic/eui';
+import { set } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Ecs } from '../../graphql/types';
+import { DetailItem } from '../../graphql/types';
 import { omitTypenameAndEmpty } from '../timeline/body/helpers';
 
 interface Props {
-  data: Ecs;
+  data: DetailItem[];
 }
 
 const JsonEditor = styled.div`
@@ -30,7 +31,7 @@ export const JsonView = pure<Props>(({ data }) => (
       mode="javascript"
       setOptions={{ fontSize: '12px' }}
       value={JSON.stringify(
-        data,
+        buildJsonView(data),
         omitTypenameAndEmpty,
         2 // indent level
       )}
@@ -39,3 +40,6 @@ export const JsonView = pure<Props>(({ data }) => (
     }
   </JsonEditor>
 ));
+
+export const buildJsonView = (data: DetailItem[]) =>
+  data.reduce((accumulator, item) => set(item.field, item.value, accumulator), {});

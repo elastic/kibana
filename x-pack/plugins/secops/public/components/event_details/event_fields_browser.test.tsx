@@ -7,7 +7,8 @@
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { mockEcsData, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
+import { TestProviders } from '../../mock/test_providers';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 
@@ -17,7 +18,7 @@ describe('EventFieldsBrowser', () => {
       test(`it renders the ${header} column header`, () => {
         const wrapper = mountWithIntl(
           <TestProviders>
-            <EventFieldsBrowser data={mockEcsData[0]} />
+            <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
           </TestProviders>
         );
 
@@ -30,7 +31,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders a filter input with the expected placeholder', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockEcsData[0]} />
+          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
         </TestProviders>
       );
 
@@ -44,7 +45,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected icon type for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockEcsData[0]} />
+          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
         </TestProviders>
       );
 
@@ -63,16 +64,15 @@ describe('EventFieldsBrowser', () => {
     test('it renders the field name for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockEcsData[0]} />
+          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
         </TestProviders>
       );
-
       expect(
         wrapper
           .find('.euiTableRow')
           .find('.euiTableRowCell')
           .at(1)
-          .containsMatchingElement(<span>@timestamp</span>)
+          .containsMatchingElement(<span>_id</span>)
       ).toEqual(true);
     });
   });
@@ -81,7 +81,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected value for the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockEcsData[0]} />
+          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
         </TestProviders>
       );
       expect(
@@ -89,7 +89,7 @@ describe('EventFieldsBrowser', () => {
           .find('[data-test-subj="draggable-content"]')
           .at(0)
           .text()
-      ).toEqual('Nov 5, 2018 @ 19:03:25.937');
+      ).toEqual('pEMaMmkBUV60JmNWmWVi');
     });
   });
 
@@ -97,7 +97,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders the expected field description the data provided', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <EventFieldsBrowser data={mockEcsData[0]} />
+          <EventFieldsBrowser data={mockDetailItemData} id={mockDetailItemDataId} />
         </TestProviders>
       );
 
@@ -107,7 +107,7 @@ describe('EventFieldsBrowser', () => {
           .find('.euiTableRowCell')
           .at(3)
           .text()
-      ).toContain('Date/time when the event originated.');
+      ).toContain('Each document has an _id that uniquely identifies it');
     });
   });
 });

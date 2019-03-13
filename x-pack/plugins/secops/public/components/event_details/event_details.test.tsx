@@ -8,7 +8,8 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { mockEcsData, TestProviders } from '../../mock';
+import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
+import { TestProviders } from '../../mock/test_providers';
 
 import { EventDetails } from './event_details';
 
@@ -17,7 +18,12 @@ describe('EventDetails', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
-          <EventDetails data={mockEcsData[0]} view="table-view" onViewSelected={jest.fn()} />
+          <EventDetails
+            data={mockDetailItemData}
+            id={mockDetailItemDataId}
+            view="table-view"
+            onViewSelected={jest.fn()}
+          />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -29,7 +35,12 @@ describe('EventDetails', () => {
       test(`it renders the ${tab} tab`, () => {
         const wrapper = mount(
           <TestProviders>
-            <EventDetails data={mockEcsData[0]} view="table-view" onViewSelected={jest.fn()} />
+            <EventDetails
+              data={mockDetailItemData}
+              id={mockDetailItemDataId}
+              view="table-view"
+              onViewSelected={jest.fn()}
+            />
           </TestProviders>
         );
 
@@ -45,7 +56,12 @@ describe('EventDetails', () => {
     test('the Table tab is selected by default', () => {
       const wrapper = mount(
         <TestProviders>
-          <EventDetails data={mockEcsData[0]} view="table-view" onViewSelected={jest.fn()} />
+          <EventDetails
+            data={mockDetailItemData}
+            id={mockDetailItemDataId}
+            view="table-view"
+            onViewSelected={jest.fn()}
+          />
         </TestProviders>
       );
 

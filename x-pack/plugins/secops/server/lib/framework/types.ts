@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndicesGetMappingParams } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 
 import { ESQuery } from '../../../common/typed_json';
@@ -13,6 +14,7 @@ import {
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
+
 export * from '../../utils/typed_resolvers';
 
 export const internalFrameworkRequest = Symbol('internalFrameworkRequest');
@@ -36,6 +38,11 @@ export interface FrameworkAdapter {
     method: 'indices.existsAlias',
     options?: object
   ): Promise<boolean>;
+  callWithRequest(
+    req: FrameworkRequest,
+    method: 'indices.getMapping',
+    options?: IndicesGetMappingParams
+  ): Promise<MappingResponse>;
   callWithRequest(
     req: FrameworkRequest,
     method: 'indices.getAlias' | 'indices.get',
@@ -81,6 +88,27 @@ export interface DatabaseSearchResponse<Hit = {}, Aggregations = undefined>
 
 export interface DatabaseMultiResponse<Hit, Aggregation> extends DatabaseResponse {
   responses: Array<DatabaseSearchResponse<Hit, Aggregation>>;
+}
+
+export interface MappingProperties {
+  type: string;
+  path: string;
+  ignore_above: number;
+  properties: Readonly<Record<string, Partial<MappingProperties>>>;
+}
+
+export interface MappingResponse {
+  [indexName: string]: {
+    mappings: {
+      _meta: {
+        beat: string;
+        version: string;
+      };
+      dynamic_templates: object[];
+      date_detection: boolean;
+      properties: Readonly<Record<string, Partial<MappingProperties>>>;
+    };
+  };
 }
 
 interface FrameworkIndexFieldDescriptor {

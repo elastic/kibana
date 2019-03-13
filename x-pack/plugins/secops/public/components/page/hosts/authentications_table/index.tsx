@@ -122,12 +122,14 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     render: ({ node }) => {
       const userName: string | null = get('user.name', node);
       if (userName != null) {
+        const id = escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`);
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`),
+              id,
               name: userName,
               excluded: false,
               kqlQuery: '',
@@ -182,12 +184,16 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     render: ({ node }) => {
       const sourceIp: string | null = get('lastFailure.source.ip', node);
       if (sourceIp != null) {
+        const id = escapeDataProviderId(
+          `authentications-table-${node._id}-lastFailure-${sourceIp}`
+        );
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${sourceIp}`),
+              id,
               name: sourceIp,
               excluded: false,
               kqlQuery: '',
@@ -224,12 +230,14 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
       const hostName: string | null = get('lastFailure.host.name', node);
       const hostId: string | null = get('lastFailure.host.id', node);
       if (hostName != null && hostId != null) {
+        const id = escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostId}`);
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostName}`),
+              id,
               name: hostName,
               excluded: false,
               kqlQuery: '',
@@ -286,12 +294,16 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     render: ({ node }) => {
       const sourceIp: string | null = get('lastSuccess.source.ip', node);
       if (sourceIp != null) {
+        const id = escapeDataProviderId(
+          `authentications-table-${node._id}-lastSuccess-${sourceIp}`
+        );
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${sourceIp}`),
+              id,
               name: sourceIp,
               excluded: false,
               kqlQuery: '',
@@ -328,12 +340,14 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
       const hostName: string | null = get('lastSuccess.host.name', node);
       const hostId: string | null = get('lastSuccess.host.id', node);
       if (hostName != null && hostId != null) {
+        const id = escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostId}`);
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostName}`),
+              id,
               name: hostName,
               excluded: false,
               kqlQuery: '',

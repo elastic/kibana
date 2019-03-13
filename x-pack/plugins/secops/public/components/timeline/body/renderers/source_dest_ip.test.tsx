@@ -7,9 +7,9 @@
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
-import { mockEcsData } from '../../../../mock';
+import { mockBrowserFields } from '../../../../containers/source/mock';
+import { mockEcsData, TestProviders } from '../../../../mock';
 
 import { SourceDest } from './source_dest_ip';
 
@@ -18,7 +18,7 @@ describe('SuricataDestIp', () => {
     test('it renders the default SuricataDestIp', () => {
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <SourceDest data={mockEcsData[2]} />
+          <SourceDest data={mockEcsData[2]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();

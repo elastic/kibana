@@ -9,7 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { Ecs } from '../../graphql/types';
+import { DetailItem } from '../../graphql/types';
 
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -18,7 +18,8 @@ import * as i18n from './translations';
 export type View = 'table-view' | 'json-view';
 
 interface Props {
-  data: Ecs;
+  data: DetailItem[];
+  id: string;
   view: View;
   onViewSelected: (selected: View) => void;
 }
@@ -28,12 +29,12 @@ const Details = styled.div`
   width: 100%;
 `;
 
-export const EventDetails = pure<Props>(({ data, view, onViewSelected }) => {
+export const EventDetails = pure<Props>(({ data, id, view, onViewSelected }) => {
   const tabs: EuiTabbedContentTab[] = [
     {
       id: 'table-view',
       name: i18n.TABLE,
-      content: <EventFieldsBrowser data={data} />,
+      content: <EventFieldsBrowser data={data} id={id} />,
     },
     {
       id: 'json-view',

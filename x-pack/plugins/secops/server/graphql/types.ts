@@ -44,6 +44,8 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 
 export type Date = any;
 
+export type DetailItemValue = any;
+
 // ====================================================
 // Types
 // ====================================================
@@ -66,6 +68,8 @@ export interface Source {
   Authentications: AuthenticationsData;
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
+
+  EventDetails: EventDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -128,6 +132,12 @@ export interface SourceStatus {
 }
 /** A descriptor of a field in an index */
 export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: string | null;
+  /** whether the field's belong to an alias index */
+  indexes: (string | null)[];
   /** The name of the field */
   name: string;
   /** The type of the field's values as recognized by Kibana */
@@ -136,6 +146,8 @@ export interface IndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
+  /** Description of the field */
+  description?: string | null;
 }
 
 export interface AuthenticationsData {
@@ -546,6 +558,24 @@ export interface Thread {
   start?: string | null;
 }
 
+export interface EventDetailsData {
+  data?: DetailItem[] | null;
+}
+
+export interface DetailItem {
+  category: string;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  field: string;
+
+  type: string;
+
+  value: DetailItemValue;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -699,6 +729,11 @@ export interface EventsSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface EventDetailsSourceArgs {
+  eventId: string;
+
+  indexName: string;
+}
 export interface HostsSourceArgs {
   id?: string | null;
 
@@ -821,6 +856,8 @@ export namespace SourceResolvers {
     Authentications?: AuthenticationsResolver<AuthenticationsData, TypeParent, Context>;
     /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Events?: EventsResolver<EventsData, TypeParent, Context>;
+
+    EventDetails?: EventDetailsResolver<EventDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -875,6 +912,17 @@ export namespace SourceResolvers {
     timerange?: TimerangeInput | null;
 
     filterQuery?: string | null;
+  }
+
+  export type EventDetailsResolver<
+    R = EventDetailsData,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, EventDetailsArgs>;
+  export interface EventDetailsArgs {
+    eventId: string;
+
+    indexName: string;
   }
 
   export type HostsResolver<R = HostsData, Parent = Source, Context = SecOpsContext> = Resolver<
@@ -1107,6 +1155,12 @@ export namespace SourceStatusResolvers {
 /** A descriptor of a field in an index */
 export namespace IndexFieldResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = IndexField> {
+    /** Where the field belong */
+    category?: CategoryResolver<string, TypeParent, Context>;
+    /** Example of field's value */
+    example?: ExampleResolver<string | null, TypeParent, Context>;
+    /** whether the field's belong to an alias index */
+    indexes?: IndexesResolver<(string | null)[], TypeParent, Context>;
     /** The name of the field */
     name?: NameResolver<string, TypeParent, Context>;
     /** The type of the field's values as recognized by Kibana */
@@ -1115,8 +1169,25 @@ export namespace IndexFieldResolvers {
     searchable?: SearchableResolver<boolean, TypeParent, Context>;
     /** Whether the field's values can be aggregated */
     aggregatable?: AggregatableResolver<boolean, TypeParent, Context>;
+    /** Description of the field */
+    description?: DescriptionResolver<string | null, TypeParent, Context>;
   }
 
+  export type CategoryResolver<R = string, Parent = IndexField, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ExampleResolver<
+    R = string | null,
+    Parent = IndexField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IndexesResolver<
+    R = (string | null)[],
+    Parent = IndexField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type NameResolver<R = string, Parent = IndexField, Context = SecOpsContext> = Resolver<
     R,
     Parent,
@@ -1134,6 +1205,11 @@ export namespace IndexFieldResolvers {
   > = Resolver<R, Parent, Context>;
   export type AggregatableResolver<
     R = boolean,
+    Parent = IndexField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DescriptionResolver<
+    R = string | null,
     Parent = IndexField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -2495,6 +2571,65 @@ export namespace ThreadResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace EventDetailsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = EventDetailsData> {
+    data?: DataResolver<DetailItem[] | null, TypeParent, Context>;
+  }
+
+  export type DataResolver<
+    R = DetailItem[] | null,
+    Parent = EventDetailsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DetailItemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = DetailItem> {
+    category?: CategoryResolver<string, TypeParent, Context>;
+
+    description?: DescriptionResolver<string | null, TypeParent, Context>;
+
+    example?: ExampleResolver<string | null, TypeParent, Context>;
+
+    field?: FieldResolver<string, TypeParent, Context>;
+
+    type?: TypeResolver<string, TypeParent, Context>;
+
+    value?: ValueResolver<DetailItemValue, TypeParent, Context>;
+  }
+
+  export type CategoryResolver<R = string, Parent = DetailItem, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type DescriptionResolver<
+    R = string | null,
+    Parent = DetailItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ExampleResolver<
+    R = string | null,
+    Parent = DetailItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FieldResolver<R = string, Parent = DetailItem, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TypeResolver<R = string, Parent = DetailItem, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type ValueResolver<
+    R = DetailItemValue,
+    Parent = DetailItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace HostsDataResolvers {

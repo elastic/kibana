@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
@@ -28,6 +29,7 @@ describe('get_column_renderer', () => {
   test('renders correctly against snapshot', () => {
     const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
     const row = rowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
       children: <span>some child</span>,
@@ -40,6 +42,7 @@ describe('get_column_renderer', () => {
   test('should render plain row data when it is a non suricata row', () => {
     const rowRenderer = getRowRenderer(nonSuricata, rowRenderers);
     const row = rowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
       children: <span>some child</span>,
@@ -55,6 +58,7 @@ describe('get_column_renderer', () => {
   test('should render a suricata row data when it is a suricata row', () => {
     const rowRenderer = getRowRenderer(suricata, rowRenderers);
     const row = rowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: suricata,
       width: 100,
       children: <span>some child </span>,
