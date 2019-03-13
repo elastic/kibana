@@ -28,7 +28,7 @@ export async function validateReferences(
 ) {
   const errors: ImportError[] = [];
 
-  // Extract from Elasticsearch and references the ids we know exists / will exist
+  // Grab record ids of the objects existing in Elasticsearch
   const findResponse = await savedObjectsClient.find({
     type: ENFORCED_TYPES,
     fields: ['id'],
