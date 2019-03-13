@@ -17930,13 +17930,6 @@ react-test-renderer@^16.0.0-0, react-test-renderer@^16.8.0:
     react-is "^16.8.2"
     scheduler "^0.13.2"
 
-react-toggle@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/react-toggle/-/react-toggle-4.0.2.tgz#77f487860efb87fafd197672a2db8c885be1440f"
-  integrity sha512-EPTWnN7gQHgEAUEmjheanZXNzY5TPnQeyyHfEs3YshaiWZf5WNjfYDrglO5F1Hl/dNveX18i4l0grTEsYH2Ccw==
-  dependencies:
-    classnames "^2.2.5"
-
 react-virtualized@^9.18.5:
   version "9.20.1"
   resolved "https://registry.yarnpkg.com/react-virtualized/-/react-virtualized-9.20.1.tgz#02dc08fe9070386b8c48e2ac56bce7af0208d22d"
