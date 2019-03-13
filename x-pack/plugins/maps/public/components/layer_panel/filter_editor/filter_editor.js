@@ -21,12 +21,44 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { QueryBar } from 'ui/query_bar';
+import { indexPatternService } from '../../../kibana_services';
 
 export class FilterEditor extends Component {
 
   state = {
     isModalOpen: false,
     query: { language: 'kuery', query: '' },
+    indexPatterns: [],
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadIndexPatterns();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  _loadIndexPatterns = async () => {
+    const indexPatternIds = this.props.layer.getIndexPatternIds();
+    const indexPatterns = [];
+    const getIndexPatternPromises = indexPatternIds.map(async (indexPatternId) => {
+      try {
+        const indexPattern = await indexPatternService.get(indexPatternId);
+        indexPatterns.push(indexPattern);
+      } catch(err) {
+        // unable to fetch index pattern
+      }
+    });
+
+    await Promise.all(getIndexPatternPromises);
+
+    if (!this._isMounted) {
+      return;
+    }
+
+    this.setState({ indexPatterns });
   }
 
   _openModal = () => {
@@ -50,6 +82,7 @@ export class FilterEditor extends Component {
       <EuiOverlayMask>
         <EuiModal
           onClose={this._closeModal}
+          maxWidth={false}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle >
@@ -60,14 +93,14 @@ export class FilterEditor extends Component {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
-          <EuiModalBody>
+          <EuiModalBody style={{ width: '75vw', height: '50vh' }}>
             <QueryBar
               query={this.state.query}
               onSubmit={this._onQueryChange}
               appName="maps"
               showUpdateButton={false}
               showDatePicker={false}
-
+              indexPatterns={this.state.indexPatterns}
             />
           </EuiModalBody>
 
