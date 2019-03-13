@@ -3,13 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Request } from 'hapi';
 
-export function authorizationModeFactory(
-  xpackInfoFeature,
-) {
-  return {
-    useRbac() {
-      return xpackInfoFeature.getLicenseCheckResults().allowRbac;
-    },
-  };
+export interface SpacesPlugin {
+  getSpaceId(request: Record<string, any>): string;
 }

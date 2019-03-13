@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { XPackFeature } from 'x-pack/plugins/xpack_main/xpack_main';
 import { authorizationModeFactory } from './mode';
 
-const createMockXpackInfoFeature = (allowRbac) => {
+const createMockSecurityXPackFeature = (allowRbac: boolean) => {
   return {
     getLicenseCheckResults() {
       return {
-        allowRbac
+        allowRbac,
       };
-    }
-  };
+    },
+  } as XPackFeature;
 };
 
 describe(`#useRbac`, () => {
   test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
-    const mockXpackInfoFeature = createMockXpackInfoFeature(false);
+    const mockXpackInfoFeature = createMockSecurityXPackFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
 
     const result = mode.useRbac();
@@ -26,7 +27,7 @@ describe(`#useRbac`, () => {
   });
 
   test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is true`, async () => {
-    const mockXpackInfoFeature = createMockXpackInfoFeature(true);
+    const mockXpackInfoFeature = createMockSecurityXPackFeature(true);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
 
     const result = mode.useRbac();

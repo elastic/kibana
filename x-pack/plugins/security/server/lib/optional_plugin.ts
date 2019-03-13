@@ -12,16 +12,18 @@ interface Plugins {
   [key: string]: any;
 }
 
-export interface OptionalPlugin {
+interface IsEnabled {
   isEnabled: boolean;
 }
+
+export type OptionalPlugin<T> = IsEnabled & T;
 
 export function createOptionalPlugin<T>(
   config: Config,
   configPrefix: string,
   plugins: Plugins,
   pluginId: string
-): OptionalPlugin & T {
+): OptionalPlugin<T> {
   return new Proxy(
     {},
     {
@@ -42,5 +44,5 @@ export function createOptionalPlugin<T>(
         return plugins[pluginId][prop];
       },
     }
-  ) as OptionalPlugin & T;
+  ) as OptionalPlugin<T>;
 }
