@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiAccordion, EuiButtonIcon, EuiLoadingKibana, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiLoadingKibana,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { IPosition } from 'monaco-editor';
 import queryString from 'querystring';
 import React from 'react';
@@ -114,36 +122,47 @@ export class ReferencesPanel extends React.Component<Props, State> {
     const lineNumberFn = (l: number) => {
       return file.lineNumbers[l - 1];
     };
+    const fileComponent = (
+      <React.Fragment>
+        <EuiText>
+          <a href={`#${this.computeUrl(file.uri)}`}>{file.file}</a>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </React.Fragment>
+    );
+
     return (
       <CodeBlock
         key={key}
         language={file.language}
         startLine={0}
         code={file.code}
-        file={file.file}
         folding={false}
         lineNumbersFunc={lineNumberFn}
         highlightRanges={file.highlights}
+        fileComponent={fileComponent}
         onClick={this.onCodeClick.bind(this, file.lineNumbers, file.uri)}
       />
     );
   }
 
   private onCodeClick(lineNumbers: string[], url: string, pos: IPosition) {
-    const { uri } = parseSchema(url)!;
     const line = parseInt(lineNumbers[pos.lineNumber - 1], 10);
-    if (!isNaN(line)) {
-      let search = history.location.search;
-      if (search.startsWith('?')) {
-        search = search.substring(1);
-      }
-      const queries = queryString.parse(search);
-      const query = queryString.stringify({
-        ...queries,
-        tab: 'references',
-        refUrl: this.props.refUrl,
-      });
-      history.push(`${uri}!L${line}:0?${query}`);
+    history.push(this.computeUrl(url, line));
+  }
+
+  private computeUrl(url: string, line?: number) {
+    const { uri } = parseSchema(url)!;
+    let search = history.location.search;
+    if (search.startsWith('?')) {
+      search = search.substring(1);
     }
+    const queries = queryString.parse(search);
+    const query = queryString.stringify({
+      ...queries,
+      tab: 'references',
+      refUrl: this.props.refUrl,
+    });
+    return line !== undefined ? `${uri}!L${line}:0?${query}` : `${uri}?${query}`;
   }
 }
