@@ -110,6 +110,7 @@ Management::
 * Fixes bug where rollup job search would display an empty prompt if no jobs matched the search {pull}31642[#31642]
 Monitoring::
 * Ensures that bulk uploader only starts once {pull}31307[#31307]
+* Addresses some UI regressions with shard allocation {pull}29757[#29757]
 Operations::
 * Bumps Node to 10.15.2 {pull}32200[#32200]
 Visualizations::
