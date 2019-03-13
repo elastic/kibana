@@ -56,6 +56,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
   public getClickHandler = (path: string) => () => {
     this.setState({ activePath: path });
   };
+
   public getStructureTreeItemRenderer = (
     location: Location,
     name: string,

@@ -250,6 +250,8 @@
 .code-link {
   &:focus {
     box-shadow: none;
+    outline: none;
+    animation: none;
   }
 }
 

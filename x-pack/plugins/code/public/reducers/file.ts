@@ -56,7 +56,7 @@ const initialState: FileState = {
     type: FileTreeItemType.Directory,
   },
   openedPaths: [],
-  loading: false,
+  loading: true,
   branches: [],
   tags: [],
   commits: [],
@@ -108,9 +108,6 @@ export const file = handleActions(
     [String(fetchRepoTree)]: (state: FileState, action: any) =>
       produce(state, draft => {
         draft.currentPath = action.payload.path;
-        if (action.payload.parents) {
-          draft.loading = true;
-        }
       }),
     [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<RepoTreePayload>) =>
       produce<FileState>(state, (draft: FileState) => {
