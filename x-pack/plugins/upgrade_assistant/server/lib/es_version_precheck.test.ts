@@ -74,9 +74,8 @@ describe('EsVersionPrecheck', () => {
   it('throws a 426 message when nodes are not on same version', async () => {
     const fakeCallWithRequest = jest.fn().mockResolvedValue({
       nodes: {
-        node1: { version: '7.0.0' },
-        node2: { version: '7.0.0' },
-        node3: { version: '6.0.0' },
+        node1: { version: CURRENT_VERSION.raw },
+        node2: { version: CURRENT_VERSION.inc('major').raw },
       },
     });
     const fakeGetCluster = jest.fn(() => ({ callWithRequest: fakeCallWithRequest }));
@@ -93,8 +92,8 @@ describe('EsVersionPrecheck', () => {
   it('returns true when nodes are on same version', async () => {
     const fakeCallWithRequest = jest.fn().mockResolvedValue({
       nodes: {
-        node1: { version: '7.0.0' },
-        node2: { version: '7.0.0' },
+        node1: { version: CURRENT_VERSION.raw },
+        node2: { version: CURRENT_VERSION.raw },
       },
     });
     const fakeGetCluster = jest.fn(() => ({ callWithRequest: fakeCallWithRequest }));
