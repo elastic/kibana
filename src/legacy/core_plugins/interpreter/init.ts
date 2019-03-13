@@ -25,8 +25,11 @@ import { routes } from './server/routes';
 
 import { Legacy } from '../../../../kibana';
 
+// @ts-ignore
 import { FunctionsRegistry } from './common/functions_registry';
+// @ts-ignore
 import { typeSpecs as types } from './common/types';
+// @ts-ignore
 import { TypesRegistry } from './common/types_registry';
 
 export const registries = {
