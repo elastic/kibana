@@ -124,17 +124,9 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <EuiText
                   grow={true}
                   size="m"
@@ -145,7 +137,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -230,20 +221,12 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           >
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
-                <EuiFlexItem
-                  component="div"
-                  grow={true}
-                >
+                <EuiFlexItem>
                   <div
                     className="euiFlexItem"
                   >
@@ -262,7 +245,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
-                  component="div"
                   grow={false}
                 >
                   <div
@@ -458,17 +440,9 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <EuiText
                   grow={true}
                   size="m"
@@ -479,7 +453,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -553,7 +526,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               >
                 <EuiIcon
                   className="euiStepNumber__icon"
-                  size="m"
                   title="complete"
                   type="check"
                 >
@@ -603,20 +575,12 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           >
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
               <div
                 className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
-                <EuiFlexItem
-                  component="div"
-                  grow={true}
-                >
+                <EuiFlexItem>
                   <div
                     className="euiFlexItem"
                   >
@@ -635,7 +599,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   </div>
                 </EuiFlexItem>
                 <EuiFlexItem
-                  component="div"
                   grow={false}
                 >
                   <div
@@ -717,17 +680,9 @@ exports[`renders 1`] = `
         "children": <React.Fragment>
           <EuiFlexGroup
             alignItems="center"
-            component="div"
-            direction="row"
-            gutterSize="l"
             justifyContent="spaceBetween"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiText
                 grow={true}
                 size="m"
@@ -738,7 +693,6 @@ exports[`renders 1`] = `
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiButton

@@ -17,10 +17,11 @@
  * under the License.
  */
 
+import { cloneDeep } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
-import { AggConfig, Vis, VisState } from 'ui/vis';
+import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
 
 interface SchemaFormat {
   id: string;
@@ -50,7 +51,7 @@ interface Schemas {
 }
 
 type buildVisFunction = (visState: VisState, schemas: Schemas, uiState: any) => string;
-type buildVisConfigFunction = (visState: Vis, schemas: Schemas) => VisState;
+type buildVisConfigFunction = (schemas: Schemas, visParams?: VisParams) => VisParams;
 
 interface BuildPipelineVisFunction {
   [key: string]: buildVisFunction;
@@ -223,68 +224,96 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `kibana_markdown ${expression}${visConfig}`;
   },
   table: (visState, schemas) => {
-    const visConfig = buildVisConfig.table(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.table(schemas, visState.params),
+    };
     return `kibana_table ${prepareJson('visConfig', visConfig)}`;
   },
   metric: (visState, schemas) => {
-    const visConfig = buildVisConfig.metric(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.metric(schemas),
+    };
     return `kibana_metric ${prepareJson('visConfig', visConfig)}`;
   },
   tagcloud: (visState, schemas) => {
-    const visConfig = buildVisConfig.tagcloud(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tagcloud(schemas),
+    };
     return `tagcloud ${prepareJson('visConfig', visConfig)}`;
   },
   region_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.region_map(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.region_map(schemas),
+    };
     return `regionmap ${prepareJson('visConfig', visConfig)}`;
   },
   tile_map: (visState, schemas) => {
-    const visConfig = buildVisConfig.tile_map(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.tile_map(schemas),
+    };
     return `tilemap ${prepareJson('visConfig', visConfig)}`;
   },
   pie: (visState, schemas) => {
-    const visConfig = buildVisConfig.pie(visState, schemas);
+    const visConfig = {
+      ...visState.params,
+      ...buildVisConfig.pie(schemas),
+    };
     return `kibana_pie ${prepareJson('visConfig', visConfig)}`;
   },
 };
 
 const buildVisConfig: BuildVisConfigFunction = {
-  table: (visState, schemas) => {
-    const visConfig = visState.params;
+  table: (schemas, visParams = {}) => {
+    const visConfig = {} as any;
+    const metrics = schemas.metric;
+    const buckets = schemas.bucket || [];
     visConfig.dimensions = {
-      metrics: schemas.metric,
-      buckets: schemas.bucket || [],
+      metrics,
+      buckets,
       splitRow: schemas.split_row,
       splitColumn: schemas.split_column,
     };
+
+    if (visParams.showMetricsAtAllLevels === false && visParams.showPartialRows === true) {
+      // Handle case where user wants to see partial rows but not metrics at all levels.
+      // This requires calculating how many metrics will come back in the tabified response,
+      // and removing all metrics from the dimensions except the last set.
+      const metricsPerBucket = metrics.length / buckets.length;
+      visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
+    }
     return visConfig;
   },
-  metric: (visState, schemas) => {
-    const visConfig = visState.params;
-    visConfig.metric.metrics = schemas.metric;
+  metric: schemas => {
+    const visConfig = { dimensions: {} } as any;
+    visConfig.dimensions.metrics = schemas.metric;
     if (schemas.group) {
-      visConfig.metric.bucket = schemas.group[0];
+      visConfig.dimensions.bucket = schemas.group[0];
     }
     return visConfig;
   },
-  tagcloud: (visState, schemas) => {
-    const visConfig = visState.params;
+  tagcloud: schemas => {
+    const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
     return visConfig;
   },
-  region_map: (visState, schemas) => {
-    const visConfig = visState.params;
+  region_map: schemas => {
+    const visConfig = {} as any;
     visConfig.metric = schemas.metric[0];
     if (schemas.segment) {
       visConfig.bucket = schemas.segment[0];
     }
     return visConfig;
   },
-  tile_map: (visState, schemas) => {
-    const visConfig = visState.params;
+  tile_map: schemas => {
+    const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],
       geohash: schemas.segment ? schemas.segment[0] : null,
@@ -292,8 +321,8 @@ const buildVisConfig: BuildVisConfigFunction = {
     };
     return visConfig;
   },
-  pie: (visState, schemas) => {
-    const visConfig = visState.params;
+  pie: schemas => {
+    const visConfig = {} as any;
     visConfig.dimensions = {
       metric: schemas.metric[0],
       buckets: schemas.segment,
@@ -330,15 +359,18 @@ export const buildVislibDimensions = (vis: any, timeRange?: any) => {
 
 // If not using the expression pipeline (i.e. visualize_data_loader), we need a mechanism to
 // take a Vis object and decorate it with the necessary params (dimensions, bucket, metric, etc)
-export const decorateVisObject = (vis: Vis, params: { timeRange?: any }) => {
+export const getVisParams = (vis: Vis, params: { timeRange?: any }) => {
   const schemas = getSchemas(vis, params.timeRange);
-  let visConfig = vis.params;
+  let visConfig = cloneDeep(vis.params);
   if (buildVisConfig[vis.type.name]) {
-    visConfig = buildVisConfig[vis.type.name](vis, schemas);
-    vis.params = visConfig;
+    visConfig = {
+      ...visConfig,
+      ...buildVisConfig[vis.type.name](schemas, visConfig),
+    };
   } else if (vislibCharts.includes(vis.type.name)) {
     visConfig.dimensions = buildVislibDimensions(vis, params.timeRange);
   }
+  return visConfig;
 };
 
 export const buildPipeline = (
@@ -370,7 +402,7 @@ export const buildPipeline = (
     pipeline += `esaggs
     ${prepareString('index', indexPattern.id)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.requiresPartialRows || false}
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false}
     ${prepareJson('aggConfigs', visState.aggs)} | `;
   }
 
@@ -386,7 +418,7 @@ export const buildPipeline = (
     pipeline += `visualization type='${vis.type.name}'
     ${prepareJson('visConfig', visState.params)}
     metricsAtAllLevels=${vis.isHierarchical()}
-    partialRows=${vis.params.showPartialRows || vis.type.name === 'tile_map'} `;
+    partialRows=${vis.type.requiresPartialRows || vis.params.showPartialRows || false} `;
     if (indexPattern) {
       pipeline += `${prepareString('index', indexPattern.id)}`;
     }

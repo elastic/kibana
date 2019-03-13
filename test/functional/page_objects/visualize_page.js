@@ -397,7 +397,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickSavedSearch(savedSearchName) {
-      await testSubjects.click('savedSearchesTab');
       await testSubjects.click(`savedObjectTitle${savedSearchName.split(' ').join('-')}`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -738,13 +737,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
-      let isOpen = await testSubjects.exists('savedObjectSaveModal');
-      await retry.try(async () => {
-        while (!isOpen) {
-          await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('savedObjectSaveModal');
-        }
-      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const isOpen = await testSubjects.exists('savedObjectSaveModal', { timeout: 5000 });
+      if (!isOpen) {
+        await testSubjects.click('visualizeSaveButton');
+      }
     }
 
     async saveVisualization(vizName, { saveAsNew = false } = {}) {

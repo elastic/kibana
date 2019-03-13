@@ -20,6 +20,7 @@ import {
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
 import { copyPersistentState } from '../../store/util';
 import { extractReferences, injectReferences } from '../../../common/migrations/references';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 const module = uiModules.get('app/maps');
 
@@ -39,6 +40,15 @@ module.factory('SavedGisMap', function (Private) {
         });
 
         savedObject.layerListJSON = attributes.layerListJSON;
+
+        const indexPatternIds = references
+          .filter(reference => {
+            return reference.type === 'index-pattern';
+          })
+          .map(reference => {
+            return reference.id;
+          });
+        savedObject.indexPatternIds = _.uniq(indexPatternIds);
       },
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
@@ -54,7 +64,7 @@ module.factory('SavedGisMap', function (Private) {
     this.showInRecentlyAccessed = true;
   }
 
-  SavedGisMap.type = 'map';
+  SavedGisMap.type = MAP_SAVED_OBJECT_TYPE;
 
   // Mappings are used to place object properties into saved object _source
   SavedGisMap.mapping = {
