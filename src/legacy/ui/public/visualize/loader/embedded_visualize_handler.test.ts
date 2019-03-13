@@ -19,6 +19,12 @@
 
 jest.useFakeTimers();
 
+global.kbnInterpreter = {
+  registries: () => {
+    return {};
+  },
+};
+
 import { EventEmitter } from 'events';
 
 // @ts-ignore
