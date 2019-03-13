@@ -8,7 +8,7 @@ export default function ({ getService, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const archive = 'uptime/full_heartbeat';
 
-  describe('graphql queries', () => {
+  describe('graphql', () => {
     before('load heartbeat data', async () => await esArchiver.load(archive));
     after('unload heartbeat index', async () => await esArchiver.unload(archive));
     // each of these test files imports a GQL query from
