@@ -445,7 +445,7 @@ To include your change in the Release Notes:
     * For a deprecated feature, use `release_note:deprecation`.
     * For a breaking change, use `release-breaking:note`.
 
-To NOT include your changes in the Release Notes, please use lable`non-issue`. PRs with the following lables also won't be included in the Release Notes:
+To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
 `build`, `docs`, `test`, `non-issue`, `jenkins`, `backport`,  and `chore`.
 
 We also produce a blog post that details more important breaking API changes every minor and major release. If the PR includes a breaking API change, apply the label `release_note:dev_docs`. Additionally add a brief summary of the break at the bottom of the PR using the format below:
