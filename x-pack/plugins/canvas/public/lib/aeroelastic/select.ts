@@ -6,40 +6,10 @@
 
 import { ActionId, NodeFunction, NodeResult } from './types';
 
-export const shallowEqual = (a: any, b: any): boolean => {
-  if (a === b) {
-    return true;
-  }
-  if (a.length !== b.length) {
-    return false;
-  }
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-  return true;
-};
-
-export const select = (fun: NodeFunction): NodeFunction => (
-  ...inputs: NodeFunction[]
-): NodeResult => {
-  // last-value memoizing version of this single line function:
-  // fun => (...inputs) => state => fun(...inputs.map(input => input(state)))
-  let argumentValues = [] as NodeResult[];
-  let value: NodeResult;
-  let actionId: ActionId;
-  return (state: NodeResult) => {
-    const lastActionId: ActionId = state.primaryUpdate.payload.uid;
-    if (
-      actionId === lastActionId ||
-      shallowEqual(argumentValues, (argumentValues = inputs.map(input => input(state))))
-    ) {
-      return value;
-    }
-
-    value = fun(...argumentValues);
-    actionId = lastActionId;
-    return value;
-  };
+export const select = (fun: NodeFunction): NodeFunction => (...fns) => {
+  let { prevId, cache } = { prevId: NaN as ActionId, cache: null as NodeResult };
+  const old = (object: NodeResult): boolean =>
+    prevId === (prevId = object.primaryUpdate.payload.uid);
+  return (obj: NodeResult) =>
+    old(obj) ? cache : (cache = fun(...fns.map(f => f(obj) as NodeResult)));
 };
