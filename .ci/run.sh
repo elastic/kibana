@@ -6,6 +6,7 @@ set -e
 cd "$(dirname "$0")/.."
 
 source src/dev/ci_setup/setup.sh
+source src/dev/ci_setup/checkout_sibling_es.sh
 
 case "$JOB" in
 kibana-intake)
