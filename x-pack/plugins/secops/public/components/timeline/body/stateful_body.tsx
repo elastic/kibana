@@ -222,6 +222,7 @@ export const StatefulBody = connect(
     unPinEvent: timelineActions.unPinEvent,
     updateColumns: timelineActions.updateColumns,
     updateRange: timelineActions.updateRange,
+    updateSort: timelineActions.updateSort,
     pinEvent: timelineActions.pinEvent,
     removeColumn: timelineActions.removeColumn,
     removeProvider: timelineActions.removeProvider,
