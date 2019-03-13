@@ -20,7 +20,7 @@ import {
   ReindexStep,
 } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
-import { FlatSettings } from './types';
+import { FlatSettings, FlatSettingsWithTypeName } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -83,6 +83,12 @@ export interface ReindexActions {
    * @param indexName
    */
   getFlatSettings(indexName: string): Promise<FlatSettings | null>;
+
+  /**
+   * Retrieve index settings (in flat, dot-notation style) and mappings with the type name included.
+   * @param indexName
+   */
+  getFlatSettingsWithTypeName(indexName: string): Promise<FlatSettingsWithTypeName | null>;
 
   // ----- Functions below are for enforcing locks around groups of indices like ML or Watcher
 
@@ -236,6 +242,18 @@ export const reindexActionsFactory = (
       const flatSettings = (await callCluster('transport.request', {
         path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=false`,
       })) as { [indexName: string]: FlatSettings };
+
+      if (!flatSettings[indexName]) {
+        return null;
+      }
+
+      return flatSettings[indexName];
+    },
+
+    async getFlatSettingsWithTypeName(indexName: string) {
+      const flatSettings = (await callCluster('transport.request', {
+        path: `/${encodeURIComponent(indexName)}?flat_settings=true&include_type_name=true`,
+      })) as { [indexName: string]: FlatSettingsWithTypeName };
 
       if (!flatSettings[indexName]) {
         return null;
