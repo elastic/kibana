@@ -86,13 +86,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -117,8 +117,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async brushHistogram(from, to) {
       const bars = await find.allByCssSelector('.series.histogram rect');
       await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
       );
     }
 

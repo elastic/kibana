@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
-  EuiHorizontalRule,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -33,7 +32,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { documentationLinks } from '../../documentation_links/documentation_links';
 
-const luceneQuerySyntaxDocs = documentationLinks.query.luceneQuerySyntax;
 const kueryQuerySyntaxDocs = documentationLinks.query.kueryQuerySyntax;
 
 interface State {
@@ -51,9 +49,22 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
   };
 
   public render() {
+    const luceneLabel = (
+      <FormattedMessage id="common.ui.queryBar.luceneLanguageName" defaultMessage="Lucene" />
+    );
+    const kqlLabel = (
+      <FormattedMessage id="common.ui.queryBar.kqlLanguageName" defaultMessage="KQL" />
+    );
+    const kqlFullName = (
+      <FormattedMessage
+        id="common.ui.queryBar.kqlFullLanguageName"
+        defaultMessage="Kibana Query Language"
+      />
+    );
+
     const button = (
       <EuiButtonEmpty size="xs" onClick={this.togglePopover}>
-        <FormattedMessage id="common.ui.queryBar.optionsButtonLabel" defaultMessage="Options" />
+        {this.props.language === 'lucene' ? luceneLabel : kqlLabel}
       </EuiButtonEmpty>
     );
 
@@ -79,15 +90,13 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
             <p>
               <FormattedMessage
                 id="common.ui.queryBar.syntaxOptionsDescription"
-                defaultMessage="Our new autocomplete and simple syntax features can help you create your
-                queries. Just start typing and you’ll see matches related to your data. See docs {docsLink}."
+                defaultMessage="The {docsLink} (KQL) offers a simplified query
+                syntax and support for scripted fields. KQL also provides autocomplete if you have
+                a Basic license or above. If you turn off KQL, Kibana uses Lucene."
                 values={{
                   docsLink: (
                     <EuiLink href={kueryQuerySyntaxDocs} target="_blank">
-                      <FormattedMessage
-                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
+                      {kqlFullName}
                     </EuiLink>
                   ),
                 }}
@@ -98,15 +107,16 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
           <EuiSpacer size="m" />
 
           <EuiForm>
-            <EuiFormRow>
+            <EuiFormRow label={kqlFullName}>
               <EuiSwitch
                 id="queryEnhancementOptIn"
                 name="popswitch"
                 label={
-                  <FormattedMessage
-                    id="common.ui.queryBar.turnOnQueryFeaturesLabel"
-                    defaultMessage="Turn on query features"
-                  />
+                  this.props.language === 'kuery' ? (
+                    <FormattedMessage id="common.ui.queryBar.kqlOnLabel" defaultMessage="On" />
+                  ) : (
+                    <FormattedMessage id="common.ui.queryBar.kqlOffLabel" defaultMessage="Off" />
+                  )
                 }
                 checked={this.props.language === 'kuery'}
                 onChange={this.onSwitchChange}
@@ -114,27 +124,6 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
               />
             </EuiFormRow>
           </EuiForm>
-
-          <EuiHorizontalRule margin="s" />
-
-          <EuiText size="xs">
-            <p>
-              <FormattedMessage
-                id="common.ui.queryBar.luceneDocsDescription"
-                defaultMessage="Not ready yet? Find our lucene docs {docsLink}."
-                values={{
-                  docsLink: (
-                    <EuiLink href={luceneQuerySyntaxDocs} target="_blank">
-                      <FormattedMessage
-                        id="common.ui.queryBar.luceneDocsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiText>
         </div>
       </EuiPopover>
     );

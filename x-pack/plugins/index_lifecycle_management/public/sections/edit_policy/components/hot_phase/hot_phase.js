@@ -21,13 +21,12 @@ import {
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../../components';
 import {
   PHASE_HOT,
-  PHASE_ROLLOVER_ALIAS,
   PHASE_ROLLOVER_MAX_AGE,
   PHASE_ROLLOVER_MAX_AGE_UNITS,
+  PHASE_ROLLOVER_MAX_DOCUMENTS,
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ENABLED,
-  MAX_SIZE_TYPE_DOCUMENT
 } from '../../../../store/constants';
 import { SetPriorityInput } from '../set_priority_input';
 
@@ -39,19 +38,6 @@ class HotPhaseUi extends PureComponent {
 
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ROLLOVER_ALIAS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MAX_AGE]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
-      [PHASE_ROLLOVER_MAX_AGE_UNITS]: PropTypes.string.isRequired,
-      [PHASE_ROLLOVER_MAX_SIZE_STORED]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
-      [PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]: PropTypes.string.isRequired
-    }).isRequired
   };
 
   render() {
@@ -63,7 +49,6 @@ class HotPhaseUi extends PureComponent {
       intl,
       setWarmPhaseOnRollover
     } = this.props;
-
     return (
       <Fragment>
         <EuiDescribedFormGroup
@@ -150,8 +135,8 @@ class HotPhaseUi extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_SIZE_STORED}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_SIZE_STORED,
                           e.target.value
                         );
@@ -174,8 +159,8 @@ class HotPhaseUi extends PureComponent {
                         defaultMessage: 'Maximum index size units'
                       })}
                       value={phaseData[PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
                           e.target.value
                         );
@@ -185,11 +170,38 @@ class HotPhaseUi extends PureComponent {
                           id: 'xpack.indexLifecycleMgmt.hotPhase.gigabytesLabel',
                           defaultMessage: 'gigabytes'
                         }) },
-                        { value: MAX_SIZE_TYPE_DOCUMENT, text: intl.formatMessage({
-                          id: 'xpack.indexLifecycleMgmt.hotPhase.documentsLabel',
-                          defaultMessage: 'documents'
+                        { value: 'mb', text: intl.formatMessage({
+                          id: 'xpack.indexLifecycleMgmt.hotPhase.megabytesLabel',
+                          defaultMessage: 'megabytes'
                         }) }
                       ]}
+                    />
+                  </ErrableFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer />
+              <EuiFlexGroup>
+                <EuiFlexItem style={{ maxWidth: 188 }}>
+                  <ErrableFormRow
+                    id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
+                    label={intl.formatMessage({
+                      id: 'xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel',
+                      defaultMessage: 'Maximum documents'
+                    })}
+                    errorKey={PHASE_ROLLOVER_MAX_DOCUMENTS}
+                    isShowingErrors={isShowingErrors}
+                    errors={errors}
+                  >
+                    <EuiFieldNumber
+                      id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_DOCUMENTS}`}
+                      value={phaseData[PHASE_ROLLOVER_MAX_DOCUMENTS]}
+                      onChange={e => {
+                        setPhaseData(
+                          PHASE_ROLLOVER_MAX_DOCUMENTS,
+                          e.target.value
+                        );
+                      }}
+                      min={1}
                     />
                   </ErrableFormRow>
                 </EuiFlexItem>
@@ -210,8 +222,8 @@ class HotPhaseUi extends PureComponent {
                     <EuiFieldNumber
                       id={`${PHASE_HOT}-${PHASE_ROLLOVER_MAX_AGE}`}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE]}
-                      onChange={async e => {
-                        await setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
+                      onChange={e => {
+                        setPhaseData(PHASE_ROLLOVER_MAX_AGE, e.target.value);
                       }}
                       min={1}
                     />
@@ -231,8 +243,8 @@ class HotPhaseUi extends PureComponent {
                         defaultMessage: 'Maximum age units'
                       })}
                       value={phaseData[PHASE_ROLLOVER_MAX_AGE_UNITS]}
-                      onChange={async e => {
-                        await setPhaseData(
+                      onChange={e => {
+                        setPhaseData(
                           PHASE_ROLLOVER_MAX_AGE_UNITS,
                           e.target.value
                         );

@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
@@ -109,7 +105,7 @@ module.exports = {
         // instructs import/no-extraneous-dependencies to treat modules
         // in plugins/ or ui/ namespace as "core modules" so they don't
         // trigger failures for not being listed in package.json
-        'import/core-modules': ['plugins', 'ui', 'uiExports'],
+        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
@@ -208,7 +204,7 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
+        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*',
       ],
       rules: {

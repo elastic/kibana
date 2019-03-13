@@ -35,26 +35,21 @@ jest.mock('./create_handlers', () => ({
 describe('kbn-interpreter/interpreter', () => {
   it('loads server-side functions', async () => {
     const kfetch = jest.fn(async () => ({}));
+    const ajaxStream = jest.fn(async () => ({}));
 
-    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register: () => {} }));
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register: () => {} },
+    });
 
     expect(kfetch).toHaveBeenCalledTimes(1);
     expect(kfetch).toHaveBeenCalledWith({ pathname: FUNCTIONS_URL });
   });
 
   it('registers client-side functions that pass through to the server', async () => {
-    const kfetch = jest.fn(async ({ method }) => {
-      if (method === 'POST') {
-        return {
-          results: [{
-            id: 1,
-            result: {
-              hello: 'world',
-            },
-          }],
-        };
-      }
-
+    const kfetch = jest.fn(async () => {
       return {
         hello: { name: 'hello' },
         world: { name: 'world' },
@@ -62,12 +57,20 @@ describe('kbn-interpreter/interpreter', () => {
     });
 
     const register = jest.fn();
+    const ajaxStream = jest.fn(async ({ onResponse }) => {
+      onResponse({ id: 1, result: { hello: 'world' } });
+    });
 
-    await initializeInterpreter(kfetch, { toJS: () => ({}) }, ({ register }));
+    await initializeInterpreter({
+      kfetch,
+      ajaxStream,
+      typesRegistry: { toJS: () => ({}) },
+      functionsRegistry: { register },
+    });
 
     expect(register).toHaveBeenCalledTimes(2);
 
-    const [ hello, world ] = register.mock.calls.map(([fn]) => fn());
+    const [hello, world] = register.mock.calls.map(([fn]) => fn());
 
     expect(hello.name).toEqual('hello');
     expect(typeof hello.fn).toEqual('function');
@@ -81,18 +84,19 @@ describe('kbn-interpreter/interpreter', () => {
 
     expect(result).toEqual({ hello: 'world' });
 
-    expect(kfetch).toHaveBeenCalledWith({
-      pathname: FUNCTIONS_URL,
-      method: 'POST',
+    expect(ajaxStream).toHaveBeenCalledWith({
+      url: FUNCTIONS_URL,
+      onResponse: expect.any(Function),
       body: JSON.stringify({
-        functions: [{
-          id: 1,
-          functionName: 'hello',
-          args,
-          context,
-        }]
+        functions: [
+          {
+            functionName: 'hello',
+            args,
+            context,
+            id: 1,
+          },
+        ],
       }),
     });
   });
-
 });

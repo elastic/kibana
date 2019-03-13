@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { Plugin, PluginName } from './plugin';
 import { createPluginStartContext } from './plugin_context';
+import { PluginsServiceStartDeps } from './plugins_service';
 
 /** @internal */
 export class PluginsSystem {
@@ -36,7 +37,7 @@ export class PluginsSystem {
     this.plugins.set(plugin.name, plugin);
   }
 
-  public async startPlugins() {
+  public async startPlugins(deps: PluginsServiceStartDeps) {
     const exposedValues = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
       return exposedValues;
@@ -67,7 +68,7 @@ export class PluginsSystem {
       exposedValues.set(
         pluginName,
         await plugin.start(
-          createPluginStartContext(this.coreContext, plugin),
+          createPluginStartContext(this.coreContext, deps, plugin),
           exposedDependencyValues
         )
       );

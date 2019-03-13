@@ -28,6 +28,7 @@ import 'ui/apply_filters';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -119,6 +120,7 @@ function VisEditor(
   AppState,
   $window,
   $injector,
+  indexPatterns,
   kbnUrl,
   redirectWhenMissing,
   Private,
@@ -180,6 +182,13 @@ function VisEditor(
         });
       };
 
+      const confirmButtonLabel = $scope.isAddToDashMode() ? (
+        <FormattedMessage
+          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+          defaultMessage="Save and add to dashboard"
+        />
+      ) : null;
+
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
@@ -187,6 +196,7 @@ function VisEditor(
           title={savedVis.title}
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
+          confirmButtonLabel={confirmButtonLabel}
         />);
       showSaveModal(saveModal);
     }
@@ -313,7 +323,14 @@ function VisEditor(
   function init() {
     // export some objects
     $scope.savedVis = savedVis;
-    $scope.indexPattern = vis.indexPattern;
+    if (vis.indexPattern) {
+      $scope.indexPattern = vis.indexPattern;
+    } else {
+      indexPatterns.getDefault().then(defaultIndexPattern => {
+        $scope.indexPattern = defaultIndexPattern;
+      });
+    }
+
     $scope.searchSource = searchSource;
     $scope.state = $state;
 

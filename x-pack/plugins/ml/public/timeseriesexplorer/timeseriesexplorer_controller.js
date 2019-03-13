@@ -56,10 +56,12 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
 } from '../../common/constants/search';
 import { annotationsRefresh$ } from '../services/annotations_service';
+import { interval$ } from '../components/controls/select_interval/select_interval';
+import { severity$ } from '../components/controls/select_severity/select_severity';
 
 
 import chrome from 'ui/chrome';
-const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+let mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
 
 uiRoutes
   .when('/timeseriesexplorer/?', {
@@ -77,14 +79,16 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
 module.controller('MlTimeSeriesExplorerController', function (
+  $injector,
   $scope,
   $timeout,
   Private,
   AppState,
   config,
-  mlSelectIntervalService,
-  mlSelectSeverityService,
   i18n) {
+
+  $injector.get('mlSelectIntervalService');
+  $injector.get('mlSelectSeverityService');
 
   $scope.timeFieldName = 'timestamp';
   timefilter.enableTimeRangeSelector();
@@ -399,7 +403,8 @@ module.controller('MlTimeSeriesExplorerController', function (
         refreshFocusData.focusChartData = processDataForFocusAnomalies(
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
-          $scope.timeFieldName);
+          $scope.timeFieldName,
+          $scope.focusAggregationInterval);
 
         refreshFocusData.focusChartData = processScheduledEventsForChart(
           refreshFocusData.focusChartData,
@@ -412,6 +417,12 @@ module.controller('MlTimeSeriesExplorerController', function (
           console.log('Time series explorer focus chart data set:', $scope.focusChartData);
 
           $scope.loading = false;
+
+          // If the annotations failed to load and the feature flag is set to `false`,
+          // make sure the checkbox toggle gets hidden.
+          if (mlAnnotationsEnabled === false) {
+            $scope.showAnnotationsCheckbox = false;
+          }
         });
       }
     }
@@ -486,19 +497,24 @@ module.controller('MlTimeSeriesExplorerController', function (
         latestMs: searchBounds.max.valueOf(),
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
       }).then((resp) => {
-        refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
-          });
+        refreshFocusData.focusAnnotationData = [];
+
+        if (Array.isArray(resp.annotations[$scope.selectedJob.job_id])) {
+          refreshFocusData.focusAnnotationData = resp.annotations[$scope.selectedJob.job_id]
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = String.fromCharCode(65 + i);
+              return d;
+            });
+        }
 
         finish();
       }).catch(() => {
-        // silent fail
+        // silently fail and disable annotations feature if loading annotations fails.
         refreshFocusData.focusAnnotationData = [];
+        mlAnnotationsEnabled = false;
         finish();
       });
     } else {
@@ -651,15 +667,15 @@ module.controller('MlTimeSeriesExplorerController', function (
       loadAnomaliesTableData($scope.zoomFrom.getTime(), $scope.zoomTo.getTime());
     }
   };
-  mlSelectIntervalService.state.watch(tableControlsListener);
-  mlSelectSeverityService.state.watch(tableControlsListener);
 
+  const intervalSub = interval$.subscribe(tableControlsListener);
+  const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
 
   $scope.$on('$destroy', () => {
     refreshWatcher.cancel();
-    mlSelectIntervalService.state.unwatch(tableControlsListener);
-    mlSelectSeverityService.state.unwatch(tableControlsListener);
+    intervalSub.unsubscribe();
+    severitySub.unsubscribe();
     annotationsRefreshSub.unsubscribe();
   });
 
@@ -773,8 +789,8 @@ module.controller('MlTimeSeriesExplorerController', function (
       [$scope.selectedJob.job_id],
       $scope.criteriaFields,
       [],
-      mlSelectIntervalService.state.get('interval').val,
-      mlSelectSeverityService.state.get('threshold').val,
+      interval$.getValue().val,
+      severity$.getValue().val,
       earliestMs,
       latestMs,
       dateFormatTz,

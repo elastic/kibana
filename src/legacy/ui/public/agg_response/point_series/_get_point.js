@@ -17,19 +17,18 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { getFormat } from '../../visualize/loader/pipeline_helpers/utilities';
 
 export function getPoint(table, x, series, yScale, row, rowIndex, y, z) {
-  const zRow = z && row[z.accessor];
   const xRow = x.accessor === -1 ? '_all' : row[x.accessor];
   const yRow = row[y.accessor];
+  const zRow = z && row[z.accessor];
 
   const point = {
     x: xRow,
     y: yRow,
     z: zRow,
-    extraMetrics: _.compact([zRow]),
+    extraMetrics: [],
     yScale: yScale,
     seriesRaw: series && {
       table,

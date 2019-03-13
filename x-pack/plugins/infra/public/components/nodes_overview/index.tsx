@@ -34,6 +34,8 @@ interface Props {
   onViewChange: (view: string) => void;
   view: string;
   intl: InjectedIntl;
+  boundsOverride: InfraWaffleMapBounds;
+  autoBounds: boolean;
 }
 
 interface MetricFormatter {
@@ -51,12 +53,10 @@ const METRIC_FORMATTERS: MetricFormatters = {
   [InfraMetricType.cpu]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
   [InfraMetricType.memory]: {
     formatter: InfraFormatterType.percent,
     template: '{{value}}',
-    bounds: { min: 0, max: 1 },
   },
   [InfraMetricType.rx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
   [InfraMetricType.tx]: { formatter: InfraFormatterType.bits, template: '{{value}}/s' },
@@ -67,19 +67,33 @@ const METRIC_FORMATTERS: MetricFormatters = {
 };
 
 const calculateBoundsFromNodes = (nodes: InfraNode[]): InfraWaffleMapBounds => {
-  const values = nodes.map(node => node.metric.value);
-  // if there is only one value then we need to set the bottom range to zero
-  if (values.length === 1) {
-    values.unshift(0);
+  const maxValues = nodes.map(node => node.metric.max);
+  const minValues = nodes.map(node => node.metric.value);
+  // if there is only one value then we need to set the bottom range to zero for min
+  // otherwise the legend will look silly since both values are the same for top and
+  // bottom.
+  if (minValues.length === 1) {
+    minValues.unshift(0);
   }
-  return { min: min(values) || 0, max: max(values) || 0 };
+  return { min: min(minValues) || 0, max: max(maxValues) || 0 };
 };
 
 export const NodesOverview = injectI18n(
   class extends React.Component<Props, {}> {
     public static displayName = 'Waffle';
     public render() {
-      const { loading, nodes, nodeType, reload, intl, view, options, timeRange } = this.props;
+      const {
+        autoBounds,
+        boundsOverride,
+        loading,
+        nodes,
+        nodeType,
+        reload,
+        intl,
+        view,
+        options,
+        timeRange,
+      } = this.props;
       if (loading) {
         return (
           <InfraLoadingPanel
@@ -113,13 +127,8 @@ export const NodesOverview = injectI18n(
           />
         );
       }
-      const { metric } = this.props.options;
-      const metricFormatter = get(
-        METRIC_FORMATTERS,
-        metric.type,
-        METRIC_FORMATTERS[InfraMetricType.count]
-      );
-      const bounds = (metricFormatter && metricFormatter.bounds) || calculateBoundsFromNodes(nodes);
+      const dataBounds = calculateBoundsFromNodes(nodes);
+      const bounds = autoBounds ? dataBounds : boundsOverride;
       return (
         <MainContainer>
           <ViewSwitcherContainer>
@@ -146,6 +155,7 @@ export const NodesOverview = injectI18n(
                 timeRange={timeRange}
                 onFilter={this.handleDrilldown}
                 bounds={bounds}
+                dataBounds={dataBounds}
               />
             </MapContainer>
           )}

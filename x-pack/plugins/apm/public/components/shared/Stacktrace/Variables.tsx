@@ -16,7 +16,6 @@ import {
   unit,
   units
 } from '../../../style/variables';
-// @ts-ignore
 import { Ellipsis } from '../Icons';
 import { PropertiesTable } from '../PropertiesTable';
 
@@ -59,10 +58,7 @@ export class Variables extends React.Component<Props> {
     return (
       <VariablesContainer>
         <VariablesToggle onClick={this.onClick}>
-          <Ellipsis
-            horizontal={this.state.isVisible}
-            style={{ marginRight: units.half }}
-          />{' '}
+          <Ellipsis horizontal={this.state.isVisible} />{' '}
           {i18n.translate(
             'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
             { defaultMessage: 'Local variables' }
@@ -70,7 +66,7 @@ export class Variables extends React.Component<Props> {
         </VariablesToggle>
         {this.state.isVisible && (
           <VariablesTableContainer>
-            <PropertiesTable propData={this.props.vars} propKey={'custom'} />
+            <PropertiesTable propData={this.props.vars} />
           </VariablesTableContainer>
         )}
       </VariablesContainer>
