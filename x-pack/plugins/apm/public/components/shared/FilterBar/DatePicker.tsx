@@ -49,12 +49,8 @@ class DatePickerComponent extends React.Component<Props> {
   public componentDidUpdate(prevProps: Props) {
     const currentParams = this.getParamsFromSearch(this.props.location.search);
     const previousParams = this.getParamsFromSearch(prevProps.location.search);
-    if (
-      currentParams.rangeFrom !== previousParams.rangeFrom ||
-      currentParams.rangeTo !== previousParams.rangeTo
-    ) {
-      this.dispatchTimeRangeUpdate();
-    }
+
+    this.dispatchTimeRangeUpdate();
 
     if (
       currentParams.refreshPaused !== previousParams.refreshPaused ||
