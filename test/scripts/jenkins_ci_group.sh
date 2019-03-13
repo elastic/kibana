@@ -25,5 +25,7 @@ export TEST_ES_FROM=${TEST_ES_FROM:-source}
 "$PERCY_BIN" exec "$GRUNT_BIN" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
 
 if [ "$CI_GROUP" == "1" ]; then
+  # this extra use of $PERCY_BIN has to be accounted for in src/dev/get_percy_env, if it is
+  # removed please remove the +1 of the ciGroupCount in src/dev/get_percy_env
   "$PERCY_BIN" exec "$GRUNT_BIN" run:pluginFunctionalTestsRelease --from=source;
 fi
