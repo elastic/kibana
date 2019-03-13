@@ -21,42 +21,39 @@ import * as Hapi from 'hapi';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 
-export class TelemetryKeeper {
-  public addInstall: (dataSet: string) => void;
-  public addUninstall: (dataSet: string) => void;
+export function usage(request: Hapi.Request) {
+  const { server } = request;
 
-  constructor(request: Hapi.Request) {
-    const { server } = request;
+  const handleIncrementError = (err: Error) => {
+    if (err != null) {
+      server.log(['debug', 'sample_data', 'telemetry'], err.stack);
+    }
+    server.log(
+      ['warning', 'sample_data', 'telemetry'],
+      `saved objects repository incrementCounter encountered an error: ${err}`
+    );
+  };
 
-    const handleIncrementError = (err: Error) => {
-      if (err != null) {
-        server.log(['debug', 'sample_data', 'telemetry'], err.stack);
-      }
-      server.log(
-        ['warning', 'sample_data', 'telemetry'],
-        `saved objects repository incrementCounter encountered an error: ${err}`
-      );
-    };
+  const {
+    savedObjects: { getSavedObjectsRepository },
+  } = server;
+  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-    const {
-      savedObjects: { getSavedObjectsRepository },
-    } = server;
-    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-    const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-
-    this.addInstall = async (dataSet: string) => {
+  return {
+    addInstall: async (dataSet: string) => {
       try {
         internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
       } catch (err) {
         handleIncrementError(err);
       }
-    };
-    this.addUninstall = async (dataSet: string) => {
+    },
+    addUninstall: async (dataSet: string) => {
       try {
         internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
       } catch (err) {
         handleIncrementError(err);
       }
-    };
-  }
+    },
+  };
 }

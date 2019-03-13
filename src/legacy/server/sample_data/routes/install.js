@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { TelemetryKeeper } from '../telemetry';
+import { usageTracker } from '../usage';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import {
@@ -172,8 +172,8 @@ export const createInstallRoute = () => ({
           .code(403);
       }
 
-      const telemetry = new TelemetryKeeper(request);
-      telemetry.addInstall(params.id); // no await necessary
+      // track the usage operation in a non-blocking way
+      usageTracker(request).addInstall(params.id);
 
       return h.response({
         elasticsearchIndicesCreated: counts,

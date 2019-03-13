@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { makeSampleDataTelemetryCollector } from './collector';
-export { TelemetryKeeper } from './keeper';
+export { makeSampleDataUsageCollector } from './collector';
+export { usage } from './usage';

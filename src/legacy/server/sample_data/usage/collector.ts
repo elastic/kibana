@@ -24,7 +24,7 @@ interface KbnServer extends Hapi.Server {
   usage: any;
 }
 
-export function makeSampleDataTelemetryCollector(server: KbnServer) {
+export function makeSampleDataUsageCollector(server: KbnServer) {
   server.usage.collectorSet.register(
     server.usage.collectorSet.makeUsageCollector({
       type: 'sample-data',
