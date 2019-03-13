@@ -38,6 +38,7 @@ export interface FetchFileResponse {
 export interface RepoTreePayload {
   tree: FileTree;
   path: string;
+  withParents: boolean | undefined;
 }
 
 export const fetchRepoTree = createAction<FetchRepoTreePayload>('FETCH REPO TREE');

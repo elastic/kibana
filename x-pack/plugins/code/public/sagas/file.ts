@@ -65,7 +65,9 @@ function* fetchPath(payload: FetchRepoTreePayload) {
     }
   });
   update.repoUri = payload.uri;
-  yield put(fetchRepoTreeSuccess({ tree: update, path: payload.path }));
+  yield put(
+    fetchRepoTreeSuccess({ tree: update, path: payload.path, withParents: payload.parents })
+  );
   return update;
 }
 
