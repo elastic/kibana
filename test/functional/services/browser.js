@@ -33,6 +33,11 @@ export async function BrowserProvider({ getService }) {
     keys = Key;
 
     /**
+     * Is WebDriver instance W3C compatible
+     */
+    isW3CEnabled = (driver.executor_.w3c === true);
+
+    /**
      * Retrieves the a rect describing the current top-level window's size and position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
      *
@@ -233,7 +238,7 @@ export async function BrowserProvider({ getService }) {
       //The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       //See: https://github.com/w3c/webdriver/issues/406
       //See: https://w3c.github.io/webdriver/#endpoints
-      if (driver.executor_.w3c === true) {
+      if (this.isW3CEnabled) {
         return [];
       } else {
         return await driver.manage().logs().get(...args);
