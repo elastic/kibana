@@ -84,8 +84,8 @@ export function SettingsPanel(props) {
           <EuiFlexItem>
 
             <EuiFormRow
-              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.minMaxZoomLabel', {
-                defaultMessage: 'Min and max zoom'
+              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
+                defaultMessage: 'Visible zoom range'
               })}
             >
               <ValidatedDualRange
