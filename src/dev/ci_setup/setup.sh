@@ -151,9 +151,10 @@ export GRUNT_BIN="$yarnBin/grunt"
 ###
 gitCommit="$(git rev-parse HEAD)"
 ciGroupCount="$(node ./src/dev/ci_setup/count_ci_groups)"
+# shellcheck disable=SC2154
 export PERCY_PULL_REQUEST="$ghprbPullId"
 export PERCY_PARALLEL_NONCE="$gitCommit/$BUILD_TAG"
 export PERCY_PARALLEL_TOTAL="$ciGroupCount"
-echo " -- PERCY_PULL_REQUEST='$ghprbPullId'"
+echo " -- PERCY_PULL_REQUEST='$PERCY_PULL_REQUEST'"
 echo " -- PERCY_PARALLEL_NONCE='$PERCY_PARALLEL_NONCE'"
 echo " -- PERCY_PARALLEL_TOTAL='$PERCY_PARALLEL_TOTAL'"
