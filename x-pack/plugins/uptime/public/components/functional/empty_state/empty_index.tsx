@@ -8,7 +8,11 @@ import { EuiEmptyPrompt, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 
-export const EmptyIndex = (props: any) => (
+interface EmptyIndexProps {
+  basePath: string;
+}
+
+export const EmptyIndex = ({ basePath }: EmptyIndexProps) => (
   <EuiEmptyPrompt
     title={
       <EuiTitle size="l">
@@ -30,7 +34,7 @@ export const EmptyIndex = (props: any) => (
               configureHeartbeatLink: (
                 <EuiLink
                   target="_blank"
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                  href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
                 >
                   <FormattedMessage
                     id="xpack.uptime.emptyState.configureHeartbeatLinkText"

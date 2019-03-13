@@ -55,6 +55,8 @@ export interface UptimePersistedState {
 }
 
 export interface UptimeAppProps {
+  // TODO: if we add a context to the Uptime UI, this should be included in it
+  basePath: string;
   darkMode: boolean;
   graphQLClient: UMGraphQLClient;
   initialDateRangeStart: string;
@@ -134,7 +136,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { routerBasename, graphQLClient } = this.props;
+    const { basePath, routerBasename, graphQLClient } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
@@ -229,6 +231,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     path="/"
                     render={props => (
                       <OverviewPage
+                        basePath={basePath}
                         {...props}
                         {...this.state}
                         setBreadcrumbs={this.setBreadcrumbs}
