@@ -1,17 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FilterBar component renders the component without errors 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
+<EuiFlexGroup>
   <EuiFlexItem
-    component="div"
     grow={true}
   >
     <EuiSearchBar

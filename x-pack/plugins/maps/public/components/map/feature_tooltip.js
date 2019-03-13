@@ -4,18 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-export function FeatureTooltip({ properties }) {
 
-  return Object.keys(properties).map(propertyName => {
+export class FeatureTooltip extends React.Component {
+
+
+  _renderProperties() {
+    return Object.keys(this.props.properties).map(propertyName => {
+      return (
+        <div key={propertyName}>
+          <strong>{propertyName}</strong>
+          {' '}
+          {this.props.properties[propertyName]}
+        </div>
+      );
+    });
+  }
+
+  render() {
     return (
-      <div key={propertyName}>
-        <strong>{propertyName}</strong>
-        {' '}
-        {properties[propertyName]}
-      </div>
+      <Fragment>
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={true}>
+            <EuiFlexGroup alignItems="flexEnd" direction="row" justifyContent="spaceBetween">
+              <EuiFlexItem>&nbsp;</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  onClick={this.props.onCloseClick}
+                  iconType="cross"
+                  aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
+                    defaultMessage: 'Close tooltip'
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {this._renderProperties()}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
     );
-  });
+  }
 }
 

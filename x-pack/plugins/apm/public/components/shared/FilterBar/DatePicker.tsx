@@ -121,7 +121,7 @@ class DatePickerComponent extends React.Component<Props> {
   }) {
     const currentSearch = toQuery(this.props.location.search);
 
-    this.props.history.replace({
+    this.props.history.push({
       ...this.props.location,
       search: fromQuery({
         ...currentSearch,

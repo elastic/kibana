@@ -9,15 +9,10 @@ exports[`TOCEntry is rendered 1`] = `
   <EuiFlexGroup
     alignItems="center"
     className="mapTocEntry-visible"
-    component="div"
-    direction="row"
     gutterSize="none"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <LayerTocActions
@@ -37,10 +32,7 @@ exports[`TOCEntry is rendered 1`] = `
         zoom={0}
       />
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiLink
         color="text"
         data-test-subj="mapOpenLayerButtonlayer_1"
@@ -60,7 +52,6 @@ exports[`TOCEntry is rendered 1`] = `
       </EuiLink>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <span
@@ -72,10 +63,7 @@ exports[`TOCEntry is rendered 1`] = `
       </span>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiSpacer
       size="s"
     />
@@ -95,15 +83,10 @@ exports[`TOCEntry props isReadOnly 1`] = `
   <EuiFlexGroup
     alignItems="center"
     className="mapTocEntry-visible"
-    component="div"
-    direction="row"
     gutterSize="none"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <LayerTocActions
@@ -123,10 +106,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
         zoom={0}
       />
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiText
         grow={true}
         size="m"
@@ -144,10 +124,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiSpacer
       size="s"
     />

@@ -301,7 +301,13 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async closeToast() {
-      const toast = await find.byCssSelector('.euiToast');
+      let toast;
+      await retry.try(async () => {
+        toast = await find.byCssSelector('.euiToast');
+        if (!toast) {
+          throw new Error('Toast is not visible yet');
+        }
+      });
       await browser.moveMouseTo(toast);
       const title = await (await find.byCssSelector('.euiToastHeader__title')).getVisibleText();
       log.debug(title);

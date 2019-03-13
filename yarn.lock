@@ -820,10 +820,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.0.2":
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.0.2.tgz#05f716021cdf482e17c4ffd35cbfb385e8b9c5e3"
-  integrity sha512-yWu4QqzdP3LtfdMZrdNGerebXrb+NlWbNDNOuXCX8SJIeek7nr12kDi10S6H97KCsGdgFzMozn1DfU5kbJcmww==
+"@elastic/eui@9.2.1":
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.2.1.tgz#3860a7219f0ee8f33ec43447edb2eda3c96a00a7"
+  integrity sha512-U92s0nh6vBS6NBiHDCq6e+49Dam8It+Iy81b2NProf1OIRk/nB0RE781x6zgUzmOFpJ1T0xiThWiiDP776v0LQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -3784,11 +3784,6 @@ attr-accept@^1.1.3:
   integrity sha512-iT40nudw8zmCweivz6j58g+RT33I4KbaIvRUhjNmDwO2WmsQUxFEZZYZ5w3vXe5x5MX9D7mfvA/XaLOZYFR9EQ==
   dependencies:
     core-js "^2.5.0"
-
-autobind-decorator@^1.3.4:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/autobind-decorator/-/autobind-decorator-1.4.3.tgz#4c96ffa77b10622ede24f110f5dbbf56691417d1"
-  integrity sha1-TJb/p3sQYi7eJPEQ9du/VmkUF9E=
 
 autolinker@~0.15.0:
   version "0.15.3"
@@ -19149,14 +19144,6 @@ react-input-autosize@^2.1.2, react-input-autosize@^2.2.1:
   dependencies:
     prop-types "^15.5.8"
 
-react-input-range@^1.3.0:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/react-input-range/-/react-input-range-1.3.0.tgz#f96d001631ab817417f1e26d8f9f9684b4827f59"
-  integrity sha1-+W0AFjGrgXQX8eJtj5+WhLSCf1k=
-  dependencies:
-    autobind-decorator "^1.3.4"
-    prop-types "^15.5.8"
-
 react-inspector@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/react-inspector/-/react-inspector-2.3.0.tgz#fc9c1d38ab687fc0d190dcaf133ae40158968fc8"
@@ -19451,13 +19438,6 @@ react-textarea-autosize@^7.0.4:
   integrity sha512-1cC8pFSrIVH92aE+UKxGQ2Gqq43qdIcMscJKScEFeBNemn6gHa+NwKqdXkHxxg5H6uuvW+cPpJPTes6zh90M+A==
   dependencies:
     prop-types "^15.6.0"
-
-react-toggle@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/react-toggle/-/react-toggle-4.0.2.tgz#77f487860efb87fafd197672a2db8c885be1440f"
-  integrity sha512-EPTWnN7gQHgEAUEmjheanZXNzY5TPnQeyyHfEs3YshaiWZf5WNjfYDrglO5F1Hl/dNveX18i4l0grTEsYH2Ccw==
-  dependencies:
-    classnames "^2.2.5"
 
 react-transition-group@^2.0.0:
   version "2.5.0"
