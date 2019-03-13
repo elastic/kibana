@@ -1,15 +1,15 @@
-[[saved-objects-api-resolve-import-conflicts]]
-=== Resolve Import Conflicts
+[[saved-objects-api-resolve-import-errors]]
+=== Resolve Import Errors
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The resolve import conflicts API enables you to resolve conflicts given by the import API by either overwriting specific saved objects or changing references to a newly created object.
+The resolve import errors API enables you to resolve errors given by the import API by either overwriting specific saved objects or changing references to a newly created object.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
 ==== Request
 
-`POST /api/saved_objects/_resolve_import_conflicts`
+`POST /api/saved_objects/_resolve_import_errors`
 
 ==== Request body
 
@@ -35,12 +35,12 @@ In the scenario the import wasn't successful a top level `errors` array will con
 
 ==== Examples
 
-The following example resolves conflicts for an index pattern and dashboard but indicates to skip the index pattern.
+The following example resolves errors for an index pattern and dashboard but indicates to skip the index pattern.
 This will cause the index pattern to not be in the system and the dashboard to overwrite the existing saved object.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_conflicts
+POST api/saved_objects/_resolve_import_errors
 Content-Type: multipart/form-data; boundary=EXAMPLE
 --EXAMPLE
 Content-Disposition: form-data; name="file"; filename="export.ndjson"
@@ -71,12 +71,12 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example resolves conflicts for a visualization and dashboard but indicates
+The following example resolves errors for a visualization and dashboard but indicates
 to replace the dashboard references to another visualization.
 
 [source,js]
 --------------------------------------------------
-POST api/saved_objects/_resolve_import_conflicts
+POST api/saved_objects/_resolve_import_errors
 Content-Type: multipart/form-data; boundary=EXAMPLE
 --EXAMPLE
 Content-Disposition: form-data; name="file"; filename="export.ndjson"

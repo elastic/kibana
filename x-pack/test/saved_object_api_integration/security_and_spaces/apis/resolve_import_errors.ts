@@ -7,7 +7,7 @@
 import { AUTHENTICATION } from '../../common/lib/authentication';
 import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
-import { resolveImportConflictsTestSuiteFactory } from '../../common/suites/resolve_import_conflicts';
+import { resolveImportErrorsTestSuiteFactory } from '../../common/suites/resolve_import_errors';
 
 // tslint:disable:no-default-export
 export default function({ getService }: TestInvoker) {
@@ -16,15 +16,15 @@ export default function({ getService }: TestInvoker) {
   const es = getService('es');
 
   const {
-    resolveImportConflictsTest,
+    resolveImportErrorsTest,
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
     expectRbacForbiddenWithUnknownType,
     expectRbacForbiddenForUnknownType,
-  } = resolveImportConflictsTestSuiteFactory(es, esArchiver, supertest);
+  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
-  describe('_resolve_import_conflicts', () => {
+  describe('_resolve_import_errors', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,
@@ -57,7 +57,7 @@ export default function({ getService }: TestInvoker) {
         },
       },
     ].forEach(scenario => {
-      resolveImportConflictsTest(`user with no access within the ${scenario.spaceId} space`, {
+      resolveImportErrorsTest(`user with no access within the ${scenario.spaceId} space`, {
         user: scenario.users.noAccess,
         spaceId: scenario.spaceId,
         tests: {
@@ -72,7 +72,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      resolveImportConflictsTest(`superuser within the ${scenario.spaceId} space`, {
+      resolveImportErrorsTest(`superuser within the ${scenario.spaceId} space`, {
         user: scenario.users.superuser,
         spaceId: scenario.spaceId,
         tests: {
@@ -87,7 +87,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      resolveImportConflictsTest(`legacy user within the ${scenario.spaceId} space`, {
+      resolveImportErrorsTest(`legacy user within the ${scenario.spaceId} space`, {
         user: scenario.users.legacyAll,
         spaceId: scenario.spaceId,
         tests: {
@@ -102,7 +102,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      resolveImportConflictsTest(`dual-privileges user within the ${scenario.spaceId} space`, {
+      resolveImportErrorsTest(`dual-privileges user within the ${scenario.spaceId} space`, {
         user: scenario.users.dualAll,
         spaceId: scenario.spaceId,
         tests: {
@@ -117,7 +117,7 @@ export default function({ getService }: TestInvoker) {
         },
       });
 
-      resolveImportConflictsTest(
+      resolveImportErrorsTest(
         `dual-privileges readonly user within the ${scenario.spaceId} space`,
         {
           user: scenario.users.dualRead,
@@ -135,43 +135,37 @@ export default function({ getService }: TestInvoker) {
         }
       );
 
-      resolveImportConflictsTest(
-        `rbac user with all globally within the ${scenario.spaceId} space`,
-        {
-          user: scenario.users.allGlobally,
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 200,
-              response: createExpectResults(scenario.spaceId),
-            },
-            unknownType: {
-              statusCode: 403,
-              response: expectRbacForbiddenForUnknownType,
-            },
+      resolveImportErrorsTest(`rbac user with all globally within the ${scenario.spaceId} space`, {
+        user: scenario.users.allGlobally,
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 200,
+            response: createExpectResults(scenario.spaceId),
           },
-        }
-      );
-
-      resolveImportConflictsTest(
-        `rbac user with read globally within the ${scenario.spaceId} space`,
-        {
-          user: scenario.users.readGlobally,
-          spaceId: scenario.spaceId,
-          tests: {
-            default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
-            },
-            unknownType: {
-              statusCode: 403,
-              response: expectRbacForbiddenWithUnknownType,
-            },
+          unknownType: {
+            statusCode: 403,
+            response: expectRbacForbiddenForUnknownType,
           },
-        }
-      );
+        },
+      });
 
-      resolveImportConflictsTest(
+      resolveImportErrorsTest(`rbac user with read globally within the ${scenario.spaceId} space`, {
+        user: scenario.users.readGlobally,
+        spaceId: scenario.spaceId,
+        tests: {
+          default: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+          unknownType: {
+            statusCode: 403,
+            response: expectRbacForbiddenWithUnknownType,
+          },
+        },
+      });
+
+      resolveImportErrorsTest(
         `rbac user with all at the space within the ${scenario.spaceId} space`,
         {
           user: scenario.users.allAtSpace,
@@ -189,7 +183,7 @@ export default function({ getService }: TestInvoker) {
         }
       );
 
-      resolveImportConflictsTest(
+      resolveImportErrorsTest(
         `rbac user with read at the space within the ${scenario.spaceId} space`,
         {
           user: scenario.users.readAtSpace,
@@ -207,7 +201,7 @@ export default function({ getService }: TestInvoker) {
         }
       );
 
-      resolveImportConflictsTest(
+      resolveImportErrorsTest(
         `rbac user with all at other space within the ${scenario.spaceId} space`,
         {
           user: scenario.users.allAtOtherSpace,
