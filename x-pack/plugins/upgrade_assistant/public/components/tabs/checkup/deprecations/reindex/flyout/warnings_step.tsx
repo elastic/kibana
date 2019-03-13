@@ -123,32 +123,32 @@ export class WarningsFlyoutStep extends React.Component<
 
           <EuiSpacer />
 
-          {warnings.includes(ReindexWarning.allField) && (
+          {warnings.includes(ReindexWarning.customTypeName) && (
             <WarningCheckbox
               checkedIds={checkedIds}
               onChange={this.onChange}
-              warning={ReindexWarning.allField}
+              warning={ReindexWarning.customTypeName}
               label={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningTitle"
-                  defaultMessage="{allField} will be removed"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningTitle"
+                  defaultMessage="Mapping type will be changed to {defaultType}"
                   values={{
-                    allField: <EuiCode>_all</EuiCode>,
+                    defaultType: <EuiCode>_doc</EuiCode>,
                   }}
                 />
               }
               description={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.allFieldWarningDetail"
-                  defaultMessage="The {allField} meta field is no longer supported in 7.0. Reindexing removes
-                      the {allField} field in the new index. Ensure that no application code or scripts reply on
-                      this field."
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
+                  defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the
+                    default type name, {defaultType}, and will be updated when reindexed. Ensure no application code
+                    or scripts rely on a different type."
                   values={{
-                    allField: <EuiCode>_all</EuiCode>,
+                    defaultType: <EuiCode>_doc</EuiCode>,
                   }}
                 />
               }
-              documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_the_literal__all_literal_meta_field_is_now_disabled_by_default"
+              documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/removal-of-types.html"
             />
           )}
 
@@ -171,37 +171,6 @@ export class WarningsFlyoutStep extends React.Component<
                 />
               }
               documentationUrl="https://www.elastic.co/guide/en/apm/get-started/master/apm-release-notes.html"
-            />
-          )}
-
-          {warnings.includes(ReindexWarning.booleanFields) && (
-            <WarningCheckbox
-              checkedIds={checkedIds}
-              onChange={this.onChange}
-              warning={ReindexWarning.booleanFields}
-              label={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningTitle"
-                  defaultMessage="Boolean data in {_source} might change"
-                  values={{ _source: <EuiCode>_source</EuiCode> }}
-                />
-              }
-              description={
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.booleanFieldsWarningDetail"
-                  defaultMessage="If a document contain a boolean field that is neither {true} or {false}
-                   (for example, {yes}, {on}, {one}), reindexing converts these fields to {true} or {false}.
-                   Ensure that no application code or scripts rely on boolean fields in the deprecated format."
-                  values={{
-                    true: <EuiCode>true</EuiCode>,
-                    false: <EuiCode>false</EuiCode>,
-                    yes: <EuiCode>"yes"</EuiCode>,
-                    on: <EuiCode>"on"</EuiCode>,
-                    one: <EuiCode>1</EuiCode>,
-                  }}
-                />
-              }
-              documentationUrl="https://www.elastic.co/guide/en/elasticsearch/reference/6.0/breaking_60_mappings_changes.html#_coercion_of_boolean_field"
             />
           )}
         </EuiFlyoutBody>
