@@ -165,6 +165,7 @@ export function ErrorGroupDetailsView({ urlParams, location }: Props) {
                 )}
               />
             </EuiPanel>
+            <EuiSpacer />
             {showDetails && (
               <DetailView
                 errorGroup={errorGroup}

@@ -478,7 +478,7 @@ app.directive('dashboardApp', function ($injector) {
           showNewVisModal(visTypes, { editorParams: [DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM] });
         };
 
-        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, visTypes);
+        showAddPanel(dashboardStateManager.addNewPanel, addNewVis, embeddableFactories);
       };
       navActions[TopNavIds.OPTIONS] = (menuItem, navController, anchorElement) => {
         showOptionsPopover({

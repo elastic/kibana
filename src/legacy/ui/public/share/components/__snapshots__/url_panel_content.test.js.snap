@@ -38,18 +38,9 @@ exports[`render 1`] = `
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Snapshot"
                   id="common.ui.share.urlPanel.snapshotLabel"
@@ -57,7 +48,6 @@ exports[`render 1`] = `
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
@@ -85,18 +75,9 @@ exports[`render 1`] = `
             "disabled": true,
             "id": "savedObject",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Saved object"
                   id="common.ui.share.urlPanel.savedObjectLabel"
@@ -104,7 +85,6 @@ exports[`render 1`] = `
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
@@ -138,18 +118,9 @@ exports[`render 1`] = `
     labelType="label"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="none"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiSwitch
           checked={false}
           data-test-subj="useShortUrl"
@@ -164,7 +135,6 @@ exports[`render 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIconTip
@@ -222,18 +192,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Snapshot"
                   id="common.ui.share.urlPanel.snapshotLabel"
@@ -241,7 +202,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
@@ -269,18 +229,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
             "disabled": false,
             "id": "savedObject",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Saved object"
                   id="common.ui.share.urlPanel.savedObjectLabel"
@@ -288,7 +239,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
@@ -322,18 +272,9 @@ exports[`should enable saved object export option when objectId is provided 1`] 
     labelType="label"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
       gutterSize="none"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiSwitch
           checked={false}
           data-test-subj="useShortUrl"
@@ -348,7 +289,6 @@ exports[`should enable saved object export option when objectId is provided 1`] 
         />
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIconTip
