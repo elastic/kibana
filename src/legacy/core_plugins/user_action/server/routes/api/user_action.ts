@@ -35,7 +35,7 @@ export const registerUserActionRoute = (server: Server) => {
         const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
         const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-        const incrementRequests = actionTypes.split(',').map(actionType => {
+        const incrementRequests = actionTypes.split(',').map((actionType: string) => {
           const savedObjectId = `${appName}:${actionType}`;
           // This object is created if it doesn't already exist.
           return internalRepository.incrementCounter('user-action', savedObjectId, 'count');
