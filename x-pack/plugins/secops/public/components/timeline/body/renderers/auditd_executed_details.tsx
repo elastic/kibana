@@ -72,7 +72,7 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
   const processTitle: string | null = get('process.title', data);
   const workingDirectory: string | null = get('process.working_directory', data);
   const args: string[] | null = get('process.args', data);
-  const argsOnly: string = args != null ? args.slice(1).join(' ') : '';
+  const argsWithoutProcess: string = args != null ? args.slice(1).join(' ') : '';
   if (data.process != null) {
     return (
       <Details>
@@ -100,8 +100,8 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
             <DraggableAuditdExecutedElement
               id={id}
               field="process.title"
-              queryValue={processTitle ? processTitle : ''}
-              value={argsOnly}
+              queryValue={processTitle != null ? processTitle : ''}
+              value={argsWithoutProcess}
             />
           </MarginLeftFlexItem>
         </EuiFlexGroup>
