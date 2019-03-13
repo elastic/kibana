@@ -12,7 +12,7 @@ import { AppKibanaFrameworkAdapter } from '../../lib/adapters/framework/kibana_f
 
 export const KibanaConfigContext = React.createContext<Partial<AppKibanaFrameworkAdapter>>({});
 
-export const PreferenceFormattedDate = pure<{ value: Date | string }>(({ value }) => (
+export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => (
   <KibanaConfigContext.Consumer>
     {(config: Partial<AppKibanaFrameworkAdapter>) => {
       return config && config.dateFormat && config.dateFormatTz && config.timezone

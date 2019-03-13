@@ -11,6 +11,7 @@ import { cloneDeep } from 'lodash';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
 
@@ -24,6 +25,7 @@ describe('plain_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = plainRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: mockDatum,
       width: 100,
       children: <span>some children</span>,
@@ -38,6 +40,7 @@ describe('plain_row_renderer', () => {
 
   test('should render a plain row', () => {
     const children = plainRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: mockDatum,
       width: 100,
       children: <span>some children</span>,

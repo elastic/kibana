@@ -215,14 +215,17 @@ describe('Providers', () => {
         </TestProviders>
       );
 
-      const andProviderBadge = wrapper
-        .find('[data-test-subj="andProviderButton"] span.euiBadge')
-        .first();
-
-      expect(andProviderBadge.text()).toEqual('2');
+      const andProviderBadges = wrapper.find(
+        '[data-test-subj="providerBadge"] .euiBadge__content span.field-value'
+      );
+      const andProviderBadgesText = andProviderBadges.map(node => node.text()).join(' ');
+      expect(andProviderBadges.length).toEqual(6);
+      expect(andProviderBadgesText).toEqual(
+        'name:  "Provider 1" name:  "Provider 2" name:  "Provider 3"'
+      );
     });
 
-    test('it invokes the onDataProviderRemoved callback when you click on the option "Delete" in the accordeon menu', () => {
+    test('it invokes the onDataProviderRemoved callback when you click on the close button is clicked', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnDataProviderRemoved = jest.fn();
@@ -244,21 +247,18 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="andProviderButton"] span.euiBadge')
+        .find('[data-test-subj="providerBadge"]')
+        .at(3)
+        .find('svg')
         .first()
         .simulate('click');
 
       wrapper.update();
 
-      wrapper
-        .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
-        .at(2)
-        .simulate('click');
-
       expect(mockOnDataProviderRemoved.mock.calls[0]).toEqual(['id-Provider 1', 'id-Provider 2']);
     });
 
-    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the accordeon menu', () => {
+    test('it invokes the onToggleDataProviderEnabled callback when you click on the option "Temporary disable" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderEnabled = jest.fn();
@@ -280,14 +280,14 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="andProviderButton"] span.euiBadge')
-        .first()
+        .find('[data-test-subj="providerBadge"]')
+        .at(3)
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
+        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
         .at(1)
         .simulate('click');
 
@@ -298,7 +298,7 @@ describe('Providers', () => {
       });
     });
 
-    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the accordeon menu', () => {
+    test('it invokes the onToggleDataProviderExcluded callback when you click on the option "Exclude results" in the provider menu', () => {
       const dataProviders = mockDataProviders.slice(0, 1);
       dataProviders[0].and = mockDataProviders.slice(1, 3);
       const mockOnToggleDataProviderExcluded = jest.fn();
@@ -320,14 +320,14 @@ describe('Providers', () => {
       );
 
       wrapper
-        .find('[data-test-subj="andProviderButton"] span.euiBadge')
-        .first()
+        .find('[data-test-subj="providerBadge"]')
+        .at(3)
         .simulate('click');
 
       wrapper.update();
 
       wrapper
-        .find('[data-test-subj="andProviderAccordion"] button.euiContextMenuItem')
+        .find('[data-test-subj="providerActions"] button.euiContextMenuItem')
         .first()
         .simulate('click');
 

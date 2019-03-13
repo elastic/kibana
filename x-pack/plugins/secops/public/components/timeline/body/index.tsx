@@ -9,6 +9,7 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../containers/source';
 import { Ecs } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
@@ -32,6 +33,7 @@ import { Sort } from './sort';
 
 interface Props {
   addNoteToEvent: AddNoteToEvent;
+  browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: Ecs[];
@@ -82,6 +84,7 @@ export const defaultWidth = 1090;
 export const Body = pure<Props>(
   ({
     addNoteToEvent,
+    browserFields,
     columnHeaders,
     columnRenderers,
     data,
@@ -131,6 +134,7 @@ export const Body = pure<Props>(
             <Events
               actionsColumnWidth={ACTIONS_COLUMN_WIDTH}
               addNoteToEvent={addNoteToEvent}
+              browserFields={browserFields}
               columnHeaders={columnHeaders}
               columnRenderers={columnRenderers}
               data={data}

@@ -11,14 +11,8 @@ import { Sources } from '../sources';
 import { FieldsAdapter } from './types';
 export { ElasticsearchIndexFieldAdapter } from './elasticsearch_adapter';
 
-export class IndexFields implements FieldsAdapter {
-  private adapter: FieldsAdapter;
-  private sources: Sources;
-
-  constructor(adapter: FieldsAdapter, sources: Sources) {
-    this.adapter = adapter;
-    this.sources = sources;
-  }
+export class IndexFields {
+  constructor(private readonly adapter: FieldsAdapter, private readonly sources: Sources) {}
 
   public async getFields(
     request: FrameworkRequest,
@@ -39,13 +33,6 @@ export class IndexFields implements FieldsAdapter {
       ...(includePacketBeatIndices ? [sourceConfiguration.packetbeatAlias] : []),
     ];
 
-    return this.getIndexFields(request, indices);
-  }
-
-  public async getIndexFields(
-    request: FrameworkRequest,
-    indices: string[] = []
-  ): Promise<IndexField[]> {
-    return await this.adapter.getIndexFields(request, indices as string[]);
+    return this.adapter.getIndexFields(request, indices);
   }
 }

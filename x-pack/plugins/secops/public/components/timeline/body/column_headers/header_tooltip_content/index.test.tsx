@@ -9,8 +9,8 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
+import { defaultHeaders } from '../../../../../mock';
 import { ColumnHeader } from '../column_header';
-import { defaultHeaders } from '../default_headers';
 
 import { HeaderToolTipContent } from '.';
 

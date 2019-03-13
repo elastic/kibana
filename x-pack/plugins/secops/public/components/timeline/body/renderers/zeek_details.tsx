@@ -9,22 +9,23 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 
 import { SourceDest } from './source_dest_ip';
 import { ZeekSignature } from './zeek_signature';
 
 const Details = styled.div`
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0;
 `;
 
-export const ZeekDetails = pure<{ data: Ecs }>(({ data }) =>
-  data.zeek != null ? (
-    <Details>
-      <ZeekSignature data={data} />
-      <EuiSpacer size="s" />
-      <SourceDest data={data} />
-    </Details>
-  ) : null
+export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
+  ({ browserFields, data }) =>
+    data.zeek != null ? (
+      <Details>
+        <ZeekSignature data={data} />
+        <EuiSpacer size="s" />
+        <SourceDest data={data} browserFields={browserFields} />
+      </Details>
+    ) : null
 );

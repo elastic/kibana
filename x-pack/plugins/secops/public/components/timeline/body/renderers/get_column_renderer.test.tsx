@@ -6,19 +6,17 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, get } from 'lodash/fp';
 import * as React from 'react';
 
 import { Ecs } from '../../../../graphql/types';
-import { getAllFieldsInSchemaByMappedName, virtualEcsSchema } from '../../../../lib/ecs';
 import { mockEcsData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
 import { getEmptyValue } from '../../../empty_value';
+import { defaultHeaders } from '../column_headers/default_headers';
 
 import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
-
-const allFieldsInSchemaByName = getAllFieldsInSchemaByMappedName(virtualEcsSchema);
 
 describe('get_column_renderer', () => {
   let nonSuricata: Ecs;
@@ -32,28 +30,30 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      data: nonSuricata,
-      field: allFieldsInSchemaByName[columnName],
+      eventId: nonSuricata._id,
+      value: get(columnName, nonSuricata),
+      field: defaultHeaders[1],
     });
 
     const wrapper = shallow(<span>{column}</span>);
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('should render event id when dealing with data that is not suricata', () => {
-    const columnName = 'event.id';
+  test('should render event severity when dealing with data that is not suricata', () => {
+    const columnName = 'event.severity';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      data: nonSuricata,
-      field: allFieldsInSchemaByName[columnName],
+      eventId: nonSuricata._id,
+      value: get(columnName, nonSuricata),
+      field: defaultHeaders[1],
     });
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual('1');
+    expect(wrapper.text()).toEqual('3');
   });
 
   test('should render empty value when dealing with an empty value of user', () => {
@@ -62,8 +62,9 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      data: nonSuricata,
-      field: allFieldsInSchemaByName[columnName],
+      eventId: nonSuricata._id,
+      value: get(columnName, nonSuricata),
+      field: defaultHeaders[7],
     });
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());
@@ -74,8 +75,9 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      data: nonSuricata,
-      field: allFieldsInSchemaByName[columnName],
+      eventId: nonSuricata._id,
+      value: get(columnName, nonSuricata),
+      field: defaultHeaders[7],
     });
     const wrapper = mount(<span>{column}</span>);
     expect(wrapper.text()).toEqual(getEmptyValue());

@@ -8,9 +8,9 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
-import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
 import { Direction } from '../../../../../graphql/types';
+import { TestProviders } from '../../../../../mock';
 import { Sort } from '../../sort';
 import { CloseButton } from '../actions';
 import { ColumnHeaderType } from '../column_header';

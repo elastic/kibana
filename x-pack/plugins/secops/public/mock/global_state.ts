@@ -8,6 +8,8 @@ import { defaultWidth } from '../components/timeline/body';
 import { Direction, NetworkTopNFlowDirection, NetworkTopNFlowType } from '../graphql/types';
 import { State } from '../store';
 
+import { defaultHeaders } from './header';
+
 export const mockGlobalState: State = {
   local: {
     app: {
@@ -94,7 +96,7 @@ export const mockGlobalState: State = {
       timelineById: {
         test: {
           id: 'test',
-          columns: [],
+          columns: defaultHeaders,
           itemsPerPage: 5,
           dataProviders: [],
           description: '',

@@ -333,7 +333,7 @@ export const applyDeltaToTimelineColumnWidth = ({
       },
     };
   }
-  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type);
+  const minWidthPixels = getColumnWidthFromType(timeline.columns[columnIndex].type!);
   const requestedWidth = timeline.columns[columnIndex].width + delta; // raw change in width
   const width = Math.max(minWidthPixels, requestedWidth); // if the requested width is smaller than the min, use the min
 

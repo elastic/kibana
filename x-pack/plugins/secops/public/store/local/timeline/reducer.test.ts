@@ -8,15 +8,13 @@ import { cloneDeep, set } from 'lodash/fp';
 
 import { defaultWidth } from '../../../components/timeline/body';
 import { ColumnHeader } from '../../../components/timeline/body/column_headers/column_header';
-import {
-  defaultColumnHeaderType,
-  defaultHeaders,
-} from '../../../components/timeline/body/column_headers/default_headers';
+import { defaultColumnHeaderType } from '../../../components/timeline/body/column_headers/default_headers';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   getColumnWidthFromType,
 } from '../../../components/timeline/body/helpers';
 import { Direction } from '../../../graphql/types';
+import { defaultHeaders } from '../../../mock';
 
 import { TimelineById } from '.';
 import {
@@ -424,7 +422,7 @@ describe('Timeline', () => {
       const delta = 50;
       const expectedToHaveNewWidth = {
         ...aDateColumn,
-        width: getColumnWidthFromType(aDateColumn.type) + delta,
+        width: getColumnWidthFromType(aDateColumn.type!) + delta,
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
@@ -446,7 +444,7 @@ describe('Timeline', () => {
       const delta = -50; // this will be less than the min
       const expectedToHaveNewWidth = {
         ...aDateColumn,
-        width: getColumnWidthFromType(aDateColumn.type), // we expect the minimum
+        width: getColumnWidthFromType(aDateColumn.type!), // we expect the minimum
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
@@ -468,7 +466,7 @@ describe('Timeline', () => {
       const delta = 50;
       const expectedToHaveNewWidth = {
         ...aNonDateColumn,
-        width: getColumnWidthFromType(aNonDateColumn.type) + delta,
+        width: getColumnWidthFromType(aNonDateColumn.type!) + delta,
       };
       const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
 
@@ -490,7 +488,7 @@ describe('Timeline', () => {
       const delta = -50;
       const expectedToHaveNewWidth = {
         ...aNonDateColumn,
-        width: getColumnWidthFromType(aNonDateColumn.type),
+        width: getColumnWidthFromType(aNonDateColumn.type!),
       };
       const expectedColumns = [columnsMock[0], expectedToHaveNewWidth, columnsMock[2]];
 

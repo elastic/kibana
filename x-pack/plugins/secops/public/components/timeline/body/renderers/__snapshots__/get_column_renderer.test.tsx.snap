@@ -12,7 +12,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
         "kqlQuery": "",
         "name": "event.id: 1",
         "queryMatch": Object {
-          "field": "event.id",
+          "field": "event.severity",
           "value": 1,
         },
       }

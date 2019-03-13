@@ -8,14 +8,13 @@ import {
   // @ts-ignore
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiFormHelpText,
 } from '@elastic/eui';
 import * as React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { AndOrBadge } from '../../and_or_badge';
 import {
   OnChangeDataProviderKqlQuery,
   OnChangeDroppableAndProvider,
@@ -28,6 +27,7 @@ import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { ProviderItemAndDragDrop } from './provider_item_and_drag_drop';
 import { ProviderItemBadge } from './provider_item_badge';
+import * as i18n from './translations';
 
 interface Props {
   id: string;
@@ -40,35 +40,34 @@ interface Props {
 }
 
 const PanelProviders = styled.div`
+  position: relative
   display: flex;
   flex-direction: row;
   min-height: 100px;
-  padding: 5px 10px 5px 10px;
+  padding: 5px 10px 15px 0px;
   overflow-y: auto;
-`;
-
-const EuiBadgeOrStyled = styled.div`
-  position: absolute;
-  right: -42px;
-  top: 27px;
-  z-index: 1;
+  align-items: stretch;
+  justify-content: flex-start;
 `;
 
 const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   position: relative;
   flex-grow: unset;
-  margin-right: 40px;
+`;
+
+const PanelProviderGroupContainer = styled(EuiFlexGroup)`
+  margin: 5px 0px;
 `;
 
 const PanelProviderItemContainer = styled(EuiFlexItem)`
-  height: 100%;
-  .euiHorizontalRule {
-    transform: rotate(90deg);
-    position: absolute;
-    top: 23px;
-    width: 80px;
-    right: -60px;
-  }
+  position: relative;
+`;
+
+const TimelineEuiFormHelpText = styled(EuiFormHelpText)`
+  padding-top: 0px;
+  position: absolute;
+  bottom: 0px;
+  left: 5px;
 `;
 
 interface GetDraggableIdParams {
@@ -97,31 +96,37 @@ export const Providers = pure<Props>(
     onToggleDataProviderExcluded,
   }) => (
     <PanelProviders className="timeline-drop-area" data-test-subj="providers">
-      {dataProviders.map((dataProvider, i) => {
-        const deleteProvider = () => onDataProviderRemoved(dataProvider.id);
-        const toggleEnabledProvider = () =>
-          onToggleDataProviderEnabled({
-            providerId: dataProvider.id,
-            enabled: !dataProvider.enabled,
-          });
-        const toggleExcludedProvider = () =>
-          onToggleDataProviderExcluded({
-            providerId: dataProvider.id,
-            excluded: !dataProvider.excluded,
-          });
-        return (
-          // Providers are a special drop target that can't be drag-and-dropped
-          // to another destination, so it doesn't use our DraggableWrapper
-          <PanelProvidersGroupContainer
-            key={dataProvider.id}
-            direction="row"
-            className="provider-item-container"
-            alignItems="center"
-            gutterSize="none"
-          >
-            <PanelProviderItemContainer grow={false}>
-              <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceAround">
-                <EuiFlexItem className="provider-item-filter-container" grow={false}>
+      <Empty showSmallMsg={dataProviders.length > 0} />
+      <PanelProvidersGroupContainer
+        direction="column"
+        className="provider-items-container"
+        alignItems="flexStart"
+        gutterSize="none"
+      >
+        <EuiFlexItem grow={true}>
+          {dataProviders.map((dataProvider, i) => {
+            const deleteProvider = () => onDataProviderRemoved(dataProvider.id);
+            const toggleEnabledProvider = () =>
+              onToggleDataProviderEnabled({
+                providerId: dataProvider.id,
+                enabled: !dataProvider.enabled,
+              });
+            const toggleExcludedProvider = () =>
+              onToggleDataProviderExcluded({
+                providerId: dataProvider.id,
+                excluded: !dataProvider.excluded,
+              });
+            return (
+              // Providers are a special drop target that can't be drag-and-dropped
+              // to another destination, so it doesn't use our DraggableWrapper
+              <PanelProviderGroupContainer
+                key={dataProvider.id}
+                direction="row"
+                gutterSize="none"
+                justifyContent="flexStart"
+                alignItems="center"
+              >
+                <PanelProviderItemContainer className="provider-item-filter-container" grow={false}>
                   <Draggable
                     draggableId={getDraggableId({ id, dataProviderId: dataProvider.id })}
                     index={i}
@@ -152,7 +157,7 @@ export const Providers = pure<Props>(
                       </div>
                     )}
                   </Draggable>
-                </EuiFlexItem>
+                </PanelProviderItemContainer>
                 <EuiFlexItem grow={false}>
                   <ProviderItemAndDragDrop
                     dataProvider={dataProvider}
@@ -163,18 +168,16 @@ export const Providers = pure<Props>(
                     onToggleDataProviderExcluded={onToggleDataProviderExcluded}
                   />
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </PanelProviderItemContainer>
-            <PanelProviderItemContainer grow={false}>
-              <EuiBadgeOrStyled>
-                <AndOrBadge type="or" />
-              </EuiBadgeOrStyled>
-              <EuiHorizontalRule />
-            </PanelProviderItemContainer>
-          </PanelProvidersGroupContainer>
-        );
-      })}
-      <Empty />
+              </PanelProviderGroupContainer>
+            );
+          })}
+        </EuiFlexItem>
+      </PanelProvidersGroupContainer>
+      <TimelineEuiFormHelpText>
+        <span>
+          {i18n.DROP_HERE} {i18n.TO_BUILD_AN} {i18n.OR.toLocaleUpperCase()} {i18n.QUERY}
+        </span>
+      </TimelineEuiFormHelpText>
     </PanelProviders>
   )
 );

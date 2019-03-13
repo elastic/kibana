@@ -7,7 +7,8 @@
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
+
+import { TestProviders } from '../../../../mock';
 
 import { DraggableSignatureId, SuricataSignature, Tokens } from './suricata_signature';
 

@@ -86,6 +86,7 @@ export const buildQuery = (options: RequestOptions) => {
         },
       },
       size: limit + 1,
+      track_total_hits: true,
       sort,
       _source: esFields,
     },
@@ -103,3 +104,17 @@ export const buildQuery = (options: RequestOptions) => {
 
   return queryDsl;
 };
+
+export const buildDetailsQuery = (indexName: string, id: string) => ({
+  allowNoIndices: true,
+  index: indexName,
+  ignoreUnavailable: true,
+  body: {
+    query: {
+      terms: {
+        _id: [id],
+      },
+    },
+  },
+  size: 1,
+});

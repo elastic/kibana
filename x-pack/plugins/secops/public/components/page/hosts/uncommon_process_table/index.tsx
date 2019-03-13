@@ -126,14 +126,16 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     render: ({ node }) => {
       const processName: string | null = get('process.name', node);
       if (processName != null) {
+        const id = escapeDataProviderId(
+          `uncommon-process-table-${node._id}-processName-${processName}`
+        );
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
-              id: escapeDataProviderId(
-                `uncommon-process-table-${node._id}-processName-${processName}`
-              ),
+              id,
               name: processName,
               excluded: false,
               kqlQuery: '',
@@ -195,15 +197,16 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
       const draggables = hosts
         .filter(({ id, name }) => id != null && name != null)
         .map(({ id, name }, index) => {
+          const dwId = escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`);
           return (
-            <React.Fragment key={id!}>
+            <React.Fragment key={dwId}>
               {index !== 0 ? <>,&nbsp;</> : null}
               <DraggableWrapper
-                key={id!}
+                key={dwId}
                 dataProvider={{
                   and: [],
                   enabled: true,
-                  id: escapeDataProviderId(`uncommon-process-table-${node._id}-hostName-${name}`),
+                  id: dwId,
                   name: name!,
                   excluded: false,
                   kqlQuery: '',

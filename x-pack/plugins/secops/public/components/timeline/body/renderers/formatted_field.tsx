@@ -4,30 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isNil } from 'lodash/fp';
 import moment from 'moment';
 import * as React from 'react';
 import { pure } from 'recompose';
 
-import { Ecs } from '../../../../../server/graphql/types';
-import { getMappedEcsValue } from '../../../../lib/ecs';
-import { getOrEmptyTag } from '../../../empty_value';
+import { getOrEmptyTagFromValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { IPDetailsLink } from '../../../links';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 
-export const FormattedField = pure<{ data: Ecs; fieldName: string; fieldType: string }>(
-  ({ data, fieldName, fieldType }) => {
-    const value = getMappedEcsValue({ data, fieldName });
-    const maybeDate = moment(new Date(value!));
-
-    return fieldType === 'date' && value != null && maybeDate.isValid() ? (
-      <LocalizedDateTooltip date={maybeDate.toDate()}>
-        <PreferenceFormattedDate value={value} />
-      </LocalizedDateTooltip>
-    ) : (fieldName === 'source.ip' || fieldName === 'destination.ip') && value != null ? (
-      <IPDetailsLink ip={value} />
-    ) : (
-      getOrEmptyTag(fieldName, data)
-    );
-  }
-);
+export const FormattedFieldValue = pure<{
+  value: string | number | undefined | null;
+  fieldName: string;
+  fieldType: string;
+}>(({ value, fieldName, fieldType }) => {
+  const maybeDate = moment(new Date(value!));
+  return fieldType === 'date' && !isNil(value) && maybeDate.isValid() ? (
+    <LocalizedDateTooltip date={maybeDate.toDate()}>
+      <PreferenceFormattedDate value={new Date(value!)} />
+    </LocalizedDateTooltip>
+  ) : fieldType === 'ip' && value != null ? (
+    <IPDetailsLink ip={value.toString()} />
+  ) : (
+    getOrEmptyTagFromValue(value)
+  );
+});

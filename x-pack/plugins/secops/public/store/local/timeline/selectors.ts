@@ -32,7 +32,7 @@ export const getKqlFilterQuerySelector = () =>
   createSelector(
     selectTimeline,
     timeline =>
-      timeline && timeline.kqlQuery.filterQuery
+      timeline && timeline.kqlQuery && timeline.kqlQuery.filterQuery
         ? timeline.kqlQuery.filterQuery.query.expression
         : null
   );
@@ -40,7 +40,7 @@ export const getKqlFilterQuerySelector = () =>
 export const getKqlFilterQueryDraftSelector = () =>
   createSelector(
     selectTimeline,
-    timeline => (timeline ? timeline.kqlQuery.filterQueryDraft : null)
+    timeline => (timeline && timeline.kqlQuery ? timeline.kqlQuery.filterQueryDraft : null)
   );
 
 export const isFilterQueryDraftValidSelector = () =>

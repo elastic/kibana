@@ -123,13 +123,15 @@ const getHostsColumns = (): Array<Columns<HostsEdges>> => [
       const hostName: string | null = get('host.name', node);
       const hostId: string | null = get('host.id', node);
       if (hostName != null && hostId != null) {
+        const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
         return (
           <DraggableWrapper
+            key={id}
             dataProvider={{
               and: [],
               enabled: true,
               excluded: false,
-              id: escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostName}`),
+              id,
               name: hostName,
               kqlQuery: '',
               queryMatch: {

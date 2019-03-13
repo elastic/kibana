@@ -9,12 +9,12 @@ import toJson from 'enzyme-to-json';
 import 'jest-styled-components';
 import * as React from 'react';
 
+import { mockBrowserFields } from '../../../containers/source/mock';
 import { Direction } from '../../../graphql/types';
-import { mockEcsData } from '../../../mock';
+import { defaultHeaders, mockEcsData } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
 
 import { Body } from '.';
-import { defaultHeaders } from './column_headers/default_headers';
 import { columnRenderers, rowRenderers } from './renderers';
 
 const testBodyHeight = 700;
@@ -26,6 +26,7 @@ describe('Body', () => {
       const wrapper = shallow(
         <Body
           addNoteToEvent={jest.fn()}
+          browserFields={mockBrowserFields}
           id={'timeline-test'}
           columnHeaders={defaultHeaders}
           columnRenderers={columnRenderers}
@@ -60,6 +61,7 @@ describe('Body', () => {
         <TestProviders>
           <Body
             addNoteToEvent={jest.fn()}
+            browserFields={mockBrowserFields}
             id={'timeline-test'}
             columnHeaders={defaultHeaders}
             columnRenderers={columnRenderers}
@@ -101,6 +103,7 @@ describe('Body', () => {
         <TestProviders>
           <Body
             addNoteToEvent={jest.fn()}
+            browserFields={mockBrowserFields}
             id={'timeline-test'}
             columnHeaders={defaultHeaders}
             columnRenderers={columnRenderers}
@@ -142,6 +145,7 @@ describe('Body', () => {
         <TestProviders>
           <Body
             addNoteToEvent={jest.fn()}
+            browserFields={mockBrowserFields}
             id={'timeline-test'}
             columnHeaders={defaultHeaders}
             columnRenderers={columnRenderers}
@@ -185,6 +189,7 @@ describe('Body', () => {
         <TestProviders>
           <Body
             addNoteToEvent={jest.fn()}
+            browserFields={mockBrowserFields}
             id={'timeline-test'}
             columnHeaders={headersJustTimestamp}
             columnRenderers={columnRenderers}

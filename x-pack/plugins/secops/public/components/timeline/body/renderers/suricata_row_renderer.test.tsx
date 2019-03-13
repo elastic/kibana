@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
@@ -26,6 +27,7 @@ describe('suricata_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = suricataRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
       children: <span>some children</span>,
@@ -45,6 +47,7 @@ describe('suricata_row_renderer', () => {
 
   test('should render children normally if it does not have a signature', () => {
     const children = suricataRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: nonSuricata,
       width: 100,
       children: <span>some children</span>,
@@ -59,6 +62,7 @@ describe('suricata_row_renderer', () => {
 
   test('should render a suricata row', () => {
     const children = suricataRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: suricata,
       width: 100,
       children: <span>some children </span>,
@@ -76,6 +80,7 @@ describe('suricata_row_renderer', () => {
   test('should render a suricata row even if it does not have a suricata signature', () => {
     delete suricata!.suricata!.eve!.alert!.signature;
     const children = suricataRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: suricata,
       width: 100,
       children: <span>some children</span>,

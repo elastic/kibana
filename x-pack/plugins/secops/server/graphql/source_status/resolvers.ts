@@ -108,11 +108,7 @@ export const createSourceStatusResolvers = (libs: {
       return await libs.sourceStatus.getIndexNames(req, source.id, 'packetbeatAlias');
     },
     async indexFields(source, args, { req }) {
-      return await libs.fields.getFields(
-        req,
-        source.id,
-        defaultTo([IndexType.ANY], args.indexTypes)
-      );
+      return libs.fields.getFields(req, source.id, defaultTo([IndexType.ANY], args.indexTypes));
     },
   },
 });

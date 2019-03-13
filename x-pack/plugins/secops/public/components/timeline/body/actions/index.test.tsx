@@ -6,8 +6,8 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import { TestProviders } from 'x-pack/plugins/secops/public/mock/test_providers';
 
+import { TestProviders } from '../../../../mock';
 import { ACTIONS_COLUMN_WIDTH } from '../helpers';
 
 import { Actions } from '.';
@@ -24,6 +24,7 @@ describe('Actions', () => {
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          loading={false}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
@@ -48,6 +49,7 @@ describe('Actions', () => {
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          loading={false}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}
@@ -74,6 +76,7 @@ describe('Actions', () => {
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          loading={false}
           noteIds={[]}
           onEventToggled={onEventToggled}
           onPinClicked={jest.fn()}
@@ -105,6 +108,7 @@ describe('Actions', () => {
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          loading={false}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={onPinClicked}
@@ -136,6 +140,7 @@ describe('Actions', () => {
           eventId="abc"
           eventIsPinned={false}
           getNotesByIds={jest.fn()}
+          loading={false}
           noteIds={[]}
           onEventToggled={jest.fn()}
           onPinClicked={jest.fn()}

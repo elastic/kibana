@@ -23,6 +23,10 @@ import {
   WrappableRequest,
 } from './types';
 
+interface CallWithRequestParams extends GenericParams {
+  max_concurrent_shard_requests?: number;
+}
+
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   private server: Server;
@@ -36,14 +40,29 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public async callWithRequest(
     req: FrameworkRequest<Legacy.Request>,
     endpoint: string,
-    params: GenericParams,
+    params: CallWithRequestParams,
     // tslint:disable-next-line:no-any
     ...rest: any[]
   ) {
     const internalRequest = req[internalFrameworkRequest];
     const { elasticsearch } = internalRequest.server.plugins;
     const { callWithRequest } = elasticsearch.getCluster('data');
-    const fields = await callWithRequest(internalRequest, endpoint, params, ...rest);
+    const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+
+    if (endpoint === 'msearch') {
+      const maxConcurrentShardRequests = await internalRequest
+        .getUiSettingsService()
+        .get('courier:maxConcurrentShardRequests');
+      if (maxConcurrentShardRequests > 0) {
+        params = { ...params, max_concurrent_shard_requests: maxConcurrentShardRequests };
+      }
+    }
+    const fields = await callWithRequest(
+      internalRequest,
+      endpoint,
+      { ...params, ignore_throttled: !includeFrozen },
+      ...rest
+    );
     return fields;
   }
 
