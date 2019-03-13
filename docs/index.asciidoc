@@ -50,6 +50,8 @@ include::logs/index.asciidoc[]
 
 include::apm/index.asciidoc[]
 
+include::uptime/index.asciidoc[]
+
 include::graph/index.asciidoc[]
 
 include::dev-tools.asciidoc[]
@@ -67,8 +69,6 @@ include::management/watcher-ui/index.asciidoc[]
 include::management/upgrade-assistant/index.asciidoc[]
 
 include::management/dashboard_only_mode/index.asciidoc[]
-
-include::uptime/index.asciidoc[]
 
 include::reporting/index.asciidoc[]
 
