@@ -65,7 +65,6 @@ module.exports = function (grunt) {
     '--server.port=5610',
   ];
 
-  const esFrom = process.env.TEST_ES_FROM || 'source';
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
@@ -178,7 +177,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
@@ -190,7 +188,6 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
@@ -202,7 +199,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
@@ -216,7 +212,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--',
@@ -225,7 +220,6 @@ module.exports = function (grunt) {
     },
 
     ...getFunctionalTestGroupRunConfigs({
-      esFrom,
       kibanaInstallDir: KIBANA_INSTALL_DIR
     })
   };
