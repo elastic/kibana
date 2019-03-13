@@ -18,49 +18,59 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+// import { FormattedMessage } from '@kbn/i18n/react';
 
 export class AdvancedSettingsVoiceAnnouncement extends Component {
 
-  turnDelayOff = () => {
-    clearTimeout(this.delayID);
-    this.setState({ delaying: false });
+  constructor() {
+    super();
+    this.state = { isDelaying: true };
+    this.delayID = null;
   }
 
-  getDerivedStateFromProps = (props) => {
-    if (this.delayID) { clearTimeout(this.delayID); }
+  turnDelayOff = () => {
+    this.setState({ isDelaying: false });
+  };
 
+  resetDelayOffTiming = (needsReset) => {
+    if (!needsReset) { return; }
+    clearTimeout(this.delayID);
+    this.delayID = setTimeout(() => this.turnDelayOff(), 350);
+  };
+
+  static getDerivedStateFromProps(props) {
     const filteredSections = Object.values(props.settings).map(setting => setting.map(option => option.ariaName));
     const filteredOptions = [].concat(...filteredSections);
-
     return {
-      delaying: true,
-      delayID: setTimeout(() => this.turnDelayOff(), 350),
       filteredSections,
       filteredOptions,
       query: props.query.text
     };
+  }
+
+  shouldComponentUpdate = (nextProps, nextState) => {
+    const needsReset = nextState.query !== this.state.query;
+    this.resetDelayOffTiming(needsReset);
+    return !nextState.isDelaying && !needsReset;
   };
 
-  shouldComponentUpdate = nextProps => !nextProps.delaying;
-
   render() {
-    if (this.query === '') { return null; }
-
+    if (this.state.query === '') { return null; }
     return (
       <div role="region" aria-live="polite">
-        <FormattedMessage
+        asd
+        {/*<FormattedMessage
           id="xpack.settings.AdvancedSettings.voiceAnnouncement"
           defaultMessage="You searched for {query}. There {are} {optionLenght} {options} in {sectionLenght} {sections}"
           values={{
-            query: this.query,
-            sectionLenght: this.filteredSections.length,
-            are: this.filteredOptions.length > 1 ? 'are' : 'is',
-            optionLenght: this.filteredOptions.length,
-            options: this.filteredOptions.length > 1 ? 'options' : 'option',
-            sections: this.filteredSections.length > 1 ? 'sections' : 'section'
+            query: this.state.query,
+            sectionLenght: this.state.filteredSections.length,
+            are: this.state.filteredOptions.length > 1 ? 'are' : 'is',
+            optionLenght: this.state.filteredOptions.length,
+            options: this.state.filteredOptions.length > 1 ? 'options' : 'option',
+            sections: this.state.filteredSections.length > 1 ? 'sections' : 'section'
           }}
-        />
+        />*/}
       </div>
     );
   }
