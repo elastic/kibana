@@ -9,8 +9,9 @@ import {
   UA_POLICY_ATTACH_INDEX,
   UA_POLICY_ATTACH_INDEX_TEMPLATE,
   UA_POLICY_DETACH_INDEX,
+  UA_INDEX_RETRY_STEP,
 } from '../../common/constants';
-import { trackUserRequest } from './user_action';
+import { trackUserRequest, trackUserAction } from './user_action';
 
 let httpClient;
 export const setHttpClient = (client) => {
@@ -70,6 +71,8 @@ export async function getAffectedIndices(indexTemplateName, policyName, httpClie
 
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
+  // Only track successful actions.
+  await trackUserAction(UA_INDEX_RETRY_STEP);
   return response.data;
 };
 
