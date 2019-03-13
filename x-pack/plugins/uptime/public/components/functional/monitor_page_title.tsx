@@ -5,7 +5,7 @@
  */
 
 import { EuiTextColor, EuiTitle } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { MonitorPageTitle as TitleType } from 'x-pack/plugins/uptime/common/graphql/types';
 
 interface MonitorPageTitleProps {
@@ -13,11 +13,9 @@ interface MonitorPageTitleProps {
 }
 
 export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTitleProps) => (
-  <Fragment>
-    <EuiTitle size="xxs">
-      <EuiTextColor color="subdued">
-        <h4>{id}</h4>
-      </EuiTextColor>
-    </EuiTitle>
-  </Fragment>
+  <EuiTitle size="xxs">
+    <EuiTextColor color="subdued">
+      <h4 data-test-subj="monitor-page-title">{id}</h4>
+    </EuiTextColor>
+  </EuiTitle>
 );

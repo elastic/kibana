@@ -68,12 +68,10 @@ export class VisualizeDataLoader {
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
     // add necessary params to vis object (dimensions, bucket, metric, etc)
-    const visParams = getVisParams(this.vis, { timeRange: params.timeRange });
-
-    const filters = params.filters || [];
-    const savedFilters = params.searchSource.getField('filter') || [];
-
-    const query = params.query || params.searchSource.getField('query');
+    const visParams = await getVisParams(this.vis, {
+      searchSource: params.searchSource,
+      timeRange: params.timeRange,
+    });
 
     // searchSource is only there for courier request handler
     const requestHandlerResponse = await this.requestHandler({
@@ -81,12 +79,11 @@ export class VisualizeDataLoader {
       metricsAtAllLevels: this.vis.isHierarchical(),
       visParams,
       ...params,
-      query,
-      filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
+      filters: params.filters ? params.filters.filter(filter => !filter.meta.disabled) : undefined,
     });
 
-    // No need to call the response handler when there have been no data nor has there been changes
-    // in the vis-state (response handler does not depend on uiState)
+    // No need to call the response handler when there have been no data nor has been there changes
+    // in the vis-state (response handler does not depend on uiStat
     const canSkipResponseHandler =
       this.previousRequestHandlerResponse &&
       this.previousRequestHandlerResponse === requestHandlerResponse &&
