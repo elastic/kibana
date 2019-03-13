@@ -78,7 +78,6 @@ export class AbstractESSource extends AbstractVectorSource {
     });
   }
 
-
   async filterAndFormatPropertiesToHtmlForMetricFields(properties) {
     let indexPattern;
     try {
@@ -87,33 +86,34 @@ export class AbstractESSource extends AbstractVectorSource {
       console.warn(`Unable to find Index pattern ${this._descriptor.indexPatternId}, values are not formatted`);
       return properties;
     }
+
+    function formatMetricValue(metricField, propertyValue) {
+      if (metricField.type === 'count') {
+        return propertyValue;
+      }
+
+      const indexPatternField = indexPattern.fields.byName[metricField.field];
+      if (!indexPatternField) {
+        return propertyValue;
+      }
+
+      const htmlConverter = indexPatternField.format.getConverterFor('html');
+      return (htmlConverter)
+        ? htmlConverter(propertyValue)
+        : indexPatternField.format.convert(propertyValue);
+    }
+
     const metricFields = this.getMetricFields();
     const tooltipProps = {};
-    metricFields.forEach((field) => {
+    metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
-        if (properties.hasOwnProperty(key)) {
-          if (field.propertyKey === key) {
-            if (field.type === 'count') {
-              value = properties[key];
-            } else {
-              const indexPatternField = indexPattern.fields.byName[field.field];
-              if (indexPatternField) {
-                const htmlConverter = indexPatternField.format.getConverterFor('html');
-                value = (htmlConverter) ? htmlConverter(properties[key]) :
-                  field.format.convert(properties[key]);
-              } else {
-                value = properties[key];
-              }
-            }
-            break;
-          }
+        if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
+          value = formatMetricValue(metricField, properties[key]);
+          break;
         }
       }
-      if (typeof value === 'undefined') {
-        value = '-';
-      }
-      tooltipProps[field.propertyLabel] = value;
+      tooltipProps[metricField.propertyLabel] = (typeof value === 'undefined') ? '-' : value;
     });
     return tooltipProps;
   }
