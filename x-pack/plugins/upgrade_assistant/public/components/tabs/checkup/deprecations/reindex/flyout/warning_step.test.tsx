@@ -14,7 +14,7 @@ import { idForWarning, WarningsFlyoutStep } from './warnings_step';
 describe('WarningsFlyoutStep', () => {
   const defaultProps = {
     advanceNextStep: jest.fn(),
-    warnings: [ReindexWarning.allField, ReindexWarning.booleanFields],
+    warnings: [ReindexWarning.customTypeName, ReindexWarning.apmReindex],
     closeFlyout: jest.fn(),
   };
 
@@ -33,11 +33,11 @@ describe('WarningsFlyoutStep', () => {
     button.simulate('click');
     expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.allField)}`).simulate('change');
+    wrapper.find(`input#${idForWarning(ReindexWarning.apmReindex)}`).simulate('change');
     button.simulate('click');
     expect(defaultProps.advanceNextStep).not.toHaveBeenCalled();
 
-    wrapper.find(`input#${idForWarning(ReindexWarning.booleanFields)}`).simulate('change');
+    wrapper.find(`input#${idForWarning(ReindexWarning.customTypeName)}`).simulate('change');
     button.simulate('click');
     expect(defaultProps.advanceNextStep).toHaveBeenCalled();
   });
