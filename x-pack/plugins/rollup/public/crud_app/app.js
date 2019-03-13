@@ -8,8 +8,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
+import { UA_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
-import { registerRouter, setUserHasLeftApp } from './services';
+import { registerRouter, setUserHasLeftApp, trackUserAction } from './services';
 import { JobList, JobCreate } from './sections';
 
 export class App extends Component {
@@ -31,6 +32,10 @@ export class App extends Component {
     // Share the router with the app without requiring React or context.
     const { router } = this.context;
     registerRouter(router);
+  }
+
+  componentWillMount() {
+    trackUserAction(UA_APP_LOAD);
   }
 
   componentWillUnmount() {
