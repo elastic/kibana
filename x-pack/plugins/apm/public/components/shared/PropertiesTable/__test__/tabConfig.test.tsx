@@ -4,18 +4,33 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('../tabConfigConst', () => {
+  return {
+    TAB_CONFIG: [
+      {
+        key: 'testProperty',
+        label: 'testPropertyLabel',
+        required: false,
+        presortedKeys: ['name', 'age']
+      },
+      {
+        key: 'optionalProperty',
+        label: 'optionalPropertyLabel',
+        required: false
+      },
+      {
+        key: 'requiredProperty',
+        label: 'requiredPropertyLabel',
+        required: true
+      }
+    ]
+  };
+});
+
 import * as propertyConfig from '../tabConfig';
 const { getTabsFromObject, sortKeysByConfig } = propertyConfig;
 
 describe('tabConfig', () => {
-  beforeEach(() => {
-    mockPropertyConfig();
-  });
-
-  afterEach(() => {
-    unMockPropertyConfig();
-  });
-
   describe('getTabsFromObject', () => {
     it('should return selected and required keys only', () => {
       const expectedTabs = [
@@ -64,31 +79,3 @@ describe('tabConfig', () => {
     });
   });
 });
-
-function mockPropertyConfig() {
-  // @ts-ignore
-  propertyConfig.TAB_CONFIG = [
-    {
-      key: 'testProperty',
-      label: 'testPropertyLabel',
-      required: false,
-      presortedKeys: ['name', 'age']
-    },
-    {
-      key: 'optionalProperty',
-      label: 'optionalPropertyLabel',
-      required: false
-    },
-    {
-      key: 'requiredProperty',
-      label: 'requiredPropertyLabel',
-      required: true
-    }
-  ];
-}
-
-const originalPropertyConfig = propertyConfig.TAB_CONFIG;
-function unMockPropertyConfig() {
-  // @ts-ignore
-  propertyConfig.TAB_CONFIG = originalPropertyConfig;
-}
