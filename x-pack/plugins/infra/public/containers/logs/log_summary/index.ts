@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadSummaryActionCreators } from './operations/load';
-
-export const loadSummary = loadSummaryActionCreators.resolve;
+export * from './with_summary';
+export * from './log_summary';
