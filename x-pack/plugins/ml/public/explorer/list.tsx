@@ -7,30 +7,46 @@
 import React from 'react';
 
 import {
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
   EuiListGroup,
+  // This isn't part of EUI's type definitions yet.
+  // @ts-ignore
   EuiListGroupItem,
 } from '@elastic/eui';
 
-export const List = ({ deleteHandler, list, optionsData }) => (
-  <EuiListGroup style={{ maxWidth: '640px', padding: 0 }}>
-    {list.map((l) => (
+import { Dictionary } from '../../common/types/common';
+
+interface OptionsDataElement {
+  agg: string;
+  field: string;
+  formRowLabel: string;
+}
+
+interface ListProps {
+  list: string[];
+  optionsData: Dictionary<OptionsDataElement>;
+  deleteHandler(l: string): void;
+}
+
+export const List: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
+  <EuiListGroup>
+    {list.map((l: string) => (
       <EuiListGroupItem
         key={l}
         id={`walterra-item-${l}`}
-        label={(
+        label={
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow label="Custom name">
-                <EuiFieldText defaultValue={optionsData[l].formRowLabel}/>
+                <EuiFieldText defaultValue={optionsData[l].formRowLabel} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow label="Aggregation">
-                <EuiFieldText defaultValue={optionsData[l].agg}/>
+                <EuiFieldText defaultValue={optionsData[l].agg} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -39,7 +55,7 @@ export const List = ({ deleteHandler, list, optionsData }) => (
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
+        }
         isActive
         extraAction={{
           color: 'subdued',

@@ -18,9 +18,8 @@ import {
 } from './dropdown';
 
 describe('DropDown', () => {
-
-  test('addAction', (done) => {
-    const dispatch = jest.fn((d) => {
+  test('addAction', done => {
+    const dispatch = jest.fn(d => {
       expect(d).toEqual({ type: actions.ADD_ITEM, payload: 'mockLabel' });
       done();
     });
@@ -32,8 +31,8 @@ describe('DropDown', () => {
     expect(dispatch.mock.calls).toHaveLength(1);
   });
 
-  test('deleteAction', (done) => {
-    const dispatch = jest.fn((d) => {
+  test('deleteAction', done => {
+    const dispatch = jest.fn(d => {
       expect(d).toEqual({ type: actions.DELETE_ITEM, payload: 'mockLabel' });
       done();
     });
