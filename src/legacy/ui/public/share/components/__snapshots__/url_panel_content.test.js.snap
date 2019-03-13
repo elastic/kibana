@@ -346,18 +346,9 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
             "data-test-subj": "exportAsSnapshot",
             "id": "snapshot",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Snapshot"
                   id="common.ui.share.urlPanel.snapshotLabel"
@@ -365,7 +356,6 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
@@ -393,18 +383,9 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
             "disabled": false,
             "id": "savedObject",
             "label": <EuiFlexGroup
-              alignItems="stretch"
-              component="div"
-              direction="row"
               gutterSize="none"
-              justifyContent="flexStart"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <FormattedMessage
                   defaultMessage="Saved object"
                   id="common.ui.share.urlPanel.savedObjectLabel"
@@ -412,7 +393,6 @@ exports[`should hide short url section when allowShortUrl is false 1`] = `
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiIconTip
