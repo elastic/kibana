@@ -130,7 +130,6 @@
     "typescript": "^3.3.3333",
     "vinyl-fs": "^3.0.2",
     "xml-crypto": "^0.10.1",
-    "xml2js": "^0.4.19",
     "yargs": "4.8.1"
   },
   "dependencies": {
@@ -287,6 +286,7 @@
     "unstated": "^2.1.1",
     "uuid": "3.0.1",
     "venn.js": "0.2.9",
+    "xml2js": "^0.4.19",
     "xregexp": "3.2.0"
   },
   "engines": {

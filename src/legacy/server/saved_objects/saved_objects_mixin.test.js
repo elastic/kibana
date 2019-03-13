@@ -142,10 +142,10 @@ describe('Saved Objects Mixin', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
       expect(mockServer.route).toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_import', method: 'POST' }));
     });
-    it('should add POST /api/saved_objects/_resolve_import_conflicts', () => {
+    it('should add POST /api/saved_objects/_resolve_import_errors', () => {
       savedObjectsMixin(mockKbnServer, mockServer);
       expect(mockServer.route)
-        .toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_resolve_import_conflicts', method: 'POST' }));
+        .toHaveBeenCalledWith(expect.objectContaining({ path: '/api/saved_objects/_resolve_import_errors', method: 'POST' }));
     });
   });
 
