@@ -238,7 +238,7 @@ describe('clone_worker_tests', () => {
       (repoServiceFactory as any) as RepositoryServiceFactory
     );
 
-    const result = await cloneWorker.executeJob({
+    const result1 = await cloneWorker.executeJob({
       payload: {
         url: 'file:///foo/bar.git',
       },
@@ -246,7 +246,19 @@ describe('clone_worker_tests', () => {
       timestamp: 0,
     });
 
-    assert.ok(result.repo === null);
+    assert.ok(result1.repo === null);
+    assert.ok(newInstanceSpy.notCalled);
+    assert.ok(cloneSpy.notCalled);
+
+    const result2 = await cloneWorker.executeJob({
+      payload: {
+        url: '/foo/bar.git',
+      },
+      options: {},
+      timestamp: 0,
+    });
+
+    assert.ok(result2.repo === null);
     assert.ok(newInstanceSpy.notCalled);
     assert.ok(cloneSpy.notCalled);
   });
