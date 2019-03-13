@@ -17,8 +17,8 @@
  * under the License.
  */
 
-declare function toPath(value: string | string[]): string[]
 
 declare module 'lodash/internal/toPath' {
+  function toPath(value: string | string[]): string[]
   export = toPath;
 }
