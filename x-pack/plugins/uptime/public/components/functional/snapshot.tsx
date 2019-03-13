@@ -40,7 +40,7 @@ export const Snapshot = ({
 }: SnapshotProps) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={4}>
-      <EuiPanel paddingSize="s" style={{ height: 170 }}>
+      <EuiPanel paddingSize="s">
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
