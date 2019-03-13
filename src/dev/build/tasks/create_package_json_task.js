@@ -45,6 +45,7 @@ export const CreatePackageJsonTask = {
         node: pkg.engines.node,
       },
       workspaces: pkg.workspaces,
+      resolutions: pkg.resolutions,
       dependencies: pkg.dependencies
     };
 

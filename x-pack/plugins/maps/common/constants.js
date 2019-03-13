@@ -23,3 +23,5 @@ export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
+
+export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
