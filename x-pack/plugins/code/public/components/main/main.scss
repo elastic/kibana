@@ -26,6 +26,7 @@
 }
 
 .code-navigation__sidebar {
+  background-color: $euiColorLightestShade;
   width: 16rem;
   border-right: $euiBorderThin;
   display: flex;
@@ -258,4 +259,9 @@
   &.codeBlame__item--first{
     border-top: none;
   }
+}
+
+
+.codeIcon__language {
+  fill: $euiColorDarkestShade;
 }

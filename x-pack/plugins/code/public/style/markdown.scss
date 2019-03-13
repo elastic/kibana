@@ -5,3 +5,7 @@
     text-decoration: underline;
   }
 }
+
+.markdown-body .highlight pre, .markdown-body pre {
+  background-color: $euiColorLightestShade;;
+}

@@ -18,7 +18,6 @@ import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 
 const DirectoryNode = styled.span`
-  color: ${theme.euiColorFullShade};
   margin-left: ${theme.euiSizeS};
   vertical-align: middle;
 `;
@@ -145,7 +144,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="submodule" />
               <DirectoryNode>
-                <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </DirectoryNode>
@@ -165,7 +164,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="symlink" />
               <DirectoryNode>
-                <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </DirectoryNode>
@@ -185,7 +184,7 @@ export class CodeFileTree extends React.Component<Props> {
             >
               <EuiIcon type="document" />
               <DirectoryNode>
-                <EuiText size="s" grow={false} className="eui-displayInlineBlock">
+                <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
               </DirectoryNode>

@@ -119,7 +119,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -178,7 +178,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -236,7 +236,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -297,7 +297,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa ePJeWw"
+                    className="sc-bdVaJa gwdwEa"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -341,12 +341,16 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa ePJeWw"
+                    className="sc-bdVaJa gwdwEa"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                     >
-                      pom.xml
+                      <div
+                        className="euiTextColor euiTextColor--default"
+                      >
+                        pom.xml
+                      </div>
                     </div>
                   </span>
                 </div>
@@ -399,7 +403,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa ePJeWw"
+                    className="sc-bdVaJa gwdwEa"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -463,7 +467,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa ePJeWw"
+                        className="sc-bdVaJa gwdwEa"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -522,7 +526,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa ePJeWw"
+                        className="sc-bdVaJa gwdwEa"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -585,7 +589,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -644,7 +648,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -703,7 +707,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -762,7 +766,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -821,7 +825,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -880,7 +884,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -924,12 +928,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  .gitattributes
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .gitattributes
+                  </div>
                 </div>
               </span>
             </div>
@@ -968,12 +976,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  .gitignore
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .gitignore
+                  </div>
                 </div>
               </span>
             </div>
@@ -1012,12 +1024,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  .travis.yml
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    .travis.yml
+                  </div>
                 </div>
               </span>
             </div>
@@ -1056,12 +1072,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  CONTRIBUTING.md
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    CONTRIBUTING.md
+                  </div>
                 </div>
               </span>
             </div>
@@ -1100,12 +1120,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  CONTRIBUTORS
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    CONTRIBUTORS
+                  </div>
                 </div>
               </span>
             </div>
@@ -1144,12 +1168,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  COPYING
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    COPYING
+                  </div>
                 </div>
               </span>
             </div>
@@ -1188,12 +1216,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  README.md
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    README.md
+                  </div>
                 </div>
               </span>
             </div>
@@ -1232,12 +1264,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  cycle_whitelist.txt
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    cycle_whitelist.txt
+                  </div>
                 </div>
               </span>
             </div>
@@ -1276,12 +1312,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  javadoc-stylesheet.css
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    javadoc-stylesheet.css
+                  </div>
                 </div>
               </span>
             </div>
@@ -1320,12 +1360,16 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa ePJeWw"
+                className="sc-bdVaJa gwdwEa"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
                 >
-                  pom.xml
+                  <div
+                    className="euiTextColor euiTextColor--default"
+                  >
+                    pom.xml
+                  </div>
                 </div>
               </span>
             </div>
