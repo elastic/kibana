@@ -55,14 +55,14 @@ export const select = (fun: NodeFunction): NodeFunction => (
   };
 };
 
-export const createStore = (initialState: NodeResult, onChangeCallback: ChangeCallbackFunction) => {
+export const createStore = (
+  initialState: NodeResult,
+  updater: UpdaterFunction,
+  onChangeCallback: ChangeCallbackFunction
+) => {
   let currentState = initialState;
-  let updater: UpdaterFunction = (state: NodeResult): NodeResult => state; // default: no side effect
+
   const getCurrentState = () => currentState;
-  // const setCurrentState = newState => (currentState = newState);
-  const setUpdater = (updaterFunction: UpdaterFunction) => {
-    updater = updaterFunction;
-  };
 
   const commit = (type: TypeName, payload: Payload, meta: Meta = { silent: false }) => {
     currentState = updater({
@@ -77,5 +77,5 @@ export const createStore = (initialState: NodeResult, onChangeCallback: ChangeCa
     }
   };
 
-  return { getCurrentState, setUpdater, commit };
+  return { getCurrentState, commit };
 };

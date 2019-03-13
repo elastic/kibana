@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { layout, matrix, state } from './aeroelastic';
+import { createLayoutStore, matrix } from './aeroelastic';
 
 const stores = new Map();
 
@@ -16,14 +16,7 @@ export const aeroelastic = {
   },
 
   createStore(initialState, onChangeCallback = () => {}, page) {
-    stores.set(page, state.createStore(initialState, onChangeCallback));
-
-    const updateScene = state.select((nextScene, primaryUpdate) => ({
-      primaryUpdate,
-      currentScene: nextScene,
-    }))(layout.nextScene, layout.primaryUpdate);
-
-    stores.get(page).setUpdater(updateScene);
+    stores.set(page, createLayoutStore(initialState, onChangeCallback));
   },
 
   removeStore(page) {

@@ -62,6 +62,7 @@ import {
   getSnappedShapes,
   getTransformIntents,
   resizeAnnotationsFunction,
+  updaterFun,
 } from './layout_functions';
 
 import { primaryUpdate, scene } from './dag_start';
@@ -241,3 +242,5 @@ export const nextScene = select(getNextScene)(
   groupedSelectedShapes,
   gestureState
 );
+
+export const updater = select(updaterFun)(nextScene, primaryUpdate);

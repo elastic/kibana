@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { nextScene } from './layout';
-import { primaryUpdate } from './dag_start';
+import { updater } from './layout';
 import { multiply, rotateZ, translate } from './matrix';
-import { createStore, select } from './state';
+import { createStore } from './state';
 
-export const layout = { nextScene, primaryUpdate };
 export const matrix = { multiply, rotateZ, translate };
-export const state = { createStore, select };
+
+export const createLayoutStore = (initialState, onChangeCallback) =>
+  createStore(initialState, updater, onChangeCallback);

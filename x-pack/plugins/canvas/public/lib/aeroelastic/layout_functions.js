@@ -1455,3 +1455,8 @@ export const getNextScene = (
     selectedShapeObjects: selectedShapes,
   };
 };
+
+export const updaterFun = (nextScene, primaryUpdate) => ({
+  primaryUpdate,
+  currentScene: nextScene,
+});
