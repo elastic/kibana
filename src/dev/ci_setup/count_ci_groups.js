@@ -18,8 +18,8 @@
  */
 
 
-const readFileSync = require('fs');
-const resolve = require('path');
+const { readFileSync } = require('fs');
+const { resolve } = require('path');
 
 const jsYaml = require('js-yaml');
 
