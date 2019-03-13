@@ -13,6 +13,6 @@
     "moment": "2.20.1"
   },
   "scripts": {
-    "build": "babel --presets env --out-dir target src"
+    "build": "babel --presets=@babel/preset-env --out-dir target src"
   }
 }

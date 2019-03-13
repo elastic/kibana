@@ -9,6 +9,6 @@
     "@babel/preset-env": "^7.3.4"
   },
   "scripts": {
-    "build": "babel --presets env --out-dir target src"
+    "build": "babel --presets=@babel/preset-env --out-dir target src"
   }
 }
