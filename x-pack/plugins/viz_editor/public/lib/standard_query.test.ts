@@ -50,7 +50,7 @@ describe('StandardQuery', () => {
             ],
             size: 1000,
           },
-          aggregations: { sum: { sum: { field: 'AvgTicketPrice' } } },
+          aggregations: { 'sum(AvgTicketPrice)': { sum: { field: 'AvgTicketPrice' } } },
         },
       },
       size: 0,
@@ -62,7 +62,7 @@ describe('StandardQuery', () => {
       queryToES({
         select: [
           { op: 'col', arg: 'Carrier' },
-          { op: 'sum', arg: { op: 'col', arg: 'AvgTicketPrice' } },
+          { op: 'sum', alias: 'foo', arg: { op: 'col', arg: 'AvgTicketPrice' } },
         ],
         limit: 1000,
       })
@@ -77,7 +77,7 @@ describe('StandardQuery', () => {
             ],
             size: 1000,
           },
-          aggregations: { sum: { sum: { field: 'AvgTicketPrice' } } },
+          aggregations: { foo: { sum: { field: 'AvgTicketPrice' } } },
         },
       },
       size: 0,
@@ -120,7 +120,7 @@ describe('StandardQuery', () => {
     expect(
       queryToES({
         select: [{ op: 'col', arg: 'Carrier' }],
-        where: [{ op: 'gt', arg: [{ op: 'col', arg: 'DistanceMiles' }, { op: 'lit', arg: 32 }] }],
+        where: { op: 'gt', arg: [{ op: 'col', arg: 'DistanceMiles' }, { op: 'lit', arg: 32 }] },
         limit: 1000,
       })
     ).toEqual({
