@@ -121,8 +121,6 @@ export const MonitorCharts = ({
             xType={EuiSeriesChartUtils.SCALE.TIME}
             xCrosshairFormat="YYYY-MM-DD hh:mmZ"
             stackBy="y"
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
             yDomain={checkDomainLimits}
             animateData={false}
           >
@@ -130,14 +128,14 @@ export const MonitorCharts = ({
               name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
                 defaultMessage: 'Up count',
               })}
-              data={status.map(({ x, up }) => ({ x, y: up }))}
+              data={status.map(({ x, up }) => ({ x, y: up || 0 }))}
               color={success}
             />
             <EuiAreaSeries
               name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.downCountLabel', {
                 defaultMessage: 'Down count',
               })}
-              data={status.map(({ x, down }) => ({ x, y: down }))}
+              data={status.map(({ x, down }) => ({ x, y: down || 0 }))}
               color={danger}
             />
           </EuiSeriesChart>
