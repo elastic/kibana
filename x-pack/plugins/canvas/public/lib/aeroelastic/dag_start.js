@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { select } from './state';
+import { select } from './select';
 
 const state = d => d; // serves as reminder that we start with the state; todo remove it as we add TS annotations (State)
 

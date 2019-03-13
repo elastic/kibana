@@ -6,7 +6,7 @@
 
 import { updater } from './layout';
 import { multiply, rotateZ, translate } from './matrix';
-import { createStore } from './state';
+import { createStore } from './store';
 
 export const matrix = { multiply, rotateZ, translate };
 
