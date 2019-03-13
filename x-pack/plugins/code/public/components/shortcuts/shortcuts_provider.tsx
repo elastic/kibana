@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { toggleHelp } from '../../actions';
 import { RootState } from '../../reducers';
 import { HotKey, Modifier, OS } from './shortcut';
