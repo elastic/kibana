@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReindexWarning } from 'x-pack/plugins/upgrade_assistant/common/types';
 import {
   CURRENT_MAJOR_VERSION,
   PREV_MAJOR_VERSION,
@@ -118,6 +119,24 @@ describe('getReindexWarnings', () => {
       getReindexWarnings({
         settings: {},
         mappings: {},
+      })
+    ).toEqual([]);
+  });
+
+  it('returns customTypeName for non-_doc mapping types', () => {
+    expect(
+      getReindexWarnings({
+        settings: {},
+        mappings: { doc: {} },
+      })
+    ).toEqual([ReindexWarning.customTypeName]);
+  });
+
+  it('does not return customTypeName for _doc mapping types', () => {
+    expect(
+      getReindexWarnings({
+        settings: {},
+        mappings: { _doc: {} },
       })
     ).toEqual([]);
   });

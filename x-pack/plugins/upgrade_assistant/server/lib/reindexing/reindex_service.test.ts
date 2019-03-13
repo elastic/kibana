@@ -48,6 +48,7 @@ describe('reindexService', () => {
       findReindexOperations: jest.fn(unimplemented('findReindexOperations')),
       findAllByStatus: jest.fn(unimplemented('findAllInProgressOperations')),
       getFlatSettings: jest.fn(unimplemented('getFlatSettings')),
+      getFlatSettingsWithTypeName: jest.fn(unimplemented('getFlatSettingsWithTypeName')),
       cleanupChanges: jest.fn(),
       incrementIndexGroupReindexes: jest.fn(unimplemented('incrementIndexGroupReindexes')),
       decrementIndexGroupReindexes: jest.fn(unimplemented('decrementIndexGroupReindexes')),
@@ -186,12 +187,12 @@ describe('reindexService', () => {
   describe('detectReindexWarnings', () => {
     it('fetches reindex warnings from flat settings', async () => {
       const indexName = 'myIndex';
-      actions.getFlatSettings.mockResolvedValueOnce({
+      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce({
         settings: {
           'index.provided_name': indexName,
         },
         mappings: {
-          properties: { https: { type: 'boolean' } },
+          _doc: { properties: { https: { type: 'boolean' } } },
         },
       });
 
@@ -200,7 +201,7 @@ describe('reindexService', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      actions.getFlatSettings.mockResolvedValueOnce(null);
+      actions.getFlatSettingsWithTypeName.mockResolvedValueOnce(null);
       const reindexWarnings = await service.detectReindexWarnings('myIndex');
       expect(reindexWarnings).toBeNull();
     });
