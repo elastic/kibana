@@ -133,6 +133,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SelectDirection
+                id="top-talkers-select-direction"
                 selectedDirection={topNFlowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />
@@ -146,7 +147,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
     this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
 
-  private onChangeTopNFlowDirection = (id: string, topNFlowDirection: NetworkTopNFlowDirection) =>
+  private onChangeTopNFlowDirection = (_: string, topNFlowDirection: NetworkTopNFlowDirection) =>
     this.props.updateTopNFlowDirection({ topNFlowDirection, networkType: this.props.type });
 }
 
