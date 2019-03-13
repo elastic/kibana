@@ -68,7 +68,10 @@ export class VisualizeDataLoader {
 
   public async fetch(params: RequestHandlerParams): Promise<VisResponseData | void> {
     // add necessary params to vis object (dimensions, bucket, metric, etc)
-    const visParams = getVisParams(this.vis, { timeRange: params.timeRange });
+    const visParams = await getVisParams(this.vis, {
+      searchSource: params.searchSource,
+      timeRange: params.timeRange,
+    });
 
     // searchSource is only there for courier request handler
     const requestHandlerResponse = await this.requestHandler({
