@@ -7,6 +7,7 @@
 import { connect } from 'react-redux';
 import { FilterEditor } from './filter_editor';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
+import { setLayerQuery } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -16,8 +17,8 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    onChange: (layer, joins) => {
-      dispatch(setJoinsForLayer(layer, joins));
+    setLayerQuery: (layerId, query) => {
+      dispatch(setLayerQuery(layerId, query));
     }
   };
 }

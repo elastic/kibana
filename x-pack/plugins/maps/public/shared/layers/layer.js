@@ -122,6 +122,10 @@ export class AbstractLayer {
     return this._descriptor.alpha;
   }
 
+  getQuery() {
+    return this._descriptor.query;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
