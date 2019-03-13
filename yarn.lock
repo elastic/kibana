@@ -1648,17 +1648,17 @@
   resolved "https://registry.yarnpkg.com/@types/cheerio/-/cheerio-0.22.10.tgz#780d552467824be4a241b29510a7873a7432c4a6"
   integrity sha512-fOM/Jhv51iyugY7KOBZz2ThfT1gwvsGCfWxpLpZDgkGjpEO4Le9cld07OdskikLjDUQJ43dzDaVRSFwQlpdqVg==
 
+"@types/chroma-js@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-1.4.1.tgz#7c52d461173d569ba1f27e0c2dd26ee76691ec82"
+  integrity sha512-i9hUiO3bwgmzZUDwBuR65WqsBQ/nwN+H2fKX0bykXCdd8cFQEuIj8vI7FXjyb2f5z5h+pv76I/uakikKSgaqTA==
+
 "@types/chromedriver@^2.38.0":
   version "2.38.0"
   resolved "https://registry.yarnpkg.com/@types/chromedriver/-/chromedriver-2.38.0.tgz#971032b73eb7f44036f4f5bed59a7fd5b468014f"
   integrity sha512-vcPGkZt1y2YVXKAY8SwCvU0u9mgw9+7tBV4HGb0YX/6bu1WXbb61bf8Y/N+xNCYwEj/Ug1UAMnhCcsSohXzRXw==
   dependencies:
     "@types/node" "*"
-
-"@types/chroma-js@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-1.4.1.tgz#7c52d461173d569ba1f27e0c2dd26ee76691ec82"
-  integrity sha512-i9hUiO3bwgmzZUDwBuR65WqsBQ/nwN+H2fKX0bykXCdd8cFQEuIj8vI7FXjyb2f5z5h+pv76I/uakikKSgaqTA==
 
 "@types/classnames@^2.2.3":
   version "2.2.3"
@@ -2238,6 +2238,13 @@
   version "0.30.2"
   resolved "https://registry.yarnpkg.com/@types/recompose/-/recompose-0.30.2.tgz#3bdb7fd37460242ef82f6d6a7428e3c96d3a1b9a"
   integrity sha512-O22WmEWoA2z2nbGmX4LqZ9zKzInN+KoyN0Stks9PMhj4GqDDwy2x3Gh0apNhCMzy3HLrCPkb+mH2QxZNtK5grw==
+  dependencies:
+    "@types/react" "*"
+
+"@types/recompose@^0.30.5":
+  version "0.30.5"
+  resolved "https://registry.yarnpkg.com/@types/recompose/-/recompose-0.30.5.tgz#09890e3c504546b38193479e610e427ac0888393"
+  integrity sha512-PEQvFmudB9n0+ZvD8l7lh0olGAWmVAuVwCM4eotzWouH8/Kcr8/EcZyLhYILqoTlqzi6ey/3kbKQzJ/h3KkyXw==
   dependencies:
     "@types/react" "*"
 
