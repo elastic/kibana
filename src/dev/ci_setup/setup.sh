@@ -33,6 +33,7 @@ fi
 
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
+export NODE_OPTIONS="--max_old_space_size=2048"
 
 parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR="$parentDir"
@@ -43,6 +44,7 @@ export KIBANA_PKG_BRANCH="$kbnBranch"
 echo " -- KIBANA_DIR='$KIBANA_DIR'"
 echo " -- XPACK_DIR='$XPACK_DIR'"
 echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- NODE_OPTIONS='$NODE_OPTIONS'"
 echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
 
 ###
