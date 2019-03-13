@@ -215,8 +215,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       const downCount: number = get(bucket, 'down.bucket_count.value');
       return {
         key,
-        downCount: statusFilter && statusFilter === 'down' ? downCount : 0,
-        upCount: statusFilter && statusFilter === 'up' ? total - downCount : 0,
+        downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,
+        upCount: statusFilter && statusFilter !== 'up' ? 0 : total - downCount,
         y: 1,
       };
     });

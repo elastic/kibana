@@ -55,6 +55,296 @@ describe('ElasticsearchPingsAdapter class', () => {
     };
   });
 
+  describe('getPingHistogram', () => {
+    it('returns an empty array for <= 1 bucket', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 2,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toEqual([]);
+    });
+
+    it('returns expected result for no status filter', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+              {
+                key: 2,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('handles status + additional user queries', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+              {
+                key: 2,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 2,
+                  },
+                },
+              },
+              {
+                key: 3,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const searchFilter = {
+        bool: {
+          must: [
+            { match: { 'monitor.status': { query: 'down', operator: 'and' } } },
+            { match: { 'monitor.id': { query: 'auto-http-0X89BB0F9A6C81D178', operator: 'and' } } },
+            { match: { 'monitor.name': { query: 'my-new-test-site-name', operator: 'and' } } },
+          ],
+        },
+      };
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(
+        serverRequest,
+        '1234',
+        '5678',
+        JSON.stringify(searchFilter)
+      );
+
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('handles simple_text_query without issues', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+              {
+                key: 2,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 2,
+                  },
+                },
+              },
+              {
+                key: 3,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const searchFilter = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(
+        serverRequest,
+        '1234',
+        '5678',
+        searchFilter
+      );
+
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('returns a down-filtered array for when filtered by down status', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+              {
+                key: 2,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(
+        serverRequest,
+        '1234',
+        '5678',
+        searchFilter
+      );
+
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toMatchSnapshot();
+    });
+
+    it('returns a down-filtered array for when filtered by up status', async () => {
+      expect.assertions(2);
+      const search = jest.fn();
+      search.mockReturnValue({
+        aggregations: {
+          timeseries: {
+            buckets: [
+              {
+                key: 1,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+              {
+                key: 2,
+                bucket_total: {
+                  value: 3,
+                },
+                down: {
+                  bucket_count: {
+                    value: 1,
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+      const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
+      const pingDatabase = { search, count: jest.fn() };
+      const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
+      const result = await pingAdapter.getPingHistogram(
+        serverRequest,
+        '1234',
+        '5678',
+        searchFilter
+      );
+
+      expect(pingDatabase.search).toHaveBeenCalledTimes(1);
+      expect(result).toMatchSnapshot();
+    });
+  });
+
   describe('getDocCount', () => {
     it('returns data in appropriate shape', async () => {
       const { count } = await adapter.getDocCount(serverRequest);

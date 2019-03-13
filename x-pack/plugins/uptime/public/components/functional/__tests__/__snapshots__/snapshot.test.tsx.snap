@@ -11,11 +11,6 @@ exports[`Snapshot component renders without errors 1`] = `
       grow={true}
       hasShadow={false}
       paddingSize="s"
-      style={
-        Object {
-          "height": 170,
-        }
-      }
     >
       <EuiFlexGroup
         direction="column"
