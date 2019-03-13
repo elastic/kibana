@@ -129,33 +129,57 @@ export async function BrowserProvider({ getService }) {
       const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
       const _toOffset = (to.offset) ? { x: to.offset.x || 0,  y: to.offset.y || 0 } : { x: 0, y: 0 };
 
-      if (from.location instanceof WebElementWrapper) {
-        _from = from.location._webElement;
-      } else {
-        _from = from.location;
-      }
+      const convertPointW3C = async (point, offset) => {
+        if (point.location instanceof WebElementWrapper) {
+          const position = await point.location.getPosition();
+          return {
+            x: Math.round(position.x + offset.x),
+            y: Math.round(position.y + offset.y)
+          };
+        } else {
+          return {
+            x: Math.round(point.location.x + offset.x),
+            y: Math.round(point.location.y + offset.y)
+          };
+        }
+      };
 
-      if (to.location instanceof WebElementWrapper) {
-        _to = to.location._webElement;
-      } else {
-        _to = to.location;
-      }
+      const convertPoint = (point) => {
+        return (point.location instanceof WebElementWrapper) ? point.location._webElement : point.location;
+      };
 
-      if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
-        const actions = driver.actions({ bridge: true });
-        return await actions
-          .move({ origin: _from })
+      if (this.isW3CEnabled) {
+        _from = await convertPointW3C(from, _fromOffset);
+        _to = await convertPointW3C(to, _toOffset);
+        const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
+
+        return await  driver.actions()
+          .move({ x: _from.x, y: _from.y, origin: 'pointer' })
           .press()
-          .move({ x: _to.x, y: _to.y, origin: 'pointer' })
+          .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
           .release()
           .perform();
       } else {
-        return await new LegacyActionSequence(driver)
-          .mouseMove(_from, _fromOffset)
-          .mouseDown()
-          .mouseMove(_to, _toOffset)
-          .mouseUp()
-          .perform();
+        // until Chromedriver is not supporting W3C Webdriver Actions API
+        _from = convertPoint(from);
+        _to = convertPoint(to);
+
+        if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
+          const actions = driver.actions({ bridge: true });
+          return await actions
+            .move({ origin: _from })
+            .press()
+            .move({ x: _to.x, y: _to.y, origin: 'pointer' })
+            .release()
+            .perform();
+        } else {
+          return await new LegacyActionSequence(driver)
+            .mouseMove(_from, _fromOffset)
+            .mouseDown()
+            .mouseMove(_to, _toOffset)
+            .mouseUp()
+            .perform();
+        }
       }
     }
 
