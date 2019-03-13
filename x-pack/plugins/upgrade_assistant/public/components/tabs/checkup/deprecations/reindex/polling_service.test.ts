@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockClient } from './polling_service.test.mocks';
+import { mockClient } from './polling_service.mock';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { ReindexPollingService } from './polling_service';

@@ -16,6 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+export const mockHttpServer = jest.fn();
+
+jest.mock('./http_server', () => ({
+  HttpServer: mockHttpServer,
+}));
+
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 

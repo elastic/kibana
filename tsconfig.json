@@ -47,9 +47,6 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
-    // TODO: we can remove this after the ts-jest bug fix
-    // https://github.com/kulshekhar/ts-jest/issues/991
-    "skipLibCheck": true,
     // adding global typings
     "types": [
       "node",

@@ -17,20 +17,7 @@
  * under the License.
  */
 
-import { loggingServiceMock } from '../logging/logging_service.mock';
-const logger = loggingServiceMock.create();
-jest.mock('../logging', () => ({
-  LoggingService: jest.fn(() => logger),
-}));
-
-import { configServiceMock } from '../config/config_service.mock';
-const configService = configServiceMock.create();
-jest.mock('../config/config_service', () => ({
-  ConfigService: jest.fn(() => configService),
-}));
-
-const mockServer = { start: jest.fn(), stop: jest.fn() };
-jest.mock('../', () => ({ Server: jest.fn(() => mockServer) }));
+import { configService, logger, mockServer } from './index.mock';
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';

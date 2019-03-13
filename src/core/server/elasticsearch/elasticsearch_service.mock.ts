@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+export const MockClusterClient = jest.fn();
+jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
+
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
