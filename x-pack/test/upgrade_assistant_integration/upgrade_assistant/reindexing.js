@@ -7,7 +7,7 @@
 
 import expect from 'expect.js';
 
-import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
+import { ReindexStatus, ReindexWarning, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -128,9 +128,9 @@ export default function ({ getService }) {
       });
     });
 
-    it('shows no warnings', async () => {
+    it('returns a warning for `doc` type', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/6.0-data`);
-      expect(resp.body.warnings.length).to.be(0);
+      expect(resp.body.warnings.includes(ReindexWarning.customTypeName)).to.be(true);
     });
 
     it('reindexes old 6.0 index', async () => {

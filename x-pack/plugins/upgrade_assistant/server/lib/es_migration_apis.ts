@@ -20,6 +20,7 @@ export interface EnrichedDeprecationInfo extends DeprecationInfo {
   index?: string;
   node?: string;
   reindex?: boolean;
+  needsDefaultFields?: boolean;
 }
 
 export interface UpgradeAssistantStatus {
@@ -65,18 +66,17 @@ const getCombinedIndexInfos = (
     Object.keys(deprecations.index_settings)
       .reduce(
         (indexDeprecations, indexName) => {
-          // prevent APM indices from showing up for general re-indexing
-          if (apmIndices.has(indexName)) {
-            return indexDeprecations;
-          }
-
           return indexDeprecations.concat(
             deprecations.index_settings[indexName].map(
               d =>
                 ({
                   ...d,
                   index: indexName,
-                  reindex: /Index created before/.test(d.message),
+                  // prevent APM indices from showing up for general re-indexing
+                  reindex: /Index created before/.test(d.message) && !apmIndices.has(indexName),
+                  needsDefaultFields: /Number of fields exceeds automatic field expansion limit/.test(
+                    d.message
+                  ),
                 } as EnrichedDeprecationInfo)
             )
           );

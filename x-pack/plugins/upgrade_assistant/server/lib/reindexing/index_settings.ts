@@ -11,7 +11,9 @@ import {
 } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { ReindexWarning } from '../../../common/types';
 import { isLegacyApmIndex } from '../apm';
-import { FlatSettings } from './types';
+import { FlatSettings, FlatSettingsWithTypeName } from './types';
+
+export const DEFAULT_TYPE_NAME = '_doc';
 
 export interface ParsedIndexName {
   cleanIndexName: string;
@@ -74,17 +76,31 @@ export const generateNewIndexName = (indexName: string): string => {
  * @param flatSettings
  */
 export const getReindexWarnings = (
-  flatSettings: FlatSettings,
+  flatSettings: FlatSettingsWithTypeName,
   apmIndexPatterns: string[] = []
 ): ReindexWarning[] => {
   const indexName = flatSettings.settings['index.provided_name'];
-  const apmReindexWarning = isLegacyApmIndex(indexName, apmIndexPatterns, flatSettings.mappings);
+  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
+  const apmReindexWarning = isLegacyApmIndex(
+    indexName,
+    apmIndexPatterns,
+    flatSettings.mappings[typeName]
+  );
+  const typeNameWarning = usesCustomTypeName(flatSettings);
 
-  const warnings = [[ReindexWarning.apmReindex, apmReindexWarning]] as Array<
-    [ReindexWarning, boolean]
-  >;
+  const warnings = [
+    [ReindexWarning.apmReindex, apmReindexWarning],
+    [ReindexWarning.customTypeName, typeNameWarning],
+  ] as Array<[ReindexWarning, boolean]>;
 
   return warnings.filter(([_, applies]) => applies).map(([warning, _]) => warning);
+};
+
+const usesCustomTypeName = (flatSettings: FlatSettingsWithTypeName) => {
+  // In 7+ it's not possible to have more than one type anyways, so always grab the first
+  // (and only) key.
+  const typeName = Object.getOwnPropertyNames(flatSettings.mappings)[0];
+  return typeName && typeName !== DEFAULT_TYPE_NAME;
 };
 
 const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
