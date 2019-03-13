@@ -30,8 +30,8 @@ import {
   ecommerceSpecProvider
 } from './data_sets';
 import {
-  makeSampleDataTelemetryCollector
-} from './telemetry';
+  makeSampleDataUsageCollector
+} from './usage';
 
 export function sampleDataMixin(kbnServer, server) {
   server.route(createListRoute());
@@ -86,5 +86,5 @@ export function sampleDataMixin(kbnServer, server) {
   server.registerSampleDataset(logsSpecProvider);
   server.registerSampleDataset(ecommerceSpecProvider);
 
-  makeSampleDataTelemetryCollector(server);
+  makeSampleDataUsageCollector(server);
 }
