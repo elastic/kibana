@@ -93,7 +93,7 @@ export class FilterEditor extends Component {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
 
-          <EuiModalBody style={{ width: '75vw', height: '50vh' }}>
+          <EuiModalBody className="mapFilterEditorModalBody">
             <QueryBar
               query={this.state.query}
               onSubmit={this._onQueryChange}
