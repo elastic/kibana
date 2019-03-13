@@ -9,7 +9,7 @@ import moment from 'moment';
 export const name = 'telemetry';
 export const description = 'Get the clusters stats for the last 1 hour from the Kibana server';
 export const method = 'POST';
-export const path = '/api/telemetry/v1/clusters/_stats';
+export const path = '/api/telemetry/v2/clusters/_stats';
 
 // Get an object with start and end times for the last 1 hour, ISO format, in UTC
 function getTimeRange() {
@@ -21,4 +21,4 @@ function getTimeRange() {
   };
 }
 
-export const body = { timeRange: getTimeRange() };
+export const body = { timeRange: getTimeRange(), unencrypted: true };

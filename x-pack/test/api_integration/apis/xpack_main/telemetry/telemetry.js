@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('/api/telemetry/v1/clusters/_stats', () => {
+  describe('/api/telemetry/v2/clusters/_stats', () => {
     it('should load multiple trial-license clusters', async () => {
       const archive = 'monitoring/multicluster';
       const timeRange = {
@@ -23,9 +23,9 @@ export default function ({ getService }) {
       await esArchiver.load(archive);
 
       const { body } = await supertest
-        .post('/api/telemetry/v1/clusters/_stats')
+        .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
+        .send({ timeRange, unencrypted: true })
         .expect(200);
       expect(body).to.eql(multiClusterFixture);
 
@@ -43,9 +43,9 @@ export default function ({ getService }) {
         await  esArchiver.load(archive);
 
         const { body } = await supertest
-          .post('/api/telemetry/v1/clusters/_stats')
+          .post('/api/telemetry/v2/clusters/_stats')
           .set('kbn-xsrf', 'xxx')
-          .send({ timeRange })
+          .send({ timeRange, unencrypted: true })
           .expect(200);
         expect(body).to.eql(basicClusterFixture);
 

@@ -24,6 +24,14 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+export function isUnprivilegedUser(err) {
+  try {
+    return err.data.code === 'T001';
+  } catch (_) {
+    return false;
+  }
+}
+
 /**
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
@@ -46,16 +54,22 @@ export class OptInExampleFlyout extends Component {
     this.state = {
       data: null,
       isLoading: true,
+      unprivilegedUser: false,
     };
   }
 
   componentDidMount() {
     this.props.fetchTelemetry()
       .then(response => this.setState({ data: Array.isArray(response.data) ? response.data : null, isLoading: false }))
-      .catch(() => this.setState({ isLoading: false }));
+      .catch(err => {
+        this.setState({
+          isLoading: false,
+          unprivilegedUser: isUnprivilegedUser(err),
+        });
+      });
   }
 
-  renderBody({ data, isLoading }) {
+  renderBody({ data, isLoading, unprivilegedUser }) {
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -63,6 +77,27 @@ export class OptInExampleFlyout extends Component {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
+      );
+    }
+
+    if (unprivilegedUser) {
+      return (
+        <EuiCallOut
+          title={<FormattedMessage
+            id="xpack.main.telemetry.callout.errorUnprivilegedUserTitle"
+            defaultMessage="Error displaying cluster statistics"
+          />}
+          color="danger"
+          iconType="cross"
+        >
+          <FormattedMessage
+            id="xpack.main.telemetry.callout.errorUnprivilegedUserDescription"
+            defaultMessage="Only users with the following roles are allowed to see unencrypted cluster statistics: {privilegedRoles}."
+            values={{
+              privilegedRoles: ['superuser', 'remote_monitoring_collector', 'remote_monitoring_agent'],
+            }}
+          />
+        </EuiCallOut>
       );
     }
 

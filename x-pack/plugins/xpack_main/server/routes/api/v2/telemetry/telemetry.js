@@ -8,8 +8,8 @@ import Joi from 'joi';
 import { boomify } from 'boom';
 import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/telemetry';
 
-export function isAllowedToViewTelemetryData(req) {
-  const { roles } = req.auth.credential;
+export function isAllowedToViewUnencryptedTelemetryData(req) {
+  const { roles } = req.auth.credentials;
   return roles.some(role => /superuser|remote_monitoring_collector|remote_monitoring_agent/.test(role));
 }
 
@@ -48,7 +48,7 @@ export function telemetryRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/telemetry/v1/optIn',
+    path: '/api/telemetry/v2/optIn',
     config: {
       validate: {
         payload: Joi.object({
@@ -81,11 +81,11 @@ export function telemetryRoute(server) {
    */
   server.route({
     method: 'POST',
-    path: '/api/telemetry/v1/clusters/_stats',
+    path: '/api/telemetry/v2/clusters/_stats',
     config: {
       validate: {
-        viewUnencrypted: Joi.bool(),
         payload: Joi.object({
+          unencrypted: Joi.bool(),
           timeRange: Joi.object({
             min: Joi.date().required(),
             max: Joi.date().required()
@@ -95,26 +95,23 @@ export function telemetryRoute(server) {
     },
     handler: async (req, h) => {
       const config = req.server.config();
-      const viewUnencrypted = req.viewUnencrypted;
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
-
-      if(viewUnencrypted) {
-        const isAllowed = viewUnencrypted && isAllowedToViewTelemetryData(req);
-        if(!isAllowed) {
-          const notAllowedErr = Error('Not allowed.');
-          notAllowedErr.status = 401;
-          throw notAllowedErr;
-        }
-      }
+      const unencrypted = req.payload.unencrypted;
 
       try {
+        if (unencrypted) {
+          const isAllowed = unencrypted && isAllowedToViewUnencryptedTelemetryData(req);
+          if(!isAllowed) {
+            return h.response({ code: 'T001' }).code(500);
+          }
+        }
         const usageData = await getTelemetry(req, config, start, end);
-        if(viewUnencrypted) {
+        if (unencrypted) {
           return usageData;
         }
 
-        return encryptTelemetry(req, usageData);
+        return encryptTelemetry(config, usageData);
       } catch (err) {
         if (config.get('env.dev')) {
         // don't ignore errors when running in dev mode

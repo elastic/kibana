@@ -7,8 +7,7 @@
 import { createRequestEncryptor } from '@elastic/request-crypto';
 import { telemetryJWKS } from './telemetry_jwks';
 
-export function getKID(kbnServer: any): string {
-  const config = kbnServer.config();
+export function getKID(config: any): string {
   const isDev = config.get('env.dev');
   if (!isDev) {
     return 'kibana_prod';
@@ -16,8 +15,8 @@ export function getKID(kbnServer: any): string {
   return 'kibana_dev';
 }
 
-export async function encryptTelemetry(kbnServer: any, payload: any): Promise<string> {
-  const kid = getKID(kbnServer);
+export async function encryptTelemetry(config: any, payload: any): Promise<string> {
+  const kid = getKID(config);
   const encryptor = await createRequestEncryptor(telemetryJWKS);
   return encryptor.encrypt(kid, payload);
 }

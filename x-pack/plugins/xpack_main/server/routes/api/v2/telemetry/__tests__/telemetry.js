@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { getTelemetry } from '../telemetry';
+import { getTelemetry, isAllowedToViewUnencryptedTelemetryData } from '../telemetry';
 
 describe('telemetry', () => {
 
@@ -78,6 +78,51 @@ describe('telemetry', () => {
       expect(config.get.calledOnce).to.be(true);
       expect(_getAllStats.calledOnce).to.be(false);
       expect(_getLocalStats.calledOnce).to.be(true);
+    });
+
+  });
+
+  describe('isAllowedToViewUnencryptedTelemetryData', () => {
+    function createMockReq(roles) {
+      return { auth: { credentials: { roles } } };
+    }
+
+    const allowedRoles = [
+      'superuser',
+      'remote_monitoring_collector',
+      'remote_monitoring_agent',
+    ];
+
+    allowedRoles.forEach(role => {
+      it(`returns true for the role ${role}`, () => {
+        const mockReq = createMockReq([role]);
+        const result = isAllowedToViewUnencryptedTelemetryData(mockReq);
+        expect(result).to.be(true);
+      });
+    });
+
+    it('returns true on multiple valid roles', () => {
+      const mockReq = createMockReq(allowedRoles);
+      const result = isAllowedToViewUnencryptedTelemetryData(mockReq);
+      expect(result).to.be(true);
+    });
+
+    it('returns true on one valid role with multiple roles', () => {
+      const mockReq = createMockReq([allowedRoles[0], 'invalid_role']);
+      const result = isAllowedToViewUnencryptedTelemetryData(mockReq);
+      expect(result).to.be(true);
+    });
+
+    it('returns false on empty roles', () => {
+      const mockReq = createMockReq([]);
+      const result = isAllowedToViewUnencryptedTelemetryData(mockReq);
+      expect(result).to.be(false);
+    });
+
+    it('returns false on invalid roles', () => {
+      const mockReq = createMockReq(['invalid_role']);
+      const result = isAllowedToViewUnencryptedTelemetryData(mockReq);
+      expect(result).to.be(false);
     });
 
   });

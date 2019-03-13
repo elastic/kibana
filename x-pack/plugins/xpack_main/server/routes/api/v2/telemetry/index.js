@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { xpackInfoRoute } from './xpack_info';
-export { settingsRoute } from './settings';
+export { telemetryRoute } from './telemetry';
