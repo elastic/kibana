@@ -482,11 +482,16 @@ export function updateLayerAlpha(id, alpha) {
 }
 
 export function setLayerQuery(id, query) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'query',
-    newValue: query,
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'query',
+      newValue: query,
+    });
+
+    // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
+    dispatch(syncDataForLayer(id));
   };
 }
 

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import chrome from 'ui/chrome';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -26,6 +27,7 @@ import { QueryBar } from 'ui/query_bar';
 import { indexPatternService } from '../../../kibana_services';
 import { Storage } from 'ui/storage';
 
+const settings = chrome.getUiSettingsClient();
 const localStorage = new Storage(window.localStorage);
 
 export class FilterEditor extends Component {
@@ -83,7 +85,7 @@ export class FilterEditor extends Component {
       return null;
     }
 
-    const query = this.props.layer.getQuery();
+    const layerQuery = this.props.layer.getQuery();
 
     return (
       <EuiOverlayMask>
@@ -102,7 +104,7 @@ export class FilterEditor extends Component {
 
           <EuiModalBody className="mapFilterEditorModalBody">
             <QueryBar
-              query={query ? query : { language: 'kuery', query: '' }}
+              query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
               onSubmit={this._onQueryChange}
               appName="maps"
               showDatePicker={false}
