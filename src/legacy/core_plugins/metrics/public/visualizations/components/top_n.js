@@ -23,6 +23,33 @@ import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
 class TopN extends Component {
+  constructor(props) {
+    super(props);
+
+    this.tableRef = React.createRef();
+    this.state = {
+      labelMaxWidth: 150
+    };
+  }
+
+  get labelMaxWidth() {
+    // calculate max-width of a label column as 35% of the table
+    return this.tableRef.current.offsetWidth * 0.35;
+  }
+
+  componentDidMount() {
+    this.setState({
+      labelMaxWidth: this.labelMaxWidth
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.labelMaxWidth !== this.labelMaxWidth) {
+      this.setState({
+        labelMaxWidth: this.labelMaxWidth
+      });
+    }
+  }
 
   handleClick(item) {
     return () => {
@@ -45,6 +72,9 @@ class TopN extends Component {
           innerBar: {
             width,
             backgroundColor
+          },
+          label: {
+            maxWidth: this.state.labelMaxWidth
           }
         },
         onClick: {
@@ -59,14 +89,16 @@ class TopN extends Component {
           onClick={this.handleClick({ lastValue, ...item })}
           style={styles.row}
         >
-          <td width="1*" className="tvbVisTopN__label">{ item.label }</td>
+          <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
+            { item.label }
+          </td>
           <td width="100%" className="tvbVisTopN__bar">
             <div
               className="tvbVisTopN__innerBar"
               style={styles.innerBar}
             />
           </td>
-          <td width="1*" className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
+          <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">{ value }</td>
         </tr>
       );
     };
@@ -87,7 +119,7 @@ class TopN extends Component {
 
     return (
       <div className={className}>
-        <table className="tvbVisTopN__table">
+        <table className="tvbVisTopN__table" ref={this.tableRef}>
           <tbody>
             { rows }
           </tbody>
