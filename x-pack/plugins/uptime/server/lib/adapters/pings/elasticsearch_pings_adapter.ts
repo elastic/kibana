@@ -8,8 +8,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DocCount, HistogramDataPoint, Ping, PingResults } from '../../../../common/graphql/types';
-import { formatEsBucketsForHistogram } from '../../helper';
-import { getFilterFromMust } from '../../helper/get_filter_from_must';
+import { formatEsBucketsForHistogram, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter, HistogramQueryResult } from '../database';
 import { UMPingsAdapter } from './adapter_types';
 
@@ -165,7 +164,11 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<HistogramDataPoint[]> {
-    const query = getFilterFromMust(dateRangeStart, dateRangeEnd, filters);
+    const { statusFilter, query } = getFilteredQueryAndStatusFilter(
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -212,8 +215,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       const downCount: number = get(bucket, 'down.bucket_count.value');
       return {
         key,
-        downCount,
-        upCount: total - downCount,
+        downCount: statusFilter && statusFilter === 'down' ? downCount : 0,
+        upCount: statusFilter && statusFilter === 'up' ? total - downCount : 0,
         y: 1,
       };
     });
