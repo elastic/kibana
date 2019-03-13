@@ -19,6 +19,7 @@ export const UA_CONFIG_WARM_PHASE = 'config_warm_phase';
 export const UA_CONFIG_SET_PRIORITY = 'config_set_priority';
 export const UA_CONFIG_FREEZE_INDEX = 'config_freeze_index';
 export const UA_INDEX_RETRY_STEP = 'index_retry_step';
+export const UA_EDIT_CLICK = 'edit_click';
 
 export const USER_ACTIONS = [
   UA_APP_LOAD,
@@ -34,4 +35,5 @@ export const USER_ACTIONS = [
   UA_CONFIG_SET_PRIORITY,
   UA_CONFIG_FREEZE_INDEX,
   UA_INDEX_RETRY_STEP,
+  UA_EDIT_CLICK,
 ];

@@ -22,4 +22,5 @@ export {
   UA_CONFIG_SET_PRIORITY,
   UA_CONFIG_FREEZE_INDEX,
   UA_INDEX_RETRY_STEP,
+  UA_EDIT_CLICK,
 } from './user_action';
