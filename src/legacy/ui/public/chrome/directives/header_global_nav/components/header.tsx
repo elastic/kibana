@@ -39,6 +39,8 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   // @ts-ignore
+  EuiImage,
+  // @ts-ignore
   EuiListGroupItem,
   // @ts-ignore
   EuiNavDrawer,
@@ -213,6 +215,12 @@ class HeaderUI extends Component<Props, State> {
             label: navLink.title,
             href: navLink.href,
             iconType: navLink.euiIconType,
+            icon:
+              !navLink.euiIconType && navLink.icon ? (
+                <EuiImage size="s" alt="" aria-hidden={true} url={`/${navLink.icon}`} />
+              ) : (
+                undefined
+              ),
             isActive: navLink.active,
             'data-test-subj': 'navDrawerAppsMenuLink',
           }
