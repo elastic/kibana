@@ -17,38 +17,21 @@
  * under the License.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { get } from 'lodash';
 import React from 'react';
-import { AggConfig } from 'ui/vis/agg_config';
 
-interface StringSelectProps {
-  agg: AggConfig;
-  value: string;
-  aggParam: any;
-  onParamsChange: (
-    type: string,
-    agg: AggConfig,
-    field: any,
-    options?: { isSetFormDirty: boolean }
-  ) => void;
-}
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { AggParamEditorProps } from '../../vis/editors/default';
 
-function StringSelect({ agg = {}, aggParam = {}, value, onParamsChange }: StringSelectProps) {
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const fieldValue: string = get(e, 'target.value');
-    onParamsChange(aggParam.name, agg, fieldValue, { isSetFormDirty: true });
-  };
-
+function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
   return (
     <EuiFormRow label={aggParam.displayName || aggParam.name} className="form-group">
       <EuiFieldText
-        value={value}
+        value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
-        onChange={onChange}
+        onChange={ev => setValue(ev.target.value)}
       />
     </EuiFormRow>
   );
 }
 
-export { StringSelect };
+export { StringParamEditor };

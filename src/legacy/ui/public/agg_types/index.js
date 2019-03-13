@@ -19,7 +19,6 @@
 
 import '../directives/validate_agg';
 import './agg_params';
-import '../agg_types/controls/string_select';
 import { IndexedArray } from '../indexed_array';
 import { countMetricAgg } from './metrics/count';
 import { avgMetricAgg } from './metrics/avg';

@@ -17,5 +17,10 @@
  * under the License.
  */
 
-export { AggParam } from './agg_param';
-export { AggType } from './agg_type';
+interface AggParam {
+  type: string;
+  name: string;
+  displayName?: string;
+}
+
+export { AggParam };
