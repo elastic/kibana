@@ -138,3 +138,9 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
+
+###
+### find commonly used bins from kibana node_modules
+###
+export PERCY_BIN="$(FORCE_COLOR=0 yarn bin)/percy"
+export GRUNT_BIN="$(FORCE_COLOR=0 yarn bin)/grunt"

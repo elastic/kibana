@@ -15,15 +15,15 @@ trap report EXIT
 
 source src/dev/ci_setup/checkout_sibling_es.sh
 
-"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+"$GRUNT_BIN" functionalTests:ensureAllTestsInCiGroup;
 
 node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
 export TEST_ES_FROM=${TEST_ES_FROM:-source}
 
-yarn percy exec "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
+"$PERCY_BIN" exec "$GRUNT_BIN" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
 
 if [ "$CI_GROUP" == "1" ]; then
-  yarn percy exec "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
+  "$PERCY_BIN" exec "$GRUNT_BIN" run:pluginFunctionalTestsRelease --from=source;
 fi
