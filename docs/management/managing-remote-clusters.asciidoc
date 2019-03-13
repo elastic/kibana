@@ -8,7 +8,7 @@ can be used to provide remote backups for disaster recovery or for geo-proximite
 
 Before using these features, you should be familiar with the following concepts:
 
-* {xpack-ref}/xpack-ccr.html[{ccr-cap}]
+* {stack-ov}/xpack-ccr.html[{ccr-cap}]
 * {ref}/modules-cross-cluster-search.html[{ccs-cap}]
 * {stack-ov}/cross-cluster-configuring.html[Cross-cluster security requirements]
 
