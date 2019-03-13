@@ -84,7 +84,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to find index-pattern, missing action:saved_objects/index-pattern/find`,
+      message: `Unable to find index-pattern,search, missing action:saved_objects/index-pattern/find,action:saved_objects/search/find`,
     });
   };
 

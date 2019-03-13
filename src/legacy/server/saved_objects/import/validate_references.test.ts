@@ -57,7 +57,14 @@ Object {
 
   test('returns errors when references are missing', async () => {
     savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [],
+      saved_objects: [
+        {
+          id: '8',
+          type: 'search',
+          attributes: {},
+          references: [],
+        },
+      ],
     });
     const savedObjects = [
       {
@@ -98,6 +105,11 @@ Object {
             type: 'search',
             id: '7',
           },
+          {
+            name: 'ref_3',
+            type: 'search',
+            id: '8',
+          },
         ],
       },
     ];
@@ -128,6 +140,10 @@ Object {
           Object {
             "id": "6",
             "type": "index-pattern",
+          },
+          Object {
+            "id": "7",
+            "type": "search",
           },
         ],
         "type": "missing_references",

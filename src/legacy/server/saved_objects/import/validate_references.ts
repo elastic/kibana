@@ -20,7 +20,7 @@
 import { SavedObject, SavedObjectsClient } from '../service';
 import { ImportError } from './types';
 
-const ENFORCED_TYPES = ['index-pattern'];
+const ENFORCED_TYPES = ['index-pattern', 'search'];
 
 export async function validateReferences(
   savedObjects: SavedObject[],

@@ -127,7 +127,7 @@ export default function ({ getService }) {
             });
         });
 
-        it('should return errors when index patterns are missing', async () => {
+        it('should return errors when index patterns or search are missing', async () => {
           const objectsToImport = [
             JSON.stringify({
               type: 'visualization',
@@ -138,6 +138,11 @@ export default function ({ getService }) {
                   name: 'ref_0',
                   type: 'index-pattern',
                   id: 'non-existing',
+                },
+                {
+                  name: 'ref_1',
+                  type: 'search',
+                  id: 'non-existing-search',
                 },
               ],
             }),
@@ -160,6 +165,10 @@ export default function ({ getService }) {
                         {
                           type: 'index-pattern',
                           id: 'non-existing',
+                        },
+                        {
+                          type: 'search',
+                          id: 'non-existing-search',
                         },
                       ],
                     },
