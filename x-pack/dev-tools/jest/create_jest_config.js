@@ -37,7 +37,7 @@ export function createJestConfig({
       '**/*.test.{js,ts,tsx}'
     ],
     transform: {
-      '^.+\\.(jsx?|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
+      '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
     },
     transformIgnorePatterns: [
       '[/\\\\]node_modules[/\\\\].+\\.js$'

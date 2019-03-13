@@ -77,7 +77,7 @@ export default {
     'integration_tests/'
   ],
   transform: {
-    '^.+\\.(jsx?|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

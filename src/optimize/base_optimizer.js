@@ -358,7 +358,7 @@ export default class BaseOptimizer {
             }
           },
           {
-            resource: createSourceFileResourceSelector(/\.(js|jsx|tsx|ts)$/),
+            resource: createSourceFileResourceSelector(/\.(js|tsx?)$/),
             use: maybeAddCacheLoader('babel', [
               {
                 loader: 'thread-loader',
@@ -384,7 +384,7 @@ export default class BaseOptimizer {
       },
 
       resolve: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+        extensions: ['.js', '.ts', '.tsx', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',

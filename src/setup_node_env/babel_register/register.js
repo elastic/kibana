@@ -72,5 +72,5 @@ require('@babel/register')({
   presets: [
     require.resolve('@kbn/babel-preset/node_preset')
   ],
-  extensions: ['.es6', '.es', '.jsx', '.js', '.mjs', '.ts', '.tsx'],
+  extensions: ['.js', '.ts', '.tsx'],
 });
