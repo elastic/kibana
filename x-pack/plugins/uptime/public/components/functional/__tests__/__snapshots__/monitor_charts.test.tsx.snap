@@ -202,7 +202,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         </EuiTitle>
         <FlexibleEuiSeriesChart
           animateData={false}
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -212,7 +211,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 16,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           stackBy="y"
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
@@ -285,47 +283,47 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               Array [
                 Object {
                   "x": 1548697620000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548697920000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698220000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698520000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698820000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699120000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699420000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699720000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700020000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700320000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700620000,
-                  "y": null,
+                  "y": 0,
                 },
               ]
             }
