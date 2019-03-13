@@ -52,9 +52,8 @@ function DefaultEditorAggSelect({
   isSubAggregation,
   onChangeAggType,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOption[] = aggType
-    ? [{ label: aggType.title, value: aggType }]
-    : [];
+  const selectedOptions: ComboBoxGroupedOption[] =
+    aggType && aggType.title ? [{ label: aggType.title, value: aggType }] : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -78,7 +77,7 @@ function DefaultEditorAggSelect({
       <FormattedMessage
         id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
         defaultMessage="{aggTitle} help"
-        values={{ aggTitle: agg.type && agg.type.title }}
+        values={{ aggTitle: aggType && aggType.title ? aggType.title : '' }}
       />
     </EuiLink>
   );
