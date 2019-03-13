@@ -28,6 +28,8 @@ import { detectLanguage } from '../utils/detect_language';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
 
+const LANG_SERVER_ERROR = 'language server error';
+
 export function lspRoute(
   server: hapi.Server,
   lspService: LspService,
@@ -53,14 +55,14 @@ export function lspRoute(
                 log.error(error);
               }
               return h
-                .response(error.toJson())
+                .response({ code: error.code, msg: LANG_SERVER_ERROR })
                 .type('json')
                 .code(503); // different code for LS errors and other internal errors.
             } else if (error.isBoom) {
               return error;
             } else {
               return h
-                .response(JSON.stringify(error))
+                .response('language server error')
                 .type('json')
                 .code(500);
             }
@@ -152,14 +154,14 @@ export function lspRoute(
         log.error(error);
         if (error instanceof ResponseError) {
           return h
-            .response(error.toJson())
+            .response({ code: error.code, msg: LANG_SERVER_ERROR })
             .type('json')
             .code(503); // different code for LS errors and other internal errors.
         } else if (error.isBoom) {
           return error;
         } else {
           return h
-            .response(JSON.stringify(error))
+            .response(LANG_SERVER_ERROR)
             .type('json')
             .code(500);
         }
