@@ -23,6 +23,6 @@ var uid = process.getuid && process.getuid();
 var isRoot = require('./is_root')(uid);
 
 if(isRoot && !force) {
-  console.error('Kibana should not be run as root.  Use --force-root to continue.');
+  console.error('Kibana should not be run as root.  Use --allow-root to continue.');
   process.exit(1);
 }

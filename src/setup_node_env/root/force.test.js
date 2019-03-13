@@ -22,7 +22,7 @@ var forceRoot = require('./force');
 describe('forceRoot', function () {
 
   it('with flag', function () {
-    expect(forceRoot(['--force-root'])).toBeTruthy();
+    expect(forceRoot(['--allow-root'])).toBeTruthy();
   });
 
   it('without flag', function () {
@@ -31,9 +31,9 @@ describe('forceRoot', function () {
   });
 
   test('remove argument', function () {
-    var args = ['--force-root', 'foo'];
+    var args = ['--allow-root', 'foo'];
     forceRoot(args);
-    expect(args.includes('--force-root')).toBeFalsy();
+    expect(args.includes('--allow-root')).toBeFalsy();
   });
 
 });
