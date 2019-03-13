@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const UA_APP_NAME = 'index-lifecycle-management';
+export const UA_APP_NAME = 'index_lifecycle_management';
 
 export const UA_APP_LOAD = 'app_load';
 export const UA_POLICY_CREATE = 'policy_create';
