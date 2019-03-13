@@ -9,28 +9,31 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export const EmptyStateLoading = (props: any) => (
-  <EuiEmptyPrompt
-    title={
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h3>
-              {i18n.translate('xpack.uptime.emptyState.loadingMessage', {
-                defaultMessage: 'Loading…',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLoadingSpinner size="xl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-  />
+export const EmptyStateLoading = () => (
+  <EuiPanel>
+    <EuiEmptyPrompt
+      title={
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h3>
+                {i18n.translate('xpack.uptime.emptyState.loadingMessage', {
+                  defaultMessage: 'Loading…',
+                })}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
+  </EuiPanel>
 );
