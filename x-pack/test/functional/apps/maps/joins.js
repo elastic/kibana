@@ -11,6 +11,7 @@ const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
   charlie: 12,
+  tango: -1
 };
 
 export default function ({ getPageObjects, getService }) {
@@ -44,10 +45,15 @@ export default function ({ getPageObjects, getService }) {
 
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources.n1t6f.data.features.length).to.equal(3);
+      expect(mapboxStyle.sources.n1t6f.data.features.length).to.equal(4);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
-        expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
+        if (properties.name === 'tango') {
+          //left join, which means we won't rescale joins that do not match
+          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
+        }else {
+          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
+        }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });
     });
