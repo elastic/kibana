@@ -18,6 +18,7 @@
  */
 
 import * as Hapi from 'hapi';
+import { fetchProvider } from './collector_fetch';
 
 interface KbnServer extends Hapi.Server {
   usage: any;
@@ -27,7 +28,7 @@ export function makeSampleDataTelemetryCollector(server: KbnServer) {
   server.usage.collectorSet.register(
     server.usage.collectorSet.makeUsageCollector({
       type: 'sample-data',
-      fetch: () => ({ progress: 'wip' }),
+      fetch: fetchProvider('.kibana'),
     })
   );
 }

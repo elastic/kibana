@@ -27,17 +27,36 @@ export class TelemetryKeeper {
 
   constructor(request: Hapi.Request) {
     const { server } = request;
+
+    const handleIncrementError = (err: Error) => {
+      if (err != null) {
+        server.log(['debug', 'sample_data', 'telemetry'], err.stack);
+      }
+      server.log(
+        ['warning', 'sample_data', 'telemetry'],
+        `saved objects repository incrementCounter encountered an error: ${err}`
+      );
+    };
+
     const {
       savedObjects: { getSavedObjectsRepository },
     } = server;
     const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
     const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-    this.addInstall = (dataSet: string) => {
-      internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
+    this.addInstall = async (dataSet: string) => {
+      try {
+        internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `installCount`);
+      } catch (err) {
+        handleIncrementError(err);
+      }
     };
-    this.addUninstall = (dataSet: string) => {
-      internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
+    this.addUninstall = async (dataSet: string) => {
+      try {
+        internalRepository.incrementCounter(SAVED_OBJECT_ID, dataSet, `unInstallCount`);
+      } catch (err) {
+        handleIncrementError(err);
+      }
     };
   }
 }
