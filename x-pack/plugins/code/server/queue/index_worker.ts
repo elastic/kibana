@@ -88,6 +88,20 @@ export class IndexWorker extends AbstractWorker {
     return await super.onJobCompleted(job, res);
   }
 
+  public async updateProgress(uri: RepositoryUri, progress: number) {
+    const p: WorkerProgress = {
+      uri,
+      progress,
+      timestamp: new Date(),
+    };
+    try {
+      return await this.objectClient.updateRepositoryLspIndexStatus(uri, p);
+    } catch (error) {
+      this.log.error(`Update index progress error.`);
+      this.log.error(error);
+    }
+  }
+
   protected getTimeoutMs(_: any) {
     // TODO(mengwei): query object/file number of a repo and come up with a number in here.
     return moment.duration(5, 'hour').asMilliseconds();
