@@ -9,8 +9,8 @@ import { MINUTE, HOUR, DAY, WEEK, MONTH, YEAR } from '../../public/crud_app/serv
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
 import { initTestBed, mockServerResponses } from './job_create.test_helpers';
 
-jest.mock('../../../../../src/legacy/ui/public/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+jest.mock('ui/index_patterns', () => {
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('ui/index_patterns/constants'); // eslint-disable-line max-len
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 

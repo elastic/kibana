@@ -70,7 +70,9 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
         reactWrapper: row,
         columns: row.find('td').map(col => ({
           reactWrapper: col,
-          value: col.text()
+          // We can't access the td value with col.text() because
+          // eui adds an extra div inside the table > tr > td on mobile => (".euiTableRowCell__mobileHeader")
+          value: col.find('.euiTableCellContent').text()
         }))
       }));
 
