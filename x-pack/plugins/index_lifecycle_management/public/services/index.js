@@ -6,4 +6,4 @@
 
 export { filterItems } from './filter_items';
 export { sortTable } from './sort_table';
-export { trackUserAction } from './track_user_action';
+export { trackUserAction, getUserActionsForPhases } from './user_action';

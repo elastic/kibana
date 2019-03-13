@@ -10,7 +10,7 @@ import {
   UA_POLICY_ATTACH_INDEX_TEMPLATE,
   UA_POLICY_DETACH_INDEX,
 } from '../../common/constants';
-import { trackUserRequest } from './track_user_action';
+import { trackUserRequest } from './user_action';
 
 let httpClient;
 export const setHttpClient = (client) => {
