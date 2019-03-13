@@ -24,14 +24,14 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('resolve_import_conflicts', () => {
+  describe('resolve_import_errors', () => {
     describe('without kibana index', () => {
       // Cleanup data that got created in import
       after(() => esArchiver.unload('saved_objects/basic'));
 
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
-          .post('/api/saved_objects/_resolve_import_conflicts')
+          .post('/api/saved_objects/_resolve_import_errors')
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
@@ -44,7 +44,7 @@ export default function ({ getService }) {
 
       it('should return 200 and import everything when overwrite parameters contains all objects', async () => {
         await supertest
-          .post('/api/saved_objects/_resolve_import_conflicts')
+          .post('/api/saved_objects/_resolve_import_errors')
           .field('overwrites', JSON.stringify([
             {
               type: 'index-pattern',
@@ -71,7 +71,7 @@ export default function ({ getService }) {
 
       it('should return 400 when no file passed in', async () => {
         await supertest
-          .post('/api/saved_objects/_resolve_import_conflicts')
+          .post('/api/saved_objects/_resolve_import_errors')
           .field('skips', '[]')
           .expect(400)
           .then((resp) => {
@@ -100,7 +100,7 @@ export default function ({ getService }) {
           ]
         };
         await supertest
-          .post('/api/saved_objects/_resolve_import_conflicts')
+          .post('/api/saved_objects/_resolve_import_errors')
           .field('replaceReferences', JSON.stringify(
             [
               {
@@ -138,7 +138,7 @@ export default function ({ getService }) {
           fileChunks.push(`{"type":"visualization","id":"${i}","attributes":{},"references":[]}`);
         }
         await supertest
-          .post('/api/saved_objects/_resolve_import_conflicts')
+          .post('/api/saved_objects/_resolve_import_errors')
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
           .then((resp) => {
@@ -158,7 +158,7 @@ export default function ({ getService }) {
 
         it('should return 200 when skipping all the records', async () => {
           await supertest
-            .post('/api/saved_objects/_resolve_import_conflicts')
+            .post('/api/saved_objects/_resolve_import_errors')
             .field('skips', JSON.stringify(
               [
                 {
@@ -184,7 +184,7 @@ export default function ({ getService }) {
 
         it('should return 200 when manually overwriting each object', async () => {
           await supertest
-            .post('/api/saved_objects/_resolve_import_conflicts')
+            .post('/api/saved_objects/_resolve_import_errors')
             .field('overwrites', JSON.stringify(
               [
                 {
@@ -210,7 +210,7 @@ export default function ({ getService }) {
 
         it('should return 200 with only one record when overwriting 1 and skipping 1', async () => {
           await supertest
-            .post('/api/saved_objects/_resolve_import_conflicts')
+            .post('/api/saved_objects/_resolve_import_errors')
             .field('overwrites', JSON.stringify(
               [
                 {

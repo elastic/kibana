@@ -23,7 +23,7 @@ import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { CustomError, extractErrors } from './extract_errors';
 
-interface ResolveImportConflictsOptions {
+interface ResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
   savedObjectsClient: SavedObjectsClient;
@@ -48,14 +48,14 @@ interface ImportResponse {
   errors?: CustomError[];
 }
 
-export async function resolveImportConflicts({
+export async function resolveImportErrors({
   readStream,
   objectLimit,
   skips,
   overwrites,
   savedObjectsClient,
   replaceReferences,
-}: ResolveImportConflictsOptions): Promise<ImportResponse> {
+}: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let errors: CustomError[] = [];
   const filter = createObjectsFilter(skips, overwrites, replaceReferences);
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);

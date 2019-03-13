@@ -6,7 +6,7 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
-import { resolveImportConflictsTestSuiteFactory } from '../../common/suites/resolve_import_conflicts';
+import { resolveImportErrorsTestSuiteFactory } from '../../common/suites/resolve_import_errors';
 
 // tslint:disable:no-default-export
 export default function({ getService }: TestInvoker) {
@@ -15,13 +15,13 @@ export default function({ getService }: TestInvoker) {
   const es = getService('es');
 
   const {
-    resolveImportConflictsTest,
+    resolveImportErrorsTest,
     createExpectResults,
     expectUnknownType,
-  } = resolveImportConflictsTestSuiteFactory(es, esArchiver, supertest);
+  } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
-  describe('_resolve_import_conflicts', () => {
-    resolveImportConflictsTest('in the current space (space_1)', {
+  describe('_resolve_import_errors', () => {
+    resolveImportErrorsTest('in the current space (space_1)', {
       ...SPACES.SPACE_1,
       tests: {
         default: {
@@ -35,7 +35,7 @@ export default function({ getService }: TestInvoker) {
       },
     });
 
-    resolveImportConflictsTest('in the default space', {
+    resolveImportErrorsTest('in the default space', {
       ...SPACES.DEFAULT,
       tests: {
         default: {

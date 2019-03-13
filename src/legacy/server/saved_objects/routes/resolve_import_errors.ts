@@ -23,7 +23,7 @@ import Joi from 'joi';
 import { extname } from 'path';
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../';
-import { resolveImportConflicts } from '../import';
+import { resolveImportErrors } from '../import';
 import { Prerequisites } from './types';
 
 interface HapiReadableStream extends Readable {
@@ -54,8 +54,8 @@ interface ImportRequest extends Hapi.Request {
   };
 }
 
-export const createResolveImportConflictsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
-  path: '/api/saved_objects/_resolve_import_conflicts',
+export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: Hapi.Server) => ({
+  path: '/api/saved_objects/_resolve_import_errors',
   method: 'POST',
   config: {
     pre: [prereqs.getSavedObjectsClient],
@@ -102,7 +102,7 @@ export const createResolveImportConflictsRoute = (prereqs: Prerequisites, server
     if (fileExtension !== '.ndjson') {
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
-    return await resolveImportConflicts({
+    return await resolveImportErrors({
       savedObjectsClient,
       readStream: request.payload.file,
       objectLimit: request.server.config().get('savedObjects.maxImportExportSize'),

@@ -10,20 +10,20 @@ import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
-interface ResolveImportConflictsTest {
+interface ResolveImportErrorsTest {
   statusCode: number;
   response: (resp: { [key: string]: any }) => void;
 }
 
-interface ResolveImportConflictsTests {
-  default: ResolveImportConflictsTest;
-  unknownType: ResolveImportConflictsTest;
+interface ResolveImportErrorsTests {
+  default: ResolveImportErrorsTest;
+  unknownType: ResolveImportErrorsTest;
 }
 
-interface ResolveImportConflictsTestDefinition {
+interface ResolveImportErrorsTestDefinition {
   user?: TestDefinitionAuthentication;
   spaceId?: string;
-  tests: ResolveImportConflictsTests;
+  tests: ResolveImportErrorsTests;
 }
 
 const createImportData = (spaceId: string) => [
@@ -43,7 +43,7 @@ const createImportData = (spaceId: string) => [
   },
 ];
 
-export function resolveImportConflictsTestSuiteFactory(
+export function resolveImportErrorsTestSuiteFactory(
   es: any,
   esArchiver: any,
   supertest: SuperTest<any>
@@ -99,9 +99,9 @@ export function resolveImportConflictsTestSuiteFactory(
     });
   };
 
-  const makeResolveImportConflictsTest = (describeFn: DescribeFn) => (
+  const makeResolveImportErrorsTest = (describeFn: DescribeFn) => (
     description: string,
-    definition: ResolveImportConflictsTestDefinition
+    definition: ResolveImportErrorsTestDefinition
   ) => {
     const { user = {}, spaceId = DEFAULT_SPACE_ID, tests } = definition;
 
@@ -112,7 +112,7 @@ export function resolveImportConflictsTestSuiteFactory(
       it(`should return ${tests.default.statusCode}`, async () => {
         const data = createImportData(spaceId);
         await supertest
-          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_conflicts`)
+          .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
           .auth(user.username, user.password)
           .field(
             'overwrites',
@@ -143,7 +143,7 @@ export function resolveImportConflictsTestSuiteFactory(
             },
           });
           await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_conflicts`)
+            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
             .auth(user.username, user.password)
             .field(
               'overwrites',
@@ -170,12 +170,12 @@ export function resolveImportConflictsTestSuiteFactory(
     });
   };
 
-  const resolveImportConflictsTest = makeResolveImportConflictsTest(describe);
+  const resolveImportErrorsTest = makeResolveImportErrorsTest(describe);
   // @ts-ignore
-  resolveImportConflictsTest.only = makeResolveImportConflictsTest(describe.only);
+  resolveImportErrorsTest.only = makeResolveImportErrorsTest(describe.only);
 
   return {
-    resolveImportConflictsTest,
+    resolveImportErrorsTest,
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
