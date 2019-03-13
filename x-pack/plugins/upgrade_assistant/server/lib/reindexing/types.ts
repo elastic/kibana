@@ -26,3 +26,15 @@ export interface FlatSettings {
     _meta?: MetaProperties;
   };
 }
+
+export interface FlatSettingsWithTypeName {
+  settings: {
+    [key: string]: string;
+  };
+  mappings: {
+    [typeName: string]: {
+      properties?: MappingProperties;
+      _meta?: MetaProperties;
+    };
+  };
+}
