@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { checkRepos } from './check_repos';
-import { CodeNodeClient, CodeNodeInfo } from './code_node_client';
+import { clientWithInternalUser, CodeNodeInfo } from './code_node_client';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -72,11 +72,11 @@ export function init(server: Server, options: any) {
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    const codeNodeClient = new CodeNodeClient(server);
+    const codeNodeClient = clientWithInternalUser(server);
     // enable security check in routes
     enableSecurity(server);
     // enable cluster status routes
-    clusterRoute(server, codeNodeClient, log);
+    clusterRoute(server);
     if (serverOptions.codeNode) {
       let info = await codeNodeClient.getCodeNodeInfo();
       if (!info) {

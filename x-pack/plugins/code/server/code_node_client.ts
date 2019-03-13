@@ -9,13 +9,7 @@ export const CODE_NODE_TYPE = 'code-node';
 export const CODE_NODE_ID = 'code-node-info';
 
 export class CodeNodeClient {
-  private readonly objectsClient: any;
-  constructor(server: Server) {
-    const repo = server.savedObjects.getSavedObjectsRepository(
-      server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
-    );
-    this.objectsClient = new server.savedObjects.SavedObjectsClient(repo);
-  }
+  constructor(readonly objectsClient: any) {}
 
   public async getCodeNodeInfo(): Promise<CodeNodeInfo | undefined> {
     try {
@@ -35,6 +29,18 @@ export class CodeNodeClient {
   public async deleteNodeInfo() {
     await this.objectsClient.delete(CODE_NODE_TYPE, CODE_NODE_ID);
   }
+}
+
+export function clientWithInternalUser(server: Server): CodeNodeClient {
+  const repo = server.savedObjects.getSavedObjectsRepository(
+    server.plugins.elasticsearch.getCluster('admin').callWithInternalUser
+  );
+  const objectsClient = new server.savedObjects.SavedObjectsClient(repo);
+  return new CodeNodeClient(objectsClient);
+}
+
+export function clientWithRequest(request: any): CodeNodeClient {
+  return new CodeNodeClient(request.getSavedObjectsClient());
 }
 
 export interface CodeNodeInfo {

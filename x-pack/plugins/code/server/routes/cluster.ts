@@ -6,15 +6,14 @@
 
 import * as Boom from 'boom';
 import { Server } from 'hapi';
-import { Logger } from 'vscode-jsonrpc';
-import { CodeNodeClient } from '../code_node_client';
+import { clientWithRequest } from '../code_node_client';
 
-export function clusterRoute(server: Server, codeNodeClient: CodeNodeClient, log: Logger) {
-  server.securedRoute({
+export function clusterRoute(server: Server) {
+  server.route({
     path: '/api/code/cluster',
     method: 'GET',
-    requireAdmin: false,
-    async handler() {
+    async handler(req: any) {
+      const codeNodeClient = clientWithRequest(req);
       const info = codeNodeClient.getCodeNodeInfo();
       if (info) {
         return info;
@@ -24,11 +23,11 @@ export function clusterRoute(server: Server, codeNodeClient: CodeNodeClient, log
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/cluster',
     method: 'DELETE',
-    requireAdmin: true,
-    async handler() {
+    async handler(req: any) {
+      const codeNodeClient = clientWithRequest(req);
       const info = codeNodeClient.getCodeNodeInfo();
       if (info) {
         await codeNodeClient.deleteNodeInfo();
