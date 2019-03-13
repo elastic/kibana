@@ -12,6 +12,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
+import { ErrorsOverviewLink } from '../../ErrorsOverviewLink';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
@@ -81,6 +82,7 @@ interface IWaterfallItemProps {
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
+  errorCount: number;
   onClick: () => unknown;
 }
 
@@ -145,6 +147,7 @@ export function WaterfallItem({
   item,
   color,
   isSelected,
+  errorCount,
   onClick
 }: IWaterfallItemProps) {
   if (!totalDuration) {
@@ -173,6 +176,12 @@ export function WaterfallItem({
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
         <Duration item={item} />
+        {errorCount > 0 && item.docType === 'transaction' ? (
+          <ErrorsOverviewLink
+            errorCount={errorCount}
+            transaction={item.transaction}
+          />
+        ) : null}
       </ItemText>
     </Container>
   );

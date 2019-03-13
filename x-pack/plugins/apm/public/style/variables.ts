@@ -46,6 +46,10 @@ export const fontSizes = {
   xxlarge: '30px'
 };
 
+export const colors = {
+  danger: '#a30000'
+};
+
 export function truncate(width: string) {
   return `
       max-width: ${width};
