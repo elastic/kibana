@@ -114,6 +114,7 @@ export class HeadlessChromiumDriverFactory {
         new HeadlessChromiumDriver(page, {
           maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger,
+          inspect: this.browserConfig.inspect,
         })
       );
 
