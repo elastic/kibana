@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
-import { usageTracker } from '../usage';
+import { usage } from '../usage';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import {
@@ -173,7 +173,7 @@ export const createInstallRoute = () => ({
       }
 
       // track the usage operation in a non-blocking way
-      usageTracker(request).addInstall(params.id);
+      usage(request).addInstall(params.id);
 
       return h.response({
         elasticsearchIndicesCreated: counts,
