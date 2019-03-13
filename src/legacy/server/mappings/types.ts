@@ -19,16 +19,24 @@
 
 // FieldMapping isn't 1:1 with the options available,
 // modify as needed.
-export interface FieldMapping {
-  type?: string;
-  dynamic?: string;
-  properties?: MappingProperties;
+export interface CoreFieldMapping {
+  type: string;
   fields?: {
     [subfield: string]: {
       type: string;
     };
   };
 }
+
+// FieldMapping isn't 1:1 with the options available,
+// modify as needed.
+export interface ComplexFieldMapping {
+  dynamic?: string;
+  type?: string;
+  properties: MappingProperties;
+}
+
+export type FieldMapping = CoreFieldMapping | ComplexFieldMapping;
 
 export interface MappingProperties {
   [field: string]: FieldMapping;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexMapping, MappingProperties } from '../types';
+import { ComplexFieldMapping, IndexMapping, MappingProperties } from '../types';
 import { getRootProperties } from './get_root_properties';
 
 /**
@@ -42,7 +42,10 @@ export function getRootPropertiesObjects(mappings: IndexMapping) {
   return Object.entries(rootProperties).reduce(
     (acc, [key, value]) => {
       // we consider the existence of the properties or type of object to designate that this is an object datatype
-      if (!blacklist.includes(key) && (value.properties || value.type === 'object')) {
+      if (
+        !blacklist.includes(key) &&
+        ((value as ComplexFieldMapping).properties || value.type === 'object')
+      ) {
         acc[key] = value;
       }
       return acc;
