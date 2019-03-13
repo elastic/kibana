@@ -21,9 +21,9 @@ export const EmptyProject = ({ isAdmin }: { isAdmin: boolean }) => (
     {isAdmin && <ImportProject />}
     <EuiSpacer />
     <EuiFlexGroup justifyContent="center">
-      <EuiButton>
-        <Link to="/setup-guide">View the Setup Guide</Link>
-      </EuiButton>
+      <Link to="/setup-guide">
+        <EuiButton>View the Setup Guide</EuiButton>
+      </Link>
     </EuiFlexGroup>
   </div>
 );
