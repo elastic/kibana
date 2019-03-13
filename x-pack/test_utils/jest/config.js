@@ -31,11 +31,6 @@ export default {
   coverageReporters: [
     'html',
   ],
-  globals: {
-    'ts-jest': {
-      skipBabel: true,
-    },
-  },
   moduleFileExtensions: [
     'js',
     'json',

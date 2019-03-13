@@ -28,6 +28,7 @@ Array [
           "valueInBytes": 1073741824,
         },
       },
+      "httpsAgent": undefined,
       "log": Object {
         "context": Array [
           "server",
@@ -52,6 +53,7 @@ Array [
         "trace": [MockFunction],
         "warn": [MockFunction],
       },
+      "server": undefined,
     },
   ],
 ]

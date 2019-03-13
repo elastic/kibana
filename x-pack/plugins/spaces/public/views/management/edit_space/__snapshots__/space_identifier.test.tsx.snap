@@ -9,8 +9,7 @@ exports[`renders without crashing 1`] = `
     helpText={
       <p>
         <FormattedMessage
-          defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine}
-          {engineeringKibanaUrl}."
+          defaultMessage="If the identifier is {engineeringIdentifier}, the Kibana URL is{nextLine} {engineeringKibanaUrl}."
           id="xpack.spaces.management.spaceIdentifier.kibanaURLForEngineeringIdentifierDescription"
           values={
             Object {

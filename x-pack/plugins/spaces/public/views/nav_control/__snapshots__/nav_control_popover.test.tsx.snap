@@ -6,7 +6,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   button={
     <SpacesGlobalNavButton
       linkIcon={
-        <Unknown
+        <SpaceAvatar
           announceSpaceName={true}
           className="spaceNavGraphic"
           size="s"
@@ -33,7 +33,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
   repositionOnScroll={true}
   withTitle={true}
 >
-  <Component
+  <SpacesDescription
     onManageSpacesClick={[Function]}
     userProfile={
       Object {

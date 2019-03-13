@@ -15,8 +15,6 @@ import { DiscoverErrorLink } from '../DiscoverErrorLink';
 import { DiscoverSpanLink } from '../DiscoverSpanLink';
 import { DiscoverTransactionLink } from '../DiscoverTransactionLink';
 
-// NOTE: jest.mock() is broken in TS test files (b/c of ts-jest, I think)
-// but using jest's "spies can be stubbed" feature, this works:
 jest
   .spyOn(savedObjects, 'getAPMIndexPattern')
   .mockReturnValue(
