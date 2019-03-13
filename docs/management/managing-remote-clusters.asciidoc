@@ -37,8 +37,8 @@ indices on the remote cluster based on an auto-follow index pattern.
 
 [float]
 [[managing-cross-cluster-replication]]
-== Managing {ccr}
- 
+== [xpack]#Managing {ccr}#
+
 *{ccr-cap}* helps you create and manage the {ccr} process. 
 If you want to replicate data from existing indices, or set up 
 local followers on a case-by-case basis, go to *Follower indices*. 
