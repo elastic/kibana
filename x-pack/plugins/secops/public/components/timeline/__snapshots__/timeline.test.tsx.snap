@@ -636,29 +636,6 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   onDataProviderRemoved={[MockFunction]}
   onToggleDataProviderEnabled={[MockFunction]}
   onToggleDataProviderExcluded={[MockFunction]}
-  onUnPinEvent={[MockFunction]}
-  pinnedEventIds={Object {}}
-  range="1 Day"
-  rowRenderers={
-    Array [
-      Object {
-        "isInstance": [Function],
-        "renderRow": [Function],
-      },
-      Object {
-        "isInstance": [Function],
-        "renderRow": [Function],
-      },
-      Object {
-        "isInstance": [Function],
-        "renderRow": [Function],
-      },
-      Object {
-        "isInstance": [Function],
-        "renderRow": [Function],
-      },
-    ]
-  }
   show={true}
   sort={
     Object {

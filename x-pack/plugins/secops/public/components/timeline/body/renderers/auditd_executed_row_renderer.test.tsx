@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
@@ -25,6 +26,7 @@ describe('auditd_executed_row_renderer', () => {
 
   test('renders correctly against snapshot', () => {
     const children = auditdExecutedRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: auditdExecuted,
       width: 100,
       children: <span>some children</span>,
@@ -49,6 +51,7 @@ describe('auditd_executed_row_renderer', () => {
 
   test('should render children normally if it does not have a auditd object', () => {
     const children = auditdExecutedRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: nonAuditdExecuted,
       width: 100,
       children: <span>some children</span>,
@@ -63,6 +66,7 @@ describe('auditd_executed_row_renderer', () => {
 
   test('should render a auditd executed row', () => {
     const children = auditdExecutedRowRenderer.renderRow({
+      browserFields: mockBrowserFields,
       data: auditdExecuted,
       width: 100,
       children: <span>some children </span>,
