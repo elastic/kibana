@@ -24,56 +24,13 @@ const NOT_INSTALLED = 'not_installed';
 const INSTALLED = 'installed';
 const UNKNOWN = 'unknown';
 
-/*
- * @return {Function} : gets the status for a sample data set
- */
-const getStatusFactoryFn = request => async sampleDataset => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-
-  for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
-    const dataIndexConfig = sampleDataset.dataIndices[i];
-    const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
-    try {
-      const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
-      if (!indexExists) {
-        sampleDataset.status = NOT_INSTALLED;
-        return;
-      }
-
-      const { count } = await callWithRequest(request, 'count', { index: index });
-      if (count === 0) {
-        sampleDataset.status = NOT_INSTALLED;
-        return;
-      }
-    } catch (err) {
-      sampleDataset.status = UNKNOWN;
-      sampleDataset.statusMsg = err.message;
-      return;
-    }
-  }
-
-  try {
-    await request.getSavedObjectsClient().get('dashboard', sampleDataset.overviewDashboard);
-  } catch (err) {
-    // savedObjectClient.get() throws an boom error when object is not found.
-    if (_.get(err, 'output.statusCode') === 404) {
-      sampleDataset.status = NOT_INSTALLED;
-      return;
-    }
-
-    sampleDataset.status = UNKNOWN;
-    sampleDataset.statusMsg = err.message;
-    return;
-  }
-
-  sampleDataset.status = INSTALLED;
-};
-
 export const createListRoute = () => ({
   path: '/api/sample_data',
   method: 'GET',
   config: {
     handler: async request => {
+      const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+
       const sampleDatasets = request.server.getSampleDatasets().map(sampleDataset => {
         return {
           id: sampleDataset.id,
@@ -87,7 +44,47 @@ export const createListRoute = () => ({
         };
       });
 
-      await Promise.all(sampleDatasets.map(getStatusFactoryFn(request)));
+      const isInstalledPromises = sampleDatasets.map(async sampleDataset => {
+        for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
+          const dataIndexConfig = sampleDataset.dataIndices[i];
+          const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+          try {
+            const indexExists = await callWithRequest(request, 'indices.exists', { index: index });
+            if (!indexExists) {
+              sampleDataset.status = NOT_INSTALLED;
+              return;
+            }
+
+            const { count } = await callWithRequest(request, 'count', { index: index });
+            if (count === 0) {
+              sampleDataset.status = NOT_INSTALLED;
+              return;
+            }
+          } catch (err) {
+            sampleDataset.status = UNKNOWN;
+            sampleDataset.statusMsg = err.message;
+            return;
+          }
+        }
+
+        try {
+          await request.getSavedObjectsClient().get('dashboard', sampleDataset.overviewDashboard);
+        } catch (err) {
+          // savedObjectClient.get() throws an boom error when object is not found.
+          if (_.get(err, 'output.statusCode') === 404) {
+            sampleDataset.status = NOT_INSTALLED;
+            return;
+          }
+
+          sampleDataset.status = UNKNOWN;
+          sampleDataset.statusMsg = err.message;
+          return;
+        }
+
+        sampleDataset.status = INSTALLED;
+      });
+
+      await Promise.all(isInstalledPromises);
       return sampleDatasets;
     },
   },
