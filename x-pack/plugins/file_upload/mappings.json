@@ -1,0 +1,9 @@
+{
+  "file-upload-telemetry": {
+      "properties": {
+        "index_creation_count": {
+          "type" : "long"
+        }
+      }
+    }
+  }

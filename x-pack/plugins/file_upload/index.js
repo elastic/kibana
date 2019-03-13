@@ -4,19 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
-import { fileDataVisualizerRoutes } from './server/routes/file_data_visualizer';
+import { fileUploadRoutes } from './server/routes/file_upload';
+import { makeUsageCollector } from './server/telemetry/';
+import mappings from './mappings';
 
 export const fileUpload = kibana => {
   return new kibana.Plugin({
     require: ['elasticsearch', 'xpack_main'],
     name: 'file_upload',
     id: 'file_upload',
+    uiExports: {
+      mappings,
+    },
 
     init(server) {
       const { xpack_main: xpackMainPlugin } = server.plugins;
 
       mirrorPluginStatus(xpackMainPlugin, this);
-      fileDataVisualizerRoutes(server);
+      fileUploadRoutes(server);
+      makeUsageCollector(server);
     }
   });
 };
