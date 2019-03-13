@@ -45,6 +45,7 @@ const stateColor = {
 class CodeProjectItem extends React.PureComponent<{
   project: Repository;
   enableManagement: boolean;
+  showStatus: boolean;
   status?: RepoStatus;
   deleteRepo?: (uri: string) => void;
   indexRepo?: (uri: string) => void;
@@ -52,7 +53,7 @@ class CodeProjectItem extends React.PureComponent<{
   openSettings?: (uri: string, url: string) => void;
 }> {
   public render() {
-    const { project, status, enableManagement } = this.props;
+    const { project, showStatus, status, enableManagement } = this.props;
     const { name, org, uri, url } = project;
     const onClickDelete = () => this.props.deleteRepo && this.props.deleteRepo(uri);
     const onClickIndex = () => this.props.indexRepo && this.props.indexRepo(uri);
@@ -155,17 +156,21 @@ class CodeProjectItem extends React.PureComponent<{
       </EuiFlexItem>
     );
 
+    const repoStatus = (
+      <EuiText>
+        <h6>
+          <EuiTextColor color="subdued">{footer}</EuiTextColor>
+        </h6>
+      </EuiText>
+    );
+
     return (
       <Panel>
         {this.renderProgress()}
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={3}>
             {disableRepoLink ? repoTitle : <Link to={`/${uri}`}>{repoTitle}</Link>}
-            <EuiText>
-              <h6>
-                <EuiTextColor color="subdued">{footer}</EuiTextColor>
-              </h6>
-            </EuiText>
+            {showStatus ? repoStatus : null}
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
             <EuiText color="subdued" size="s">
