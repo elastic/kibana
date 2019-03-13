@@ -3,15 +3,9 @@
 exports[`EditConditionLink renders for a condition using actual 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiText
@@ -31,7 +25,6 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     className="condition-edit-value-field"
-    component="div"
     grow={false}
   >
     <EuiFieldNumber
@@ -45,7 +38,6 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiLink
@@ -67,15 +59,9 @@ exports[`EditConditionLink renders for a condition using actual 1`] = `
 exports[`EditConditionLink renders for a condition using diff from typical 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiText
@@ -95,7 +81,6 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
   </EuiFlexItem>
   <EuiFlexItem
     className="condition-edit-value-field"
-    component="div"
     grow={false}
   >
     <EuiFieldNumber
@@ -109,7 +94,6 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiLink
@@ -131,15 +115,9 @@ exports[`EditConditionLink renders for a condition using diff from typical 1`] =
 exports[`EditConditionLink renders for a condition using typical 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiText
@@ -159,7 +137,6 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     className="condition-edit-value-field"
-    component="div"
     grow={false}
   >
     <EuiFieldNumber
@@ -173,7 +150,6 @@ exports[`EditConditionLink renders for a condition using typical 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiLink

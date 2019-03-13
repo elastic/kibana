@@ -18,7 +18,7 @@ import {
 } from '../actions/elements';
 import { restoreHistory } from '../actions/history';
 import { selectElement } from '../actions/transient';
-import { addPage, removePage, duplicatePage, gotoPage } from '../actions/pages';
+import { addPage, removePage, duplicatePage, setPage } from '../actions/pages';
 import { appReady } from '../actions/app';
 import { setWorkpad } from '../actions/workpad';
 import { getNodes, getPages, getSelectedPage, getSelectedElement } from '../selectors/workpad';
@@ -59,7 +59,7 @@ const aeroelasticConfiguration = {
 
 const isGroupId = id => id.startsWith(aeroelasticConfiguration.groupName);
 
-const pageChangerActions = [gotoPage.toString(), duplicatePage.toString(), addPage.toString()];
+const pageChangerActions = [duplicatePage.toString(), addPage.toString(), setPage.toString()];
 
 /**
  * elementToShape

@@ -3,20 +3,14 @@
 exports[`render 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
-  gutterSize="l"
   justifyContent="spaceBetween"
-  responsive={true}
   style={
     Object {
       "flexGrow": 0,
     }
   }
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiTitle
@@ -42,7 +36,6 @@ exports[`render 1`] = `
     </EuiTitle>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiText
