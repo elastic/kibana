@@ -33,7 +33,6 @@ import { DocumentMigrator, VersionedTransformer } from '../core/document_migrato
 export interface KbnServer {
   server: Server;
   version: string;
-  ready: () => Promise<any>;
   uiExports: {
     savedObjectMappings: any[];
     savedObjectMigrations: any;

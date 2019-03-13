@@ -91,7 +91,6 @@ function mockKbnServer({ configValues }: { configValues?: any } = {}) {
   const callCluster = jest.fn();
   const kbnServer: KbnServer = {
     version: '8.2.3',
-    ready: jest.fn(async () => undefined),
     uiExports: {
       savedObjectValidations: {},
       savedObjectMigrations: {},
