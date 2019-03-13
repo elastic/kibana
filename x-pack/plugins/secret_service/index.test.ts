@@ -24,14 +24,25 @@ describe('The SecretService', function TestSecretService() {
 
   it('should expose a method to encrypt data', async () => {
     const stubConfigGet = jest.fn();
+    const stubKeystore = {
+      has: jest.fn(),
+      get: jest.fn(),
+      add: jest.fn(),
+      exists: jest.fn(),
+      save: jest.fn(),
+    };
     let secret: string;
     const core = {
       expose: jest.fn(),
       log: jest.fn(),
+      logWithMetadata: jest.fn(),
       savedObjects: {
         addScopedSavedObjectsClientWrapperFactory: jest.fn(),
         getSavedObjectsRepository: jest.fn(() => {
           return {
+            errors: {
+              isConflictError: jest.fn(),
+            },
             create: jest.fn((type, attributes, { id }) => {
               secret = attributes.secret;
               return {
@@ -57,7 +68,7 @@ describe('The SecretService', function TestSecretService() {
           get: stubConfigGet,
         };
       },
-      Keystore,
+      keystore: stubKeystore,
       plugins: {
         elasticsearch: {
           getCluster: () => {
@@ -66,6 +77,7 @@ describe('The SecretService', function TestSecretService() {
         },
       },
     };
+
     stubConfigGet.mockReturnValueOnce('test-kibana-keystore');
     stubConfigGet.mockReturnValueOnce(false);
     stubConfigGet.mockReturnValue('bogusencryptionkey');

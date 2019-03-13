@@ -5,7 +5,7 @@
  */
 
 import crypto from 'crypto';
-import { join, resolve } from 'path';
+import { resolve } from 'path';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
@@ -40,8 +40,7 @@ export const secretService = (kibana: any) => {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
       const configKey = 'xpack.secret_service.secret';
-      const filePath = join(server.config().get('path.data'), 'kibana.keystore');
-      const keystore: any = new server.Keystore(filePath);
+      const { keystore } = server;
 
       if (!keystore.has(configKey)) {
         keystore.add(configKey, crypto.randomBytes(128).toString('hex'));

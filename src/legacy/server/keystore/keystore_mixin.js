@@ -18,7 +18,9 @@
  */
 
 import { Keystore } from './keystore';
+import { join } from 'path';
 
 export function keystoreMixin(_, server) {
-  server.decorate('server', 'Keystore', Keystore);
+  const keystorePath = join(server.config().get('path.data'), 'kibana.keystore');
+  server.decorate('server', 'keystore', new Keystore(keystorePath));
 }
