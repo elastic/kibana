@@ -40,9 +40,12 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [history, setWatchHistory] = useState([]);
   const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
-  const [itemDetail, setItemDetail] = useState<{ id?: string; details?: any; watchId?: string }>(
-    {}
-  );
+  const [itemDetail, setItemDetail] = useState<{
+    id?: string;
+    details?: any;
+    watchId?: string;
+    watchStatus?: { actionStatuses?: any };
+  }>({});
 
   const pagination = {
     initialPageSize: 10,
@@ -115,7 +118,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
 
   const showDetailFlyout = async (item: { id: string }) => {
     const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
-    // console.log(watchHistoryItemDetail);
+    console.log(watchHistoryItemDetail);
     setItemDetail(watchHistoryItemDetail);
     return setIsDetailVisible(true);
   };
@@ -128,6 +131,30 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   let flyout;
 
   if (isDetailVisible && Object.keys(itemDetail).length !== 0) {
+    const detailColumns = [
+      {
+        field: 'id',
+        name: i18n.translate('xpack.watcher.sections.watchList.watchActionStatusTable.id', {
+          defaultMessage: 'Name',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (id: string) => {
+          return <EuiText>{id}</EuiText>;
+        },
+      },
+      {
+        field: 'state',
+        name: i18n.translate('xpack.watcher.sections.watchList.watchActionStatusTable.id', {
+          defaultMessage: 'State',
+        }),
+        sortable: true,
+        truncateText: true,
+        render: (state: string) => {
+          return <EuiText>{state}</EuiText>;
+        },
+      },
+    ];
     flyout = (
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
@@ -139,7 +166,22 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
             <h2>{itemDetail.watchId}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-        {itemDetail.id}
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem>
+            {/* TODO[pcs] this `as any` kind of casting is a bit of a hack */}
+            <EuiInMemoryTable
+              items={(itemDetail.watchStatus as any).actionStatuses}
+              itemId="id"
+              columns={detailColumns}
+              message={
+                <FormattedMessage
+                  id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
+                  defaultMessage="No current status to show"
+                />
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyout>
     );
   }
