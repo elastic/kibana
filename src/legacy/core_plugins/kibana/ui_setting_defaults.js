@@ -1056,17 +1056,5 @@ export function getUiSettingDefaults() {
       }),
       category: ['accessibility'],
     },
-    'rollups:enableIndexPatterns': {
-      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
-        defaultMessage: 'Enable rollup index patterns',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
-        defaultMessage:
-          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
-          'visualizations based on rollup data. Refresh the page to apply the changes.',
-      }),
-      category: ['rollups'],
-    },
   };
 }
