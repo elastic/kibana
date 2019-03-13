@@ -19,9 +19,9 @@
 
 import { Readable } from 'stream';
 import { SavedObject } from '../service';
-import { resolveImportConflicts } from './resolve_import_conflicts';
+import { resolveImportErrors } from './resolve_import_errors';
 
-describe('resolveImportConflicts()', () => {
+describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
     {
       id: '1',
@@ -85,7 +85,7 @@ describe('resolveImportConflicts()', () => {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await resolveImportConflicts({
+    const result = await resolveImportErrors({
       readStream,
       objectLimit: 4,
       skips: [],
@@ -112,7 +112,7 @@ Object {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await resolveImportConflicts({
+    const result = await resolveImportErrors({
       readStream,
       objectLimit: 4,
       skips: [
@@ -150,7 +150,7 @@ Object {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await resolveImportConflicts({
+    const result = await resolveImportErrors({
       readStream,
       objectLimit: 4,
       skips: [],
@@ -206,7 +206,7 @@ Object {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await resolveImportConflicts({
+    const result = await resolveImportErrors({
       readStream,
       objectLimit: 4,
       skips: [],
