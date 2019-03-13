@@ -17,12 +17,5 @@
  * under the License.
  */
 
-/**
- *  Get the names of the types defined in the EsMappingsDsl
- *
- *  @param  {EsMappingsDsl} mappings
- *  @return {Array<string>}
- */
-export function getTypes(mappings) {
-  return Object.keys(mappings).filter(type => type !== '_default_');
-}
+export { getTypes, getProperty, getRootProperties, getRootPropertiesObjects } from './lib';
+export { FieldMapping, MappingMeta, MappingProperties, IndexMapping } from './types';
