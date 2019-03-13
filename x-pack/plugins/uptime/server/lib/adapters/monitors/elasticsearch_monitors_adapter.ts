@@ -491,7 +491,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             count,
             statusCode,
             timestamp,
-            name,
+            name: name === '' ? null : name,
           });
         });
       }

@@ -6,7 +6,8 @@
       "type": "io",
       "count": 748,
       "statusCode": null,
-      "timestamp": "2019-01-28T17:59:34.075Z"
+      "timestamp": "2019-01-28T17:59:34.075Z",
+      "name": null
     }
   ]
 }
