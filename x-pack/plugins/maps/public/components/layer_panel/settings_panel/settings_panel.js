@@ -14,13 +14,13 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
-  EuiCallOut,
-  EuiDualRange
+  EuiCallOut
 } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../shared/components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ValidatedDualRange } from 'ui/validated_range';
 
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 24;
@@ -88,12 +88,12 @@ export function SettingsPanel(props) {
                 defaultMessage: 'Min and max zoom'
               })}
             >
-              <EuiDualRange
+              <ValidatedDualRange
                 min={MIN_ZOOM}
                 max={MAX_ZOOM}
-                step={1}
                 value={[props.minZoom, props.maxZoom]}
                 showInput
+                showRange
                 onChange={onZoomChange}
               />
             </EuiFormRow>

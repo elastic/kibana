@@ -9,11 +9,12 @@ import PropTypes from 'prop-types';
 import {
   EuiFormRow,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiDualRange
+  EuiFlexItem
 } from '@elastic/eui';
+import { ValidatedDualRange } from 'ui/validated_range';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
+
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
 
@@ -35,12 +36,13 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
           }
           compressed
         >
-          <EuiDualRange
+          <ValidatedDualRange
             min={DEFAULT_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
             step={1}
             value={[minSize, maxSize]}
             showInput
+            showRange
             onChange={onSizeChange}
           />
         </EuiFormRow>
