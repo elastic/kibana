@@ -2,12 +2,7 @@
 
 exports[`StickyProperties should render entire component 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="none"
-  justifyContent="flexStart"
-  responsive={true}
   style={
     Object {
       "marginBottom": "-1em",
@@ -17,8 +12,6 @@ exports[`StickyProperties should render entire component 1`] = `
   wrap={true}
 >
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="0"
     style={
       Object {
@@ -47,8 +40,6 @@ exports[`StickyProperties should render entire component 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="1"
     style={
       Object {
@@ -83,8 +74,6 @@ exports[`StickyProperties should render entire component 1`] = `
     </EuiToolTip>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="2"
     style={
       Object {
@@ -113,8 +102,6 @@ exports[`StickyProperties should render entire component 1`] = `
     </PropertyValue>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="3"
     style={
       Object {
@@ -143,8 +130,6 @@ exports[`StickyProperties should render entire component 1`] = `
     </PropertyValue>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="4"
     style={
       Object {

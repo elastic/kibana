@@ -33,6 +33,7 @@ export default {
     '<rootDir>/src/setup_node_env',
     '<rootDir>/packages',
     '<rootDir>/src/test_utils',
+    '<rootDir>/test/functional/services/remote',
   ],
   collectCoverageFrom: [
     'packages/kbn-ui-framework/src/components/**/*.js',
@@ -52,7 +53,6 @@ export default {
     '<rootDir>/src/dev/jest/setup/babel_polyfill.js',
     '<rootDir>/src/dev/jest/setup/polyfills.js',
     '<rootDir>/src/dev/jest/setup/enzyme.js',
-    '<rootDir>/src/dev/jest/setup/throw_on_console_error.js',
   ],
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [

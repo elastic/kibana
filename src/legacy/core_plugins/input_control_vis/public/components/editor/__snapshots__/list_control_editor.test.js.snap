@@ -28,6 +28,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     }
     id="multiselect-0"
     key="multiselect"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -55,6 +56,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -90,6 +92,7 @@ exports[`renders dynamic options should display disabled dynamic options with to
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}
@@ -132,6 +135,7 @@ exports[`renders dynamic options should display dynamic options for string field
     }
     id="multiselect-0"
     key="multiselect"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -159,6 +163,7 @@ exports[`renders dynamic options should display dynamic options for string field
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -205,6 +210,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     }
     id="multiselect-0"
     key="multiselect"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -232,6 +238,7 @@ exports[`renders dynamic options should display size field when dynamic options 
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
+    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -267,6 +274,7 @@ exports[`renders dynamic options should display size field when dynamic options 
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}
@@ -316,6 +324,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -354,6 +363,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     id="multiselect-0"
     key="multiselect"
+    labelType="label"
   >
     <EuiSwitch
       checked={true}
@@ -381,6 +391,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
     }
     id="dynamicOptions-0"
     key="dynamicOptions"
+    labelType="label"
   >
     <EuiSwitch
       checked={false}
@@ -416,6 +427,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldNumber
       compressed={false}

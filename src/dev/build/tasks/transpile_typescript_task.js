@@ -54,8 +54,11 @@ export const TranspileTypescriptTask = {
     const projects = [
       typesProjectRepo.tsConfigPath,
       typesProjectBuild.tsConfigPath,
+      // Browser needs to be compiled before server code so that any shared code
+      // is compiled to the lowest common denominator (server's CommonJS format)
+      // which can be supported by both environments.
+      browserProject.tsConfigPath,
       defaultProject.tsConfigPath,
-      browserProject.tsConfigPath
     ];
 
     // compile each typescript config file

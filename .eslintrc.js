@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
@@ -208,7 +204,7 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
+        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*',
       ],
       rules: {

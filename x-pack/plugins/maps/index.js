@@ -6,29 +6,35 @@
 
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
-import ecommerceSavedObjects from './server/sample_data/ecommerce_saved_objects.json';
-import fligthsSavedObjects from './server/sample_data/flights_saved_objects.json';
-import webLogsSavedObjects from './server/sample_data/web_logs_saved_objects.json';
+import { getEcommerceSavedObjects } from './server/sample_data/ecommerce_saved_objects';
+import { getFlightsSavedObjects } from './server/sample_data/flights_saved_objects.js';
+import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_objects.js';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
+import { migrations } from './migrations';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
 import { initTelemetryCollection } from './server/maps_telemetry';
+import { i18n } from '@kbn/i18n';
+import {  APP_ID, APP_ICON, createMapPath } from './common/constants';
+import { getAppTitle } from './common/i18n_getters';
 
 export function maps(kibana) {
 
   return new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main', 'tile_map', 'task_manager'],
-    id: 'maps',
+    id: APP_ID,
     configPrefix: 'xpack.maps',
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       app: {
-        title: 'Maps',
-        description: 'Map application',
+        title: getAppTitle(),
+        description: i18n.translate('xpack.maps.appDescription', {
+          defaultMessage: 'Map application'
+        }),
         main: 'plugins/maps/index',
         icon: 'plugins/maps/icon.svg',
-        euiIconType: 'gisApp',
+        euiIconType: APP_ICON,
       },
       injectDefaultVars(server) {
         const serverConfig = server.config();
@@ -38,6 +44,9 @@ export function maps(kibana) {
           isEmsEnabled: mapConfig.includeElasticMapsService,
         };
       },
+      embeddableFactories: [
+        'plugins/maps/embeddable/map_embeddable_factory_provider'
+      ],
       inspectorViews: [
         'plugins/maps/inspector/views/register_views',
       ],
@@ -48,7 +57,8 @@ export function maps(kibana) {
           isNamespaceAgnostic: true
         }
       },
-      mappings
+      mappings,
+      migrations,
     },
     config(Joi) {
       return Joi.object({
@@ -81,9 +91,33 @@ export function maps(kibana) {
         .feature(this.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
-      server.addSavedObjectsToSampleDataset('ecommerce', ecommerceSavedObjects);
-      server.addSavedObjectsToSampleDataset('flights', fligthsSavedObjects);
-      server.addSavedObjectsToSampleDataset('logs', webLogsSavedObjects);
+      const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
+        defaultMessage: 'Map'
+      });
+      server.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+      server.addAppLinksToSampleDataset('ecommerce', [
+        {
+          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
+      server.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
+      server.addAppLinksToSampleDataset('flights', [
+        {
+          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
+      server.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
+      server.addAppLinksToSampleDataset('logs', [
+        {
+          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
       server.injectUiAppVars('maps', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
