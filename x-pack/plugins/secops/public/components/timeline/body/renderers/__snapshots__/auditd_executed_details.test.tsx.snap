@@ -1,0 +1,158 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuditExecutedDetails rendering it renders the default AuditExecutedDetails 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <pure(Component)
+    data={
+      Object {
+        "_id": "20",
+        "destination": null,
+        "event": Object {
+          "action": "executed",
+          "category": "audit-rule",
+          "dataset": null,
+          "id": null,
+          "module": "auditd",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "f896741c3b3b44bdb8e351a4ab6d2d7c",
+          "ip": Array [
+            "134.209.63.134",
+            "10.46.0.5",
+            "fe80::a0d9:16ff:fecf:e70b",
+          ],
+          "name": "zeek-sanfran",
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": Array [
+            "gpgconf",
+            "--list-dirs",
+            "agent-socket",
+          ],
+          "executable": "/usr/bin/gpgconf",
+          "name": "gpgconf",
+          "pid": 5402,
+          "ppid": 5401,
+          "title": "gpgconf --list-dirs agent-socket",
+          "working_directory": "/",
+        },
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-13T05:42:11.815Z",
+        "url": null,
+        "user": Object {
+          "name": "johnson",
+        },
+        "zeek": null,
+      }
+    }
+  />
+</Component>
+`;

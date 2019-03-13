@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { auditdExecutedRowRenderer } from './auditd_executed_row_renderer';
 import { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
@@ -13,6 +14,7 @@ import { suricataRowRenderer } from './suricata_row_renderer';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
+export * from './auditd_executed_row_renderer';
 export * from './column_renderer';
 export * from './row_renderer';
 export * from './empty_column_renderer';
@@ -24,7 +26,12 @@ export * from './suricata_row_renderer';
 export * from './unknown_column_renderer';
 export * from './zeek_row_renderer';
 
-export const rowRenderers: RowRenderer[] = [zeekRowRenderer, suricataRowRenderer, plainRowRenderer];
+export const rowRenderers: RowRenderer[] = [
+  zeekRowRenderer,
+  suricataRowRenderer,
+  auditdExecutedRowRenderer,
+  plainRowRenderer,
+];
 
 export const columnRenderers: ColumnRenderer[] = [
   plainColumnRenderer,

@@ -288,6 +288,8 @@ export interface Ecs {
   timestamp?: Date | null;
 
   user?: UserEcsFields | null;
+
+  process?: ProcessEcsFields | null;
 }
 
 export interface DestinationEcsFields {
@@ -520,6 +522,30 @@ export interface UrlEcsFields {
   password?: string | null;
 }
 
+export interface ProcessEcsFields {
+  pid?: number | null;
+
+  name?: string | null;
+
+  ppid?: number | null;
+
+  args?: (string | null)[] | null;
+
+  executable?: string | null;
+
+  title?: string | null;
+
+  thread?: Thread | null;
+
+  working_directory?: string | null;
+}
+
+export interface Thread {
+  id?: number | null;
+
+  start?: string | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -606,30 +632,6 @@ export interface UncommonProcessItem {
   host: HostEcsFields[];
 
   user?: UserEcsFields | null;
-}
-
-export interface ProcessEcsFields {
-  pid?: number | null;
-
-  name?: string | null;
-
-  ppid?: number | null;
-
-  args?: (string | null)[] | null;
-
-  executable?: string | null;
-
-  title?: string | null;
-
-  thread?: Thread | null;
-
-  working_directory?: string | null;
-}
-
-export interface Thread {
-  id?: number | null;
-
-  start?: string | null;
 }
 
 export interface SayMyName {
@@ -1567,6 +1569,8 @@ export namespace EcsResolvers {
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
+
+    process?: ProcessResolver<ProcessEcsFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = Ecs, Context = SecOpsContext> = Resolver<
@@ -1636,6 +1640,11 @@ export namespace EcsResolvers {
   >;
   export type UserResolver<
     R = UserEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ProcessResolver<
+    R = ProcessEcsFields | null,
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -2408,6 +2417,86 @@ export namespace UrlEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace ProcessEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = ProcessEcsFields> {
+    pid?: PidResolver<number | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    ppid?: PpidResolver<number | null, TypeParent, Context>;
+
+    args?: ArgsResolver<(string | null)[] | null, TypeParent, Context>;
+
+    executable?: ExecutableResolver<string | null, TypeParent, Context>;
+
+    title?: TitleResolver<string | null, TypeParent, Context>;
+
+    thread?: ThreadResolver<Thread | null, TypeParent, Context>;
+
+    working_directory?: WorkingDirectoryResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PidResolver<
+    R = number | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PpidResolver<
+    R = number | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ArgsResolver<
+    R = (string | null)[] | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ExecutableResolver<
+    R = string | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TitleResolver<
+    R = string | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ThreadResolver<
+    R = Thread | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type WorkingDirectoryResolver<
+    R = string | null,
+    Parent = ProcessEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ThreadResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = Thread> {
+    id?: IdResolver<number | null, TypeParent, Context>;
+
+    start?: StartResolver<string | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = number | null, Parent = Thread, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type StartResolver<R = string | null, Parent = Thread, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
 export namespace HostsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = HostsData> {
     edges?: EdgesResolver<HostsEdges[], TypeParent, Context>;
@@ -2694,86 +2783,6 @@ export namespace UncommonProcessItemResolvers {
     Parent = UncommonProcessItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace ProcessEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = ProcessEcsFields> {
-    pid?: PidResolver<number | null, TypeParent, Context>;
-
-    name?: NameResolver<string | null, TypeParent, Context>;
-
-    ppid?: PpidResolver<number | null, TypeParent, Context>;
-
-    args?: ArgsResolver<(string | null)[] | null, TypeParent, Context>;
-
-    executable?: ExecutableResolver<string | null, TypeParent, Context>;
-
-    title?: TitleResolver<string | null, TypeParent, Context>;
-
-    thread?: ThreadResolver<Thread | null, TypeParent, Context>;
-
-    working_directory?: WorkingDirectoryResolver<string | null, TypeParent, Context>;
-  }
-
-  export type PidResolver<
-    R = number | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type NameResolver<
-    R = string | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type PpidResolver<
-    R = number | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type ArgsResolver<
-    R = (string | null)[] | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type ExecutableResolver<
-    R = string | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type TitleResolver<
-    R = string | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type ThreadResolver<
-    R = Thread | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type WorkingDirectoryResolver<
-    R = string | null,
-    Parent = ProcessEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace ThreadResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = Thread> {
-    id?: IdResolver<number | null, TypeParent, Context>;
-
-    start?: StartResolver<string | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<R = number | null, Parent = Thread, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type StartResolver<R = string | null, Parent = Thread, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
 }
 
 export namespace SayMyNameResolvers {

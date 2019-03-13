@@ -259,6 +259,8 @@ export interface Ecs {
   timestamp?: Date | null;
 
   user?: UserEcsFields | null;
+
+  process?: ProcessEcsFields | null;
 }
 
 export interface DestinationEcsFields {
@@ -491,6 +493,30 @@ export interface UrlEcsFields {
   password?: string | null;
 }
 
+export interface ProcessEcsFields {
+  pid?: number | null;
+
+  name?: string | null;
+
+  ppid?: number | null;
+
+  args?: (string | null)[] | null;
+
+  executable?: string | null;
+
+  title?: string | null;
+
+  thread?: Thread | null;
+
+  working_directory?: string | null;
+}
+
+export interface Thread {
+  id?: number | null;
+
+  start?: string | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -577,30 +603,6 @@ export interface UncommonProcessItem {
   host: HostEcsFields[];
 
   user?: UserEcsFields | null;
-}
-
-export interface ProcessEcsFields {
-  pid?: number | null;
-
-  name?: string | null;
-
-  ppid?: number | null;
-
-  args?: (string | null)[] | null;
-
-  executable?: string | null;
-
-  title?: string | null;
-
-  thread?: Thread | null;
-
-  working_directory?: string | null;
-}
-
-export interface Thread {
-  id?: number | null;
-
-  start?: string | null;
 }
 
 export interface SayMyName {
@@ -1576,6 +1578,10 @@ export namespace GetTimelineQuery {
 
     url?: Url | null;
 
+    user?: User | null;
+
+    process?: Process | null;
+
     zeek?: Zeek | null;
   };
 
@@ -1713,6 +1719,30 @@ export namespace GetTimelineQuery {
     username?: string | null;
 
     password?: string | null;
+  };
+
+  export type User = {
+    __typename?: 'UserEcsFields';
+
+    name?: string | null;
+  };
+
+  export type Process = {
+    __typename?: 'ProcessEcsFields';
+
+    pid?: number | null;
+
+    name?: string | null;
+
+    ppid?: number | null;
+
+    args?: (string | null)[] | null;
+
+    executable?: string | null;
+
+    title?: string | null;
+
+    working_directory?: string | null;
   };
 
   export type Zeek = {

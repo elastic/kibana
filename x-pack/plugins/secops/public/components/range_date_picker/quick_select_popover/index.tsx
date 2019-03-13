@@ -78,7 +78,7 @@ export class QuickSelectPopover extends React.PureComponent<Props, State> {
         id="QuickSelectPopover"
         button={quickSelectButton}
         isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover.bind(this)}
+        closePopover={() => this.closePopover()}
         anchorPosition="downLeft"
         zIndex={1001}
       >

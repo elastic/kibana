@@ -176,4 +176,6 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...suricataFieldsMap },
   ...{ ...zeekFieldsMap },
   ...{ ...httpFieldsMap },
+  ...{ ...userFieldsMap },
+  ...{ ...processFieldsMap },
 };
