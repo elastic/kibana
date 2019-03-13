@@ -29,7 +29,7 @@ export const ExplorerNoInfluencersFound = ({ swimlaneViewByFieldName, showFilter
         {showFilterMessage === true && (
           <FormattedMessage
             id="xpack.ml.explorer.noInfluencersFoundTitleFilterMessage"
-            defaultMessage="{swimlaneViewByFieldName} influencers not applicable for given filter"
+            defaultMessage="No {swimlaneViewByFieldName} influencers found for specified filter"
             values={{ swimlaneViewByFieldName }}
           />
         )}
