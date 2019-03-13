@@ -18,7 +18,7 @@ function getAllFetchParams(searchRequests, Promise) {
   });
 }
 
-function serializeAllFetchParams(fetchParams, searchRequests) {
+async function serializeAllFetchParams(fetchParams, searchRequests) {
   const searchRequestsWithFetchParams = [];
   const failedSearchRequests = [];
 
