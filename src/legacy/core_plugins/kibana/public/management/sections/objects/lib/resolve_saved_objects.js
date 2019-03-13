@@ -239,13 +239,14 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
       if (error instanceof SavedObjectNotFound) {
         if (error.savedObjectType === 'search') {
           failedImports.push({ obj, error });
-        }
-        if (error.savedObjectType === 'index-pattern') {
+        } else if (error.savedObjectType === 'index-pattern') {
           if (obj.savedSearchId) {
             conflictedSavedObjectsLinkedToSavedSearches.push(obj);
           } else {
             conflictedIndexPatterns.push({ obj, doc: otherDoc });
           }
+        } else {
+          failedImports.push({ obj, error });
         }
       } else {
         failedImports.push({ obj, error });
