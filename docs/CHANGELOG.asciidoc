@@ -102,6 +102,7 @@ Canvas::
 * Provides a valid `axisconfig` position default {pull}32335[#32335]
 Kibana App::
 * Removes the use of 's' regex flag in {kib} query language {pull}31292[#31292]
+* Fixes vislib legend filters {pull}29592[#29592]
 Machine Learning::
 * Sets default number of shards to 1 when creating a new index for File data visualizer {pull}31567[#31567]
 * Adds missing error handling to annotations request {pull}32384[#32384]
