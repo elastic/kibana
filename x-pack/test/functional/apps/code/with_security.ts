@@ -17,11 +17,8 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
   const codeAdmin = 'codeAdmin';
   const codeUser = 'codeUser';
   const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
-  const manageButtonSelectors = [
-    'settingsRepositoryButton',
-    'indexRepositoryButton',
-    'deleteRepositoryButton',
-  ];
+  const manageButtonSelectors = ['indexRepositoryButton', 'deleteRepositoryButton'];
+  const log = getService('log');
 
   describe('with security enabled:', () => {
     before(async () => {
@@ -89,9 +86,11 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
         for (const buttonSelector of manageButtonSelectors) {
           const buttons = await testSubjects.findAll(buttonSelector);
           expect(buttons).to.have.length(1);
+          log.debug(`button ${buttonSelector} found.`);
         }
         const importButton = await testSubjects.findAll('newProjectButton');
         expect(importButton).to.have.length(1);
+        log.debug(`button newProjectButton found.`);
       });
 
       await login(codeUser);

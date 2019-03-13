@@ -93,14 +93,15 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
     });
 
     describe('handles table function', () => {
-      const params = { foo: 'bar' };
       it('without splits or buckets', () => {
+        const params = { foo: 'bar' };
         const schemas = { metric: [0, 1] };
         const actual = buildPipelineVisFunction.table({ params }, schemas);
         expect(actual).toMatchSnapshot();
       });
 
       it('with splits', () => {
+        const params = { foo: 'bar' };
         const schemas = {
           metric: [0],
           split_row: [1, 2],
@@ -110,10 +111,37 @@ describe('visualize loader pipeline helpers: build pipeline', () => {
       });
 
       it('with splits and buckets', () => {
+        const params = { foo: 'bar' };
         const schemas = {
           metric: [0, 1],
           split_row: [2, 4],
-          bucket: [3]
+          bucket: [3],
+        };
+        const actual = buildPipelineVisFunction.table({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
+      it('with showPartialRows=true and showMetricsAtAllLevels=true', () => {
+        const params = {
+          showMetricsAtAllLevels: true,
+          showPartialRows: true,
+        };
+        const schemas = {
+          metric: [1, 2, 4, 5],
+          bucket: [0, 3],
+        };
+        const actual = buildPipelineVisFunction.table({ params }, schemas);
+        expect(actual).toMatchSnapshot();
+      });
+
+      it('with showPartialRows=true and showMetricsAtAllLevels=false', () => {
+        const params = {
+          showMetricsAtAllLevels: false,
+          showPartialRows: true,
+        };
+        const schemas = {
+          metric: [1, 2, 4, 5],
+          bucket: [0, 3],
         };
         const actual = buildPipelineVisFunction.table({ params }, schemas);
         expect(actual).toMatchSnapshot();

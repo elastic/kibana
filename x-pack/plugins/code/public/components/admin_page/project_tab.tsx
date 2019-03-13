@@ -134,6 +134,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
   public submitImportProject = () => {
     this.props.importRepo(this.state.repoURL);
+    this.setState({ repoURL: '' });
   };
 
   public renderImportModal = () => {
@@ -188,6 +189,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         openSettings={this.openSettingModal}
         key={repo.uri}
         project={repo}
+        showStatus={true}
         status={status[repo.uri]}
         enableManagement={isAdmin}
       />

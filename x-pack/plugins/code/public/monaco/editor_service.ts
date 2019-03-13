@@ -55,8 +55,8 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
       if (input.options && input.options.selection) {
         const { startColumn, startLineNumber } = input.options.selection;
         const url = uri + `!L${startLineNumber}:${startColumn}`;
-        const lastPath = history.location.pathname;
-        if (lastPath === url) {
+        const currentPath = window.location.hash.substring(1);
+        if (currentPath === url) {
           this.helper!.revealPosition(startLineNumber, startColumn);
         } else {
           history.push(url);

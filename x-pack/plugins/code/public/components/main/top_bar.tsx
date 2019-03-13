@@ -60,9 +60,7 @@ export class TopBar extends React.Component<Props, { value: string }> {
               <Breadcrumb routeParams={this.props.routeParams} />
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ marginRight: '-.5rem' }}>
-            {this.props.buttons}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{this.props.buttons}</EuiFlexItem>
         </EuiFlexGroup>
       </div>
     );

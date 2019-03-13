@@ -29,6 +29,7 @@ import {
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
 import { RootState } from '../reducers';
+import { getPathOfTree } from '../reducers/file';
 import { fileSelector, getTree, lastRequestPathSelector, refUrlSelector } from '../selectors';
 import { history } from '../utils/url';
 import { mainRoutePattern } from './patterns';
@@ -174,7 +175,7 @@ function* handleMainRouteChange(action: Action<Match>) {
       uri: repoUri,
       revision,
       path: file || '',
-      parents: tree.children == null,
+      parents: getPathOfTree(tree, (file || '').split('/')) === null,
       isDir: pathType === PathTypes.tree,
     })
   );

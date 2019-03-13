@@ -9,6 +9,7 @@ import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
+import chrome from 'ui/chrome';
 import Url from 'url';
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -65,6 +66,13 @@ class SearchPage extends React.PureComponent<Props, State> {
   public state = {
     uri: '',
   };
+  public componentDidMount() {
+    chrome.breadcrumbs.push({ text: `Search` });
+  }
+
+  public componentWillUnmount() {
+    chrome.breadcrumbs.pop();
+  }
 
   public onLanguageFilterToggled = (lang: string) => {
     const { languages, repositories, query, page } = this.props;
@@ -147,7 +155,12 @@ class SearchPage extends React.PureComponent<Props, State> {
         repos &&
         repos.map((repo: any) => (
           <EuiFlexItem key={repo.uri}>
-            <ProjectItem key={repo.uri} project={repo} enableManagement={false} />
+            <ProjectItem
+              key={repo.uri}
+              project={repo}
+              showStatus={false}
+              enableManagement={false}
+            />
           </EuiFlexItem>
         ));
       const to = from + repos.length;

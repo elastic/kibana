@@ -21,3 +21,14 @@
   left: 0;
   height: 29px;
 }
+
+@include euiBreakpoint('xs','s') {
+  .codeFileTree--container {
+    margin-left: -$euiSizeXL;
+    margin-top: -$euiSizeL;
+
+    .euiSideNav__mobileToggle {
+      display: none;
+    }
+  }
+}

@@ -239,7 +239,7 @@ export class CodeFileTree extends React.Component<Props> {
         items: (this.props.node!.children || []).map(this.treeToItems),
       },
     ];
-    return this.props.node && <EuiSideNav items={items} />;
+    return this.props.node && <EuiSideNav items={items} isOpenOnMobile={true} />;
   }
 
   private isPathOpen(path: string) {

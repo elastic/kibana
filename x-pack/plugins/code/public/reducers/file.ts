@@ -91,25 +91,16 @@ function mergeNode(a: FileTree, b: FileTree): FileTree {
   };
 }
 
-function mergeTree(draft: FileState, tree: FileTree, path: string) {
-  const pathSegments = path.split('/');
-  let current = draft.tree;
-  const node = tree;
-  if (path && current.children != null) {
-    const pLastIndex = pathSegments.length - 1;
-    pathSegments.forEach((p, pidx) => {
-      const idx = current.children!.findIndex(child => child.name === p);
-      if (idx >= 0) {
-        if (pidx === pLastIndex) {
-          current.children![idx!] = mergeNode(current.children![idx!], node);
-        }
-        current = current.children![idx];
-      }
-    });
-  } else {
-    // it's root
-    draft.tree = tree;
+export function getPathOfTree(tree: FileTree, paths: string[]) {
+  let child: FileTree | undefined = tree;
+  for (const p of paths) {
+    if (child && child.children) {
+      child = child.children.find(c => c.name === p);
+    } else {
+      return null;
+    }
   }
+  return child;
 }
 
 export const file = handleActions(
@@ -117,13 +108,30 @@ export const file = handleActions(
     [String(fetchRepoTree)]: (state: FileState, action: any) =>
       produce(state, draft => {
         draft.currentPath = action.payload.path;
-        draft.loading = true;
+        if (action.payload.parents) {
+          draft.loading = true;
+        }
       }),
     [String(fetchRepoTreeSuccess)]: (state: FileState, action: Action<RepoTreePayload>) =>
       produce<FileState>(state, (draft: FileState) => {
         draft.loading = false;
-        const { tree, path } = action.payload!;
-        mergeTree(draft, tree, path);
+        const { tree, path, withParents } = action.payload!;
+        if (withParents) {
+          draft.tree = mergeNode(draft.tree, tree);
+        } else {
+          const parentsPath = path.split('/');
+          const lastPath = parentsPath.pop();
+          const parent = getPathOfTree(draft.tree, parentsPath);
+          if (parent) {
+            parent.children = parent.children || [];
+            const idx = parent.children.findIndex(c => c.name === lastPath);
+            if (idx >= 0) {
+              parent.children[idx] = tree;
+            } else {
+              parent.children.push(tree);
+            }
+          }
+        }
       }),
     [String(resetRepoTree)]: (state: FileState) =>
       produce<FileState>(state, (draft: FileState) => {

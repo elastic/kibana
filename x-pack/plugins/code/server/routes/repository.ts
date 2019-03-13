@@ -9,7 +9,7 @@ import Boom from 'boom';
 import { Server } from 'hapi';
 import { isValidGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
-import { RepositoryConfig } from '../../model';
+import { RepositoryConfig, RepositoryUri } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
 import { Logger } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
@@ -151,14 +151,13 @@ export function repositoryRoute(
         try {
           gitStatus = await repoObjectClient.getRepositoryGitStatus(repoUri);
         } catch (error) {
-          log.error(`Get repository git status ${repoUri} error: ${error}`);
+          log.debug(`Get repository git status ${repoUri} error: ${error}`);
         }
 
         let indexStatus = null;
         try {
           indexStatus = await repoObjectClient.getRepositoryLspIndexStatus(repoUri);
         } catch (error) {
-          // index status won't exist if during clone, so suppress the error log to debug level.
           log.debug(`Get repository index status ${repoUri} error: ${error}`);
         }
 
@@ -166,7 +165,6 @@ export function repositoryRoute(
         try {
           deleteStatus = await repoObjectClient.getRepositoryDeleteStatus(repoUri);
         } catch (error) {
-          // delete status is not always there, so suppress the error log to debug level.
           log.debug(`Get repository delete status ${repoUri} error: ${error}`);
         }
         return {
@@ -235,32 +233,24 @@ export function repositoryRoute(
     method: 'PUT',
     async handler(req, h) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
-      const repoUrl: string = config.uri;
-
+      const repoUri: RepositoryUri = config.uri;
       const log = new Logger(req.server);
-
-      // Reject the request if the url is an invalid git url.
-      if (!isValidGitUrl(repoUrl)) {
-        return Boom.badRequest(`Invalid git url: ${repoUrl}`);
-      }
-
-      const repo = RepositoryUtils.buildRepository(repoUrl);
       const repoObjectClient = new RepositoryObjectClient(new EsClientWithRequest(req));
 
       try {
         // Check if the repository exists
-        await repoObjectClient.getRepository(repo.uri);
+        await repoObjectClient.getRepository(repoUri);
       } catch (error) {
-        return Boom.badRequest(`Repository not existed for ${repoUrl}`);
+        return Boom.badRequest(`Repository not existed for ${repoUri}`);
       }
 
       try {
         // Persist to elasticsearch
-        await repoObjectClient.setRepositoryConfig(repo.uri, config);
-        repoConfigController.resetConfigCache(repo.uri);
+        await repoObjectClient.setRepositoryConfig(repoUri, config);
+        repoConfigController.resetConfigCache(repoUri);
         return {};
       } catch (error) {
-        const msg = `Issue repository clone request for ${repoUrl} error`;
+        const msg = `Update repository config for ${repoUri} error`;
         log.error(msg);
         log.error(error);
         return Boom.badRequest(msg);

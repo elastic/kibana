@@ -44,6 +44,9 @@ const ButtonsContainer = styled.div`
   & > *:first-child {
     margin-right: ${theme.euiSizeS};
   }
+  & .euiButton {
+    min-width: ${theme.euiSizeS};
+  }
 `;
 
 const EditorBlameContainer = styled.div`
@@ -182,7 +185,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
-            buttonSize="m"
+            buttonSize="s"
             color="primary"
             options={this.buttonOptions}
             type="single"
@@ -190,7 +193,7 @@ class CodeContent extends React.PureComponent<Props> {
             onChange={this.switchButton}
           />
           <EuiButtonGroup
-            buttonSize="m"
+            buttonSize="s"
             color="primary"
             options={this.rawButtonOptions}
             type="single"
@@ -203,7 +206,7 @@ class CodeContent extends React.PureComponent<Props> {
       return (
         <ButtonsContainer>
           <EuiButtonGroup
-            buttonSize="m"
+            buttonSize="s"
             color="primary"
             options={[
               {

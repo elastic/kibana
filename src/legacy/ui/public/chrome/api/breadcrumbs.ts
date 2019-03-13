@@ -78,6 +78,13 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
       filter(fn: (breadcrumb: Breadcrumb, i: number, all: Breadcrumb[]) => boolean) {
         newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.filter(fn));
       },
+
+      /**
+       * Remove last element of the breadcrumb
+       */
+      pop() {
+        newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.slice(0, -1));
+      },
     },
 
     /**

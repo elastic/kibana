@@ -46,6 +46,7 @@ class CodeImportProject extends React.PureComponent<
 
   public submitImportProject = () => {
     this.props.importRepo(this.state.value);
+    this.setState({ value: '' });
   };
 
   public render() {

@@ -41,27 +41,17 @@ class CodeMain extends React.Component<Props> {
   }
 
   public componentDidUpdate() {
+    chrome.breadcrumbs.pop();
     this.setBreadcrumbs();
   }
 
   public setBreadcrumbs() {
     const { org, repo } = this.props.match.params;
-    chrome.breadcrumbs.set([
-      {
-        text: 'Code',
-        href: '#/',
-      },
-      { text: `${org} → ${repo}` },
-    ]);
+    chrome.breadcrumbs.push({ text: `${org} → ${repo}` });
   }
 
   public componentWillUnmount() {
-    chrome.breadcrumbs.set([
-      {
-        text: 'Code',
-        href: '#/',
-      },
-    ]);
+    chrome.breadcrumbs.pop();
   }
 
   public render() {
