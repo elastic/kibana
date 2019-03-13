@@ -6,7 +6,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 
 import { UA_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
@@ -34,7 +34,7 @@ export class App extends Component {
     registerRouter(router);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     trackUserAction(UA_APP_LOAD);
   }
 
@@ -45,11 +45,13 @@ export class App extends Component {
 
   render() {
     return (
-      <Switch>
-        <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
-        <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
-        <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
-      </Switch>
+      <HashRouter>
+        <Switch>
+          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
+          <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
+          <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
+        </Switch>
+      </HashRouter>
     );
   }
 }
