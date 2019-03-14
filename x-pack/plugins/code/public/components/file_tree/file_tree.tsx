@@ -96,11 +96,23 @@ export class CodeFileTree extends React.Component<Props> {
     }
   };
 
+  public scrollIntoView(el: any) {
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const elemTop = rect.top;
+      const elemBottom = rect.bottom;
+      const isVisible = elemTop >= 0 && elemBottom <= window.innerHeight;
+      if (!isVisible) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      }
+    }
+  }
+
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
     const className = 'code-file-node';
     let bg = null;
     if (this.props.match.params.path === node.path) {
-      bg = <div className="code-full-width-file-node" />;
+      bg = <div ref={el => this.scrollIntoView(el)} className="code-full-width-file-node" />;
     }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
