@@ -16,12 +16,10 @@ See {heartbeat-ref}/heartbeat-configuration.html[Configure Heartbeat] for instru
 on configuring monitors to begin storing Uptime information in your cluster.
 
 [float]
-== Begin using Uptime
+== Uptime, Heartbeat, and Kibana
 For Uptime to work, it is important you use the same major versions of Heartbeat and Kibana.
-For example, version 6.7 of Kibana will expect an index of `heartbeat-6*`, while Kibana
-7.0 requires an index of `heartbeat-7*` (containing documents from Heartbeat 7.0).
-Kibana 7.0 does not support older versions of Heartbeat data because there are breaking
-changes in the schema mappings between the major versions.
+For example, version 6.7 of Kibana will expect an index of `heartbeat-6*`,
+while Kibana 7.0 requires an index of `heartbeat-7*` (containing documents from Heartbeat 7.0).
 
 --
 
