@@ -9,7 +9,7 @@
 import { once } from 'lodash';
 
 const callWithRequest = once((server) => {
-  const cluster = server.plugins.elasticsearch.createCluster('fileupload');
+  const cluster = server.plugins.elasticsearch.getCluster('data');
   return cluster.callWithRequest;
 });
 

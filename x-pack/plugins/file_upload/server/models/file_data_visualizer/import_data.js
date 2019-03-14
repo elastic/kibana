@@ -5,6 +5,7 @@
  */
 
 import { INDEX_META_DATA_CREATED_BY  } from '../../../common/constants/file_import';
+import uuid from 'uuid';
 
 export function importDataProvider(callWithRequest) {
   async function importData(id, index, settings, mappings, ingestPipeline, data) {
@@ -21,7 +22,7 @@ export function importDataProvider(callWithRequest) {
 
       if (id === undefined) {
         // first chunk of data, create the index and id to return
-        id = generateId();
+        id = uuid.v1();
 
         await createIndex(index, settings, mappings);
         createdIndex = index;
@@ -163,9 +164,4 @@ export function importDataProvider(callWithRequest) {
   return {
     importData,
   };
-}
-
-
-function generateId() {
-  return Math.random().toString(36).substr(2, 9);
 }

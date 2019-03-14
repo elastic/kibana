@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const MAX_BYTES = 104857600;
+export const MAX_BYTES = 10485760;
 
 // Value to use in the Elasticsearch index mapping meta data to identify the
 // index as having been created by the File Upload Plugin.
