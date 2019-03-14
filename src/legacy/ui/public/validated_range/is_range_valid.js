@@ -38,7 +38,7 @@ export function isRangeValid(value, min, max, allowEmptyRange) {
   let isValid = true;
   let errorMessage = '';
 
-  const bothMustBeSetErrorMessage =     errorMessage = i18n.translate('common.ui.dualRangeControl.mustSetBothErrorMessage', {
+  const bothMustBeSetErrorMessage = i18n.translate('common.ui.dualRangeControl.mustSetBothErrorMessage', {
     defaultMessage: 'Both lower and upper values must be set'
   });
   if (!allowEmptyRange && (!isLowerValueValid || !isUpperValueValid)) {
