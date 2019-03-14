@@ -41,10 +41,10 @@ export const InfrastructurePage = injectI18n(({ match, intl }: InfrastructurePag
           title: 'Snapshot',
           path: `${match.path}/snapshot`,
         },
-        {
-          title: 'Metrics explorer',
-          path: `${match.path}/metrics-explorer`,
-        },
+        // {
+        //   title: 'Metrics explorer',
+        //   path: `${match.path}/metrics-explorer`,
+        // },
       ]}
     />
 
