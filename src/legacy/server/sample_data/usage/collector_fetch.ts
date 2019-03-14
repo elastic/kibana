@@ -99,7 +99,6 @@ export function fetchProvider(index: string) {
       const dataDate = moment.utc(hit._source.updated_at);
 
       if (isSampleDataSetInstalled) {
-        // have it installed
         const { lastDate, lastSet } = getLast(
           dataSet,
           dataDate,
@@ -114,7 +113,6 @@ export function fetchProvider(index: string) {
           last_install_set: lastSet,
         };
       } else {
-        // uninstall
         const { lastDate, lastSet } = getLast(
           dataSet,
           dataDate,
