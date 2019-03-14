@@ -36,7 +36,6 @@ chrome.helpExtension.set(domElement => {
 const REACT_APP_ROOT_ID = 'react-apm-root';
 
 chrome.setRootTemplate(template);
-chrome.disableAutoAngularUrlEncodingFix();
 const store = configureStore();
 const checkForRoot = resolve => {
   const ready = !!document.getElementById(REACT_APP_ROOT_ID);
