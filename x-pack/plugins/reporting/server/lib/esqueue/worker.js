@@ -59,6 +59,9 @@ export class Worker extends events.EventEmitter {
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warn');
 
+    this._running = true;
+    this.debug(`Created worker for ${this.jobtype} jobs`);
+
     this._poller = new Poller({
       functionToPoll: () => {
         return this._processPendingJobs();
@@ -68,10 +71,7 @@ export class Worker extends events.EventEmitter {
       continuePollingOnError: true,
       pollFrequencyErrorMultiplier: opts.intervalErrorMultiplier,
     });
-
     this._startJobPolling();
-    this._running = true;
-    this.debug(`Created worker for ${this.jobtype} jobs`);
   }
 
   destroy() {
