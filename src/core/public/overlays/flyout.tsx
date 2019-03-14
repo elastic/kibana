@@ -19,8 +19,9 @@
 
 import React from 'react';
 
+import { Subject } from 'rxjs';
+
 import { EuiFlyout } from '@elastic/eui';
-import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 
@@ -48,15 +49,17 @@ function getOrCreateContainerElement() {
  * away your reference to this instance whenever you receive that event.
  * @extends EventEmitter
  */
-class FlyoutSession extends EventEmitter {
+class FlyoutSession {
   /**
-   * Binds the current flyout session to an Angular scope, meaning this flyout
-   * session will be closed as soon as the Angular scope gets destroyed.
-   * @param {object} scope - An angular scope object to bind to.
+   * A promise that will be resolved once this flytout session is closed,
+   * by the user or by closing it from the outside via valling {@link #close}.
    */
-  public bindToAngularScope(scope: ng.IScope): void {
-    const removeWatch = scope.$on('$destroy', () => this.close());
-    this.on('closed', () => removeWatch());
+  public readonly onClose: Promise<void>;
+
+  private closeSubject = new Subject<void>();
+
+  constructor() {
+    this.onClose = this.closeSubject.toPromise();
   }
 
   /**
@@ -70,7 +73,8 @@ class FlyoutSession extends EventEmitter {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
         ReactDOM.unmountComponentAtNode(container);
-        this.emit('closed');
+        this.closeSubject.next();
+        this.closeSubject.complete();
       }
     }
   }

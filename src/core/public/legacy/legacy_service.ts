@@ -25,6 +25,7 @@ import { HttpStart } from '../http';
 import { I18nStart } from '../i18n';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
+import { OverlayStart } from '../overlays';
 import { UiSettingsClient } from '../ui_settings';
 
 interface Deps {
@@ -36,6 +37,7 @@ interface Deps {
   basePath: BasePathStart;
   uiSettings: UiSettingsClient;
   chrome: ChromeStart;
+  overlay: OverlayStart;
 }
 
 export interface LegacyPlatformParams {

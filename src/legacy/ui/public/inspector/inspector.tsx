@@ -19,7 +19,8 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FlyoutSession, openFlyout } from 'ui/flyout';
+import { FlyoutSession } from '../../../../core/public/overlays';
+import { getNewPlatform } from '../new_platform';
 import { Adapters } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { viewRegistry } from './view_registry';
@@ -72,10 +73,14 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  return openFlyout(<InspectorPanel views={views} adapters={adapters} title={options.title} />, {
-    'data-test-subj': 'inspectorPanel',
-    closeButtonAriaLabel: closeButtonLabel,
-  });
+  // TODO: -!
+  return getNewPlatform().start.core!.overlay.openFlyout(
+    <InspectorPanel views={views} adapters={adapters} title={options.title} />,
+    {
+      'data-test-subj': 'inspectorPanel',
+      closeButtonAriaLabel: closeButtonLabel,
+    }
+  );
 }
 
 const Inspector = {

@@ -27,6 +27,7 @@ import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
+import { OverlayService } from './overlays';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -53,6 +54,7 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly overlay: OverlayService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly notificationsTargetDomElement: HTMLDivElement;
@@ -90,6 +92,7 @@ export class CoreSystem {
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.overlay = new OverlayService();
     this.chrome = new ChromeService({ browserSupportsCsp });
 
     this.legacyPlatformTargetDomElement = document.createElement('div');
@@ -113,6 +116,7 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start({ i18n });
       const http = this.http.start({ fatalErrors });
+      const overlay = this.overlay.start();
       const basePath = this.basePath.start({ injectedMetadata });
       const uiSettings = this.uiSettings.start({
         notifications,
@@ -134,6 +138,7 @@ export class CoreSystem {
         basePath,
         uiSettings,
         chrome,
+        overlay,
       });
 
       return { fatalErrors };

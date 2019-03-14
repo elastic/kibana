@@ -24,6 +24,7 @@ import { HttpStart } from '../../../../core/public/http';
 import { I18nStart } from '../../../../core/public/i18n';
 import { InjectedMetadataStart } from '../../../../core/public/injected_metadata';
 import { NotificationsStart } from '../../../../core/public/notifications';
+import { OverlayStart } from '../../../../core/public/overlays';
 import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
 interface CoreStart {
@@ -35,6 +36,7 @@ interface CoreStart {
   basePath: BasePathStart;
   uiSettings: UiSettingsClient;
   chrome: ChromeStart;
+  overlay: OverlayStart;
 }
 
 const runtimeContext = {
