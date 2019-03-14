@@ -97,7 +97,7 @@ interface Props {
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  customSubmitButton?: node;
+  customSubmitButton?: React.ReactNode;
 }
 
 interface State {
