@@ -25,7 +25,7 @@ if (!process.env.BABEL_CACHE_PATH) {
   process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../../optimize/.babelcache.json');
 }
 
-// paths that babel-register should ignore
+// paths that @babel/register should ignore
 var ignore = [
   /\/bower_components\//,
   /\/kbn-pm\/dist\//,

@@ -30,7 +30,7 @@ export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
  */
 
 // import global polyfills before everything else
-import 'babel-polyfill';
+import '@babel/polyfill';
 import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
