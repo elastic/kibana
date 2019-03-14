@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ApplitoolsProvider } from './applitools';
+import { ApplitoolsProvider } from './applitools/applitools';
 import { AppsMenuProvider } from './apps_menu';
 // @ts-ignore not TS yet
 import { BrowserProvider } from './browser';
