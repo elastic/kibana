@@ -91,7 +91,6 @@ export function openFlyout(
   flyoutChildren: React.ReactNode,
   flyoutProps: {
     closeButtonAriaLabel?: string;
-    onClose?: () => void;
     'data-test-subj'?: string;
   } = {}
 ): FlyoutSession {
@@ -101,16 +100,10 @@ export function openFlyout(
   }
   const container = getOrCreateContainerElement();
   const session = (activeSession = new FlyoutSession());
-  const onClose = () => {
-    if (flyoutProps.onClose) {
-      flyoutProps.onClose();
-    }
-    session.close();
-  };
 
   ReactDOM.render(
     <I18nContext>
-      <EuiFlyout {...flyoutProps} onClose={onClose}>
+      <EuiFlyout {...flyoutProps} onClose={() => session.close()}>
         {flyoutChildren}
       </EuiFlyout>
     </I18nContext>,
