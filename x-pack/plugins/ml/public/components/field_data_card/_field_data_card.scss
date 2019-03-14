@@ -1,44 +1,44 @@
 // SASSTODO: This entire sass file needs to be rewritten, using a color blind viz palette and proper vars.
-// This will need to be done in a more thorough cleanup. 
+// This will need to be done in a more thorough cleanup.
 
 .ml-field-data-card {
   width: 360px;
   height: 435px;
 
   .boolean {
-    background-color: #e6c220;
+    background-color: $euiColorVis5;
   }
 
   .date {
-    background-color: #f98510;
+    background-color: $euiColorVis7;
   }
 
   .document_count {
-    background-color: #db1374;
+    background-color: $euiColorVis2;
   }
 
   .geo_point {
-    background-color: #461a0a;
+    background-color: $euiColorVis8;
   }
 
   .ip {
-    background-color: #490092;
+    background-color: $euiColorVis3;
   }
 
   .keyword {
-    background-color: #00b3a4;
+    background-color: $euiColorVis0;
   }
 
   .number {
-    background-color: #3185fc;
+    background-color: $euiColorVis1;
   }
 
   .text {
-    background-color: #920000;
+    background-color: $euiColorVis9;
   }
 
   .type-other, .unknown {
-    background-color: #bfa180;
+    background-color: $euiColorVis6;
   }
 
   // Use euiPanel styling
@@ -110,12 +110,12 @@
 
       .x.axis path, .x.axis line {
         fill: none;
-        stroke: #cccccc;
+        stroke: $euiBorderColor;
         shape-rendering: crispEdges;
       }
 
       .area {
-        fill: #3185fc;
+        fill: $euiColorVis1;
       }
     }
 
@@ -134,12 +134,12 @@
     }
 
     .bar {
-      stroke: #ffffff;
+      stroke: $euiColorEmptyShade;
     }
 
     .axis path, .axis line {
       fill: none;
-      stroke: #cccccc;
+      stroke: $euiBorderColors;
       shape-rendering: crispEdges;
     }
   }

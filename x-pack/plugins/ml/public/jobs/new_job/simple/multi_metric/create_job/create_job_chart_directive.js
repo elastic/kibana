@@ -17,6 +17,7 @@ import moment from 'moment';
 
 import { TimeBuckets } from 'ui/time_buckets';
 import { drawLineChartDots, numTicksForDateFormat } from 'plugins/ml/util/chart_utils';
+import { euiColorForTheme, mlThemeColors } from 'plugins/ml/util/theme_colors';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
@@ -172,7 +173,7 @@ module.directive('mlMultiMetricJobChart', function () {
         .attr('y', 0)
         .attr('height', lineChartHeight)
         .attr('width', vizWidth)
-        .style('fill', '#FFFFFF');
+        .style('fill', euiColorForTheme('euiColorEmptyShade'));
 
       // Add border round plot area.
       lineChartGroup.append('rect')
@@ -180,7 +181,7 @@ module.directive('mlMultiMetricJobChart', function () {
         .attr('y', 0)
         .attr('height', lineChartHeight)
         .attr('width', vizWidth)
-        .style('stroke', '#cccccc')
+        .style('fill', euiColorForTheme('euiBorderColor'))
         .style('fill', 'none')
         .style('stroke-width', 1);
 
@@ -232,7 +233,7 @@ module.directive('mlMultiMetricJobChart', function () {
       // Set up the color scale to use for indicating score.
       const color = d3.scale.threshold()
         .domain([3, 25, 50, 75, 100])
-        .range(['#d2e9f7', '#8bc8fb', '#ffdd00', '#ff7e00', '#fe5050']);
+        .range(Object.values(mlThemeColors));
 
       swimlaneGroup.select('.swimlane-cells').remove();
 

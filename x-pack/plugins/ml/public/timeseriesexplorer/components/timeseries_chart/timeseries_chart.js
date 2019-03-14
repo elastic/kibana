@@ -76,12 +76,13 @@ const ZOOM_INTERVAL_OPTIONS = [
 // Set up the color scale to use for indicating score.
 const anomalyColorScale = d3.scale.threshold()
   .domain([3, 25, 50, 75, 100])
+  // These are lightened versions of variables.scss file in ml/public
   .range(['#d2e9f7', '#8bc8fb', '#ffdd00', '#ff7e00', '#fe5050']);
 
 // Create a gray-toned version of the color scale to use under the context chart mask.
 const anomalyGrayScale = d3.scale.threshold()
   .domain([3, 25, 50, 75, 100])
-  .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
+  .range(['#535966', '#0077CC', '#FEC514', '#E2543D', '#DD0A73']);
 
 function getSvgHeight() {
   return focusHeight + contextChartHeight + swimlaneHeight + chartSpacing + margin.top + margin.bottom;
@@ -1013,11 +1014,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
       .attr('x', 0)
       .attr('width', 10);
 
-    const topBorder = contextGroup.append('rect')
-      .attr('class', 'top-border')
-      .attr('y', -2)
-      .attr('height', contextChartLineTopMargin);
-
     // Draw the brush handles using SVG foreignObject elements.
     // Note these are not supported on IE11 and below, so will not appear in IE.
     const leftHandle = contextGroup.append('foreignObject')
@@ -1039,9 +1035,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
         mask.reveal(brushExtent);
         leftHandle.attr('x', contextXScale(brushExtent[0]) - 10);
         rightHandle.attr('x', contextXScale(brushExtent[1]) + 0);
-
-        topBorder.attr('x', contextXScale(brushExtent[0]) + 1);
-        topBorder.attr('width', contextXScale(brushExtent[1]) - contextXScale(brushExtent[0]) - 2);
       }
 
       setBrushVisibility(show);
@@ -1088,9 +1081,6 @@ const TimeseriesChartIntl = injectI18n(class TimeseriesChart extends React.Compo
 
       const brushHandles = d3.selectAll('.brush-handle-inner');
       brushHandles.style('visibility', visibility);
-
-      const topBorder = d3.selectAll('.top-border');
-      topBorder.style('visibility', visibility);
 
       const border = d3.selectAll('.chart-border-highlight');
       border.style('visibility', visibility);

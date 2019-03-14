@@ -2,10 +2,11 @@
 
 .fields-selection {
   .selection-list-container {
+    @include euiFontSizeXS;
+    @include euiScrollBar;
     max-height: 250px;
     overflow: auto;
     padding: $euiSizeXS $euiSizeS;
-    @include euiFontSizeXS;
     color: $euiColorDarkShade;
     background-color: $euiColorEmptyShade;
     background-image: none;

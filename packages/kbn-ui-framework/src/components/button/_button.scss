@@ -91,7 +91,7 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--primary {
-  color: $buttonDefaultTextColor;
+  color: chooseLightOrDarkText($buttonPrimaryBackgroundColor, #FFF, #000);
   background-color: $buttonPrimaryBackgroundColor;
 
   @include kuiButtonFocus {
@@ -99,7 +99,7 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
+    color: chooseLightOrDarkText($buttonPrimaryHoverBackgroundColor, #FFF, #000) !important /* 1 */;
     background-color: $buttonPrimaryHoverBackgroundColor;
   }
 }
@@ -108,7 +108,7 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--success {
-  color: $buttonDefaultTextColor;
+  color: chooseLightOrDarkText($buttonSuccessBackgroundColor, #FFF, #000);
   background-color: $buttonSuccessBackgroundColor;
 
   @include kuiButtonFocus {
@@ -116,7 +116,7 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
+    color: chooseLightOrDarkText($buttonSuccessHoverBackgroundColor, #FFF, #000) !important; /* 1 */
     background-color: $buttonSuccessHoverBackgroundColor;
   }
 }
@@ -144,7 +144,7 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--warning {
-  color: $buttonDefaultTextColor;
+  color: chooseLightOrDarkText($buttonWarningBackgroundColor, #FFF, #000);
   background-color: $buttonWarningBackgroundColor;
 
   @include kuiButtonFocus {
@@ -153,7 +153,7 @@
   }
 
   @include kuiButtonHoverAndActive {
-    color: $buttonDefaultTextColor !important; /* 1 */
+    color: chooseLightOrDarkText($buttonWarningHoverBackgroundColor, #FFF, #000) !important; /* 1 */
     background-color: $buttonWarningHoverBackgroundColor;
   }
 

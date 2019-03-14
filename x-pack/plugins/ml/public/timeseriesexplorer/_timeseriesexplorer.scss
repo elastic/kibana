@@ -113,8 +113,8 @@
     }
 
     .chart-border-highlight {
-      stroke: $euiColorDarkShade;
-      stroke-width: 2;
+      stroke: $euiBorderColor;
+      stroke-width: 1;
     }
     .chart-border-highlight:hover {
       opacity: 1;
@@ -125,13 +125,13 @@
     }
 
     .area.bounds {
-      fill: rgba(50, 167, 194, 0.25); // Needs variable
+      fill: transparentize($euiColorSecondary, .8); // Needs variable
       pointer-events: none;
     }
 
     .values-line {
       fill: none;
-      stroke: #32a7c2; // Needs variable
+      stroke: $euiColorSecondary; // Needs variable
       stroke-width: 2;
       pointer-events: none;
     }
@@ -142,7 +142,7 @@
     }
 
     .values-dots circle {
-      fill: #32a7c2; // Needs variable
+      fill: $euiColorSecondary; // Needs variable
       stroke-width: 0;
     }
 
@@ -158,13 +158,13 @@
     .metric-value {
       opacity: 1;
       fill: transparent;
-      stroke: #32a7c2;
+      stroke: $euiColorSecondary;
       stroke-width: 0px;
     }
 
     .anomaly-marker {
       stroke-width: 1px;
-      stroke: #aaaaaa; // Needs variable
+      stroke: $euiColorEmptyShade; // Needs variable
     }
 
     .anomaly-marker.critical {
@@ -184,7 +184,7 @@
     }
 
     .anomaly-marker.low {
-      fill: #d2e9f7; // Needs variable
+      fill: $mlColorUnknown; // Needs variable
     }
 
     .metric-value:hover,
@@ -192,7 +192,7 @@
     .anomaly-marker.highlighted {
       stroke-width: 6px;
       stroke-opacity: 0.65;
-      stroke: #32a7c2;
+      stroke: $euiColorSecondary;
     }
 
     rect.scheduled-event-marker {
@@ -218,7 +218,7 @@
         }
 
         rect {
-          fill: $euiColorLightestShade;
+          fill: $euiColorEmptyShade;
         }
       }
 
@@ -250,7 +250,7 @@
       }
 
       .area.context {
-        fill: rgba(50, 167, 194, 0.25); // Needs variable
+        fill: transparentize($euiColorSecondary, .8); // Needs variable
       }
 
       .values-line {
@@ -263,20 +263,23 @@
 
       .mask {
         polygon {
-          fill-opacity: 0.1;
+          fill: $euiColorEmptyShade;
+          fill-opacity: .2;
         }
 
+        // Color of the graphing bound when not selected
         .area.bounds {
-          fill: #d6d6d6;
+          fill: $euiColorLightestShade;
         }
 
+        // Color of the line drawn within the bounds when not selected
         .values-line {
           stroke-width: 1;
-          stroke: #b8b8b8;
+          stroke: $euiColorLightShade;
         }
 
         .values-dots circle {
-          fill: #b8b8b8;
+          fill: $euiColorDarkShade;
           stroke-width: 0;
         }
       }
@@ -292,14 +295,13 @@
     }
 
     .brush .extent {
-      stroke: #aaaaaa;
       fill-opacity: 0;
       shape-rendering: crispEdges;
     }
 
     .brush .extent {
-      stroke: $euiColorDarkShade;
-      stroke-width: 2;
+      stroke: $euiColorSecondary;
+      stroke-width: 1;
       cursor: move;
     }
 
@@ -307,9 +309,6 @@
       opacity: 1;
     }
 
-    .top-border {
-      fill: $euiColorEmptyShade;
-    }
 
     foreignObject.brush-handle {
       pointer-events: none;
@@ -317,8 +316,9 @@
     }
 
     div.brush-handle-inner {
-      border: 1px solid $euiColorDarkShade;
-      background-color: $euiColorLightShade;
+      border: 1px solid $euiColorSecondary;
+      background-color: $euiColorSecondary;
+      color: chooseLightOrDarkText($euiColorSecondary, $euiColorGhost, #000);
       height: 70px;
       width: 10px;
       text-align: center;
@@ -340,7 +340,7 @@
     rect.brush-handle {
       stroke-width: 1;
       stroke: $euiColorDarkShade;
-      fill: $euiColorLightShade;
+      fill: $euiColorDarkShade;
       pointer-events: none;
     }
 

@@ -56,10 +56,6 @@
  * 4. Fix an IE bug which causes the last child to overflow the container.
  * 5. Fixing this bug means we now need to align the children to the right.
  */
-:focus:not([class^="eui"]) {
-  -webkit-animation: 350ms cubic-bezier(0.694, 0.0482, 0.335, 1) 1 normal forwards focusRingAnimate;
-          animation: 350ms cubic-bezier(0.694, 0.0482, 0.335, 1) 1 normal forwards focusRingAnimate; }
-
 /**
  * 1. Required for IE11.
  */
@@ -226,7 +222,7 @@ main {
  * 1. Override Bootstrap.
  */
 .kuiButton--primary {
-  color: #FFF;
+  color: #000;
   background-color: #1BA9F5; }
   .kuiButton--primary:not(a):enabled:focus {
     color: #FFF; }
@@ -234,29 +230,25 @@ main {
     /* 1 */
     color: #FFF; }
   .kuiButton--primary:enabled:hover {
-    color: #FFF !important;
-    /* 1 */
+    color: #000 !important;
     background-color: #098dd4; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
+    color: #000 !important;
     background-color: #098dd4; }
   .kuiButton--primary:enabled:active {
-    color: #FFF !important;
-    /* 1 */
+    color: #000 !important;
     background-color: #098dd4; }
   a.kuiButton--primary:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFF !important;
-    /* 1 */
+    color: #000 !important;
     background-color: #098dd4; }
 
 /**
  * 1. Override Bootstrap.
  */
 .kuiButton--success {
-  color: #FFF;
+  color: #000;
   background-color: #7DE2D1; }
   .kuiButton--success:not(a):enabled:focus {
     color: #FFF; }
@@ -264,21 +256,21 @@ main {
     /* 1 */
     color: #FFF; }
   .kuiButton--success:enabled:hover {
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #53d9c2; }
   a.kuiButton--success:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #53d9c2; }
   .kuiButton--success:enabled:active {
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #53d9c2; }
   a.kuiButton--success:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #53d9c2; }
 
@@ -330,7 +322,7 @@ main {
  * 1. Override Bootstrap.
  */
 .kuiButton--warning {
-  color: #FFF;
+  color: #000;
   background-color: #FFCE7A; }
   .kuiButton--warning:not(a):enabled:focus {
     z-index: 1;
@@ -352,21 +344,21 @@ main {
     /* 3 */
     color: #FFF; }
   .kuiButton--warning:enabled:hover {
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):hover {
     /* 1 */
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #ffbb47; }
   .kuiButton--warning:enabled:active {
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #ffbb47; }
   a.kuiButton--warning:not(.kuiButton-isDisabled):active {
     /* 1 */
-    color: #FFF !important;
+    color: #000 !important;
     /* 1 */
     background-color: #ffbb47; }
   .kuiButton--warning:disabled {

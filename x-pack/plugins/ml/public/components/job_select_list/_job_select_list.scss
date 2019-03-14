@@ -4,8 +4,8 @@
 // SASSTODO: EXTREMELY DANGEROUS OVERWRITE
 // Little worried about touching it now
 navbar {
-  padding: 10px;
-  background-color: #EFF0F1;
+  padding: $euiSizeS;
+  background: $euiColorLightestShade;
 }
 
 // SASSTODO: EXTREMELY DANGEROUS OVERWRITE
@@ -19,13 +19,13 @@ navbar button[disabled] {
   margin: -9px -14px;
 
   .header {
-    padding: 9px 14px;
-    border-bottom: 1px solid #eeeeee;
+    padding: $euiSizeS $euiSize;
+    border-bottom: $euiBorderThin;
   }
+
   .footer {
-    text-align: center;
-    padding: 9px;
-    border-top: 1px solid #eee;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
 
     .kuiButton--primary:focus {
       background-color: #0079a5;
@@ -73,11 +73,11 @@ navbar button[disabled] {
   }
 
   .select-list {
+    @include euiScrollBar;
     max-height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
-
-    background-color: #F5F7FA;
+    background-color: $euiColorEmptyShade;
 
     .list-section-title {
       margin: 14px;
@@ -85,15 +85,15 @@ navbar button[disabled] {
     }
 
     .list-section {
-      border: 1px solid #e0e0e0;
-      background-color: #ffffff;
-      margin: 14px;
-      margin-top: 5px;
-      padding: 10px;
-      border-radius: 3px;
+      border: $euiBorderThin;
+      margin: $euiSize;
+      margin-top: $euiSizeXS;
+      padding: $euiSizeS;
+      border-radius: $euiBorderRadius;
     }
+
     .list-section-single {
-      margin: -1px;
+      margin: 0;
       border-radius: 0px;
       border: 0px;
     }
@@ -116,40 +116,34 @@ navbar button[disabled] {
       }
 
       .job-row-inner {
-        display: inline-block;
-        font-size: 13px;
-        font-weight: normal;
-        color: #444444;
-        white-space: nowrap;
+        @include euiFontSizeXS;
 
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        white-space: nowrap;
         margin: 0px;
         padding: 0px;
-        line-height: 20px;
 
         // SASSTODO: Replace with proper selector
         & > label > div {
           width: 280px;
           display: inline-block;
           vertical-align: top;
-          height: 30px;
+          height: $euiSizeXL;
           padding-top: 6px;
           overflow: hidden;
           text-overflow: ellipsis;
           padding-right: 4px;
 
           .disabled-job {
-            color: #cccccc;
+            color: $euiColorMediumShade;
           }
         }
 
         // SASSTODO: Replace with proper selector
         & > label > div:nth-child(2) {
           width: 310px;
-          border-left: 1px solid #eee;
-          border-right: 1px solid #eee;
-          padding-left: 4px;
-          padding-top: 6px;
-          margin-left: -3px;
 
           .disabled-job {
             background-color: #cccccc;
@@ -168,8 +162,9 @@ navbar button[disabled] {
       }
 
       .gant-bar {
-        background-color: #79adda;
-        height: 14px;
+        margin-top: $euiSizeXS;
+        background-color: $euiColorSecondary;
+        height: $euiSizeS;
         border-radius: 2px;
       }
 
@@ -229,15 +224,15 @@ navbar button[disabled] {
 
       .gant-back-edge {
         height: 18px;
-        border-left: 1px solid #d6d6d6;
-        border-right: 1px solid #d6d6d6;
+        border-left: $euiBorderThin;
+        border-right: $euiBorderThin;
         margin-bottom: -16px;
         padding-top: 9px;
 
         // SASSTODO: Needs a poper selector
         div {
           height: 1px;
-          border-top: 1px dashed #d6d6d6;
+          border-top: $euiBorderEditable;
         }
       }
     }
@@ -246,7 +241,7 @@ navbar button[disabled] {
 
         // SASSTODO: Needs a poper selector
         & > label > div {
-          background-color: #f2f2f2;
+          background-color: $euiColorLightestShade;
         }
       }
     }
@@ -274,41 +269,28 @@ navbar button[disabled] {
   }
 
   .ml-job-select-btn-label {
-    background-color:#9c9c9c;
-    color: #ffffff;
+    background: $euiColorMediumShade;
+    color: chooseLightOrDarkText($euiColorMediumShade, $euiColorGhost, #000);
     display:inline-block;
-    padding:0px 10px;
-    border: 0px solid #ecf0f1;
-    border-top-style: solid;
-    border-right-style: none;
-    border-bottom-style: solid;
-    border-left-style: solid;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-    height: 34px;
-    line-height:33px;
-    font-size: 12px;
+    padding:0px $euiSizeS;
+    border-top-left-radius: $euiBorderRadius;
+    border-bottom-left-radius: $euiBorderRadius;
+    height: $euiSizeXXL;
+    line-height: $euiSizeXXL;
+    font-size: $euiFontSizeXS;
   }
 
   .ml-job-select-btn {
-    width: 300px;
-    height: 34px;
-    text-align: left;
-    color: #444444;
-    background-color: white;
-    border: 1px solid #ffffff;
-    border-left-width: 0px;
-    border-radius: 0px 4px 4px 0px;
-    padding: 6px 16px;
-    padding-left: 10px;
-    transition: border-color ease-in-out .15s;
-    font-size: 14px;
-    line-height: 20px;
-    cursor: pointer;
+    @include euiFormControlStyle;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
     .ml-job-select-btn-text {
-      float: left;
       width: 260px;
+      height: $euiSizeXXL;
+      line-height: $euiSizeXXL;
+      font-size: $euiFontSizeXS;
       overflow-x: hidden;
       display: inline-flex;
       white-space: nowrap;
@@ -321,19 +303,13 @@ navbar button[disabled] {
     }
 
     .caret {
-      float: right;
       margin-top: 6px;
       display:inline-block;
     }
   }
 
   .ml-job-select-btn:hover, .ml-job-select-btn:focus, .ml-job-select-btn:active {
-    color: #444444;
-    background-color: #ffffff;
-    border-color: #0079a5;
-    border-left-width: 1px;
-    padding-left: 9px;
-    transform: none;
+    animation: none;
   }
 
   .ml-job-select-btn:focus {
