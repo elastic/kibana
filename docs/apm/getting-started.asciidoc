@@ -8,14 +8,15 @@ the *Setup Instructions* will get you started.
 [role="screenshot"]
 image::apm/images/apm-setup.png[Installation instructions on the APM page in Kibana]
 
-After you install the Elastic APM agent library in your application,
+
+Index patterns tell Kibana which Elasticsearch indices you want to explore.
+An APM index pattern is necessary for certain features in the APM UI, like the query bar. 
+To set up the correct index pattern,
+simply click *Load Kibana objects* at the bottom of the Setup Instructions.
+
+After you install an Elastic APM agent library in your application,
 the application automatically appears in the APM UI in {kib}.
 No further configuration is required.
 
-If you also use the Elastic Stack for logging and server-level metrics,
-you can import the APM dashboards that come with the APM Server.
-You can use these APM specific visualizations to correlate APM data with other data sources.
-To get the dashboards, click *Load Kibana objects* at the bottom of the Setup Instructions.
-
 [role="screenshot"]
-image::apm/images/apm-setup-dashboards.png[Install dashboards for APM in Kibana]
+image::apm/images/apm-index-pattern.png[Setup index pattern for APM in Kibana]
