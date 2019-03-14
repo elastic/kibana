@@ -85,11 +85,10 @@ export function fetchProvider(index: string) {
     }
 
     return hits.reduce((telemetry: TelemetryResponse, hit: SearchHit) => {
-      const innerSource = hit._source['sample-data-telemetry'] || {
+      const { installCount = 0, unInstallCount = 0 } = hit._source['sample-data-telemetry'] || {
         installCount: 0,
         unInstallCount: 0,
       };
-      const { installCount = 0, unInstallCount = 0 } = innerSource;
 
       if (installCount === 0 && unInstallCount === 0) {
         return telemetry;
