@@ -94,11 +94,11 @@ export function fetchProvider(index: string) {
         return telemetry;
       }
 
-      const calc = installCount - unInstallCount;
+      const isSampleDataSetInstalled = installCount - unInstallCount > 0;
       const dataSet = hit._id.replace('sample-data-telemetry:', ''); // sample-data-telemetry:ecommerce => ecommerce
       const dataDate = moment.utc(hit._source.updated_at);
 
-      if (calc > 0) {
+      if (isSampleDataSetInstalled) {
         // have it installed
         const { lastDate, lastSet } = getLast(
           dataSet,
@@ -113,7 +113,7 @@ export function fetchProvider(index: string) {
           last_install_date: lastDate,
           last_install_set: lastSet,
         };
-      } else if (calc === 0) {
+      } else {
         // uninstall
         const { lastDate, lastSet } = getLast(
           dataSet,
