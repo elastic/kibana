@@ -14,11 +14,11 @@ import {
   JobSource,
   KbnServer,
 } from '../../types';
-// @ts-ignore
+// @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
-// @ts-ignore
+// @ts-ignore untyped dependency
 import { LevelLogger } from './level_logger';
-// @ts-ignore
+// @ts-ignore untyped dependency
 import { oncePerServer } from './once_per_server';
 
 function createWorkerFn(server: KbnServer) {
