@@ -26,7 +26,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.buttons',
-  'ui.bootstrap.dateparser',
   'ui.bootstrap.position',
   'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
@@ -61,7 +60,6 @@ angular.module('ui.bootstrap.tpls', [
 import './alert/alert';
 import './bindHtml/bindHtml';
 import './buttons/buttons';
-import './dateparser/dateparser';
 import './dropdown/dropdown';
 import './modal/modal';
 import './pagination/pagination';
