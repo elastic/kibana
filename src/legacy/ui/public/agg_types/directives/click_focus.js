@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import $ from 'jquery';
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 const module = uiModules.get('kibana');
 
 module.directive('clickFocus', function () {
