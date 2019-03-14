@@ -28,6 +28,8 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
+let detailVertexId = undefined;
+
 function getPageData($injector) {
   const $route = $injector.get('$route');
   const $http = $injector.get('$http');
@@ -42,7 +44,8 @@ function getPageData($injector) {
     ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
     : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
   return $http.post(url, {
-    ccs
+    ccs,
+    detailVertexId
   })
     .then(response => response.data)
     .then(data => {
@@ -107,11 +110,16 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
       const timeseriesTooltipXValueFormatter = xValue =>
         moment(xValue).format(dateFormat);
 
+      const setDetailVertexId = vertex => {
+        detailVertexId = vertex.id;
+      };
+
       $scope.$watch(() => this.data, data => {
         if (!data || !data.pipeline) {
           return;
         }
         this.pipelineState = new PipelineState(data.pipeline);
+        this.detailVertex = data.vertex;
         this.renderReact(
           <I18nContext>
             <EuiPage>
@@ -122,6 +130,8 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
                       Pipeline.fromPipelineGraph(this.pipelineState.config.graph)
                     )}
                     timeseriesTooltipXValueFormatter={timeseriesTooltipXValueFormatter}
+                    setDetailVertexId={setDetailVertexId}
+                    detailVertex={this.detailVertex}
                   />
                 </EuiPageContent>
               </EuiPageBody>

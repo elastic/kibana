@@ -116,8 +116,9 @@ function fetchPipelineLatestStats(query, logstashIndexPattern, pipelineId, versi
   return callWithRequest(req, 'search', params);
 }
 
-export function getPipelineStatsAggregation(callWithRequest, req, logstashIndexPattern, timeseriesInterval,
+export function getPipelineStatsAggregation(req, logstashIndexPattern, timeseriesInterval,
   { clusterUuid, start, end, pipelineId, version }) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const filters = [
     {
       nested: {

@@ -9,7 +9,6 @@ import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
-import { getPipelineVersions } from './get_pipeline_versions';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
 export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds) {
@@ -83,23 +82,11 @@ export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation
     }
   });
 
-  return stateDocument.logstash_state;
+  return stateDocument.logstash_state.pipeline;
 }
 
-export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, pipelineHash) {
+export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
-
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const versions = await getPipelineVersions(callWithRequest, req, config, lsIndexPattern, clusterUuid, pipelineId);
-
-  let version;
-  if (pipelineHash) {
-    // Find version corresponding to given hash
-    version = versions.find(({ hash }) => hash === pipelineHash);
-  } else {
-    // Go with latest version
-    version = versions[0];
-  }
 
   const options = {
     clusterUuid,
@@ -112,17 +99,13 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
   const timeseriesInterval = calculateTimeseriesInterval(version.firstSeen, version.lastSeen, minIntervalSeconds);
 
   const [ stateDocument, statsAggregation ] = await Promise.all([
-    getPipelineStateDocument(callWithRequest, req, lsIndexPattern, options),
-    getPipelineStatsAggregation(callWithRequest, req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineStateDocument(req, lsIndexPattern, options),
+    getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
   if (stateDocument === null) {
     return boom.notFound(`Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`);
   }
 
-  const result = {
-    ..._enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval),
-    versions
-  };
-  return result;
+  return _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval);
 }

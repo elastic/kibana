@@ -139,12 +139,12 @@ function fetchPipelineVertexTimeSeriesStats(query, logstashIndexPattern, pipelin
     }
   };
 
-  console.log(JSON.stringify(params.body));
   return callWithRequest(req, 'search', params);
 }
 
-export function getPipelineVertexStatsAggregation(callWithRequest, req, logstashIndexPattern, timeSeriesIntervalInSeconds,
+export function getPipelineVertexStatsAggregation(req, logstashIndexPattern, timeSeriesIntervalInSeconds,
   { clusterUuid, start, end, pipelineId, version, vertexId }) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const filters = [
     {
       nested: {

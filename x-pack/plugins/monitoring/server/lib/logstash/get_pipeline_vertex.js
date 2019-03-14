@@ -9,7 +9,6 @@ import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
 import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
-import { getPipelineVersions } from './get_pipeline_versions';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
 export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds) {
@@ -90,14 +89,8 @@ export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStat
   return vertex;
 }
 
-export async function getPipelineVertex(req, config, lsIndexPattern, clusterUuid, pipelineId, pipelineHash, vertexId) {
+export async function getPipelineVertex(req, config, lsIndexPattern, clusterUuid, pipelineId, version, vertexId) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
-
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const versions = await getPipelineVersions(callWithRequest, req, config, lsIndexPattern, clusterUuid, pipelineId);
-
-  // Find version corresponding to given hash
-  const version = versions.find(({ hash }) => hash === pipelineHash);
 
   const options = {
     clusterUuid,
@@ -111,8 +104,8 @@ export async function getPipelineVertex(req, config, lsIndexPattern, clusterUuid
   const timeseriesInterval = calculateTimeseriesInterval(version.firstSeen, version.lastSeen, minIntervalSeconds);
 
   const [ stateDocument, statsAggregation ] = await Promise.all([
-    getPipelineStateDocument(callWithRequest, req, lsIndexPattern, options),
-    getPipelineVertexStatsAggregation(callWithRequest, req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineStateDocument(req, lsIndexPattern, options),
+    getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
   if (stateDocument === null) {
