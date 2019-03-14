@@ -34,7 +34,8 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
     lsIndexPattern,
     beatsIndexPattern,
     apmIndexPattern,
-    alertsIndex
+    alertsIndex,
+    filebeatIndexPattern
   } = indexPatterns;
 
   const isStandaloneCluster = clusterUuid === STANDALONE_CLUSTER_CLUSTER_UUID;
@@ -88,7 +89,7 @@ export async function getClustersFromRequest(req, indexPatterns, { clusterUuid, 
       cluster.alerts = alerts;
     }
 
-    cluster.logs = await getLogTypes(req, 'filebeat-*', { clusterUuid: cluster.cluster_uuid, start, end });
+    cluster.logs = await getLogTypes(req, filebeatIndexPattern, { clusterUuid: cluster.cluster_uuid, start, end });
   } else if (!isStandaloneCluster) {
     // get all clusters
     if (!clusters || clusters.length === 0) {
