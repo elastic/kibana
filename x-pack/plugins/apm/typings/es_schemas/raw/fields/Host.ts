@@ -6,4 +6,5 @@
 
 export interface Host {
   hostname?: string;
+  [key: string]: unknown;
 }

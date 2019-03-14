@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Http {
-  request: { method: string };
-  response: { status_code: number };
+export interface Url {
+  full: string;
+  [key: string]: unknown;
 }
