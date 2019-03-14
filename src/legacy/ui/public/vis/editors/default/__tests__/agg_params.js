@@ -21,7 +21,6 @@
 import angular from 'angular';
 import _ from 'lodash';
 import expect from 'expect.js';
-import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import '../agg_params';
 import { VisProvider } from '../../..';
@@ -62,10 +61,6 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
     orderAggSchema = (new Schemas([config])).all[0];
     $parentScope.groupName = 'metrics';
 
-    const formCtrl = {
-      $addControl: sinon.fake()
-    };
-
     const state = {
       schema: orderAggSchema,
       type: 'count'
@@ -88,8 +83,6 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
     $elem = angular.element(
       `<vis-editor-agg-params index-pattern="vis.indexPattern" agg="agg" group-name="groupName"></vis-editor-agg-params>`
     );
-
-    $elem.data('$formController', formCtrl);
 
     // compile the html
     compile($elem)($parentScope);

@@ -22,16 +22,17 @@ import { AggType } from 'ui/agg_types';
 
 type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   label: string;
+  value?: AggType;
   options?: EuiComboBoxOptionProps[];
 };
 
-function groupAggregationsByType(aggs: AggType[]) {
+function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type') {
   if (!Array.isArray(aggs)) {
     return [];
   }
 
   const groupedOptions: ComboBoxGroupedOption[] = aggs.reduce((array: AggType[], type: AggType) => {
-    const group = array.find(element => element.label === type.subtype);
+    const group = array.find(element => element.label === type[groupBy]);
     const option = {
       label: type.title,
       value: type,
@@ -40,7 +41,7 @@ function groupAggregationsByType(aggs: AggType[]) {
     if (group) {
       group.options.push(option);
     } else {
-      array.push({ label: type.subtype, options: [option] });
+      array.push({ label: type[groupBy], options: [option] });
     }
 
     return array;
@@ -65,4 +66,4 @@ function sortByLabel(a: { label: string }, b: { label: string }) {
   return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 
-export { groupAggregationsByType };
+export { groupAggregationsBy, ComboBoxGroupedOption };

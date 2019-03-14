@@ -18,18 +18,18 @@
  */
 
 import $ from 'jquery';
-import { has, get } from 'lodash';
+import { get } from 'lodash';
 import advancedToggleHtml from './advanced_toggle.html';
 import '../../../filters/match_any';
 import './agg_param';
+import './agg_select';
 import { aggTypes } from '../../../agg_types';
 import { uiModules } from '../../../modules';
-import { documentationLinks } from '../../../documentation_links/documentation_links';
 import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { editorConfigProviders } from '../config/editor_config_providers';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
-import { groupAggregationsByType } from './default_editor_utils';
+import { groupAggregationsBy } from './default_editor_utils';
 
 uiModules
   .get('app/visualize')
@@ -39,8 +39,7 @@ uiModules
       restrict: 'E',
       template: aggParamsTemplate,
       scope: true,
-      require: '^form',
-      link: function ($scope, $el, attr, aggForm) {
+      link: function ($scope, $el, attr) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
         $scope.$bind('indexPattern', attr.indexPattern);
@@ -57,16 +56,12 @@ uiModules
           updateEditorConfig('default');
         });
 
-        $scope.groupedAggTypeOptions = groupAggregationsByType($scope.aggTypeOptions);
+        $scope.groupedAggTypeOptions = groupAggregationsBy($scope.aggTypeOptions, 'subtype');
         $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
-        $scope.isSelectValid = () => Boolean($scope.agg.type);
-        $scope.onChangeAggType = (agg, aggType) => {
-          if (agg.type !== aggType) {
-            agg.type = aggType;
-          }
 
-          if (aggForm && aggForm.aggType) {
-            aggForm.aggType.$setDirty();
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
           }
         };
 
@@ -114,10 +109,6 @@ uiModules
 
         function updateAggParamEditor() {
           updateEditorConfig();
-          $scope.aggHelpLink = null;
-          if (has($scope, 'agg.type.name')) {
-            $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
-          }
 
           if ($aggParamEditors) {
             $aggParamEditors.remove();

@@ -33,17 +33,11 @@
   </p>
 </div>
 
-<default-editor-agg-select
+<vis-agg-select
   agg="agg"
-  agg-type="agg.type"
   is-sub-aggregation="isSubAggregation"
-  agg-help-link="aggHelpLink"
-  on-change-agg-type="onChangeAggType"
   agg-type-options="groupedAggTypeOptions"
-  is-select-valid="isSelectValid"
-  ng-model="agg.type"
-  name="aggType"
-  required
+  ng-model="_internalNgModelStateAggType"
 />
 
 <!-- schema editors get added down here: aggSelect.html, agg_types/controls/*.html -->
