@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockFatalError } from './subscribe_with_scope.mock';
+import { mockFatalError } from './subscribe_with_scope.test.mocks';
 
 import * as Rx from 'rxjs';
 import { subscribeWithScope } from './subscribe_with_scope';

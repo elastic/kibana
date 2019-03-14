@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.mock';
+import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockPackage } from './env.mock';
+import { mockPackage } from './env.test.mocks';
 
 import { Env } from '.';
 import { getEnvOptions } from './__mocks__/env';

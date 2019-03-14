@@ -22,7 +22,7 @@ import {
   httpService,
   mockLegacyService,
   mockPluginsService,
-} from './index.mock';
+} from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Server } from '.';

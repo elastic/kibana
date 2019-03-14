@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.mock';
+import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';

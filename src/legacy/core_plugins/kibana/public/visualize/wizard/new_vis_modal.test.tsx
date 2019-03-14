@@ -20,7 +20,7 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-import { settingsGet } from './new_vis_modal.mock';
+import { settingsGet } from './new_vis_modal.test.mocks';
 
 import { NewVisModal } from './new_vis_modal';
 

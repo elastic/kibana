@@ -33,7 +33,7 @@ import {
   MockNotificationsService,
   mockNotificationStart,
   MockUiSettingsService,
-} from './core_system.mock';
+} from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.mock';
+import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
 
 import { ToastsService } from './toasts_service';
 import { ToastsStart } from './toasts_start';

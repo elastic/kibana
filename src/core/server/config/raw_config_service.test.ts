@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockGetConfigFromFiles } from './raw_config_service.mock';
+import { mockGetConfigFromFiles } from './raw_config_service.test.mocks';
 
 import { first } from 'rxjs/operators';
 import { RawConfigService } from '.';

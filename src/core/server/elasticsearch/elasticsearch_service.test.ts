@@ -19,7 +19,7 @@
 
 import { first } from 'rxjs/operators';
 
-import { MockClusterClient } from './elasticsearch_service.mock';
+import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';

@@ -22,7 +22,7 @@ import {
   mockGetAutocompleteSuggestions,
   mockPersistedLog,
   mockPersistedLogFactory,
-} from 'ui/query_bar/components/query_bar.mock';
+} from 'ui/query_bar/components/query_bar.test.mocks';
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';

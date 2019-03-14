@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mockJobQueueClient } from './report_info_button.mock';
+import { mockJobQueueClient } from './report_info_button.test.mocks';
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

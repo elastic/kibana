@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockHttpServer } from './http_service.mock';
+import { mockHttpServer } from './http_service.test.mocks';
 
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';

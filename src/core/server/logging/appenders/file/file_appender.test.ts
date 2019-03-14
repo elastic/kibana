@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockCreateWriteStream } from './file_appender.mock';
+import { mockCreateWriteStream } from './file_appender.test.mocks';
 
 import { LogLevel } from '../../log_level';
 import { LogRecord } from '../../log_record';

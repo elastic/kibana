@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../package.json', () => mockPackage);
 
 import { BehaviorSubject } from 'rxjs';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';

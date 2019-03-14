@@ -19,7 +19,7 @@
 
 import { PluginDiscoveryErrorType } from './plugin_discovery_error';
 
-import { mockReadFile } from './plugin_manifest_parser.mock';
+import { mockReadFile } from './plugin_manifest_parser.test.mocks';
 
 import { resolve } from 'path';
 import { parseManifest } from './plugin_manifest_parser';

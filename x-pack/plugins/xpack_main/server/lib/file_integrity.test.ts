@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './file_integrity.mock';
+import './file_integrity.test.mocks';
 
 import { getIntegrityHash, getIntegrityHashes } from './file_integrity';
 

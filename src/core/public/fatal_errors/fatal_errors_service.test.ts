@@ -24,7 +24,7 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
-import { mockRender } from './fatal_errors_service.mock';
+import { mockRender } from './fatal_errors_service.test.mocks';
 
 import { FatalErrorsService } from './fatal_errors_service';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockCreateLayout } from './appenders.mock';
+import { mockCreateLayout } from './appenders.test.mocks';
 
 import { LegacyAppender } from '../../legacy/logging/appenders/legacy_appender';
 import { Appenders } from './appenders';

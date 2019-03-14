@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockDiscover, mockPackage } from './plugins_service.mock';
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject, from } from 'rxjs';

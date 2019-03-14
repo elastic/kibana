@@ -23,7 +23,7 @@ import {
   MockClient,
   mockParseElasticsearchClientConfig,
   MockScopedClusterClient,
-} from './cluster_client.mock';
+} from './cluster_client.test.mocks';
 
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { configService, logger, mockServer } from './index.mock';
+import { configService, logger, mockServer } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';

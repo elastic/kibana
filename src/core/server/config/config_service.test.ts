@@ -22,7 +22,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { mockPackage } from './config_service.mock';
+import { mockPackage } from './config_service.test.mocks';
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 

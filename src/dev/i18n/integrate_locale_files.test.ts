@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.mock';
+import { mockMakeDirAsync, mockWriteFileAsync } from './integrate_locale_files.test.mocks';
 
 import path from 'path';
 import { integrateLocaleFiles, verifyMessages } from './integrate_locale_files';

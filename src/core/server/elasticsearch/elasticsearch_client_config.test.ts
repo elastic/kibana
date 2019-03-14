@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockReadFileSync } from './elasticsearch_client_config.mock';
+import { mockReadFileSync } from './elasticsearch_client_config.test.mocks';
 
 import { duration } from 'moment';
 import { loggingServiceMock } from '../logging/logging_service.mock';

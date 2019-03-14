@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockCreatePluginStartContext } from './plugins_system.mock';
+import { mockCreatePluginStartContext } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';

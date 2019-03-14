@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.mock';
+import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.test.mocks';
 
 // Load the service
 import { UiSettingsService } from './ui_settings_service';
