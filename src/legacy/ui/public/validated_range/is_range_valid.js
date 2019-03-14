@@ -38,16 +38,15 @@ export function isRangeValid(value, min, max, allowEmptyRange) {
   let isValid = true;
   let errorMessage = '';
 
+  const bothMustBeSetErrorMessage =     errorMessage = i18n.translate('common.ui.dualRangeControl.mustSetBothErrorMessage', {
+    defaultMessage: 'Both lower and upper values must be set'
+  });
   if (!allowEmptyRange && (!isLowerValueValid || !isUpperValueValid)) {
     isValid = false;
-    errorMessage = i18n.translate('common.ui.dualRangeControl.bothMustNotBeEmptyWhenNotAllowed', {
-      defaultMessage: 'Neither lower and upper values can be empty'
-    });
+    errorMessage = bothMustBeSetErrorMessage;
   } else if ((!isLowerValueValid && isUpperValueValid) || (isLowerValueValid && !isUpperValueValid)) {
     isValid = false;
-    errorMessage = i18n.translate('common.ui.dualRangeControl.mustSetBothErrorMessage', {
-      defaultMessage: 'Both lower and upper values must be set'
-    });
+    errorMessage = bothMustBeSetErrorMessage;
   } else if ((isLowerValueValid && lowerValue < min) || (isUpperValueValid && upperValue > max)) {
     isValid = false;
     errorMessage = i18n.translate('common.ui.dualRangeControl.outsideOfRangeErrorMessage', {

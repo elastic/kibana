@@ -32,11 +32,9 @@ export function SettingsPanel(props) {
     props.updateLabel(props.layerId, label);
   };
 
-  const onZoomChange = (value) => {
-    const minZoom = Math.max(MIN_ZOOM, parseInt(value[0], 10));
-    props.updateMinZoom(props.layerId, minZoom);
-    const maxZoom = Math.min(MAX_ZOOM, parseInt(value[1], 10));
-    props.updateMaxZoom(props.layerId, maxZoom);
+  const onZoomChange = ([min, max]) => {
+    props.updateMinZoom(props.layerId, Math.max(MIN_ZOOM, parseInt(min, 10)));
+    props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
   const onAlphaChange = (alpha) => {
