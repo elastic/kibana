@@ -32,13 +32,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
   };
 
   beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
   });
 
   test('returns empty response when no objects exist', async () => {
@@ -238,13 +232,7 @@ describe('validateReferences()', () => {
   };
 
   beforeEach(() => {
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+    jest.resetAllMocks();
   });
 
   test('returns empty when no objects are passed in', async () => {

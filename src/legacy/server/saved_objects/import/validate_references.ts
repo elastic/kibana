@@ -48,7 +48,7 @@ export async function getNonExistingReferenceAsKeys(
       collector.delete(`${savedObject.type}:${savedObject.id}`);
     }
   }
-  return Array.from(collector.values()).map(obj => `${obj.type}:${obj.id}`);
+  return [...collector.keys()];
 }
 
 export async function validateReferences(

@@ -414,7 +414,7 @@ export class SavedObjectsRepository {
   /**
    * Returns an array of objects by id
    *
-   * @param {array} objects - an array of objects containing id and optionally type or fields
+   * @param {array} objects - an array of objects containing id, type and optionally fields
    * @param {object} [options={}]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
