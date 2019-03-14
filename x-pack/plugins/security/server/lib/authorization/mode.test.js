@@ -6,30 +6,76 @@
 
 import { authorizationModeFactory } from './mode';
 
-const createMockXpackInfoFeature = (allowRbac) => {
-  return {
-    getLicenseCheckResults() {
-      return {
-        allowRbac
-      };
-    }
-  };
-};
+class MockXPackInfoFeature {
+  constructor(allowRbac) {
+    this.allowRbac = allowRbac;
+  }
 
-describe(`#useRbac`, () => {
-  test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
-    const mockXpackInfoFeature = createMockXpackInfoFeature(false);
+  mockSetAllowRbac(allowRbac) {
+    this.allowRbac = allowRbac;
+  }
+
+  getLicenseCheckResults() {
+    return {
+      allowRbac: this.allowRbac
+    };
+  }
+}
+
+describe(`#useRbacForRequest`, () => {
+  test(`throws an Error if request isn't specified`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
 
-    const result = mode.useRbac();
+    expect(() => mode.useRbacForRequest()).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid value used as weak map key"`
+    );
+  });
+
+  test(`throws an Error if request is "null"`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(false);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
+
+    expect(() => mode.useRbacForRequest(null)).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid value used as weak map key"`
+    );
+  });
+
+  test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(false);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
+    const request = {};
+
+    const result = mode.useRbacForRequest(request);
     expect(result).toBe(false);
   });
 
-  test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is true`, async () => {
-    const mockXpackInfoFeature = createMockXpackInfoFeature(true);
+  test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is initially false, and changes to true`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
+    const request = {};
 
-    const result = mode.useRbac();
+    expect(mode.useRbacForRequest(request)).toBe(false);
+    mockXpackInfoFeature.mockSetAllowRbac(true);
+    expect(mode.useRbacForRequest(request)).toBe(false);
+  });
+
+  test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is true`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(true);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
+    const request = {};
+
+    const result = mode.useRbacForRequest(request);
     expect(result).toBe(true);
+  });
+
+  test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is initially true, and changes to false`, async () => {
+    const mockXpackInfoFeature = new MockXPackInfoFeature(true);
+    const mode = authorizationModeFactory(mockXpackInfoFeature);
+    const request = {};
+
+    expect(mode.useRbacForRequest(request)).toBe(true);
+    mockXpackInfoFeature.mockSetAllowRbac(false);
+    expect(mode.useRbacForRequest(request)).toBe(true);
   });
 });
