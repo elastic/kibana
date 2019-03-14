@@ -11,9 +11,9 @@ export const paths = {
   baseUrl: 'https://s3.amazonaws.com/headless-shell/',
   packages: [{
     platforms: ['darwin', 'freebsd', 'openbsd'],
-    archiveFilename: 'chromium-04c5a83-darwin.zip',
-    archiveChecksum: '89a98bfa6454bec550f196232d1faeb3',
-    rawChecksum: '413bbd646a4862a136bc0852ab6f41c5',
+    archiveFilename: 'chromium-2fac04a-darwin.zip',
+    archiveChecksum: '36814b1629457aa178b4ecdf6cc1bc5f',
+    rawChecksum: '9b40e2efa7f4f1870835ee4cdaf1dd51',
     binaryRelativePath: 'headless_shell-darwin/headless_shell',
   }, {
     platforms: ['linux'],
