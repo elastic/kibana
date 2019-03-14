@@ -80,14 +80,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const expectRbacForbiddenRead = (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to find index-pattern,search, missing action:saved_objects/index-pattern/find,action:saved_objects/search/find`,
-    });
-  };
-
   const expectRbacForbiddenWithUnknownType = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       statusCode: 403,
@@ -155,7 +147,6 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
-    expectRbacForbiddenRead,
     expectRbacForbiddenWithUnknownType,
     expectRbacForbiddenForUnknownType,
   };

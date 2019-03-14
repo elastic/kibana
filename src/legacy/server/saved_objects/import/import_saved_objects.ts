@@ -43,30 +43,29 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
-  let objectsToImport = await collectSavedObjects(readStream, objectLimit);
+  const objectsFromStream = await collectSavedObjects(readStream, objectLimit);
 
-  let errors: ImportError[] = [];
-  ({ filteredObjects: objectsToImport, errors } = await validateReferences(
-    objectsToImport,
+  const { filteredObjects, errors: validationErrors } = await validateReferences(
+    objectsFromStream,
     savedObjectsClient
-  ));
+  );
 
-  if (objectsToImport.length === 0) {
+  if (filteredObjects.length === 0) {
     return {
-      success: errors.length === 0,
+      success: validationErrors.length === 0,
       successCount: 0,
-      ...(errors.length ? { errors } : {}),
+      ...(validationErrors.length ? { errors: validationErrors } : {}),
     };
   }
 
-  const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToImport, {
+  const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
   });
-  errors = [...errors, ...extractErrors(bulkCreateResult.saved_objects)];
+  const errors = [...validationErrors, ...extractErrors(bulkCreateResult.saved_objects)];
 
   return {
     success: errors.length === 0,
-    successCount: objectsToImport.length - errors.length,
+    successCount: objectsFromStream.length - errors.length,
     ...(errors.length ? { errors } : {}),
   };
 }

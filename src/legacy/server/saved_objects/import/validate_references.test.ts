@@ -17,7 +17,204 @@
  * under the License.
  */
 
-import { validateReferences } from './validate_references';
+import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+
+describe('getNonExistingReferenceAsKeys()', () => {
+  const savedObjectsClient = {
+    errors: {} as any,
+    bulkCreate: jest.fn(),
+    bulkGet: jest.fn(),
+    create: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  };
+
+  beforeEach(() => {
+    savedObjectsClient.bulkCreate.mockReset();
+    savedObjectsClient.bulkGet.mockReset();
+    savedObjectsClient.create.mockReset();
+    savedObjectsClient.delete.mockReset();
+    savedObjectsClient.find.mockReset();
+    savedObjectsClient.get.mockReset();
+    savedObjectsClient.update.mockReset();
+  });
+
+  test('returns empty response when no objects exist', async () => {
+    const result = await getNonExistingReferenceAsKeys([], savedObjectsClient);
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+  });
+
+  test('removes references that exist within savedObjects', async () => {
+    const savedObjects = [
+      {
+        id: '1',
+        type: 'index-pattern',
+        attributes: {},
+        references: [],
+      },
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ];
+    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+  });
+
+  test('removes references that exist within es', async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+        ],
+      },
+    ];
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+        },
+      ],
+    });
+    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test(`doesn't handle saved object types outside of ENFORCED_TYPES`, async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'foo',
+            id: '1',
+          },
+        ],
+      },
+    ];
+    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+  });
+
+  test('returns references within ENFORCED_TYPES when they are missing', async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'index-pattern',
+            id: '1',
+          },
+          {
+            name: 'ref_1',
+            type: 'search',
+            id: '3',
+          },
+          {
+            name: 'ref_2',
+            type: 'foo',
+            id: '4',
+          },
+        ],
+      },
+    ];
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+        {
+          id: '3',
+          type: 'search',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+      ],
+    });
+    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    expect(result).toEqual(['index-pattern:1', 'search:3']);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "3",
+          "type": "search",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+});
 
 describe('validateReferences()', () => {
   const savedObjectsClient = {
@@ -42,9 +239,6 @@ describe('validateReferences()', () => {
   });
 
   test('returns empty when no objects are passed in', async () => {
-    savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [],
-    });
     const result = await validateReferences([], savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
 Object {
@@ -52,12 +246,44 @@ Object {
   "filteredObjects": Array [],
 }
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 
   test('returns errors when references are missing', async () => {
-    savedObjectsClient.find.mockResolvedValue({
+    savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
+        {
+          type: 'index-pattern',
+          id: '3',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+        {
+          type: 'index-pattern',
+          id: '5',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+        {
+          type: 'index-pattern',
+          id: '6',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
+        {
+          type: 'search',
+          id: '7',
+          error: {
+            statusCode: 404,
+            message: 'Not found',
+          },
+        },
         {
           id: '8',
           type: 'search',
@@ -162,11 +388,46 @@ Object {
   ],
 }
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Array [
+        Object {
+          "id": "3",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "5",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "6",
+          "type": "index-pattern",
+        },
+        Object {
+          "id": "7",
+          "type": "search",
+        },
+        Object {
+          "id": "8",
+          "type": "search",
+        },
+      ],
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
   });
 
   test(`doesn't return errors when references exist in Elasticsearch`, async () => {
-    savedObjectsClient.find.mockResolvedValue({
+    savedObjectsClient.bulkGet.mockResolvedValue({
       saved_objects: [
         {
           id: '1',
@@ -210,13 +471,10 @@ Object {
   ],
 }
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
   });
 
   test(`doesn't return errors when references exist within the saved objects`, async () => {
-    savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [],
-    });
     const savedObjects = [
       {
         id: '1',
@@ -263,6 +521,54 @@ Object {
   ],
 }
 `);
-    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
+  });
+
+  test(`doesn't validate references on types not part of ENFORCED_TYPES`, async () => {
+    const savedObjects = [
+      {
+        id: '1',
+        type: 'dashboard',
+        attributes: {},
+        references: [
+          {
+            name: 'ref_0',
+            type: 'visualization',
+            id: '2',
+          },
+          {
+            name: 'ref_1',
+            type: 'other-type',
+            id: '3',
+          },
+        ],
+      },
+    ];
+    const result = await validateReferences(savedObjects, savedObjectsClient);
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [],
+  "filteredObjects": Array [
+    Object {
+      "attributes": Object {},
+      "id": "1",
+      "references": Array [
+        Object {
+          "id": "2",
+          "name": "ref_0",
+          "type": "visualization",
+        },
+        Object {
+          "id": "3",
+          "name": "ref_1",
+          "type": "other-type",
+        },
+      ],
+      "type": "dashboard",
+    },
+  ],
+}
+`);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
 });

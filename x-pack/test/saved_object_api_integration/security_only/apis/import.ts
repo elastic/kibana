@@ -19,7 +19,6 @@ export default function({ getService }: TestInvoker) {
     createExpectResults,
     expectRbacForbidden,
     expectUnknownType,
-    expectRbacForbiddenRead,
     expectRbacForbiddenWithUnknownType,
     expectRbacForbiddenForUnknownType,
   } = importTestSuiteFactory(es, esArchiver, supertest);
@@ -30,11 +29,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });
@@ -58,11 +57,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });
@@ -128,11 +127,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });
@@ -142,11 +141,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });
@@ -156,11 +155,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });
@@ -170,11 +169,11 @@ export default function({ getService }: TestInvoker) {
       tests: {
         default: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbidden,
         },
         unknownType: {
           statusCode: 403,
-          response: expectRbacForbiddenRead,
+          response: expectRbacForbiddenWithUnknownType,
         },
       },
     });

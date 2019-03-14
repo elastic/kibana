@@ -22,23 +22,44 @@ import { ImportError } from './types';
 
 const ENFORCED_TYPES = ['index-pattern', 'search'];
 
+export async function getNonExistingReferenceAsKeys(
+  savedObjects: SavedObject[],
+  savedObjectsClient: SavedObjectsClient
+) {
+  const collector = new Map();
+  for (const savedObject of savedObjects) {
+    for (const { type, id } of savedObject.references || []) {
+      if (!ENFORCED_TYPES.includes(type)) {
+        continue;
+      }
+      collector.set(`${type}:${id}`, { type, id });
+    }
+  }
+  for (const savedObject of savedObjects) {
+    collector.delete(`${savedObject.type}:${savedObject.id}`);
+  }
+  if (collector.size) {
+    const bulkGetResponse = await savedObjectsClient.bulkGet(Array.from(collector.values()));
+    for (const savedObject of bulkGetResponse.saved_objects) {
+      if (savedObject.error) {
+        continue;
+      }
+      collector.delete(`${savedObject.type}:${savedObject.id}`);
+    }
+  }
+  return Array.from(collector.values()).map(obj => `${obj.type}:${obj.id}`);
+}
+
 export async function validateReferences(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClient
 ) {
   const errors: ImportError[] = [];
 
-  // Grab record ids of the objects existing in Elasticsearch
-  const findResponse = await savedObjectsClient.find({
-    type: ENFORCED_TYPES,
-    fields: ['id'],
-  });
-  const foundKeys = findResponse.saved_objects.map(obj => `${obj.type}:${obj.id}`);
-  for (const savedObject of savedObjects) {
-    if (ENFORCED_TYPES.includes(savedObject.type) && !foundKeys.includes(savedObject.id)) {
-      foundKeys.push(`${savedObject.type}:${savedObject.id}`);
-    }
-  }
+  const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
+    savedObjects,
+    savedObjectsClient
+  );
 
   // Filter out objects with missing references, add to error object
   const filteredObjects = savedObjects.filter(savedObject => {
@@ -47,7 +68,7 @@ export async function validateReferences(
       if (!ENFORCED_TYPES.includes(refType)) {
         continue;
       }
-      if (!foundKeys.includes(`${refType}:${refId}`)) {
+      if (nonExistingReferenceKeys.includes(`${refType}:${refId}`)) {
         missingReferences.push({ type: refType, id: refId });
       }
     }
