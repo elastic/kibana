@@ -6,9 +6,7 @@
 
 import chroma from 'chroma-js';
 
-export function readableColor(background, light, dark) {
-  light = light || '#FFF';
-  dark = dark || '#333';
+export function readableColor(background: string, light: string = '#FFF', dark: string = '#333') {
   try {
     return chroma.contrast(background, '#000') < 7 ? light : dark;
   } catch (e) {
