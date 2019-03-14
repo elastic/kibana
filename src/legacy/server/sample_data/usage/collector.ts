@@ -25,7 +25,13 @@ interface KbnServer extends Hapi.Server {
 }
 
 export function makeSampleDataUsageCollector(server: KbnServer) {
-  const index = server.config().get('kibana.index') as string;
+  let index: string;
+  try {
+    index = server.config().get('kibana.index');
+  } catch (err) {
+    return; // kibana plugin is not enabled (test environment)
+  }
+
   server.usage.collectorSet.register(
     server.usage.collectorSet.makeUsageCollector({
       type: 'sample-data',
