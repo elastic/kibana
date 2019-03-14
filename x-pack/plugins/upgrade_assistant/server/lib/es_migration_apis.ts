@@ -64,6 +64,8 @@ const getCombinedIndexInfos = (
 
   return (
     Object.keys(deprecations.index_settings)
+      // prevent APM indices from showing up for general re-indexing
+      .filter(indexName => !apmIndices.has(indexName))
       .reduce(
         (indexDeprecations, indexName) => {
           return indexDeprecations.concat(
@@ -72,7 +74,6 @@ const getCombinedIndexInfos = (
                 ({
                   ...d,
                   index: indexName,
-                  // prevent APM indices from showing up for general re-indexing
                   reindex: /Index created before/.test(d.message) && !apmIndices.has(indexName),
                   needsDefaultFields: /Number of fields exceeds automatic field expansion limit/.test(
                     d.message
