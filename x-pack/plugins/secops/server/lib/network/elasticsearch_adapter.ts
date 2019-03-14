@@ -65,7 +65,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
     const networkDnsEdges: NetworkDnsEdges[] = formatDnsEgdes(
-      getOr([], 'aggregations.dns_name_query_count', response)
+      getOr([], 'aggregations.dns_name_query_count.buckets', response)
     );
     const hasNextPage = networkDnsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
@@ -133,7 +133,7 @@ const formatDnsEgdes = (buckets: NetworkDnsBuckets[]): NetworkDnsEdges[] =>
       timestamp: bucket.timestamp.value_as_string,
       dnsBytesIn: getOrNumber('dns_bytes_in.value', bucket),
       dnsBytesOut: getOrNumber('dns_bytes_out.value', bucket),
-      name: bucket.key,
+      dnsName: bucket.key,
       queryCount: bucket.doc_count,
       uniqueDomains: getOrNumber('unique_domains.value', bucket),
     },

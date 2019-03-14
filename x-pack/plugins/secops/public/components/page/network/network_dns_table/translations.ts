@@ -6,17 +6,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TOP_TALKERS = i18n.translate('xpack.secops.networkDnsTable.title', {
-  defaultMessage: 'Top Talkers',
+export const TOP_DNS_DOMAINS = i18n.translate('xpack.secops.networkDnsTable.title', {
+  defaultMessage: 'Top DNS Domains',
 });
 
-export const NAME = i18n.translate('xpack.secops.networkDnsTable.column.nameTitle', {
-  defaultMessage: 'Name',
+export const TOOLTIP = i18n.translate('xpack.secops.networkDnsTable.helperTooltip', {
+  defaultMessage: 'Only show DNS traffic; You can also sort any columns in the table below;',
 });
 
-export const COUNT = i18n.translate('xpack.secops.networkDnsTable.column.CountTitle', {
-  defaultMessage: 'Count',
+export const NAME = i18n.translate('xpack.secops.networkDnsTable.column.registerDomain', {
+  defaultMessage: 'Register Domain',
 });
+
+export const TOTAL_QUERIES = i18n.translate(
+  'xpack.secops.networkDnsTable.column.TotalQueriesTitle',
+  {
+    defaultMessage: 'Total Queries',
+  }
+);
 
 export const UNIQUE_DOMAINS = i18n.translate(
   'xpack.secops.networkDnsTable.column.uniqueDomainsTitle',

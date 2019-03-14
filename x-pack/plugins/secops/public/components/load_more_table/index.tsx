@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -34,6 +34,11 @@ export interface SortingBasicTable {
   direction: Direction;
 }
 
+export interface Criteria {
+  page: { index: number; size: number };
+  sort: { field: string; direction: 'asc' | 'desc' };
+}
+
 interface BasicTableProps<T> {
   columns: Array<Columns<T>>;
   hasNextPage: boolean;
@@ -42,6 +47,7 @@ interface BasicTableProps<T> {
   loadingTitle?: string;
   loadMore: () => void;
   itemsPerRow?: ItemsPerRow[];
+  onChange?: (criteria: Criteria) => void;
   // tslint:disable-next-line:no-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
@@ -97,8 +103,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       limit,
       loading,
       loadingTitle,
+      onChange = noop,
       pageOfItems,
-      sorting,
+      sorting = null,
       title,
       updateLimitPagination,
     } = this.props;
@@ -160,6 +167,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
         <EuiBasicTable
           items={pageOfItems}
           columns={columns}
+          onChange={onChange}
           sorting={
             sorting
               ? {

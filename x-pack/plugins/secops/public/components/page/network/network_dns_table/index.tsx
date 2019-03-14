@@ -4,15 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { NetworkDnsEdges, NetworkDnsSortField } from '../../../../graphql/types';
+import {
+  Direction,
+  NetworkDnsDirection,
+  NetworkDnsEdges,
+  NetworkDnsSortField,
+} from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -23,9 +29,9 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
-  totalCount: number;
   loadMore: (cursor: string) => void;
   startDate: number;
+  totalCount: number;
   type: networkModel.NetworkType;
 }
 
@@ -75,6 +81,11 @@ const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
 `;
 
+const Sup = styled.sup`
+  vertical-align: super;
+  padding: 0 5px;
+`;
+
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
   public render() {
     const {
@@ -85,32 +96,36 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       limit,
       loading,
       loadMore,
-      totalCount,
       nextCursor,
-      updateDnsLimit,
       startDate,
+      totalCount,
       type,
+      updateDnsLimit,
     } = this.props;
     return (
       <LoadMoreTable
         columns={getNetworkDnsColumns(startDate, type)}
-        loadingTitle={i18n.TOP_TALKERS}
+        loadingTitle={i18n.TOP_DNS_DOMAINS}
         loading={loading}
         pageOfItems={data}
         loadMore={() => loadMore(nextCursor)}
         limit={limit}
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
+        onChange={this.onChange}
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
         sorting={{
-          field: dnsSortField.field,
-          direction: dnsSortField.sort,
+          field: `node.${dnsSortField.field}`,
+          direction: dnsSortField.direction,
         }}
         title={
           <EuiFlexGroup>
             <EuiFlexItem>
               <h3>
-                {i18n.TOP_TALKERS}
+                {i18n.TOP_DNS_DOMAINS}
+                <Sup>
+                  <EuiIconTip content={i18n.TOOLTIP} position="right" />
+                </Sup>
                 <CountBadge color="hollow">{totalCount}</CountBadge>
               </h3>
             </EuiFlexItem>
@@ -122,6 +137,18 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       />
     );
   }
+
+  private onChange = (criteria: Criteria) => {
+    if (criteria.sort) {
+      const newDnsSortField: NetworkDnsSortField = {
+        field: criteria.sort.field.split('.')[1] as NetworkDnsDirection,
+        direction: criteria.sort.direction === 'asc' ? Direction.ascending : Direction.descending,
+      };
+      if (!isEqual(newDnsSortField, this.props.dnsSortField)) {
+        this.props.updateDnsSort({ dnsSortField: newDnsSortField, networkType: this.props.type });
+      }
+    }
+  };
 
   private onChangePtrIncluded = () =>
     this.props.updateIsPtrIncluded({

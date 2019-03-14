@@ -14,8 +14,10 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
+import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
+import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
@@ -28,6 +30,7 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
+const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
 interface NetworkComponentReduxProps {
   filterQuery: string;
@@ -88,6 +91,31 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                         />
                       )}
                     </NetworkTopNFlowQuery>
+                    <EuiSpacer size="m" />
+                    <NetworkDnsQuery
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      poll={poll}
+                      sourceId="default"
+                      startDate={from}
+                      type={networkModel.NetworkType.page}
+                    >
+                      {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
+                        <NetworkDnsTableManage
+                          data={networkDns}
+                          id={id}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          loading={loading}
+                          loadMore={loadMore}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          startDate={from}
+                          totalCount={totalCount}
+                          type={networkModel.NetworkType.page}
+                        />
+                      )}
+                    </NetworkDnsQuery>
                   </>
                 )}
               </GlobalTime>

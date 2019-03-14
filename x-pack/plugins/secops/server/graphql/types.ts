@@ -1,9 +1,9 @@
 /* tslint:disable */
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+     * or more contributor license agreements. Licensed under the Elastic License;
+     * you may not use this file except in compliance with the Elastic License.
+     */
 
 import { SecOpsContext } from '../lib/types';
 import { GraphQLResolveInfo } from 'graphql';
@@ -614,14 +614,6 @@ export interface TopNFlowItem {
   ip?: string | null;
 }
 
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  direction?: NetworkDirectionEcs[] | null;
-}
-
 export interface NetworkDnsData {
   edges: NetworkDnsEdges[];
 
@@ -643,7 +635,7 @@ export interface NetworkDnsItem {
 
   dnsBytesOut?: number | null;
 
-  name?: string | null;
+  dnsName?: string | null;
 
   queryCount?: number | null;
 
@@ -746,7 +738,7 @@ export interface SortField {
 export interface NetworkDnsSortField {
   field: NetworkDnsDirection;
 
-  sort: Direction;
+  direction: Direction;
 }
 
 // ====================================================
@@ -865,14 +857,6 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
 }
 
 export enum NetworkDnsDirection {
@@ -2842,32 +2826,6 @@ export namespace TopNFlowItemResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace NetworkEcsFieldResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
-
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
-
-    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
-  }
-
-  export type BytesResolver<
-    R = number | null,
-    Parent = NetworkEcsField,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type PacketsResolver<
-    R = number | null,
-    Parent = NetworkEcsField,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type DirectionResolver<
-    R = NetworkDirectionEcs[] | null,
-    Parent = NetworkEcsField,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace NetworkDnsDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkDnsData> {
     edges?: EdgesResolver<NetworkDnsEdges[], TypeParent, Context>;
@@ -2921,7 +2879,7 @@ export namespace NetworkDnsItemResolvers {
 
     dnsBytesOut?: DnsBytesOutResolver<number | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    dnsName?: DnsNameResolver<string | null, TypeParent, Context>;
 
     queryCount?: QueryCountResolver<number | null, TypeParent, Context>;
 
@@ -2945,7 +2903,7 @@ export namespace NetworkDnsItemResolvers {
     Parent = NetworkDnsItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type NameResolver<
+  export type DnsNameResolver<
     R = string | null,
     Parent = NetworkDnsItem,
     Context = SecOpsContext

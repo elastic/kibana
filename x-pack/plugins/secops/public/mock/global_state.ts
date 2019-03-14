@@ -74,7 +74,7 @@ export const mockGlobalState: State = {
             limit: 10,
             dnsSortField: {
               field: NetworkDnsDirection.queryCount,
-              sort: Direction.descending,
+              direction: Direction.descending,
             },
             isPtrIncluded: false,
           },

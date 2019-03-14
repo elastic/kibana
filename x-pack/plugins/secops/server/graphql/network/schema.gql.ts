@@ -56,14 +56,14 @@ export const networkSchema = gql`
 
   input NetworkDnsSortField {
     field: NetworkDnsDirection!
-    sort: Direction!
+    direction: Direction!
   }
 
   type NetworkDnsItem {
     _id: String
     dnsBytesIn: Float
     dnsBytesOut: Float
-    name: String
+    dnsName: String
     queryCount: Float
     timestamp: Date
     uniqueDomains: Float

@@ -15,23 +15,23 @@ const getDslSorting = (dir: Direction): DslSort => (dir === Direction.ascending 
 const getQueryOrder = (networkDnsSortField: NetworkDnsSortField) => {
   if (networkDnsSortField.field === NetworkDnsDirection.queryCount) {
     return {
-      _count: getDslSorting(networkDnsSortField.sort),
+      _count: getDslSorting(networkDnsSortField.direction),
     };
   } else if (networkDnsSortField.field === NetworkDnsDirection.dnsName) {
     return {
-      _key: getDslSorting(networkDnsSortField.sort),
+      _key: getDslSorting(networkDnsSortField.direction),
     };
   } else if (networkDnsSortField.field === NetworkDnsDirection.uniqueDomains) {
     return {
-      unique_domains: getDslSorting(networkDnsSortField.sort),
+      unique_domains: getDslSorting(networkDnsSortField.direction),
     };
   } else if (networkDnsSortField.field === NetworkDnsDirection.dnsBytesIn) {
     return {
-      dns_bytes_in: getDslSorting(networkDnsSortField.sort),
+      dns_bytes_in: getDslSorting(networkDnsSortField.direction),
     };
   } else if (networkDnsSortField.field === NetworkDnsDirection.dnsBytesOut) {
     return {
-      dns_bytes_out: getDslSorting(networkDnsSortField.sort),
+      dns_bytes_out: getDslSorting(networkDnsSortField.direction),
     };
   }
 };
@@ -46,20 +46,30 @@ const getCountAgg = () => ({
 
 const createIncludePTRFilter = (isPtrIncluded: boolean) =>
   isPtrIncluded
-    ? [
-        {
-          must_not: [
-            {
-              match_phrase: {
-                ['dns.question.type']: {
-                  query: 'PTR',
-                },
+    ? {}
+    : {
+        must_not: [
+          {
+            match_phrase: {
+              'dns.question.type': {
+                query: 'PTR',
               },
             },
-          ],
+          },
+        ],
+      };
+
+const getDnsFilter = () => ({
+  must: [
+    {
+      match_phrase: {
+        'network.protocol': {
+          query: 'dns',
         },
-      ]
-    : [];
+      },
+    },
+  ],
+});
 
 export const buildDnsQuery = ({
   fields,
@@ -76,18 +86,6 @@ export const buildDnsQuery = ({
 }: NetworkDnsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...createIncludePTRFilter(isPtrIncluded),
-    {
-      must: [
-        {
-          match_phrase: {
-            'network.protocol': {
-              query: 'dns',
-            },
-          },
-        },
-      ],
-    },
     {
       range: {
         [timestamp]: {
@@ -140,6 +138,8 @@ export const buildDnsQuery = ({
       query: {
         bool: {
           filter,
+          ...getDnsFilter(),
+          ...createIncludePTRFilter(isPtrIncluded),
         },
       },
     },

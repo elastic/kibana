@@ -3430,85 +3430,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "NetworkEcsField",
-        "description": "",
-        "fields": [
-          {
-            "name": "bytes",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "packets",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "direction",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "ENUM", "name": "NetworkDirectionEcs", "ofType": null }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "NetworkDirectionEcs",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          {
-            "name": "inbound",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "outbound",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "internal",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "external",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "unknown", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
         "kind": "INPUT_OBJECT",
         "name": "NetworkDnsSortField",
         "description": "",
@@ -3525,7 +3446,7 @@
             "defaultValue": null
           },
           {
-            "name": "sort",
+            "name": "direction",
             "description": "",
             "type": {
               "kind": "NON_NULL",
@@ -3700,7 +3621,7 @@
             "deprecationReason": null
           },
           {
-            "name": "name",
+            "name": "dnsName",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },

@@ -30,7 +30,7 @@ export const networkDnsQuery = gql`
             _id
             dnsBytesIn
             dnsBytesOut
-            name
+            dnsName
             queryCount
             uniqueDomains
           }

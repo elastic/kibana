@@ -1,9 +1,9 @@
 /* tslint:disable */
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
- */
+     * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+     * or more contributor license agreements. Licensed under the Elastic License;
+     * you may not use this file except in compliance with the Elastic License.
+     */
 
 // ====================================================
 // START: Typescript template
@@ -585,14 +585,6 @@ export interface TopNFlowItem {
   ip?: string | null;
 }
 
-export interface NetworkEcsField {
-  bytes?: number | null;
-
-  packets?: number | null;
-
-  direction?: NetworkDirectionEcs[] | null;
-}
-
 export interface NetworkDnsData {
   edges: NetworkDnsEdges[];
 
@@ -614,7 +606,7 @@ export interface NetworkDnsItem {
 
   dnsBytesOut?: number | null;
 
-  name?: string | null;
+  dnsName?: string | null;
 
   queryCount?: number | null;
 
@@ -717,7 +709,7 @@ export interface SortField {
 export interface NetworkDnsSortField {
   field: NetworkDnsDirection;
 
-  sort: Direction;
+  direction: Direction;
 }
 
 // ====================================================
@@ -836,14 +828,6 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
-}
-
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
 }
 
 export enum NetworkDnsDirection {
@@ -1466,7 +1450,7 @@ export namespace GetNetworkDnsQuery {
 
     dnsBytesOut?: number | null;
 
-    name?: string | null;
+    dnsName?: string | null;
 
     queryCount?: number | null;
 

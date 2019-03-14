@@ -5,10 +5,10 @@
  */
 
 import numeral from '@elastic/numeral';
-import { get, isNil } from 'lodash/fp';
+import { isNil } from 'lodash/fp';
 import React from 'react';
 
-import { NetworkDnsEdges } from '../../../../graphql/types';
+import { NetworkDnsDirection, NetworkDnsItem } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -22,16 +22,16 @@ import * as i18n from './translations';
 export const getNetworkDnsColumns = (
   startDate: number,
   type: networkModel.NetworkType
-): Array<Columns<NetworkDnsEdges>> => [
+): Array<Columns<NetworkDnsItem>> => [
   {
+    field: `node.${NetworkDnsDirection.dnsName}`,
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: ({ node }) => {
-      const name = get('name', node);
+    render: dnsName => {
       const id = escapeDataProviderId(`networkDns-table--name-${name}`);
-      if (!isNil(name)) {
+      if (!isNil(dnsName)) {
         return (
           <DraggableWrapper
             key={id}
@@ -39,12 +39,12 @@ export const getNetworkDnsColumns = (
               and: [],
               enabled: true,
               id,
-              name,
+              name: dnsName.toString(),
               excluded: false,
               kqlQuery: '',
               queryMatch: {
                 field: 'dns.question.etld_plus_one',
-                value: escapeQueryValue(name),
+                value: escapeQueryValue(dnsName.toString()),
               },
               queryDate: {
                 from: startDate,
@@ -57,7 +57,7 @@ export const getNetworkDnsColumns = (
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                defaultToEmptyTag(name)
+                defaultToEmptyTag(dnsName)
               )
             }
           />
@@ -68,48 +68,56 @@ export const getNetworkDnsColumns = (
     },
   },
   {
-    name: i18n.COUNT,
+    field: `node.${NetworkDnsDirection.queryCount}`,
+    name: i18n.TOTAL_QUERIES,
+    sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (!isNil(node.queryCount)) {
-        return numeral(node.queryCount).format('0');
+    render: queryCount => {
+      if (!isNil(queryCount)) {
+        return numeral(queryCount).format('0');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: `node.${NetworkDnsDirection.uniqueDomains}`,
     name: i18n.UNIQUE_DOMAINS,
+    sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (!isNil(node.uniqueDomains)) {
-        return numeral(node.uniqueDomains).format('0');
+    render: uniqueDomains => {
+      if (!isNil(uniqueDomains)) {
+        return numeral(uniqueDomains).format('0');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: `node.${NetworkDnsDirection.dnsBytesIn}`,
     name: i18n.DNS_BYTES_IN,
+    sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (!isNil(node.dnsBytesIn)) {
-        return numeral(node.dnsBytesIn).format('0.000b');
+    render: dnsBytesIn => {
+      if (!isNil(dnsBytesIn)) {
+        return numeral(dnsBytesIn).format('0.000b');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
-    name: i18n.DNS_BYTES_IN,
+    field: `node.${NetworkDnsDirection.dnsBytesOut}`,
+    name: i18n.DNS_BYTES_OUT,
+    sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (!isNil(node.dnsBytesOut)) {
-        return numeral(node.dnsBytesOut).format('0.000b');
+    render: dnsBytesOut => {
+      if (!isNil(dnsBytesOut)) {
+        return numeral(dnsBytesOut).format('0.000b');
       } else {
         return getEmptyTagValue();
       }
