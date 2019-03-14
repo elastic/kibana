@@ -12,9 +12,7 @@ import { registerRoutes } from './server/routes';
 import { createQueueFactory } from './server/lib/create_queue';
 import { config as appConfig } from './server/config/config';
 import { checkLicenseFactory } from './server/lib/check_license';
-import { validateConfig } from './server/lib/validate_config';
-import { validateMaxContentLength } from './server/lib/validate_max_content_length';
-import { validateBrowser } from './server/lib/validate_browser';
+import { runValidations } from './server/lib/validate';
 import { exportTypesRegistryFactory } from './server/lib/export_types_registry';
 import { CHROMIUM, createBrowserDriverFactory, getDefaultChromiumSandboxDisabled } from './server/browsers';
 import { logConfiguration } from './log_configuration';
@@ -149,15 +147,14 @@ export const reporting = (kibana) => {
       server.expose('exportTypesRegistry', exportTypesRegistry);
 
       const config = server.config();
-      const logWarning = message => server.log(['reporting', 'warning'], message);
-
-      validateConfig(config, logWarning);
-      validateMaxContentLength(server, logWarning);
-      validateBrowser(browserFactory, logWarning);
-      logConfiguration(config, message => server.log(['reporting', 'debug'], message));
+      const logger = {
+        debug: message => server.log(['reporting', 'debug'], message),
+        warning: message => server.log(['reporting', 'warning'], message),
+      };
+      logConfiguration(config, logger);
+      runValidations(server, config, logger, browserFactory);
 
       const { xpack_main: xpackMainPlugin } = server.plugins;
-
       mirrorPluginStatus(xpackMainPlugin, this);
       const checkLicense = checkLicenseFactory(exportTypesRegistry);
       xpackMainPlugin.status.once('green', () => {
