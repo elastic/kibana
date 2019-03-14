@@ -16,13 +16,10 @@ interface IStackframeBase {
   vars?: {
     [key: string]: unknown;
   };
-}
-
-interface IStackframeWithoutLineContext extends IStackframeBase {
   line: {
     number: number;
-    context: undefined;
   };
+  [key: string]: unknown;
 }
 
 export interface IStackframeWithLineContext extends IStackframeBase {
@@ -32,6 +29,4 @@ export interface IStackframeWithLineContext extends IStackframeBase {
   };
 }
 
-export type IStackframe =
-  | IStackframeWithoutLineContext
-  | IStackframeWithLineContext;
+export type IStackframe = IStackframeBase | IStackframeWithLineContext;

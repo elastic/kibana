@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Kubernetes {
-  pod: { uid: string };
+import { ErrorRaw } from '../raw/ErrorRaw';
+import { Agent } from './fields/Agent';
+
+export interface APMError extends ErrorRaw {
+  agent: Agent;
 }
