@@ -174,6 +174,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     log,
     esClient,
     [lspIndexerFactory],
+    serverOptions,
     cancellationService
   ).bind();
 
