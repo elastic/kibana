@@ -1034,30 +1034,6 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-5.0.0.tgz#e6fe9e1aa8b00c93045178f78a6dd0d457d56fa8"
-  integrity sha512-WL6sp6u2Rt1O7a2exLU/RuDcRnpluPN6aQ2JexBl+G6mVyF8F5I3RGJKTJp3jOozOaODRY2ev+Nq57EydkjrKg==
-  dependencies:
-    classnames "^2.2.5"
-    core-js "^2.5.1"
-    focus-trap-react "^3.0.4"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "npm:@elastic/lodash@3.10.1-kibana1"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-color "^2.13.8"
-    react-datepicker v1.5.0
-    react-input-autosize "^2.2.1"
-    react-virtualized "^9.18.5"
-    react-vis "1.10.2"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
-    uuid "^3.1.0"
-
 "@elastic/eui@6.10.5":
   version "6.10.5"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-6.10.5.tgz#ab8f4a1aacc842056b322e84b77db645987c98ee"
@@ -1076,6 +1052,32 @@
     prop-types "^15.6.0"
     react-ace "^5.5.0"
     react-color "^2.13.8"
+    react-input-autosize "^2.2.1"
+    react-is "~16.3.0"
+    react-virtualized "^9.18.5"
+    react-vis "1.10.2"
+    resize-observer-polyfill "^1.5.0"
+    tabbable "^1.1.0"
+    uuid "^3.1.0"
+
+"@elastic/eui@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.4.0.tgz#e5f83c612674fc6f59e990f557e563be1409d25e"
+  integrity sha512-cQnsU3UeQ1s6F427vY53lzlh7mvNoPmIvPL24B5jH3JYaWULhIL1xSJXJgDSOSdrdHCxkXDD9Q8Y7256x4Xf4Q==
+  dependencies:
+    "@types/lodash" "^4.14.116"
+    "@types/numeral" "^0.0.25"
+    classnames "^2.2.5"
+    core-js "^2.5.1"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^4.17.11"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^5.5.0"
+    react-color "^2.13.8"
+    react-focus-lock "^1.17.7"
     react-input-autosize "^2.2.1"
     react-is "~16.3.0"
     react-virtualized "^9.18.5"
@@ -17119,9 +17121,9 @@ polished@^1.9.2:
   integrity sha512-mPocQrVUSiqQdHNZFGL1iHJmsR/etiv05Nf2oZUbya+GMsQkZVEBl5wonN+Sr/e9zQBEhT6yrMjxAUJ06eyocQ==
 
 popper.js@^1.14.1:
-  version "1.14.3"
-  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.3.tgz#1438f98d046acf7b4d78cd502bf418ac64d4f095"
-  integrity sha1-FDj5jQRqz3tNeM1QK/QYrGTU8JU=
+  version "1.14.7"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.14.7.tgz#e31ec06cfac6a97a53280c3e55e4e0c860e7738e"
+  integrity sha512-4q1hNvoUre/8srWsH7hnoSJ5xVmIL4qgz+s4qf2TnJIMyZFUFMGH+9vE7mXynAlHSZ/NdTmmow86muD0myUkVQ==
 
 portfinder@^1.0.9:
   version "1.0.13"
@@ -17935,16 +17937,6 @@ react-color@^2.13.8:
     reactcss "^1.2.0"
     tinycolor2 "^1.4.1"
 
-react-datepicker@v1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/react-datepicker/-/react-datepicker-1.5.0.tgz#7eacd9609313189c84a21bb7421486054939a4b2"
-  integrity sha512-Neh1rz0d1QeR7KuoTiYeR6oj73DJkqt0vuNSgfMuxXEwGmz/4sPynouYGo6gdKiQbxIXBJJ/FLDLHJEr5XNThw==
-  dependencies:
-    classnames "^2.2.5"
-    prop-types "^15.6.0"
-    react-onclickoutside "^6.7.1"
-    react-popper "^0.9.1"
-
 react-datetime@^2.14.0:
   version "2.15.0"
   resolved "https://registry.yarnpkg.com/react-datetime/-/react-datetime-2.15.0.tgz#a8f7da6c58b6b45dbeea32d4e8485db17614e12c"
@@ -17955,7 +17947,7 @@ react-datetime@^2.14.0:
     prop-types "^15.5.7"
     react-onclickoutside "^6.5.0"
 
-react-dom@^16.0.0, react-dom@^16.2.0:
+react-dom@^16.0.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.2.0.tgz#69003178601c0ca19b709b33a83369fe6124c044"
   integrity sha512-zpGAdwHVn9K0091d+hr+R0qrjoJ84cIBFL2uU60KvWBPfZ7LPSrfqviTxGHWN0sjPZb2hxWzMexwrvJdKePvjg==
@@ -17965,15 +17957,15 @@ react-dom@^16.0.0, react-dom@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-dom@^16.3.0:
-  version "16.7.0"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.7.0.tgz#a17b2a7ca89ee7390bc1ed5eb81783c7461748b8"
-  integrity sha512-D0Ufv1ExCAmF38P2Uh1lwpminZFRXEINJe53zRAbm4KPwSyd6DY/uDoS0Blj9jvPpn1+wivKpZYc8aAAN/nAkg==
+react-dom@^16.2.0, react-dom@^16.8.0:
+  version "16.8.2"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.2.tgz#7c8a69545dd554d45d66442230ba04a6a0a3c3d3"
+  integrity sha512-cPGfgFfwi+VCZjk73buu14pYkYBR1b/SRMSYqkLDdhSEHnSwcuYTPu6/Bh6ZphJFIk80XLvbSe2azfcRzNF+Xg==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.12.0"
+    scheduler "^0.13.2"
 
 react-dom@^16.6.0:
   version "16.6.0"
@@ -18106,18 +18098,10 @@ react-motion@^0.5.2:
     prop-types "^15.5.8"
     raf "^3.1.0"
 
-react-onclickoutside@^6.5.0, react-onclickoutside@^6.7.1:
+react-onclickoutside@^6.5.0:
   version "6.7.1"
   resolved "https://registry.yarnpkg.com/react-onclickoutside/-/react-onclickoutside-6.7.1.tgz#6a5b5b8b4eae6b776259712c89c8a2b36b17be93"
   integrity sha512-p84kBqGaMoa7VYT0vZ/aOYRfJB+gw34yjpda1Z5KeLflg70HipZOT+MXQenEhdkPAABuE2Astq4zEPdMqUQxcg==
-
-react-popper@^0.9.1:
-  version "0.9.5"
-  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-0.9.5.tgz#02a24ef3eec33af9e54e8358ab70eb0e331edd05"
-  integrity sha1-AqJO8+7DOvnlToNYq3DrDjMe3QU=
-  dependencies:
-    popper.js "^1.14.1"
-    prop-types "^15.6.1"
 
 react-portal@^3.2.0:
   version "3.2.0"
@@ -18344,7 +18328,7 @@ react-vis@^1.8.1:
     prop-types "^15.5.8"
     react-motion "^0.4.8"
 
-react@>=0.13.3, react@^16.2.0:
+react@>=0.13.3:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
   integrity sha512-ZmIomM7EE1DvPEnSFAHZn9Vs9zJl5A9H7el0EGTE6ZbW9FKe/14IYAlPbC8iH25YarEQxZL+E8VW7Mi7kfQrDQ==
@@ -18354,25 +18338,15 @@ react@>=0.13.3, react@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react@^16.3.0:
-  version "16.3.1"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.3.1.tgz#4a2da433d471251c69b6033ada30e2ed1202cfd8"
-  integrity sha512-NbkxN9jsZ6+G+ICsLdC7/wUD26uNbvKU/RAxEWgc9kcdKvROt+5d5j2cNQm5PSFTQ4WNGsR3pa4qL2Q0/WSy1w==
-  dependencies:
-    fbjs "^0.8.16"
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.0"
-
-react@^16.6.0:
-  version "16.6.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.6.0.tgz#b34761cfaf3e30f5508bc732fb4736730b7da246"
-  integrity sha512-zJPnx/jKtuOEXCbQ9BKaxDMxR0001/hzxXwYxG8septeyYGfsgAei6NgfbVgOhbY1WOP2o3VPs/E9HaN+9hV3Q==
+react@^16.2.0, react@^16.6.0, react@^16.8.0:
+  version "16.8.2"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.8.2.tgz#83064596feaa98d9c2857c4deae1848b542c9c0c"
+  integrity sha512-aB2ctx9uQ9vo09HVknqv3DGRpI7OIGJhCx3Bt0QqoRluEjHSaObJl+nG12GDdYH6sTgE7YiPJ6ZUyMx9kICdXw==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.10.0"
+    scheduler "^0.13.2"
 
 reactcss@1.2.3, reactcss@^1.2.0:
   version "1.2.3"
@@ -19566,14 +19540,6 @@ scheduler@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.10.0.tgz#7988de90fe7edccc774ea175a783e69c40c521e1"
   integrity sha512-+TSTVTCBAA3h8Anei3haDc1IRwMeDmtI/y/o3iBe3Mjl2vwYF9DtPDt929HyRmV/e7au7CLu8sc4C4W0VOs29w==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-
-scheduler@^0.12.0:
-  version "0.12.0"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.12.0.tgz#8ab17699939c0aedc5a196a657743c496538647b"
-  integrity sha512-t7MBR28Akcp4Jm+QoR63XgAi9YgCUmgvDHqf5otgAj4QvdoBE4ImCX0ffehefePPG+aitiYHp0g/mW6s4Tp+dw==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
