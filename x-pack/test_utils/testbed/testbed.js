@@ -16,6 +16,24 @@ const history = {
   replace: () => {}
 };
 
+/**
+ * Register a testBed for a React component to be tested inside a Redux provider
+ *
+ * @param {React.SFC} Component A react component to test
+ * @param {object} defaultProps Props to initialize the component with
+ * @param {object} store The Redux store to initialize the Redux Provider with
+ *
+ * @returns {object} with the following properties:
+ *
+ * - component The component wrapped by the Redux provider
+ * - exists() Method to check if a test subject exists in the mounted component
+ * - find() Method to find a test subject in the mounted componenet
+ * - setProp() Method to update the props on the wrapped component
+ * - getFormErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
+ * - getMetadataFromEuiTable() Method that will extract the table rows and column + their values from an Eui tablle component
+ * - form.setInput() Method to update a form input value
+ * - form.selectCheckBox() Method to select a form checkbox
+ */
 export const registerTestBed = (Component, defaultProps, store = {}) => (props) => {
   const component = mountWithIntl(
     <Provider store={store}>
@@ -69,7 +87,13 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
    * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
    */
   const getMetadataFromEuiTable = (tableTestSubject) => {
-    const rows = find(tableTestSubject)
+    const table = find(tableTestSubject);
+
+    if (!table.length) {
+      throw new Error(`Eui Table "${tableTestSubject}" not found.`);
+    }
+
+    const rows = table
       .find('tr')
       .slice(1) // we remove the first row as it is the table header
       .map(row => ({

@@ -319,6 +319,7 @@ export class FollowerIndicesTable extends PureComponent {
           cellProps={(item, column) => ({
             'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
           })}
+          data-test-subj="ccrFollowerIndexListTable"
         />
         {this.renderLoading()}
       </Fragment>

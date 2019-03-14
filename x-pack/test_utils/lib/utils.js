@@ -5,4 +5,4 @@
  */
 
 
-export const nextTick = async (time = 0) => new Promise((resolve) => setTimeout(resolve), time);
+export const nextTick = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));
