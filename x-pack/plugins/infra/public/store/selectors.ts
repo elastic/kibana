@@ -18,10 +18,7 @@ import {
   waffleTimeSelectors as localWaffleTimeSelectors,
 } from './local';
 import { State } from './reducer';
-import {
-  logEntriesSelectors as remoteLogEntriesSelectors,
-  logSummarySelectors as remoteLogSummarySelectors,
-} from './remote';
+import { logEntriesSelectors as remoteLogEntriesSelectors } from './remote';
 
 /**
  * local selectors
@@ -44,7 +41,6 @@ export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyou
 const selectRemote = (state: State) => state.remote;
 
 export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
-export const logSummarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
 
 /**
  * shared selectors
