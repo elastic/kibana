@@ -25,6 +25,8 @@ const Root = styled.div`
 const Symbol = styled.div<{ isContainer: boolean }>`
   cursor: pointer;
   display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
   align-items: center;
   height: 1.5rem;
   margin-left: ${props => (props.isContainer ? '0.75rem' : '2rem')};
