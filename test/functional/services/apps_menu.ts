@@ -30,9 +30,7 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
      */
     public async readLinks() {
       await this.ensureMenuOpen();
-      const appMenu = await testSubjects.find(
-        'navDrawerExpandButton-isCollapsed navDrawerAppsMenu'
-      );
+      const appMenu = await testSubjects.find('navDrawer');
       const $ = await appMenu.parseDomContent();
 
       const links: Array<{
@@ -67,7 +65,8 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
       try {
         log.debug(`click "${name}" app link`);
         const container = await testSubjects.find('navDrawer');
-        const link = await container.findByPartialLinkText(name);
+        // Text content is not visible or selectable (0px width) so we use an attr with th same value
+        const link = await container.findByCssSelector(`[aria-label='${name}']`);
         await link.click();
       } finally {
         await this.ensureMenuClosed();
