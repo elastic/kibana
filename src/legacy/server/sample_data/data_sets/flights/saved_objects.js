@@ -394,7 +394,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{}"
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
