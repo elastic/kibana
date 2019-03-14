@@ -20,7 +20,7 @@ import {
 import { AuthorizationMode, authorizationModeFactory } from './mode';
 import { privilegesFactory, PrivilegesService } from './privileges';
 
-interface AuthorizationService {
+export interface AuthorizationService {
   actions: Actions;
   application: string;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;

@@ -12,3 +12,4 @@ export { PrivilegeSerializer } from './privilege_serializer';
 // @ts-ignore
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 export { ResourceSerializer } from './resource_serializer';
+export { initAPIAuthorization } from './api_authorization';
