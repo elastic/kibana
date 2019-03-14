@@ -6,8 +6,8 @@
 
 import url from 'url';
 // @ts-ignore
-import { oncePerServer } from '../../../server/lib/once_per_server';
-import { ConfigObject, KbnServer } from '../../../types';
+import { oncePerServer } from '../server/lib/once_per_server';
+import { ConfigObject, KbnServer } from '../types';
 
 function getAbsoluteUrlFn(server: KbnServer) {
   const config: ConfigObject = server.config();
