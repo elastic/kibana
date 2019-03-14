@@ -8,7 +8,6 @@
     "declarationMap": true
   },
   "include": [
-    "./src/core/public/index.ts",
-    "./src/core/server/index.ts"
+    "./kibana.d.ts"
   ]
 }

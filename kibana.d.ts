@@ -20,8 +20,8 @@
 /**
  * All exports from TS source files (where the implementation is actually done in TS).
  */
-export * from './target/types/public';
-export * from './target/types/server';
+export * from './src/core/public';
+export * from './src/core/server';
 
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
