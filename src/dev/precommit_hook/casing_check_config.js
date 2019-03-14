@@ -138,7 +138,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/ui/public/assets/favicons/mstile-310x150.png',
   'src/legacy/ui/public/assets/favicons/mstile-310x310.png',
   'src/legacy/ui/public/assets/favicons/safari-pinned-tab.svg',
-  'src/legacy/ui/public/directives/__tests__/confirm-click.js',
   'src/legacy/ui/public/icons/beats-color.svg',
   'src/legacy/ui/public/icons/beats-gray.svg',
   'src/legacy/ui/public/icons/elasticsearch-color.svg',
