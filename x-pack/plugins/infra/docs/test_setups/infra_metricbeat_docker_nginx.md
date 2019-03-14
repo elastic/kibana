@@ -111,7 +111,7 @@ Enable the `docker` module of `metricbeat` with
 ```
 $ sudo ./metricbeat modules enable docker
 ```
-Check in `modules.d/docker.yml` that the docker metricsets are enabled (not commented out):
+Enable docker metricsets in `modules.d/docker.yml` if necessary (i.e. make sure they're not commented out):
 ```
 - module: docker
   metricsets:
