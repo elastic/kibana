@@ -39,8 +39,7 @@ uiModules
       restrict: 'E',
       template: aggParamsTemplate,
       scope: true,
-      require: '^form',
-      link: function ($scope, $el, attr, aggForm) {
+      link: function ($scope, $el, attr) {
         $scope.$bind('agg', attr.agg);
         $scope.$bind('groupName', attr.groupName);
         $scope.$bind('indexPattern', attr.indexPattern);
@@ -60,10 +59,6 @@ uiModules
         $scope.onParamChange = (agg, paramName, value) => {
           if(agg.params[paramName] !== value) {
             agg.params[paramName] = value;
-          }
-
-          if (aggForm && aggForm[paramName]) {
-            aggForm[paramName].$setDirty();
           }
         };
 
@@ -211,6 +206,10 @@ uiModules
 
           if (param.editorComponent) {
             attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
+            // The form should interact with reactified components as well.
+            // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
+            // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.
+            attrs['ng-model'] = `_internalNgModelState${param.name}`;
           }
 
           return $('<vis-agg-param-editor>')

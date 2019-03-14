@@ -37,6 +37,7 @@ uiModules
       // We can't use scope binding here yet, since quiet a lot of child directives arbitrary access
       // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
       scope: true,
+      require: '?^ngModel',
       template: function ($el, attrs) {
         if (attrs.editorComponent) {
           // Why do we need the `ng-if` here?
@@ -64,7 +65,7 @@ uiModules
           $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
         },
-        post: function ($scope) {
+        post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.config = config;
 
           $scope.optionEnabled = function (option) {
@@ -85,6 +86,10 @@ uiModules
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
+
+            if(ngModelCtrl && isFunction(ngModelCtrl.$setDirty)) {
+              ngModelCtrl.$setDirty();
+            }
           };
         }
       }
