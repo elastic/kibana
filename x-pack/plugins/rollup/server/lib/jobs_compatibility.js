@@ -53,12 +53,12 @@ export function mergeJobConfigurations(jobs = []) {
         const aggName = agg.agg;
         const aggDoesntExist = !allAggs[aggName];
         const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
-        const isDateHistogramAgg = aggName === 'date_histogram';
+        const aggIsntDateHistogram = aggName !== 'date_histogram';
 
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
-        if(aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
+        if(aggDoesntExist || (fieldDoesntExist && aggIsntDateHistogram)) {
           allAggs[aggName] = allAggs[aggName] || {};
           allAggs[aggName][fieldName] = { ...agg };
         }
