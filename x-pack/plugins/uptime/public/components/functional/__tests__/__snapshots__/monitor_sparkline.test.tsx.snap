@@ -4,6 +4,7 @@ exports[`MonitorSparkline component renders a series when there are down items 1
 <FlexibleEuiSeriesChart
   animateData={false}
   height={70}
+  showCrosshair={false}
   showDefaultAxis={false}
   stackBy="y"
   style={
