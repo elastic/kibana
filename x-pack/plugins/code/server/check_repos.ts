@@ -27,7 +27,7 @@ export async function checkRepos(
       if (!fs.existsSync(path)) {
         log.info(`can't find ${repo.uri} on local disk, cloning from remote.`);
         const payload = {
-          url: repo.uri,
+          url: repo.url,
         };
         await cloneWorker.enqueueJob(payload, {});
       }
