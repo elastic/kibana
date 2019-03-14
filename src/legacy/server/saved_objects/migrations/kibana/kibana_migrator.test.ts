@@ -64,7 +64,7 @@ describe('KibanaMigrator', () => {
       expect(result).toEqual({ status: 'skipped' });
     });
 
-    it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
+    it('waits for elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
       const clusterStub = jest.fn<any, any>(() => {
         throw new Error('Doh!');
