@@ -6,13 +6,13 @@
   align-content: center;
   align-self: start;
   width: 100%;
+}
 
-  &__split {
-    display: flex;
-    flex: 0 1 auto;
-    flex-direction: row;
-    overflow: hidden;
-    min-width: $tvbSplitBlockVisMinSize;
-    min-height: $tvbSplitBlockVisMinSize;
-  }
+.tvbSplitVis__split {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: row;
+  overflow: hidden;
+  min-width: $tvbSplitBlockVisMinSize;
+  min-height: $tvbSplitBlockVisMinSize;
 }
