@@ -44,8 +44,7 @@ function requestDocumentSearch(payload: DocumentSearchPayload) {
   }
 
   if (repoScope) {
-    const qs = repoScope.split(',').join('&repoScope=');
-    queryParams.repoScope = qs;
+    queryParams.repoScope = repoScope;
   }
 
   if (query && query.length > 0) {

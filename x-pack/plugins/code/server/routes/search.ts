@@ -25,9 +25,9 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
 
       let scope = [];
       if (typeof repoScope === 'string') {
-        scope.push(repoScope);
+        scope = repoScope.split(',');
       } else {
-        scope = repoScope;
+        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -57,9 +57,9 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
 
       let scope = [];
       if (typeof repoScope === 'string') {
-        scope.push(repoScope);
+        scope = repoScope.split(',');
       } else {
-        scope = repoScope;
+        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -91,9 +91,9 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
 
       let scope = [];
       if (typeof repoScope === 'string') {
-        scope.push(repoScope);
+        scope = repoScope.split(',');
       } else {
-        scope = repoScope;
+        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -125,9 +125,9 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
 
       let scope = [];
       if (typeof repoScope === 'string') {
-        scope.push(repoScope);
+        scope = repoScope.split(',');
       } else {
-        scope = repoScope;
+        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -156,9 +156,9 @@ export function symbolSearchRoute(server: hapi.Server, log: Logger) {
 
     let scope = [];
     if (typeof repoScope === 'string') {
-      scope.push(repoScope);
+      scope = repoScope.split(',');
     } else {
-      scope = repoScope;
+      return Boom.illegal('Invalid repoScope param');
     }
 
     const searchReq: SymbolSearchRequest = {
