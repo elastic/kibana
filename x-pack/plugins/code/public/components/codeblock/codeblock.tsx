@@ -4,23 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiText } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { EuiPanel } from '@elastic/eui';
 import { editor, IPosition, IRange } from 'monaco-editor';
 import React from 'react';
-import styled from 'styled-components';
 import { ResizeChecker } from 'ui/resize_checker';
 import { monaco } from '../../monaco/monaco';
 import { registerEditor } from '../../monaco/single_selection_helper';
 
-const U = styled.u`
-  color: ${theme.euiCodeBlockTagColor};
-`;
-
 interface Props {
   code: string;
-  file?: string;
+  fileComponent?: React.ReactNode;
   startLine?: number;
   language?: string;
   highlightRanges?: IRange[];
@@ -130,14 +123,7 @@ export class CodeBlock extends React.PureComponent<Props> {
     const linesCount = this.props.code.split('\n').length;
     return (
       <EuiPanel style={{ marginBottom: '2rem' }} paddingSize="s">
-        {this.props.file && (
-          <React.Fragment>
-            <EuiText>
-              <U>{this.props.file}</U>
-            </EuiText>
-            <EuiSpacer size="s" />
-          </React.Fragment>
-        )}
+        {this.props.fileComponent}
         <div ref={r => (this.el = r)} style={{ height: linesCount * 18 }} />
       </EuiPanel>
     );
