@@ -12,29 +12,29 @@ export function initAPIAuthorization(server: Server, authorization: Authorizatio
   const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
 
   server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
-    // if we don't have a license enabling security, don't validate this request
-    if (!mode.useRbac()) {
+    // if the api doesn't start with "/api/" or we aren't using RBAC for this request, just continue
+    if (!request.path.startsWith('/api/') || !mode.useRbac()) {
       return h.continue;
     }
 
-    // Enforce API restrictions for associated applications
-    if (request.path.startsWith('/api/')) {
-      const { tags = [] } = request.route.settings;
+    const { tags = [] } = request.route.settings;
+    const tagPrefix = 'access:';
+    const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
 
-      const tagPrefix = 'access:';
-      const actionTags = tags.filter(tag => tag.startsWith(tagPrefix));
-
-      if (actionTags.length > 0) {
-        const apiActions = actionTags.map(tag => actions.api.get(tag.substring(tagPrefix.length)));
-
-        const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
-        const checkPrivilegesResponse = await checkPrivileges(apiActions);
-        if (!checkPrivilegesResponse.hasAllRequested) {
-          return Boom.notFound();
-        }
-      }
+    // if there are no tags starting with "access:", just continue
+    if (actionTags.length === 0) {
+      return h.continue;
     }
 
-    return h.continue;
+    const apiActions = actionTags.map(tag => actions.api.get(tag.substring(tagPrefix.length)));
+    const checkPrivileges = checkPrivilegesDynamicallyWithRequest(request);
+    const checkPrivilegesResponse = await checkPrivileges(apiActions);
+
+    // we've actually authorized the request
+    if (checkPrivilegesResponse.hasAllRequested) {
+      return h.continue;
+    }
+
+    return Boom.notFound();
   });
 }
