@@ -8,6 +8,7 @@ import {
   EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
+  EuiIcon,
   // @ts-ignore missing type definition
   EuiInMemoryTable,
   EuiLink,
@@ -64,7 +65,10 @@ export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps
           }),
           render: (status: string, monitor: LatestMonitor) => (
             <div>
-              <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
+              <EuiHealth
+                color={status === 'up' ? 'success' : 'danger'}
+                style={{ display: 'block' }}
+              >
                 {status === 'up'
                   ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
                       defaultMessage: 'Up',
@@ -85,11 +89,13 @@ export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps
             defaultMessage: 'ID',
           }),
           render: (id: string, monitor: LatestMonitor) => (
-            <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
-              {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
-                ? monitor.ping.monitor.name
-                : id}
-            </Link>
+            <EuiLink>
+              <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
+                {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
+                  ? monitor.ping.monitor.name
+                  : id}
+              </Link>
+            </EuiLink>
           ),
         },
         {
@@ -99,11 +105,13 @@ export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps
           }),
           render: (url: string, monitor: LatestMonitor) => (
             <div>
-              <EuiLink href={url} target="_blank" color="subdued">
-                {url}
+              <EuiLink href={url} target="_blank" color="text">
+                {url} <EuiIcon size="s" type="popout" color="subdued" />
               </EuiLink>
               {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
-                <EuiText size="xs">{monitor.ping.monitor.ip}</EuiText>
+                <EuiText size="xs" color="subdued">
+                  {monitor.ping.monitor.ip}
+                </EuiText>
               ) : null}
             </div>
           ),

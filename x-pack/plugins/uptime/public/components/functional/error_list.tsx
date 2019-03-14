@@ -8,6 +8,7 @@ import {
   EuiBadge,
   EuiCodeBlock,
   EuiInMemoryTable,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextColor,
@@ -65,7 +66,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             defaultMessage: 'Monitor ID',
           }),
           render: (id: string, { name }: ErrorListItem) => (
-            <Link to={`/monitor/${id}`}>{name || id}</Link>
+            <EuiLink>
+              <Link to={`/monitor/${id}`}>{name || id}</Link>
+            </EuiLink>
           ),
           width: '25%',
         },
