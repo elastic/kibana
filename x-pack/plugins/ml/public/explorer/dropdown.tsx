@@ -6,7 +6,7 @@
 
 import { uniq } from 'lodash';
 
-import React, { useReducer } from 'react';
+import React, { useState } from 'react';
 
 import { EuiComboBox, EuiSpacer } from '@elastic/eui';
 
@@ -48,57 +48,17 @@ fields.forEach(field => {
   options.push(o);
 });
 
-export const actions = {
-  ADD_ITEM: 'addItem',
-  DELETE_ITEM: 'deleteItem',
-};
-
-export function createAddAction(dispatch: React.Dispatch<Action>) {
-  return (d: DropDownLabel[]) => dispatch({ type: actions.ADD_ITEM, payload: d[0].label });
-}
-
-export function createDeleteAction(dispatch: React.Dispatch<Action>) {
-  return (payload: string) => dispatch({ type: actions.DELETE_ITEM, payload });
-}
-
-interface Action {
-  type: string;
-  payload: any;
-}
-
-interface State {
-  list: string[];
-  selectedOptions: [];
-}
-
-export const initialState: State = {
-  list: [],
-  selectedOptions: [],
-};
-
-export function reducer(state: State, action: Action) {
-  switch (action.type) {
-    case actions.ADD_ITEM:
-      return {
-        ...state,
-        list: uniq([...state.list, action.payload]),
-      };
-    case actions.DELETE_ITEM:
-      return {
-        ...state,
-        list: state.list.filter(l => l !== action.payload),
-      };
-  }
-  return state;
-}
-
 export const DropDown = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [list, setList] = useState([] as Label[]);
 
-  const { list, selectedOptions } = state;
+  const addAction = (d: DropDownLabel[]) => {
+    const label: Label = d[0].label;
+    setList(uniq([...list, label]));
+  };
 
-  const addAction = createAddAction(dispatch);
-  const deleteAction = createDeleteAction(dispatch);
+  const deleteAction = (label: Label) => {
+    setList(list.filter(l => l !== label));
+  };
 
   return (
     <div style={{ textAlign: 'left' }}>
@@ -110,7 +70,7 @@ export const DropDown = () => {
         placeholder="Add an aggregation ..."
         singleSelection={{ asPlainText: true }}
         options={options}
-        selectedOptions={selectedOptions}
+        selectedOptions={[]}
         onChange={addAction}
         isClearable={false}
       />
