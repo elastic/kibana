@@ -18,4 +18,4 @@
  */
 
 export { importSavedObjects } from './import_saved_objects';
-export { resolveImportConflicts } from './resolve_import_conflicts';
+export { resolveImportErrors } from './resolve_import_errors';
