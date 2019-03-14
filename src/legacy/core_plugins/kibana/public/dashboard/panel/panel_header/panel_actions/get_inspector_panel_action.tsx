@@ -78,7 +78,7 @@ export function getInspectorPanelAction({
           }
         };
         // In case the inspector gets closed (otherwise), restore the original destroy function
-        session.on('closed', () => {
+        session.onClose.then(() => {
           embeddable.destroy = originalDestroy;
         });
       },

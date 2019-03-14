@@ -167,6 +167,10 @@ const basePathStart = {
   removeFromPath: jest.fn(),
 };
 
+const overlayStart = {
+  openFlyout: jest.fn(),
+};
+
 const uiSettingsStart: any = {};
 const chromeStart: any = {};
 const i18nStart: any = { Context: () => '' };
@@ -187,6 +191,7 @@ const defaultStartDeps = {
   basePath: basePathStart,
   uiSettings: uiSettingsStart,
   chrome: chromeStart,
+  overlay: overlayStart,
 };
 
 afterEach(() => {
