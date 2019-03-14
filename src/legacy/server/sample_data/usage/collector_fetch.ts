@@ -48,7 +48,7 @@ export function fetchProvider(index: string) {
         query: { term: { type: { value: 'sample-data-telemetry' } } },
         _source: { includes: ['sample-data-telemetry', 'type', 'updated_at'] },
       },
-      filterPath: ['hits.hits._id', 'hits.hits._source'],
+      filter_path: 'hits.hits._id,hits.hits._source',
       ignore: [404],
     });
 
