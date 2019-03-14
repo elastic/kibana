@@ -34,7 +34,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.tooltip',
   'ui.bootstrap.popover',
   'ui.bootstrap.progressbar',
-  'ui.bootstrap.rating',
   'ui.bootstrap.tabs',
   'ui.bootstrap.timepicker',
   'ui.bootstrap.typeahead'
@@ -52,7 +51,6 @@ angular.module('ui.bootstrap.tpls', [
   'template/progressbar/bar.html',
   'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
-  'template/rating/rating.html',
   'template/tabs/tab.html',
   'template/tabs/tabset.html',
   'template/timepicker/timepicker.html',
@@ -70,7 +68,6 @@ import './pagination/pagination';
 import './popover/popover';
 import './position/position';
 import './progressbar/progressbar';
-import './rating/rating';
 import './tabs/tabs';
 import './timepicker/timepicker';
 import './tooltip/tooltip';
@@ -141,12 +138,6 @@ import progressbar from './progressbar/progressbar.html';
 
 angular.module('template/progressbar/progressbar.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/progressbar/progressbar.html', progressbar);
-}]);
-
-import rating from './rating/rating.html';
-
-angular.module('template/rating/rating.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/rating/rating.html', rating);
 }]);
 
 import tab from './tabs/tab.html';
