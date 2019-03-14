@@ -2,23 +2,22 @@
 == Working with remote clusters
 
 {kib} *Management* provides user interfaces for working with data from remote 
-clusters and managing the cross cluster replication process. You can replicate indices from a 
+clusters and managing the {ccr} process. You can replicate indices from a 
 leader remote cluster to a follower index in a local cluster. The local follower indices
 can be used to provide remote backups for disaster recovery or for geo-proximite copies of data.
 
 Before using these features, you should be familiar with the following concepts:
 
-* {xpack-ref}/xpack-ccr.html[Cross cluster replication]
-* {ref}/modules-cross-cluster-search.html[Cross cluster search]
-* {xpack-ref}/cross-cluster-configuring.html[Cross cluster security requirements]
+* {stack-ov}/xpack-ccr.html[{ccr-cap}]
+* {ref}/modules-cross-cluster-search.html[{ccs-cap}]
+* {stack-ov}/cross-cluster-configuring.html[Cross-cluster security requirements]
 
 [float]
 [[managing-remote-clusters]]
 == Managing remote clusters 
 
 *Remote clusters* helps you manage remote clusters for use with 
-cross cluster search and cross cluster replication. You can add and remove remote 
-clusters and check their connectivity. 
+{ccs} and {ccr}. You can add and remove remote clusters and check their connectivity. 
 
 Before you use this feature, you should be familiar with the concept of 
 {ref}/modules-remote-clusters.html[remote clusters].  
@@ -32,16 +31,16 @@ from the *Remote clusters* list view.
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
 
-Once a remote cluster is registered, you can use the tools under *Cross Cluster Replication* 
+Once a remote cluster is registered, you can use the tools under *{ccr-cap}* 
 to add and manage follower indices on the local cluster, and replicate data from 
 indices on the remote cluster based on an auto-follow index pattern.
 
 [float]
 [[managing-cross-cluster-replication]]
-== Managing cross cluster replication
- 
-*Cross Cluster Replication* helps you create and manage the cross cluster 
-replication process. If you want to replicate data from existing indices, or set up 
+== [xpack]#Managing {ccr}#
+
+*{ccr-cap}* helps you create and manage the {ccr} process. 
+If you want to replicate data from existing indices, or set up 
 local followers on a case-by-case basis, go to *Follower indices*. 
 If you want to automatically detect and follow new indices when they are created 
 on a remote cluster, you can do so from *Auto-follow patterns*. 
@@ -56,10 +55,10 @@ a given remote cluster, and monitor whether the replication is active.
 
 Before you use these features, you should be familiar with the following concepts:
 
-* {xpack-ref}/ccr-requirements.html[Requirements for leader indices] 
-* {xpack-ref}/ccr-auto-follow.html[Automatically following indices]
+* {stack-ov}/ccr-requirements.html[Requirements for leader indices] 
+* {stack-ov}/ccr-auto-follow.html[Automatically following indices]
 
-To get started, go to *Management > Elasticsearch > Cross Cluster Replication*. 
+To get started, go to *Management > Elasticsearch > {ccr-cap}*. 
 
 [role="screenshot"]
 image::images/auto_follow_pattern.png[][UI for adding an auto-follow pattern]
