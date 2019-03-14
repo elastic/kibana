@@ -9,7 +9,7 @@ import { resolve } from 'path';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
-import { SecretService } from './server';
+import { CONFIG_KEY_NAME, SecretService } from './server';
 
 export const secretService = (kibana: any) => {
   return new kibana.Plugin({
@@ -39,11 +39,10 @@ export const secretService = (kibana: any) => {
     async init(server: any) {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
-      const configKey = 'xpack.secret_service.secret';
       const { keystore } = server;
 
-      if (!keystore.has(configKey)) {
-        keystore.add(configKey, crypto.randomBytes(128).toString('hex'));
+      if (!keystore.has(CONFIG_KEY_NAME)) {
+        keystore.add(CONFIG_KEY_NAME, crypto.randomBytes(128).toString('hex'));
         if (!keystore.exists()) {
           warn(`Keystore missing, new keystore created ${keystore.path}`);
         }
@@ -61,17 +60,16 @@ export const secretService = (kibana: any) => {
       if (auditEnabled) {
         auditor = new AuditLogger(server, this.id);
       }
-      const encryptionKey = keystore.get(configKey);
+      const encryptionKey = keystore.get(CONFIG_KEY_NAME);
       const service = new SecretService(repository, 'secret', encryptionKey, auditor);
 
       // validate key used
-      const invalidMessage =
-        'Could not validate encryption key, please make sure that the right key is in the keystore!';
-
       const valid = await service.validateKey();
 
       if (!valid) {
-        throw new Error(invalidMessage);
+        throw new Error(
+          `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
+        );
       }
       server.expose('secretService', service);
     },

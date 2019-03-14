@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecretService } from './service/secret_service';
+export { CONFIG_KEY_NAME, SecretService } from './service/secret_service';

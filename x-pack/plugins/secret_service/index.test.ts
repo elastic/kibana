@@ -5,7 +5,7 @@
  */
 
 import { secretService } from './';
-import { Keystore, PluginSpec } from './mocks';
+import { PluginSpec } from './mocks';
 
 describe('The SecretService', function TestSecretService() {
   const mockKbn = {
@@ -78,9 +78,8 @@ describe('The SecretService', function TestSecretService() {
       },
     };
 
-    stubConfigGet.mockReturnValueOnce('test-kibana-keystore');
+    stubKeystore.get.mockReturnValue('bogusencrpyptionley');
     stubConfigGet.mockReturnValueOnce(false);
-    stubConfigGet.mockReturnValue('bogusencryptionkey');
     await subject.init(core);
     expect(core.expose).toHaveBeenCalledWith('secretService', expect.any(Object));
   });

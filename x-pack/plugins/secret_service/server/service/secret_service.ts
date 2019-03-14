@@ -6,33 +6,29 @@
 
 // @ts-ignores
 import nodeCrypto from '@elastic/node-crypto';
-import crypto from 'crypto';
-import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
+import { SavedObjectsRepository } from 'src/legacy/server/saved_objects';
+import uuid from 'uuid';
 // @ts-ignore
 import { AuditLogger } from '../../../server/lib/audit_logger';
 
 type SSEvents = 'secret_object_created' | 'secret_object_accessed' | 'secret_object_decrypt_failed';
 type SecretId = Promise<string>;
 
+export const CONFIG_KEY_NAME = 'xpack.secret_service.secret';
+
 export class SecretService {
   public readonly hideAttribute: (deets: any) => SecretId;
   public readonly unhideAttribute: (deets: any) => any;
   public readonly validateKey: () => Promise<boolean>;
-  private readonly type: string;
-  private readonly auditor?: AuditLogger;
   private readonly hideAttributeWithId: (id: string, toEncrypt: any) => SecretId;
 
   constructor(
-    savedObjectsClient: SavedObjectsClient,
-    type: string,
-    key?: Buffer,
-    auditor?: AuditLogger
+    private readonly savedObjectsRepository: SavedObjectsRepository,
+    private readonly type: string,
+    private readonly encryptionKey: string,
+    private readonly auditor?: AuditLogger
   ) {
-    this.type = type;
-    this.auditor = auditor;
-    key = key || crypto.randomBytes(128);
-    const crypt = nodeCrypto({ encryptionKey: key.toString('hex') });
-
+    const crypt = nodeCrypto({ encryptionKey: this.encryptionKey });
     const logEvent = (event: SSEvents, message?: string) => {
       if (this.auditor) {
         this.auditor.log(event, message);
@@ -40,7 +36,7 @@ export class SecretService {
     };
 
     this.hideAttribute = async (toEncrypt: any) => {
-      return this.hideAttributeWithId(crypto.randomBytes(32).toString('base64'), toEncrypt);
+      return this.hideAttributeWithId(uuid.v4(), toEncrypt);
     };
 
     this.hideAttributeWithId = async (id: string, toEncrypt: any) => {
@@ -48,33 +44,25 @@ export class SecretService {
       const secret = await crypt.encrypt(toEncrypt);
 
       // lastly put the encrypted details into the saved object
-      const saved = await savedObjectsClient.create(this.type, { secret }, { id });
+      const saved = await this.savedObjectsRepository.create(this.type, { secret }, { id });
 
-      logEvent(
-        'secret_object_created',
-        `Secret object id:${saved.id} was created at ${new Date()}`
-      );
+      logEvent('secret_object_created', `Secret object id:${saved.id} was created`);
 
       return saved.id;
     };
 
     this.unhideAttribute = async (id: string) => {
-      const encKey = 'secret';
-
       // retrieve the saved object by id.
-      const savedObject: any = await savedObjectsClient.get(this.type, id);
+      const savedObject: any = await this.savedObjectsRepository.get(this.type, id);
 
       // extract the hidden secret value
-      const toDecrypt = savedObject.attributes[encKey];
+      const toDecrypt = savedObject.attributes.secret;
 
       // decrypt the details
       try {
         const unhidden = await crypt.decrypt(toDecrypt);
 
-        logEvent(
-          'secret_object_accessed',
-          `Saved object id:${savedObject.id} accessed at ${new Date()}`
-        );
+        logEvent('secret_object_accessed', `Saved object id:${savedObject.id} accessed`);
 
         return {
           ...savedObject,
@@ -85,7 +73,7 @@ export class SecretService {
       } catch (e) {
         logEvent(
           'secret_object_decrypt_failed',
-          "Kibana's encryption key is invalid, please ensure that this instance has the right keystore!"
+          `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
         );
         const err = new Error(`SecretService Decrypt Failed: ${e.message}`);
         err.stack = e.stack;
@@ -102,7 +90,7 @@ export class SecretService {
         objToValidate = await this.hideAttributeWithId(id, { version: secret });
       } catch (e) {
         // creation failed for some reason
-        if (!savedObjectsClient.errors.isConflictError(e)) {
+        if (!this.savedObjectsRepository.errors.isConflictError(e)) {
           // because there was already a document with the id
           throw e;
         }
