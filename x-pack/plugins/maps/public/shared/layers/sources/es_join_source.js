@@ -144,12 +144,9 @@ export class ESJoinSource extends AbstractESSource {
       return configState.type === 'count';
     });
     const countPropertyName = _.get(countConfigState, 'id');
-
-    const propertiesMap = extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName);
-
     return {
       rawData: rawEsData,
-      propertiesMap: propertiesMap,
+      propertiesMap: extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName),
     };
   }
 
