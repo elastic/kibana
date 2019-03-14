@@ -37,7 +37,6 @@ import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 // @ts-ignore not TS yet
 import { FilterBarProvider } from './filter_bar';
-// @ts-ignore not TS yet
 import { FindProvider } from './find';
 // @ts-ignore not TS yet
 import { FlyoutProvider } from './flyout';
