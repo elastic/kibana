@@ -50,7 +50,7 @@ export async function ApplitoolsProvider({ getService }: FtrProviderContext) {
   const eyes = new Eyes();
   eyes.setApiKey(process.env.PERCY_TOKEN);
   eyes.setHostingApp('Chrome');
-  eyes.setBatch(process.env.PERCY_PARALLEL_NONCE);
+  eyes.setBatch(process.env.PERCY_PARALLEL_NONCE, process.env.PERCY_PARALLEL_NONCE);
   eyes.setParentBranchName(pkg.branch);
   eyes.setBranchName(branchName);
   eyes.setLogHandler(new FtrLogHandler(log));
