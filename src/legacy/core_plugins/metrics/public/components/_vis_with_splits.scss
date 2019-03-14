@@ -1,11 +1,17 @@
 .tvbSplitVis {
   display: flex;
   flex: 1 0 auto;
-}
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  width: 100%;
 
-.tvbSplitVis__split {
-  display: flex;
-  flex: 1 0 0;
-  flex-direction: column;
-  overflow: hidden;
+  &__split {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: row;
+    overflow: hidden;
+    min-width: $tvbSplitBlockVisMinSize;
+    min-height: $tvbSplitBlockVisMinSize;
+  }
 }
