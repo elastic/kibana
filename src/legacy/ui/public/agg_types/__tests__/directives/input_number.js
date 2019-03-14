@@ -19,7 +19,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import '../input_number';
+import '../../directives/input_number';
 
 describe('Number input directive', function () {
   let $compile;
