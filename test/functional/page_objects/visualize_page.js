@@ -21,7 +21,7 @@ import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/publ
 import Bluebird from 'bluebird';
 import expect from 'expect.js';
 
-export function VisualizePageProvider({ getService, getPageObjects }) {
+export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
   const config = getService('config');
   const testSubjects = getService('testSubjects');
@@ -29,6 +29,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const log = getService('log');
   const inspector = getService('inspector');
+  const screenshot = getService('screenshots');
   const table = getService('table');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
@@ -740,6 +741,39 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const chartTypes = await find.allByCssSelector('.y > g');
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getVisibleText());
       return await Promise.all(getChartTypesPromises);
+    }
+
+    /**
+     * Removes chrome and takes a small screenshot of a vis to compare against a baseline.
+     * @param {string} name The name of the baseline image.
+     * @param {object} opts Options object.
+     * @param {number} opts.threshold Threshold for allowed variance when comparing images.
+     */
+    async expectVisToMatchScreenshot(name, opts = { threshold: 0.05 }) {
+      log.debug(`expectVisToMatchScreenshot(${name})`);
+
+      // Collapse sidebar and inject some CSS to hide the nav so we have a focused screenshot
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      await browser.execute(`
+        var el = document.createElement('style');
+        el.id = '__data-test-style';
+        el.innerHTML = '[data-test-subj="headerGlobalNav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="top-nav"] { display: none; } ';
+        el.innerHTML += '[data-test-subj="experimentalVisInfo"] { display: none; } ';
+        document.body.appendChild(el);
+      `);
+
+      const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+
+      // Reset the chart to its original state
+      await browser.execute(`
+        var el = document.getElementById('__data-test-style');
+        document.body.removeChild(el);
+      `);
+      await this.clickEditorSidebarCollapse();
+      await this.waitForVisualizationRenderingStabilized();
+      expect(percentDifference).to.be.lessThan(opts.threshold);
     }
 
     /*
