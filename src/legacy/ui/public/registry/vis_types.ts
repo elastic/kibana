@@ -17,5 +17,17 @@
  * under the License.
  */
 
-export { importSavedObjects, resolveImportConflicts } from './import';
-export { getSortedObjectsForExport } from './export';
+import { VisType } from '../vis';
+import { uiRegistry, UIRegistry } from './_registry';
+
+interface VisTypesRegistryAccessors {
+  byName: { [typeName: string]: VisType };
+}
+
+export type VisTypesRegistry = UIRegistry<VisType> & VisTypesRegistryAccessors;
+
+export const VisTypesRegistryProvider = uiRegistry<VisType, VisTypesRegistryAccessors>({
+  name: 'visTypes',
+  index: ['name'],
+  order: ['title'],
+});

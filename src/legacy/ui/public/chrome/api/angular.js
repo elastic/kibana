@@ -34,6 +34,12 @@ const URL_LIMIT_WARN_WITHIN = 1000;
 export function initAngularApi(chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
 
+  internals.disableAutoAngularUrlEncodingFix = false;
+  chrome.disableAutoAngularUrlEncodingFix = () => {
+    internals.disableAutoAngularUrlEncodingFix = true;
+    return chrome;
+  };
+
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
 
