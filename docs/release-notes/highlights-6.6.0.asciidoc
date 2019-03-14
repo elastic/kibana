@@ -17,7 +17,7 @@ bug fixes and other changes.
 For increased stability, you can now define multiple {es} nodes for {kib}. This 
 prevents {kib} from being tied to a single {es} node while allowing for the 
 requests to be distributed over multiple nodes in the cluster.  Simply set 
-`elasticsearch.host` in your kibana.yml file to the URLs of the {es} nodes you 
+`elasticsearch.hosts` in your kibana.yml file to the URLs of the {es} nodes you 
 want to use.  You can also configure {kib} to automatically discover other nodes 
 in the cluster (`elasticsearch.sniffOnStart`) or on an interval (`elasticsearch.sniffInterval`).
 For more information, see {kibana-ref}/settings.html[Kibana configuration settings].
