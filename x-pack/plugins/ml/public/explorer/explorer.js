@@ -102,11 +102,12 @@ function getExplorerDefaultState() {
     noInfluencersConfigured: true,
     noJobsFound: true,
     overallSwimlaneData: [],
-    queryString: undefined,
+    queryString: '',
     selectedCells: null,
     selectedJobs: null,
     swimlaneViewByFieldName: undefined,
     tableData: {},
+    tableQueryString: '',
     viewByLoadedForTimeFormatted: null,
     viewBySwimlaneData: getDefaultViewBySwimlaneData(),
     viewBySwimlaneDataLoading: false,
@@ -918,8 +919,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    // TODO: Should always update the query string shown in the kqlFilterBar as the value
-    // TODO: pull out query removal into utils function and test
     applyFilterFromTable = (fieldName, fieldValue, action) => {
       let newQueryString = '';
       const { queryString } = this.state;
@@ -935,8 +934,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           const queryPattern = new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i', 'g');
           newQueryString = this.state.queryString.replace(queryPattern, '');
           // match 'and' or 'or' at the start/end of the string
-          const endPattern = /\s(and|or)\s?$/ig;
-          const startPattern = /^\s?(and|or)\s/ig;
+          const endPattern = /\s(and|or)\s*$/ig;
+          const startPattern = /^\s*(and|or)\s/ig;
           // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
           newQueryString = newQueryString.replace(endPattern, '');
           newQueryString = newQueryString.replace(startPattern, '');
@@ -950,7 +949,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
       filteredFields,
-      queryString }) => {
+      queryString,
+      tableQueryString }) => {
       const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
@@ -961,7 +961,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           filteredFields: [],
           influencersFilterQuery: undefined,
           maskAll: false,
-          queryString: undefined,
+          queryString: '',
+          tableQueryString: '',
           ...getClearedSelectedAnomaliesState()
         };
 
@@ -980,13 +981,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         }
 
         this.props.appStateHandler(APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS,
-          { influencersFilterQuery, filterActive: true, filteredFields, queryString });
+          { influencersFilterQuery, filterActive: true, filteredFields, queryString, tableQueryString });
 
         this.updateExplorer({
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
           queryString,
+          tableQueryString,
           maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
             filteredFields.includes(selectedViewByFieldName) === false),
           swimlaneViewByFieldName: selectedViewByFieldName
@@ -1017,6 +1019,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         selectedCells,
         swimlaneViewByFieldName,
         tableData,
+        tableQueryString,
         viewByLoadedForTimeFormatted,
         viewBySwimlaneData,
         viewBySwimlaneDataLoading,
@@ -1025,8 +1028,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const loading = this.props.loading || this.state.loading;
 
       const swimlaneWidth = getSwimlaneContainerWidth(noInfluencersConfigured);
-
-      const filterBarPlaceholder = filterPlaceHolder;
 
       if (loading === true) {
         return (
@@ -1066,7 +1067,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 indexPattern={indexPattern}
                 onSubmit={this.applyInfluencersFilterQuery}
                 initialValue={queryString}
-                placeholder={filterBarPlaceholder}
+                placeholder={filterPlaceHolder}
+                valueExternal={tableQueryString}
               />
             </div>}
 

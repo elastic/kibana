@@ -44,6 +44,7 @@ export function getKqlQueryValues(inputValue, indexPattern) {
     influencersFilterQuery: query,
     filteredFields,
     queryString: inputValue,
-    isAndOperator
+    isAndOperator,
+    tableQueryString: inputValue
   };
 }
