@@ -1,12 +1,12 @@
-[[managing-remote-clusters]]
-== Managing Remote Clusters
+[[working-remote-clusters]]
+== Working with remote clusters
 
 {kib} *Management* provides two user interfaces for working with data from remote 
 clusters. 
 
 *Remote Clusters* helps you manage remote clusters for use with 
-{ref}/modules-cross-cluster-search.html[cross cluster search] and 
-{xpack-ref}/xpack-ccr.html[cross cluster replication]. You can add and remove remote 
+{ref}/modules-cross-cluster-search.html[{ccs}] and 
+{stack-ov}/xpack-ccr.html[{ccr}]. You can add and remove remote 
 clusters and check their connectivity. 
 
 Go to *Management > Elasticsearch > Remote Clusters* to get started. 
@@ -14,13 +14,14 @@ Go to *Management > Elasticsearch > Remote Clusters* to get started.
 [role="screenshot"]
 image::images/add_remote_cluster.png[][UI for adding a remote cluster]
 
+[float]
+[[managing-cross-cluster-replication]]
+=== [xpack]#Managing {ccr}#
+*{ccr-cap}* includes tools to help you create and manage the {ccr} process.  
+You can follow an index pattern on the remote cluster for auto-discovery and then 
+replicate new indices in the local cluster that match the auto-follow pattern.
 
-*Cross Cluster Replication* includes tools to help you create and manage the remote 
-replication process.  You can follow an index pattern on the remote cluster for 
-auto-discovery and then replicate new indices in the local cluster that match the 
-auto-follow pattern.
-
-Go to *Management > Elasticsearch > Cross Cluster Replication* to get started. 
+Go to *Management > Elasticsearch > {ccr-cap}* to get started. 
 
 [role="screenshot"]
 image::images/auto_follow_pattern.png[][UI for adding an auto-follow pattern]
