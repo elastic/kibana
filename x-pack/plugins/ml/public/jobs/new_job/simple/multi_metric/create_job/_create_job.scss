@@ -112,7 +112,7 @@
     display: flex;
     margin-bottom: 25px;
     position: relative;
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: $euiColorLightestShade;
     transition: opacity 0.5s ;
 
     .status-label {
@@ -178,32 +178,32 @@ ml-multi-metric-job-chart {
   }
 
   .area.bounds {
-    fill: rgba(50, 167, 194, 0.25);
+    fill: transparentize($euiColorSecondary, .8);
   }
 
   .values-line {
     fill: none;
-    stroke: #32a7c2;
+    stroke: $euiColorSecondary;
     stroke-width: 2;
   }
 
   .values-dots circle {
-    fill: #32a7c2;
+    fill: $euiColorSecondary;
     stroke-width: 0;
   }
 
   .metric-value {
     opacity: 1;
-    fill: #32a7c2;
+    fill: $euiColorSecondary;
   }
 
   .context-chart .axis text {
     font-size: 10px;
-    fill: #333333;
+    fill: $euiTextColor;
   }
 
   .area.context {
-    fill: #e4e4e4;
+    fill: $euiColorLightestShade;
   }
 
   .swimlane .axis text {
@@ -237,7 +237,7 @@ ml-multi-metric-job-chart {
     min-width: 70px;
     margin-bottom: -5px;
     margin-left: 49px;
-    background-color: #FFFFFF;
+    background-color: $euiColorEmptyShade;
     height: 2px;
     border-radius: 0px;
   }
@@ -246,7 +246,7 @@ ml-multi-metric-job-chart {
     text-align: right;
     line-height: 18px;
     transition: none;
-    background-color: #32a7c2;
+    background-color: $euiColorSecondary;
   }
 }
 
