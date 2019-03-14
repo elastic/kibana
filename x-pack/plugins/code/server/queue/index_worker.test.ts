@@ -6,7 +6,6 @@
 
 import sinon from 'sinon';
 
-import { WorkerReservedProgress } from '../../model';
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -187,8 +186,6 @@ test('On index job completed.', async () => {
     },
     {
       uri: 'github.com/elastic/kibana',
-      progress: WorkerReservedProgress.COMPLETED,
-      timestamp: new Date(),
     }
   );
 

@@ -6,13 +6,7 @@
 
 import moment from 'moment';
 
-import {
-  IndexStats,
-  IndexWorkerResult,
-  RepositoryUri,
-  WorkerProgress,
-  WorkerReservedProgress,
-} from '../../model';
+import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -79,13 +73,18 @@ export class IndexWorker extends AbstractWorker {
     return await this.objectClient.setRepositoryLspIndexStatus(uri, progress);
   }
 
-  public async onJobCompleted(job: Job, res: WorkerProgress) {
-    const { uri } = job.payload;
-    await this.objectClient.updateRepositoryLspIndexStatus(uri, {
-      progress: WorkerReservedProgress.COMPLETED,
+  public async updateProgress(uri: RepositoryUri, progress: number) {
+    const p: WorkerProgress = {
+      uri,
+      progress,
       timestamp: new Date(),
-    });
-    return await super.onJobCompleted(job, res);
+    };
+    try {
+      return await this.objectClient.updateRepositoryLspIndexStatus(uri, p);
+    } catch (error) {
+      this.log.error(`Update index progress error.`);
+      this.log.error(error);
+    }
   }
 
   protected getTimeoutMs(_: any) {

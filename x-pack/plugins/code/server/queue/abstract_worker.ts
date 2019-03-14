@@ -26,13 +26,15 @@ export abstract class AbstractWorker implements Worker {
   // Assemble jobs, for now most of the job object construction should be the same.
   public createJob(payload: any, options: any): Job {
     const timestamp = moment().valueOf();
-    if (options.timeout !== undefined || options.timeout !== null) {
+    if (options.timeout !== undefined && options.timeout !== null) {
+      // If the job explicitly specify the timeout, then honor it.
       return {
         payload,
         options,
         timestamp,
       };
     } else {
+      // Otherwise, use a default timeout.
       return {
         payload,
         options: {
@@ -55,7 +57,7 @@ export abstract class AbstractWorker implements Worker {
   public async enqueueJob(payload: any, options: any) {
     const job: Job = this.createJob(payload, options);
     return new Promise((resolve, reject) => {
-      const jobInternal: JobInternal<Job> = this.queue.addJob(this.id, job, {});
+      const jobInternal: JobInternal<Job> = this.queue.addJob(this.id, job, job.options);
       jobInternal.on(esqueueEvents.EVENT_JOB_CREATED, async (createdJob: JobInternal<Job>) => {
         if (createdJob.id === jobInternal.id) {
           await this.onJobEnqueued(job);

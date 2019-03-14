@@ -76,7 +76,11 @@ export abstract class AbstractIndexer implements Indexer {
         failCount += 1;
       }
 
-      if (progressReporter) {
+      // Double check if the the indexer is cancelled or not, because the
+      // processRequest process could take fairly long and during this time
+      // the index job might have been cancelled already. In this case,
+      // we shall not update the progress.
+      if (!this.isCancelled() && progressReporter) {
         this.log.debug(`Update progress for ${this.type} indexer.`);
         // Update progress if progress reporter has been provided.
         const progress: IndexProgress = {

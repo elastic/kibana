@@ -126,17 +126,36 @@ export const status = handleActions(
       }),
     [String(updateCloneProgress)]: (state: StatusState, action: any) =>
       produce<StatusState>(state, draft => {
+        const progress = action.payload.progress;
+        let s = RepoState.CLONING;
+        if (
+          progress === WorkerReservedProgress.ERROR ||
+          progress === WorkerReservedProgress.TIMEOUT
+        ) {
+          s = RepoState.CLONE_ERROR;
+        } else if (progress === WorkerReservedProgress.COMPLETED) {
+          s = RepoState.READY;
+        }
         draft.status[action.payload.repoUri] = {
           ...action.payload,
-          state: RepoState.CLONING,
+          state: s,
         };
       }),
     [String(updateIndexProgress)]: (state: StatusState, action: any) =>
       produce<StatusState>(state, draft => {
         const progress = action.payload.progress;
+        let s = RepoState.INDEXING;
+        if (
+          progress === WorkerReservedProgress.ERROR ||
+          progress === WorkerReservedProgress.TIMEOUT
+        ) {
+          s = RepoState.INDEX_ERROR;
+        } else if (progress === WorkerReservedProgress.COMPLETED) {
+          s = RepoState.READY;
+        }
         draft.status[action.payload.repoUri] = {
           ...action.payload,
-          state: progress < WorkerReservedProgress.COMPLETED ? RepoState.INDEXING : RepoState.READY,
+          state: s,
         };
       }),
     [String(updateDeleteProgress)]: (state: StatusState, action: any) =>
@@ -145,9 +164,17 @@ export const status = handleActions(
         if (progress === WorkerReservedProgress.COMPLETED) {
           delete draft.status[action.payload.repoUri];
         } else {
+          let s = RepoState.DELETING;
+          if (
+            progress === WorkerReservedProgress.ERROR ||
+            progress === WorkerReservedProgress.TIMEOUT
+          ) {
+            s = RepoState.DELETE_ERROR;
+          }
+
           draft.status[action.payload.repoUri] = {
             ...action.payload,
-            state: RepoState.DELETING,
+            state: s,
           };
         }
       }),
