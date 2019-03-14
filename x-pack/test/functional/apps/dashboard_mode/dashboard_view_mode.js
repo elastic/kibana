@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const appsMenu = getService('appsMenu');
   const filterBar = getService('filterBar');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -119,23 +120,27 @@ export default function ({ getService, getPageObjects }) {
         const appLinks = await appsMenu.readLinks();
         expect(appLinks).to.have.length(1);
         expect(appLinks[0]).to.have.property('text', 'Dashboard');
+        await applitools.snapshotWindow();
       });
 
       it('shows the dashboard landing page by default', async () => {
         const currentUrl = await browser.getCurrentUrl();
         console.log('url: ', currentUrl);
         expect(currentUrl).to.contain('dashboards');
+        await applitools.snapshotWindow();
       });
 
       it('does not show the create dashboard button', async () => {
         const createNewButtonExists = await testSubjects.exists('newItemButton');
         expect(createNewButtonExists).to.be(false);
+        await applitools.snapshotWindow();
       });
 
       it('opens a dashboard up', async () => {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.be(false);
+        await applitools.snapshotWindow();
       });
 
       it('can filter on a visualization', async () => {
@@ -143,6 +148,7 @@ export default function ({ getService, getPageObjects }) {
         await pieChart.filterOnPieSlice();
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);
+        await applitools.snapshotWindow();
       });
 
       it('does not show the edit menu item', async () => {

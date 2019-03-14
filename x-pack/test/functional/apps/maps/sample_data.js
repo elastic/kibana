@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-
-export default function ({ getPageObjects, getService, updateBaselines }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
-  const screenshot = getService('screenshots');
+  const applitools = getService('applitools');
 
   describe('maps loaded from sample data', () => {
 
@@ -51,8 +49,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('ecommerce_map', updateBaselines);
-        expect(percentDifference).to.be.lessThan(0.05);
+        await applitools.snapshotWindow();
       });
     });
 
@@ -75,8 +72,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('flights_map', updateBaselines);
-        expect(percentDifference).to.be.lessThan(0.05);
+        await applitools.snapshotWindow();
       });
     });
 
@@ -101,8 +97,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       });
 
       it('should load saved object and display layers', async () => {
-        const percentDifference = await screenshot.compareAgainstBaseline('web_logs_map', updateBaselines);
-        expect(percentDifference).to.be.lessThan(0.06);
+        await applitools.snapshotWindow();
       });
     });
 

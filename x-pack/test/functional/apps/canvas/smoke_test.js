@@ -12,6 +12,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects(['common']);
 
   describe('smoke test', async () => {
@@ -36,6 +37,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         expect(workpadRows).to.have.length(1);
         expect(await workpadRows[0].getVisibleText()).to.equal('Test Workpad');
       });
+      await applitools.snapshotWindow();
     });
 
     it('loads workpage when clicked', async () => {
@@ -50,6 +52,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         const url = await browser.getCurrentUrl();
         expect(parse(url).hash).to.equal(`#/workpad/${testWorkpadId}/page/1`);
       });
+      await applitools.snapshotWindow();
     });
 
     it('renders elements on workpad', async () => {
@@ -78,6 +81,7 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
         const timelionRows = await elements[3].findAllByCssSelector('.canvasDataTable tbody tr');
         expect(timelionRows).to.have.length(12);
       });
+      await applitools.snapshotWindow();
     });
   });
 }

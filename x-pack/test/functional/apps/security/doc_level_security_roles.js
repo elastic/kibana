@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
-  const screenshot = getService('screenshots');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('actualRoles = %j', roles);
       expect(roles).to.have.key('myroleEast');
       expect(roles.myroleEast.reserved).to.be(false);
-      screenshot.take('Security_Roles');
+      await applitools.snapshotWindow();
     });
 
     it('should add new user userEAST ', async function () {
@@ -63,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('actualUsers = %j', users);
       expect(users.userEast.roles).to.eql(['kibana_user', 'myroleEast']);
       expect(users.userEast.reserved).to.be(false);
+      await applitools.snapshotWindow();
     });
 
     it('user East should only see EAST doc', async function () {
@@ -75,7 +76,9 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type:_doc _index:dlstest _score:0');
+      await applitools.snapshotWindow();
     });
+
     after('logout', async () => {
       await PageObjects.security.logout();
     });

@@ -6,8 +6,9 @@
 
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'common']);
+  const applitools = getService('applitools');
 
   describe('Add layer panel', () => {
     before(async () => {
@@ -37,6 +38,7 @@ export default function ({ getPageObjects }) {
       // Verify panel isn't open
       panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(false);
+      await applitools.snapshotWindow();
     });
 
     it('should close & remove layer on clicking "Cancel" after selecting layer',
@@ -61,6 +63,7 @@ export default function ({ getPageObjects }) {
         await PageObjects.maps.waitForLayerDeleted(vectorLayer);
         vectorLayerExists = await PageObjects.maps.doesLayerExist(vectorLayer);
         expect(vectorLayerExists).to.be(false);
+        await applitools.snapshotWindow();
       });
 
     it('should close and remove layer on map save', async () => {
