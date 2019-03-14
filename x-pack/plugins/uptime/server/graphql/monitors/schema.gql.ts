@@ -8,10 +8,10 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type FilterBar {
-    id: [String]
-    port: [Int]
-    scheme: [String]
-    status: [String]
+    id: [String!]
+    port: [Int!]
+    status: [String!]
+    type: [String!]
   }
 
   type HistogramDataPoint {
@@ -22,17 +22,11 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
-  type HistogramSeries {
-    monitorId: String
-    data: [HistogramDataPoint]
-  }
-
   type Snapshot {
     up: Int
     down: Int
-    trouble: Int
     total: Int
-    histogram: [HistogramSeries]
+    histogram: [HistogramDataPoint!]!
   }
 
   type DataPoint {
@@ -78,13 +72,14 @@ export const monitorsSchema = gql`
   }
 
   type LatestMonitorsResult {
-    monitors: [LatestMonitor]
+    monitors: [LatestMonitor!]
   }
 
   type ErrorListItem {
     latestMessage: String
     monitorId: String
     type: String!
+    monitorType: String
     count: Int
     statusCode: String
     timestamp: String
@@ -92,37 +87,23 @@ export const monitorsSchema = gql`
 
   extend type Query {
     getMonitors(
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
+      dateRangeStart: String!
+      dateRangeEnd: String!
       filters: String
     ): LatestMonitorsResult
 
-    getSnapshot(
-      dateRangeStart: UnsignedInteger
-      dateRangeEnd: UnsignedInteger
-      downCount: Int
-      windowSize: Int
-      filters: String
-    ): Snapshot
+    getSnapshot(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Snapshot
 
     getMonitorChartsData(
-      monitorId: String
-      dateRangeStart: UnsignedInteger
-      dateRangeEnd: UnsignedInteger
+      monitorId: String!
+      dateRangeStart: String!
+      dateRangeEnd: String!
     ): [MonitorChartEntry]
 
-    getLatestMonitors(
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
-      monitorId: String
-    ): [Ping!]!
+    getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
 
-    getFilterBar(dateRangeStart: UnsignedInteger!, dateRangeEnd: UnsignedInteger!): FilterBar
+    getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 
-    getErrorsList(
-      dateRangeStart: UnsignedInteger!
-      dateRangeEnd: UnsignedInteger!
-      filters: String
-    ): [ErrorListItem]
+    getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem!]
   }
 `;

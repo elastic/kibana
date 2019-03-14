@@ -1,0 +1,18 @@
+{
+  "filterBar": {
+    "status": ["up", "down"],
+    "port": [80, 443, 9200, 12349],
+    "id": [
+      "http@http://localhost:12349/",
+      "http@http://www.example.com",
+      "http@http://www.google.com/",
+      "http@https://news.google.com/",
+      "http@https://www.elastic.co",
+      "http@https://www.github.com/",
+      "http@https://www.google.com/",
+      "http@https://www.wikipedia.org/",
+      "tcp-tcp@localhost:9200"
+    ],
+    "type": ["http", "tcp"]
+  }
+}

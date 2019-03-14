@@ -7,18 +7,20 @@
 import { sortBy } from 'lodash';
 import React from 'react';
 
-import { EuiBasicTable, EuiButton } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { FixDefaultFieldsButton } from './default_fields/button';
+import { DeleteTasksButton } from './delete_tasks_button';
+import { ReindexButton } from './reindex';
 
 const PAGE_SIZES = [10, 25, 50, 100, 250, 500, 1000];
 
 export interface IndexDeprecationDetails {
   index: string;
+  reindex: boolean;
+  delete: boolean;
+  needsDefaultFields: boolean;
   details?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
 }
 
 export interface IndexDeprecationTableProps extends ReactIntl.InjectedIntlProps {
@@ -134,26 +136,30 @@ export class IndexDeprecationTableUI extends React.Component<
   }
 
   private get actionsColumn() {
-    // NOTE: this naive implementation assumes all indices in the table have
-    // the same actions (can still have different URLs). This should work for known usecases.
+    // NOTE: this naive implementation assumes all indices in the table are
+    // should show the reindex button. This should work for known usecases.
     const { indices } = this.props;
-    if (!indices.find(i => i.actions !== undefined)) {
+    const showDeleteButton = indices.find(i => i.delete === true);
+    const showReindexButton = indices.find(i => i.reindex === true);
+    const showNeedsDefaultFieldsButton = indices.find(i => i.needsDefaultFields === true);
+    if (!showDeleteButton && !showReindexButton && !showNeedsDefaultFieldsButton) {
       return null;
     }
 
-    const actions = indices[0].actions!;
-
     return {
-      actions: actions.map((action, idx) => ({
-        render(index: IndexDeprecationDetails) {
-          const { url, label } = index.actions![idx];
-          return (
-            <EuiButton size="s" href={url} target="_blank">
-              {label}
-            </EuiButton>
-          );
+      actions: [
+        {
+          render(indexDep: IndexDeprecationDetails) {
+            if (showDeleteButton) {
+              return <DeleteTasksButton />;
+            } else if (showReindexButton) {
+              return <ReindexButton indexName={indexDep.index!} />;
+            } else {
+              return <FixDefaultFieldsButton indexName={indexDep.index!} />;
+            }
+          },
         },
-      })),
+      ],
     };
   }
 }

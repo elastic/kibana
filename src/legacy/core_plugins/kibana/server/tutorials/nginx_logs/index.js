@@ -23,8 +23,8 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function nginxLogsSpecProvider(server, context) {
   const moduleName = 'nginx';
-  const geoipRequired = true;
-  const uaRequired = true;
+  const geoipRequired = false;
+  const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'nginxLogs',

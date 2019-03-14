@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getCloudUsageCollector } from './get_cloud_usage_collector';
+
 export const cloud = kibana => {
   return new kibana.Plugin({
     id: 'cloud',
@@ -32,5 +34,13 @@ export const cloud = kibana => {
         }).default(),
       }).default();
     },
+
+    init(server) {
+      const config = server.config().get(`xpack.cloud`);
+      server.expose('config', {
+        isCloudEnabled: !!config.id
+      });
+      server.usage.collectorSet.register(getCloudUsageCollector(server));
+    }
   });
 };

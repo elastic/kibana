@@ -71,7 +71,7 @@ export class StepLogisticsUi extends Component {
 
     if(!isValidatingIndexPattern && hasMatchingIndices) {
       return (
-        <EuiTextColor color="secondary">
+        <EuiTextColor color="secondary" data-test-subj="fieldIndexPatternSuccessMessage">
           <p>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepLogistics.fieldIndexPattern.helpHasMatchesLabel"
@@ -323,6 +323,7 @@ export class StepLogisticsUi extends Component {
                 value={id}
                 onChange={e => onFieldsChange({ id: e.target.value })}
                 fullWidth
+                data-test-subj="rollupJobName"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>
@@ -364,6 +365,7 @@ export class StepLogisticsUi extends Component {
                 isInvalid={Boolean(areStepErrorsVisible && errorIndexPattern) || Boolean(indexPatternAsyncErrors)}
                 isLoading={isValidatingIndexPattern}
                 fullWidth
+                data-test-subj="rollupIndexPattern"
               />
             </EuiFormRow>
 
@@ -390,6 +392,7 @@ export class StepLogisticsUi extends Component {
                 onChange={e => onFieldsChange({ rollupIndex: e.target.value })}
                 isInvalid={Boolean(areStepErrorsVisible && errorRollupIndex)}
                 fullWidth
+                data-test-subj="rollupIndexName"
               />
             </EuiFormRow>
           </EuiDescribedFormGroup>

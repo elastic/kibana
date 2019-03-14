@@ -1,3 +1,12 @@
+.tab-settings,
+.tab-datavisualizer,
+.tab-timeseriesexplorer,
+.tab-explorer,
+.tab-jobs {
+  // Make all page background white until More of the pages use EuiPage to wrap in panel-like components
+  background-color: $euiColorEmptyShade;
+}
+
 // These are hacks that were near ML's root. Unsure if they still need to be here.
 .tab-jobs,
 .edit-job-modal,
@@ -37,6 +46,12 @@
     .ui-select-placeholder {
       color: $euiColorDarkShade;
     }
+  }
+
+  .btn {
+    border: 1px solid $euiColorLightShade;
+    background-color: $euiColorEmptyShade;
+    color: $euiColorDarkestShade;
   }
  }
 

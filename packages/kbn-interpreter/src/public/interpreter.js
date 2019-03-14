@@ -17,55 +17,37 @@
  * under the License.
  */
 
-import { socketInterpreterProvider } from '../common/interpreter/socket_interpret';
+import { interpreterProvider } from '../common/interpreter/interpret';
 import { serializeProvider } from '../common/lib/serialize';
 import { createHandlers } from './create_handlers';
+import { batchedFetch } from './batched_fetch';
+import { FUNCTIONS_URL } from './consts';
 
-export async function initializeInterpreter(socket, typesRegistry, functionsRegistry) {
-  let resolve;
-  const functionList = new Promise(_resolve => (resolve = _resolve));
+export async function initializeInterpreter(kfetch, typesRegistry, functionsRegistry) {
+  const serverFunctionList = await kfetch({ pathname: FUNCTIONS_URL });
+  const types = typesRegistry.toJS();
+  const { serialize } = serializeProvider(types);
+  const batch = batchedFetch({ kfetch, serialize });
 
-  const getInitializedFunctions = async () => {
-    return functionList;
-  };
+  // For every sever-side function, register a client-side
+  // function that matches its definition, but which simply
+  // calls the server-side function endpoint.
+  Object.keys(serverFunctionList).forEach(functionName => {
+    functionsRegistry.register(() => ({
+      ...serverFunctionList[functionName],
+      fn: (context, args) => batch({ functionName, args, context }),
+    }));
+  });
 
   const interpretAst = async (ast, context, handlers) => {
-    // Load plugins before attempting to get functions, otherwise this gets racey
-    const serverFunctionList = await functionList;
-    const interpretFn = await socketInterpreterProvider({
+    const interpretFn = await interpreterProvider({
       types: typesRegistry.toJS(),
-      handlers: { ...handlers, ...createHandlers(socket) },
+      handlers: { ...handlers, ...createHandlers() },
       functions: functionsRegistry.toJS(),
-      referableFunctions: serverFunctionList,
-      socket: socket,
     });
     return interpretFn(ast, context);
   };
 
-  // Listen for interpreter runs
-  socket.on('run', ({ ast, context, id }) => {
-    const types = typesRegistry.toJS();
-    const { serialize, deserialize } = serializeProvider(types);
-    interpretAst(ast, deserialize(context)).then(value => {
-      socket.emit(`resp:${id}`, { value: serialize(value) });
-    });
-  });
-
-  // Create the function list
-  let gotFunctionList = false;
-  socket.once('functionList', (fl) => {
-    gotFunctionList = true;
-    resolve(fl);
-  });
-
-  const interval = setInterval(() => {
-    if (gotFunctionList) {
-      clearInterval(interval);
-      return;
-    }
-    socket.emit('getFunctionList');
-  }, 1000);
-
-  return { getInitializedFunctions, interpretAst };
+  return { interpretAst };
 }
 

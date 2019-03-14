@@ -7,7 +7,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Markdown from 'markdown-it';
-import './markdown.scss';
 
 const md = new Markdown();
 

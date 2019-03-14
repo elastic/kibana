@@ -7,7 +7,7 @@
 export const filebeatNginxRules = [
   {
     when: {
-      exists: ['nginx.access'],
+      exists: ['nginx.access.method'],
     },
     format: [
       {

@@ -38,6 +38,7 @@ export function getKibanaInfoForStats(server, kbnServer) {
     name: config.get('server.name'),
     index: config.get('kibana.index'),
     host: config.get('server.host'),
+    locale: config.get('i18n.locale'),
     transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
     version: kbnServer.version.replace(snapshotRegex, ''),
     snapshot: snapshotRegex.test(kbnServer.version),

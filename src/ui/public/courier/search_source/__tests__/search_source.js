@@ -311,9 +311,7 @@ describe('SearchSource', function () {
             }
           };
           state.index = {
-            fields: {
-              byName: {}
-            }
+            fields: []
           };
           searchSource._mergeProp(state, filter, 'filter');
           expect(state.filters).to.eql([ filter ]);
@@ -329,9 +327,7 @@ describe('SearchSource', function () {
             }
           };
           state.index = {
-            fields: {
-              byName: {}
-            }
+            fields: []
           };
           searchSource._mergeProp(state, filter, 'filter');
           expect(state.filters).to.be.empty();
@@ -345,11 +341,7 @@ describe('SearchSource', function () {
             }
           };
           state.index = {
-            fields: {
-              byName: {
-                bar: true
-              }
-            }
+            fields: [{ name: 'bar' }]
           };
           searchSource._mergeProp(state, filter, 'filter');
           expect(state.filters).to.eql([ filter ]);

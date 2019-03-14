@@ -29,15 +29,20 @@ module.directive('mlDocumentationHelpLink', function () {
       // metadata.branch corresponds to the version used in documentation links.
       const version = metadata.branch;
 
-      const props = {
-        fullUrl: `${baseUrl}/guide/en/x-pack/${version}/${scope.uri}`,
-        label: scope.label
-      };
+      function renderReactComponent() {
 
-      ReactDOM.render(
-        React.createElement(DocumentationHelpLink, props),
-        element[0]
-      );
+        const props = {
+          fullUrl: `${baseUrl}/guide/en/x-pack/${version}/${scope.uri}`,
+          label: scope.label
+        };
+
+        ReactDOM.render(
+          React.createElement(DocumentationHelpLink, props),
+          element[0]
+        );
+      }
+
+      scope.$watch('uri', renderReactComponent);
     }
   };
 

@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
+<Fragment>
+  <EuiEmptyPrompt
+    body={
+      <React.Fragment>
+        <p>
+          <FormattedMessage
+            defaultMessage="{configureHeartbeatLink} to start logging uptime data."
+            id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+            values={
+              Object {
+                "configureHeartbeatLink": <EuiLink
+                  color="primary"
+                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                  target="_blank"
+                  type="button"
+                >
+                  <FormattedMessage
+                    defaultMessage="Configure Heartbeat"
+                    id="xpack.uptime.emptyState.configureHeartbeatLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </React.Fragment>
+    }
+    iconColor="subdued"
+    title={
+      <EuiTitle
+        size="l"
+        textTransform="none"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="No uptime data available"
+            id="xpack.uptime.emptyState.noDataTitle"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+    }
+  />
+</Fragment>
+`;
+
+exports[`EmptyState component renders child components when count is truthy 1`] = `
+<Fragment>
+  <div>
+    Foo
+  </div>
+  <div>
+    Bar
+  </div>
+  <div>
+    Baz
+  </div>
+</Fragment>
+`;

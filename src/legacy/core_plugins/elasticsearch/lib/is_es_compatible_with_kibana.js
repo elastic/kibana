@@ -38,7 +38,12 @@ export default function isEsCompatibleWithKibana(esVersion, kibanaVersion) {
     patch: semver.patch(kibanaVersion),
   };
 
-  // Reject mismatching major version numbers.
+  // Accept the next major version of ES.
+  if (esVersionNumbers.major === kibanaVersionNumbers.major + 1) {
+    return true;
+  }
+
+  // Reject any other major version mismatches with ES.
   if (esVersionNumbers.major !== kibanaVersionNumbers.major) {
     return false;
   }

@@ -289,10 +289,9 @@ describe('service_settings (FKA tilemaptest)', function () {
     });
 
     it ('should get hotlink', async () => {
-      mapConfig.emsLandingPageUrl = 'https://foo/bar';
       const fileLayers = await serviceSettings.getFileLayers();
       const hotlink = await serviceSettings.getEMSHotLink(fileLayers[0]);
-      expect(hotlink).to.eql('undefined#file/world_countries');//undefined becuase emsLandingPageUrl is set at kibana-load
+      expect(hotlink).to.eql('?locale=en#file/world_countries');//url host undefined becuase emsLandingPageUrl is set at kibana-load
 
     });
 

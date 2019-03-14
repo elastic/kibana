@@ -48,7 +48,7 @@ describe('get_last_recovery', () => {
 
   it('No hits results in an empty array', () => {
     // Note: we don't expect it to touch hits without total === 1
-    expect(handleLastRecoveries({ hits: { total: 0 } }, new Date(0))).to.have.length(0);
+    expect(handleLastRecoveries({ hits: { hits: [] } }, new Date(0))).to.have.length(0);
   });
 
   it('Filters on stop time', () => {

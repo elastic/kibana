@@ -49,4 +49,10 @@ describe('Kuery escape', function () {
     const expected = 'Hello, world, \\and \\<nice\\> to meet you!';
     expect(escapeKuery(value)).to.be(expected);
   });
+
+  it('should escape newlines and tabs', () => {
+    const value = 'This\nhas\tnewlines\r\nwith\ttabs';
+    const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
+    expect(escapeKuery(value)).to.be(expected);
+  });
 });

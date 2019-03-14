@@ -38,11 +38,6 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     }),
   });
 
-  const InfraSourceConfigSchema = InfraDefaultSourceConfigSchema.keys({
-    metricAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'metricAlias').required(),
-    logAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'logAlias').required(),
-  });
-
   const InfraRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     query: Joi.object({
@@ -53,7 +48,6 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
       .keys({
         default: InfraDefaultSourceConfigSchema,
       })
-      .pattern(/.*/, InfraSourceConfigSchema)
       .default(),
   }).default();
 

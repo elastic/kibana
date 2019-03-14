@@ -1,0 +1,164 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FilterBar component renders without errors 1`] = `
+<EuiFlexGroup
+  alignItems="stretch"
+  component="div"
+  direction="row"
+  gutterSize="l"
+  justifyContent="flexStart"
+  responsive={true}
+  wrap={false}
+>
+  <EuiFlexItem
+    component="div"
+    grow={true}
+  >
+    <EuiSearchBar
+      filters={
+        Array [
+          Object {
+            "field": "monitor.status",
+            "items": Array [
+              Object {
+                "name": "Up",
+                "value": "up",
+              },
+              Object {
+                "name": "Down",
+                "value": "down",
+              },
+            ],
+            "type": "field_value_toggle_group",
+          },
+          Object {
+            "field": "monitor.id",
+            "multiSelect": false,
+            "name": "ID",
+            "options": Array [
+              Object {
+                "value": "http@http://localhost:12349/",
+                "view": "http@http://localhost:12349/",
+              },
+              Object {
+                "value": "http@http://localhost:9200",
+                "view": "http@http://localhost:9200",
+              },
+              Object {
+                "value": "http@http://www.example.com",
+                "view": "http@http://www.example.com",
+              },
+              Object {
+                "value": "http@http://www.google.com/",
+                "view": "http@http://www.google.com/",
+              },
+              Object {
+                "value": "http@https://news.google.com/",
+                "view": "http@https://news.google.com/",
+              },
+              Object {
+                "value": "http@https://www.elastic.co",
+                "view": "http@https://www.elastic.co",
+              },
+              Object {
+                "value": "http@https://www.github.com/",
+                "view": "http@https://www.github.com/",
+              },
+              Object {
+                "value": "http@https://www.google.com/",
+                "view": "http@https://www.google.com/",
+              },
+              Object {
+                "value": "http@https://www.wikipedia.org/",
+                "view": "http@https://www.wikipedia.org/",
+              },
+              Object {
+                "value": "icmp-icmptest-ip@8.8.8.8",
+                "view": "icmp-icmptest-ip@8.8.8.8",
+              },
+              Object {
+                "value": "tcp-tcp@localhost:9200",
+                "view": "tcp-tcp@localhost:9200",
+              },
+            ],
+            "searchThreshold": 2,
+            "type": "field_value_selection",
+          },
+          Object {
+            "field": "tcp.port",
+            "multiSelect": false,
+            "name": "Port",
+            "options": Array [
+              Object {
+                "value": 80,
+                "view": 80,
+              },
+              Object {
+                "value": 443,
+                "view": 443,
+              },
+              Object {
+                "value": 9200,
+                "view": 9200,
+              },
+              Object {
+                "value": 12349,
+                "view": 12349,
+              },
+            ],
+            "searchThreshold": 2,
+            "type": "field_value_selection",
+          },
+          Object {
+            "field": "monitor.type",
+            "multiSelect": false,
+            "name": "Type",
+            "options": Array [
+              Object {
+                "value": "http",
+                "view": "http",
+              },
+              Object {
+                "value": "icmp",
+                "view": "icmp",
+              },
+              Object {
+                "value": "tcp",
+                "view": "tcp",
+              },
+            ],
+            "searchThreshold": 2,
+            "type": "field_value_selection",
+          },
+        ]
+      }
+      onChange={[Function]}
+      schema={
+        Object {
+          "fields": Object {
+            "monitor.host": Object {
+              "type": "string",
+            },
+            "monitor.id": Object {
+              "type": "string",
+            },
+            "monitor.ip": Object {
+              "type": "string",
+            },
+            "monitor.scheme": Object {
+              "type": "string",
+            },
+            "monitor.status": Object {
+              "type": "string",
+            },
+            "tcp.port": Object {
+              "type": "number",
+            },
+          },
+          "strict": true,
+        }
+      }
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

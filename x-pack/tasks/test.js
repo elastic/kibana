@@ -14,7 +14,6 @@ const MOCHA_OPTIONS = {
   ui: 'bdd',
   reporter: createAutoJUnitReporter({
     reportName: 'X-Pack Mocha Tests',
-    rootDirectory: __dirname,
   }),
 };
 

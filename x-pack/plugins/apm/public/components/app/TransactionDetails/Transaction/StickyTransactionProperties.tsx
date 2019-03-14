@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import idx from 'idx';
 import { get } from 'lodash';
 import React from 'react';
+import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import {
   REQUEST_URL_FULL,
   TRANSACTION_DURATION,
@@ -15,7 +16,6 @@ import {
   USER_ID
 } from '../../../../../common/constants';
 import { Transaction } from '../../../../../typings/es_schemas/Transaction';
-import { NOT_AVAILABLE_LABEL } from '../../../../constants';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,

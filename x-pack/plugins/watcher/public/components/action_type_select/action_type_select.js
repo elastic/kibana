@@ -30,7 +30,11 @@ app.directive('actionTypeSelect', function ($injector) {
 
         this.loadActionTypes()
           .then(actionTypes => {
-            this.actionTypes = actionTypes;
+            this.actionTypes = actionTypes.filter((actionType) => {
+              // 'Action' is the default action type. If an action has the default then it's
+              // not fully implemented and shouldn't be presented to the user.
+              return actionType.typeName !== 'Action';
+            });
           });
       }
 

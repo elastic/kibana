@@ -25,6 +25,7 @@ async function executeUpgrade(callWithRequest) {
   return callWithRequest('indices.putMapping', {
     index: INDEX_NAMES.PIPELINES,
     type: TYPE_NAMES.PIPELINES,
+    include_type_name: true,
     body: {
       properties: {
         pipeline_settings: {

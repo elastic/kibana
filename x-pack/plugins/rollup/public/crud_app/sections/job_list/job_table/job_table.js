@@ -7,7 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import _ from 'lodash';
 
 import {
   EuiCheckbox,
@@ -25,6 +26,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -253,7 +255,6 @@ export class JobTableUi extends Component {
       if (name === 'ID') {
         content = (
           <EuiLink
-            data-test-subj="rollupTableJobLink"
             onClick={() => {
               openDetailPanel(job.id);
             }}
@@ -280,7 +281,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRowCell
           key={`${job.id}-${name}`}
-          data-test-subj={`jobTableCell-${name}`}
+          data-test-subj={`jobTableCell-${_.camelCase(name)}`}
           truncateText={truncateText}
         >
           {wrappedContent}
@@ -298,6 +299,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRow
           key={`${id}-row`}
+          data-test-subj="jobTableRow"
         >
           <EuiTableRowCellCheckbox key={`checkbox-${id}`}>
             <EuiCheckbox
@@ -397,9 +399,14 @@ export class JobTableUi extends Component {
             </EuiTableBody>
           </EuiTable>
         ) : (
-          <div>
-            No rollup jobs to show
-          </div>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobTable.noJobsMatchSearchMessage"
+                defaultMessage="No rollup jobs match your search"
+              />
+            </p>
+          </EuiText>
         )}
 
         <EuiSpacer size="m" />

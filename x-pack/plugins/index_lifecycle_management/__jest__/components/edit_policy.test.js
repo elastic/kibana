@@ -29,6 +29,7 @@ import {
   policyNameContainsSpaceErrorMessage,
   policyNameMustBeDifferentErrorMessage,
   policyNameAlreadyUsedErrorMessage,
+  maximumDocumentsRequiredMessage,
 } from '../../public/store/selectors/lifecycle';
 
 let server;
@@ -63,8 +64,8 @@ window.scrollTo = jest.fn();
 window.TextEncoder = null;
 let component;
 const activatePhase = (rendered, phase) => {
-  const testSubject = `activatePhaseButton-${phase}`;
-  findTestSubject(rendered, testSubject).simulate('click');
+  const testSubject = `enablePhaseSwitch-${phase}`;
+  findTestSubject(rendered, testSubject).simulate('change', { target: { checked: true } });
   rendered.update();
 };
 const expectedErrorMessages = (rendered, expectedErrorMessages) => {
@@ -95,6 +96,11 @@ const setPolicyName = (rendered, policyName) => {
 const setPhaseAfter = (rendered, phase, after) => {
   const afterInput = rendered.find(`input#${phase}-selectedMinimumAge`);
   afterInput.simulate('change', { target: { value: after } });
+  rendered.update();
+};
+const setPhaseIndexPriority = (rendered, phase, priority) => {
+  const priorityInput = rendered.find(`input#${phase}-phaseIndexPriority`);
+  priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
 const save = rendered => {
@@ -179,7 +185,7 @@ describe('edit policy', () => {
       maxAgeInput.simulate('change', { target: { value: '' } });
       rendered.update();
       save(rendered);
-      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage]);
+      expectedErrorMessages(rendered, [maximumSizeRequiredMessage, maximumAgeRequiredMessage, maximumDocumentsRequiredMessage]);
     });
     test('should show number above 0 required error when trying to save with -1 for max size', () => {
       const rendered = mountWithIntl(component);
@@ -217,6 +223,14 @@ describe('edit policy', () => {
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumbersAboveZeroErrorMessage]);
     });
+    test('should show positive number required error when trying to save with -1 for index priority', () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      setPhaseIndexPriority(rendered, 'hot', -1);
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
   });
   describe('warm phase', () => {
     test('should show number required error when trying to save empty warm phase', () => {
@@ -242,6 +256,16 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       activatePhase(rendered, 'warm');
       setPhaseAfter(rendered, 'warm', -1);
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+    });
+    test('should show positive number required error when trying to save warm phase with -1 for index priority', () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      activatePhase(rendered, 'warm');
+      setPhaseAfter(rendered, 'warm', 1);
+      setPhaseIndexPriority(rendered, 'warm', -1);
       save(rendered);
       expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
@@ -422,6 +446,16 @@ describe('edit policy', () => {
       flyoutButton.simulate('click');
       rendered.update();
       expect(rendered.find('.euiFlyout').exists()).toBeTruthy();
+    });
+    test('should show positive number required error when trying to save with -1 for index priority', () => {
+      const rendered = mountWithIntl(component);
+      noRollover(rendered);
+      setPolicyName(rendered, 'mypolicy');
+      activatePhase(rendered, 'cold');
+      setPhaseAfter(rendered, 'cold', 1);
+      setPhaseIndexPriority(rendered, 'cold', -1);
+      save(rendered);
+      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
     });
   });
   describe('delete phase', () => {

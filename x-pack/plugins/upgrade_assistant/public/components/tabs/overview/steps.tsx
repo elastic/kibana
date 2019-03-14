@@ -26,6 +26,7 @@ import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
 
 // Leaving these here even if unused so they are picked up for i18n static analysis
 // Keep this until last minor release (when next major is also released).
+// @ts-ignore
 const WAIT_FOR_RELEASE_STEP = {
   title: i18n.translate('xpack.upgradeAssistant.overviewTab.steps.waitForReleaseStep.stepTitle', {
     defaultMessage: 'Wait for the Elasticsearch {nextEsVersion} release',
@@ -74,7 +75,7 @@ const START_UPGRADE_STEP = {
               values={{
                 instructionButton: (
                   <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup-upgrade.html"
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/setup-upgrade.html"
                     target="_blank"
                   >
                     <FormattedMessage
@@ -95,9 +96,10 @@ const START_UPGRADE_STEP = {
 export const StepsUI: StatelessComponent<
   UpgradeAssistantTabProps & ReactIntl.InjectedIntlProps
 > = ({ checkupData, setSelectedTabIndex, intl }) => {
-  const countByType = Object.keys(checkupData!).reduce(
+  const checkupDataTyped = (checkupData! as unknown) as { [checkupType: string]: any[] };
+  const countByType = Object.keys(checkupDataTyped).reduce(
     (counts, checkupType) => {
-      counts[checkupType] = checkupData![checkupType].length;
+      counts[checkupType] = checkupDataTyped[checkupType].length;
       return counts;
     },
     {} as { [checkupType: string]: number }
@@ -234,7 +236,7 @@ export const StepsUI: StatelessComponent<
                     values={{
                       deprecationLogsDocButton: (
                         <EuiLink
-                          href="https://www.elastic.co/guide/en/elasticsearch/reference/current/logging.html#deprecation-logging"
+                          href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/logging.html#deprecation-logging"
                           target="_blank"
                         >
                           <FormattedMessage
@@ -266,7 +268,7 @@ export const StepsUI: StatelessComponent<
         },
 
         // Swap in START_UPGRADE_STEP on the last minor release.
-        WAIT_FOR_RELEASE_STEP,
+        START_UPGRADE_STEP,
       ]}
     />
   );

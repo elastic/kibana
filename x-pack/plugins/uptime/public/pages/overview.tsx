@@ -7,27 +7,28 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState } from '../components/queries/empty_state';
-import { ErrorList } from '../components/queries/error_list';
-import { FilterBar } from '../components/queries/filter_bar';
-import { MonitorList } from '../components/queries/monitor_list';
-import { Snapshot } from '../components/queries/snapshot';
+import {
+  EmptyStateQuery,
+  ErrorListQuery,
+  FilterBarQuery,
+  MonitorListQuery,
+  SnapshotQuery,
+} from '../components/queries';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
+import { UptimeCommonProps } from '../uptime_app';
 
 interface OverviewPageProps {
-  autorefreshInterval: number;
-  autorefreshEnabled: boolean;
-  dateRangeStart: number;
-  dateRangeEnd: number;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
+
+type Props = OverviewPageProps & UptimeCommonProps;
 
 interface OverviewPageState {
   currentFilterQuery?: string;
 }
 
-export class OverviewPage extends React.Component<OverviewPageProps, OverviewPageState> {
-  constructor(props: OverviewPageProps) {
+export class OverviewPage extends React.Component<Props, OverviewPageState> {
+  constructor(props: Props) {
     super(props);
     this.state = {
       currentFilterQuery: undefined,
@@ -39,42 +40,21 @@ export class OverviewPage extends React.Component<OverviewPageProps, OverviewPag
   }
 
   public render() {
-    const { autorefreshEnabled, autorefreshInterval, dateRangeStart, dateRangeEnd } = this.props;
     return (
       <Fragment>
-        <EmptyState
-          autorefreshEnabled={autorefreshEnabled}
-          autorefreshInterval={autorefreshInterval}
-        >
-          <FilterBar
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
+        <EmptyStateQuery {...this.props}>
+          <FilterBarQuery
+            {...this.props}
             updateQuery={(query: object | undefined) => {
               this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
             }}
           />
-          <Snapshot
-            autorefreshEnabled={autorefreshEnabled}
-            autorefreshInterval={autorefreshInterval}
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
+          <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer size="xl" />
-          <MonitorList
-            autorefreshEnabled={autorefreshEnabled}
-            autorefreshInterval={autorefreshInterval}
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
+          <MonitorListQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer />
-          <ErrorList
-            dateRangeStart={dateRangeStart}
-            dateRangeEnd={dateRangeEnd}
-            filters={this.state.currentFilterQuery}
-          />
-        </EmptyState>
+          <ErrorListQuery filters={this.state.currentFilterQuery} {...this.props} />
+        </EmptyStateQuery>
       </Fragment>
     );
   }

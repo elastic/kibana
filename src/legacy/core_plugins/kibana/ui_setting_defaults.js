@@ -47,7 +47,7 @@ export function getUiSettingDefaults() {
                        'kbn.advancedSettings.query.queryStringOptionsText',
           values: {
             optionsLink:
-              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">' +
+              '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener">' +
               i18n.translate('kbn.advancedSettings.query.queryStringOptions.optionsLinkText', {
                 defaultMessage: 'Options',
               }) +
@@ -104,7 +104,7 @@ export function getUiSettingDefaults() {
                      'kbn.advancedSettings.sortOptionsText',
         values: {
           optionsLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.sortOptions.optionsLinkText', {
               defaultMessage: 'Options',
             }) +
@@ -342,7 +342,7 @@ export function getUiSettingDefaults() {
           setRequestReferenceSetting: '<strong>courier:setRequestPreference</strong>',
           customSettingValue: '"custom"',
           requestPreferenceLink:
-            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener noreferrer">' +
+            '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-preference.html" target="_blank" rel="noopener">' +
             i18n.translate('kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText', {
               defaultMessage: 'Request Preference',
             }) +
@@ -364,7 +364,7 @@ export function getUiSettingDefaults() {
         values: {
           maxRequestsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-multi-search.html"
-            target="_blank" rel="noopener noreferrer" >max_concurrent_shard_requests</a>`
+            target="_blank" rel="noopener" >max_concurrent_shard_requests</a>`
         },
       }),
       category: ['search'],
@@ -372,7 +372,7 @@ export function getUiSettingDefaults() {
     'search:includeFrozen': {
       name: 'Search in frozen indices',
       description: `Will include <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/frozen-indices.html"
-        target="_blank" rel="noopener noreferrer">frozen indices</a> in results if enabled. Searching through frozen indices
+        target="_blank" rel="noopener">frozen indices</a> in results if enabled. Searching through frozen indices
         might increase the search time.`,
       value: false,
       category: ['search'],
@@ -432,7 +432,7 @@ export function getUiSettingDefaults() {
         values: {
           cellDimensionsLink:
             `<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText', {
               defaultMessage: 'Explanation of cell dimensions',
             }) +
@@ -777,30 +777,52 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Time picker quick ranges',
       }),
       value: JSON.stringify([
-        { from: 'now/d',    to: 'now/d',    display: 'Today',                 section: 0 },
-        { from: 'now/w',    to: 'now/w',    display: 'This week',             section: 0 },
-        { from: 'now/M',    to: 'now/M',    display: 'This month',            section: 0 },
-        { from: 'now/y',    to: 'now/y',    display: 'This year',             section: 0 },
-        { from: 'now/d',    to: 'now',      display: 'Today so far',          section: 0 },
-        { from: 'now/w',    to: 'now',      display: 'Week to date',          section: 0 },
-        { from: 'now/M',    to: 'now',      display: 'Month to date',         section: 0 },
-        { from: 'now/y',    to: 'now',      display: 'Year to date',          section: 0 },
+        { from: 'now/d',    to: 'now/d',
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),			              section: 0 },
+        { from: 'now/w',    to: 'now/w',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),			      section: 0 },
+        { from: 'now/M',    to: 'now/M',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' }),			    section: 0 },
+        { from: 'now/y',    to: 'now/y',
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' }),			      section: 0 },
+        { from: 'now/d',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' }),			  section: 0 },
+        { from: 'now/w',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' }),			  section: 0 },
+        { from: 'now/M',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' }),			section: 0 },
+        { from: 'now/y',    to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' }),			  section: 0 },
 
-        { from: 'now-15m',  to: 'now',      display: 'Last 15 minutes',       section: 1 },
-        { from: 'now-30m',  to: 'now',      display: 'Last 30 minutes',       section: 1 },
-        { from: 'now-1h',   to: 'now',      display: 'Last 1 hour',           section: 1 },
-        { from: 'now-4h',   to: 'now',      display: 'Last 4 hours',          section: 1 },
-        { from: 'now-12h',  to: 'now',      display: 'Last 12 hours',         section: 1 },
-        { from: 'now-24h',  to: 'now',      display: 'Last 24 hours',         section: 1 },
-        { from: 'now-7d',   to: 'now',      display: 'Last 7 days',           section: 1 },
+        { from: 'now-15m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),	section: 1 },
+        { from: 'now-30m',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }),	section: 1 },
+        { from: 'now-1h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),			    section: 1 },
+        { from: 'now-4h',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last4Hours', { defaultMessage: 'Last 4 hours' }),			  section: 1 },
+        { from: 'now-12h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last12Hours', { defaultMessage: 'Last 12 hours' }),			section: 1 },
+        { from: 'now-24h',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),			section: 1 },
+        { from: 'now-7d',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),			    section: 1 },
 
-        { from: 'now-30d',  to: 'now',      display: 'Last 30 days',          section: 2 },
-        { from: 'now-60d',  to: 'now',      display: 'Last 60 days',          section: 2 },
-        { from: 'now-90d',  to: 'now',      display: 'Last 90 days',          section: 2 },
-        { from: 'now-6M',   to: 'now',      display: 'Last 6 months',         section: 2 },
-        { from: 'now-1y',   to: 'now',      display: 'Last 1 year',           section: 2 },
-        { from: 'now-2y',   to: 'now',      display: 'Last 2 years',          section: 2 },
-        { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 2 },
+        { from: 'now-30d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),			  section: 2 },
+        { from: 'now-60d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last60Days', { defaultMessage: 'Last 60 days' }),			  section: 2 },
+        { from: 'now-90d',  to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),			  section: 2 },
+        { from: 'now-6M',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last6Months', { defaultMessage: 'Last 6 months' }),			section: 2 },
+        { from: 'now-1y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),			    section: 2 },
+        { from: 'now-2y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last2Years', { defaultMessage: 'Last 2 years' }),			  section: 2 },
+        { from: 'now-5y',   to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last5Years', { defaultMessage: 'Last 5 years' }),			  section: 2 },
 
       ], null, 2),
       type: 'json',
@@ -815,7 +837,7 @@ export function getUiSettingDefaults() {
         values: {
           acceptedFormatsLink:
             `<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText', {
               defaultMessage: 'accepted formats',
             }) +
@@ -866,7 +888,7 @@ export function getUiSettingDefaults() {
         values: {
           markdownLink:
             `<a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/"
-            target="_blank" rel="noopener noreferrer">` +
+            target="_blank" rel="noopener">` +
             i18n.translate('kbn.advancedSettings.notifications.banner.markdownLinkText', {
               defaultMessage: 'Markdown supported',
             }) +

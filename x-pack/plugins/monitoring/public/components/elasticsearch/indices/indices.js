@@ -16,6 +16,7 @@ import {
   EuiPage,
   EuiPageContent,
   EuiPageBody,
+  EuiPanel,
   EuiSwitch,
   EuiSpacer,
 } from '@elastic/eui';
@@ -148,9 +149,11 @@ const ElasticsearchIndicesUI = ({
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPageContent>
+        <EuiPanel>
           <ClusterStatus stats={clusterStatus} />
-          <EuiSpacer size="xs"/>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPageContent>
           <EuiSwitch
             label={(
               <FormattedMessage
@@ -179,6 +182,9 @@ const ElasticsearchIndicesUI = ({
               },
             }}
             onTableChange={onTableChange}
+            executeQueryOptions={{
+              defaultFields: ['name']
+            }}
           />
         </EuiPageContent>
       </EuiPageBody>

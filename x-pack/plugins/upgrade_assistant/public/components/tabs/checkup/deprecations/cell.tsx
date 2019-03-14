@@ -7,7 +7,6 @@
 import React, { ReactNode, StatelessComponent } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -17,16 +16,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FixDefaultFieldsButton } from './default_fields/button';
+import { DeleteTasksButton } from './delete_tasks_button';
+import { ReindexButton } from './reindex';
 
 interface DeprecationCellProps {
   items?: Array<{ title?: string; body: string }>;
+  indexName?: string;
+  reindex?: boolean;
+  deleteIndex?: boolean;
+  needsDefaultFields?: boolean;
   docUrl?: string;
   headline?: string;
   healthColor?: string;
-  actions?: Array<{
-    label: string;
-    url: string;
-  }>;
   children?: ReactNode;
 }
 
@@ -36,7 +38,10 @@ interface DeprecationCellProps {
 export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
   headline,
   healthColor,
-  actions,
+  indexName,
+  reindex,
+  deleteIndex,
+  needsDefaultFields,
   docUrl,
   items = [],
   children,
@@ -78,14 +83,23 @@ export const DeprecationCell: StatelessComponent<DeprecationCellProps> = ({
         ))}
       </EuiFlexItem>
 
-      {actions &&
-        actions.map(button => (
-          <EuiFlexItem key={button.url} grow={false}>
-            <EuiButton size="s" href={button.url} target="_blank">
-              {button.label}
-            </EuiButton>
-          </EuiFlexItem>
-        ))}
+      {reindex && (
+        <EuiFlexItem grow={false}>
+          <ReindexButton indexName={indexName!} />
+        </EuiFlexItem>
+      )}
+
+      {deleteIndex && (
+        <EuiFlexItem grow={false}>
+          <DeleteTasksButton />
+        </EuiFlexItem>
+      )}
+
+      {needsDefaultFields && (
+        <EuiFlexItem grow={false}>
+          <FixDefaultFieldsButton indexName={indexName!} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
 
     <EuiSpacer size="s" />

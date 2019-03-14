@@ -208,7 +208,6 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           return savedObjectsClient.get(esType, this.id)
             .then(resp => {
               // temporary compatability for savedObjectsClient
-
               return {
                 _id: resp.id,
                 _type: resp.type,

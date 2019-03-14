@@ -30,7 +30,7 @@ export interface Query {
 
   getFilterBar?: FilterBar | null;
 
-  getErrorsList?: (ErrorListItem | null)[] | null;
+  getErrorsList?: ErrorListItem[] | null;
 }
 
 export interface PingResults {
@@ -42,6 +42,8 @@ export interface PingResults {
 export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
+  /** Milliseconds from the timestamp to the current time */
+  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -263,7 +265,7 @@ export interface DocCount {
 }
 
 export interface LatestMonitorsResult {
-  monitors?: (LatestMonitor | null)[] | null;
+  monitors?: LatestMonitor[] | null;
 }
 
 export interface LatestMonitor {
@@ -293,17 +295,9 @@ export interface Snapshot {
 
   down?: number | null;
 
-  trouble?: number | null;
-
   total?: number | null;
 
-  histogram?: (HistogramSeries | null)[] | null;
-}
-
-export interface HistogramSeries {
-  monitorId?: string | null;
-
-  data?: (HistogramDataPoint | null)[] | null;
+  histogram: HistogramDataPoint[];
 }
 
 export interface HistogramDataPoint {
@@ -357,13 +351,13 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  id?: (string | null)[] | null;
+  id?: string[] | null;
 
-  port?: (number | null)[] | null;
+  port?: number[] | null;
 
-  scheme?: (string | null)[] | null;
+  status?: string[] | null;
 
-  status?: (string | null)[] | null;
+  type?: string[] | null;
 }
 
 export interface ErrorListItem {
@@ -372,6 +366,8 @@ export interface ErrorListItem {
   monitorId?: string | null;
 
   type: string;
+
+  monitorType?: string | null;
 
   count?: number | null;
 
@@ -393,51 +389,47 @@ export interface AllPingsQueryArgs {
 
   status?: string | null;
 
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
-
-  downCount?: number | null;
-
-  windowSize?: number | null;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }
 export interface GetMonitorChartsDataQueryArgs {
-  monitorId?: string | null;
+  monitorId: string;
 
-  dateRangeStart?: UnsignedInteger | null;
+  dateRangeStart: string;
 
-  dateRangeEnd?: UnsignedInteger | null;
+  dateRangeEnd: string;
 }
 export interface GetLatestMonitorsQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   monitorId?: string | null;
 }
 export interface GetFilterBarQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 }
 export interface GetErrorsListQueryArgs {
-  dateRangeStart: UnsignedInteger;
+  dateRangeStart: string;
 
-  dateRangeEnd: UnsignedInteger;
+  dateRangeEnd: string;
 
   filters?: string | null;
 }

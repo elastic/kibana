@@ -47,7 +47,7 @@ class VerticalLines extends PureComponent {
             style={{ stroke: colors.gray3 }}
           />
 
-          {traceRootDuration && (
+          {traceRootDuration > 0 && (
             <VerticalGridLines
               tickValues={[traceRootDuration]}
               style={{ stroke: colors.gray3 }}

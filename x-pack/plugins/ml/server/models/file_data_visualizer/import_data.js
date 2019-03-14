@@ -93,7 +93,7 @@ export function importDataProvider(callWithRequest) {
       body.settings = settings;
     }
 
-    await callWithRequest('indices.create', { index, body });
+    await callWithRequest('indices.create', { index, body, include_type_name: true });
   }
 
   async function indexData(index, pipelineId, data) {

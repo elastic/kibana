@@ -10,9 +10,14 @@ import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { EnrichedDeprecationInfo } from '../../../../../server/lib/es_migration_apis';
 import { GroupByOption } from '../../../types';
 
+import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { COLOR_MAP, LEVEL_MAP } from '../constants';
 import { DeprecationCell } from './cell';
 import { IndexDeprecationDetails, IndexDeprecationTable } from './index_table';
+
+const OLD_INDEX_MESSAGE = `Index created before ${CURRENT_MAJOR_VERSION}.0`;
+const DELETE_INDEX_MESSAGE = `.tasks index must be re-created`;
+const NEEDS_DEFAULT_FIELD_MESSAGE = 'Number of fields exceeds automatic field expansion limit';
 
 const sortByLevelDesc = (a: DeprecationInfo, b: DeprecationInfo) => {
   return -1 * (LEVEL_MAP[a.level] - LEVEL_MAP[b.level]);
@@ -34,7 +39,10 @@ const MessageDeprecation: StatelessComponent<{ deprecation: EnrichedDeprecationI
     <DeprecationCell
       headline={deprecation.message}
       healthColor={COLOR_MAP[deprecation.level]}
-      actions={deprecation.actions}
+      indexName={deprecation.index}
+      reindex={deprecation.message === OLD_INDEX_MESSAGE}
+      deleteIndex={deprecation.message === DELETE_INDEX_MESSAGE}
+      needsDefaultFields={deprecation.message === NEEDS_DEFAULT_FIELD_MESSAGE}
       docUrl={deprecation.url}
       items={items}
     />
@@ -83,17 +91,18 @@ export const DeprecationList: StatelessComponent<{
   // If we're grouping by message and the first deprecation has an index field, show an index
   // group deprecation. Otherwise, show each message.
   if (currentGroupBy === GroupByOption.message && deprecations[0].index !== undefined) {
-    // If we're grouping by index we assume that every deprecation message is the same
-    // issue and that each deprecation will have an index associated with it.
+    // We assume that every deprecation message is the same issue (since they have the same
+    // message) and that each deprecation will have an index associated with it.
     const indices = deprecations.map(dep => ({
       index: dep.index!,
       details: dep.details,
-      actions: dep.actions,
+      reindex: dep.message === OLD_INDEX_MESSAGE,
+      delete: dep.message === DELETE_INDEX_MESSAGE,
+      needsDefaultFields: dep.message === NEEDS_DEFAULT_FIELD_MESSAGE,
     }));
 
     return <IndexDeprecation indices={indices} deprecation={deprecations[0]} />;
   } else if (currentGroupBy === GroupByOption.index) {
-    // If we're grouping by index show all info for each message
     return (
       <div>
         {deprecations.sort(sortByLevelDesc).map(dep => (

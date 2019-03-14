@@ -26,9 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const PageObjects = getPageObjects(['common', 'discover', 'header']);
+  const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize']);
   const defaultSettings = {
-    'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
   };
 
@@ -132,14 +131,18 @@ export default function ({ getService, getPageObjects }) {
 
       it('should modify the time range when a bar is clicked', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.clickHistogramBar(0);
+        await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
         expect(actualTimeString).to.be('September 20th 2015, 00:00:00.000 to September 20th 2015, 03:00:00.000');
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
         await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.visualize.waitForVisualization();
         await PageObjects.discover.brushHistogram(0, 1);
+        await PageObjects.visualize.waitForVisualization();
         const actualTimeString = await PageObjects.header.getPrettyDuration();
         expect(actualTimeString).to.be('September 19th 2015, 23:52:17.080 to September 20th 2015, 02:59:51.112');
       });

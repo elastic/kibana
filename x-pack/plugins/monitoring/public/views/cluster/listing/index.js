@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import uiRoutes from 'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
+import { I18nContext } from 'ui/i18n';
 import template from './index.html';
+import { Listing } from '../../../components/cluster/listing';
 
 const getPageData = $injector => {
   const monitoringClusters = $injector.get('monitoringClusters');
@@ -42,11 +45,37 @@ uiRoutes.when('/home', {
         storageKey: 'clusters',
         getPageData,
         $scope,
-        $injector
+        $injector,
+        reactNodeId: 'monitoringClusterListingApp'
       });
 
       const $route = $injector.get('$route');
+      const kbnUrl = $injector.get('kbnUrl');
+      const globalState = $injector.get('globalState');
+      const storage = $injector.get('localStorage');
+      const showLicenseExpiration = $injector.get('showLicenseExpiration');
       this.data = $route.current.locals.clusters;
+
+
+      $scope.$watch(() => this.data, data => {
+        this.renderReact(
+          <I18nContext>
+            <Listing
+              clusters={data}
+              angular={{
+                scope: $scope,
+                globalState,
+                kbnUrl,
+                storage,
+                showLicenseExpiration
+              }}
+              sorting={this.sorting}
+              pagination={this.pagination}
+              onTableChange={this.onTableChange}
+            />
+          </I18nContext>
+        );
+      });
     }
   }
 })

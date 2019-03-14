@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
@@ -329,7 +325,7 @@ module.exports = {
      * GIS overrides
      */
     {
-      files: ['x-pack/plugins/gis/**/*'],
+      files: ['x-pack/plugins/maps/**/*'],
       rules: {
         'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
       },

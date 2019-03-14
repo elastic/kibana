@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard_view_mode');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await kibanaServer.uiSettings.disableToastAutohide();
@@ -54,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Dashboard viewer', () => {
       before('Create logstash data role', async () => {
         await PageObjects.settings.navigateTo();
-        await PageObjects.settings.clickLinkText('Roles');
+        await testSubjects.click('roles');
         await PageObjects.security.clickCreateNewRole();
 
         await testSubjects.setValue('roleFormNameInput', 'logstash-data');

@@ -22,6 +22,7 @@ import {
 
 import { isFullLicense } from '../../license/check_license';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { timefilter } from 'ui/timefilter';
 
 function startTrialDescription() {
   return (
@@ -49,6 +50,9 @@ function startTrialDescription() {
 
 
 export const DatavisualizerSelector = injectI18n(function (props) {
+
+  timefilter.disableTimeRangeSelector();
+  timefilter.disableAutoRefreshSelector();
 
   const startTrialVisible = (isFullLicense() === false);
 

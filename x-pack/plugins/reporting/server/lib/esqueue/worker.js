@@ -130,7 +130,8 @@ export class Worker extends events.EventEmitter {
       index: job._index,
       type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then((response) => {
@@ -167,7 +168,8 @@ export class Worker extends events.EventEmitter {
       index: job._index,
       type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then(() => true)
@@ -244,7 +246,8 @@ export class Worker extends events.EventEmitter {
         index: job._index,
         type: job._type,
         id: job._id,
-        version: job._version,
+        if_seq_no: job._seq_no,
+        if_primary_term: job._primary_term,
         body: { doc }
       })
         .then(() => {
@@ -259,6 +262,7 @@ export class Worker extends events.EventEmitter {
           if (err.statusCode === 409) return false;
           this.warn(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
+          return this._failJob(job, (err.message) ? err.message : false);
         });
     }, (jobErr) => {
       if (!jobErr) {
@@ -350,6 +354,7 @@ export class Worker extends events.EventEmitter {
   _getPendingJobs() {
     const nowTime = moment().toISOString();
     const query = {
+      seq_no_primary_term: true,
       _source: {
         excludes: [ 'output.content' ]
       },
@@ -384,7 +389,6 @@ export class Worker extends events.EventEmitter {
     return this.client.search({
       index: `${this.queue.index}-*`,
       type: this.doctype,
-      version: true,
       body: query
     })
       .then((results) => {

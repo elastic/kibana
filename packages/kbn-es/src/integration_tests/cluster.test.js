@@ -139,10 +139,14 @@ describe('#installSnapshot()', () => {
     const cluster = new Cluster(log);
     await cluster.installSnapshot({ foo: 'bar' });
     expect(installSnapshot).toHaveBeenCalledTimes(1);
-    expect(installSnapshot).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSnapshot).toHaveBeenCalledWith(
+      // In es6.7, this is the literal object. In 7.0, it also
+      // contains "version": "7.0.0"
+      expect.objectContaining({
+        log,
+        foo: 'bar',
+      })
+    );
   });
 
   it('rejects if installSnapshot() rejects', async () => {

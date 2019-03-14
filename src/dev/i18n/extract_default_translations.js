@@ -42,30 +42,6 @@ function addMessageToMap(targetMap, key, value, reporter) {
   }
 }
 
-export function filterPaths(inputPaths, paths) {
-  const availablePaths = Object.values(paths);
-  const pathsForExtraction = new Set();
-
-  for (const inputPath of inputPaths) {
-    const normalizedPath = normalizePath(inputPath);
-
-    // If input path is the sub path of or equal to any available path, include it.
-    if (
-      availablePaths.some(path => normalizedPath.startsWith(`${path}/`) || path === normalizedPath)
-    ) {
-      pathsForExtraction.add(normalizedPath);
-    } else {
-      // Otherwise go through all available paths and see if any of them is the sub
-      // path of the input path (empty normalized path corresponds to root or above).
-      availablePaths
-        .filter(path => !normalizedPath || path.startsWith(`${normalizedPath}/`))
-        .forEach(ePath => pathsForExtraction.add(ePath));
-    }
-  }
-
-  return [...pathsForExtraction];
-}
-
 function filterEntries(entries, exclude) {
   return entries.filter(entry =>
     exclude.every(excludedPath => !normalizePath(entry).startsWith(excludedPath))
@@ -147,14 +123,4 @@ export async function extractMessagesFromPathToMap(inputPath, targetMap, config,
       }
     })
   );
-}
-
-export async function getDefaultMessagesMap(inputPaths, config, reporter) {
-  const defaultMessagesMap = new Map();
-
-  for (const inputPath of filterPaths(inputPaths, config.paths)) {
-    await extractMessagesFromPathToMap(inputPath, defaultMessagesMap, config, reporter);
-  }
-
-  return defaultMessagesMap;
 }

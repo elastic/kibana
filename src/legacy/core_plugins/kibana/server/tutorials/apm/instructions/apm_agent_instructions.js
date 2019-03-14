@@ -318,7 +318,7 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.install.textPre', {
       defaultMessage: 'Install the APM agent for JavaScript as a dependency to your application:',
     }),
-    commands: [`npm install elastic-apm-js-base --save`],
+    commands: [`npm install @elastic/apm-rum --save`],
   },
   {
     title: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.title', {
@@ -327,7 +327,7 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
     textPre: i18n.translate('kbn.server.tutorials.apm.jsClient.configure.textPre', {
       defaultMessage: 'Agents are libraries that run inside of your application.',
     }),
-    commands: `import {curlyOpen} init as initApm {curlyClose} from 'elastic-apm-js-base'
+    commands: `import {curlyOpen} init as initApm {curlyClose} from '@elastic/apm-rum'
 var apm = initApm({curlyOpen}
 
   // ${i18n.translate('kbn.server.tutorials.apm.jsClient.configure.commands.setRequiredServiceNameComment', {
@@ -460,7 +460,7 @@ Do **not** add the agent as a dependency to your application.',
      -jar my-application.jar`.split('\n'),
     textPost: i18n.translate('kbn.server.tutorials.apm.javaClient.startApplication.textPost', {
       defaultMessage: 'See the [documentation]({documentationLink}) for configuration options and advanced \
-usage.\n\n**Warning: The Java agent is currently in Beta and not meant for production use.**',
+usage.',
       values: { documentationLink: '{config.docs.base_url}guide/en/apm/agent/java/current/index.html' },
     }),
   },

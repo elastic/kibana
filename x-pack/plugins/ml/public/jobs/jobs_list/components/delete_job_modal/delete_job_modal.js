@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
+import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../common/constants/jobs_list';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 export const DeleteJobModal = injectI18n(class extends Component {
@@ -67,10 +68,12 @@ export const DeleteJobModal = injectI18n(class extends Component {
 
   deleteJob = () => {
     this.setState({ deleting: true });
-    deleteJobs(this.state.jobs, () => {
-      this.refreshJobs();
+    deleteJobs(this.state.jobs);
+
+    setTimeout(() => {
       this.closeModal();
-    });
+      this.refreshJobs();
+    }, DELETING_JOBS_REFRESH_INTERVAL_MS);
   }
 
   setEL = (el) => {

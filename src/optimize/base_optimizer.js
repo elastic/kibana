@@ -46,7 +46,7 @@ const STATS_WARNINGS_FILTER = new RegExp([
 
 export default class BaseOptimizer {
   constructor(opts) {
-    this.log = opts.log || (() => null);
+    this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
 
@@ -270,7 +270,7 @@ export default class BaseOptimizer {
         new DynamicDllPlugin({
           uiBundles: this.uiBundles,
           threadLoaderPoolConfig: this.getThreadLoaderPoolConfig(),
-          log: this.log
+          logWithMetadata: this.logWithMetadata
         }),
 
         new MiniCssExtractPlugin({
@@ -326,8 +326,8 @@ export default class BaseOptimizer {
             loader: 'raw-loader'
           },
           {
-            test: /\.png$/,
-            loader: 'url-loader'
+            test: /\.(png|jpg|gif|jpeg)$/,
+            loader: ['url-loader'],
           },
           {
             test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,

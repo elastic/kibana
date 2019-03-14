@@ -21,7 +21,7 @@ exports[`HistoryTabs should change the selected item on tab click 2`] = `
 `;
 
 exports[`HistoryTabs should render correctly 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiTabs
     expand={false}
     size="m"
@@ -69,5 +69,5 @@ exports[`HistoryTabs should render correctly 1`] = `
     path="/three"
     render={[Function]}
   />
-</React.Fragment>
+</Fragment>
 `;

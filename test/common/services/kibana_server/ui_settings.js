@@ -24,7 +24,7 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 
 export class KibanaServerUiSettings {
-  constructor(url, log, defaults) {
+  constructor(url, log, defaults, lifecycle) {
     this._log = log;
     this._defaults = defaults;
     this._wreck = Wreck.defaults({
@@ -33,6 +33,12 @@ export class KibanaServerUiSettings {
       json: true,
       redirects: 3,
     });
+
+    if (this._defaults) {
+      lifecycle.on('beforeTests', async () => {
+        await this.update(defaults);
+      });
+    }
   }
 
   /**

@@ -22,6 +22,7 @@ import React from 'react';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { wrapInI18nContext } from 'ui/i18n';
 import { applyTheme } from 'ui/theme';
 import { toastNotifications } from 'ui/notify';
 
@@ -54,6 +55,7 @@ import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
+import { documentationLinks } from 'ui/documentation_links';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -66,7 +68,7 @@ const app = uiModules.get('app/dashboard', [
 ]);
 
 app.directive('dashboardViewportProvider', function (reactDirective) {
-  return reactDirective(DashboardViewportProvider);
+  return reactDirective(wrapInI18nContext(DashboardViewportProvider));
 });
 
 app.directive('dashboardApp', function ($injector) {
@@ -85,6 +87,7 @@ app.directive('dashboardApp', function ($injector) {
       $rootScope,
       $route,
       $routeParams,
+      $window,
       getAppState,
       dashboardConfig,
       localStorage,
@@ -216,7 +219,7 @@ app.directive('dashboardApp', function ($injector) {
             dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
-      $scope.updateQueryAndFetch = function (query) {
+      $scope.updateQueryAndFetch = function ({ query }) {
         const oldQuery = $scope.model.query;
         if (_.isEqual(oldQuery, query)) {
           // The user can still request a reload in the query bar, even if the
@@ -239,7 +242,9 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', $scope.updateQueryAndFetch);
+      $scope.$watch('model.query', (query) => {
+        $scope.updateQueryAndFetch({ query });
+      });
 
       $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
         dashboardStateManager.handleTimeChange(timefilter.getTime());
@@ -361,6 +366,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
+      navActions[TopNavIds.DOCUMENTATION] = () => $window.open(documentationLinks.kibana.dashboard);
       navActions[TopNavIds.FULL_SCREEN] = () =>
         dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);

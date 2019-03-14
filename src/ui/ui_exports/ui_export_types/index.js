@@ -57,6 +57,7 @@ export {
   docViews,
   hacks,
   home,
+  canvas,
   visTypeEnhancers,
   aliases,
   visualize,

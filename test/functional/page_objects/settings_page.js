@@ -38,19 +38,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await find.clickByDisplayedLinkText(text);
     }
     async clickKibanaSettings() {
-      await find.clickByDisplayedLinkText('Advanced Settings');
+      await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // Verify navigation is successful.
       await testSubjects.existOrFail('managementSettingsTitle');
     }
 
     async clickKibanaSavedObjects() {
-      await find.clickByDisplayedLinkText('Saved Objects');
+      await testSubjects.click('objects');
     }
 
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
-      await find.clickByDisplayedLinkText('Index Patterns');
+      await testSubjects.click('indices');
     }
 
     async getAdvancedSettings(propertyName) {
@@ -277,7 +276,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.clickOptionalAddNewButton();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await retry.try(async () => {
-          await this.setIndexPatternField(indexPatternName);
+          await this.setIndexPatternField({ indexPatternName });
         });
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -317,14 +316,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(indexPatternName = 'logstash-') {
+    async setIndexPatternField({ indexPatternName = 'logstash-', expectWildcard = true } = {}) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
       await field.type(indexPatternName);
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(`${indexPatternName}*`);
+      expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
     }
 
     async getCreateIndexPatternGoToStep2Button() {

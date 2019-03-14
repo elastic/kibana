@@ -46,41 +46,6 @@ declare module '@elastic/eui' {
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
 
-  type EuiDatePickerProps = CommonProps &
-    Pick<
-      ReactDatePickerProps,
-      Exclude<
-        keyof ReactDatePickerProps,
-        | 'monthsShown'
-        | 'showWeekNumbers'
-        | 'fixedHeight'
-        | 'dropdownMode'
-        | 'useShortMonthInDropdown'
-        | 'todayButton'
-        | 'timeCaption'
-        | 'disabledKeyboardNavigation'
-        | 'isClearable'
-        | 'withPortal'
-        | 'ref'
-        | 'placeholderText'
-        | 'selected'
-      >
-    > & {
-      fullWidth?: boolean;
-      inputRef?: Ref<Element | ReactType>;
-      injectTimes?: moment.Moment[];
-      isInvalid?: boolean;
-      isLoading?: boolean;
-      selected?: moment.Moment | null | undefined;
-      placeholder?: string;
-      shadow?: boolean;
-      calendarContainer?: React.ReactNode;
-      onChange?: (date: moment.Moment | null) => void;
-      startDate?: moment.Moment | undefined;
-      endDate?: moment.Moment | undefined;
-    };
-  export const EuiDatePicker: React.SFC<EuiDatePickerProps>;
-
   type EuiFilterGroupProps = CommonProps;
   export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
 
@@ -159,15 +124,33 @@ declare module '@elastic/eui' {
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 
-  type EuiDatePickerRangeProps = CommonProps & {
-    startDateControl: React.ReactNode;
-    endDateControl: React.ReactNode;
-    iconType?: IconType | boolean;
-    fullWidth?: boolean;
-    disabled?: boolean;
-    isLoading?: boolean;
-    dateFormat?: string;
+  type EuiInMemoryTableProps = CommonProps & {
+    items?: any;
+    columns?: any;
+    sorting?: any;
+    search?: any;
+    selection?: any;
+    pagination?: any;
+    itemId?: any;
+    isSelectable?: any;
+    loading?: any;
+    hasActions?: any;
+    message?: any;
   };
+  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 
-  export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
+  type EuiButtonGroupProps = CommonProps & {
+    buttonSize?: any;
+    color?: any;
+    idToSelectedMap?: any;
+    options?: any;
+    type?: any;
+    onChange?: any;
+    isIconOnly?: any;
+    isDisabled?: any;
+    isFullWidth?: any;
+    legend?: any;
+    idSelected?: any;
+  };
+  export const EuiButtonGroup: React.SFC<EuiButtonGroupProps>;
 }

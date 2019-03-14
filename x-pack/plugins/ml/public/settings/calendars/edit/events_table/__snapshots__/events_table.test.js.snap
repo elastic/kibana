@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EventsTable Renders events table with no search bar 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSpacer
     size="m"
   />
@@ -65,11 +65,11 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`EventsTable Renders events table with search bar 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiSpacer
     size="m"
   />
@@ -177,5 +177,5 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       }
     }
   />
-</React.Fragment>
+</Fragment>
 `;

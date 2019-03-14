@@ -100,7 +100,7 @@ export function AgentFeatureTipMessage({
     <TableInfo>
       <EuiIconWithSpace type="iInCircle" />
       {getAgentFeatureText(featureName)}{' '}
-      <EuiLink target="_blank" rel="noopener noreferrer" href={docsUrl}>
+      <EuiLink target="_blank" rel="noopener" href={docsUrl}>
         {i18n.translate(
           'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
           { defaultMessage: 'Learn more in the documentation.' }

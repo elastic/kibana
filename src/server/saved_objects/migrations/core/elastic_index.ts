@@ -52,7 +52,11 @@ export interface FullIndexInfo {
  * index mappings are somewhat what we expect.
  */
 export async function fetchInfo(callCluster: CallCluster, index: string): Promise<FullIndexInfo> {
-  const result = await callCluster('indices.get', { ignore: [404], index });
+  const result = await callCluster('indices.get', {
+    ignore: [404],
+    index,
+    include_type_name: true,
+  });
 
   if ((result as NotFound).status === 404) {
     return {
@@ -226,7 +230,11 @@ export async function createIndex(
   index: string,
   mappings?: IndexMapping
 ) {
-  await callCluster('indices.create', { body: { mappings, settings }, index });
+  await callCluster('indices.create', {
+    body: { mappings, settings },
+    index,
+    include_type_name: true,
+  });
 }
 
 export async function deleteIndex(callCluster: CallCluster, index: string) {
@@ -251,6 +259,7 @@ export async function convertToAlias(
   await callCluster('indices.create', {
     body: { mappings: info.mappings, settings },
     index: info.indexName,
+    include_type_name: true,
   });
 
   await reindex(callCluster, alias, info.indexName, batchSize);

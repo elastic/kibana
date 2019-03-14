@@ -89,6 +89,7 @@ describe('IndexMigrator', () => {
         settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
       },
       index: '.kibana_1',
+      include_type_name: true,
     });
   });
 
@@ -180,6 +181,7 @@ describe('IndexMigrator', () => {
     await new IndexMigrator(opts).migrate();
 
     sinon.assert.calledWith(callCluster, 'indices.create', {
+      include_type_name: true,
       body: {
         mappings: {
           doc: {

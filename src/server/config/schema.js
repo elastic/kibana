@@ -21,8 +21,13 @@ import Joi from 'joi';
 import { constants as cryptoConstants } from 'crypto';
 import os from 'os';
 
-import { fromRoot } from '../../utils';
-import { getData } from '../path';
+import {
+  fromRoot
+} from '../../utils';
+import {
+  getData
+} from '../path';
+import { DEFAULT_CSP_RULES } from '../csp';
 
 const tilemapSchema = Joi.object({
   url: Joi.string(),
@@ -86,6 +91,11 @@ export default () => Joi.object({
   pid: Joi.object({
     file: Joi.string(),
     exclusive: Joi.boolean().default(false)
+  }).default(),
+
+  csp: Joi.object({
+    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
+    strict: Joi.boolean().default(false),
   }).default(),
 
   cpu: Joi.object({
@@ -236,7 +246,7 @@ export default () => Joi.object({
     tilemap: tilemapSchema,
     regionmap: regionmapSchema,
     manifestServiceUrl: Joi.string().default('https://catalogue.maps.elastic.co/v6.6/manifest'),
-    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.6'),
+    emsLandingPageUrl: Joi.string().default('https://maps.elastic.co/v6.7'),
   }).default(),
   tilemap: tilemapSchema.notes('Deprecated'),
   regionmap: regionmapSchema.notes('Deprecated'),

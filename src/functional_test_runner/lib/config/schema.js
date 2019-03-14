@@ -115,7 +115,6 @@ export const schema = Joi.object().keys({
   junit: Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
-    rootDirectory: Joi.string(),
   }).default(),
 
   mochaReporter: Joi.object().keys({
@@ -139,6 +138,7 @@ export const schema = Joi.object().keys({
     license: Joi.string().default('oss'),
     from: Joi.string().default('snapshot'),
     serverArgs: Joi.array(),
+    dataArchive: Joi.string(),
   }).default(),
 
   kbnTestServer: Joi.object().keys({

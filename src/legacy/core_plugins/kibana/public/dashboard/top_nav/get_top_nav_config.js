@@ -41,7 +41,8 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
-            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
+            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
+            getDocumentationConfig(actions[TopNavIds.DOCUMENTATION]),
           ]
       );
     case DashboardViewMode.EDIT:
@@ -50,7 +51,9 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getAddConfig(actions[TopNavIds.ADD]),
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
-        getShareConfig(actions[TopNavIds.SHARE])];
+        getShareConfig(actions[TopNavIds.SHARE]),
+        getDocumentationConfig(actions[TopNavIds.DOCUMENTATION]),
+      ];
     default:
       return [];
   }
@@ -177,6 +180,18 @@ function getOptionsConfig(action) {
       defaultMessage: 'Options',
     }),
     testId: 'dashboardOptionsButton',
+    run: action,
+  };
+}
+
+function getDocumentationConfig(action) {
+  return {
+    key: i18n.translate('kbn.dashboard.topNav.documentationButtonKey', {
+      defaultMessage: 'documentation',
+    }),
+    description: i18n.translate('kbn.dashboard.topNav.documentationButtonDescription', {
+      defaultMessage: 'Documentation',
+    }),
     run: action,
   };
 }

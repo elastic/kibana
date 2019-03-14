@@ -23,7 +23,7 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function systemLogsSpecProvider(server, context) {
   const moduleName = 'system';
-  const geoipRequired = true;
+  const geoipRequired = false;
   const uaRequired = false;
   const platforms = ['OSX', 'DEB', 'RPM'];
   return {

@@ -7,18 +7,15 @@
 import { compose, withState } from 'recompose';
 import { connect } from 'react-redux';
 import { canUserWrite } from '../../state/selectors/app';
-import { getWorkpadName, getSelectedPage, isWriteable } from '../../state/selectors/workpad';
+import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { setWriteable } from '../../state/actions/workpad';
-import { getAssets } from '../../state/selectors/assets';
 import { addElement } from '../../state/actions/elements';
 import { WorkpadHeader as Component } from './workpad_header';
 
 const mapStateToProps = state => ({
   isWriteable: isWriteable(state) && canUserWrite(state),
   canUserWrite: canUserWrite(state),
-  workpadName: getWorkpadName(state),
   selectedPage: getSelectedPage(state),
-  hasAssets: Object.keys(getAssets(state)).length ? true : false,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -35,10 +32,10 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => ({
 });
 
 export const WorkpadHeader = compose(
-  withState('showElementModal', 'setShowElementModal', false),
   connect(
     mapStateToProps,
     mapDispatchToProps,
     mergeProps
-  )
+  ),
+  withState('showElementModal', 'setShowElementModal', false)
 )(Component);

@@ -118,5 +118,6 @@ html(lang=locale)
     style#themeCss
 
   body
+    kbn-csp(data=JSON.stringify({ nonce, strictCsp }))
     kbn-injected-metadata(data=JSON.stringify(injectedMetadata))
     block content

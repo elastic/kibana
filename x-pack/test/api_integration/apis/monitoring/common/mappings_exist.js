@@ -48,7 +48,7 @@ export default function ({ getService }) {
       let mappings;
 
       before('load mappings', async () => {
-        const template = await es.indices.getTemplate({ name: indexTemplate });
+        const template = await es.indices.getTemplate({ name: indexTemplate, include_type_name: true });
         mappings = get(template, [indexTemplate, 'mappings', 'doc', 'properties']);
       });
 

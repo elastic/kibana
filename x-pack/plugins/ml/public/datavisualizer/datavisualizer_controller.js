@@ -93,7 +93,12 @@ module
     $scope.metricFieldFilter = '';
     $scope.fieldFilterIcon = 0;
     $scope.fieldFilter = '';
-    $scope.recognizerResults = { count: 0 };
+    $scope.recognizerResults = {
+      count: 0,
+      onChange() {
+        $scope.$applyAsync();
+      }
+    };
 
     $scope.showSidebar = isFullLicense();
 
@@ -265,7 +270,8 @@ module
 
     function buildSearchQuery() {
       const searchQuery = luceneStringToDsl($scope.searchQueryText);
-      decorateQuery(searchQuery, config);
+      const queryStringOptions = config.get('query:queryString:options');
+      decorateQuery(searchQuery, queryStringOptions);
       return searchQuery;
     }
 

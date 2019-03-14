@@ -23,6 +23,7 @@ import { getSearchDsl } from './search_dsl';
 import { includedFields } from './included_fields';
 import { decorateEsError } from './decorate_es_error';
 import * as errors from './errors';
+import { decodeRequestVersion, encodeVersion, encodeHitVersion } from '../../version';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -169,7 +170,8 @@ export class SavedObjectsRepository {
         const {
           error,
           _id: responseId,
-          _version: version,
+          _seq_no: seqNo,
+          _primary_term: primaryTerm,
         } = Object.values(response)[0];
 
         const {
@@ -199,8 +201,8 @@ export class SavedObjectsRepository {
           id,
           type,
           updated_at: time,
-          version,
-          attributes
+          version: encodeVersion(seqNo, primaryTerm),
+          attributes,
         };
       })
     };
@@ -252,7 +254,6 @@ export class SavedObjectsRepository {
    * @returns {promise} - { took, timed_out, total, deleted, batches, version_conflicts, noops, retries, failures }
    */
   async deleteByNamespace(namespace) {
-
     if (!namespace || typeof namespace !== 'string') {
       throw new TypeError(`namespace is required, and must be a string`);
     }
@@ -313,7 +314,7 @@ export class SavedObjectsRepository {
     }
 
     if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
+      throw new TypeError('options.fields must be an array');
     }
 
     const esOptions = {
@@ -324,7 +325,7 @@ export class SavedObjectsRepository {
       ignore: [404],
       rest_total_hits_as_int: true,
       body: {
-        version: true,
+        seq_no_primary_term: true,
         ...getSearchDsl(this._mappings, this._schema, {
           search,
           searchFields,
@@ -407,7 +408,7 @@ export class SavedObjectsRepository {
           id,
           type,
           ...time && { updated_at: time },
-          version: doc._version,
+          version: encodeHitVersion(doc),
           attributes: doc._source[type],
           migrationVersion: doc._source.migrationVersion,
         };
@@ -449,7 +450,7 @@ export class SavedObjectsRepository {
       id,
       type,
       ...updatedAt && { updated_at: updatedAt },
-      version: response._version,
+      version: encodeHitVersion(response),
       attributes: response._source[type],
       migrationVersion: response._source.migrationVersion,
     };
@@ -461,7 +462,7 @@ export class SavedObjectsRepository {
    * @param {string} type
    * @param {string} id
    * @param {object} [options={}]
-   * @property {integer} options.version - ensures version matches that of persisted object
+   * @property {string} options.version - ensures version matches that of persisted object
    * @property {string} [options.namespace]
    * @returns {promise}
    */
@@ -476,7 +477,7 @@ export class SavedObjectsRepository {
       id: this._serializer.generateRawId(namespace, type, id),
       type: this._type,
       index: this._index,
-      version,
+      ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
       ignore: [404],
       body: {
@@ -496,7 +497,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      version: response._version,
+      version: encodeHitVersion(response),
       attributes
     };
   }
@@ -570,7 +571,7 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      version: response._version,
+      version: encodeHitVersion(response),
       attributes: response.get._source[type],
     };
 

@@ -4,33 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UMGqlRange } from '../../../../common/domain_types';
-
 export interface UMMonitorsAdapter {
   getMonitorChartsData(
     request: any,
     monitorId: string,
-    dateRangeStart: number,
-    dateRangeEnd: number
+    dateRangeStart: string,
+    dateRangeEnd: string
   ): Promise<any>;
   getLatestMonitors(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any>;
   getSnapshotCount(
     request: any,
-    range: UMGqlRange,
-    downCount: number,
-    windowSize: number,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any>;
-  getFilterBar(request: any, dateRangeStart: number, dateRangeEnd: number): Promise<any>;
+  getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
   getErrorsList(
     request: any,
-    dateRangeStart: number,
-    dateRangeEnd: number,
-    filters?: string
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
   ): Promise<any>;
 }

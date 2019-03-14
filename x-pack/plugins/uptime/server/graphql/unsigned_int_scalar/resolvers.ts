@@ -16,10 +16,7 @@ const unsignedIntegerScalar = new GraphQLScalarType({
   },
   parseValue(value) {
     const parsed = parseInt(value, 10);
-    if (parsed < 0) {
-      return null;
-    }
-    return parseInt(value, 10);
+    return parsed < 0 ? null : parsed;
   },
   parseLiteral(ast) {
     switch (ast.kind) {

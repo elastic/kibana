@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('vertical bar chart', function () {
@@ -46,8 +47,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       // leaving Interval set to Auto
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
     };
 
 
@@ -57,7 +56,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.waitForVisualizationSavedToastGone();
       await PageObjects.visualize.loadSavedVisualization(vizName1);
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.visualize.waitForVisualization();
     });
 
@@ -259,6 +257,16 @@ export default function ({ getService, getPageObjects }) {
         const expectedEntries = ['404', '200', '503'];
         const legendEntries = await PageObjects.visualize.getLegendEntries();
         expect(legendEntries).to.eql(expectedEntries);
+      });
+
+      it ('should correctly filter by legend', async () => {
+        await PageObjects.visualize.filterLegend('200');
+        await PageObjects.visualize.waitForVisualization();
+        const legendEntries = await PageObjects.visualize.getLegendEntries();
+        const expectedEntries = ['200'];
+        expect(legendEntries).to.eql(expectedEntries);
+        await filterBar.removeFilter('response.raw');
+        await PageObjects.visualize.waitForVisualization();
       });
     });
 

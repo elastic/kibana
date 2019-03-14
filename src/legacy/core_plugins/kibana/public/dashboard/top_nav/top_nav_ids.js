@@ -20,6 +20,7 @@
 export const TopNavIds = {
   ADD: 'add',
   SHARE: 'share',
+  DOCUMENTATION: 'documentation',
   OPTIONS: 'options',
   SAVE: 'save',
   EXIT_EDIT_MODE: 'exitEditMode',

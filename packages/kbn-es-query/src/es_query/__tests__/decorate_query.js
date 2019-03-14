@@ -20,17 +20,13 @@
 import expect from 'expect.js';
 import { decorateQuery } from '../decorate_query';
 
-const configStub = {
-  get: () => ({ analyze_wildcard: true })
-};
-
 describe('Query decorator', function () {
   it('should be a function', function () {
     expect(decorateQuery).to.be.a(Function);
   });
 
   it('should merge in the query string options', function () {
-    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, configStub);
+    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true });
     expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
   });
 });

@@ -14,8 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -44,7 +42,7 @@ export class JobListUi extends Component {
     loadJobs: PropTypes.func,
     refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
-    jobs: PropTypes.array,
+    hasJobs: PropTypes.bool,
     isLoading: PropTypes.bool,
   }
 
@@ -180,6 +178,7 @@ export class JobListUi extends Component {
         }
         actions={
           <EuiButton
+            data-test-subj="createRollupJobButton"
             {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}
             fill
             iconType="plusInCircle"
@@ -249,7 +248,7 @@ export class JobListUi extends Component {
   }
 
   render() {
-    const { isLoading, jobs, jobLoadError } = this.props;
+    const { isLoading, hasJobs, jobLoadError } = this.props;
 
     let content;
 
@@ -259,23 +258,21 @@ export class JobListUi extends Component {
       } else {
         content = this.renderError(jobLoadError);
       }
-    } else if (!isLoading && !jobs.length) {
+    } else if (!isLoading && !hasJobs) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();
     }
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {content}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent
+        horizontalPosition="center"
+        className="rollupJobsListPanel"
+      >
+        {content}
+      </EuiPageContent>
     );
   }
 }
 
 export const JobList = injectI18n(JobListUi);
-

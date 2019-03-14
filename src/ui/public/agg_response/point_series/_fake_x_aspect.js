@@ -40,5 +40,8 @@ export function makeFakeXAspect() {
     i: -1,
     aggConfig: fake,
     title: fake.makeLabel(),
+    params: {
+      defaultValue: '_all',
+    },
   };
 }

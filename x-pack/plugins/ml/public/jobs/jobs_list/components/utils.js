@@ -179,7 +179,7 @@ export function deleteJobs(jobs, finish = () => {}) {
   const jobIds = jobs.map(j => j.id);
   mlJobService.deleteJobs(jobIds)
   	.then((resp) => {
-      showResults(resp, DATAFEED_STATE.DELETED);
+      showResults(resp, JOB_STATE.DELETED);
       finish();
     })
     .catch((error) => {

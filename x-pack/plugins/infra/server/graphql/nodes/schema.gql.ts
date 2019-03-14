@@ -10,11 +10,13 @@ export const nodesSchema: any = gql`
   type InfraNodeMetric {
     name: InfraMetricType!
     value: Float!
+    avg: Float!
+    max: Float!
   }
 
   type InfraNodePath {
     value: String!
-    label: String
+    label: String!
   }
 
   type InfraNode {
@@ -60,6 +62,7 @@ export const nodesSchema: any = gql`
     hosts
     pods
     containers
+    custom
   }
 
   input InfraPathInput {

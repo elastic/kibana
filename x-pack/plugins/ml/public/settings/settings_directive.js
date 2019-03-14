@@ -16,6 +16,7 @@ import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
 
+import { I18nContext } from 'ui/i18n';
 import uiRoutes from 'ui/routes';
 import { timefilter } from 'ui/timefilter';
 
@@ -41,9 +42,6 @@ import { Settings } from './settings.js';
 
 module.directive('mlSettings', function () {
 
-  timefilter.disableTimeRangeSelector(); // remove time picker from top of page
-  timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
-
   const canGetFilters = checkPermission('canGetFilters');
   const canGetCalendars = checkPermission('canGetCalendars');
 
@@ -52,11 +50,18 @@ module.directive('mlSettings', function () {
     replace: false,
     scope: {},
     link: function (scope, element) {
+      timefilter.disableTimeRangeSelector();
+      timefilter.disableAutoRefreshSelector();
+
       ReactDOM.render(
-        React.createElement(Settings, {
-          canGetFilters,
-          canGetCalendars
-        }),
+        <I18nContext>
+          {React.createElement(
+            Settings, {
+              canGetFilters,
+              canGetCalendars
+            })
+          }
+        </I18nContext>,
         element[0]
       );
     }

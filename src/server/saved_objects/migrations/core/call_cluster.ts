@@ -83,10 +83,12 @@ export interface PutTemplateOpts {
 
 export interface IndexOpts {
   index: string;
+  include_type_name?: boolean;
 }
 
 export interface IndexCreationOpts {
   index: string;
+  include_type_name?: boolean;
   body?: {
     mappings?: IndexMapping;
     settings?: {

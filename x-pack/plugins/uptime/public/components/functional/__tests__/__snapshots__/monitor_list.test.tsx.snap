@@ -1,0 +1,559 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MonitorList component renders a monitor list without errors 1`] = `
+<Fragment>
+  <EuiTitle
+    size="xs"
+    textTransform="none"
+  >
+    <h5>
+      <FormattedMessage
+        defaultMessage="Monitor status"
+        id="xpack.uptime.monitorList.monitoringStatusTitle"
+        values={Object {}}
+      />
+    </h5>
+  </EuiTitle>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="l"
+  >
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "field": "ping.monitor.status",
+            "name": "Status",
+            "render": [Function],
+          },
+          Object {
+            "field": "ping.timestamp",
+            "name": "Last updated",
+            "render": [Function],
+          },
+          Object {
+            "field": "ping.monitor.host",
+            "name": "Host",
+            "render": [Function],
+          },
+          Object {
+            "field": "key.port",
+            "name": "Port",
+            "sortable": true,
+          },
+          Object {
+            "field": "ping.monitor.type",
+            "name": "Type",
+            "sortable": true,
+          },
+          Object {
+            "field": "ping.monitor.ip",
+            "name": "IP",
+          },
+          Object {
+            "field": "upSeries",
+            "name": "Monitor History",
+            "render": [Function],
+          },
+        ]
+      }
+      executeQueryOptions={Object {}}
+      items={
+        Array [
+          Object {
+            "downSeries": Array [
+              Object {
+                "x": 1547848920000,
+                "y": 54,
+              },
+              Object {
+                "x": 1547849220000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547849520000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547849820000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547850120000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547850420000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547850720000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547851020000,
+                "y": 60,
+              },
+              Object {
+                "x": 1547851320000,
+                "y": 5,
+              },
+              Object {
+                "x": 1547851620000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851920000,
+                "y": null,
+              },
+              Object {
+                "x": 1547852220000,
+                "y": null,
+              },
+              Object {
+                "x": 1547852520000,
+                "y": 4,
+              },
+            ],
+            "key": Object {
+              "id": "http@http://www.example.com",
+              "port": 80,
+            },
+            "ping": Object {
+              "monitor": Object {
+                "duration": Object {
+                  "us": 2479437,
+                },
+                "host": "www.example.com",
+                "ip": "198.71.248.67",
+                "status": "down",
+                "type": "http",
+              },
+              "timestamp": "2019-01-18T23:02:58.384Z",
+            },
+            "upSeries": Array [
+              Object {
+                "x": 1547848920000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849220000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849520000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849820000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850120000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850420000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850720000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851020000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851320000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851620000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851920000,
+                "y": null,
+              },
+              Object {
+                "x": 1547852220000,
+                "y": null,
+              },
+              Object {
+                "x": 1547852520000,
+                "y": null,
+              },
+            ],
+          },
+          Object {
+            "downSeries": Array [
+              Object {
+                "x": 1547848920000,
+                "y": null,
+              },
+              Object {
+                "x": 1547848980000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849040000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849100000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849160000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849220000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849280000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849340000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849400000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849460000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849520000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849580000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849640000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849700000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849760000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849820000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849880000,
+                "y": null,
+              },
+              Object {
+                "x": 1547849940000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850000000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850060000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850120000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850180000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850240000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850300000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850360000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850420000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850480000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850540000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850600000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850660000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850720000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850780000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850840000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850900000,
+                "y": null,
+              },
+              Object {
+                "x": 1547850960000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851020000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851080000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851140000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851200000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851260000,
+                "y": null,
+              },
+              Object {
+                "x": 1547851320000,
+                "y": null,
+              },
+            ],
+            "key": Object {
+              "id": "http@https://www.elastic.co",
+              "port": 443,
+            },
+            "ping": Object {
+              "monitor": Object {
+                "duration": Object {
+                  "us": 392993,
+                },
+                "host": "www.elastic.co",
+                "ip": "151.101.210.217",
+                "status": "up",
+                "type": "http",
+              },
+              "timestamp": "2019-01-18T22:42:22.385Z",
+            },
+            "upSeries": Array [
+              Object {
+                "x": 1547848920000,
+                "y": 10,
+              },
+              Object {
+                "x": 1547848980000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849040000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849100000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849160000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849220000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849280000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849340000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849400000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849460000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849520000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849580000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849640000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849700000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849760000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849820000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849880000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547849940000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850000000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850060000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850120000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850180000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850240000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850300000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850360000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850420000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850480000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850540000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850600000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850660000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850720000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850780000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850840000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850900000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547850960000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851020000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851080000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851140000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851200000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851260000,
+                "y": 20,
+              },
+              Object {
+                "x": 1547851320000,
+                "y": 8,
+              },
+            ],
+          },
+        ]
+      }
+      loading={false}
+      pagination={
+        Object {
+          "initialPageSize": 10,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            20,
+            50,
+          ],
+        }
+      }
+      responsive={true}
+      sorting={false}
+    />
+  </EuiPanel>
+</Fragment>
+`;

@@ -34,6 +34,7 @@ export function apm(kibana) {
         euiIconType: 'apmApp',
         order: 8100
       },
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       home: ['plugins/apm/register_feature'],
       injectDefaultVars(server) {
         const config = server.config();

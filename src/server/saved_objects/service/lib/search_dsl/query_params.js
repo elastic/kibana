@@ -47,7 +47,8 @@ function getFieldsForTypes(searchFields, types) {
 
   if (!searchFields || !searchFields.length) {
     return {
-      all_fields: true
+      lenient: true,
+      fields: ['*'],
     };
   }
 

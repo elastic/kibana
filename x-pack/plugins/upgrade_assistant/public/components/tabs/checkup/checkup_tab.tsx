@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { NEXT_MAJOR_VERSION } from '../../../../common/version';
+import { LoadingErrorBanner } from '../../error_banner';
 import {
   GroupByOption,
   LevelFilterOption,
@@ -63,6 +64,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
       alertBanner,
       checkupLabel,
       deprecations,
+      loadingError,
       loadingState,
       refreshCheckupData,
       setSelectedTabIndex,
@@ -114,7 +116,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
                   values={{
                     snapshotRestoreDocsButton: (
                       <EuiLink
-                        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-snapshots.html"
+                        href="https://www.elastic.co/guide/en/elasticsearch/reference/6.7/modules-snapshots.html"
                         target="_blank"
                       >
                         <FormattedMessage
@@ -134,16 +136,7 @@ export class CheckupTab extends UpgradeAssistantTabComponent<CheckupTabProps, Ch
         <EuiPageContent>
           <EuiPageContentBody>
             {loadingState === LoadingState.Error ? (
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.errorCallout.calloutTitle"
-                    defaultMessage="A network error occurred while retrieving the checkup results."
-                  />
-                }
-                color="danger"
-                iconType="cross"
-              />
+              <LoadingErrorBanner loadingError={loadingError} />
             ) : deprecations && deprecations.length > 0 ? (
               <Fragment>
                 <CheckupControls
