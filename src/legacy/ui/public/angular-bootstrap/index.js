@@ -64,7 +64,6 @@ angular.module('ui.bootstrap.tpls', [
 import './alert/alert';
 import './bindHtml/bindHtml';
 import './buttons/buttons';
-import './collapse/collapse';
 import './dateparser/dateparser';
 import './dropdown/dropdown';
 import './modal/modal';
