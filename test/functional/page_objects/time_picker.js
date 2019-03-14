@@ -188,10 +188,11 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeDurationInHours() {
+      const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
       const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
 
-      const startMoment = moment(Date.parse(start));
-      const endMoment = moment(Date.parse(end));
+      const startMoment = moment(start, DEFAULT_DATE_FORMAT);
+      const endMoment = moment(end, DEFAULT_DATE_FORMAT);
 
       return moment.duration(moment(endMoment) - moment(startMoment)).asHours();
     }
