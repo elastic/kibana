@@ -81,7 +81,7 @@ exports[`render symbol tree correctly 1`] = `
               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                className="sc-bwzfXH eSZWNW"
+                className="sc-bwzfXH jYPrbO"
               >
                 <svg
                   className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -154,7 +154,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH havHSm"
+                    className="sc-bwzfXH jYpsNE"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
@@ -204,7 +204,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH havHSm"
+                    className="sc-bwzfXH jYpsNE"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
@@ -254,7 +254,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH eSZWNW"
+                    className="sc-bwzfXH jYPrbO"
                   >
                     <svg
                       className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -328,7 +328,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH havHSm"
+                        className="sc-bwzfXH jYpsNE"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
@@ -378,7 +378,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH havHSm"
+                        className="sc-bwzfXH jYpsNE"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
@@ -428,7 +428,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH havHSm"
+                        className="sc-bwzfXH jYpsNE"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
@@ -478,7 +478,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH eSZWNW"
+                        className="sc-bwzfXH jYPrbO"
                       >
                         <svg
                           className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -552,7 +552,7 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
-                            className="sc-bwzfXH havHSm"
+                            className="sc-bwzfXH jYpsNE"
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrow1"
