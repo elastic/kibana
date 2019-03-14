@@ -23,7 +23,6 @@ uiModules.get('kibana', [
 angular.module('ui.bootstrap', [
   'ui.bootstrap.tpls',
   'ui.bootstrap.transition',
-  'ui.bootstrap.collapse',
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.buttons',
