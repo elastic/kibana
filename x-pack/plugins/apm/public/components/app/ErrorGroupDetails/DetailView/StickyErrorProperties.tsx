@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isBoolean } from 'lodash';
 import React, { Fragment } from 'react';
 import {
   ERROR_EXC_HANDLED,
@@ -56,6 +57,7 @@ function TransactionLink({ error, transaction }: Props) {
 }
 
 export function StickyErrorProperties({ error, transaction }: Props) {
+  const isHandled = idx(error, _ => _.error.exception[0].handled);
   const stickyProperties = [
     {
       fieldName: '@timestamp',
@@ -88,9 +90,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
       label: i18n.translate('xpack.apm.errorGroupDetails.handledLabel', {
         defaultMessage: 'Handled'
       }),
-      val:
-        String(idx(error, _ => _.error.exception[0].handled)) ||
-        NOT_AVAILABLE_LABEL,
+      val: isBoolean(isHandled) ? String(isHandled) : NOT_AVAILABLE_LABEL,
       width: '25%'
     },
     {

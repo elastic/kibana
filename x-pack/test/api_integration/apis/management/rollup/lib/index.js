@@ -11,3 +11,7 @@ export {
 export {
   getRandomString,
 } from './random';
+
+export {
+  wait
+} from './utils';
