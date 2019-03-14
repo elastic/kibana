@@ -16,6 +16,7 @@ import {
   fetchFile,
   FetchFileResponse,
   fetchRepoBranches,
+  fetchRepoCommits,
   fetchRepoTree,
   fetchTreeCommits,
   findReferences,
@@ -168,6 +169,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   // repo changed
   if (currentTree.repoUri !== repoUri) {
     yield put(resetRepoTree());
+    yield put(fetchRepoCommits({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
   yield put(

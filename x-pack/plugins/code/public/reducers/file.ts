@@ -116,7 +116,7 @@ export const file = handleActions(
       produce<FileState>(state, (draft: FileState) => {
         draft.loading = false;
         const { tree, path, withParents } = action.payload!;
-        if (withParents) {
+        if (withParents || path === '/' || path === '') {
           draft.tree = mergeNode(draft.tree, tree);
         } else {
           const parentsPath = path.split('/');
