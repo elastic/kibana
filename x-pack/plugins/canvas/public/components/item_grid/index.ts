@@ -5,6 +5,6 @@
  */
 
 import { pure } from 'recompose';
-import { ItemGrid as Component } from './item_grid';
+import { ItemGrid as Component, Props as ComponentProps } from './item_grid';
 
-export const ItemGrid = pure(Component);
+export const ItemGrid = pure<ComponentProps<any>>(Component);
