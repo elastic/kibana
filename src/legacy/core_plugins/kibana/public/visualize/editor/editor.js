@@ -214,6 +214,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
+        allowShortUrl: uiCapabilities.visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',

@@ -15,6 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     'visualize',
     'header',
     'security',
+    'share',
     'spaceSelector',
     'timePicker',
   ]);
@@ -98,6 +99,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
         await testSubjects.existOrFail('visualizeSaveButton', 10000);
       });
+
+      it('Embed code shows create short-url button', async () => {
+        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.createShortUrlExistOrFail();
+      });
+
+      it('Permalinks shows create short-url button', async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlExistOrFail();
+      });
     });
 
     describe('global visualize read-only privileges', () => {
@@ -165,6 +176,16 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         });
         await testSubjects.existOrFail('shareTopNavButton', 10000);
         await testSubjects.missingOrFail('visualizeSaveButton', 10000);
+      });
+
+      it(`Embed Code doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Embedcode');
+        await PageObjects.share.createShortUrlMissingOrFail();
+      });
+
+      it(`Permalinks doesn't show create short-url button`, async () => {
+        await PageObjects.share.openShareMenuItem('Permalinks');
+        await PageObjects.share.createShortUrlMissingOrFail();
       });
     });
 
