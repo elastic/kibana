@@ -21,12 +21,14 @@ import './components/watch_detail';
 import { WatchDetail } from './components/watch_detail/watch_detail_component';
 import { WatchHistory } from './components/watch_detail/watch_history_component';
 import { I18nContext } from 'ui/i18n';
+import { EuiSpacer } from '@elastic/eui';
 
 let elem;
 const renderReact = async (elem, watchId) => {
   render(
     <I18nContext>
       <WatchDetail watchId={watchId}/>
+      <EuiSpacer />
       <WatchHistory watchId={watchId}/>
     </I18nContext>,
     elem

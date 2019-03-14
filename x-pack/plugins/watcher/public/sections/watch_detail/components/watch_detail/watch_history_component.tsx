@@ -8,12 +8,13 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import React, { useEffect, useState } from 'react';
 
-import { fetchWatchHistory, fetchWatchHistoryDetail } from '../../../../lib/api';
+import { fetchWatchDetail, fetchWatchHistory, fetchWatchHistoryDetail } from '../../../../lib/api';
 
 import { i18n } from '@kbn/i18n';
 import { WATCH_STATES } from '../../../../../common/constants';
 
 import {
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -46,6 +47,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     watchId?: string;
     watchStatus?: { actionStatuses?: any };
   }>({});
+  const [watch, setWatch] = useState({});
 
   const pagination = {
     initialPageSize: 10,
@@ -106,6 +108,10 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     },
   ];
   const loadWatchHistory = async () => {
+    // TODO[pcs]: this is a duplicate call, pass this down to component
+    // we need the watch detail here because it contains types for actions
+    const loadedWatch = await fetchWatchDetail(watchId);
+    setWatch(loadedWatch);
     const loadedWatchHistory = await fetchWatchHistory(watchId, 'now-1h');
     setWatchHistory(loadedWatchHistory);
     setIsLoading(false);
@@ -118,7 +124,6 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
 
   const showDetailFlyout = async (item: { id: string }) => {
     const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
-    console.log(watchHistoryItemDetail);
     setItemDetail(watchHistoryItemDetail);
     return setIsDetailVisible(true);
   };
@@ -155,6 +160,8 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         },
       },
     ];
+
+    const executionDetails = JSON.stringify(itemDetail.details, null, 2);
     flyout = (
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
@@ -163,7 +170,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2>{itemDetail.watchId}</h2>
+            <h2>Watch History Detail</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -180,6 +187,12 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 />
               }
             />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem>
+            <EuiCodeBlock language="javascript">{executionDetails}</EuiCodeBlock>
+            <EuiSpacer />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyout>

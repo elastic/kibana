@@ -74,7 +74,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
   ];
   const loadWatchActions = async () => {
     const loadedWatchActions = await fetchWatchDetail(watchId);
-    setWatchActions(loadedWatchActions);
+    setWatchActions(loadedWatchActions.watchStatus.actionStatuses);
     setIsWatchesLoading(false);
   };
   useEffect(() => {
