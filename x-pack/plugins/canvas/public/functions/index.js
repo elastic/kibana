@@ -7,5 +7,6 @@
 import { asset } from './asset';
 import { filters } from './filters';
 import { timelion } from './timelion';
+import { to } from './to';
 
-export const clientFunctions = [asset, filters, timelion];
+export const clientFunctions = [asset, filters, timelion, to];
