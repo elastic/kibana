@@ -10,7 +10,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/ui/fields/Agent';
 import { StringMap } from '../../../../typings/common';
 import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
 import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';

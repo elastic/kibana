@@ -16,7 +16,7 @@ import {
   URL_FULL,
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { asPercent, asTime } from '../../../../utils/formatters';
 import {
   IStickyProperty,
