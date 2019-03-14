@@ -9,6 +9,7 @@ export type AgentName =
   | 'java'
   | 'js-base'
   | 'js-react'
+  | 'rum-js'
   | 'nodejs'
   | 'python'
   | 'ruby';

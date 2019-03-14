@@ -16,6 +16,7 @@ export enum AgentName {
   Java = 'java',
   NodeJs = 'nodejs',
   JsBase = 'js-base',
+  RumJs = 'rum-js',
   Ruby = 'ruby',
   GoLang = 'go'
 }
