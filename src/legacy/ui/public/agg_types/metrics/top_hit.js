@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { MetricAggType } from './metric_agg_type';
+import '../directives/auto_select_if_only_one';
 import topSortEditor from '../controls/top_sort.html';
 import aggregateAndSizeEditor from '../controls/top_aggregate_and_size.html';
 import { aggTypeFieldFilters } from '../param_types/filter';

@@ -20,7 +20,7 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import '../auto_select_if_only_one';
+import '../../directives/auto_select_if_only_one';
 
 describe('Auto-select if only one directive', function () {
   let $compile;
