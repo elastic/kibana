@@ -45,7 +45,7 @@ import { SelectInterval, interval$ } from '../components/controls/select_interva
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
-import { getKqlQueryValues } from '../util/kql_filter_bar_utils';
+import { getKqlQueryValues, removeFilterFromQueryString } from '../util/kql_filter_bar_utils';
 
 import {
   getClearedSelectedAnomaliesState,
@@ -85,6 +85,7 @@ import { ExplorerChartsContainer } from './explorer_charts/explorer_charts_conta
 // Anomalies Table
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
 import { timefilter } from 'ui/timefilter';
+import { toastNotifications } from 'ui/notify';
 
 function getExplorerDefaultState() {
   return {
@@ -930,20 +931,24 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (this.state.filterActive === false) {
           return;
         } else {
-          // Remove the passed in fieldName and value from the existing filter
-          const queryPattern = new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i', 'g');
-          newQueryString = this.state.queryString.replace(queryPattern, '');
-          // match 'and' or 'or' at the start/end of the string
-          const endPattern = /\s(and|or)\s*$/ig;
-          const startPattern = /^\s*(and|or)\s/ig;
-          // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
-          newQueryString = newQueryString.replace(endPattern, '');
-          newQueryString = newQueryString.replace(startPattern, '');
+          newQueryString = removeFilterFromQueryString(this.state.queryString, fieldName, fieldValue);
         }
       }
 
-      const queryValues = getKqlQueryValues(`${newQueryString}`, this.state.indexPattern);
-      this.applyInfluencersFilterQuery(queryValues);
+      try {
+        const queryValues = getKqlQueryValues(`${newQueryString}`, this.state.indexPattern);
+        this.applyInfluencersFilterQuery(queryValues);
+      } catch(e) {
+        console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+
+        toastNotifications.addDanger(this.props.intl.formatMessage({
+          id: 'xpack.ml.explorer.invalidKuerySyntaxErrorMessageWithError',
+          defaultMessage: 'Invalid kuery syntax. {errorMessage}'
+        },
+        {
+          errorMessage: e.message || '',
+        }));
+      }
     }
 
     applyInfluencersFilterQuery = ({

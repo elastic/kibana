@@ -48,3 +48,18 @@ export function getKqlQueryValues(inputValue, indexPattern) {
     tableQueryString: inputValue
   };
 }
+
+export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
+  let newQueryString = '';
+  // Remove the passed in fieldName and value from the existing filter
+  const queryPattern = new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i', 'g');
+  newQueryString = currentQueryString.replace(queryPattern, '');
+  // match 'and' or 'or' at the start/end of the string
+  const endPattern = /\s(and|or)\s*$/ig;
+  const startPattern = /^\s*(and|or)\s/ig;
+  // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
+  newQueryString = newQueryString.replace(endPattern, '');
+  newQueryString = newQueryString.replace(startPattern, '');
+
+  return newQueryString;
+}
