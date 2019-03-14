@@ -22,14 +22,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const retry = getService('retry');
 
   return new class AppsMenu {
     /**
      * Get the text and href from each of the links in the apps menu
      */
     public async readLinks() {
-      await this.ensureMenuOpen();
       const appMenu = await testSubjects.find('navDrawer');
       const $ = await appMenu.parseDomContent();
 
@@ -45,7 +43,6 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
           };
         });
 
-      await this.ensureMenuClosed();
       return links;
     }
 
@@ -69,24 +66,8 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
         const link = await container.findByCssSelector(`[aria-label='${name}']`);
         await link.click();
       } finally {
-        await this.ensureMenuClosed();
+        // Intentionally empty
       }
-    }
-
-    private async ensureMenuClosed() {
-      await retry.waitFor(
-        'apps drawer closed',
-        async () => await testSubjects.exists('navDrawerExpandButton-isCollapsed')
-      );
-    }
-
-    private async ensureMenuOpen() {
-      const link = await testSubjects.find('navDrawerExpandButton-isCollapsed');
-      await link.click();
-      await retry.waitFor(
-        'apps drawer open',
-        async () => await testSubjects.exists('navDrawerExpandButton-isExpanded')
-      );
     }
   }();
 }
