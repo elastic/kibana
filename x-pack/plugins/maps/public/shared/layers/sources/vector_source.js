@@ -95,14 +95,14 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async filterAndFormatProperties(properties) {
+  async filterAndFormatPropertiesToHtml(properties) {
     //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
     const props = {};
     for (const key in properties) {
       if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
-      props[key] = properties[key];
+      props[key] = _.escape(properties[key]);
     }
     return props;
   }
