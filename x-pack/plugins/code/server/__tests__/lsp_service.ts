@@ -44,7 +44,7 @@ describe('lsp_service tests', () => {
 
   const options = {
     enabled: true,
-    queueIndex: '.code-worker-queue',
+    queueIndex: '.code_internal-worker-queue',
     queueTimeout: 60 * 60 * 1000, // 1 hour by default
     updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
     indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
