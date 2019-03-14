@@ -41,7 +41,7 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
   }
 
   public async createUIAtPath(path: string, toController: 'management' | 'self' = 'self') {
-    throw new Error('not yet implamented');
+    throw new Error('not yet implemented');
   }
 
   public registerManagementSection(settings: {
