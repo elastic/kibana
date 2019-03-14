@@ -87,7 +87,7 @@ uiModules
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
 
-            if(ngModelCtrl && isFunction(ngModelCtrl.$setDirty)) {
+            if(ngModelCtrl) {
               ngModelCtrl.$setDirty();
             }
           };
