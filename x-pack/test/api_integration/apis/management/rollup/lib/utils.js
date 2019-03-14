@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  initElasticsearchIndicesHelpers
-} from './es_index';
 
-export {
-  getRandomString,
-} from './random';
-
-export {
-  wait
-} from './utils';
+export const wait = (time = 1000) => (
+  new Promise((resolve) => (
+    setTimeout(resolve, time)
+  ))
+);
