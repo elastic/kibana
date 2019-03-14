@@ -13,7 +13,9 @@ function report {
 
 trap report EXIT
 
-# "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
+source src/dev/ci_setup/checkout_sibling_es.sh
+
+"$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
 node scripts/build --debug --oss;
 
