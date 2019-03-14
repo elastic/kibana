@@ -39,7 +39,8 @@ export async function getNonExistingReferenceAsKeys(
     collector.delete(`${savedObject.type}:${savedObject.id}`);
   }
   if (collector.size) {
-    const bulkGetResponse = await savedObjectsClient.bulkGet(Array.from(collector.values()));
+    const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
+    const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts);
     for (const savedObject of bulkGetResponse.saved_objects) {
       if (savedObject.error) {
         continue;

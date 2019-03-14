@@ -106,6 +106,9 @@ describe('getNonExistingReferenceAsKeys()', () => {
     Array [
       Array [
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "1",
           "type": "index-pattern",
         },
@@ -195,10 +198,16 @@ describe('getNonExistingReferenceAsKeys()', () => {
     Array [
       Array [
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "1",
           "type": "index-pattern",
         },
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "3",
           "type": "search",
         },
@@ -394,22 +403,37 @@ Object {
     Array [
       Array [
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "3",
           "type": "index-pattern",
         },
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "5",
           "type": "index-pattern",
         },
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "6",
           "type": "index-pattern",
         },
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "7",
           "type": "search",
         },
         Object {
+          "fields": Array [
+            "id",
+          ],
           "id": "8",
           "type": "search",
         },
