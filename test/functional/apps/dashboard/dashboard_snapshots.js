@@ -20,7 +20,7 @@
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const browser = getService('browser');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
     });
 
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
     });
   });

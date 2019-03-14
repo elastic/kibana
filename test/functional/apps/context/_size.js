@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const docTable = getService('docTable');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects(['context']);
 
   describe('context size', function contextSize() {
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
         const successorCountPicker = await PageObjects.context.getSuccessorCountPicker();
         expect(await successorCountPicker.getProperty('value')).to.equal(`${TEST_DEFAULT_CONTEXT_SIZE}`);
       });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('should increase according to the `context:step` setting when clicking the `load newer` button', async function () {
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('should increase according to the `context:step` setting when clicking the `load older` button', async function () {
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
           2 * TEST_DEFAULT_CONTEXT_SIZE + TEST_STEP_SIZE + 1
         );
       });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
   });
 

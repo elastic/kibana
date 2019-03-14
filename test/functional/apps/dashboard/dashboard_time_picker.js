@@ -22,7 +22,7 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'timePicker']);
 
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.setTimepickerInHistoricalDataRange();
       await pieChart.expectPieSliceCount(10);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('Saved search updated when time picker changes', async () => {
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
       await dashboardExpect.docTableFieldCount(150);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');

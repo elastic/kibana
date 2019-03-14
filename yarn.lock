@@ -2304,6 +2304,13 @@
   dependencies:
     "@types/retry" "*"
 
+"@types/png-async@*":
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/@types/png-async/-/png-async-0.9.4.tgz#2a1732cd80d26ecf6d5a4b6bb5f801198b81264f"
+  integrity sha512-cIaM89GfFn911g5DXS6W2+WEnw1v/Anw4lIZaDqBW6F5EpOAb/G5FaHDIcSkdc4lovu1jNDKYOdIl7CtFpXXgg==
+  dependencies:
+    png-async "*"
+
 "@types/pngjs@^3.3.1":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@types/pngjs/-/pngjs-3.3.1.tgz#47d97bd29dd6372856050e9e5e366517dd1ba2d8"
@@ -8099,6 +8106,11 @@ dateformat@^2.0.0:
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-2.2.0.tgz#4065e2013cf9fb916ddfd82efb506ad4c6769062"
   integrity sha1-QGXiATz5+5Ft39gu+1Bq1MZ2kGI=
 
+dateformat@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-3.0.3.tgz#a6e37499a4d9a9cf85ef5872044d62901c9889ae"
+  integrity sha512-jyCETtSl3VMZMWeRo7iY1FL19ges1t55hMo5yaam4Jrsm5EPL89UQkoQRyiI+Yf4k8r2ZpdngkV8hr1lIdjb3Q==
+
 debug-fabulous@1.X:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/debug-fabulous/-/debug-fabulous-1.1.0.tgz#af8a08632465224ef4174a9f06308c3c2a1ebc8e"
@@ -10187,6 +10199,33 @@ extsprintf@^1.2.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.4.0.tgz#e2689f8f356fad62cca65a3a91c5df5f9551692f"
   integrity sha1-4mifjzVvrWLMplo6kcXfX5VRaS8=
+
+eyes.images@^3.6.3:
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/eyes.images/-/eyes.images-3.6.3.tgz#8125bb6ab98423143f630730fc741445cf1cf23d"
+  integrity sha512-jUGyiGFSR8Ok1RzjiCc7iHuqtl4LeIEAwLgQgYGH0pvnCLft6pEepZEc0BJGvZPtd8ejtvUTPiPOQyHT8xt0Dg==
+  dependencies:
+    eyes.sdk "^3.6.2"
+    eyes.utils "^3.6.1"
+
+eyes.sdk@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/eyes.sdk/-/eyes.sdk-3.6.2.tgz#63bd635ecf805142f1c1690ac7cee5027896b494"
+  integrity sha512-ucImJgzvT1sINX91/zwfI6vdXLATYuT1i7Qo7KczspPlbKKhioVb0JaFeg7kgqGwPkhQa7Ib76xN+JaBTUnAjA==
+  dependencies:
+    "@types/node" "*"
+    eyes.utils "^3.6.1"
+    request "^2.88.0"
+
+eyes.utils@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/eyes.utils/-/eyes.utils-3.6.1.tgz#d690a5613551bfdf557dfc04765c0016360f83f7"
+  integrity sha512-O0Zz9c5NAEHpOv5jPgqBPX/K9m8NzNXK2kpIQ3d5WzeD8C3P3lD1jKBLlZhWPLqG5+EzBsHkai3auHgdkW6vkQ==
+  dependencies:
+    "@types/node" "*"
+    "@types/png-async" "*"
+    dateformat "^3.0.3"
+    png-async "^0.9.3"
 
 eyes@0.1.x:
   version "0.1.8"
@@ -18465,6 +18504,11 @@ pn@^1.0.0, pn@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pn/-/pn-1.1.0.tgz#e2f4cef0e219f463c179ab37463e4e1ecdccbafb"
   integrity sha512-2qHaIQr2VLRFoxe2nASzsV6ef4yOOH+Fi9FBOVH6cqeSgUnoyySPZkxzLuzd+RYOQTRpROA0ztTMqxROKSb/nA==
+
+png-async@*, png-async@^0.9.3:
+  version "0.9.4"
+  resolved "https://registry.yarnpkg.com/png-async/-/png-async-0.9.4.tgz#0638817508fcf4e732706b2f82c74c947cb83f78"
+  integrity sha512-B//AXX9TkneKfgtOpT1mdUnnhk2BImGD+a98vImsMU8uo1dBeHyW/kM2erWZ/CsYteTPU/xKG+t6T62heHkC3A==
 
 png-js@>=0.1.0:
   version "0.1.1"

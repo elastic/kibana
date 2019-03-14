@@ -22,7 +22,7 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const browser = getService('browser');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'common']);
 
@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
         isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(false);
       });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('displays exit full screen logo button', async () => {
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
     it('exits when the text button is clicked on', async () => {
       const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
       await browser.moveMouseTo(logoButton);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
       await PageObjects.dashboard.clickExitFullScreenTextButton();
 
       await retry.try(async () => {

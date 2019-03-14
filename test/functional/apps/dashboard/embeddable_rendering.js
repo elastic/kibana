@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
   const pieChart = getService('pieChart');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // await dashboardExpect.panelCount(27);
       await PageObjects.dashboard.waitForRenderComplete();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('adding saved searches', async () => {
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       // await dashboardExpect.panelCount(28);
       await PageObjects.dashboard.waitForRenderComplete();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
     });
@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('data rendered correctly when dashboard is opened from listing page', async () => {
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('embeddable rendering test');
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('data rendered correctly when dashboard is hard refreshed', async () => {
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('panels are updated when time changes outside of data', async () => {
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectNoDataRenders();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('panels are updated when time changes inside of data', async () => {
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.waitForRenderComplete();
       await expectAllDataRenders();
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
   });
 }

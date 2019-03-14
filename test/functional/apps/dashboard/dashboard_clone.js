@@ -21,7 +21,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
   describe('dashboard clone', function describeIndexTests() {
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
 
       const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(clonedDashboardName);
       expect(countOfDashboards).to.equal(1);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('the copy should have all the same visualizations', async function () {
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
         const panelTitles = await PageObjects.dashboard.getPanelTitles();
         expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
       });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('clone appends Copy to the dashboard title name', async () => {
@@ -60,13 +60,13 @@ export default function ({ getService, getPageObjects }) {
 
       const title = await PageObjects.dashboard.getCloneTitle();
       expect(title).to.be(clonedDashboardName);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
       await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('and doesn\'t save', async () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
 
       const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
       expect(countOfDashboards).to.equal(1);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('Clones on confirm duplicate title warning', async function () {
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
       const countOfDashboards =
         await PageObjects.dashboard.getDashboardCountWithName(dashboardName + ' Copy');
       expect(countOfDashboards).to.equal(2);
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
   });
 }

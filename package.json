@@ -346,6 +346,8 @@
     "eslint-plugin-prettier": "^2.6.2",
     "eslint-plugin-react": "^7.11.1",
     "expect.js": "0.3.1",
+    "eyes.images": "^3.6.3",
+    "eyes.sdk": "^3.6.2",
     "faker": "1.1.0",
     "fetch-mock": "7.3.0",
     "geckodriver": "1.12.2",

@@ -78,7 +78,7 @@ export async function ScreenshotsProvider({ getService }) {
           browser.takeScreenshot(),
           fcb(cb => mkdirp(dirname(path), cb)),
         ]);
-        await fcb(cb => writeFile(path, screenshot, 'base64', cb));
+        await fcb(cb => writeFile(path, screenshot, cb));
       } catch (err) {
         log.error('SCREENSHOT FAILED');
         log.error(err);

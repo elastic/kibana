@@ -42,9 +42,13 @@ export async function setupMocha(lifecycle, log, config, providers) {
     )
   });
 
-  // global beforeEach hook in root suite triggers before all others
+  // global beforeEach/afterEach hook in root suite triggers before all others
   mocha.suite.beforeEach('global before each', async function () {
     await lifecycle.trigger('beforeEachTest', this.currentTest);
+  });
+  // global beforeEach/afterEach hook in root suite triggers before all others
+  mocha.suite.afterEach('global after each', async function () {
+    await lifecycle.trigger('afterEachTest', this.currentTest);
   });
 
   loadTestFiles({

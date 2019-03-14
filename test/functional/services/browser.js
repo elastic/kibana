@@ -247,7 +247,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<Buffer>}
      */
     async takeScreenshot() {
-      return await driver.takeScreenshot();
+      return Buffer.from(await driver.takeScreenshot(), 'base64');
     }
 
     /**

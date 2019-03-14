@@ -17,23 +17,18 @@
  * under the License.
  */
 
-var readFileSync = require('fs').readFileSync;
-var agentJsFilename = require('@percy/agent').agentJsFilename;
+// @ts-ignore types not available yet
+import { ToolingLog } from '@kbn/test';
+import { LogHandler } from 'eyes.sdk';
 
-export function takePercySnapshot() {
-  if (!window.PercyAgent) {
-    return false;
+export class FtrLogHandler extends LogHandler {
+  constructor(private readonly toolingLog: ToolingLog) {
+    super();
   }
 
-  var agent = new window.PercyAgent({
-    handleAgentCommunication: false
-  });
-
-  return agent.domSnapshot(window.document);
+  public onMessage(verbose: boolean, msg: string) {
+    if (verbose) {
+      this.toolingLog.verbose(`Applitools: ${msg}`);
+    }
+  }
 }
-
-export var takePercySnapshotWithAgent = `
-  ${readFileSync(agentJsFilename(), 'utf8')}
-
-  return (${takePercySnapshot.toString()})();
-`;

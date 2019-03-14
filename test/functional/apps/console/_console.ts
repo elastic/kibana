@@ -35,7 +35,7 @@ GET _search
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
-  const percy = getService('percy');
+  const applitools = getService('applitools');
   const PageObjects = getPageObjects(['common', 'console']);
 
   describe('console app', function describeIndexTests() {
@@ -53,7 +53,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
       });
 
-      await percy.snapshot();
+      await applitools.snapshotWindow();
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
