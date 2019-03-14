@@ -53,8 +53,6 @@ export function fetchProvider(index: string) {
     });
 
     const getLast = (
-      hit: SearchHit,
-      telemetry: TelemetryResponse,
       dataSet: string,
       dataDate: moment.Moment,
       accumSet: string | null,
@@ -104,8 +102,6 @@ export function fetchProvider(index: string) {
       if (calc > 0) {
         // have it installed
         const { lastDate, lastSet } = getLast(
-          hit,
-          telemetry,
           dataSet,
           dataDate,
           telemetry.last_install_set,
@@ -121,8 +117,6 @@ export function fetchProvider(index: string) {
       } else if (calc === 0) {
         // uninstall
         const { lastDate, lastSet } = getLast(
-          hit,
-          telemetry,
           dataSet,
           dataDate,
           telemetry.last_uninstall_set,
