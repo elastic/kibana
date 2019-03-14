@@ -12,6 +12,13 @@ export interface LspOptions {
   detach: boolean;
   verbose: boolean;
 }
+
+export interface JavaOptions {
+  enableMavenImport: boolean;
+  enableGradleImport: boolean;
+  autoBuild: boolean;
+}
+
 export class ServerOptions {
   public readonly workspacePath = resolve(this.config.get('path.data'), 'code/workspace');
 
@@ -38,6 +45,8 @@ export class ServerOptions {
   public readonly enableGlobalReference: boolean = this.options.enableGlobalReference;
 
   public readonly lsp: LspOptions = this.options.lsp;
+
+  public readonly java: JavaOptions = this.options.java;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {

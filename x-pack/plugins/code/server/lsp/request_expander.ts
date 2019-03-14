@@ -144,12 +144,22 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   private async sendInitRequest(workspacePath: string) {
-    return await this.proxy.initialize({}, [
+    return await this.proxy.initialize(
+      {},
+      [
+        {
+          name: workspacePath,
+          uri: `file://${workspacePath}`,
+        },
+      ],
       {
-        name: workspacePath,
-        uri: `file://${workspacePath}`,
-      },
-    ]);
+        settings: {
+          'java.import.gradle.enabled': this.serverOptions.java.enableGradleImport,
+          'java.import.maven.enabled': this.serverOptions.java.enableMavenImport,
+          'java.autobuild.enabled': this.serverOptions.java.autoBuild,
+        },
+      }
+    );
   }
 
   private handle() {

@@ -100,7 +100,8 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
   public async initialize(
     clientCapabilities: ClientCapabilities,
-    workspaceFolders: [WorkspaceFolder]
+    workspaceFolders: [WorkspaceFolder],
+    initOptions: any
   ): Promise<InitializeResult> {
     const clientConn = await this.connect();
     const rootUri = workspaceFolders[0].uri;
@@ -109,6 +110,7 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       workspaceFolders,
       rootUri,
       capabilities: clientCapabilities,
+      initializationOptions: initOptions,
     };
     return await clientConn.sendRequest('initialize', params).then(r => {
       this.logger.info(`initialized at ${rootUri}`);
