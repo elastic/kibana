@@ -9,7 +9,7 @@ This document is an attempt to note all of the gotchas we've come across while b
 # Before you begin
 You'll need access to our GCP account, which is where we have two machines provisioned for the Linux and Windows builds. Mac builds can be achieved locally, and are a great place to start to gain familiarity.
 
-1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/home/dashboard?project=elastic-kibana-184716).
+1. Login to our GCP instance [here using your okta credentials](https://console.cloud.google.com/).
 2. Click the "Compute Engine" tab.
 3. Ensure that `chromium-build-linux` and `chromium-build-windows-12-beefy` are there.
 4. If #3 fails, you'll have to spin up new instances. Generally, these need `n1-standard-8` types or 8 vCPUs/30 GB memory.
