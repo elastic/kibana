@@ -6,7 +6,7 @@
 
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
-import { Link, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 interface TabConfiguration {
   title: string;
@@ -16,8 +16,6 @@ interface TabConfiguration {
 interface RoutedTabsProps {
   tabs: TabConfiguration[];
 }
-
-const noop = () => undefined;
 
 export class RoutedTabs extends React.Component<RoutedTabsProps> {
   public render() {
@@ -30,9 +28,9 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
         <Route
           key={`${tab.path}${tab.title}`}
           path={tab.path}
-          children={({ match }) => (
-            <EuiTab onClick={noop} isSelected={match !== null}>
-              <Link to={tab.path}>{tab.title}</Link>
+          children={({ match, history }) => (
+            <EuiTab onClick={() => history.push(tab.path)} isSelected={match !== null}>
+              {tab.title}
             </EuiTab>
           )}
         />
