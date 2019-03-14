@@ -107,9 +107,10 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(filters) {
+  async getBounds(dataFilters) {
     if (this._source.isBoundsAware()) {
-      return await this._source.getBoundsForFilters(filters);
+      const searchFilters = this._getSearchFilters(dataFilters);
+      return await this._source.getBoundsForFilters(searchFilters);
     }
     return this._getBoundsBasedOnData();
   }

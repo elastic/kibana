@@ -106,8 +106,9 @@ export class HeatmapLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
-  async getBounds(filters) {
-    return await this._source.getBoundsForFilters(filters);
+  async getBounds(dataFilters) {
+    const searchFilters = this._getSearchFilters(dataFilters);
+    return await this._source.getBoundsForFilters(searchFilters);
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
@@ -119,12 +120,7 @@ export class HeatmapLayer extends AbstractLayer {
       return;
     }
 
-    const searchFilters = {
-      ...dataFilters,
-      layerQuery: this.getQuery(),
-      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      metric: this._getPropKeyOfSelectedMetric()
-    };
+    const searchFilters = this._getSearchFilters(dataFilters);
 
     const sourceDataRequest = this.getSourceDataRequest();
     const meta = sourceDataRequest ? sourceDataRequest.getMeta() : {};
@@ -161,6 +157,15 @@ export class HeatmapLayer extends AbstractLayer {
     }
 
     await this._fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters });
+  }
+
+  _getSearchFilters(dataFilters) {
+    return {
+      ...dataFilters,
+      layerQuery: this.getQuery(),
+      geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      metric: this._getPropKeyOfSelectedMetric()
+    };
   }
 
   async _fetchNewData({ startLoading, stopLoading, onLoadError, searchFilters }) {
