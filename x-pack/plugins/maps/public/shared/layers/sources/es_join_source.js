@@ -57,21 +57,6 @@ export function extractPropertiesMap(rawEsDataResponse, propertyNames, countProp
   return propertiesMap;
 }
 
-function extractPropertiesMapFromESData(rawEsDataResponse, configStates) {
-  const metricPropertyNames = configStates
-    .filter(configState => {
-      return configState.schema === 'metric' && configState.type !== 'count';
-    })
-    .map(configState => {
-      return configState.id;
-    });
-  const countConfigState = configStates.find(configState => {
-    return configState.type === 'count';
-  });
-  const countPropertyName = _.get(countConfigState, 'id');
-  return extractPropertiesMap(rawEsDataResponse, metricPropertyNames, countPropertyName);
-}
-
 export class ESJoinSource extends AbstractESSource {
 
   static type = 'ES_JOIN_SOURCE';
@@ -116,7 +101,7 @@ export class ESJoinSource extends AbstractESSource {
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
 
-    let resp;
+    let rawEsData;
     try {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
@@ -132,7 +117,7 @@ export class ESJoinSource extends AbstractESSource {
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
-      resp = await fetchSearchSourceAndRecordWithInspector({
+      rawEsData = await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
@@ -148,33 +133,27 @@ export class ESJoinSource extends AbstractESSource {
       }));
     }
 
-    // const metricPropertyNames = configStates
-    //   .filter(configState => {
-    //     return configState.schema === 'metric' && configState.type !== 'count';
-    //   })
-    //   .map(configState => {
-    //     return configState.id;
-    //   });
-    // const countConfigState = configStates.find(configState => {
-    //   return configState.type === 'count';
-    // });
-    // const countPropertyName = _.get(countConfigState, 'id');
+    const metricPropertyNames = configStates
+      .filter(configState => {
+        return configState.schema === 'metric' && configState.type !== 'count';
+      })
+      .map(configState => {
+        return configState.id;
+      });
+    const countConfigState = configStates.find(configState => {
+      return configState.type === 'count';
+    });
+    const countPropertyName = _.get(countConfigState, 'id');
 
-    const propertiesMap = extractPropertiesMapFromESData(resp, configStates);
+    const propertiesMap = extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName);
 
     return {
-      rawData: resp,
+      rawData: rawEsData,
       propertiesMap: propertiesMap,
     };
   }
 
-  extractPropertiesMapFromRawEsDataResponse(rawEsData) {
-    const configStates = this._makeAggConfigs();
-    return extractPropertiesMapFromESData(rawEsData, configStates);
-  }
-
   isFilterByMapBounds() {
-    // TODO
     return false;
   }
 

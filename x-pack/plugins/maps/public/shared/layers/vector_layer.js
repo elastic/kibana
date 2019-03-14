@@ -234,21 +234,19 @@ export class VectorLayer extends AbstractLayer {
       const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
       if (canSkip) {
         const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-        const rawEsData = sourceDataRequest.getData();
-        const propmap = joinSource.extractPropertiesMapFromRawEsDataResponse(rawEsData);
+        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
         return {
           dataHasChanged: false,
           join: join,
-          propertiesMap: propmap
+          propertiesMap: propertiesMap
         };
       }
       startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
-        rawData,
         propertiesMap
       } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
-      stopLoading(sourceDataId, requestToken, rawData);
+      stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
         join: join,
@@ -339,9 +337,9 @@ export class VectorLayer extends AbstractLayer {
     }
 
     //all other cases, perform the join
-    //- source data changed
-    //- join data changed
-    //- source and join data changed
+    //- source data changed but join data has not
+    //- join data changed but source data has not
+    //- both source and join data changed
     const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
