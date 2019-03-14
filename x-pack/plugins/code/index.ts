@@ -30,7 +30,7 @@ export const code = (kibana: any) =>
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        queueIndex: Joi.string().default('.code-worker-queue'),
+        queueIndex: Joi.string().default('.code_internal-worker-queue'),
         // 1 hour by default.
         queueTimeout: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which update scheduler executes. 5 minutes by default.
