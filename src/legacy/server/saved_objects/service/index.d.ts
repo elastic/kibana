@@ -31,7 +31,7 @@ export interface SavedObjectsService<Request = any> {
   getSavedObjectsRepository(...rest: any[]): any;
 }
 
-export { SavedObjectsClientWrapperFactory } from './lib';
+export { SavedObjectsClientWrapperFactory, SavedObjectsRepository } from './lib';
 export {
   FindOptions,
   GetResponse,

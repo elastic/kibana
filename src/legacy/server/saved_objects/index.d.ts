@@ -24,5 +24,6 @@ export {
   SavedObjectsClient,
   SavedObjectsClientWrapperFactory,
   SavedObjectReference,
+  SavedObjectsRepository,
   SavedObjectsService,
 } from './service';

@@ -17,7 +17,23 @@
  * under the License.
  */
 
-import { BaseOptions, SavedObject } from '../saved_objects_client';
+import {
+  BaseOptions,
+  BulkCreateObject,
+  BulkCreateResponse,
+  BulkGetObjects,
+  BulkGetResponse,
+  CreateOptions,
+  CreateResponse,
+  FindOptions,
+  FindResponse,
+  GetResponse,
+  SavedObject,
+  SavedObjectAttributes,
+  UpdateOptions,
+  UpdateResponse,
+} from '../saved_objects_client';
+import * as errors from './errors';
 
 export interface SavedObjectsRepositoryOptions {
   index: string | string[];
@@ -30,9 +46,8 @@ export interface SavedObjectsRepositoryOptions {
 }
 
 export declare class SavedObjectsRepository {
-  // ATTENTION: this interface is incomplete
-
-  public get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
+  public static errors: typeof errors;
+  public errors: typeof errors;
   public incrementCounter: (
     type: string,
     id: string,
@@ -41,4 +56,39 @@ export declare class SavedObjectsRepository {
   ) => Promise<SavedObject>;
 
   constructor(options: SavedObjectsRepositoryOptions);
+
+  public create<T extends SavedObjectAttributes = any>(
+    type: string,
+    attributes: T,
+    options?: CreateOptions
+  ): Promise<CreateResponse<T>>;
+
+  public bulkCreate<T extends SavedObjectAttributes = any>(
+    objects: Array<BulkCreateObject<T>>,
+    options?: CreateOptions
+  ): Promise<BulkCreateResponse<T>>;
+
+  public delete(type: string, id: string, options?: BaseOptions): Promise<{}>;
+
+  public find<T extends SavedObjectAttributes = any>(
+    options: FindOptions
+  ): Promise<FindResponse<T>>;
+
+  public bulkGet<T extends SavedObjectAttributes = any>(
+    objects: BulkGetObjects,
+    options?: BaseOptions
+  ): Promise<BulkGetResponse<T>>;
+
+  public get<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    options?: BaseOptions
+  ): Promise<GetResponse<T>>;
+
+  public update<T extends SavedObjectAttributes = any>(
+    type: string,
+    id: string,
+    attributes: Partial<T>,
+    options?: UpdateOptions
+  ): Promise<UpdateResponse<T>>;
 }
