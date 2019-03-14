@@ -92,6 +92,7 @@ export class FilterEditor extends Component {
         <EuiModal
           onClose={this._closeModal}
           maxWidth={false}
+          data-test-subj="mapFilterEditorModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle >
@@ -113,6 +114,7 @@ export class FilterEditor extends Component {
               customSubmitButton={
                 <EuiButton
                   fill
+                  data-test-subj="mapFilterEditorSubmitButton"
                 >
                   <FormattedMessage
                     id="xpack.maps.layerPanel.filterEditor.modal.queryBarSubmitButtonLabel"
@@ -168,6 +170,7 @@ export class FilterEditor extends Component {
     return (
       <EuiButton
         onClick={this._openModal}
+        data-test-subj="mapLayerPanelOpenFilterEditorButton"
       >
         {openModalButtonLabel}
       </EuiButton>
