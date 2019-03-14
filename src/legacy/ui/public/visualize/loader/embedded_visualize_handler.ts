@@ -17,15 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore untyped dependency
-// import { registries } from 'plugins/interpreter/registries';
-// hack to import registries from interpreter plugin (we can no longer import if this moves to plugin
-// todo: check how it worked before registries were moved inside package.
-const registries = global.kbnInterpreter.registries();
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
+// @ts-ignore untyped dependency
+import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
