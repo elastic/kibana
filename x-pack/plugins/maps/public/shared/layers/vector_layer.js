@@ -233,9 +233,13 @@ export class VectorLayer extends AbstractLayer {
     try {
       const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
       if (canSkip) {
+        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+        const rawEsData = sourceDataRequest.getData();
+        const propmap = joinSource.extractPropertiesMapFromRawEsDataResponse(rawEsData);
         return {
-          shouldJoin: false,
-          join: join
+          dataHasChanged: false,
+          join: join,
+          propertiesMap: propmap
         };
       }
       startLoading(sourceDataId, requestToken, dataFilters);
@@ -246,15 +250,16 @@ export class VectorLayer extends AbstractLayer {
       } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, rawData);
       return {
-        shouldJoin: true,
+        dataHasChanged: true,
         join: join,
         propertiesMap: propertiesMap,
       };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        shouldJoin: false,
-        join: join
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: null
       };
     }
   }
@@ -324,13 +329,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
-    if (!sourceResult.refreshed && !joinState.shouldJoin) {
+    if (!sourceResult.refreshed && !joinState.dataHasChanged) {
+      //no data changes in both the source data or the join data
       return false;
     }
     if (!sourceResult.featureCollection || !joinState.propertiesMap) {
+      //no data available in source or join (ie. request is pending or data errored)
       return false;
     }
 
+    //all other cases, perform the join
+    //- source data changed
+    //- join data changed
+    //- source and join data changed
     const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
@@ -344,7 +355,6 @@ export class VectorLayer extends AbstractLayer {
     const hasJoined = joinStates.map(joinState => {
       return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
-
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 

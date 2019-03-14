@@ -40,9 +40,9 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
+export function extractPropertiesMap(rawEsDataResponse, propertyNames, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(resp, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
+  _.get(rawEsDataResponse, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
     const properties = {};
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -55,6 +55,21 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
     propertiesMap.set(termBucket.key, properties);
   });
   return propertiesMap;
+}
+
+function extractPropertiesMapFromESData(rawEsDataResponse, configStates) {
+  const metricPropertyNames = configStates
+    .filter(configState => {
+      return configState.schema === 'metric' && configState.type !== 'count';
+    })
+    .map(configState => {
+      return configState.id;
+    });
+  const countConfigState = configStates.find(configState => {
+    return configState.type === 'count';
+  });
+  const countPropertyName = _.get(countConfigState, 'id');
+  return extractPropertiesMap(rawEsDataResponse, metricPropertyNames, countPropertyName);
 }
 
 export class ESJoinSource extends AbstractESSource {
@@ -133,22 +148,29 @@ export class ESJoinSource extends AbstractESSource {
       }));
     }
 
-    const metricPropertyNames = configStates
-      .filter(configState => {
-        return configState.schema === 'metric' && configState.type !== 'count';
-      })
-      .map(configState => {
-        return configState.id;
-      });
-    const countConfigState = configStates.find(configState => {
-      return configState.type === 'count';
-    });
-    const countPropertyName = _.get(countConfigState, 'id');
+    // const metricPropertyNames = configStates
+    //   .filter(configState => {
+    //     return configState.schema === 'metric' && configState.type !== 'count';
+    //   })
+    //   .map(configState => {
+    //     return configState.id;
+    //   });
+    // const countConfigState = configStates.find(configState => {
+    //   return configState.type === 'count';
+    // });
+    // const countPropertyName = _.get(countConfigState, 'id');
+
+    const propertiesMap = extractPropertiesMapFromESData(resp, configStates);
 
     return {
       rawData: resp,
-      propertiesMap: extractPropertiesMap(resp, metricPropertyNames, countPropertyName),
+      propertiesMap: propertiesMap,
     };
+  }
+
+  extractPropertiesMapFromRawEsDataResponse(rawEsData) {
+    const configStates = this._makeAggConfigs();
+    return extractPropertiesMapFromESData(rawEsData, configStates);
   }
 
   isFilterByMapBounds() {
