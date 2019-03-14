@@ -17,32 +17,26 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
-import { ImportError } from './types';
+interface ConflictError {
+  type: 'conflict';
+}
 
-export function extractErrors(savedObjects: SavedObject[]) {
-  const errors: ImportError[] = [];
-  for (const savedObject of savedObjects) {
-    if (savedObject.error) {
-      if (savedObject.error.statusCode === 409) {
-        errors.push({
-          id: savedObject.id,
-          type: savedObject.type,
-          error: {
-            type: 'conflict',
-          },
-        });
-        continue;
-      }
-      errors.push({
-        id: savedObject.id,
-        type: savedObject.type,
-        error: {
-          ...savedObject.error,
-          type: 'unknown',
-        },
-      });
-    }
-  }
-  return errors;
+interface UnknownError {
+  type: 'unknown';
+  message: string;
+  statusCode: number;
+}
+
+interface MissingReferencesError {
+  type: 'missing_references';
+  references: Array<{
+    type: string;
+    id: string;
+  }>;
+}
+
+export interface ImportError {
+  id: string;
+  type: string;
+  error: ConflictError | MissingReferencesError | UnknownError;
 }
