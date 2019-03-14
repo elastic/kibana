@@ -89,7 +89,6 @@ export default class KbnServer {
       warningsMixin,
       usageMixin,
       statusMixin,
-      keystoreMixin,
 
       // writes pid file
       pidMixin,
@@ -102,6 +101,9 @@ export default class KbnServer {
 
       // tell the config we are done loading plugins
       configCompleteMixin,
+
+      // once the main config is loaded add the keystore
+      keystoreMixin,
 
       // setup this.uiExports and this.uiBundles
       uiMixin,
