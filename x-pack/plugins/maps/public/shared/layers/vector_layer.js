@@ -16,6 +16,21 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
+
+const CLOSED_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], 'Polygon'],
+  ['==', ['geometry-type'], 'MultiPolygon']
+];
+
+const ALL_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], 'Polygon'],
+  ['==', ['geometry-type'], 'MultiPolygon'],
+  ['==', ['geometry-type'], 'LineString'],
+  ['==', ['geometry-type'], 'MultiLineString']
+];
+
 export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
@@ -422,13 +437,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(fillLayerId, CLOSED_SHAPE_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -437,13 +446,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(lineLayerId, ALL_SHAPE_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -502,16 +505,12 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async getPropertiesForTooltip(properties) {
-    const tooltipsFromSource =  await this._source.filterAndFormatProperties(properties);
-
-    //add tooltips from joins
-    return this._joins.reduce((acc, join) => {
-      const propsFromJoin = join.filterAndFormatPropertiesForTooltip(properties);
-      return {
-        ...propsFromJoin,
-        ...acc,
-      };
-    }, { ...tooltipsFromSource });
+    const tooltipsFromSource =  await this._source.filterAndFormatPropertiesToHtml(properties);
+    for (let i = 0; i < this._joins.length; i++) {
+      const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
+      Object.assign(tooltipsFromSource, propsFromJoin);
+    }
+    return tooltipsFromSource;
   }
 
   canShowTooltip() {
