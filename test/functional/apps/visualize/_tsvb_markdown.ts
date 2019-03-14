@@ -71,6 +71,14 @@ export default function({ getPageObjects }: FtrProviderContext) {
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
       });
+
+      it('should change variable name', async () => {
+        await visualBuilder.markdownSwitchSubTab('data');
+      });
+
+      it('should render markdown table', async () => {
+        /* */
+      });
     });
   });
 }

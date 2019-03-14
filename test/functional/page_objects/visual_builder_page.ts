@@ -156,6 +156,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await element.click();
     }
 
+    public async setMarkdownLabel(variableName: string) {
+      await find.setValue(`[placeholder="Label"]`, variableName);
+    }
+
+    public async setMarkdownVarName(variableName: string) {
+      await find.setValue(`[placeholder="Variable name"]`, variableName);
+    }
+
     public async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
