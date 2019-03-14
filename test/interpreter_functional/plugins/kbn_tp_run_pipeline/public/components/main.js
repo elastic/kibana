@@ -26,13 +26,6 @@ import {
   EuiPageContentHeader,
 } from '@elastic/eui';
 
-import { RequestAdapter } from 'ui/inspector/adapters/request';
-import { DataAdapter } from 'ui/inspector/adapters/data';
-import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
-
-// todo: registries must be taken out of package
-import { registries } from '@kbn/interpreter/public';
-
 class Main extends React.Component {
 
   chartDiv = React.createRef();
@@ -43,12 +36,12 @@ class Main extends React.Component {
 
     window.runPipeline = async (expression, context = {}, initialContext = {}) => {
       const adapters = {
-        requests: new RequestAdapter(),
-        data: new DataAdapter(),
+        requests: new props.RequestAdapter(),
+        data: new props.DataAdapter(),
       };
       console.log('running expression', expression);
       this.exprDiv.innerText = expression;
-      return await runPipeline(expression, context, {
+      return await props.runPipeline(expression, context, {
         inspectorAdapters: adapters,
         getInitialContext: () => initialContext,
       });
@@ -63,7 +56,7 @@ class Main extends React.Component {
         this.exprDiv.innerText = 'Expression did not return render type!\n\n' + JSON.stringify(context);
         return;
       }
-      const renderer = registries.renderers.get(context.as);
+      const renderer = props.registries.renderers.get(context.as);
       if (!renderer) {
         this.exprDiv.innerText = 'Renderer was not found in registry!\n\n' + JSON.stringify(context);
         return;

@@ -23,6 +23,13 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
 
+import { RequestAdapter } from 'ui/inspector/adapters/request';
+import { DataAdapter } from 'ui/inspector/adapters/data';
+import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
+
+// todo: registries must be taken out of package
+import { registries } from '@kbn/interpreter/public';
+
 // This is required so some default styles and required scripts/Angular modules are loaded,
 // or the timezone setting is correctly applied.
 import 'ui/autoload/all';
@@ -56,7 +63,7 @@ function RootController($scope, $element) {
   const domNode = $element[0];
 
   // render react to DOM
-  render(<Main />, domNode);
+  render(<Main RequestAdapter={RequestAdapter} DataAdapter={DataAdapter} runPipeline={runPipeline} registries={registries}/>, domNode);
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {

@@ -15,3 +15,7 @@ node scripts/functional_tests_server.js --config test/interpreter_functional/con
 # Start a test run
 node scripts/functional_test_runner.js --config test/interpreter_functional/config.js
 ```
+
+# Writing tests
+
+Look into test_suites/run_pipeline/basic.js for examples

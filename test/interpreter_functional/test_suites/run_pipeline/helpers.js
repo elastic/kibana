@@ -20,26 +20,50 @@
 import expect from 'expect.js';
 import { delay } from 'bluebird';
 
+// helper for testing interpreter expressions
 export const expectExpressionProvider = ({ getService, updateBaselines }) => {
   const browser = getService('browser');
   const screenshot = getService('screenshots');
   const snapshots = getService('snapshots');
   const log = getService('log');
 
+  /**
+   * returns a handler object to test a given expression
+   * @name: name of the test
+   * @expression: expression to execute
+   * @context: context provided to the expression
+   * @initialContext: initialContext provided to the expression
+   * @returns handler object
+   */
   return (name, expression, context = {}, initialContext = {}) => {
     log.debug(`executing expression ${expression}`);
     const steps = expression.split('|'); // todo: we should actually use interpreter parser and get the ast
     let responsePromise;
 
     const handler = {
+      /**
+       * checks if provided object matches expression result
+       * @param result: expected expression result
+       * @returns {Promise<void>}
+       */
       toReturn: async result => {
         const pipelineResponse = await handler.getResponse();
         expect(pipelineResponse).to.eql(result);
       },
+      /**
+       * returns expression response
+       * @returns {*}
+       */
       getResponse: () => {
         if (!responsePromise) responsePromise = handler.runExpression();
         return responsePromise;
       },
+      /**
+       * runs the expression and returns the result
+       * @param step: expression to execute
+       * @param stepContext: context to provide to expression
+       * @returns {Promise<*>} result of running expression
+       */
       runExpression: async (step, stepContext) => {
         log.debug(`running expression ${step || expression}`);
         const promise = browser.executeAsync((expression, context, initialContext, done) => {
@@ -49,26 +73,40 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
         }, step || expression, stepContext || context, initialContext);
         return await promise;
       },
-      stepsToMatchSnapshot: async () => {
-        let lastResponse;
-        for (let i = 0; i < steps.length; i++) {
-          const step = steps[i];
-          lastResponse = await handler.runExpression(step, lastResponse);
-          const diff = await snapshots.compareAgainstBaseline(name + i, lastResponse, updateBaselines);
-          expect(diff).to.be.lessThan(0.05);
-        }
-        if (!responsePromise) {
-          responsePromise = new Promise(resolve => {
-            resolve(lastResponse);
-          });
-        }
-        return handler;
+      steps: {
+        /**
+         * does a snapshot comparison between result of every function in the expression and the baseline
+         * @returns {Promise<void>}
+         */
+        toMatchSnapshot: async () => {
+          let lastResponse;
+          for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            lastResponse = await handler.runExpression(step, lastResponse);
+            const diff = await snapshots.compareAgainstBaseline(name + i, lastResponse, updateBaselines);
+            expect(diff).to.be.lessThan(0.05);
+          }
+          if (!responsePromise) {
+            responsePromise = new Promise(resolve => {
+              resolve(lastResponse);
+            });
+          }
+          return handler;
+        },
       },
+      /**
+       * does a snapshot comparison between result of running the expression and baseline
+       * @returns {Promise<void>}
+       */
       toMatchSnapshot: async () => {
         const pipelineResponse = await handler.getResponse();
         await snapshots.compareAgainstBaseline(name, pipelineResponse, updateBaselines);
         return handler;
       },
+      /**
+       * does a screenshot comparison between result of rendering expression and baseline
+       * @returns {Promise<void>}
+       */
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
         await browser.executeAsync((context, done) => {
