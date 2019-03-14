@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import Ipv4Address from '../utils/ipv4_address';
-import { uiModules } from '../modules';
+import Ipv4Address from '../../utils/ipv4_address';
+import { uiModules } from '../../modules';
 
 uiModules
   .get('kibana')
