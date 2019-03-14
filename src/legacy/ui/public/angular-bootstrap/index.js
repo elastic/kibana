@@ -61,7 +61,6 @@ angular.module('ui.bootstrap.tpls', [
   'template/typeahead/typeahead-popup.html'
 ]);
 
-import './accordion/accordion';
 import './alert/alert';
 import './bindHtml/bindHtml';
 import './buttons/buttons';
