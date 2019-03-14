@@ -47,7 +47,6 @@ import '../timefilter';
 import '../timepicker';
 import '../tooltip';
 import '../url';
-import '../validate_date_interval';
 import '../watch_multi';
 import '../saved_objects/ui/saved_object_save_as_checkbox';
 import '../react_components';
