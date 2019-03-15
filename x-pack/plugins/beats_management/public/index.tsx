@@ -6,7 +6,6 @@
 import * as euiVars from '@elastic/eui/dist/eui_theme_k6_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import { I18nContext } from 'ui/i18n';
@@ -19,11 +18,6 @@ import { AppRouter } from './router';
 async function startApp() {
   await libs.framework.createUIAtPath(
     BASE_PATH,
-    libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
-  );
-  await libs.framework.waitUntilFrameworkReady();
-
-  render(
     <ThemeProvider theme={{ eui: euiVars }}>
       <I18nContext>
         <HashRouter basename="/management/beats_management">
@@ -40,8 +34,9 @@ async function startApp() {
         </HashRouter>
       </I18nContext>
     </ThemeProvider>,
-    libs.framework.DOMElement
+    libs.framework.versionGreaterThen('6.7.0') ? 'management' : 'self'
   );
+  await libs.framework.waitUntilFrameworkReady();
 
   if (libs.framework.licenseIsAtLeast('standard')) {
     libs.framework.registerManagementSection({

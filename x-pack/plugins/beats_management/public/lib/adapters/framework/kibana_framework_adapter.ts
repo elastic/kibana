@@ -116,7 +116,11 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
     }
   }
 
-  public async createUIAtPath(path: string, toController: 'management' | 'self' = 'self') {
+  public async renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self' = 'self'
+  ) {
     const adapter = this;
 
     this.routes.when(
@@ -134,11 +138,8 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
           try {
             $scope.$$postDigest(() => {
               const elem = document.getElementById(`${this.PLUGIN_ID}ReactRoot`);
-              if (elem) {
-                elem.appendChild(this.DOMElement);
-              } else {
-                throw new Error(`Error mounting to the dom`);
-              }
+              ReactDOM.render(component, elem);
+
               adapter.manageAngularLifecycle($scope, $route, elem);
             });
             $scope.$onInit = () => {

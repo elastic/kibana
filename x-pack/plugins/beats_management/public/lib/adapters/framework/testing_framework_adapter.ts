@@ -7,7 +7,6 @@
 import { FrameworkAdapter, FrameworkInfo, FrameworkUser } from './adapter_types';
 
 export class TestingFrameworkAdapter implements FrameworkAdapter {
-  public DOMElement = document.createElement('div');
   public get info() {
     if (this.xpackInfo) {
       return this.xpackInfo;
@@ -40,7 +39,11 @@ export class TestingFrameworkAdapter implements FrameworkAdapter {
     return;
   }
 
-  public async createUIAtPath(path: string, toController: 'management' | 'self' = 'self') {
+  public async renderUIAtPath(
+    path: string,
+    component: React.ReactElement<any>,
+    toController: 'management' | 'self' = 'self'
+  ) {
     throw new Error('not yet implemented');
   }
 

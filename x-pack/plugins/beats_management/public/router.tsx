@@ -7,6 +7,7 @@
 import { get } from 'lodash';
 import React, { useContext, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { REQUIRED_LICENSES } from '../common/constants';
 import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { URLStateProps, WithURLState } from './containers/with_url_state';
@@ -34,15 +35,16 @@ export const AppRouter: React.SFC = () => {
       {/* Redirects mapping */}
       <Switch>
         {/* License check (UI displays when license exists but is expired) */}
-        {get(libs.framework.info, 'license.expired', true) && (
-          <Route
-            render={routeProps =>
-              !routeProps.location.pathname.includes('/error') ? (
-                <Redirect to="/error/invalid_license" />
-              ) : null
-            }
-          />
-        )}
+        {get(libs.framework.info, 'license.expired', true) ||
+          (!REQUIRED_LICENSES.includes(get(libs.framework.info, 'license.type', 'basic')) && (
+            <Route
+              render={routeProps =>
+                !routeProps.location.pathname.includes('/error') ? (
+                  <Redirect to="/error/invalid_license" />
+                ) : null
+              }
+            />
+          ))}
 
         {/* Ensure security is eanabled for elastic and kibana */}
         {!get(libs.framework.info, 'security.enabled', true) && (
@@ -60,11 +62,11 @@ export const AppRouter: React.SFC = () => {
           ['beats_admin'].concat(libs.framework.info.settings.defaultUserRoles)
         ) && (
           <Route
-            render={routeProps =>
-              !routeProps.location.pathname.includes('/error') ? (
+            render={routeProps => {
+              return !routeProps.location.pathname.includes('/error') ? (
                 <Redirect to="/error/no_access" />
-              ) : null
-            }
+              ) : null;
+            }}
           />
         )}
 
@@ -83,7 +85,6 @@ export const AppRouter: React.SFC = () => {
         {/* This app does not make use of a homepage. The mainpage is overview/enrolled_beats */}
         <Route path="/" exact={true} render={() => <Redirect to="/overview/enrolled_beats" />} />
       </Switch>
-
       {/* Render routes from the FS */}
       <WithURLState>
         {(URLProps: URLStateProps) => (
