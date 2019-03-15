@@ -65,7 +65,7 @@ exports[`CalendarListsHeader renders header 1`] = `
             color="primary"
             iconSide="left"
             iconType="refresh"
-            onClick={[Function]}
+            onClick={[MockFunction]}
             size="s"
             type="button"
           >
