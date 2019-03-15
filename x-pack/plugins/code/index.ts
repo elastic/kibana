@@ -54,6 +54,7 @@ export const code = (kibana: any) =>
         codeSecurity: Joi.object({
           enableMavenImport: Joi.boolean().default(true),
           enableGradleImport: Joi.boolean().default(true),
+          installNodeDependency: Joi.boolean().default(true),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.

@@ -16,6 +16,7 @@ export interface LspOptions {
 export interface CodeSecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
+  installNodeDependency: boolean;
 }
 
 export class ServerOptions {
