@@ -51,7 +51,7 @@ export const code = (kibana: any) =>
           verbose: Joi.boolean().default(false),
         }).default(),
         repos: Joi.array().default([]),
-        codeSecurity: Joi.object({
+        security: Joi.object({
           enableMavenImport: Joi.boolean().default(true),
           enableGradleImport: Joi.boolean().default(true),
           installNodeDependency: Joi.boolean().default(true),

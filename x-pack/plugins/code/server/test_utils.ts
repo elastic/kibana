@@ -22,6 +22,11 @@ export const TEST_OPTIONS = {
     detach: false,
     verbose: false,
   },
+  security: {
+    enableMavenImport: true,
+    enableGradleImport: true,
+    installNodeDependency: true,
+  },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
   disableScheduler: true, // Temp option to disable all schedulers.

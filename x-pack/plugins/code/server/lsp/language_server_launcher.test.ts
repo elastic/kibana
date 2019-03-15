@@ -8,7 +8,7 @@ import fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import rimraf from 'rimraf';
-import { ServerOptions } from '../server_options';
+import { TEST_OPTIONS } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { TYPESCRIPT } from './language_servers';
 import { TypescriptServerLauncher } from './ts_launcher';
@@ -20,10 +20,8 @@ const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const options: ServerOptions = {
   workspacePath: `${tmpDataPath}/workspace`,
   jdtWorkspacePath: `${tmpDataPath}/jdt`,
-  // @ts-ignore
-  lsp: {
-    detach: false,
-  },
+  lsp: TEST_OPTIONS.lsp,
+  security: TEST_OPTIONS.security,
 };
 
 beforeAll(async () => {
