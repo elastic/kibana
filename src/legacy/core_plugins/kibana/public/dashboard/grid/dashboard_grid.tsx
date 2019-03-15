@@ -37,6 +37,7 @@ import {
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
+import { PanelStateMap } from '../selectors/types';
 import { GridData } from '../types';
 
 let lastValidGridSize = 0;
@@ -121,7 +122,7 @@ interface Props extends ReactIntl.InjectedIntlProps {
   panels: PanelMap;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (updatedPanels: PanelMap) => void;
+  onPanelsUpdated: (updatedPanels: PanelStateMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
 }
@@ -217,10 +218,12 @@ class DashboardGridUi extends React.Component<Props, State> {
           ...panels[panelLayout.i],
           panelIndex: panelLayout.i,
           gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+          embeddableConfig: {},
+          id: panelLayout.i,
         };
         return updatedPanelsAcc;
       },
-      {} as PanelMap
+      {} as PanelStateMap
     );
     onPanelsUpdated(updatedPanels);
   };

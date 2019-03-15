@@ -19,10 +19,9 @@
 
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { CoreKibanaState } from '../../selectors';
 import { updatePanels } from '../actions';
 import { getPanels, getUseMargins, getViewMode } from '../selectors';
-import { DashboardViewMode } from '../selectors/types';
+import { DashboardViewMode, PanelStateMap } from '../selectors/types';
 import { Panel } from '../types';
 import { DashboardGrid } from './dashboard_grid';
 
@@ -37,7 +36,7 @@ interface DashboardGridContainerStateProps {
 }
 
 interface DashboardGridContainerDispatchProps {
-  onPanelsUpdated(updatedPanels: PanelMap): void;
+  onPanelsUpdated(updatedPanels: PanelStateMap): void;
 }
 
 const mapStateToProps = ({ dashboard }: any): any => ({
@@ -47,7 +46,7 @@ const mapStateToProps = ({ dashboard }: any): any => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onPanelsUpdated: (updatedPanels: PanelMap) => dispatch(updatePanels(updatedPanels)),
+  onPanelsUpdated: (updatedPanels: PanelStateMap) => dispatch(updatePanels(updatedPanels)),
 });
 
 export const DashboardGridContainer = connect<
