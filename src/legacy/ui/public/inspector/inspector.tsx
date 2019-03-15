@@ -73,7 +73,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  // TODO: -!
+  // TODO: Remove the null assumption as soon as we have a guarantee core is always ready
   return getNewPlatform().start.core!.overlay.openFlyout(
     <InspectorPanel views={views} adapters={adapters} title={options.title} />,
     {
