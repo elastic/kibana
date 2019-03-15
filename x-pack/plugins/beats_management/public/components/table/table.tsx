@@ -48,7 +48,7 @@ interface TableProps {
   };
   onTableChange?: (index: number, size: number) => void;
   type: TableType;
-  actionHandler?(action: AssignmentActionType, payload?: any, selection?: any[]): void;
+  actionHandler?(action: AssignmentActionType, payload?: string, selection?: any[]): void;
 }
 
 interface TableState {
@@ -80,7 +80,7 @@ export class Table extends React.Component<TableProps, TableState> {
     });
   };
 
-  public actionHandler = (action: AssignmentActionType, payload?: any): void => {
+  public actionHandler = (action: AssignmentActionType, payload?: string): void => {
     const selectedIds = this.state.selection.map((item: any) => item.id);
 
     const selectedItems: any[] = [];
@@ -164,6 +164,7 @@ export class Table extends React.Component<TableProps, TableState> {
     );
   }
 
+  // TODO replace with ComponentProps<typeof EuiBasicTable>['onChange'] once EuiBasicTable is propperly typed
   private onTableChange = (
     event: { page: { index: number; size: number } } = { page: { index: 0, size: 50 } }
   ) => {

@@ -141,7 +141,7 @@ class TagEditPageComponent extends React.PureComponent<
                 attachedBeatsSize: newState.size.toString(),
               });
             }}
-            actionHandler={async (action: AssignmentActionType, payload: any) => {
+            actionHandler={async (action: AssignmentActionType, payload: string) => {
               // Something
             }}
           />

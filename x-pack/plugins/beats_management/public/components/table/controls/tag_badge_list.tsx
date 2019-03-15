@@ -22,7 +22,7 @@ interface TagBadgeListProps {
   disabled: boolean;
   name: string;
   action?: AssignmentActionType;
-  actionHandler(action: AssignmentActionType, payload?: any): void;
+  actionHandler(action: AssignmentActionType, payload?: string): void;
 }
 
 interface ComponentState {

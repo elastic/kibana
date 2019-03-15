@@ -25,7 +25,7 @@ interface ComponentProps {
   forBeat?: string;
   options: TableOptionsState;
   onOptionsChange: (newState: TableOptionsState) => void;
-  actionHandler?(action: AssignmentActionType, payload: any, selected: BeatTag[]): void;
+  actionHandler?(action: AssignmentActionType, payload: string, selected: BeatTag[]): void;
 }
 
 export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
@@ -83,7 +83,7 @@ export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
 
   const actionHandler = async (
     action: AssignmentActionType,
-    payload: any,
+    payload: string,
     selectedItems: BeatTag[]
   ) => {
     if (!selectedItems.length) {

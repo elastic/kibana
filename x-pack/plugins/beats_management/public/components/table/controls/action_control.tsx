@@ -17,7 +17,7 @@ interface ActionControlProps {
   showWarning?: boolean;
   warningHeading?: string;
   warningMessage?: string;
-  actionHandler(action: AssignmentActionType, payload?: any): void;
+  actionHandler(action: AssignmentActionType, payload?: string): void;
 }
 
 interface ActionControlState {

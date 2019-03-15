@@ -25,7 +25,7 @@ interface ComponentProps {
   forAttachedTag?: string;
   options: TableOptionsState;
   onOptionsChange: (newState: TableOptionsState) => void;
-  actionHandler?(action: AssignmentActionType, payload: any, selected: CMBeat[]): void;
+  actionHandler?(action: AssignmentActionType, payload: string, selected: CMBeat[]): void;
 }
 
 export const BeatsCMTable: React.SFC<ComponentProps> = props => {
@@ -66,11 +66,13 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
       }
 
       const tags = await libs.tags.getTagsWithIds(flatten(loadedBeats.list.map(beat => beat.tags)));
+      const mappedBeats = loadedBeats.list.map(beat => ({
+        ...beat,
+        tags: (tags || []).filter(tag => beat.tags.includes(tag.id)),
+      })) as any[];
+
       setBeats({
-        list: loadedBeats.list.map(beat => ({
-          ...beat,
-          tags: (tags || []).filter(tag => beat.tags.includes(tag.id)),
-        })) as any[],
+        list: mappedBeats,
         total: loadedBeats.total,
         // I am not sure why, but sometimes page is returned as a string and others a number...
         page: parseInt(`${loadedBeats.page}`, 10),
@@ -111,7 +113,7 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
       }}
       actionHandler={async (
         action: AssignmentActionType,
-        payload: any,
+        payload: string,
         selectedItems: CMBeat[]
       ) => {
         if (!selectedItems.length) {

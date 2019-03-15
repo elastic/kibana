@@ -157,7 +157,7 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
           }}
           actionHandler={async (
             action: AssignmentActionType,
-            payload: any,
+            payload: string,
             selectedBeats: CMBeat[]
           ) => {
             switch (action) {

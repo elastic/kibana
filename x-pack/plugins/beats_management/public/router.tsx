@@ -5,15 +5,29 @@
  */
 
 import { get } from 'lodash';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import { Loading } from './components/loading';
 import { ChildRoutes } from './components/navigation/child_routes';
 import { URLStateProps, WithURLState } from './containers/with_url_state';
 import { LibsContext } from './context/libs';
+import { useAsyncEffect } from './hooks/use_async_effect';
 import { routeMap } from './pages/index';
 
 export const AppRouter: React.SFC = () => {
   const libs = useContext(LibsContext);
+  const [isEmptyCM, setisCMEmpty] = useState<boolean | null>(null);
+
+  useAsyncEffect(async () => {
+    const beats = await libs.beats.getAll('', 0, 1);
+    const tags = await libs.tags.getAll('', 0, 1);
+
+    setisCMEmpty(beats.list.length === 0 && tags.list.length === 0);
+  }, []);
+
+  if (isEmptyCM === null) {
+    return <Loading />;
+  }
 
   return (
     <React.Fragment>
@@ -51,6 +65,18 @@ export const AppRouter: React.SFC = () => {
                 <Redirect to="/error/no_access" />
               ) : null
             }
+          />
+        )}
+
+        {/* If there are no beats or tags yet, redirect to the walkthrough */}
+        {isEmptyCM && (
+          <Route
+            render={props => {
+              setisCMEmpty(false);
+              return !props.location.pathname.includes('/walkthrough') ? (
+                <Redirect to="/walkthrough/initial" />
+              ) : null;
+            }}
           />
         )}
 

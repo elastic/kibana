@@ -15,7 +15,7 @@ interface ComponentProps extends ControlSchema {
     [key: string]: any;
   };
   disabled: boolean;
-  actionHandler(action: AssignmentActionType, payload?: any): void;
+  actionHandler(action: AssignmentActionType, payload?: string): void;
 }
 
 export const OptionControl: React.SFC<ComponentProps> = (props: ComponentProps) => {
