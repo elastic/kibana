@@ -8,7 +8,6 @@ export type AgentName =
   | 'go'
   | 'java'
   | 'js-base'
-  | 'js-react'
   | 'rum-js'
   | 'nodejs'
   | 'python'
