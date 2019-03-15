@@ -1,7 +1,7 @@
 [[errors]]
 === Errors overview
 
-TIP: {apm-overview-ref-v}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
+TIP: {apm-overview-ref-70}/errors.html[Errors] are defined as groups of exceptions with matching exception or log messages.
 
 The *Errors* overview provides a high-level view of the error message and culprit,
 the number of occurrences, and the most recent occurrence.
