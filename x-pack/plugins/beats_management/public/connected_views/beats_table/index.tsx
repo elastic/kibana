@@ -127,10 +127,12 @@ export const BeatsCMTable: React.SFC<ComponentProps> = props => {
             let status;
             if (
               selectedItems.some(
-                beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
+                beat =>
+                  beat.tags !== undefined &&
+                  ((beat.tags as any) as BeatTag[]).some(tag => tag.id === payload)
               )
             ) {
-              status = await libs.beats.assignTagsToBeats(assignments);
+              status = await libs.beats.removeTagsFromBeats(assignments);
             } else {
               status = await libs.beats.assignTagsToBeats(assignments);
             }

@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment from 'moment';
 import React from 'react';
-import { CMBeat } from '../../../common/domain_types';
+import { BeatTag, CMBeat } from '../../../common/domain_types';
 import { EnrollBeat } from '../../components/enroll_beats';
 import { Breadcrumb } from '../../components/navigation/breadcrumb';
 import { AssignmentActionType } from '../../components/table/table';
@@ -165,7 +165,9 @@ class BeatsPageComponent extends React.PureComponent<PageProps, PageState> {
                 let assignType: 'added' | 'removed';
                 if (
                   selectedBeats.some(
-                    beat => beat.tags !== undefined && beat.tags.some(id => id === payload)
+                    beat =>
+                      beat.tags !== undefined &&
+                      ((beat.tags as any) as BeatTag[]).some(tag => tag.id === payload)
                   )
                 ) {
                   assignType = 'removed';
