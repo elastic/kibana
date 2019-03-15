@@ -212,4 +212,8 @@ export class ESJoinSource extends AbstractESSource {
     //no need to localize. this is never rendered.
     return `es_table ${this._descriptor.indexPatternId}`;
   }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
 }

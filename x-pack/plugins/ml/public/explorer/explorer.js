@@ -95,7 +95,6 @@ function getExplorerDefaultState() {
     filterPlaceHolder: undefined,
     indexPattern: { title: ML_RESULTS_INDEX_PATTERN, fields: [] },
     influencersFilterQuery: undefined,
-    isAndOperator: false,
     hasResults: false,
     influencers: {},
     loading: true,
@@ -707,7 +706,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             topFieldValues,
             overallSwimlaneData,
             selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName
+            viewBySwimlaneOptions.swimlaneViewByFieldName,
+            influencersFilterQuery
           ),
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
@@ -903,8 +903,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
       filteredFields,
-      queryString,
-      isAndOperator }) => {
+      queryString }) => {
       const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
@@ -914,7 +913,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           filterActive: false,
           filteredFields: [],
           influencersFilterQuery: undefined,
-          isAndOperator: false,
           maskAll: false,
           queryString: undefined,
           ...getClearedSelectedAnomaliesState()
@@ -941,7 +939,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
-          isAndOperator,
           queryString,
           maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
             filteredFields.includes(selectedViewByFieldName) === false),
@@ -963,7 +960,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         filterActive,
         filterPlaceHolder,
         indexPattern,
-        isAndOperator,
         maskAll,
         influencers,
         hasResults,
@@ -1163,7 +1159,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 {!showViewBySwimlane && !viewBySwimlaneDataLoading && swimlaneViewByFieldName !== null && (
                   <ExplorerNoInfluencersFound
                     swimlaneViewByFieldName={swimlaneViewByFieldName}
-                    showFilterMessage={(filterActive === true && isAndOperator === true)}
+                    showFilterMessage={(filterActive === true)}
                   />
                 )}
               </React.Fragment>
