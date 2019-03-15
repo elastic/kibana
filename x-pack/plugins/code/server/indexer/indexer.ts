@@ -9,7 +9,7 @@ import { IndexProgress, IndexStats, RepositoryUri } from '../../model';
 export type ProgressReporter = (progress: IndexProgress) => void;
 
 export interface Indexer {
-  start(ProgressReporter?: ProgressReporter): Promise<IndexStats>;
+  start(ProgressReporter?: ProgressReporter, checkpoint?: string): Promise<IndexStats>;
   cancel(): void;
 }
 

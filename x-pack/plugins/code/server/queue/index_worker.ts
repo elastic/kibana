@@ -48,6 +48,41 @@ export class IndexWorker extends AbstractWorker {
     const { uri, revision } = payload;
     const indexerNumber = this.indexerFactories.length;
 
+    const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
+      uri
+    )) as IndexWorkerProgress;
+    let checkpoint: string | undefined;
+    if (workerProgress) {
+      // There exist an ongoing index process
+      const {
+        uri: currentUri,
+        revision: currentRevision,
+        indexProgress: currentIndexProgress,
+        progress,
+      } = workerProgress;
+
+      checkpoint = currentIndexProgress && currentIndexProgress.checkpoint;
+
+      if (
+        !checkpoint &&
+        progress > WorkerReservedProgress.INIT &&
+        progress < WorkerReservedProgress.COMPLETED &&
+        currentUri === uri &&
+        currentRevision === revision
+      ) {
+        // If
+        // * no checkpoint exist (undefined or empty string)
+        // * index progress is ongoing
+        // * the uri and revision match the current job
+        // Then we can safely dedup this index job request.
+        this.log.info(`Index job skipped for ${uri} at revision ${revision}`);
+        return {
+          uri,
+          revision,
+        };
+      }
+    }
+
     // Binding the index cancellation logic
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
@@ -60,7 +95,7 @@ export class IndexWorker extends AbstractWorker {
           this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
         const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        return indexer.start(progressReporter);
+        return indexer.start(progressReporter, checkpoint);
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);

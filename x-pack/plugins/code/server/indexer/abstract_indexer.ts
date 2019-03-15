@@ -29,7 +29,7 @@ export abstract class AbstractIndexer implements Indexer {
     this.indexCreator = new IndexCreator(client);
   }
 
-  public async start(progressReporter?: ProgressReporter) {
+  public async start(progressReporter?: ProgressReporter, checkpoint?: string) {
     this.log.info(
       `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
     );
@@ -60,11 +60,28 @@ export abstract class AbstractIndexer implements Indexer {
       throw error;
     }
 
+    let meetCheckpoint = false;
     const reqsIterator = await this.getIndexRequestIterator();
     for await (const req of reqsIterator) {
       if (this.isCancelled()) {
         this.log.info(`Indexer cancelled. Stop right now.`);
         break;
+      }
+
+      // If checkpoint is not undefined and not empty
+      if (checkpoint) {
+        const cp = this.encodeCheckpoint(req);
+        // Assume for the same revision, everything we iterate the repository,
+        // the order of the files is definite.
+        if (cp === checkpoint) {
+          this.log.info(`The index checkpoint ${checkpoint} has been found.`);
+          meetCheckpoint = true;
+        }
+
+        if (!meetCheckpoint) {
+          // If the checkpoint has not been met yet, skip current request.
+          continue;
+        }
       }
 
       try {
