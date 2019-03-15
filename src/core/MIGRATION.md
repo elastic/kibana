@@ -621,3 +621,56 @@ With all of your services converted, you are now ready to complete your migratio
 
 Details to come...
 
+
+## Frequently asked questions
+
+### Is migrating a plugin an all-or-nothing thing?
+
+It doesn't have to be. Within the Kibana repo, you can have a new platform plugin with the same name as a legacy plugin.
+
+Technically speaking, you could move all of your server-side code to the new platform and leave the legacy browser-side code where it is. You can even move only a portion of code on your server at a time, like on a route by route basis for example.
+
+For any new plugin APIs being defined as part of this process, it is recommended to create those APIs in new platform plugins, and then core will pass them down into the legacy world to be used there. This leaves one less thing you need to migrate.
+
+### Do plugins need to be converted to TypeScript?
+
+No. That said, the migration process will require a lot of refactoring, and TypeScript will make this dramatically easier and less risky. Independent of the new platform effort, our goals are to convert the entire Kibana repo to TypeScript over time, so now is a great time to do it.
+
+At the very least, any plugin exposing an extension point should do so with first-class type support so downstream plugins that _are_ using TypeScript can depend on those types.
+
+### How is static code shared between plugins?
+
+Plugins are strongly discouraged from sharing static code for other plugins to import. There will be times when it is necessary, so it will remain possible, but it has serious drawbacks that won't necessarily be clear at development time.
+
+1. When a plugin is uninstalled, its code is removed from the filesystem, so all imports referencing it will break. This will result in Kibana failing to start or load, and there is no way to recover beyond installing the missing plugin or disabling the plugin with the broken import.
+2. When a plugin is disabled, its static exports will still be importable by any other plugin. This can result in undesirable effects where it _appears_ like a plugin is enabled when it is not. In the worst case, it can result in an unexpected user experience where features that should have been disabled are not.
+3. Code that is statically imported will be _copied_ into the plugin that imported it. This will bloat your plugin's client-side bundles and its footprint on the server's file system. Often today client-side imports expose a global singleton, and due to this copying behavior that will no longer work.
+
+If you must share code statically, regardless of whether static code is on the server or in the browser, it can be imported via relative paths.
+
+For some background, this has long been problemmatic in Kibana for two reasons:
+
+* Plugin directories were configurable, so there was no reliably relative path for imports across plugins and from core. This has since been addressed and all plugins in the Kibana repo have reliable locations relative to the Kibana root.
+* The `x-pack` directory moved into `node_modules` at build time, so a relative import from `x-pack` to `src` that worked during development would break once a Kibana distribution was built. This is still a problem today, but the fix is in flight via issue [#32722](https://github.com/elastic/kibana/pull/32722).
+
+Any code not exported via the index of either the `server` or `public` directories should never be imported outside that plugin as it should be considered unstable and subject to change at any time.
+
+### How is "common" code shared on both the client and server?
+
+There is no formal notion of "common" code that can safely be imported from either client-side or server-side code. However, if a plugin author wishes to maintain a set of code in their plugin in a single place and then expose it to both server-side and client-side code, they can do so by exporting in the index files for both the `server` and `public` directories.
+
+The benefit of this approach is that the details of where code lives and whether it is accessible in multiple runtimes is an implementation detail of the plugin itself. A plugin consumer that is writing client-side code only ever needs to concern themselves with the client-side contracts being exposed, and the same can be said for server-side contracts on the server.
+
+A plugin author that decides some set of code should diverge from having a single "common" definition can now safely change the implementation details without impacting downstream consumers.
+
+### When does code go into a plugin, core, or packages?
+
+This is an impossible question to answer definitively for all circumstances. For each time this question is raised, we must carefully consider to what extent we think that code is relevant to almost everyone developing in Kbana, what license the code is shipping under, which teams are most appropriate to "own" that code, is the code stateless etc.
+
+As a general rule of thumb, most code in Kibana should exist in plugins. Plugins are the most obvious way that we break Kibana down into sets of specialized domains with controls around interdependency communication and management. It's always possible to move code from a plugin into core if we ever decide to do so, but it's much more disruptive to move code from core to a plugin.
+
+There is essentially no code that _can't_ exist in a plugin. When in doubt, put the code in a plugin.
+
+After plugins, core is where most of the rest of the code in Kibana will exist. Functionality that's critical to the reliable execution of the Kibana process belongs in core. Services that will widely be used by nearly every non-trivial plugin in any Kibana install belong in core. Functionality that is too specialized to specific use cases should not be in core, so while something like generic saved objects is a core concern, index patterns are not.
+
+The packages directory should have the least amount of code in Kibana. Just because some piece of code is not stateful doesn't mean it should go into packages. The packages directory exists to aid us in our quest to centralize as many of our owned dependencies in this single monorepo, so it's the logical place to put things like Elastic forks of node modules or vendored dependencies.
