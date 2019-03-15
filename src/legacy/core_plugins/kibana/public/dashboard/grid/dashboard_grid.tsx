@@ -25,6 +25,7 @@ import ReactGridLayout, { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
+// @ts-ignore
 import sizeMe from 'react-sizeme';
 import { EmbeddableFactory } from 'ui/embeddable';
 import { toastNotifications } from 'ui/notify';
@@ -117,10 +118,10 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 import { Panel } from '../types';
 
 interface Props extends ReactIntl.InjectedIntlProps {
-  panels: PanelsMap;
+  panels: PanelMap;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
   dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
-  onPanelsUpdated: (updatedPanels: PanelsMap) => void;
+  onPanelsUpdated: (updatedPanels: PanelMap) => void;
   maximizedPanelId?: string;
   useMargins: boolean;
 }
@@ -131,7 +132,7 @@ interface State {
   layout?: GridData[];
 }
 
-interface PanelsMap {
+interface PanelMap {
   [panelId: string]: Panel;
 }
 
@@ -192,7 +193,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     });
   }
 
-  public createEmbeddableFactoriesMap(panels: PanelsMap) {
+  public createEmbeddableFactoriesMap(panels: PanelMap) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -219,7 +220,7 @@ class DashboardGridUi extends React.Component<Props, State> {
         };
         return updatedPanelsAcc;
       },
-      {} as PanelsMap
+      {} as PanelMap
     );
     onPanelsUpdated(updatedPanels);
   };

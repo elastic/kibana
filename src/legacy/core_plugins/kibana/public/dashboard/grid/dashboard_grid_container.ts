@@ -19,29 +19,35 @@
 
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
+import { CoreKibanaState } from '../../selectors';
 import { updatePanels } from '../actions';
 import { getPanels, getUseMargins, getViewMode } from '../selectors';
-import { DashboardState, DashboardViewMode, PanelStateMap } from '../selectors/types';
+import { DashboardViewMode } from '../selectors/types';
+import { Panel } from '../types';
 import { DashboardGrid } from './dashboard_grid';
 
+interface PanelMap {
+  [panelId: string]: Panel;
+}
+
 interface DashboardGridContainerStateProps {
-  panels: PanelStateMap;
+  panels: PanelMap;
   dashboardViewMode: DashboardViewMode;
   useMargins: boolean;
 }
 
 interface DashboardGridContainerDispatchProps {
-  onPanelsUpdated(updatedPanels: PanelStateMap): void;
+  onPanelsUpdated(updatedPanels: PanelMap): void;
 }
 
-const mapStateToProps = ({ dashboard }: { dashboard: DashboardState }) => ({
+const mapStateToProps = ({ dashboard }: any): any => ({
   panels: getPanels(dashboard),
   dashboardViewMode: getViewMode(dashboard),
   useMargins: getUseMargins(dashboard),
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  onPanelsUpdated: (updatedPanels: PanelStateMap) => dispatch(updatePanels(updatedPanels)),
+  onPanelsUpdated: (updatedPanels: PanelMap) => dispatch(updatePanels(updatedPanels)),
 });
 
 export const DashboardGridContainer = connect<

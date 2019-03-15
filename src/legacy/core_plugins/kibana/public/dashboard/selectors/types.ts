@@ -60,7 +60,7 @@ export interface EmbeddableReduxState {
 }
 
 export interface PanelStateMap {
-  readonly [panelId: string]: PanelState;
+  [panelId: string]: PanelState;
 }
 
 export interface EmbeddablesMap {
