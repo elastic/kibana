@@ -157,7 +157,7 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {repository ? (
+        {!error && !loading && repository ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
