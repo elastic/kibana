@@ -22,12 +22,9 @@ import { PriorityCollection } from './priority_collection';
  * Provider for the Scoped Saved Object Client.
  */
 export class ScopedSavedObjectsClientProvider {
-
   _wrapperFactories = new PriorityCollection();
 
-  constructor({
-    defaultClientFactory
-  }) {
+  constructor({ defaultClientFactory }) {
     this._originalClientFactory = this._clientFactory = defaultClientFactory;
   }
 

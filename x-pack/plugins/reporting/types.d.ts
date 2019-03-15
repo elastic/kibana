@@ -14,6 +14,7 @@ type SavedObjectClient = any;
 export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
+  expose: () => void;
   plugins: Record<string, any>;
   route: any;
   log: any;
@@ -106,16 +107,6 @@ export interface CryptoFactory {
   decrypt: (headers?: Record<string, string>) => string;
 }
 
-export interface ReportingJob {
-  headers?: Record<string, string>;
-  basePath?: string;
-  urls?: string[];
-  relativeUrl?: string;
-  forceNow?: string;
-  timeRange?: any;
-  objects?: [any];
-}
-
 // params that come into a request
 export interface JobParams {
   savedObjectType: string;
@@ -126,12 +117,16 @@ export interface JobParams {
 }
 
 export interface JobDocPayload {
-  basePath: string;
-  headers: string;
-  objects: string | null; // string if completed job; null if incomplete job
+  basePath?: string;
+  forceNow?: string;
+  headers?: Record<string, string>;
+  jobParams: JobParams;
+  objects?: string | null; // string if completed job; null if incomplete job;
+  relativeUrl?: string;
+  timeRange?: any;
   title: string;
   type: string;
-  jobParams: JobParams;
+  urls?: string[];
 }
 
 export interface JobDocOutput {
@@ -147,4 +142,36 @@ export interface JobDoc {
   output: JobDocOutput;
   payload: JobDocPayload;
   status: string; // completed, failed, etc
+}
+
+export interface JobSource {
+  _id: string;
+  _source: JobDoc;
+}
+
+export interface ESQueueWorker {
+  on: (event: string, handler: any) => void;
+}
+
+export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+
+export interface ExportType {
+  jobType: string;
+  createJobFactory: any;
+  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+}
+
+export interface ESQueueWorkerOptions {
+  kibanaName: string;
+  kibanaId: string;
+  interval: number;
+  intervalErrorMultiplier: number;
+}
+
+export interface ESQueueInstance {
+  registerWorker: (
+    jobtype: string,
+    workerFn: any,
+    workerOptions: ESQueueWorkerOptions
+  ) => ESQueueWorker;
 }
