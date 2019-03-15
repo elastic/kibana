@@ -154,9 +154,9 @@ export class RequestExpander implements ILanguageServerHandler {
       ],
       {
         settings: {
-          'java.import.gradle.enabled': this.serverOptions.java.enableGradleImport,
-          'java.import.maven.enabled': this.serverOptions.java.enableMavenImport,
-          'java.autobuild.enabled': this.serverOptions.java.autoBuild,
+          'java.import.gradle.enabled': this.serverOptions.codeSecurity.enableGradleImport,
+          'java.import.maven.enabled': this.serverOptions.codeSecurity.enableMavenImport,
+          'java.autobuild.enabled': false,
         },
       }
     );

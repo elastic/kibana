@@ -13,10 +13,9 @@ export interface LspOptions {
   verbose: boolean;
 }
 
-export interface JavaOptions {
+export interface CodeSecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
-  autoBuild: boolean;
 }
 
 export class ServerOptions {
@@ -46,7 +45,7 @@ export class ServerOptions {
 
   public readonly lsp: LspOptions = this.options.lsp;
 
-  public readonly java: JavaOptions = this.options.java;
+  public readonly codeSecurity: CodeSecurityOptions = this.options.codeSecurity;
 
   public readonly repoConfigs: RepoConfigs = (this.options.repos as RepoConfig[]).reduce(
     (previous, current) => {
