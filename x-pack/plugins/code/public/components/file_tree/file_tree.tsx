@@ -67,11 +67,10 @@ export class CodeFileTree extends React.Component<Props> {
     }
   };
 
-  public toggleTree = (path: string, isDir: boolean) => {
+  public toggleTree = (path: string) => {
     if (this.isPathOpen(path)) {
       this.props.closeTreePath(path);
     } else {
-      this.fetchTree(path, isDir);
       this.props.openTreePath(path);
     }
   };
@@ -104,7 +103,7 @@ export class CodeFileTree extends React.Component<Props> {
     }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
-      this.toggleTree(path, node.type === FileTreeItemType.Directory);
+      this.toggleTree(path);
       this.onClick(node);
     };
     switch (node.type) {

@@ -181,12 +181,12 @@ function* handleMainRouteChange(action: Action<Match>) {
       isDir: pathType === PathTypes.tree,
     })
   );
+  const uri = toCanonicalUrl({
+    repoUri,
+    file,
+    revision,
+  });
   if (file && pathType === PathTypes.blob) {
-    const uri = toCanonicalUrl({
-      repoUri,
-      file,
-      revision,
-    });
     if (lastRequestPath !== uri) {
       yield put(loadStructure(uri!));
     }

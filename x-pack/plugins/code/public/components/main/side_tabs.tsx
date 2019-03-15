@@ -50,26 +50,28 @@ class CodeSideTabs extends React.PureComponent<Props> {
   }
 
   public get tabs() {
+    const fileTabContent = this.props.loadingFileTree ? (
+      this.renderLoadingSpinner('file')
+    ) : (
+      <div className="codeFileTree--container">{<FileTree />}</div>
+    );
+    const structureTabContent = this.props.loadingStructureTree ? (
+      this.renderLoadingSpinner('structure')
+    ) : (
+      <SymbolTree />
+    );
     return [
       {
         id: Tabs.file,
         name: 'File',
-        content: (
-          <div className="codeFileTree--container">
-            {this.props.loadingFileTree ? this.renderLoadingSpinner('file') : <FileTree />}
-          </div>
-        ),
+        content: fileTabContent,
         isSelected: Tabs.file === this.sideTab,
         'data-test-subj': 'codeFileTreeTab',
       },
       {
         id: Tabs.structure,
         name: 'Structure',
-        content: this.props.loadingFileTree ? (
-          this.renderLoadingSpinner('structure')
-        ) : (
-          <SymbolTree />
-        ),
+        content: structureTabContent,
         isSelected: Tabs.structure === this.sideTab,
         disabled: this.props.match.params.pathType === PathTypes.tree,
         'data-test-subj': 'codeStructureTreeTab',

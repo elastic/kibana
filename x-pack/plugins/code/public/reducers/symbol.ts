@@ -105,7 +105,7 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
           container.members = [{ ...s, path: `${container.path}/${s.name}` }];
         }
       } else {
-        structureTree.push(s);
+        structureTree.push({ ...s, path: s.name });
       }
     });
 
