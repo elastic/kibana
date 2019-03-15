@@ -8,16 +8,16 @@ import {
   ActionId,
   ChangeCallbackFunction,
   Meta,
-  NodeResult,
   Payload,
+  State,
   TypeName,
   UpdaterFunction,
-} from './types';
+} from '.';
 
 let counter = 0 as ActionId;
 
 export const createStore = (
-  initialState: NodeResult,
+  initialState: State,
   updater: UpdaterFunction,
   onChangeCallback: ChangeCallbackFunction
 ) => {
