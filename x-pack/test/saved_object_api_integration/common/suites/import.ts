@@ -65,6 +65,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
             message: `Unsupported saved object type: 'wigwags': Bad Request`,
             statusCode: 400,
             error: 'Bad Request',
+            type: 'unknown',
           },
         },
       ],
