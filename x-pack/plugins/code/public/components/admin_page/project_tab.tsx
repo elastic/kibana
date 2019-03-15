@@ -28,9 +28,7 @@ import {
 import moment from 'moment';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { uiCapabilities } from 'ui/capabilities';
-
 import { Repository } from '../../../model';
 import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
@@ -38,10 +36,6 @@ import { ToastType } from '../../reducers/repository';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
-
-const NewProjectButton = styled(EuiButton)`
-  margin-top: 1.5rem;
-`;
 
 enum SortOptionsValue {
   AlphabeticalAsc = 'alphabetical_asc',
@@ -246,9 +240,13 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem>
             {(uiCapabilities.code.admin as boolean) && (
               // @ts-ignore
-              <NewProjectButton onClick={this.openModal} data-test-subj="newProjectButton">
+              <EuiButton
+                className="codeButton__import-project"
+                onClick={this.openModal}
+                data-test-subj="newProjectButton"
+              >
                 Add New Project
-              </NewProjectButton>
+              </EuiButton>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
