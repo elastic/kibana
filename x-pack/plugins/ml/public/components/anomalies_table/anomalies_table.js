@@ -107,6 +107,7 @@ class AnomaliesTable extends Component {
           definition={definition}
           isAggregatedData={this.isShowingAggregatedData()}
           filter={this.props.filter}
+          influencerFilter={this.props.influencerFilter}
           influencersLimit={INFLUENCERS_LIMIT}
         />
       );
