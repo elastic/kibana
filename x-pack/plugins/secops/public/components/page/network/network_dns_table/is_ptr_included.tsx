@@ -17,7 +17,7 @@ interface Props {
 
 export const IsPtrIncluded = pure<Props>(({ isPtrIncluded, onChange }) => (
   <EuiSwitch
-    name="switch"
+    name="switch-ptr-included"
     label={i18n.INCLUDE_PTR_RECORDS}
     checked={isPtrIncluded}
     onChange={onChange}

@@ -736,7 +736,7 @@ export interface SortField {
 }
 
 export interface NetworkDnsSortField {
-  field: NetworkDnsDirection;
+  field: NetworkDnsFields;
 
   direction: Direction;
 }
@@ -859,7 +859,7 @@ export enum NetworkTopNFlowType {
   source = 'source',
 }
 
-export enum NetworkDnsDirection {
+export enum NetworkDnsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
   uniqueDomains = 'uniqueDomains',

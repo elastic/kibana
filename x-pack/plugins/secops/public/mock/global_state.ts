@@ -7,7 +7,7 @@
 import { defaultWidth } from '../components/timeline/body';
 import {
   Direction,
-  NetworkDnsDirection,
+  NetworkDnsFields,
   NetworkTopNFlowDirection,
   NetworkTopNFlowType,
 } from '../graphql/types';
@@ -73,7 +73,7 @@ export const mockGlobalState: State = {
           dns: {
             limit: 10,
             dnsSortField: {
-              field: NetworkDnsDirection.queryCount,
+              field: NetworkDnsFields.queryCount,
               direction: Direction.descending,
             },
             isPtrIncluded: false,

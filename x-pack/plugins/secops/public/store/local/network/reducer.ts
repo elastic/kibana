@@ -8,7 +8,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   Direction,
-  NetworkDnsDirection,
+  NetworkDnsFields,
   NetworkTopNFlowDirection,
   NetworkTopNFlowType,
 } from '../../../graphql/types';
@@ -40,7 +40,7 @@ export const initialNetworkState: NetworkState = {
       dns: {
         limit: DEFAULT_TABLE_LIMIT,
         dnsSortField: {
-          field: NetworkDnsDirection.uniqueDomains,
+          field: NetworkDnsFields.uniqueDomains,
           direction: Direction.descending,
         },
         isPtrIncluded: false,

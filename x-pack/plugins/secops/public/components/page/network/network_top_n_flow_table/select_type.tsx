@@ -12,23 +12,27 @@ import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../../graph
 
 import * as i18n from './translations';
 
-const toggleTypeOptions = [
+const toggleTypeOptions = (id: string) => [
   {
+    id: `${id}-${NetworkTopNFlowType.source}`,
     value: NetworkTopNFlowType.source,
     inputDisplay: i18n.BY_SOURCE_IP,
     directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
   },
   {
+    id: `${id}-${NetworkTopNFlowType.destination}`,
     value: NetworkTopNFlowType.destination,
     inputDisplay: i18n.BY_DESTINATION_IP,
     directions: [NetworkTopNFlowDirection.uniDirectional, NetworkTopNFlowDirection.biDirectional],
   },
   {
+    id: `${id}-${NetworkTopNFlowType.client}`,
     value: NetworkTopNFlowType.client,
     inputDisplay: i18n.BY_CLIENT_IP,
     directions: [NetworkTopNFlowDirection.biDirectional],
   },
   {
+    id: `${id}-${NetworkTopNFlowType.server}`,
     value: NetworkTopNFlowType.server,
     inputDisplay: i18n.BY_SERVER_IP,
     directions: [NetworkTopNFlowDirection.biDirectional],
@@ -36,6 +40,7 @@ const toggleTypeOptions = [
 ];
 
 interface Props {
+  id: string;
   selectedDirection: NetworkTopNFlowDirection;
   selectedType: NetworkTopNFlowType;
   onChangeType: (value: NetworkTopNFlowType) => void;
@@ -43,9 +48,11 @@ interface Props {
 }
 
 export const SelectType = pure<Props>(
-  ({ isLoading = false, onChangeType, selectedDirection, selectedType }) => (
+  ({ id, isLoading = false, onChangeType, selectedDirection, selectedType }) => (
     <EuiSuperSelect
-      options={toggleTypeOptions.filter(option => option.directions.includes(selectedDirection))}
+      options={toggleTypeOptions(id).filter(option =>
+        option.directions.includes(selectedDirection)
+      )}
       valueOfSelected={selectedType}
       onChange={onChangeType}
       isLoading={isLoading}

@@ -13,8 +13,8 @@ import { ActionCreator } from 'typescript-fsa';
 
 import {
   Direction,
-  NetworkDnsDirection,
   NetworkDnsEdges,
+  NetworkDnsFields,
   NetworkDnsSortField,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
@@ -141,7 +141,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
   private onChange = (criteria: Criteria) => {
     if (criteria.sort) {
       const newDnsSortField: NetworkDnsSortField = {
-        field: criteria.sort.field.split('.')[1] as NetworkDnsDirection,
+        field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
         direction: criteria.sort.direction === 'asc' ? Direction.ascending : Direction.descending,
       };
       if (!isEqual(newDnsSortField, this.props.dnsSortField)) {

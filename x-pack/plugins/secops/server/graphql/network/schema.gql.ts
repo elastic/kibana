@@ -46,7 +46,7 @@ export const networkSchema = gql`
     biDirectional
   }
 
-  enum NetworkDnsDirection {
+  enum NetworkDnsFields {
     dnsName
     queryCount
     uniqueDomains
@@ -55,7 +55,7 @@ export const networkSchema = gql`
   }
 
   input NetworkDnsSortField {
-    field: NetworkDnsDirection!
+    field: NetworkDnsFields!
     direction: Direction!
   }
 

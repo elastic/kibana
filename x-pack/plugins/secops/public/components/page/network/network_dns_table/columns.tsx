@@ -8,7 +8,7 @@ import numeral from '@elastic/numeral';
 import { isNil } from 'lodash/fp';
 import React from 'react';
 
-import { NetworkDnsDirection, NetworkDnsItem } from '../../../../graphql/types';
+import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -24,7 +24,7 @@ export const getNetworkDnsColumns = (
   type: networkModel.NetworkType
 ): Array<Columns<NetworkDnsItem>> => [
   {
-    field: `node.${NetworkDnsDirection.dnsName}`,
+    field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
@@ -68,7 +68,7 @@ export const getNetworkDnsColumns = (
     },
   },
   {
-    field: `node.${NetworkDnsDirection.queryCount}`,
+    field: `node.${NetworkDnsFields.queryCount}`,
     name: i18n.TOTAL_QUERIES,
     sortable: true,
     truncateText: false,
@@ -82,7 +82,7 @@ export const getNetworkDnsColumns = (
     },
   },
   {
-    field: `node.${NetworkDnsDirection.uniqueDomains}`,
+    field: `node.${NetworkDnsFields.uniqueDomains}`,
     name: i18n.UNIQUE_DOMAINS,
     sortable: true,
     truncateText: false,
@@ -96,7 +96,7 @@ export const getNetworkDnsColumns = (
     },
   },
   {
-    field: `node.${NetworkDnsDirection.dnsBytesIn}`,
+    field: `node.${NetworkDnsFields.dnsBytesIn}`,
     name: i18n.DNS_BYTES_IN,
     sortable: true,
     truncateText: false,
@@ -110,7 +110,7 @@ export const getNetworkDnsColumns = (
     },
   },
   {
-    field: `node.${NetworkDnsDirection.dnsBytesOut}`,
+    field: `node.${NetworkDnsFields.dnsBytesOut}`,
     name: i18n.DNS_BYTES_OUT,
     sortable: true,
     truncateText: false,

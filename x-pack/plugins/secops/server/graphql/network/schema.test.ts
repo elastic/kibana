@@ -14,12 +14,17 @@ import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../types';
+import {
+  Direction,
+  NetworkDnsFields,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../types';
 
-import { getNetworkTopNFlowQueryMock, mockNetworkTopNFlowData } from './network.mock';
+import { getNetworkQueryMock, mockNetworkDnsData, mockNetworkTopNFlowData } from './network.mock';
 import { networkSchema } from './schema.gql';
 
-const testCaseSource = {
+const testNetworkTopNFlowSource = {
   id: 'Test case to query Network Top N Flow',
   query: `
     query GetNetworkTopNFlowQuery(
@@ -86,7 +91,7 @@ const testCaseSource = {
   context: {
     req: {
       payload: {
-        operationName: 'test',
+        operationName: 'top-n-flow',
       },
     },
   },
@@ -99,9 +104,80 @@ const testCaseSource = {
   },
 };
 
-describe('Test Source Schema', () => {
+const testNetworkDnsSource = {
+  id: 'Test case to query Network DNS Domains',
+  query: `
+    query GetNetworkDnsQuery(
+      $sort: NetworkDnsSortField!
+      $isPtrIncluded: Boolean!
+      $timerange: TimerangeInput!
+      $pagination: PaginationInput!
+      $filterQuery: String
+    ) {
+      source(id: "default") {
+        NetworkDns(
+          isPtrIncluded: $isPtrIncluded
+          sort: $sort
+          timerange: $timerange
+          pagination: $pagination
+          filterQuery: $filterQuery
+        ) {
+          totalCount
+          edges {
+            node {
+              _id
+              dnsBytesIn
+              dnsBytesOut
+              dnsName
+              queryCount
+              uniqueDomains
+            }
+            cursor {
+              value
+            }
+          }
+          pageInfo {
+            endCursor {
+              value
+            }
+            hasNextPage
+          }
+        }
+      }
+    }
+	`,
+  variables: {
+    timerange: {
+      interval: '12h',
+      to: 1514782800000,
+      from: 1546318799999,
+    },
+    isPtrIncluded: false,
+    sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.ascending },
+    pagination: {
+      limit: 2,
+      cursor: null,
+    },
+  },
+  context: {
+    req: {
+      payload: {
+        operationName: 'dns',
+      },
+    },
+  },
+  expected: {
+    data: {
+      source: {
+        ...mockNetworkDnsData,
+      },
+    },
+  },
+};
+
+describe('Test Network Schema', () => {
   // Array of case types
-  const cases = [testCaseSource];
+  const cases = [testNetworkTopNFlowSource, testNetworkDnsSource];
   const typeDefs = [
     rootSchema,
     sharedSchema,
@@ -122,7 +198,7 @@ describe('Test Source Schema', () => {
   };
   const mocks = {
     Query: () => ({
-      ...getNetworkTopNFlowQueryMock(logger),
+      ...getNetworkQueryMock(logger),
     }),
   };
 

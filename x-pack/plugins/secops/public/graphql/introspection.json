@@ -3441,7 +3441,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "NetworkDnsDirection", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "NetworkDnsFields", "ofType": null }
             },
             "defaultValue": null
           },
@@ -3462,7 +3462,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "NetworkDnsDirection",
+        "name": "NetworkDnsFields",
         "description": "",
         "fields": null,
         "inputFields": null,
