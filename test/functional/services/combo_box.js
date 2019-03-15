@@ -56,7 +56,7 @@ export function ComboBoxProvider({ getService }) {
     }
 
     async _waitForOptionsListLoading(comboBoxElement) {
-      await comboBoxElement.waitForDeletedByClassName('euiLoadingSpinner');
+      await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
     async getOptionsList(comboBoxSelector) {

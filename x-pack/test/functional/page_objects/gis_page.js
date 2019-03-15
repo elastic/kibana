@@ -55,7 +55,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('Wait for layers to load');
       const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
-        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+        await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
 
