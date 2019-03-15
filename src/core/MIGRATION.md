@@ -81,14 +81,14 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
 
 ```ts
-import { PluginInitializerContext, CoreStart, PluginStop } from '../../../core/public';
+import { PluginInitializerContext, CoreSetup, PluginStop } from '../../../core/public';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: CoreStart) {
-    // called when plugin is started up, aka when Kibana is loaded
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up
   }
 
   public stop(core: PluginStop) {
@@ -111,14 +111,14 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, CoreStart, PluginStop } from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, PluginStop } from '../../../core/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public start(core: CoreStart) {
-    // called when plugin is started up during Kibana's startup sequence
+  public setup(core: CoreSetup) {
+    // called when plugin is setting up during Kibana's startup sequence
   }
 
   public stop(core: PluginStop) {
@@ -131,38 +131,38 @@ The platform does not impose any technical restrictions on how the internals of 
 
 ### Services
 
-The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins via the first argument of their `start` and `stop` functions. The interface varies from service to service, but it is always accessed through this argument.
+The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins via the first argument of their `setup` and `stop` functions. The interface varies from service to service, but it is always accessed through this argument.
 
-For example, the core `UiSettings` service exposes a function `get` to all plugin `start` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
+For example, the core `UiSettings` service exposes a function `get` to all plugin `setup` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
-import { CoreStart } from '../../../core/public';
+import { CoreSetup } from '../../../core/public';
 
 export class Plugin {
-  public start(core: CoreStart) {
+  public setup(core: CoreSetup) {
     core.uiSettings.get('courier:maxShardsBeforeCryTime');
   }
 }
 ```
 
-Different service interfaces can and will be passed to `start` and `stop` because certain functionality makes sense in the context of a running plugin while other types of functionality may have restrictions or may only make sense in the context of a plugin that is stopping.
+Different service interfaces can and will be passed to `setup` and `stop` because certain functionality makes sense in the context of a running plugin while other types of functionality may have restrictions or may only make sense in the context of a plugin that is stopping.
 
 For example, the `stop` function in the browser gets invoked as part of the `window.onbeforeunload` event, which means you can't necessarily execute asynchronous code here in a reliable way. For that reason, `core` likely wouldn't provide any asynchronous functions to plugin `stop` functions in the browser.
 
 ### Integrating with other plugins
 
-Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to `start` and/or `stop`.
+Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to `setup` and/or `stop`.
 
-Anything returned from `start` or `stop` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
+Anything returned from `setup` or `stop` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
 
 **foobar plugin.ts:**
 
 ```ts
-export type FoobarPluginStart = ReturnType<Plugin['start']>;
+export type FoobarPluginSetup = ReturnType<Plugin['setup']>;
 export type FoobarPluginStop = ReturnType<Plugin['stop']>;
 
 export class Plugin {
-  public start() {
+  public setup() {
     return {
       getFoo() {
         return 'foo';
@@ -193,16 +193,16 @@ Unlike core, capabilities exposed by plugins are _not_ automatically injected in
 }
 ```
 
-With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of `start` and/or `stop`:
+With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of `setup` and/or `stop`:
 
 **demo plugin.ts:**
 
 ```ts
-import { CoreStart, PluginStop } from '../../../core/server';
-import { FoobarPluginStart, FoobarPluginStop } from '../../foobar/server';
+import { CoreSetup, PluginStop } from '../../../core/server';
+import { FoobarPluginSetup, FoobarPluginStop } from '../../foobar/server';
 
-interface DemoStartDependencies {
-  foobar: FoobarPluginStart
+interface DemoSetupDependencies {
+  foobar: FoobarPluginSetup
 }
 
 interface DemoStopDependencies {
@@ -210,7 +210,7 @@ interface DemoStopDependencies {
 }
 
 export class Plugin {
-  public start(core: CoreStart, dependencies: DemoStartDependencies) {
+  public setup(core: CoreSetup, dependencies: DemoSetupDependencies) {
     const { foobar } = dependencies;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
@@ -234,7 +234,7 @@ This means that there are unique sets of challenges for migrating to the new pla
 
 The general shape/architecture of legacy server-side code is similar to the new platform architecture in one important way: most legacy server-side plugins define an `init` function where the bulk of their business logic begins, and they access both "core" and "plugin-provided" functionality through the arguments given to `init`. Rarely does legacy server-side code share stateful services via import statements.
 
-While not exactly the same, legacy plugin `init` functions behave similarly today as new platform `start` functions. There is no corresponding legacy concept of `stop`, however.
+While not exactly the same, legacy plugin `init` functions behave similarly today as new platform `setup` functions. There is no corresponding legacy concept of `stop`, however.
 
 Despite their similarities, server-side plugins pose a formidable challenge: legacy core and plugin functionality is retrieved from either the hapi.js `server` or `request` god objects. Worse, these objects are often passed deeply throughout entire plugins, which directly couples business logic with hapi. And the worst of it all is, these objects are mutable at any time.
 
@@ -671,17 +671,17 @@ export default (kibana) => {
 If we were to express this same set of capabilities in a shape that's more suitable to the new plugin system, it would look something like this:
 
 ```ts
-import { CoreStart } from '../../core/server';
-import { FooPluginStart } from '../foo/server';
+import { CoreSetup } from '../../core/server';
+import { FooPluginSetup } from '../foo/server';
 
-interface DemoStartDependencies {
-  foo: FooPluginStart
+interface DemoSetupDependencies {
+  foo: FooPluginSetup
 }
 
-export type DemoPluginStart = ReturnType<Plugin['start']>;
+export type DemoPluginSetup = ReturnType<Plugin['setup']>;
 
 export class Plugin {
-  public start(core: CoreStart, dependencies: DemoStartDependencies) {
+  public setup(core: CoreSetup, dependencies: DemoSetupDependencies) {
     core.http.route({
       path: '/api/demo_plugin/search',
       method: 'POST',
@@ -722,7 +722,7 @@ export class Plugin {
 
 ##### Starting the plugin up
 
-The new plugin definition uses `start` instead of `init`, and rather than getting the hapi server object as its only argument, it gets two arguments: the core services and a dependency on another plugin.
+The new plugin definition uses `setup` instead of `init`, and rather than getting the hapi server object as its only argument, it gets two arguments: the core services and a dependency on another plugin.
 
 ```ts
 // before
@@ -731,14 +731,14 @@ init(server) {
 }
 
 //after
-public start(core: CoreStart, dependencies: DemoStartDependencies) {
+public setup(core: CoreSetup, dependencies: DemoSetupDependencies) {
   // ...
 }
 ```
 
 ##### Accessing core services
 
-Rather than accessing "core" functions like HTTP routing directly on a hapi server object, the new plugin accesses core functionality through the top level services it exposes in the first argument to `start`. In the case of HTTP routing, it uses `core.http`.
+Rather than accessing "core" functions like HTTP routing directly on a hapi server object, the new plugin accesses core functionality through the top level services it exposes in the first argument to `setup`. In the case of HTTP routing, it uses `core.http`.
 
 ```ts
 // before
@@ -766,7 +766,7 @@ core.http.route({
 
 Legacy plugins on the server might expose functionality or services to other plugins by invoking the `expose` function on the hapi `server` object. This can happen at any time throughout the runtime of Kibana which makes it less than reliable.
 
-New plugins return the contract (if any) that they wish to make available to downstream plugins. This ensures the entirety of a plugin's start contract is available upon completion of its own `start` function. It also makes it much easier to provide type definitions for plugin contracts.
+New plugins return the contract (if any) that they wish to make available to downstream plugins. This ensures the entirety of a plugin's start contract is available upon completion of its own `setup` function. It also makes it much easier to provide type definitions for plugin contracts.
 
 ```ts
 // before
@@ -784,7 +784,7 @@ return {
 
 ##### Accessing plugin services
 
-In server-side code of legacy plugins, you once again use the hapi `server` object to access functionality that was exposed by other plugins. In new plugins, you access the exposed functionality in a similar way but on the second argument to `start` that is dedicated only to injecting plugin capabilities.
+In server-side code of legacy plugins, you once again use the hapi `server` object to access functionality that was exposed by other plugins. In new plugins, you access the exposed functionality in a similar way but on the second argument to `setup` that is dedicated only to injecting plugin capabilities.
 
 ```ts
 // before
@@ -801,14 +801,14 @@ One other thing worth noting in this example is how a new plugin will consume st
 This is done through standard modules and relative imports.
 
 ```ts
-// import CoreStart type from core server
-import { CoreStart } from '../../core/server';
+// import CoreSetup type from core server
+import { CoreSetup } from '../../core/server';
 
-// import FooPluginStart type from plugin foo
-import { FooPluginStart } from '../foo/server';
+// import FooPluginSetup type from plugin foo
+import { FooPluginSetup } from '../foo/server';
 
-// export DemoPluginStart type for downstream plugins, based on return value of start()
-export type DemoPluginStart = ReturnType<Plugin['start']>;
+// export DemoPluginSetup type for downstream plugins, based on return value of setup()
+export type DemoPluginSetup = ReturnType<Plugin['setup']>;
 ```
 
 While these particular examples involve only types, the exact same pattern should be followed for those rare situations when a plugin exposes static functionality for plugins to consume.
@@ -865,15 +865,15 @@ To update this plugin, we'll create a plugin definition in a hack uiExport, and 
 }
 
 // demo/public/plugin.js
-import { CoreStart } from '../../core/public';
-import { FooPluginStart } from '../foo/public';
+import { CoreSetup } from '../../core/public';
+import { FooPluginSetup } from '../foo/public';
 
-interface DemoStartDependencies {
-  foo: FooPluginStart
+interface DemoSetupDependencies {
+  foo: FooPluginSetup
 }
 
 export class Plugin {
-  public start(core: CoreStart, dependencies: DemoStartDependencies) {
+  public setup(core: CoreSetup, dependencies: DemoSetupDependencies) {
     const { chrome } = core;
 
     dependencies.foo.registerFoo(() => {
@@ -904,7 +904,7 @@ const dependencies = {
   }
 };
 
-new Plugin().start(core, dependencies);
+new Plugin().setup(core, dependencies);
 ```
 
 The `shim_plugin.js` file is take on the role of the plugin service in the new platform. It wires up the plugin definition with the dependencies that plugin has on core (i.e. `chrome`) and other plugins (i.e. `foo`). All of the webpack alias imports needed by this plugin have been moved into the shim, and the `plugin.js` code is pristine.
@@ -921,7 +921,7 @@ In order to support dependent legacy plugins that have not yet been updated, we 
 // foo/public/plugin.ts
 import { ReplaySubject } from 'rxjs';
 
-export type FooPluginStart = ReturnType<Plugin['start']>;
+export type FooPluginSetup = ReturnType<Plugin['setup']>;
 
 export type FooFn = () => void;
 
@@ -931,7 +931,7 @@ export class Plugin {
     this.foos$ = new ReplaySubject(1);
   }
 
-  public start() {
+  public setup() {
     return {
       foos$: this.foos$.asObservable(),
       registerFoo(fn) {
@@ -951,39 +951,39 @@ export class Plugin {
 import { Plugin } from '../plugin';
 
 const plugin = new Plugin();
-const start = plugin.start();
+const setup = plugin.setup();
 
-require('ui/registry/foo').__temporaryShim__(start);
+require('ui/registry/foo').__temporaryShim__(setup);
 
 
 // ui/public/registry/foo.ts
-import { FooPluginStart, FooFn } from '../../../core_plugins/foo/public/plugin';
+import { FooPluginSetup, FooFn } from '../../../core_plugins/foo/public/plugin';
 
 // legacy plugin order is not guaranteed, so we store a buffer of registry
 // calls and then empty them out when the owning plugin shims this module with
 // proper state
 let temporaryRegistry = [];
-let start;
-export function __temporaryShim__(fooStart: FooPluginStart) {
-  if (start) {
+let setup;
+export function __temporaryShim__(fooSetup: FooPluginSetup) {
+  if (setup) {
     throw new Error('Foo registry already shimmed');
   }
-  start = fooStart;
-  temporaryRegistry.forEach(fn => start.registerFoo(fn));
+  setup = fooSetup;
+  temporaryRegistry.forEach(fn => setup.registerFoo(fn));
   temporaryRegistry = undefined;
 }
 
 export const FooRegistryProvider = {
   register(fn: FooFn) {
-    if (start) {
-      start.registerFoo(fn);
+    if (setup) {
+      setup.registerFoo(fn);
     } else {
       temporaryRegistry.push(fn);
     }
   },
   getAll() {
-    if (start) {
-      return start.foos$;
+    if (setup) {
+      return setup.foos$;
     } else {
       throw new Error('Foo registry not yet shimmed');
     }
@@ -1038,7 +1038,7 @@ Let's look at an example for a react application.
 ```ts
 // demo/public/plugin.js
 export class Plugin {
-  start(core) {
+  setup(core) {
     const { I18nContext } = core.i18n;
     core.applications.register('demo', async function mount(domElement) {
       const { bootstrapApp } = await import('../application');
@@ -1080,18 +1080,18 @@ export function bootstrapApp({ domElement, I18nContext }) {
 
 
 // demo/public/hacks/shim_plugin.js
-import { coreStart } from 'ui/core';
+import { coreSetup } from 'ui/core';
 import { I18nContext } from 'ui/i18n';
 import { Plugin } from '../plugin';
 
 const core = {
-  ...coreStart,
+  ...coreSetup,
   i18n: {
     I18nContext
   }
 };
 
-new Plugin().start(core);
+new Plugin().setup(core);
 
 
 // demo/public/index.js
@@ -1103,7 +1103,7 @@ chrome.setRootController(function ($element) {
 });
 ```
 
-The plugin and application bundles do not use webpack aliases for imports. Stateful services are passed around as function arguments. The plugin definition shim wires up the necessary bits of the core start contract, and the legacy app entry file shims the app-specific behaviors that ultimately will move into core (e.g. mounting the application) or will go away entirely (ui/autoload/styles).
+The plugin and application bundles do not use webpack aliases for imports. Stateful services are passed around as function arguments. The plugin definition shim wires up the necessary bits of the core setup contract, and the legacy app entry file shims the app-specific behaviors that ultimately will move into core (e.g. mounting the application) or will go away entirely (ui/autoload/styles).
 
 **Angular application:**
 
