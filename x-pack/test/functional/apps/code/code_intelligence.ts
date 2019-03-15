@@ -105,7 +105,7 @@ export default function codeIntelligenceFunctonalTests({
         });
 
         // Hover on the 'UserModel' reference on line 5.
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
@@ -151,7 +151,7 @@ export default function codeIntelligenceFunctonalTests({
         });
 
         // Hover on the 'UserModel' reference on line 5.
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];
