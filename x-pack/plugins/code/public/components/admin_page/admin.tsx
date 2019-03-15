@@ -8,28 +8,13 @@ import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import url from 'url';
-
-import { EuiTab, EuiTabs } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { Repository } from '../../../model';
 import { RootState } from '../../reducers';
 import { EmptyProject } from './empty_project';
 import { LanguageSeverTab } from './language_server_tab';
 import { ProjectTab } from './project_tab';
-
-const Container = styled.div`
-  margin: 0 ${theme.euiSizeXL};
-  flex-grow: 1;
-`;
-
-const Root = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
-`;
 
 enum AdminTabs {
   projects = 'Projects',
@@ -129,12 +114,12 @@ class AdminPage extends React.PureComponent<Props, State> {
 
   public render() {
     return (
-      <Root>
-        <Container>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem className="codeContainer__admin-wrapper">
           {this.renderTabs()}
           {this.renderTabContent()}
-        </Container>
-      </Root>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 }
