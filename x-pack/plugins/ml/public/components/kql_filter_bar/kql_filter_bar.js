@@ -10,8 +10,7 @@ import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getKqlQueryValues } from '../../util/kql_filter_bar_utils';
-import { getSuggestions } from './utils';
+import { getSuggestions, getKqlQueryValues } from './utils';
 
 
 export class KqlFilterBar extends Component {

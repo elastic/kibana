@@ -45,7 +45,7 @@ import { SelectInterval, interval$ } from '../components/controls/select_interva
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
-import { getKqlQueryValues, removeFilterFromQueryString } from '../util/kql_filter_bar_utils';
+import { getKqlQueryValues, removeFilterFromQueryString } from '../components/kql_filter_bar/utils';
 
 import {
   getClearedSelectedAnomaliesState,
