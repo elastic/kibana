@@ -17,13 +17,21 @@
  * under the License.
  */
 
-import { Registry } from '../common';
-import { RenderFunction } from './render_function';
+import { get, identity } from 'lodash';
+import { getType } from '@kbn/interpreter/common';
 
-class RenderFunctionsRegistry extends Registry {
-  wrapper(obj) {
-    return new RenderFunction(obj);
+export function serializeProvider(types) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
+
+  function provider(key) {
+    return context => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn = get(typeDef, key) || identity;
+      return fn(context);
+    };
   }
 }
-
-export { RenderFunctionsRegistry };

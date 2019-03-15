@@ -17,18 +17,6 @@
  * under the License.
  */
 
-import { register, FunctionsRegistry, TypesRegistry } from '../common';
-import { RenderFunctionsRegistry } from './render_functions_registry';
-import { browserFunctions } from '../plugin/functions/browser';
-import { typeSpecs } from '../plugin/types';
+import { RenderFunctionsRegistry } from '../lib/render_functions_registry';
 
-export const registries = {
-  browserFunctions: new FunctionsRegistry(),
-  renderers: new RenderFunctionsRegistry(),
-  types: new TypesRegistry(),
-};
-
-register(registries, {
-  browserFunctions,
-  types: typeSpecs,
-});
+export const renderersRegistry = new RenderFunctionsRegistry();

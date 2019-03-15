@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { Registry } from './registry';
-import { Fn } from './fn';
+import { Fn, Registry } from '@kbn/interpreter/common';
 
 export class FunctionsRegistry extends Registry {
   wrapper(obj) {
