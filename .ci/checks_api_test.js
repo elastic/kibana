@@ -22,7 +22,7 @@ const start = async function(){
   });
 
   const jwt = app.getSignedJsonWebToken();
-  const { data } = await requesty('GET /repos/:owner/:repo/installation', {
+  const { data } = await request('GET /repos/:owner/:repo/installation', {
     owner: 'elastic',
     repo: 'kibana',
     headers: {
