@@ -14,7 +14,7 @@ import {
   UpdaterFunction,
 } from './types';
 
-const makeUid = (): ActionId => 1e11 + Math.floor((1e12 - 1e11) * Math.random());
+let counter = 0 as ActionId;
 
 export const createStore = (
   initialState: NodeResult,
@@ -30,7 +30,7 @@ export const createStore = (
       ...currentState,
       primaryUpdate: {
         type,
-        payload: { ...payload, uid: makeUid() },
+        payload: { ...payload, uid: counter++ },
       },
     });
     if (!meta.silent) {
