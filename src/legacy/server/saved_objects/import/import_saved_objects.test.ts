@@ -76,6 +76,7 @@ describe('importSavedObjects()', () => {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -143,6 +144,7 @@ Object {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
@@ -210,6 +212,7 @@ Object {
         this.push(null);
       },
     });
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects.map(savedObject => ({
         type: savedObject.type,
@@ -231,32 +234,28 @@ Object {
   "errors": Array [
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "1",
       "type": "index-pattern",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "2",
       "type": "search",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "3",
       "type": "visualization",
     },
     Object {
       "error": Object {
-        "message": "conflict",
-        "statusCode": 409,
+        "type": "conflict",
       },
       "id": "4",
       "type": "dashboard",
