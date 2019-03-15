@@ -5,13 +5,15 @@
  */
 
 import { connect } from 'react-redux';
+import { getServiceDetails } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IReduxState } from 'x-pack/plugins/apm/public/store/rootReducer';
 import { selectIsMLAvailable } from 'x-pack/plugins/apm/public/store/selectors/license';
 import { ServiceIntegrationsView } from './view';
 
 function mapStateToProps(state = {} as IReduxState) {
   return {
-    mlAvailable: selectIsMLAvailable(state)
+    mlAvailable: selectIsMLAvailable(state),
+    serviceDetails: getServiceDetails(state).data
   };
 }
 

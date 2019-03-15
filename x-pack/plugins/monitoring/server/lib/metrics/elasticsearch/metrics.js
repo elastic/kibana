@@ -670,7 +670,7 @@ export const metrics = {
       defaultMessage: 'Cgroup Throttling'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.cgroupCpuPerformance.cgroupThrottlingDescription', {
-      defaultMessage: 'The amount of throttled time, reported in nanoseconds, of the Cgroup.'
+      defaultMessage: 'The amount of throttled time, reported in nanoseconds, of the cgroup.'
     }),
     type: 'node',
     format: LARGE_ABBREVIATED,
@@ -685,7 +685,7 @@ export const metrics = {
       defaultMessage: 'Cgroup Throttled Count'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.cgroupCfsStats.cgroupThrottledCountDescription', {
-      defaultMessage: 'The number of times that the CPU was throttled by the Cgroup.'
+      defaultMessage: 'The number of times that the CPU was throttled by the cgroup.'
     }),
     type: 'node',
     format: LARGE_FLOAT,
@@ -700,7 +700,7 @@ export const metrics = {
       defaultMessage: 'Cgroup Usage'
     }),
     description: i18n.translate('xpack.monitoring.metrics.esNode.cgroupCpuPerformance.cgroupUsageDescription', {
-      defaultMessage: 'The usage, reported in nanoseconds, of the Cgroup. Compare this with the throttling to discover issues.'
+      defaultMessage: 'The usage, reported in nanoseconds, of the cgroup. Compare this with the throttling to discover issues.'
     }),
     type: 'node',
     format: LARGE_ABBREVIATED,

@@ -44,18 +44,18 @@ function getTypes(mappings, type) {
  *  @return {Object}
  */
 function getFieldsForTypes(searchFields, types) {
-
   if (!searchFields || !searchFields.length) {
     return {
-      all_fields: true
+      lenient: true,
+      fields: ['*'],
     };
   }
 
   return {
-    fields: searchFields.reduce((acc, field) => [
-      ...acc,
-      ...types.map(prefix => `${prefix}.${field}`)
-    ], []),
+    fields: searchFields.reduce(
+      (acc, field) => [...acc, ...types.map(prefix => `${prefix}.${field}`)],
+      []
+    ),
   };
 }
 
@@ -75,19 +75,16 @@ function getClauseForType(schema, namespace, type) {
   if (namespace && !schema.isNamespaceAgnostic(type)) {
     return {
       bool: {
-        must: [
-          { term: { type } },
-          { term: { namespace } },
-        ]
-      }
+        must: [{ term: { type } }, { term: { namespace } }],
+      },
     };
   }
 
   return {
     bool: {
       must: [{ term: { type } }],
-      must_not: [{ exists: { field: 'namespace' } }]
-    }
+      must_not: [{ exists: { field: 'namespace' } }],
+    },
   };
 }
 
@@ -102,38 +99,51 @@ function getClauseForType(schema, namespace, type) {
  *  @param  {Object} hasReference
  *  @return {Object}
  */
-export function getQueryParams(mappings, schema, namespace, type, search, searchFields, defaultSearchOperator, hasReference) {
+export function getQueryParams(
+  mappings,
+  schema,
+  namespace,
+  type,
+  search,
+  searchFields,
+  defaultSearchOperator,
+  hasReference
+) {
   const types = getTypes(mappings, type);
   const bool = {
-    filter: [{
-      bool: {
-        must: hasReference
-          ? [{
-            nested: {
-              path: 'references',
-              query: {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        'references.id': hasReference.id,
+    filter: [
+      {
+        bool: {
+          must: hasReference
+            ? [
+                {
+                  nested: {
+                    path: 'references',
+                    query: {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              'references.id': hasReference.id,
+                            },
+                          },
+                          {
+                            term: {
+                              'references.type': hasReference.type,
+                            },
+                          },
+                        ],
                       },
                     },
-                    {
-                      term: {
-                        'references.type': hasReference.type,
-                      },
-                    },
-                  ],
+                  },
                 },
-              },
-            },
-          }]
-          : undefined,
-        should: types.map(type => getClauseForType(schema, namespace, type)),
-        minimum_should_match: 1
-      }
-    }],
+              ]
+            : undefined,
+          should: types.map(type => getClauseForType(schema, namespace, type)),
+          minimum_should_match: 1,
+        },
+      },
+    ],
   };
 
   if (search) {
@@ -141,13 +151,10 @@ export function getQueryParams(mappings, schema, namespace, type, search, search
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(
-            searchFields,
-            types
-          ),
+          ...getFieldsForTypes(searchFields, types),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
-        }
-      }
+        },
+      },
     ];
   }
 

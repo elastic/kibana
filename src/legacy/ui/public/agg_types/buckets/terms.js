@@ -41,9 +41,8 @@ const orderAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
-    title: i18n.translate('common.ui.aggTypes.buckets.terms.orderAggTitle', {
-      defaultMessage: 'Order Agg',
-    }),
+    // This string is never visible to the user so it doesn't need to be translated
+    title: 'Order Agg',
     hideCustomLabel: true,
     aggFilter: aggFilter
   }
@@ -234,7 +233,7 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {
@@ -304,6 +303,9 @@ export const termsBucketAgg = new BucketAggType({
       name: 'missingBucketLabel',
       default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
         defaultMessage: 'Missing',
+        description: `Default label used inside of charts for documents missing a specific field.
+          Can be seen when creating a chart with a terms aggregation and select the "Show missing values"
+          checkbox.`
       }),
       write: _.noop
     },
