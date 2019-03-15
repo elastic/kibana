@@ -107,7 +107,7 @@ export default function ({ getService }) {
           .send({
             kibana: [
               {
-                _reserved: ['apm', 'ml', 'monitoring']
+                _reserved: ['ml', 'monitoring']
               }
             ]
           })
@@ -121,7 +121,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['reserved_apm', 'reserved_ml', 'reserved_monitoring'],
+                privileges: ['reserved_ml', 'reserved_monitoring'],
                 resources: ['*'],
               }
             ],
@@ -195,7 +195,7 @@ export default function ({ getService }) {
             },
             kibana: [
               {
-                _reserved: ['apm', 'monitoring'],
+                _reserved: ['monitoring'],
                 base: ['read'],
                 feature: {
                   dashboard: ['read'],
@@ -235,7 +235,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_apm', 'reserved_monitoring'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_monitoring'],
                 resources: ['*'],
               },
               {

@@ -92,22 +92,19 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
-        reserved: {
-          ml: [
-            actions.version,
-            actions.app.get('ml'),
-            ...actions.savedObject.readOperations('config'),
-            actions.ui.get('catalogue', 'ml'),
-            actions.ui.get('navLinks', 'ml'),
-          ],
-          monitoring: [
-            actions.version,
-            actions.app.get('monitoring'),
-            ...actions.savedObject.readOperations('config'),
-            actions.ui.get('catalogue', 'monitoring'),
-            actions.ui.get('navLinks', 'monitoring'),
-          ],
-        },
+        reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
+          if (feature.reservedPrivilege) {
+            acc[feature.id] = [
+              actions.version,
+              ...flatten(
+                featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
+                  featurePrivilegeBuilder.getActions(feature.reservedPrivilege!, feature)
+                )
+              ),
+            ];
+          }
+          return acc;
+        }, {}),
       };
     },
   };

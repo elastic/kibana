@@ -89,6 +89,13 @@ export const ml = (kibana) => {
         app: ['ml', 'kibana'],
         catalogue: ['ml'],
         privileges: {},
+        reservedPrivilege: {
+          savedObject: {
+            all: [],
+            read: ['config']
+          },
+          ui: [],
+        }
       });
 
       // Add server routes and initialize the plugin here

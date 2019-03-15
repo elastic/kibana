@@ -65,6 +65,13 @@ export const init = (monitoringPlugin, server) => {
     app: ['monitoring', 'kibana'],
     catalogue: ['monitoring'],
     privileges: {},
+    reservedPrivilege: {
+      savedObject: {
+        all: [],
+        read: ['config']
+      },
+      ui: [],
+    }
   });
 
   const bulkUploader = initBulkUploader(kbnServer, server);

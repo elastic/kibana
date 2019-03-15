@@ -44,6 +44,7 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
   catalogue?: string[];
   privileges: TPrivileges;
   privilegesTooltip?: string;
+  reservedPrivilege?: FeatureKibanaPrivileges;
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -60,6 +61,25 @@ const managementSchema = Joi.object().pattern(
 );
 const catalogueSchema = Joi.array().items(Joi.string());
 
+const privilegeSchema = Joi.object({
+  grantWithBaseRead: Joi.bool(),
+  management: managementSchema,
+  catalogue: catalogueSchema,
+  api: Joi.array().items(Joi.string()),
+  app: Joi.array().items(Joi.string()),
+  savedObject: Joi.object({
+    all: Joi.array()
+      .items(Joi.string())
+      .required(),
+    read: Joi.array()
+      .items(Joi.string())
+      .required(),
+  }).required(),
+  ui: Joi.array()
+    .items(Joi.string().regex(uiCapabilitiesRegex))
+    .required(),
+});
+
 const schema = Joi.object({
   id: Joi.string()
     .regex(featurePrivilegePartRegex)
@@ -75,30 +95,12 @@ const schema = Joi.object({
     .required(),
   management: managementSchema,
   catalogue: catalogueSchema,
-  privileges: Joi.object()
-    .pattern(
-      /^(read|all)$/,
-      Joi.object({
-        grantWithBaseRead: Joi.bool(),
-        management: managementSchema,
-        catalogue: catalogueSchema,
-        api: Joi.array().items(Joi.string()),
-        app: Joi.array().items(Joi.string()),
-        savedObject: Joi.object({
-          all: Joi.array()
-            .items(Joi.string())
-            .required(),
-          read: Joi.array()
-            .items(Joi.string())
-            .required(),
-        }).required(),
-        ui: Joi.array()
-          .items(Joi.string().regex(uiCapabilitiesRegex))
-          .required(),
-      })
-    )
-    .required(),
+  privileges: Joi.object({
+    all: privilegeSchema,
+    read: privilegeSchema,
+  }).required(),
   privilegesTooltip: Joi.string(),
+  reservedPrivilege: privilegeSchema,
 });
 
 export class FeatureRegistry {
