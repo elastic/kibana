@@ -5,6 +5,7 @@
  */
 
 import { authorizationModeFactory } from './mode';
+import { requestFixture } from '../__tests__/__fixtures__/request';
 
 class MockXPackInfoFeature {
   constructor(allowRbac) {
@@ -36,7 +37,7 @@ describe(`#useRbacForRequest`, () => {
   test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is false`, async () => {
     const mockXpackInfoFeature = new MockXPackInfoFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
-    const request = {};
+    const request = requestFixture();
 
     const result = mode.useRbacForRequest(request);
     expect(result).toBe(false);
@@ -45,7 +46,7 @@ describe(`#useRbacForRequest`, () => {
   test(`returns false if xpackInfoFeature.getLicenseCheckResults().allowRbac is initially false, and changes to true`, async () => {
     const mockXpackInfoFeature = new MockXPackInfoFeature(false);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
-    const request = {};
+    const request = requestFixture();
 
     expect(mode.useRbacForRequest(request)).toBe(false);
     mockXpackInfoFeature.getLicenseCheckResults.mockReturnValue({ allowRbac: true });
@@ -55,7 +56,7 @@ describe(`#useRbacForRequest`, () => {
   test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is true`, async () => {
     const mockXpackInfoFeature = new MockXPackInfoFeature(true);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
-    const request = {};
+    const request = requestFixture();
 
     const result = mode.useRbacForRequest(request);
     expect(result).toBe(true);
@@ -64,7 +65,7 @@ describe(`#useRbacForRequest`, () => {
   test(`returns true if xpackInfoFeature.getLicenseCheckResults().allowRbac is initially true, and changes to false`, async () => {
     const mockXpackInfoFeature = new MockXPackInfoFeature(true);
     const mode = authorizationModeFactory(mockXpackInfoFeature);
-    const request = {};
+    const request = requestFixture();
 
     expect(mode.useRbacForRequest(request)).toBe(true);
     mockXpackInfoFeature.getLicenseCheckResults.mockReturnValue({ allowRbac: false });
