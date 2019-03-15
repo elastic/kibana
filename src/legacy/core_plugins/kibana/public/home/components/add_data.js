@@ -106,10 +106,12 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
             icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
             title={loggingTitle}
             description={loggingDescription}
+            descriptionId="aria-describedby.addLogDataButtonLabel"
             footer={
               <EuiButton
                 className="homAddData__button"
                 href="#/home/tutorial_directory/logging"
+                aria-describedby="aria-describedby.addLogDataButtonLabel"
               >
                 <FormattedMessage
                   id="kbn.home.addData.logging.addLogDataButtonLabel"
