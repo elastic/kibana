@@ -40,9 +40,9 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export function extractPropertiesMap(rawEsDataResponse, propertyNames, countPropertyName) {
+export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(rawEsDataResponse, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
+  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
     const properties = {};
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -145,7 +145,6 @@ export class ESJoinSource extends AbstractESSource {
     });
     const countPropertyName = _.get(countConfigState, 'id');
     return {
-      rawData: rawEsData,
       propertiesMap: extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName),
     };
   }
