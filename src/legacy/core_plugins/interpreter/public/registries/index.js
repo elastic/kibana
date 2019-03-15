@@ -17,4 +17,14 @@
  * under the License.
  */
 
-import '../common/register';
+import { typesRegistry } from './type_registry';
+import { functionsRegistry } from './functions_registry';
+import { renderersRegistry } from './renderer_registry';
+
+const registries = {
+  browserFunctions: functionsRegistry,
+  renderers: renderersRegistry,
+  types: typesRegistry,
+};
+
+export { registries, typesRegistry, functionsRegistry, renderersRegistry };
