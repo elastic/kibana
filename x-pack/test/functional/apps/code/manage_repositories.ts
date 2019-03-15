@@ -48,8 +48,14 @@ export default function manageRepositoriesFunctonalTests({
           expect(await repositoryItems[0].getVisibleText()).to.equal(
             'Microsoft/TypeScript-Node-Starter'
           );
+        });
 
-          // Wait for the repository to finish index.
+        // Wait for the index to start.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+        });
+        // Wait for the index to end.
+        await retry.try(async () => {
           expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
         });
       });

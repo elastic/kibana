@@ -20,35 +20,43 @@ export class FileSuggestionsProvider extends AbstractSuggestionsProvider {
 
   protected async fetchSuggestions(
     query: string,
-    repoScope: string[]
+    repoScope?: string[]
   ): Promise<AutocompleteSuggestionGroup> {
-    const queryParams: { q: string; repoScope?: string } = { q: query };
-    if (repoScope) {
-      const qs = repoScope.join('&repoScope=');
-      queryParams.repoScope = qs;
-    }
-    const res = await kfetch({
-      pathname: `../api/code/suggestions/doc`,
-      method: 'get',
-      query: queryParams,
-    });
-    const suggestions = Array.from(res.results as SearchResultItem[])
-      .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
-      .map((doc: SearchResultItem) => {
-        return {
-          description: '',
-          end: 10,
-          start: 1,
-          text: doc.filePath,
-          tokenType: '',
-          selectUrl: `/${doc.uri}/blob/HEAD/${doc.filePath}`,
-        };
+    try {
+      const queryParams: { q: string; repoScope?: string } = { q: query };
+      if (repoScope && repoScope.length > 0) {
+        queryParams.repoScope = repoScope.join(',');
+      }
+      const res = await kfetch({
+        pathname: `../api/code/suggestions/doc`,
+        method: 'get',
+        query: queryParams,
       });
-    return {
-      type: AutocompleteSuggestionType.FILE,
-      total: res.total,
-      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
-      suggestions,
-    };
+      const suggestions = Array.from(res.results as SearchResultItem[])
+        .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
+        .map((doc: SearchResultItem) => {
+          return {
+            description: '',
+            end: 10,
+            start: 1,
+            text: doc.filePath,
+            tokenType: '',
+            selectUrl: `/${doc.uri}/blob/HEAD/${doc.filePath}`,
+          };
+        });
+      return {
+        type: AutocompleteSuggestionType.FILE,
+        total: res.total,
+        hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
+        suggestions,
+      };
+    } catch (error) {
+      return {
+        type: AutocompleteSuggestionType.FILE,
+        total: 0,
+        hasMore: false,
+        suggestions: [],
+      };
+    }
   }
 }
