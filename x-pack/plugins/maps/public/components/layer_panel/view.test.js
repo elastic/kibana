@@ -16,6 +16,12 @@ jest.mock('./join_editor', () => ({
   }
 }));
 
+jest.mock('./filter_editor', () => ({
+  JoinEditor: () => {
+    return (<div>mockFilterEditor</div>);
+  }
+}));
+
 jest.mock('./flyout_footer', () => ({
   FlyoutFooter: () => {
     return (<div>mockFlyoutFooter</div>);
@@ -42,6 +48,7 @@ const mockLayer = {
     ];
   },
   isJoinable: () => { return true; },
+  supportsElasticsearchFilters: () => { return false; },
   getLayerTypeIconName: () => { return 'vector'; }
 };
 
