@@ -90,7 +90,7 @@ Find the Chromium revision (modify the following command to be wherever you have
 - Take the revision number from that, and tack it to the end of this URL: https://crrev.com
   - (For example: https://crrev.com/637110)
 - Grab the SHA from there
-  - (For example, rev 575458 has sha 2fac04abf6133ab2da2846a8fbd0e97690722699)
+  - (For example, rev 637110 has sha 2fac04abf6133ab2da2846a8fbd0e97690722699)
 
 Note: In Linux, you should run the build command in tmux so that if your ssh session disconnects, the build can keep going. To do this, just type `tmux` into your terminal to hop into a tmux session. If you get disconnected, you can hop back in like so:
 
