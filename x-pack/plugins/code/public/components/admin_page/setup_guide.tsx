@@ -14,22 +14,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { documentationLinks } from '../../lib/documentation_links';
 import { RootState } from '../../reducers';
-
-const Root = styled.div`
-  padding: ${theme.euiSizeXXL} 0;
-  margin: 0 auto;
-  & > div {
-    margin-top: ${theme.euiSizeL};
-    width: 56rem;
-  }
-`;
 
 const steps = [
   {
