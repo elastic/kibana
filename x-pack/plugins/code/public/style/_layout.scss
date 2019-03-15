@@ -3,6 +3,11 @@
   flex-grow: 1;
 }
 
+.codeContainer__import {
+  max-width: 50rem;
+  margin: auto;
+}
+
 .codeFooter--error {
   color: $euiColorDanger;
 }

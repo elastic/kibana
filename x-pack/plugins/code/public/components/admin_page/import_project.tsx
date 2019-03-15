@@ -15,16 +15,10 @@ import {
 } from '@elastic/eui';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { closeToast, importRepo } from '../../actions';
 import { RootState } from '../../reducers';
 import { ToastType } from '../../reducers/repository';
 import { isImportRepositoryURLInvalid } from '../../utils/url';
-
-const ImportWrapper = styled.div`
-  max-width: 800px;
-  margin: auto;
-`;
 
 class CodeImportProject extends React.PureComponent<
   {
@@ -65,14 +59,14 @@ class CodeImportProject extends React.PureComponent<
     const { importLoading, toastMessage, showToast, toastType } = this.props;
 
     return (
-      <ImportWrapper>
+      <div className="codeContainer__import">
         {showToast && (
-          <EuiGlobalToastList
-            toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
-            dismissToast={this.props.closeToast}
-            toastLifeTimeMs={6000}
-          />
-        )}
+            <EuiGlobalToastList
+              toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
+              dismissToast={this.props.closeToast}
+              toastLifeTimeMs={6000}
+            />
+          )}
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -107,7 +101,7 @@ class CodeImportProject extends React.PureComponent<
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </ImportWrapper>
+      </div>
     );
   }
 }
