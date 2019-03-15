@@ -100,7 +100,8 @@ export class LanguageServerProxy implements ILanguageServerHandler {
   }
   public async initialize(
     clientCapabilities: ClientCapabilities,
-    workspaceFolders: [WorkspaceFolder]
+    workspaceFolders: [WorkspaceFolder],
+    initOptions?: object
   ): Promise<InitializeResult> {
     const clientConn = await this.connect();
     const rootUri = workspaceFolders[0].uri;
@@ -110,15 +111,20 @@ export class LanguageServerProxy implements ILanguageServerHandler {
       rootUri,
       capabilities: clientCapabilities,
     };
-    return await clientConn.sendRequest('initialize', params).then(r => {
-      this.logger.info(`initialized at ${rootUri}`);
+    return await clientConn
+      .sendRequest(
+        'initialize',
+        initOptions ? { ...params, initializationOptions: initOptions } : params
+      )
+      .then(r => {
+        this.logger.info(`initialized at ${rootUri}`);
 
-      // @ts-ignore
-      // TODO fix this
-      clientConn.sendNotification(InitializedNotification.type, {});
-      this.initialized = true;
-      return r as InitializeResult;
-    });
+        // @ts-ignore
+        // TODO fix this
+        clientConn.sendNotification(InitializedNotification.type, {});
+        this.initialized = true;
+        return r as InitializeResult;
+      });
   }
 
   public listen() {

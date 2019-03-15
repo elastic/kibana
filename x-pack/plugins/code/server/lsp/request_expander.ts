@@ -54,7 +54,8 @@ export class RequestExpander implements ILanguageServerHandler {
     proxy: LanguageServerProxy,
     readonly builtinWorkspace: boolean,
     readonly maxWorkspace: number,
-    readonly serverOptions: ServerOptions
+    readonly serverOptions: ServerOptions,
+    readonly initialOptions?: object
   ) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
@@ -144,12 +145,16 @@ export class RequestExpander implements ILanguageServerHandler {
   }
 
   private async sendInitRequest(workspacePath: string) {
-    return await this.proxy.initialize({}, [
-      {
-        name: workspacePath,
-        uri: `file://${workspacePath}`,
-      },
-    ]);
+    return await this.proxy.initialize(
+      {},
+      [
+        {
+          name: workspacePath,
+          uri: `file://${workspacePath}`,
+        },
+      ],
+      this.initialOptions
+    );
   }
 
   private handle() {
