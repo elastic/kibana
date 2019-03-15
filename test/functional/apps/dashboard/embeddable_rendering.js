@@ -115,6 +115,7 @@ export default function ({ getService, getPageObjects }) {
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
+      expect(visNames.length).to.be.equal(27);
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
@@ -123,6 +124,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
+      expect(visAndSearchNames.length).to.be.equal(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
