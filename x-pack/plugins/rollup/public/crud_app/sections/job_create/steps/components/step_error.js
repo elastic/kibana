@@ -26,6 +26,7 @@ export function StepError({ title = (
         title={title}
         color="danger"
         iconType="cross"
+        data-test-subj="rollupJobCreateStepError"
       />
     </Fragment>
   );
