@@ -26,6 +26,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
     'visualBuilder',
     'timePicker',
     'visualize',
+    'common',
   ]);
 
   describe('visual builder', function describeIndexTests() {
@@ -72,12 +73,68 @@ export default function({ getPageObjects }: FtrProviderContext) {
         expect(markdownText).to.be(expectedRenderer);
       });
 
-      it('should change variable name', async () => {
+      it('should change label name', async () => {
+        const BASE_LABEL = 'count';
+        const LABEL = 'label';
         await visualBuilder.markdownSwitchSubTab('data');
+
+        await visualBuilder.setMarkdownDataVariable(LABEL, LABEL);
+
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        const table = await visualBuilder.getMarkdownTableVariables();
+        table.forEach(row => {
+          expect(row.key).to.contain(LABEL);
+        });
+
+        // cleanup label
+        await visualBuilder.markdownSwitchSubTab('data');
+        await visualBuilder.setMarkdownDataVariable('', LABEL);
+
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
+        rerenderedTable.forEach(row => {
+          expect(row.key).to.include.string(BASE_LABEL);
+        });
+      });
+
+      it('should change variable name', async () => {
+        const VARIABLE = 'variable';
+        await visualBuilder.markdownSwitchSubTab('data');
+        await visualBuilder.setMarkdownDataVariable(VARIABLE, VARIABLE);
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        const table = await visualBuilder.getMarkdownTableVariables();
+
+        table.forEach((row, index) => {
+          // exception: last index for variable is always: {{count.label}}
+          index === table.length - 1
+            ? expect(row.key).to.not.include.string(VARIABLE)
+            : expect(row.key).to.include.string(VARIABLE);
+        });
+
+        // cleanup variable name
+        await visualBuilder.markdownSwitchSubTab('data');
+        await visualBuilder.setMarkdownDataVariable('', VARIABLE);
+
+        // table should not be containing variable sault
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
+        rerenderedTable.forEach(row => {
+          expect(row.key).to.not.include.string(VARIABLE);
+        });
       });
 
       it('should render markdown table', async () => {
-        /* */
+        const TABLE =
+          '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';
+        const DATA = '46';
+
+        await visualBuilder.enterMarkdown(TABLE);
+        const text = await visualBuilder.getMarkdownText();
+        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
+
+        tableValues.forEach(value => {
+          expect(value).to.be.equal(DATA);
+        });
       });
     });
   });
