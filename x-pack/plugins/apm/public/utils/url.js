@@ -148,7 +148,12 @@ export const KibanaLink = withLocation(KibanaLinkComponent);
 // Angular decodes encoded url tokens like "%2F" to "/" which causes the route to change.
 // It was supposedly fixed in https://github.com/angular/angular.js/commit/1b779028fdd339febaa1fff5f3bd4cfcda46cc09 but still seeing the issue
 export function legacyEncodeURIComponent(url) {
-  return url && encodeURIComponent(url).replace(/%/g, '~');
+  return (
+    url &&
+    encodeURIComponent(url)
+      .replace(/~/g, '%7E')
+      .replace(/%/g, '~')
+  );
 }
 
 export function legacyDecodeURIComponent(url) {
