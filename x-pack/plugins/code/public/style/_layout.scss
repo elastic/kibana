@@ -1,3 +1,8 @@
+.euiFlexItem.codeContainer__admin-wrapper {
+  padding: $euiSize $euiSizeXL;
+  flex-grow: 1;
+}
+
 .codeFooter--error {
   color: $euiColorDanger;
 }
