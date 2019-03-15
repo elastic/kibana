@@ -92,11 +92,6 @@ export interface DiscoveredPlugin {
   readonly id: PluginName;
 
   /**
-   * Path on the filesystem where plugin was loaded from.
-   */
-  readonly path: string;
-
-  /**
    * Root configuration path used by the plugin, defaults to "id".
    */
   readonly configPath: ConfigPath;
@@ -113,6 +108,18 @@ export interface DiscoveredPlugin {
    * not required for this plugin to work properly.
    */
   readonly optionalPlugins: ReadonlyArray<PluginName>;
+}
+
+/**
+ * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
+ * be exposed to client-side code.
+ * @internal
+ */
+export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+  /**
+   * Path on the filesystem where plugin was loaded from.
+   */
+  readonly path: string;
 }
 
 type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (

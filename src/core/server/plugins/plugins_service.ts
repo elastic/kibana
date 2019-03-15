@@ -24,14 +24,17 @@ import { CoreContext } from '../core_context';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
-import { DiscoveredPlugin, Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
 export interface PluginsServiceStart {
   contracts: Map<PluginName, unknown>;
-  uiPlugins: Map<PluginName, DiscoveredPlugin>;
+  uiPlugins: {
+    public: Map<PluginName, DiscoveredPlugin>;
+    internal: Map<PluginName, DiscoveredPluginInternal>;
+  };
 }
 
 /** @internal */

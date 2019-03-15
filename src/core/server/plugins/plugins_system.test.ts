@@ -233,11 +233,16 @@ Array [
   expect(thirdPluginToRun.start).toHaveBeenCalledTimes(1);
 });
 
-test('`uiPlugins` returns empty Map before plugins are added', async () => {
-  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`Map {}`);
+test('`uiPlugins` returns empty Maps before plugins are added', async () => {
+  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
+Object {
+  "internal": Map {},
+  "public": Map {},
+}
+`);
 });
 
-test('`uiPlugins` returns ordered Map of all plugin manifests', async () => {
+test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
   const plugins = new Map([
     [createPlugin('order-4', { required: ['order-2'] }), { 'order-2': 'added-as-2' }],
     [createPlugin('order-0'), {}],
@@ -256,55 +261,14 @@ test('`uiPlugins` returns ordered Map of all plugin manifests', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
-Map {
-  "order-0" => Object {
-    "configPath": "path",
-    "id": "order-0",
-    "optionalPlugins": Array [],
-    "path": "some-path",
-    "requiredPlugins": Array [],
-  },
-  "order-1" => Object {
-    "configPath": "path",
-    "id": "order-1",
-    "optionalPlugins": Array [],
-    "path": "some-path",
-    "requiredPlugins": Array [
-      "order-0",
-    ],
-  },
-  "order-2" => Object {
-    "configPath": "path",
-    "id": "order-2",
-    "optionalPlugins": Array [
-      "order-0",
-    ],
-    "path": "some-path",
-    "requiredPlugins": Array [
-      "order-1",
-    ],
-  },
-  "order-3" => Object {
-    "configPath": "path",
-    "id": "order-3",
-    "optionalPlugins": Array [
-      "missing-dep",
-    ],
-    "path": "some-path",
-    "requiredPlugins": Array [
-      "order-2",
-    ],
-  },
-  "order-4" => Object {
-    "configPath": "path",
-    "id": "order-4",
-    "optionalPlugins": Array [],
-    "path": "some-path",
-    "requiredPlugins": Array [
-      "order-2",
-    ],
-  },
-}
+  // Expect that they're ordered
+  expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
+Array [
+  "order-0",
+  "order-1",
+  "order-2",
+  "order-3",
+  "order-4",
+]
 `);
 });
