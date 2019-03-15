@@ -282,6 +282,7 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           onChange={mockOnChange}
           itemsPerRow={rowItems}
+          sorting={{ direction: Direction.ascending, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
@@ -294,7 +295,7 @@ describe('Load More Table Component', () => {
 
       expect(mockOnChange).toBeCalled();
       expect(mockOnChange.mock.calls[0]).toEqual([
-        { page: undefined, sort: { direction: 'asc', field: 'node.host.name' } },
+        { page: undefined, sort: { direction: 'desc', field: 'node.host.name' } },
       ]);
     });
   });

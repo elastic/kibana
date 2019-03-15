@@ -6,7 +6,7 @@
 
 import { getOrEmptyTagFromValue } from '../empty_value';
 
-import { ItemsPerRow } from './index';
+import { Columns, ItemsPerRow } from './index';
 
 export const mockData = {
   Hosts: {
@@ -46,7 +46,7 @@ export const mockData = {
   },
 };
 
-export const getHostsColumns = () => [
+export const getHostsColumns = (): Array<Columns<string>> => [
   {
     field: 'node.host.name',
     name: 'Host',

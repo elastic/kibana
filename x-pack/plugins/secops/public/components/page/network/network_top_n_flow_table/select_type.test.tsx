@@ -17,7 +17,7 @@ describe('NetworkTopNFlow Select direction', () => {
   const mockOnChange = jest.fn();
 
   describe('rendering', () => {
-    test('it renders the default Authentication table', () => {
+    test('it renders the select type for NetworkTopNFlow table', () => {
       const wrapper = shallow(
         <SelectType
           id={`${NetworkTopNFlowTableId}-select-type`}

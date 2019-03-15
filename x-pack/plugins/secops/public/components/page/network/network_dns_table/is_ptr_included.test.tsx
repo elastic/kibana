@@ -16,7 +16,7 @@ describe('NetworkTopNFlow Select direction', () => {
   const mockOnChange = jest.fn();
 
   describe('rendering', () => {
-    test('it renders the basic group button for uni-direction and bi-direction', () => {
+    test('it renders the basic switch to include PTR in table', () => {
       const wrapper = shallow(<IsPtrIncluded isPtrIncluded={true} onChange={mockOnChange} />);
 
       expect(toJson(wrapper)).toMatchSnapshot();

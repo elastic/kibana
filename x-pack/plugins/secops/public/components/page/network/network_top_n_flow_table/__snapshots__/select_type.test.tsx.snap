@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NetworkTopNFlow Select direction rendering it renders the default Authentication table 1`] = `
+exports[`NetworkTopNFlow Select direction rendering it renders the select type for NetworkTopNFlow table 1`] = `
 <Component
   id="networkTopNFlow-top-talkers-select-type"
   isLoading={false}

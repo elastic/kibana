@@ -78,8 +78,8 @@ const testNetworkTopNFlowSource = {
   variables: {
     timerange: {
       interval: '12h',
-      to: 1514782800000,
-      from: 1546318799999,
+      to: new Date('2018-01-01T05:00:00.000Z').valueOf(),
+      from: new Date('2019-01-01T04:59:59.999Z').valueOf(),
     },
     type: NetworkTopNFlowType.source,
     direction: NetworkTopNFlowDirection.uniDirectional,

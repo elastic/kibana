@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NetworkTopNFlow Select direction rendering it renders the basic group button for uni-direction and bi-direction 1`] = `
+exports[`NetworkTopNFlow Select direction rendering it renders the basic switch to include PTR in table 1`] = `
 <Component
   isPtrIncluded={true}
   onChange={[MockFunction]}

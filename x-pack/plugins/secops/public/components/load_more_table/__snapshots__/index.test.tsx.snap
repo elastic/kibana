@@ -74,7 +74,7 @@ exports[`Load More Table Component rendering it renders the default load more ta
     noItemsMessage="No items found"
     onChange={[Function]}
     responsive={true}
-    sorting={Object {}}
+    sorting={null}
   />
   <styled.div>
     <EuiFlexGroup

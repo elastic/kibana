@@ -19,19 +19,21 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 
+type valueof<T> = T[keyof T];
+
 export const getNetworkDnsColumns = (
   startDate: number,
   type: networkModel.NetworkType
-): Array<Columns<NetworkDnsItem>> => [
+): Array<Columns<valueof<NetworkDnsItem>>> => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: dnsName => {
-      const id = escapeDataProviderId(`networkDns-table--name-${name}`);
+    render: (dnsName: string) => {
       if (!isNil(dnsName)) {
+        const id = escapeDataProviderId(`networkDns-table--name-${dnsName}`);
         return (
           <DraggableWrapper
             key={id}
@@ -39,12 +41,12 @@ export const getNetworkDnsColumns = (
               and: [],
               enabled: true,
               id,
-              name: dnsName.toString(),
+              name: dnsName,
               excluded: false,
               kqlQuery: '',
               queryMatch: {
                 field: 'dns.question.etld_plus_one',
-                value: escapeQueryValue(dnsName.toString()),
+                value: escapeQueryValue(dnsName),
               },
               queryDate: {
                 from: startDate,
@@ -73,7 +75,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: queryCount => {
+    render: (queryCount: number) => {
       if (!isNil(queryCount)) {
         return numeral(queryCount).format('0');
       } else {
@@ -87,7 +89,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: uniqueDomains => {
+    render: (uniqueDomains: number) => {
       if (!isNil(uniqueDomains)) {
         return numeral(uniqueDomains).format('0');
       } else {
@@ -101,7 +103,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: dnsBytesIn => {
+    render: (dnsBytesIn: number) => {
       if (!isNil(dnsBytesIn)) {
         return numeral(dnsBytesIn).format('0.000b');
       } else {
@@ -115,7 +117,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: dnsBytesOut => {
+    render: (dnsBytesOut: number) => {
       if (!isNil(dnsBytesOut)) {
         return numeral(dnsBytesOut).format('0.000b');
       } else {

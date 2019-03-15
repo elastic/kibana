@@ -32,11 +32,12 @@ export interface ItemsPerRow {
 export interface SortingBasicTable {
   field: string;
   direction: Direction;
+  allowNeutralSort?: boolean;
 }
 
 export interface Criteria {
   page: { index: number; size: number };
-  sort: { field: string; direction: 'asc' | 'desc' };
+  sort: { field: string; direction: 'asc' | 'desc'; allowNeutralSort?: boolean };
 }
 
 interface BasicTableProps<T> {
@@ -148,6 +149,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           {item.text}
         </EuiContextMenuItem>
       ));
+
     return (
       <BasicTableContainer>
         {!paginationLoading && loading && (
@@ -172,11 +174,11 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             sorting
               ? {
                   sort: {
-                    field: sorting!.field,
-                    direction: sorting!.direction === Direction.ascending ? 'asc' : 'desc',
+                    field: sorting.field,
+                    direction: sorting.direction === Direction.ascending ? 'asc' : 'desc',
                   },
                 }
-              : {}
+              : null
           }
         />
         {hasNextPage && (
