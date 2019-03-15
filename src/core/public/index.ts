@@ -26,6 +26,8 @@ import { InjectedMetadataStart } from './injected_metadata';
 import { NotificationsStart } from './notifications';
 import { UiSettingsClient } from './ui_settings';
 
+export { CoreSystem } from './core_system';
+
 export interface CoreStart {
   i18n: I18nStart;
   injectedMetadata: InjectedMetadataStart;

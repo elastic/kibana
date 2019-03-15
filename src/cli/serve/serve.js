@@ -23,7 +23,7 @@ import { resolve } from 'path';
 
 import { fromRoot } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
-import { bootstrap } from '../../core/server/bootstrap';
+import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
