@@ -27,34 +27,42 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
     query: string,
     repoScope?: string[]
   ): Promise<AutocompleteSuggestionGroup> {
-    const queryParams: { q: string; repoScope?: string } = { q: query };
-    if (repoScope) {
-      const qs = repoScope.join('&repoScope=');
-      queryParams.repoScope = qs;
-    }
-    const res = await kfetch({
-      pathname: `../api/code/suggestions/symbol`,
-      method: 'get',
-      query: queryParams,
-    });
-    const suggestions = Array.from(res.symbols as DetailSymbolInformation[])
-      .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
-      .map((symbol: DetailSymbolInformation) => {
-        return {
-          description: this.getSymbolDescription(symbol.symbolInformation.location),
-          end: 10,
-          start: 1,
-          text: symbol.qname,
-          tokenType: this.symbolKindToTokenClass(symbol.symbolInformation.kind),
-          selectUrl: this.getSymbolLinkUrl(symbol.symbolInformation.location),
-        };
+    try {
+      const queryParams: { q: string; repoScope?: string } = { q: query };
+      if (repoScope && repoScope.length > 0) {
+        queryParams.repoScope = repoScope.join(',');
+      }
+      const res = await kfetch({
+        pathname: `../api/code/suggestions/symbol`,
+        method: 'get',
+        query: queryParams,
       });
-    return {
-      type: AutocompleteSuggestionType.SYMBOL,
-      total: res.total,
-      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
-      suggestions: suggestions as AutocompleteSuggestion[],
-    };
+      const suggestions = Array.from(res.symbols as DetailSymbolInformation[])
+        .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
+        .map((symbol: DetailSymbolInformation) => {
+          return {
+            description: this.getSymbolDescription(symbol.symbolInformation.location),
+            end: 10,
+            start: 1,
+            text: symbol.qname,
+            tokenType: this.symbolKindToTokenClass(symbol.symbolInformation.kind),
+            selectUrl: this.getSymbolLinkUrl(symbol.symbolInformation.location),
+          };
+        });
+      return {
+        type: AutocompleteSuggestionType.SYMBOL,
+        total: res.total,
+        hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
+        suggestions: suggestions as AutocompleteSuggestion[],
+      };
+    } catch (error) {
+      return {
+        type: AutocompleteSuggestionType.SYMBOL,
+        total: 0,
+        hasMore: false,
+        suggestions: [],
+      };
+    }
   }
 
   private getSymbolDescription(location: Location) {

@@ -19,29 +19,45 @@ export class RepositorySuggestionsProvider extends AbstractSuggestionsProvider {
     return scope === SearchScope.DEFAULT || scope === SearchScope.REPOSITORY;
   }
 
-  protected async fetchSuggestions(query: string): Promise<AutocompleteSuggestionGroup> {
-    const res = await kfetch({
-      pathname: `../api/code/suggestions/repo`,
-      method: 'get',
-      query: { q: query },
-    });
-    const suggestions = Array.from(res.repositories as Repository[])
-      .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
-      .map((repo: Repository) => {
-        return {
-          description: '',
-          end: 10,
-          start: 1,
-          text: toRepoNameWithOrg(repo.uri),
-          tokenType: '',
-          selectUrl: `/${repo.uri}`,
-        };
+  protected async fetchSuggestions(
+    query: string,
+    repoScope?: string[]
+  ): Promise<AutocompleteSuggestionGroup> {
+    try {
+      const queryParams: { q: string; repoScope?: string } = { q: query };
+      if (repoScope && repoScope.length > 0) {
+        queryParams.repoScope = repoScope.join(',');
+      }
+      const res = await kfetch({
+        pathname: `../api/code/suggestions/repo`,
+        method: 'get',
+        query: queryParams,
       });
-    return {
-      type: AutocompleteSuggestionType.REPOSITORY,
-      total: res.total,
-      hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
-      suggestions,
-    };
+      const suggestions = Array.from(res.repositories as Repository[])
+        .slice(0, this.MAX_SUGGESTIONS_PER_GROUP)
+        .map((repo: Repository) => {
+          return {
+            description: '',
+            end: 10,
+            start: 1,
+            text: toRepoNameWithOrg(repo.uri),
+            tokenType: '',
+            selectUrl: `/${repo.uri}`,
+          };
+        });
+      return {
+        type: AutocompleteSuggestionType.REPOSITORY,
+        total: res.total,
+        hasMore: res.total > this.MAX_SUGGESTIONS_PER_GROUP,
+        suggestions,
+      };
+    } catch (error) {
+      return {
+        type: AutocompleteSuggestionType.REPOSITORY,
+        total: 0,
+        hasMore: false,
+        suggestions: [],
+      };
+    }
   }
 }
