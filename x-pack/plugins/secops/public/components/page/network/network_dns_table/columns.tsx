@@ -25,7 +25,7 @@ export const getNetworkDnsColumns = (
 ): Array<Columns<NetworkDnsItem>> => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
-    name: i18n.NAME,
+    name: i18n.REGISTERED_DOMAIN,
     truncateText: false,
     hideForMobile: false,
     sortable: true,

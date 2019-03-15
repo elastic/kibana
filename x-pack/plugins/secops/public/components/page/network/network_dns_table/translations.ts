@@ -11,12 +11,16 @@ export const TOP_DNS_DOMAINS = i18n.translate('xpack.secops.networkDnsTable.titl
 });
 
 export const TOOLTIP = i18n.translate('xpack.secops.networkDnsTable.helperTooltip', {
-  defaultMessage: 'Only show DNS traffic; You can also sort any columns in the table below;',
+  defaultMessage:
+    'This shows DNS protocol traffic only, and can be useful for hunting domains used in DNS data exfiltration.',
 });
 
-export const NAME = i18n.translate('xpack.secops.networkDnsTable.column.registerDomain', {
-  defaultMessage: 'Register Domain',
-});
+export const REGISTERED_DOMAIN = i18n.translate(
+  'xpack.secops.networkDnsTable.column.registeredDomain',
+  {
+    defaultMessage: 'Registered Domain',
+  }
+);
 
 export const TOTAL_QUERIES = i18n.translate(
   'xpack.secops.networkDnsTable.column.TotalQueriesTitle',

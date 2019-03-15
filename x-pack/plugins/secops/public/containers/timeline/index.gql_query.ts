@@ -66,6 +66,7 @@ export const timelineQuery = gql`
             }
             network {
               transport
+              direction
             }
             http {
               version
