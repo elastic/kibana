@@ -15,5 +15,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./common'));
     loadTestFile(require.resolve('./standalone_cluster'));
+    loadTestFile(require.resolve('./logs'));
   });
 }
