@@ -17,6 +17,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Dispatch, useEffect, useReducer } from 'react';
 
+import { registry, StandardVisState } from '../../../editorConfigRegistry';
+
 interface Props {
   kfetch: (opts: any) => Promise<any>;
 }
@@ -25,15 +27,25 @@ interface State {
   loading: boolean;
   time: Date;
   errorMessage: string;
+  currentEditorConfig: string;
+  standardVisState: StandardVisState;
+  customVisState: object;
 }
 
-type Action = { type: 'loaded'; time: Date } | { type: 'loadError'; message: string };
+type Action =
+  | { type: 'loaded'; time: Date }
+  | { type: 'loadError'; message: string }
+  | { type: 'updateStandardVisState'; newState: StandardVisState }
+  | { type: 'updateCustomVisState'; newState: object };
 
 function initialState(): State {
   return {
     loading: true,
     time: new Date(),
     errorMessage: '',
+    currentEditorConfig: 'sample',
+    standardVisState: { title: 'Unknown Vis', columns: [], query: {} },
+    customVisState: {},
   };
 }
 
@@ -50,6 +62,16 @@ function reducer(state: State, action: Action): State {
         ...state,
         loading: false,
         errorMessage: action.message,
+      };
+    case 'updateStandardVisState':
+      return {
+        ...state,
+        standardVisState: action.newState,
+      };
+    case 'updateCustomVisState':
+      return {
+        ...state,
+        customVisState: { ...state.customVisState, [state.currentEditorConfig]: action.newState },
       };
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
@@ -84,6 +106,19 @@ export function Main({ kfetch }: Props) {
     return <h1>Loading...</h1>;
   }
 
+  const { editorPanels, toExpression } = registry.getByName(state.currentEditorConfig);
+
+  const { leftPanel, rightPanel } = editorPanels({
+    standardState: state.standardVisState,
+    customState: state.customVisState,
+    onChangeStandardState: (newState: StandardVisState) => {
+      dispatch({ type: 'updateStandardVisState', newState });
+    },
+    onChangeCustomState: (newState: object) => {
+      dispatch({ type: 'updateCustomVisState', newState });
+    },
+  });
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -115,21 +150,11 @@ export function Main({ kfetch }: Props) {
             </EuiTitle>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            <EuiText>
-              <h3>
-                <FormattedMessage
-                  id="vizEditor.congratulationsText"
-                  defaultMessage="You have successfully created your first Kibana Plugin!"
-                />
-              </h3>
-              <p>
-                <FormattedMessage
-                  id="vizEditor.serverTimeText"
-                  defaultMessage="The server time (via API call) is {time}"
-                  values={{ time }}
-                />
-              </p>
-            </EuiText>
+            {leftPanel}
+            Current Expression: {toExpression(state.standardVisState, state.customVisState)}
+            {/* TODO execute the expression and render it to a node inside here */}
+            {rightPanel}
+            {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
