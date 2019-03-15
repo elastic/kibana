@@ -10,9 +10,9 @@ This tutorial requires three data sets:
 Create a new working directory where you want to download the files. From that directory, run the following commands:
 
 [source,shell]
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip
-curl -O https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/shakespeare.json
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/accounts.zip
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/logs.jsonl.gz
 
 Two of the data sets are compressed. To extract the files, use these commands:
 
