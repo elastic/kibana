@@ -271,3 +271,11 @@
 .code-no-min-width {
   min-width: unset !important;
 }
+
+.code-commit-id {
+  @include euiCodeFont;
+  height: calc(20rem / 14);
+  margin: auto 0;
+  text-align: center;
+  flex-shrink: 0;
+}
