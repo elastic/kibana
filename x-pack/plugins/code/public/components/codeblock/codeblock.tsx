@@ -73,7 +73,7 @@ export class CodeBlock extends React.PureComponent<Props> {
           return {
             range,
             options: {
-              inlineClassName: 'code-search-highlight',
+              inlineClassName: 'codeSearch__highlight',
             },
           };
         });
@@ -101,7 +101,7 @@ export class CodeBlock extends React.PureComponent<Props> {
             return {
               range,
               options: {
-                inlineClassName: 'code-search-highlight',
+                inlineClassName: 'codeSearch__highlight',
               },
             };
           });
