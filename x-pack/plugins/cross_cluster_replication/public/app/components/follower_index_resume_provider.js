@@ -94,6 +94,7 @@ class FollowerIndexResumeProviderUi extends PureComponent {
             )
           }
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="ccrFollowerIndexResumeReplicationConfirmationModal"
         >
           {isSingle ? (
             <p>

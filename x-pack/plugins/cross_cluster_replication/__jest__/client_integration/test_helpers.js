@@ -41,7 +41,12 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
       find('ccrFollowerIndexListContextMenuButton').simulate('click');
     };
 
-    const openContextMenuTableRowAt = (index = 0) => {
+    const clickContextMenuButtonAt = (index = 0) => {
+      const contextMenu = find('followerIndexActionContextMenu');
+      contextMenu.find('button').at(index).simulate('click');
+    };
+
+    const openTableRowContextMenuAt = (index = 0) => {
       const actionsColumnIndex = rows[0].columns.length - 1; // Actions are in the last column
       const actionsTableCell = rows[index].columns[actionsColumnIndex];
       const button = actionsTableCell.reactWrapper.find('button');
@@ -54,7 +59,8 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
     return {
       selectFollowerIndexAt,
       openContextMenu,
-      openContextMenuTableRowAt
+      clickContextMenuButtonAt,
+      openTableRowContextMenuAt,
     };
   };
 
@@ -70,8 +76,8 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
 
 export { nextTick } from '../../../../test_utils';
 
-export const initTestBed = (component) => {
-  const testBed = registerTestBed(component, {}, ccrStore)();
+export const initTestBed = (component, props = {}) => {
+  const testBed = registerTestBed(component, {}, ccrStore)(props);
   const getUserActions = initUserActions(testBed);
 
   return {

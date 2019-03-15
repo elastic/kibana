@@ -77,7 +77,8 @@ describe('<FollowerIndicesList />', () => {
 
     let selectFollowerIndexAt;
     let openContextMenu;
-    let openContextMenuTableRowAt;
+    let openTableRowContextMenuAt;
+    let clickContextMenuButtonAt;
 
     beforeEach(async () => {
       // Mock Http Request that loads Follower indices
@@ -98,7 +99,8 @@ describe('<FollowerIndicesList />', () => {
       ({
         selectFollowerIndexAt,
         openContextMenu,
-        openContextMenuTableRowAt,
+        openTableRowContextMenuAt,
+        clickContextMenuButtonAt,
       } = getUserActions('followerIndicesList'));
 
       // Read the index list table
@@ -177,19 +179,39 @@ describe('<FollowerIndicesList />', () => {
           'Unfollow leader index'
         ]);
       });
+
+      test('should open a confirmation modal when clicking on "pause replication"', () => {
+        expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(false);
+
+        selectFollowerIndexAt(0);
+        openContextMenu();
+        clickContextMenuButtonAt(0); // first button is the "pause" action
+
+        expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(true);
+      });
+
+      test('should open a confirmation modal when clicking on "unfollow leader index"', () => {
+        expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(false);
+
+        selectFollowerIndexAt(0);
+        openContextMenu();
+        clickContextMenuButtonAt(2); // third button is the "unfollow" action
+
+        expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(true);
+      });
     });
 
     describe('table row action menu', () => {
       test('should open a context menu when clicking on the button of each row', async () => {
         expect(component.find('.euiContextMenuPanel').length).toBe(0);
 
-        openContextMenuTableRowAt(0);
+        openTableRowContextMenuAt(0);
 
         expect(component.find('.euiContextMenuPanel').length).toBe(1);
       });
 
       test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
-        openContextMenuTableRowAt(0);
+        openTableRowContextMenuAt(0);
 
         const buttonLabels = component
           .find('.euiContextMenuPanel')
@@ -205,7 +227,7 @@ describe('<FollowerIndicesList />', () => {
 
       test('should have the "resume", "edit" and "unfollow" options in the row context menu', async () => {
         // We open the context menu of the second row (index 1) as followerIndices[1].status is "paused"
-        openContextMenuTableRowAt(1);
+        openTableRowContextMenuAt(1);
 
         const buttonLabels = component
           .find('.euiContextMenuPanel')
@@ -217,6 +239,33 @@ describe('<FollowerIndicesList />', () => {
           'Edit follower index',
           'Unfollow leader index'
         ]);
+      });
+
+      test('should open a confirmation modal when clicking on "pause replication"', async () => {
+        expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(false);
+
+        openTableRowContextMenuAt(0);
+        find('ccrFollowerIndexListPauseActionButton').simulate('click');
+
+        expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(true);
+      });
+
+      test('should open a confirmation modal when clicking on "resume"', async () => {
+        expect(exists('ccrFollowerIndexResumeReplicationConfirmationModal')).toBe(false);
+
+        openTableRowContextMenuAt(1); // open the second row context menu, as it is a "paused" follower index
+        find('ccrFollowerIndexListResumeActionButton').simulate('click');
+
+        expect(exists('ccrFollowerIndexResumeReplicationConfirmationModal')).toBe(true);
+      });
+
+      test('should open a confirmation modal when clicking on "unfollow leader index"', () => {
+        expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(false);
+
+        openTableRowContextMenuAt(0);
+        find('ccrFollowerIndexListUnfollowActionButton').simulate('click');
+
+        expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(true);
       });
     });
   });
