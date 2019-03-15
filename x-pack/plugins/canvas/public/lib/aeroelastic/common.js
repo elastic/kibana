@@ -6,7 +6,9 @@
 
 import { select } from './select';
 
-const state = d => d; // serves as reminder that we start with the state; todo remove it as we add TS annotations (State)
+// serves as reminder that we start with the state
+// todo remove it as we add TS annotations (State)
+const state = d => d;
 
 const getScene = state => state.currentScene;
 export const scene = select(getScene)(state);
