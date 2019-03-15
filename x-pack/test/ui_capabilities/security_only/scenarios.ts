@@ -134,19 +134,37 @@ const All: All = {
   role: allRole,
 };
 
-interface AdvancedSettingsAll extends User {
-  username: 'advancedSettings_all';
+interface Read extends User {
+  username: 'read';
 }
-const AdvancedSettingsAll: AdvancedSettingsAll = {
-  username: 'advancedSettings_all',
-  fullName: 'advancedSettings_all',
-  password: 'advancedSettings_all-password',
+const Read: Read = {
+  username: 'read',
+  fullName: 'read',
+  password: 'read-password',
   role: {
-    name: 'advancedSettings_all_role',
+    name: 'read_role',
+    kibana: [
+      {
+        base: ['read'],
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+interface FooAll extends User {
+  username: 'foo_all';
+}
+const FooAll: FooAll = {
+  username: 'foo_all',
+  fullName: 'foo_all',
+  password: 'foo_all-password',
+  role: {
+    name: 'foo_all_role',
     kibana: [
       {
         feature: {
-          advancedSettings: ['all'],
+          foo: ['all'],
         },
         spaces: ['*'],
       },
@@ -154,19 +172,19 @@ const AdvancedSettingsAll: AdvancedSettingsAll = {
   },
 };
 
-interface AdvancedSettingsRead extends User {
-  username: 'advancedSettings_read';
+interface FooRead extends User {
+  username: 'foo_read';
 }
-const AdvancedSettingsRead: AdvancedSettingsRead = {
-  username: 'advancedSettings_read',
-  fullName: 'advancedSettings_read',
-  password: 'advancedSettings_read-password',
+const FooRead: FooRead = {
+  username: 'foo_read',
+  fullName: 'foo_read',
+  password: 'foo_read-password',
   role: {
-    name: 'advancedSettings_read_role',
+    name: 'foo_read_role',
     kibana: [
       {
         feature: {
-          advancedSettings: ['read'],
+          foo: ['read'],
         },
         spaces: ['*'],
       },
@@ -174,628 +192,24 @@ const AdvancedSettingsRead: AdvancedSettingsRead = {
   },
 };
 
-interface ApmUser extends User {
-  username: 'apm_user';
-}
-const ApmUser: ApmUser = {
-  username: 'apm_user',
-  fullName: 'apm_user',
-  password: 'apm_user-password',
-  role: {
-    name: 'apm_user',
-  },
-};
-
-interface ApmUserAndAll extends User {
-  username: 'apm_user_and_all';
-}
-const ApmUserAndAll: ApmUserAndAll = {
-  username: 'apm_user_and_all',
-  fullName: 'apm_user_and_all',
-  password: 'apm_user_and_all-password',
-  roles: [
-    {
-      name: 'apm_user',
-    },
-    allRole,
-  ],
-};
-
-interface CanvasAll extends User {
-  username: 'canvas_all';
-}
-const CanvasAll: CanvasAll = {
-  username: 'canvas_all',
-  fullName: 'canvas_all',
-  password: 'canvas_all-password',
-  role: {
-    name: 'canvas_all_role',
-    kibana: [
-      {
-        feature: {
-          canvas: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface CanvasRead extends User {
-  username: 'canvas_read';
-}
-const CanvasRead: CanvasRead = {
-  username: 'canvas_read',
-  fullName: 'canvas_read',
-  password: 'canvas_read-password',
-  role: {
-    name: 'canvas_read_role',
-    kibana: [
-      {
-        feature: {
-          canvas: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DashboardAll extends User {
-  username: 'dashboard_all';
-}
-const DashboardAll: DashboardAll = {
-  username: 'dashboard_all',
-  fullName: 'dashboard_all',
-  password: 'dashboard_all-password',
-  role: {
-    name: 'dashboard_all_role',
-    kibana: [
-      {
-        feature: {
-          dashboard: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DashboardRead extends User {
-  username: 'dashboard_read';
-}
-const DashboardRead: DashboardRead = {
-  username: 'dashboard_read',
-  fullName: 'dashboard_read',
-  password: 'dashboard_read-password',
-  role: {
-    name: 'dashboard_read_role',
-    kibana: [
-      {
-        feature: {
-          dashboard: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DevToolsAll extends User {
-  username: 'dev_tools_all';
-}
-const DevToolsAll: DevToolsAll = {
-  username: 'dev_tools_all',
-  fullName: 'dev_tools_all',
-  password: 'dev_tools_all-password',
-  role: {
-    name: 'dev_tools_all_role',
-    kibana: [
-      {
-        feature: {
-          dev_tools: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DevToolsRead extends User {
-  username: 'dev_tools_read';
-}
-const DevToolsRead: DevToolsRead = {
-  username: 'dev_tools_read',
-  fullName: 'dev_tools_read',
-  password: 'dev_tools_read-password',
-  role: {
-    name: 'dev_tools_read_role',
-    kibana: [
-      {
-        feature: {
-          dev_tools: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DiscoverAll extends User {
-  username: 'discover_all';
-}
-const DiscoverAll: DiscoverAll = {
-  username: 'discover_all',
-  fullName: 'discover_all',
-  password: 'discover_all-password',
-  role: {
-    name: 'discover_all_role',
-    kibana: [
-      {
-        feature: {
-          discover: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface DiscoverRead extends User {
-  username: 'discover_read';
-}
-const DiscoverRead: DiscoverRead = {
-  username: 'discover_read',
-  fullName: 'discover_read',
-  password: 'discover_read-password',
-  role: {
-    name: 'discover_read_role',
-    kibana: [
-      {
-        feature: {
-          discover: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface GraphAll extends User {
-  username: 'graph_all';
-}
-const GraphAll: GraphAll = {
-  username: 'graph_all',
-  fullName: 'graph_all',
-  password: 'graph_all-password',
-  role: {
-    name: 'graph_all_role',
-    kibana: [
-      {
-        feature: {
-          graph: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface GraphRead extends User {
-  username: 'graph_read';
-}
-const GraphRead: GraphRead = {
-  username: 'graph_read',
-  fullName: 'graph_read',
-  password: 'graph_read-password',
-  role: {
-    name: 'graph_read_role',
-    kibana: [
-      {
-        feature: {
-          graph: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface MapsAll extends User {
-  username: 'maps_all';
-}
-const MapsAll: MapsAll = {
-  username: 'maps_all',
-  fullName: 'maps_all',
-  password: 'maps_all-password',
-  role: {
-    name: 'maps_all_role',
-    kibana: [
-      {
-        feature: {
-          maps: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface MapsRead extends User {
-  username: 'maps_read';
-}
-const MapsRead: MapsRead = {
-  username: 'maps_read',
-  fullName: 'maps_read',
-  password: 'maps_read-password',
-  role: {
-    name: 'maps_read_role',
-    kibana: [
-      {
-        feature: {
-          maps: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface InfrastructureAll extends User {
-  username: 'infrastructure_all';
-}
-const InfrastructureAll: InfrastructureAll = {
-  username: 'infrastructure_all',
-  fullName: 'infrastructure_all',
-  password: 'infrastructure_all-password',
-  role: {
-    name: 'infrastructure_all_role',
-    kibana: [
-      {
-        feature: {
-          infrastructure: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface InfrastructureRead extends User {
-  username: 'infrastructure_read';
-}
-const InfrastructureRead: InfrastructureRead = {
-  username: 'infrastructure_read',
-  fullName: 'infrastructure_read',
-  password: 'infrastructure_read-password',
-  role: {
-    name: 'infrastructure_read_role',
-    kibana: [
-      {
-        feature: {
-          infrastructure: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface LogsAll extends User {
-  username: 'logs_all';
-}
-const LogsAll: LogsAll = {
-  username: 'logs_all',
-  fullName: 'logs_all',
-  password: 'logs_all-password',
-  role: {
-    name: 'logs_all_role',
-    kibana: [
-      {
-        feature: {
-          logs: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface LogsRead extends User {
-  username: 'logs_read';
-}
-const LogsRead: LogsRead = {
-  username: 'logs_read',
-  fullName: 'logs_read',
-  password: 'logs_read-password',
-  role: {
-    name: 'logs_read_role',
-    kibana: [
-      {
-        feature: {
-          logs: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface MachineLearningAdmin extends User {
-  username: 'machine_learning_admin';
-}
-const MachineLearningAdmin: MachineLearningAdmin = {
-  username: 'machine_learning_admin',
-  fullName: 'machine_learning_admin',
-  password: 'machine_learning_admin-password',
-  role: {
-    name: 'machine_learning_admin',
-  },
-};
-
-interface MachineLearningAdminAndAll extends User {
-  username: 'machine_learning_admin_and_all';
-}
-const MachineLearningAdminAndAll: MachineLearningAdminAndAll = {
-  username: 'machine_learning_admin_and_all',
-  fullName: 'machine_learning_admin_and_all',
-  password: 'machine_learning_admin_and_all-password',
-  roles: [
-    {
-      name: 'machine_learning_admin',
-    },
-    allRole,
-  ],
-};
-
-interface MachineLearningUser extends User {
-  username: 'machine_learning_user';
-}
-const MachineLearningUser: MachineLearningUser = {
-  username: 'machine_learning_user',
-  fullName: 'machine_learning_user',
-  password: 'machine_learning_user-password',
-  role: {
-    name: 'machine_learning_user',
-  },
-};
-
-interface MachineLearningUserAndAll extends User {
-  username: 'machine_learning_user_and_all';
-}
-const MachineLearningUserAndAll: MachineLearningUserAndAll = {
-  username: 'machine_learning_user_and_all',
-  fullName: 'machine_learning_user_and_all',
-  password: 'machine_learning_user_and_all-password',
-  roles: [
-    {
-      name: 'machine_learning_user',
-    },
-    allRole,
-  ],
-};
-
-interface MonitoringUser extends User {
-  username: 'monitoring_user';
-}
-const MonitoringUser: MonitoringUser = {
-  username: 'monitoring_user',
-  fullName: 'monitoring_user',
-  password: 'monitoring_user-password',
-  role: {
-    name: 'monitoring_user_role',
-  },
-};
-
-interface MonitoringUserAndAll extends User {
-  username: 'monitoring_user_and_all';
-}
-const MonitoringUserAndAll: MonitoringUserAndAll = {
-  username: 'monitoring_user_and_all',
-  fullName: 'monitoring_user_and_all',
-  password: 'monitoring_user_and_all-password',
-  roles: [
-    {
-      name: 'monitoring_user',
-    },
-    allRole,
-  ],
-};
-
-interface TimelionAll extends User {
-  username: 'timelion_all';
-}
-const TimelionAll: TimelionAll = {
-  username: 'timelion_all',
-  fullName: 'timelion_all',
-  password: 'timelion_all-password',
-  role: {
-    name: 'timelion_all_role',
-    kibana: [
-      {
-        feature: {
-          timelion: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface TimelionRead extends User {
-  username: 'timelion_read';
-}
-const TimelionRead: TimelionRead = {
-  username: 'timelion_read',
-  fullName: 'timelion_read',
-  password: 'timelion_read-password',
-  role: {
-    name: 'timelion_read_role',
-    kibana: [
-      {
-        feature: {
-          timelion: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface UptimeAll extends User {
-  username: 'uptime_all';
-}
-const UptimeAll: UptimeAll = {
-  username: 'uptime_all',
-  fullName: 'uptime_all',
-  password: 'uptime_all-password',
-  role: {
-    name: 'uptime_all_role',
-    kibana: [
-      {
-        feature: {
-          uptime: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface UptimeRead extends User {
-  username: 'uptime_read';
-}
-const UptimeRead: UptimeRead = {
-  username: 'uptime_read',
-  fullName: 'uptime_read',
-  password: 'uptime_read-password',
-  role: {
-    name: 'uptime_read_role',
-    kibana: [
-      {
-        feature: {
-          uptime: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface VisualizeAll extends User {
-  username: 'visualize_all';
-}
-const VisualizeAll: VisualizeAll = {
-  username: 'visualize_all',
-  fullName: 'visualize_all',
-  password: 'visualize_all-password',
-  role: {
-    name: 'visualize_all_role',
-    kibana: [
-      {
-        feature: {
-          visualize: ['all'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-interface VisualizeRead extends User {
-  username: 'visualize_read';
-}
-const VisualizeRead: VisualizeRead = {
-  username: 'visualize_read',
-  fullName: 'visualize_read',
-  password: 'visualize_read-password',
-  role: {
-    name: 'visualize_read_role',
-    kibana: [
-      {
-        feature: {
-          visualize: ['read'],
-        },
-        spaces: ['*'],
-      },
-    ],
-  },
-};
-
-export type UserScenarios =
-  | NoKibanaPrivileges
-  | Superuser
-  | LegacyAll
-  | DualPrivilegesAll
-  | DualPrivilegesRead
-  | All
-  | AdvancedSettingsAll
-  | AdvancedSettingsRead
-  | ApmUser
-  | ApmUserAndAll
-  | CanvasAll
-  | CanvasRead
-  | DashboardAll
-  | DashboardRead
-  | DevToolsAll
-  | DevToolsRead
-  | DiscoverAll
-  | DiscoverRead
-  | GraphAll
-  | GraphRead
-  | MapsAll
-  | MapsRead
-  | InfrastructureAll
-  | InfrastructureRead
-  | LogsAll
-  | LogsRead
-  | MachineLearningAdmin
-  | MachineLearningAdminAndAll
-  | MachineLearningUser
-  | MachineLearningUserAndAll
-  | MonitoringUser
-  | MonitoringUserAndAll
-  | TimelionAll
-  | TimelionRead
-  | UptimeAll
-  | UptimeRead
-  | VisualizeAll
-  | VisualizeRead;
-export const UserScenarios: UserScenarios[] = [
+export const UserScenarios: [
   NoKibanaPrivileges,
   Superuser,
   LegacyAll,
   DualPrivilegesAll,
   DualPrivilegesRead,
   All,
-  AdvancedSettingsRead,
-  ApmUser,
-  ApmUserAndAll,
-  CanvasRead,
-  DashboardAll,
-  DashboardRead,
-  DevToolsAll,
-  DevToolsRead,
-  DiscoverAll,
-  DiscoverRead,
-  GraphAll,
-  GraphRead,
-  MapsAll,
-  MapsRead,
-  InfrastructureAll,
-  InfrastructureRead,
-  LogsAll,
-  LogsRead,
-  MachineLearningAdmin,
-  MachineLearningAdminAndAll,
-  MachineLearningUser,
-  MachineLearningUserAndAll,
-  MonitoringUser,
-  MonitoringUserAndAll,
-  TimelionAll,
-  TimelionRead,
-  UptimeAll,
-  UptimeRead,
-  VisualizeAll,
-  VisualizeRead,
+  Read,
+  FooAll,
+  FooRead
+] = [
+  NoKibanaPrivileges,
+  Superuser,
+  LegacyAll,
+  DualPrivilegesAll,
+  DualPrivilegesRead,
+  All,
+  Read,
+  FooAll,
+  FooRead,
 ];

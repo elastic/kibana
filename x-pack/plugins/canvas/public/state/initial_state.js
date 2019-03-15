@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiCapabilities } from 'ui/capabilities';
 import { get } from 'lodash';
+import { uiCapabilities } from 'ui/capabilities';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
@@ -14,6 +14,12 @@ export const getInitialState = path => {
     assets: {}, // assets end up here
     transient: {
       canUserWrite: uiCapabilities.canvas.save,
+      elementStats: {
+        total: 0,
+        ready: 0,
+        pending: 0,
+        error: 0,
+      },
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},

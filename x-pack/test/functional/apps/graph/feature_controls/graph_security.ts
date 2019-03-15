@@ -17,14 +17,14 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   describe('security', () => {
     before(async () => {
-      esArchiver.load('empty_kibana');
+      await esArchiver.load('empty_kibana');
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
     describe('global graph all privileges', () => {

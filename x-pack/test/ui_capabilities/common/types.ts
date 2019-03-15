@@ -52,5 +52,5 @@ export interface User {
 export interface Space {
   id: string;
   name: string;
-  disabledFeatures: string[];
+  disabledFeatures: string[] | '*';
 }

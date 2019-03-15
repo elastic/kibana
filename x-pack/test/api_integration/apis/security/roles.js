@@ -52,9 +52,9 @@ export default function ({ getService }) {
               {
                 base: ['all'],
                 feature: {
-                  dashboard: ["read"],
-                  discover: ["all"],
-                  ml: ["all"]
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
                 },
                 spaces: ['marketing', 'sales']
               }
@@ -198,17 +198,17 @@ export default function ({ getService }) {
                 _reserved: ['apm', 'monitoring'],
                 base: ['read'],
                 feature: {
-                  dashboard: ["read"],
-                  dev_tools: ["all"],
+                  dashboard: ['read'],
+                  dev_tools: ['all'],
                 },
                 spaces: ['*']
               },
               {
                 base: ['all'],
                 feature: {
-                  dashboard: ["read"],
-                  discover: ["all"],
-                  ml: ["all"]
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
                 },
                 spaces: ['marketing', 'sales']
               }
@@ -334,17 +334,17 @@ export default function ({ getService }) {
               _reserved: ['apm', 'monitoring'],
               base: ['read'],
               feature: {
-                dashboard: ["read"],
-                dev_tools: ["all"],
+                dashboard: ['read'],
+                dev_tools: ['all'],
               },
               spaces: ['*']
             },
             {
               base: ['all'],
               feature: {
-                dashboard: ["read"],
-                discover: ["all"],
-                ml: ["all"]
+                dashboard: ['read'],
+                discover: ['all'],
+                ml: ['all']
               },
               spaces: ['marketing', 'sales']
             }

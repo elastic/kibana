@@ -93,13 +93,6 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           read: [actions.login, actions.version, ...readActions],
         },
         reserved: {
-          apm: [
-            actions.version,
-            actions.app.get('apm'),
-            ...actions.savedObject.readOperations('config'),
-            actions.ui.get('catalogue', 'apm'),
-            actions.ui.get('navLinks', 'apm'),
-          ],
           ml: [
             actions.version,
             actions.app.get('ml'),

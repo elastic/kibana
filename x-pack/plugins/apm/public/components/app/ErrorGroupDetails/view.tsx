@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
@@ -23,10 +23,9 @@ import {
   units
 } from '../../../style/variables';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { DetailView } from './DetailView';
-// @ts-ignore
-import Distribution from './Distribution';
+import { ErrorDistribution } from './Distribution';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -67,7 +66,7 @@ interface Props {
   location: Location;
 }
 
-export function ErrorGroupDetails({ urlParams, location }: Props) {
+export function ErrorGroupDetailsView({ urlParams, location }: Props) {
   return (
     <ErrorGroupDetailsRequest
       urlParams={urlParams}
@@ -109,51 +108,64 @@ export function ErrorGroupDetails({ urlParams, location }: Props) {
 
             <EuiSpacer size="m" />
 
-            <KueryBar />
+            <FilterBar />
 
             <EuiSpacer size="s" />
 
-            {showDetails && (
-              <Titles>
-                <EuiText>
-                  {logMessage && (
-                    <Fragment>
-                      <Label>
-                        {i18n.translate(
-                          'xpack.apm.errorGroupDetails.logMessageLabel',
-                          {
-                            defaultMessage: 'Log message'
-                          }
-                        )}
-                      </Label>
-                      <Message>{logMessage}</Message>
-                    </Fragment>
-                  )}
-                  <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+            <EuiPanel>
+              {showDetails && (
+                <Titles>
+                  <EuiText>
+                    {logMessage && (
+                      <Fragment>
+                        <Label>
+                          {i18n.translate(
+                            'xpack.apm.errorGroupDetails.logMessageLabel',
+                            {
+                              defaultMessage: 'Log message'
+                            }
+                          )}
+                        </Label>
+                        <Message>{logMessage}</Message>
+                      </Fragment>
+                    )}
+                    <Label>
+                      {i18n.translate(
+                        'xpack.apm.errorGroupDetails.exceptionMessageLabel',
+                        {
+                          defaultMessage: 'Exception message'
+                        }
+                      )}
+                    </Label>
+                    <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
+                    <Label>
+                      {i18n.translate(
+                        'xpack.apm.errorGroupDetails.culpritLabel',
+                        {
+                          defaultMessage: 'Culprit'
+                        }
+                      )}
+                    </Label>
+                    <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
+                  </EuiText>
+                </Titles>
+              )}
+              <ErrorDistributionRequest
+                urlParams={urlParams}
+                render={({ data }) => (
+                  <ErrorDistribution
+                    distribution={data}
+                    title={i18n.translate(
+                      'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                       {
-                        defaultMessage: 'Exception message'
+                        defaultMessage: 'Occurrences'
                       }
                     )}
-                  </Label>
-                  <Message>{excMessage || NOT_AVAILABLE_LABEL}</Message>
-                  <Label>
-                    {i18n.translate(
-                      'xpack.apm.errorGroupDetails.culpritLabel',
-                      {
-                        defaultMessage: 'Culprit'
-                      }
-                    )}
-                  </Label>
-                  <Culprit>{culprit || NOT_AVAILABLE_LABEL}</Culprit>
-                </EuiText>
-              </Titles>
-            )}
-            <ErrorDistributionRequest
-              urlParams={urlParams}
-              render={({ data }) => <Distribution distribution={data} />}
-            />
+                  />
+                )}
+              />
+            </EuiPanel>
+            <EuiSpacer />
             {showDetails && (
               <DetailView
                 errorGroup={errorGroup}

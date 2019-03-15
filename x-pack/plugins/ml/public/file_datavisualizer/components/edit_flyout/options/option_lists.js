@@ -9,7 +9,7 @@ export const FORMAT_OPTIONS = [
   'delimited',
   'ndjson',
   'semi_structured_text',
-  'xml',
+  // 'xml',
 ];
 
 export const TIMESTAMP_OPTIONS = [

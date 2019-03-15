@@ -18,6 +18,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { TAB_SETTINGS } from '../../../../../constants';
 import {
   settingsToDisplay,
   readOnlySettings
@@ -57,7 +58,7 @@ export class EditSettingsJson extends React.PureComponent {
   }
   componentWillMount() {
     const { indexName } = this.props;
-    this.props.loadIndexData({ dataType: 'Settings', indexName });
+    this.props.loadIndexData({ dataType: TAB_SETTINGS, indexName });
   }
   componentDidUpdate() {
     const { data, indexStatus } = this.props;
@@ -145,7 +146,7 @@ export class EditSettingsJson extends React.PureComponent {
         <EuiLink
           href={settingsDocumentationLink}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener"
         >
           <FormattedMessage
             id="xpack.idxMgmt.editSettingsJSON.settingsReferenceLinkText"

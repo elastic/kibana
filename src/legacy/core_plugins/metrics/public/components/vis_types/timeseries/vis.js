@@ -25,9 +25,9 @@ import { MarkdownSimple } from 'ui/markdown';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
-import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
+import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
 function hasSeparateAxis(row) {
@@ -36,20 +36,10 @@ function hasSeparateAxis(row) {
 
 class TimeseriesVisualization extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   getInterval = () => {
     const { visData, model } = this.props;
-    const series = _.get(visData, `${model.id}.series`, []);
-    return series.reduce((currentInterval, item) => {
-      if (item.data.length > 1) {
-        const seriesInterval = item.data[1][0] - item.data[0][0];
-        if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
-      }
-      return currentInterval;
-    }, 0);
+
+    return getInterval(visData, model);
   }
 
   xaxisFormatter = (val) => {
@@ -209,15 +199,18 @@ class TimeseriesVisualization extends Component {
       });
     }
 
+    const panelBackgroundColor = model.background_color || backgroundColor;
+    const style = { backgroundColor: panelBackgroundColor };
+
     const params = {
       dateFormat: this.props.dateFormat,
       crosshair: true,
       tickFormatter: formatter,
       legendPosition: model.legend_position || 'right',
+      backgroundColor: panelBackgroundColor,
       series,
       annotations,
       yaxes,
-      reversed: this.props.reversed,
       showGrid: Boolean(model.show_grid),
       legend: Boolean(model.show_legend),
       xAxisFormatter: this.xaxisFormatter,
@@ -225,15 +218,11 @@ class TimeseriesVisualization extends Component {
         if (this.props.onBrush) this.props.onBrush(ranges);
       }
     };
+
     if (interval) {
       params.xaxisLabel = getAxisLabelString(interval);
     }
-    const style = { };
-    const panelBackgroundColor = model.background_color || backgroundColor;
-    if (panelBackgroundColor) {
-      style.backgroundColor = panelBackgroundColor;
-      params.reversed = color(panelBackgroundColor || backgroundColor).luminosity() < 0.45;
-    }
+
     return (
       <div className="tvbVis" style={style}>
         <Timeseries {...params}/>
@@ -250,7 +239,6 @@ TimeseriesVisualization.propTypes = {
   model: PropTypes.object,
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
-  reversed: PropTypes.bool,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func

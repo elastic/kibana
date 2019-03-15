@@ -71,7 +71,7 @@ const Step: React.StatelessComponent<StepProgressStep & { idx: number }> = ({
 };
 
 export interface StepProgressStep {
-  title: string;
+  title: React.ReactNode;
   status: STATUS;
   children?: ReactNode;
 }
@@ -84,8 +84,9 @@ export const StepProgress: React.StatelessComponent<{
 }> = ({ steps }) => {
   return (
     <div className="upgStepProgress__container">
+      {/* Use the index as the key only works here because these values do not change order after mounting. */}
       {steps.map((step, idx) => (
-        <Step key={step.title} {...step} idx={idx} />
+        <Step key={idx} {...step} idx={idx} />
       ))}
     </div>
   );

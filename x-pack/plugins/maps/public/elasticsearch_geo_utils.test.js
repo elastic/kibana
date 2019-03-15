@@ -230,8 +230,8 @@ describe('geoPointToGeometry', () => {
     const lon2 = -60;
     const value = [
       {
-        "lat": lat,
-        "lon": lon
+        'lat': lat,
+        'lon': lon
       },
       `${lat2},${lon2}`
     ];
@@ -281,10 +281,10 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
     expect(filter).toEqual({
-      "geo_bounding_box": {
-        "location": {
-          "bottom_right": [-83, 35],
-          "top_left": [-89, 39]
+      'geo_bounding_box': {
+        'location': {
+          'bottom_right': [-83, 35],
+          'top_left': [-89, 39]
         }
       }
     });
@@ -293,14 +293,14 @@ describe('createExtentFilter', () => {
   it('should return elasticsearch geo_shape filter for geo_shape field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      "geo_shape": {
-        "location": {
-          "relation": "INTERSECTS",
-          "shape": {
-            "coordinates": [
+      'geo_shape': {
+        'location': {
+          'relation': 'INTERSECTS',
+          'shape': {
+            'coordinates': [
               [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
             ],
-            "type": "polygon"
+            'type': 'polygon'
           }
         }
       }
@@ -316,14 +316,14 @@ describe('createExtentFilter', () => {
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      "geo_shape": {
-        "location": {
-          "relation": "INTERSECTS",
-          "shape": {
-            "coordinates": [
+      'geo_shape': {
+        'location': {
+          'relation': 'INTERSECTS',
+          'shape': {
+            'coordinates': [
               [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
             ],
-            "type": "polygon"
+            'type': 'polygon'
           }
         }
       }
@@ -340,8 +340,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 90,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]
       ]
     });
@@ -355,8 +355,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
     });
@@ -370,8 +370,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
       ]
     });
@@ -385,8 +385,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 170,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
     });
@@ -400,8 +400,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -190,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      "type": "polygon",
-      "coordinates": [
+      'type': 'polygon',
+      'coordinates': [
         [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
       ]
     });

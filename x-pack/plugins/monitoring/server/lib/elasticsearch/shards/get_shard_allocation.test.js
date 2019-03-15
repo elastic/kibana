@@ -9,26 +9,26 @@ import { handleResponse } from './get_shard_allocation';
 describe('get_shard_allocation', () => {
 
   const exampleShardSource = {
-    cluster_uuid: "Xb_iFZeMSDialSlUwnH53w",
-    state_uuid: "Xobm9shMQGa2p52j-Vh61A",
-    type: "shards",
-    timestamp: "2018-07-05T23:59:51.259Z",
+    cluster_uuid: 'Xb_iFZeMSDialSlUwnH53w',
+    state_uuid: 'Xobm9shMQGa2p52j-Vh61A',
+    type: 'shards',
+    timestamp: '2018-07-05T23:59:51.259Z',
   };
 
   const shards = [
     {
-      node: "X7Cq5UJ9TrS6gWVLItV-0A",
-      index: "my-index-v1",
+      node: 'X7Cq5UJ9TrS6gWVLItV-0A',
+      index: 'my-index-v1',
       relocating_node: null,
-      state: "STARTED",
+      state: 'STARTED',
       shard: 0,
       primary: true,
     },
     {
-      node: "Y8Cq5UJ9TrS6gWVLItV-0A",
-      index: "my-index-v1",
+      node: 'Y8Cq5UJ9TrS6gWVLItV-0A',
+      index: 'my-index-v1',
       relocating_node: null,
-      state: "STARTED",
+      state: 'STARTED',
       shard: 0,
       primary: false,
     },
@@ -37,7 +37,7 @@ describe('get_shard_allocation', () => {
   describe('handleResponse', () => {
 
     it('deduplicates shards', () => {
-      const nextTimestamp = "2018-07-06T00:00:01.259Z";
+      const nextTimestamp = '2018-07-06T00:00:01.259Z';
       const hits = shards.map(shard => {
         return {
           _source: {

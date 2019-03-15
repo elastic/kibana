@@ -51,7 +51,7 @@ import {
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const INCLUDED_TYPES = [
+export const POSSIBLE_TYPES = [
   'index-pattern',
   'visualization',
   'dashboard',
@@ -68,18 +68,23 @@ class ObjectsTableUI extends Component {
     newIndexPatternUrl: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
     getEditUrl: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
+    uiCapabilities: PropTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
+    this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
+      return this.props.uiCapabilities.savedObjectsManagement[type].read;
+    });
 
     this.state = {
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
       savedObjects: [],
-      savedObjectCounts: INCLUDED_TYPES.reduce((typeToCountMap, type) => {
+      savedObjectCounts: this.savedObjectTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type] = 0;
         return typeToCountMap;
       }, {}),
@@ -114,7 +119,7 @@ class ObjectsTableUI extends Component {
   fetchCounts = async () => {
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = INCLUDED_TYPES.filter(
+    const filteredTypes = this.savedObjectTypes.filter(
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
@@ -143,7 +148,7 @@ class ObjectsTableUI extends Component {
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
-      INCLUDED_TYPES,
+      this.savedObjectTypes,
       queryText
     );
 
@@ -171,7 +176,7 @@ class ObjectsTableUI extends Component {
       page: page + 1,
       fields: ['title', 'id'],
       searchFields: ['title'],
-      type: INCLUDED_TYPES.filter(
+      type: this.savedObjectTypes.filter(
         type => !visibleTypes || visibleTypes.includes(type)
       ),
     };
@@ -229,6 +234,7 @@ class ObjectsTableUI extends Component {
     const selectedSavedObjects = selection.map(item => ({
       id: item.id,
       type: item.type,
+      title: item.title,
     }));
     this.setState({ selectedSavedObjects });
   };
@@ -362,6 +368,7 @@ class ObjectsTableUI extends Component {
     return await getRelationships(
       type,
       id,
+      this.savedObjectTypes,
       this.props.$http,
       this.props.basePath
     );
@@ -379,6 +386,7 @@ class ObjectsTableUI extends Component {
         services={this.props.services}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
+        savedObjectTypes={this.props.savedObjectTypes}
       />
     );
   }
@@ -397,6 +405,7 @@ class ObjectsTableUI extends Component {
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
         getEditUrl={this.props.getEditUrl}
+        canGoInApp={this.props.canGoInApp}
         goInApp={this.props.goInApp}
       />
     );
@@ -486,7 +495,14 @@ class ObjectsTableUI extends Component {
               {
                 field: 'id',
                 name: intl.formatMessage({
-                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id/Name'
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.idColumnName', defaultMessage: 'Id'
+                }),
+              },
+              {
+                field: 'title',
+                name: intl.formatMessage({
+                  id: 'kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
+                  defaultMessage: 'Title',
                 }),
               },
             ]}
@@ -584,11 +600,15 @@ class ObjectsTableUI extends Component {
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = INCLUDED_TYPES.map(type => ({
+    const filterOptions = this.savedObjectTypes.map(type => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
+
+    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
+      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
+    });
 
     return (
       <EuiPageContent
@@ -615,8 +635,10 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
+          canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
           onDelete={this.onDelete}
           getEditUrl={this.props.getEditUrl}
+          canGoInApp={this.props.canGoInApp}
           goInApp={this.props.goInApp}
           pageIndex={page}
           pageSize={perPage}

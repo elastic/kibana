@@ -98,7 +98,7 @@ export function getRangeScript(field, params) {
 
   return {
     script: {
-      inline: script,
+      source: script,
       params: knownParams,
       lang: field.lang
     }

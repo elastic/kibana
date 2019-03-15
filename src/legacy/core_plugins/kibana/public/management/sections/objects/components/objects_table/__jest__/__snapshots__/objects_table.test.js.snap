@@ -46,7 +46,11 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
         },
         Object {
           "field": "id",
-          "name": "Id/Name",
+          "name": "Id",
+        },
+        Object {
+          "field": "title",
+          "name": "Title",
         },
       ]
     }
@@ -55,10 +59,12 @@ exports[`ObjectsTable delete should show a confirm modal 1`] = `
       Array [
         Object {
           "id": "1",
+          "title": "Title 1",
           "type": "index-pattern",
         },
         Object {
           "id": "3",
+          "title": "Title 2",
           "type": "dashboard",
         },
       ]
@@ -161,6 +167,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
 <InjectIntl(RelationshipsUI)
+  canGoInApp={[Function]}
   close={[Function]}
   getEditUrl={[Function]}
   getRelationships={[Function]}
@@ -186,6 +193,8 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <InjectIntl(TableUI)
+    canDeleteSavedObjectTypes={Array []}
+    canGoInApp={[Function]}
     filterOptions={
       Array [
         Object {

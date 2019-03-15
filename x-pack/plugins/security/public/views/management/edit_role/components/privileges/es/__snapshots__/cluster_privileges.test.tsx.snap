@@ -1,18 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
+<EuiFlexGroup>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="clusterPrivs"
   >
     <EuiComboBox
@@ -82,6 +72,9 @@ exports[`it renders without crashing 1`] = `
           },
           Object {
             "label": "manage_saml",
+          },
+          Object {
+            "label": "create_snapshot",
           },
         ]
       }

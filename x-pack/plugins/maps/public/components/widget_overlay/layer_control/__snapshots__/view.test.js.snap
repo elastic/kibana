@@ -1,0 +1,102 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LayerControl is rendered 1`] = `
+<EuiPanel
+  className="mapWidgetControl mapWidgetControl-hasShadow"
+  grow={false}
+  hasShadow={false}
+  paddingSize="none"
+>
+  <EuiFlexItem
+    className="mapWidgetControl__header"
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <EuiTitle
+          size="xs"
+          textTransform="none"
+        >
+          <h2>
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          color="primary"
+          data-test-subj="addLayerButton"
+          flush="right"
+          iconSide="left"
+          onClick={[Function]}
+          size="xs"
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Add layer"
+            id="xpack.maps.layerControl.addLayerButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mapLayerControl"
+  >
+    <LayerTOC />
+  </EuiFlexItem>
+</EuiPanel>
+`;
+
+exports[`LayerControl props isReadOnly 1`] = `
+<EuiPanel
+  className="mapWidgetControl mapWidgetControl-hasShadow"
+  grow={false}
+  hasShadow={false}
+  paddingSize="none"
+>
+  <EuiFlexItem
+    className="mapWidgetControl__header"
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      responsive={false}
+    >
+      <EuiFlexItem>
+        <EuiTitle
+          size="xs"
+          textTransform="none"
+        >
+          <h2>
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    className="mapLayerControl"
+  >
+    <LayerTOC />
+  </EuiFlexItem>
+</EuiPanel>
+`;

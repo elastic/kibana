@@ -1,3 +1,6 @@
+@import '@elastic/eui/src/components/tool_tip/variables';
+@import '@elastic/eui/src/components/tool_tip/mixins';
+
 .tvbVisTimeSeries {
   position: relative;
   display: flex;
@@ -32,6 +35,7 @@
 }
 
 .tvbVisTimeSeries__container {
+  @include euiFontSizeXS;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -39,7 +43,7 @@
 }
 
 .tvbVisTimeSeries__axisLabel {
-  @include euiFontSizeXS;
+  font-weight: $euiFontWeightBold;
   color: $tvbTextColor;
   text-align: center;
   min-height: 1.2em;
@@ -67,31 +71,26 @@
 }
 
 .tvbTooltip {
-  background-color: tintOrShade($euiColorFullShade, 25%, 90%);
-  @include euiBottomShadow($color: $euiColorFullShade);
+  @include euiToolTipStyle;
   @include euiFontSizeXS;
   padding: $euiSizeS;
-  border-radius: $euiBorderRadius;
-  color: $euiColorGhost;
-  max-width: 320px;
 }
 
 .tvbTooltip__caret {
-  $temp-arrowSize: $euiSizeM;
-  width: $temp-arrowSize;
-  height: $temp-arrowSize;
-  color: tintOrShade($euiColorFullShade, 25%, 90%);
-  border-radius: 2px;
+  $tempArrowSize: $euiSizeM;
+  width: $tempArrowSize;
+  height: $tempArrowSize;
+  border-radius: $euiBorderRadius / 2;
   background-color: tintOrShade($euiColorFullShade, 25%, 90%);
   transform-origin: center;
   transform: rotateZ(45deg);
 
   .tvbTooltip__container--left & {
-    margin-right: (($temp-arrowSize/2) + 1px) * -1;
+    margin-right: (($tempArrowSize/2) + 1px) * -1;
   }
 
   .tvbTooltip__container--right & {
-    margin-left: (($temp-arrowSize/2) + 1px) * -1;
+    margin-left: (($tempArrowSize/2) + 1px) * -1;
   }
 }
 
@@ -111,6 +110,6 @@
 }
 
 .tvbTooltip__timestamp {
-  color: $euiColorLightShade;
+  color: transparentize($euiColorGhost, .3);
   white-space: nowrap;
 }

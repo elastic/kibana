@@ -91,7 +91,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           }
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.existOrFail('newDashboardLink');
+        await testSubjects.existOrFail('newItemButton');
       });
 
       it(`create new dashboard shows addNew button`, async () => {
@@ -219,7 +219,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           }
         );
         await testSubjects.existOrFail('dashboardLandingPage', 10000);
-        await testSubjects.missingOrFail('newDashboardLink');
+        await testSubjects.missingOrFail('newItemButton');
       });
 
       it(`create new dashboard redirects to the home page`, async () => {
@@ -231,7 +231,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', 20000);
       });
 
       it(`can view existing Dashboard`, async () => {
@@ -305,7 +305,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
             shouldLoginIfPrompted: false,
           }
         );
-        await testSubjects.existOrFail('homeApp', 10000);
+        await testSubjects.existOrFail('homeApp', 20000);
       });
 
       it(`edit dashboard for object which doesn't exist redirects to the home page`, async () => {

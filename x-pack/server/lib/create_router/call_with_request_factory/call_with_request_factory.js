@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
-
-const callWithRequest = once(server => {
-  const cluster = server.plugins.elasticsearch.getCluster('data');
-  return cluster.callWithRequest;
-});
-
 export const callWithRequestFactory = (server, request) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   return (...args) => {
-    return callWithRequest(server)(request, ...args);
+    return callWithRequest(request, ...args);
   };
 };

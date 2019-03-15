@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('security/discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
 
@@ -33,9 +33,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('logstash_reader', {
         elasticsearch: {
-          "indices": [{
-            "names": ["logstash-*"],
-            "privileges": ["read", "view_index_metadata"]
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
           }]
         },
         kibana: {

@@ -2,17 +2,8 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -29,7 +20,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiBadge
@@ -45,24 +35,14 @@ exports[`PingList component renders sorted list without errors 1`] = `
     hasShadow={false}
     paddingSize="l"
   >
-    <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
-    >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+    <EuiFlexGroup>
+      <EuiFlexItem>
         <EuiFormRow
           describedByIds={Array []}
           fullWidth={false}
           hasEmptyLabelSpace={false}
           label="Status"
+          labelType="label"
         >
           <EuiComboBox
             compressed={false}
@@ -101,13 +81,11 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.status",
             "name": "Status",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "timestamp",
             "name": "Timestamp",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "monitor.ip",
@@ -123,7 +101,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "field": "monitor.duration.us",
             "name": "Duration ms",
             "render": [Function],
-            "sortable": true,
           },
           Object {
             "field": "error.type",
@@ -347,7 +324,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
         }
       }
       responsive={true}
-      sorting={true}
+      sorting={false}
     />
   </EuiPanel>
 </Fragment>

@@ -39,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -57,6 +56,7 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
@@ -106,6 +106,15 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_ts_projects')
       ]
     },
 
@@ -211,8 +220,6 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
-        '--',
-        '--server.maxPayloadBytes=1648576',
       ],
     },
 
@@ -224,8 +231,6 @@ module.exports = function (grunt) {
         '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 

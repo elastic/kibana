@@ -28,7 +28,7 @@ import supertest from 'supertest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
 
 const chance = new Chance();
@@ -36,6 +36,7 @@ const chance = new Chance();
 let server: HttpServer;
 let config: HttpConfig;
 
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   config = {
     host: '127.0.0.1',
@@ -49,7 +50,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   await server.stop();
-  logger.mockClear();
+  jest.clearAllMocks();
 });
 
 test('listening after started', async () => {

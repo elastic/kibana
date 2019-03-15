@@ -33,6 +33,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
+          labelType="label"
         >
           <SpaceSelector
             intl={
@@ -163,6 +164,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           fullWidth={true}
           hasEmptyLabelSpace={false}
           label="Privilege"
+          labelType="label"
         >
           <EuiSuperSelect
             compressed={false}
@@ -463,16 +465,9 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
     </EuiFlyoutBody>
     <EuiFlyoutFooter>
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
         justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
@@ -492,7 +487,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButton

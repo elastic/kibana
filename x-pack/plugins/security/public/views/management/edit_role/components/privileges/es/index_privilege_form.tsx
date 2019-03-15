@@ -201,19 +201,21 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       <EuiFlexGroup direction="column">
         {!this.props.isReadOnlyRole && (
           <EuiFlexItem>
-            <EuiSwitch
-              data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
-              label={
-                <FormattedMessage
-                  id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
-                  defaultMessage="Grant read privileges to specific documents"
-                />
-              }
+            {
               // @ts-ignore
-              compressed={true}
-              checked={this.state.queryExpanded}
-              onChange={this.toggleDocumentQuery}
-            />
+              <EuiSwitch
+                data-test-subj={`restrictDocumentsQuery${this.props.formIndex}`}
+                label={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
+                    defaultMessage="Grant read privileges to specific documents"
+                  />
+                }
+                compressed={true}
+                checked={this.state.queryExpanded}
+                onChange={this.toggleDocumentQuery}
+              />
+            }
           </EuiFlexItem>
         )}
         {this.state.queryExpanded && (

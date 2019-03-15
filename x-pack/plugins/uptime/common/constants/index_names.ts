@@ -5,5 +5,5 @@
  */
 
 export const INDEX_NAMES = {
-  HEARTBEAT: 'heartbeat*',
+  HEARTBEAT: 'heartbeat-8*',
 };

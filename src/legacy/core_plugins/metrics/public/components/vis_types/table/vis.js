@@ -20,12 +20,15 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { fieldFormats } from 'ui/registry/field_formats';
 import tickFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const DateFormat = fieldFormats.getType('date');
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -41,17 +44,22 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
+const getPercentileLabel = (metric, item) => {
+  const { value } = _.last(metric.percentiles);
+  const label = calculateLabel(metric, item.metrics);
+  return `${label}, ${value || 0}`;
+};
+
 class TableVis extends Component {
 
   constructor(props) {
     super(props);
-    this.renderRow = this.renderRow.bind(this);
+    this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
 
-  renderRow(row) {
+  renderRow = row => {
     const { model } = this.props;
-    const rowId = row.key;
-    let rowDisplay = rowId;
+    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = (<a href={url}>{rowDisplay}</a>);
@@ -72,14 +80,14 @@ class TableVis extends Component {
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
+        <td key={`${row.key}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
           <span>{ value }</span>
           {trend}
         </td>
       );
     });
     return (
-      <tr key={rowId}>
+      <tr key={row.key}>
         <td>{rowDisplay}</td>
         {columns}
       </tr>
@@ -95,7 +103,9 @@ class TableVis extends Component {
     });
     const columns  = model.series.map(item => {
       const metric = _.last(item.metrics);
-      const label = item.label || calculateLabel(metric, item.metrics);
+      const label = metric.type === 'percentile' ?
+        getPercentileLabel(metric, item) :
+        item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -175,11 +185,6 @@ class TableVis extends Component {
     const { visData, model } = this.props;
     const header = this.renderHeader();
     let rows;
-    let reversedClass = '';
-
-    if (this.props.reversed) {
-      reversedClass = 'reversed';
-    }
 
     if (_.isArray(visData.series) && visData.series.length) {
       rows = visData.series.map(this.renderRow);
@@ -204,7 +209,7 @@ class TableVis extends Component {
       );
     }
     return(
-      <div className={`tvbVis ${reversedClass}`} data-test-subj="tableView">
+      <div className="tvbVis" data-test-subj="tableView">
         <table className="table">
           <thead>
             {header}
@@ -231,7 +236,6 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  reversed: PropTypes.bool,
   getConfig: PropTypes.func
 };
 

@@ -7,7 +7,7 @@
 import { range } from 'lodash';
 
 const generateVisibleTextString = text => {
-  return text.split("\n").join(' | ');
+  return text.split('\n').join(' | ');
 };
 
 const classificationsAndTooltipsReducer = (classifications, tooltips) => {

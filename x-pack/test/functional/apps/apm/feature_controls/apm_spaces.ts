@@ -52,7 +52,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           basePath: '/s/custom_space',
         });
 
-        await testSubjects.existOrFail('apm-main-container');
+        await testSubjects.existOrFail('apmMainContainer');
       });
     });
 

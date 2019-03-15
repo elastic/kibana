@@ -29,8 +29,8 @@ function formatHits(hits, aliases) {
       uuid: hit.uuid,
       primary: hit.pri,
       replica: hit.rep,
-      documents: hit["docs.count"],
-      size: hit["store.size"],
+      documents: hit['docs.count'],
+      size: hit['store.size'],
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
       aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
     };

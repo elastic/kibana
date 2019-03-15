@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { ConfirmDelete } from './confirm_delete';
-import { injectI18n, FormattedMessage } from "@kbn/i18n/react";
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 class UsersUI extends Component {
   constructor(props) {
@@ -54,8 +54,8 @@ class UsersUI extends Component {
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
-            id: "xpack.security.management.users.fetchingUsersErrorMessage",
-            defaultMessage: "Error fetching users: {message}"
+            id: 'xpack.security.management.users.fetchingUsersErrorMessage',
+            defaultMessage: 'Error fetching users: {message}'
           }, { message: e.data.message })
         );
       }
@@ -119,7 +119,7 @@ class UsersUI extends Component {
     const columns = [
       {
         field: 'full_name',
-        name: intl.formatMessage({ id: "xpack.security.management.users.fullNameColumnName", defaultMessage: "Full Name" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.fullNameColumnName', defaultMessage: 'Full Name' }),
         sortable: true,
         truncateText: true,
         render: fullName => {
@@ -128,7 +128,7 @@ class UsersUI extends Component {
       },
       {
         field: 'username',
-        name: intl.formatMessage({ id: "xpack.security.management.users.userNameColumnName", defaultMessage: "User Name" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.userNameColumnName', defaultMessage: 'User Name' }),
         sortable: true,
         truncateText: true,
         render: username => (
@@ -140,15 +140,18 @@ class UsersUI extends Component {
       {
         field: 'email',
         name: intl.formatMessage({
-          id: "xpack.security.management.users.emailAddressColumnName",
-          defaultMessage: "Email Address"
+          id: 'xpack.security.management.users.emailAddressColumnName',
+          defaultMessage: 'Email Address'
         }),
         sortable: true,
         truncateText: true,
+        render: email => {
+          return <div data-test-subj="userRowEmail">{email}</div>;
+        },
       },
       {
         field: 'roles',
-        name: intl.formatMessage({ id: "xpack.security.management.users.rolesColumnName", defaultMessage: "Roles" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.rolesColumnName', defaultMessage: 'Roles' }),
         render: rolenames => {
           const roleLinks = rolenames.map((rolename, index) => {
             return (
@@ -163,14 +166,14 @@ class UsersUI extends Component {
       },
       {
         field: 'metadata._reserved',
-        name: intl.formatMessage({ id: "xpack.security.management.users.reservedColumnName", defaultMessage: "Reserved" }),
+        name: intl.formatMessage({ id: 'xpack.security.management.users.reservedColumnName', defaultMessage: 'Reserved' }),
         sortable: false,
         width: '100px',
         align: 'right',
         description:
           intl.formatMessage({
-            id: "xpack.security.management.users.reservedColumnDescription",
-            defaultMessage: "Reserved users are built-in and cannot be removed. Only the password can be changed."
+            id: 'xpack.security.management.users.reservedColumnDescription',
+            defaultMessage: 'Reserved users are built-in and cannot be removed. Only the password can be changed.'
           }),
         render: reserved =>
           reserved ? (

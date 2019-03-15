@@ -303,7 +303,7 @@ export function extractDescriptionValueFromNode(node, messageId) {
 
 export function extractValuesKeysFromNode(node, messageId) {
   if (!isObjectExpression(node)) {
-    throw createFailError(`"values" value should be an object expression ("${messageId}").`);
+    throw createFailError(`"values" value should be an inline object literal ("${messageId}").`);
   }
 
   return node.properties.map(property =>

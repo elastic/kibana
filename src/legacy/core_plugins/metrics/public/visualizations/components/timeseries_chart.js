@@ -19,6 +19,8 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import classNames from 'classnames';
+import { isBackgroundInverted, isBackgroundDark } from '../../../common/set_is_reversed';
 import moment from 'moment';
 import reactcss from 'reactcss';
 import FlotChart from './flot_chart';
@@ -115,7 +117,6 @@ class TimeseriesChart extends Component {
         plot={annotation.plot}
         key={annotation.key}
         icon={annotation.icon}
-        reversed={this.props.reversed}
         color={annotation.color}
       />
     );
@@ -150,12 +151,12 @@ class TimeseriesChart extends Component {
         <div className={`tvbTooltip__container tvbTooltip__container--${right ? 'right' : 'left'}`} style={styles.tooltipContainer}>
           <span className="tvbTooltip__caret"/>
           <div className="tvbTooltip">
+            <div className="tvbTooltip__timestamp">{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
             <div className="tvbTooltip__item">
               <EuiIcon className="tvbTooltip__icon" type="dot" color={item.series.color} />
               <div className="tvbTooltip__label">{ item.series.label }</div>
               <div className="tvbTooltip__value">{ formatter(value) }</div>
             </div>
-            <div className="tvbTooltip__timestamp">{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
           </div>
         </div>
       );
@@ -170,7 +171,7 @@ class TimeseriesChart extends Component {
       onDraw: this.handleDraw,
       options: this.props.options,
       plothover: this.props.plothover,
-      reversed: this.props.reversed,
+      reversed: isBackgroundDark(this.props.backgroundColor),
       series: this.props.series,
       annotations: this.props.annotations,
       showGrid: this.props.showGrid,
@@ -181,10 +182,9 @@ class TimeseriesChart extends Component {
     };
 
     const annotations = this.state.annotations.map(this.renderAnnotations);
-    let axisLabelClass = 'tvbVisTimeSeries__axisLabel';
-    if (this.props.reversed) {
-      axisLabelClass += ' tvbVisTimeSeries__axisLabel--reversed';
-    }
+    const axisLabelClass = classNames('tvbVisTimeSeries__axisLabel', {
+      'tvbVisTimeSeries__axisLabel--reversed': isBackgroundInverted(this.props.backgroundColor),
+    });
 
     return (
       <div ref={(el) => this.container = el} className="tvbVisTimeSeries__container">
@@ -209,7 +209,7 @@ TimeseriesChart.propTypes = {
   onBrush: PropTypes.func,
   options: PropTypes.object,
   plothover: PropTypes.func,
-  reversed: PropTypes.bool,
+  backgroundColor: PropTypes.string,
   series: PropTypes.array,
   annotations: PropTypes.array,
   show: PropTypes.array,

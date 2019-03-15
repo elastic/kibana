@@ -13,12 +13,18 @@ import {
 
 import { AbstractTMSSource } from './tms_source';
 import { TileLayer } from '../tile_layer';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 
 export class XYZTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_XYZ';
-  static title = 'Tile Map Service from URL';
-  static description = 'Map tiles from a URL that includes the XYZ coordinates';
+  static title = i18n.translate('xpack.maps.source.ems_xyzTitle', {
+    defaultMessage: 'Tile Map Service from URL'
+  });
+  static description = i18n.translate('xpack.maps.source.ems_xyzDescription', {
+    defaultMessage: 'Map tiles from a URL that includes the XYZ coordinates'
+  });
   static icon = 'grid';
 
   static createDescriptor(urlTemplate) {
@@ -28,10 +34,10 @@ export class XYZTMSSource extends AbstractTMSSource {
     };
   }
 
-  static renderEditor({  onPreviewSource }) {
+  static renderEditor({  onPreviewSource, inspectorAdapters }) {
     const previewTMS = (urlTemplate) => {
       const sourceDescriptor = XYZTMSSource.createDescriptor(urlTemplate);
-      const source = new XYZTMSSource(sourceDescriptor);
+      const source = new XYZTMSSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
     return (<XYZTMSEditor previewTMS={previewTMS} />);
@@ -39,8 +45,8 @@ export class XYZTMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: XYZTMSSource.title },
-      { label: 'Url', value: this._descriptor.urlTemplate },
+      { label: getDataSourceLabel(), value: XYZTMSSource.title },
+      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
     ];
   }
 
@@ -70,12 +76,9 @@ export class XYZTMSSource extends AbstractTMSSource {
 
 class XYZTMSEditor extends  React.Component {
 
-  constructor() {
-    super();
-    this.state = {
-      tmsInput: '',
-      tmsCanPreview: false
-    };
+  state = {
+    tmsInput: '',
+    tmsCanPreview: false
   }
 
   _handleTMSInputChange(e) {
@@ -95,7 +98,7 @@ class XYZTMSEditor extends  React.Component {
     return (
       <EuiFormRow label="Url">
         <EuiFieldText
-          placeholder="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
           onChange={(e) => this._handleTMSInputChange(e)}
         />
       </EuiFormRow>

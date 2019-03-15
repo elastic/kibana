@@ -29,7 +29,7 @@
  * ```ts
  * import { Logger, PluginInitializerContext, PluginStartContext } from '../../kibana';
  *
- * export interface SomePluginContract {
+ * export interface SomePlugin {
  *   setValue: (val: string) => void;
  * }
  *
@@ -60,5 +60,6 @@
  * option TypeScript will not emit declarations for this code.
  */
 
+export { CallAPIOptions, ClusterClient } from './core/server/elasticsearch';
 export { Logger, LoggerFactory } from './core/server/logging';
 export { PluginInitializerContext, PluginName, PluginStartContext } from './core/server/plugins';

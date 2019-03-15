@@ -23,6 +23,12 @@ export const essql = () => ({
       types: ['number'],
       default: 1000,
     },
+    timezone: {
+      aliases: ['tz'],
+      types: ['string'],
+      default: 'UTC',
+      help: 'Timezone to use for date operations, valid ISO formats and UTC offsets both work',
+    },
   },
   fn: (context, args, handlers) =>
     queryEsSQL(handlers.elasticsearchClient, { ...args, filter: context.and }),

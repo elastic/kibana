@@ -19,15 +19,15 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['search'],
+          all: ['search', 'url'],
           read: ['config', 'index-pattern'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'search'],
+          read: ['config', 'index-pattern', 'search', 'url'],
         },
         ui: ['show'],
       },
@@ -45,10 +45,10 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['visualization'],
+          all: ['visualization', 'url'],
           read: ['config', 'index-pattern', 'search'],
         },
-        ui: ['show', 'save'],
+        ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {
@@ -71,7 +71,7 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['dashboard'],
+          all: ['dashboard', 'url'],
           read: [
             'config',
             'index-pattern',
