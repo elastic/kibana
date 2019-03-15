@@ -4,17 +4,28 @@ exports[`CalendarListsHeader renders header 1`] = `
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
+    component="div"
+    direction="row"
+    gutterSize="l"
     justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
   >
     <EuiFlexItem
+      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
+        component="div"
+        direction="row"
         gutterSize="m"
+        justifyContent="flexStart"
         responsive={false}
+        wrap={false}
       >
         <EuiFlexItem
+          component="div"
           grow={false}
         >
           <EuiTitle
@@ -30,7 +41,10 @@ exports[`CalendarListsHeader renders header 1`] = `
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          component="div"
+          grow={true}
+        >
           <EuiTextColor
             color="subdued"
             component="span"
@@ -51,14 +65,20 @@ exports[`CalendarListsHeader renders header 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
+      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
+        component="div"
+        direction="row"
         gutterSize="m"
+        justifyContent="flexStart"
         responsive={false}
+        wrap={false}
       >
         <EuiFlexItem
+          component="div"
           grow={false}
         >
           <EuiButtonEmpty
