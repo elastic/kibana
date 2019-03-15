@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { IndexerFactory } from '../indexer';
 import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
+import { ServerOptions } from '../server_options';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
@@ -58,6 +59,7 @@ test('Execute index job.', async () => {
     log,
     {} as EsClient,
     [(indexerFactory as any) as IndexerFactory],
+    {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -110,6 +112,7 @@ test('Execute index job and then cancel.', async () => {
     log,
     {} as EsClient,
     [(indexerFactory as any) as IndexerFactory],
+    {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce
   );
 
@@ -146,6 +149,7 @@ test('On index job enqueued.', async () => {
     log,
     esClient as EsClient,
     [],
+    {} as ServerOptions,
     {} as CancellationSerivce
   );
 
@@ -173,6 +177,7 @@ test('On index job completed.', async () => {
     log,
     esClient as EsClient,
     [],
+    {} as ServerOptions,
     {} as CancellationSerivce
   );
 

@@ -7,10 +7,12 @@
 import moment from 'moment';
 
 import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
+import { GitOperations } from '../git_operations';
 import { IndexerFactory, IndexProgress } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
+import { ServerOptions } from '../server_options';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
 import { AbstractWorker } from './abstract_worker';
 import { CancellationSerivce } from './cancellation_service';
@@ -25,6 +27,7 @@ export class IndexWorker extends AbstractWorker {
     protected readonly log: Logger,
     protected readonly client: EsClient,
     protected readonly indexerFactories: IndexerFactory[],
+    protected readonly options: ServerOptions,
     private readonly cancellationService: CancellationSerivce
   ) {
     super(queue, log);
@@ -87,9 +90,23 @@ export class IndexWorker extends AbstractWorker {
     }
   }
 
-  protected getTimeoutMs(_: any) {
-    // TODO(mengwei): query object/file number of a repo and come up with a number in here.
-    return moment.duration(5, 'hour').asMilliseconds();
+  protected async getTimeoutMs(payload: any) {
+    try {
+      const gitOperator = new GitOperations(this.options.repoPath);
+      const totalCount = await gitOperator.countRepoFiles(payload.uri, 'head');
+      let timeout = moment.duration(1, 'hour').asMilliseconds();
+      if (totalCount > 0) {
+        // timeout = ln(file_count) in hour
+        // e.g. 10 files -> 2.3 hours, 100 files -> 4.6 hours, 1000 -> 6.9 hours, 10000 -> 9.2 hours
+        timeout = moment.duration(Math.log(totalCount), 'hour').asMilliseconds();
+      }
+      this.log.info(`Set index job timeout to be ${timeout} ms.`);
+      return timeout;
+    } catch (error) {
+      this.log.error(`Get repo file total count error.`);
+      this.log.error(error);
+      throw error;
+    }
   }
 
   private getProgressReporter(
