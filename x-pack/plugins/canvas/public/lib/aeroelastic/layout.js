@@ -65,7 +65,7 @@ import {
   updaterFun,
 } from './layout_functions';
 
-import { primaryUpdate, scene } from './dag_start';
+import { primaryUpdate, scene } from './common';
 
 export const shapes = select(getShapes)(scene);
 

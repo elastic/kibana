@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { scene } from './dag_start';
+import { scene } from './common';
 import { select } from './select';
 
 // Only needed to shuffle some modifier keys for Apple keyboards as per vector editing software conventions,
