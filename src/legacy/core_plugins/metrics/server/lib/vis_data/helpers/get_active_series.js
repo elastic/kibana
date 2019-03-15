@@ -17,9 +17,9 @@
  * under the License.
  */
 export const getActiveSeries = (panel) => {
-  // The Gauge panel has a limit of 1 series per panel.
-  const isGaugePanel = panel.type === 'gauge';
+  const shouldNotApplyFilter = ['gauge', 'markdown'].includes(panel.type);
 
-  return (panel.series || []).filter(series => !series.hidden || isGaugePanel);
+  return (panel.series || [])
+    .filter(series => !series.hidden || shouldNotApplyFilter);
 };
 
