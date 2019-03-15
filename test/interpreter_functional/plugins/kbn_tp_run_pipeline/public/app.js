@@ -28,7 +28,7 @@ import { DataAdapter } from 'ui/inspector/adapters/data';
 import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
 
 // todo: registries must be taken out of package
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
 // or the timezone setting is correctly applied.
