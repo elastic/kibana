@@ -241,7 +241,7 @@ app.directive('dashboardApp', function ($injector) {
           // a reload, since no state changes will cause it.
           dashboardStateManager.requestReload();
         } else {
-          $scope.model.query = migrateLegacyQuery(query);
+          $scope.model.query = query;
           dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
         }
         $scope.refresh();
@@ -281,7 +281,8 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (query) => {
+      $scope.$watch('model.query', (newQuery) => {
+        const query = migrateLegacyQuery(newQuery);
         $scope.updateQueryAndFetch({ query });
       });
 
