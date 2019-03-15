@@ -88,6 +88,7 @@ $visLegendLineHeight: $euiSize;
 
   > * {
     max-width: 100%; // Needed for truncation (dom element has no class)
+    width: 100%;
   }
 
   &.disabled {
