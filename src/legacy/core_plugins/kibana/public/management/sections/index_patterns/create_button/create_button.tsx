@@ -33,6 +33,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { injectUICapabilities, UICapabilities } from 'ui/capabilities/react';
 
 interface State {
   isPopoverOpen: boolean;
@@ -46,18 +47,23 @@ interface Props {
     isBeta?: boolean;
     onClick: () => void;
   }>;
+  uiCapabilities: UICapabilities;
 }
 
-export class CreateButton extends Component<Props, State> {
+class CreateButtonComponent extends Component<Props, State> {
   public state = {
     isPopoverOpen: false,
   };
 
   public render() {
-    const { options, children } = this.props;
+    const { options, children, uiCapabilities } = this.props;
     const { isPopoverOpen } = this.state;
 
     if (!options || !options.length) {
+      return null;
+    }
+
+    if (!uiCapabilities.indexPatterns.createNew) {
       return null;
     }
 
@@ -146,3 +152,5 @@ export class CreateButton extends Component<Props, State> {
     );
   };
 }
+
+export const CreateButton = injectUICapabilities(CreateButtonComponent);
