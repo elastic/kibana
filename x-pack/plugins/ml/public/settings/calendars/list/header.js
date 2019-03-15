@@ -66,7 +66,7 @@ export function CalendarsListHeader({ totalCount, refreshCalendars }) {
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                onClick={() => refreshCalendars()}
+                onClick={refreshCalendars}
               >
                 <FormattedMessage
                   id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
