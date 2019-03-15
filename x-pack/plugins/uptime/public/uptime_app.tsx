@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import ApolloClient from 'apollo-client';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
@@ -47,6 +48,10 @@ export interface UptimeCommonProps {
   registerWatch: (client: () => void) => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setHeadingText: (text: string) => void;
+}
+
+export interface QueryCommonProps {
+  client: ApolloClient<any>;
 }
 
 export interface UptimeCommonState {
@@ -172,8 +177,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           { dateRangeStart: start, dateRangeEnd: end },
                           this.persistState
                         );
-                        this.state.forceRefreshClients.forEach(client => client());
+                        this.refreshApp();
                       }}
+                      // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
+                      onRefresh={() => this.refreshApp()}
                       onRefreshChange={({
                         isPaused,
                         refreshInterval,
@@ -243,6 +250,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   private addForceRefreshListener = (newClient: () => void): void => {
     this.setState({ forceRefreshClients: [...this.state.forceRefreshClients, newClient] });
+  };
+
+  private refreshApp = () => {
+    this.state.forceRefreshClients.forEach(handler => handler());
   };
 }
 
