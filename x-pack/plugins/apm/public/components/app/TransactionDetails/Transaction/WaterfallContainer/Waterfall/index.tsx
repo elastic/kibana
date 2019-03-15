@@ -10,9 +10,9 @@ import React, { Component } from 'react';
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import {
+  APMQueryParams,
   fromQuery,
   history,
-  QueryParams,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from '../../../../../../store/urlParams';
@@ -150,7 +150,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: QueryParams) {
+  private setQueryParams(params: APMQueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

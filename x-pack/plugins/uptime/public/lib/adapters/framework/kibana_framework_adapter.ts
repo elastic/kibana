@@ -45,7 +45,7 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
     const route = {
       controllerAs: 'uptime',
       // @ts-ignore angular
-      controller: ($scope, $route, $http, config) => {
+      controller: ($scope, $route, config, $location, $window) => {
         const graphQLClient = createGraphQLClient(this.uriPath, this.xsrfHeader);
         $scope.$$postDigest(() => {
           const elem = document.getElementById('uptimeReactRoot');
@@ -57,6 +57,23 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           const routerBasename = basePath.endsWith('/')
             ? `${basePath}/${PLUGIN.ROUTER_BASE_NAME}`
             : basePath + PLUGIN.ROUTER_BASE_NAME;
+
+          /**
+           * TODO: this is a redirect hack to deal with a problem that largely
+           * in testing but rarely occurs in the real world, where the specified
+           * URL contains `.../app/uptime{SOME_URL_PARAM_TEXT}#` instead of
+           * a path like `.../app/uptime#{SOME_URL_PARAM_TEXT}`.
+           *
+           * This redirect will almost never be triggered in practice, but it makes more
+           * sense to include it here rather than altering the existing testing
+           * infrastructure underlying the rest of Kibana.
+           *
+           * We welcome a more permanent solution that will result in the deletion of the
+           * block below.
+           */
+          if ($location.absUrl().indexOf(PLUGIN.ROUTER_BASE_NAME) === -1) {
+            $window.location.replace(routerBasename);
+          }
           const persistedState = this.initializePersistedState();
           const darkMode = config.get('theme:darkMode', false) || false;
           const {

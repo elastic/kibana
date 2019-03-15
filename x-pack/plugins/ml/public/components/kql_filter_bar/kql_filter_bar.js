@@ -64,7 +64,6 @@ export class KqlFilterBar extends Component {
 
     try {
       const ast = fromKueryExpression(inputValue);
-      const isAndOperator = (ast.function === 'and');
       const query = convertKueryToEsQuery(inputValue, indexPattern);
 
       if (!query) {
@@ -92,8 +91,7 @@ export class KqlFilterBar extends Component {
       onSubmit({
         influencersFilterQuery: query,
         filteredFields,
-        queryString: inputValue,
-        isAndOperator
+        queryString: inputValue
       });
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console

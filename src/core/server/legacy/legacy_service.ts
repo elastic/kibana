@@ -20,8 +20,9 @@
 import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
-import { CoreContext, CoreService } from '../../types';
+import { CoreService } from '../../types';
 import { Config } from '../config';
+import { CoreContext } from '../core_context';
 import { DevConfig } from '../dev';
 import { ElasticsearchServiceStart } from '../elasticsearch';
 import { BasePathProxyServer, HttpConfig, HttpServiceStart } from '../http';

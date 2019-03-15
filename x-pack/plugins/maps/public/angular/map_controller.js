@@ -14,6 +14,7 @@ import { timefilter } from 'ui/timefilter';
 import { Provider } from 'react-redux';
 import { createMapStore } from '../store/store';
 import { GisMap } from '../components/gis_map';
+import { addHelpMenuToAppChrome } from '../help_menu_util';
 import {
   setSelectedLayer,
   setRefreshConfig,
@@ -40,6 +41,7 @@ import { getInitialLayers } from './get_initial_layers';
 import { getInitialQuery } from './get_initial_query';
 import { getInitialTimeFilters } from './get_initial_time_filters';
 import { getInitialRefreshConfig } from './get_initial_refresh_config';
+import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 const REACT_ANCHOR_DOM_ELEMENT_ID = 'react-maps-root';
 
@@ -208,6 +210,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     { text: $scope.map.title }
   ]);
 
+  addHelpMenuToAppChrome(chrome);
+
   async function doSave(saveOptions) {
     await store.dispatch(clearTransientLayerStateAndCloseFlyout());
     savedMap.syncWithStore(store.getState());
@@ -307,7 +311,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
           onClose={() => {}}
           title={savedMap.title}
           showCopyOnSave={savedMap.id ? true : false}
-          objectType={'map'}
+          objectType={MAP_SAVED_OBJECT_TYPE}
         />);
       showSaveModal(saveModal);
     }
