@@ -13,11 +13,13 @@ import { WMSSource } from './wms_source';
 import { KibanaTilemapSource } from './kibana_tilemap_source';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import { ESSearchSource } from './es_search_source';
+import { ESTracksSource } from './es_tracks_source';
 
 
 export const ALL_SOURCES = [
   ESSearchSource,
   ESGeoGridSource,
+  ESTracksSource,
   EMSFileSource,
   EMSTMSSource,
   KibanaRegionmapSource,
