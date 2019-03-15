@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { interpreterProvider } from '../common/interpreter/interpret';
-import { serializeProvider } from '../common/lib/serialize';
+import { interpreterProvider } from '../../common/interpreter/interpret';
+import { serializeProvider } from '../../common/serialize';
 import { createHandlers } from './create_handlers';
 import { batchedFetch } from './batched_fetch';
 import { FUNCTIONS_URL } from './consts';

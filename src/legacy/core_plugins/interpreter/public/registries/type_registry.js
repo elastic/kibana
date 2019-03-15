@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { Registry } from '../common';
-import { RenderFunction } from './render_function';
+import { TypesRegistry } from '../../common/types_registry';
 
-class RenderFunctionsRegistry extends Registry {
-  wrapper(obj) {
-    return new RenderFunction(obj);
-  }
-}
-
-export { RenderFunctionsRegistry };
+export const typesRegistry = new TypesRegistry();

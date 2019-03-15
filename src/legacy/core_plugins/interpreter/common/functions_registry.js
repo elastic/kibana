@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import { Registry } from './registry';
-import { Type } from './type';
+import { Fn, Registry } from '@kbn/interpreter/common';
 
-export class TypesRegistry extends Registry {
+export class FunctionsRegistry extends Registry {
   wrapper(obj) {
-    return new Type(obj);
+    return new Fn(obj);
   }
 }

@@ -17,11 +17,21 @@
  * under the License.
  */
 
-import { Registry } from './registry';
-import { Fn } from './fn';
+import { get, identity } from 'lodash';
+import { getType } from '@kbn/interpreter/common';
 
-export class FunctionsRegistry extends Registry {
-  wrapper(obj) {
-    return new Fn(obj);
+export function serializeProvider(types) {
+  return {
+    serialize: provider('serialize'),
+    deserialize: provider('deserialize'),
+  };
+
+  function provider(key) {
+    return context => {
+      const type = getType(context);
+      const typeDef = types[type];
+      const fn = get(typeDef, key) || identity;
+      return fn(context);
+    };
   }
 }

@@ -19,7 +19,7 @@
 
 // All types must be universal and be castable on the client or on the server
 import { get } from 'lodash';
-import { getType } from './get_type';
+import { getType } from '@kbn/interpreter/common';
 
 // TODO: Currently all casting functions must be syncronous.
 

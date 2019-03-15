@@ -17,14 +17,26 @@
  * under the License.
  */
 
-import { typeSpecs as types } from '../plugin/types';
-import { register, TypesRegistry, FunctionsRegistry } from '../common';
+interface ConflictError {
+  type: 'conflict';
+}
 
-export const registries = {
-  types: new TypesRegistry(),
-  serverFunctions: new FunctionsRegistry(),
-};
+interface UnknownError {
+  type: 'unknown';
+  message: string;
+  statusCode: number;
+}
 
-register(registries, {
-  types,
-});
+interface MissingReferencesError {
+  type: 'missing_references';
+  references: Array<{
+    type: string;
+    id: string;
+  }>;
+}
+
+export interface ImportError {
+  id: string;
+  type: string;
+  error: ConflictError | MissingReferencesError | UnknownError;
+}
