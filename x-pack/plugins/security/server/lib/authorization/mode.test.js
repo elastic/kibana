@@ -8,18 +8,10 @@ import { authorizationModeFactory } from './mode';
 
 class MockXPackInfoFeature {
   constructor(allowRbac) {
-    this.allowRbac = allowRbac;
+    this.getLicenseCheckResults.mockReturnValue({ allowRbac });
   }
 
-  mockSetAllowRbac(allowRbac) {
-    this.allowRbac = allowRbac;
-  }
-
-  getLicenseCheckResults() {
-    return {
-      allowRbac: this.allowRbac
-    };
-  }
+  getLicenseCheckResults = jest.fn();
 }
 
 describe(`#useRbacForRequest`, () => {
@@ -56,7 +48,7 @@ describe(`#useRbacForRequest`, () => {
     const request = {};
 
     expect(mode.useRbacForRequest(request)).toBe(false);
-    mockXpackInfoFeature.mockSetAllowRbac(true);
+    mockXpackInfoFeature.getLicenseCheckResults.mockReturnValue({ allowRbac: true });
     expect(mode.useRbacForRequest(request)).toBe(false);
   });
 
@@ -75,7 +67,7 @@ describe(`#useRbacForRequest`, () => {
     const request = {};
 
     expect(mode.useRbacForRequest(request)).toBe(true);
-    mockXpackInfoFeature.mockSetAllowRbac(false);
+    mockXpackInfoFeature.getLicenseCheckResults.mockReturnValue({ allowRbac: false });
     expect(mode.useRbacForRequest(request)).toBe(true);
   });
 });
