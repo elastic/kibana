@@ -6,16 +6,16 @@
 
 import React, { Fragment } from 'react';
 
-import { FSRepository } from '../../../../../../../common/repository_types';
+import { HDFSRepository } from '../../../../../../../common/repository_types';
 import { AppStateInterface, useStateValue } from '../../../../../services/app_context';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
-  repository: FSRepository;
+  repository: HDFSRepository;
 }
 
-export const FSDetails = ({ repository }: Props) => {
+export const HDFSDetails = ({ repository }: Props) => {
   const [
     {
       core: {
@@ -23,38 +23,47 @@ export const FSDetails = ({ repository }: Props) => {
       },
     },
   ] = useStateValue() as [AppStateInterface];
+  const { settings } = repository;
   const {
-    settings: {
-      location,
-      compress,
-      chunk_size,
-      max_restore_bytes_per_sec,
-      max_snapshot_bytes_per_sec,
-      readonly,
-    },
-  } = repository;
+    uri,
+    path,
+    load_defaults,
+    compress,
+    chunk_size,
+    'security.principal': securityPrincipal,
+    ...rest
+  } = settings;
 
   const listItems = [
     {
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.locationLabel"
-          defaultMessage="Location"
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.uriLabel"
+          defaultMessage="URI"
         />
       ),
-      description: location,
+      description: uri,
+    },
+    {
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.pathLabel"
+          defaultMessage="Path"
+        />
+      ),
+      description: path,
     },
   ];
 
-  if (readonly !== undefined) {
+  if (load_defaults !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.readonlyLabel"
-          defaultMessage="Readonly"
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.loadDefaultsLabel"
+          defaultMessage="Load defaults"
         />
       ),
-      description: String(readonly),
+      description: String(load_defaults),
     });
   }
 
@@ -62,7 +71,7 @@ export const FSDetails = ({ repository }: Props) => {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.compressLabel"
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.compressLabel"
           defaultMessage="Compress"
         />
       ),
@@ -74,7 +83,7 @@ export const FSDetails = ({ repository }: Props) => {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.chunkSizeLabel"
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.chunkSizeLabel"
           defaultMessage="Chunk size"
         />
       ),
@@ -82,29 +91,24 @@ export const FSDetails = ({ repository }: Props) => {
     });
   }
 
-  if (max_restore_bytes_per_sec !== undefined) {
+  if (securityPrincipal !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxRestoreBytesLabel"
-          defaultMessage="Max restore bytes per second"
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.securityPrincipalLabel"
+          defaultMessage="Security principal"
         />
       ),
-      description: max_restore_bytes_per_sec,
+      description: securityPrincipal,
     });
   }
 
-  if (max_snapshot_bytes_per_sec !== undefined) {
+  Object.keys(rest).forEach(key => {
     listItems.push({
-      title: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxSnapshotBytesLabel"
-          defaultMessage="Max snapshot bytes per second"
-        />
-      ),
-      description: max_snapshot_bytes_per_sec,
+      title: <Fragment>{key}</Fragment>,
+      description: String(settings[key]),
     });
-  }
+  });
 
   return (
     <Fragment>

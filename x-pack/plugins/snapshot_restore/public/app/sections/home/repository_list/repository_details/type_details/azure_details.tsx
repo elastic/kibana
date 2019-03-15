@@ -6,16 +6,16 @@
 
 import React, { Fragment } from 'react';
 
-import { FSRepository } from '../../../../../../../common/repository_types';
+import { AzureRepository } from '../../../../../../../common/repository_types';
 import { AppStateInterface, useStateValue } from '../../../../../services/app_context';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface Props {
-  repository: FSRepository;
+  repository: AzureRepository;
 }
 
-export const FSDetails = ({ repository }: Props) => {
+export const AzureDetails = ({ repository }: Props) => {
   const [
     {
       core: {
@@ -24,37 +24,44 @@ export const FSDetails = ({ repository }: Props) => {
     },
   ] = useStateValue() as [AppStateInterface];
   const {
-    settings: {
-      location,
-      compress,
-      chunk_size,
-      max_restore_bytes_per_sec,
-      max_snapshot_bytes_per_sec,
-      readonly,
-    },
+    settings: { client, container, base_path, compress, chunk_size, readonly, location_mode },
   } = repository;
 
-  const listItems = [
-    {
-      title: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.locationLabel"
-          defaultMessage="Location"
-        />
-      ),
-      description: location,
-    },
-  ];
+  const listItems = [];
 
-  if (readonly !== undefined) {
+  if (client !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.readonlyLabel"
-          defaultMessage="Readonly"
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.clientLabel"
+          defaultMessage="Client"
         />
       ),
-      description: String(readonly),
+      description: client,
+    });
+  }
+
+  if (container !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.containerLabel"
+          defaultMessage="Container"
+        />
+      ),
+      description: container,
+    });
+  }
+
+  if (base_path !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.basePathLabel"
+          defaultMessage="Base path"
+        />
+      ),
+      description: base_path,
     });
   }
 
@@ -62,7 +69,7 @@ export const FSDetails = ({ repository }: Props) => {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.compressLabel"
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.compressLabel"
           defaultMessage="Compress"
         />
       ),
@@ -74,7 +81,7 @@ export const FSDetails = ({ repository }: Props) => {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.chunkSizeLabel"
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.chunkSizeLabel"
           defaultMessage="Chunk size"
         />
       ),
@@ -82,28 +89,32 @@ export const FSDetails = ({ repository }: Props) => {
     });
   }
 
-  if (max_restore_bytes_per_sec !== undefined) {
+  if (readonly !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxRestoreBytesLabel"
-          defaultMessage="Max restore bytes per second"
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.readonlyLabel"
+          defaultMessage="Readonly"
         />
       ),
-      description: max_restore_bytes_per_sec,
+      description: String(readonly),
     });
   }
 
-  if (max_snapshot_bytes_per_sec !== undefined) {
+  if (location_mode !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxSnapshotBytesLabel"
-          defaultMessage="Max snapshot bytes per second"
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.locationModeLabel"
+          defaultMessage="Location mode"
         />
       ),
-      description: max_snapshot_bytes_per_sec,
+      description: location_mode,
     });
+  }
+
+  if (!listItems.length) {
+    return null;
   }
 
   return (
