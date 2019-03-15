@@ -6,15 +6,20 @@
 import React, { Fragment } from 'react';
 
 import { useFetch } from '../../../../services/api';
-import { AppStateInterface, useStateValue } from '../../../../services/app_context';
+import { AppStateInterface, useAppState } from '../../../../services/app_context';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 
 import { Repository, SourceRepositoryType } from '../../../../../../common/repository_types';
-
-import { RepositoryTypeName, SectionError, SectionLoading } from '../../../../components';
+import {
+  RepositoryDeleteProvider,
+  RepositoryTypeName,
+  SectionError,
+  SectionLoading,
+} from '../../../../components';
 import { TypeDetails } from './type_details';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,12 +44,22 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
         documentation: { esDocBasePath, esPluginDocBasePath },
       },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
   const { FormattedMessage } = i18n;
   const { error, loading, data: repository } = useFetch({
     path: `repositories/${repositoryName}`,
     method: 'get',
   });
+
+  const renderBody = () => {
+    if (loading) {
+      return renderLoading();
+    }
+    if (error) {
+      return renderError();
+    }
+    return renderRepository();
+  };
 
   const renderLoading = () => {
     return (
@@ -126,15 +141,64 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
     );
   };
 
-  let content;
+  const renderFooter = () => {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            iconType="cross"
+            flush="left"
+            onClick={onClose}
+            data-test-subj="srRepositoryDetailsFlyoutCloseButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.closeButtonLabel"
+              defaultMessage="Close"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        {repository ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <RepositoryDeleteProvider>
+                  {(deleteRepository: (names: Array<Repository['name']>) => void) => {
+                    return (
+                      <EuiButtonEmpty
+                        color="danger"
+                        data-test-subj="srRepositoryDetailsDeleteActionButton"
+                        onClick={() => deleteRepository([repositoryName])}
+                      >
+                        <FormattedMessage
+                          id="xpack.snapshotRestore.repositoryDetails.removeButtonLabel"
+                          defaultMessage="Remove"
+                        />
+                      </EuiButtonEmpty>
+                    );
+                  }}
+                </RepositoryDeleteProvider>
+              </EuiFlexItem>
 
-  if (loading) {
-    content = renderLoading();
-  } else if (error) {
-    content = renderError();
-  } else {
-    content = renderRepository();
-  }
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => {
+                    /* placeholder */
+                  }}
+                  fill
+                  color="primary"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryDetails.editButtonLabel"
+                    defaultMessage="Edit"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+    );
+  };
 
   return (
     <EuiFlyout
@@ -152,25 +216,9 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody data-test-subj="srRepositoryDetailsContent">{content}</EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="srRepositoryDetailsContent">{renderBody()}</EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              flush="left"
-              onClick={onClose}
-              data-test-subj="srRepositoryDetailsFlyoutCloseButton"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryDetails.closeButtonLabel"
-                defaultMessage="Close"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      <EuiFlyoutFooter>{renderFooter()}</EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

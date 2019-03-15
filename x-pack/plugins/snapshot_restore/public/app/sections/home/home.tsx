@@ -10,7 +10,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
-import { AppStateInterface, useStateValue } from '../../services/app_context';
+import { AppStateInterface, useAppState } from '../../services/app_context';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -34,7 +34,7 @@ export const SnapshotRestoreHome = ({
       core: { i18n, chrome },
       plugins: { management },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
   const { FormattedMessage } = i18n;
 
   const tabs = [

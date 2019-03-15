@@ -11,7 +11,7 @@ import {
   SourceRepositoryType,
 } from '../../../../../../common/repository_types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
-import { AppStateInterface, useStateValue } from '../../../../services/app_context';
+import { AppStateInterface, useAppState } from '../../../../services/app_context';
 
 interface Props {
   repositories: Repository[];
@@ -24,7 +24,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
     {
       core: { i18n },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
   const { FormattedMessage } = i18n;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 

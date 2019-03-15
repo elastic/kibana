@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react';
 import { API_BASE_PATH } from '../../../common/constants';
-import { AppStateInterface, useStateValue } from './app_context';
+import { AppStateInterface, useAppState } from './app_context';
 
 export const useFetch = ({
   path,
@@ -22,7 +22,7 @@ export const useFetch = ({
     {
       core: { http, chrome },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
 
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);

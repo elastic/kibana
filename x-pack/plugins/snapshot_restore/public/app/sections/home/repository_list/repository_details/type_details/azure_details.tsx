@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { AzureRepository } from '../../../../../../../common/repository_types';
-import { AppStateInterface, useStateValue } from '../../../../../services/app_context';
+import { AppStateInterface, useAppState } from '../../../../../services/app_context';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -22,7 +22,7 @@ export const AzureDetails = ({ repository }: Props) => {
         i18n: { FormattedMessage },
       },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
   const {
     settings: { client, container, base_path, compress, chunk_size, readonly, location_mode },
   } = repository;

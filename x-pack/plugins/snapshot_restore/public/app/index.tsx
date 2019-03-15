@@ -27,6 +27,7 @@ export const renderReact = async (
     plugins,
   };
 
+  // Placeholder reducer in case we need it for any app state data
   const appStateReducer = (state: any, action: any) => {
     switch (action.type) {
       default:

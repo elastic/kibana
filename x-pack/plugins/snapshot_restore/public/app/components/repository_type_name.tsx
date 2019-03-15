@@ -15,7 +15,7 @@ import {
   S3RepositoryType,
   SourceRepositoryType,
 } from '../../../common/repository_types';
-import { AppStateInterface, useStateValue } from '../services/app_context';
+import { AppStateInterface, useAppState } from '../services/app_context';
 
 interface Props {
   type: RepositoryType;
@@ -29,7 +29,7 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
         i18n: { FormattedMessage },
       },
     },
-  ] = useStateValue() as [AppStateInterface];
+  ] = useAppState() as [AppStateInterface];
 
   const getTypeName = (repositoryType: RepositoryType): JSX.Element => {
     switch (repositoryType) {

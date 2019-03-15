@@ -24,4 +24,4 @@ export const StateProvider = ({
   children: any;
 }) => <AppState.Provider value={useReducer(reducer, initialState)}>{children}</AppState.Provider>;
 
-export const useStateValue = () => useContext(AppState);
+export const useAppState = () => useContext(AppState);
