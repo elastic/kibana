@@ -73,8 +73,9 @@ export function esNodeRoute(server) {
         const shardStats = await getShardStats(req, esIndexPattern, cluster, { includeIndices: true, includeNodes: true });
         const nodeSummary = await getNodeSummary(req, esIndexPattern, clusterState, shardStats, { clusterUuid, nodeUuid, start, end });
         const metrics = await getMetrics(req, esIndexPattern, metricSet, [{ term: { 'source_node.uuid': nodeUuid } }]);
-        const logs = await getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end });
 
+
+        let logs;
         let shardAllocation;
         if (!isAdvanced) {
           // TODO: Why so many fields needed for a single component (shard legend)?
@@ -93,6 +94,8 @@ export function esNodeRoute(server) {
             nodes: shardStats.nodes, // for identifying nodes that shard relocates to
             stateUuid, // for debugging/troubleshooting
           };
+
+          logs = await getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end });
         }
 
         return {

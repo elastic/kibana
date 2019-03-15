@@ -59,7 +59,8 @@
         }
       },
       "status": "green"
-    }
+    },
+    "logs": []
   },
   "logstash": {
     "node_count": 1,
