@@ -265,3 +265,7 @@
 .codeIcon__language {
   fill: $euiColorDarkestShade;
 }
+
+.code-no-min-width {
+  min-width: unset !important;
+}

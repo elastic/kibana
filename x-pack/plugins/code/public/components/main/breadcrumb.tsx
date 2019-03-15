@@ -17,7 +17,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
     const { resource, org, repo, revision, path } = this.props.routeParams;
     const repoUri = `${resource}/${org}/${repo}`;
 
-    const breadcrumbs: Array<{ text: string; href: string }> = [];
+    const breadcrumbs: Array<{ text: string; href: string; className?: string }> = [];
     const pathSegments = path ? path.split('/') : [];
 
     pathSegments.forEach((p, index) => {
@@ -26,6 +26,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
       breadcrumbs.push({
         text: p,
         href,
+        className: 'code-no-min-width',
       });
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;
