@@ -69,7 +69,15 @@ export class JavaLauncher implements ILanguageServerLauncher {
     proxy.listen();
     return new Promise<RequestExpander>(resolve => {
       proxy.onConnected(() => {
-        resolve(new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options));
+        resolve(
+          new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
+            settings: {
+              'java.import.gradle.enabled': this.options.codeSecurity.enableGradleImport,
+              'java.import.maven.enabled': this.options.codeSecurity.enableMavenImport,
+              'java.autobuild.enabled': false,
+            },
+          })
+        );
       });
     });
   }

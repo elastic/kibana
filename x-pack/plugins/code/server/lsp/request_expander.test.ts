@@ -16,10 +16,6 @@ import { RequestExpander } from './request_expander';
 // @ts-ignore
 const options: ServerOptions = {
   workspacePath: '/tmp/test/workspace',
-  codeSecurity: {
-    enableMavenImport: true,
-    enableGradleImport: true,
-  },
 };
 
 beforeEach(async () => {

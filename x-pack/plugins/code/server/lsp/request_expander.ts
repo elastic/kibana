@@ -54,7 +54,8 @@ export class RequestExpander implements ILanguageServerHandler {
     proxy: LanguageServerProxy,
     readonly builtinWorkspace: boolean,
     readonly maxWorkspace: number,
-    readonly serverOptions: ServerOptions
+    readonly serverOptions: ServerOptions,
+    readonly initialOptions?: object
   ) {
     this.proxy = proxy;
     this.handle = this.handle.bind(this);
@@ -152,13 +153,7 @@ export class RequestExpander implements ILanguageServerHandler {
           uri: `file://${workspacePath}`,
         },
       ],
-      {
-        settings: {
-          'java.import.gradle.enabled': this.serverOptions.codeSecurity.enableGradleImport,
-          'java.import.maven.enabled': this.serverOptions.codeSecurity.enableMavenImport,
-          'java.autobuild.enabled': false,
-        },
-      }
+      this.initialOptions
     );
   }
 
