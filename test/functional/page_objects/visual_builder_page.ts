@@ -83,7 +83,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
     }
 
-    public async getMarkdownText() {
+    public async getMarkdownText(): Promise<string> {
       const el = await find.byCssSelector('.tvbEditorVisualization');
       const text = await el.getVisibleText();
       return text;
@@ -156,12 +156,29 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await element.click();
     }
 
-    public async setMarkdownLabel(variableName: string) {
-      await find.setValue(`[placeholder="Label"]`, variableName);
-    }
-
-    public async setMarkdownVarName(variableName: string) {
-      await find.setValue(`[placeholder="Variable name"]`, variableName);
+    /**
+     * setting label for markdown visualization
+     *
+     * @param {string} variableName
+     * @memberof VisualBuilderPage
+     */
+    public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
+      const SELECTOR = type === 'label' ? '[placeholder="Label"]' : '[placeholder="Variable name"]';
+      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
+      if (variableName) {
+        await find.setValue(SELECTOR, variableName);
+      } else {
+        const input = await find.byCssSelector(SELECTOR);
+        if (process.platform === 'darwin') {
+          await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
+        } else {
+          await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
+        }
+        await input.pressKeys(browser.keys.NULL); // Release modifier keys
+        await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      }
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async clickSeriesOption(nth = 0) {
