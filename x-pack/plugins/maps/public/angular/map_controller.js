@@ -28,7 +28,8 @@ import {
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE
+  FLYOUT_STATE,
+  setReadOnly,
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -122,6 +123,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    store.dispatch(setReadOnly(!uiCapabilities.maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
