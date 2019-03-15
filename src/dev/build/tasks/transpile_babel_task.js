@@ -29,8 +29,7 @@ export const TranspileBabelTask = {
     await createPromiseFromStreams([
       vfs.src(
         [
-          '**/*.{js,ts,tsx}',
-          '!**/*.d.ts',
+          '**/*.js',
           '!packages/**',
           '!**/public/**',
           '!**/node_modules/**',
