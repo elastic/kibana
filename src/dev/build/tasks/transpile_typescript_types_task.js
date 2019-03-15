@@ -17,48 +17,20 @@
  * under the License.
  */
 
-import { exec, write } from '../lib';
+import { exec } from '../lib';
 import { Project } from '../../typescript';
 
-export const TranspileTypescriptTask = {
-  description: 'Transpiling sources with typescript compiler',
+export const TranspileTypescriptTypesTask = {
+  description: 'Transpiling types with typescript compiler',
 
   async run(config, log, build) {
     // the types project is built inside the repo so x-pack can use it for it's in-repo build.
     const typesProjectRepo = new Project(config.resolveFromRepo('tsconfig.types.json'));
     const typesProjectBuild = new Project(build.resolvePath('tsconfig.types.json'));
 
-    // these projects are built in the build folder
-    const defaultProject = new Project(build.resolvePath('tsconfig.json'));
-    const browserProject = new Project(build.resolvePath('tsconfig.browser.json'));
-
-    // update the default config to exclude **/public/**/* files
-    await write(defaultProject.tsConfigPath, JSON.stringify({
-      ...defaultProject.config,
-      exclude: [
-        ...defaultProject.config.exclude,
-        'src/**/public/**/*'
-      ]
-    }));
-
-    // update the browser config file to include **/public/**/* files
-    await write(browserProject.tsConfigPath, JSON.stringify({
-      ...browserProject.config,
-      include: [
-        ...browserProject.config.include,
-        'src/**/public/**/*',
-        'typings/**/*'
-      ]
-    }));
-
     const projects = [
       typesProjectRepo.tsConfigPath,
-      typesProjectBuild.tsConfigPath,
-      // Browser needs to be compiled before server code so that any shared code
-      // is compiled to the lowest common denominator (server's CommonJS format)
-      // which can be supported by both environments.
-      browserProject.tsConfigPath,
-      defaultProject.tsConfigPath,
+      typesProjectBuild.tsConfigPath
     ];
 
     // compile each typescript config file
