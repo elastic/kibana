@@ -98,7 +98,6 @@ coming[5.6.16]
 
 [float]
 [[Enhancements-5.6.16]]
-
 === Enhancements
 Operations::
 * Bumps node to 6.17.0 {pull}32201[#32201]
