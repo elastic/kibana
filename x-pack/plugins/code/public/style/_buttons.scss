@@ -9,6 +9,7 @@
   justify-content: space-between;
   cursor: pointer;
   transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+  padding: $euiSizeM 0;
   &:hover {
     background-color: $euiColorLightestShade;
   }
