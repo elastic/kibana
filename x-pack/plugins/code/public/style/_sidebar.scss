@@ -1,13 +1,13 @@
-.code-sidebar {
+.codeSidebar {
   box-shadow: inset -1px 0 0 $euiColorLightShade;
   padding: $euiSizeS;
   flex-basis: 18rem;
   flex-grow: 0;
 
-  .code-sidebar__heading {
+  .codeSidebar__heading {
     margin: $euiSizeM $euiSizeM 0 $euiSizeM;
   }
-  
+
   .code-sidebar__link {
     background-color: transparent;
     border-radius: $euiBorderRadius;
@@ -24,8 +24,8 @@
   }
 }
 
-.code-projects-tab {
-  .code-projects-tab__empty_header {
+.codeTab__projects {
+  .codeTab__projects--emptyHeader {
     text-align: center;
   }
 }

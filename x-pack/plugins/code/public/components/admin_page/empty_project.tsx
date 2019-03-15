@@ -15,9 +15,9 @@ import { ImportProject } from './import_project';
 export const EmptyProject = () => {
   const isAdmin = uiCapabilities.code.admin as boolean;
   return (
-    <div className="code-projects-tab">
+    <div className="codeTab__projects">
       <EuiSpacer size="xl" />
-      <div className="code-projects-tab__empty_header">
+      <div className="codeTab__projects--emptyHeader">
         <EuiText>
           <h1>You don't have any projects yet</h1>
         </EuiText>
