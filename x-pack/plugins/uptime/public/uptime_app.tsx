@@ -44,8 +44,13 @@ export interface UptimeCommonProps {
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
+  registerWatch: (client: () => void) => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setHeadingText: (text: string) => void;
+}
+
+export interface UptimeCommonState {
+  lastForceRefresh?: number;
 }
 
 export interface UptimePersistedState {
@@ -68,6 +73,8 @@ export interface UptimeAppProps {
   persistState(state: UptimePersistedState): void;
 }
 
+type forceRefreshClient = () => void;
+
 interface UptimeAppState {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
@@ -76,6 +83,8 @@ interface UptimeAppState {
   dateRangeStart: string;
   dateRangeEnd: string;
   headingText?: string;
+  lastForceRefresh?: number;
+  forceRefreshClients: forceRefreshClient[];
 }
 
 // TODO: when EUI exports types for this, this should be replaced
@@ -130,6 +139,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       colors,
       dateRangeStart,
       dateRangeEnd,
+      forceRefreshClients: [],
     };
   }
 
@@ -162,6 +172,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                           { dateRangeStart: start, dateRangeEnd: end },
                           this.persistState
                         );
+                        this.state.forceRefreshClients.forEach(client => client());
                       }}
                       onRefreshChange={({
                         isPaused,
@@ -189,6 +200,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...props}
                         {...this.props}
                         {...this.state}
+                        registerWatch={this.addForceRefreshListener}
                         setHeadingText={this.setHeadingText}
                       />
                     )}
@@ -200,6 +212,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...props}
                         {...this.props}
                         {...this.state}
+                        registerWatch={this.addForceRefreshListener}
                         setHeadingText={this.setHeadingText}
                         query={this.props.graphQLClient.query}
                       />
@@ -226,6 +239,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       dateRangeStart,
       dateRangeEnd,
     });
+  };
+
+  private addForceRefreshListener = (newClient: () => void): void => {
+    this.setState({ forceRefreshClients: [...this.state.forceRefreshClients, newClient] });
   };
 }
 
