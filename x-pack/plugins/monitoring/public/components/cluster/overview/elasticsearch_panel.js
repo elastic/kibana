@@ -308,7 +308,10 @@ function ElasticsearchPanelUi(props) {
               ))}
               {props.logs.length === 0
                 ? (
-                  <span>No logs found. Follow these instructions to get them setup</span>
+                  <FormattedMessage
+                    id={`xpack.monitoring.cluster.overview.logsPanel.noLogsFound`}
+                    defaultMessage="No logs found."
+                  />
                 )
                 : null
               }

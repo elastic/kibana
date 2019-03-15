@@ -15,33 +15,45 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { formatDateTimeLocal } from '../../../common/formatting';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const columns = [
   {
     field: 'timestamp',
-    name: 'Timestamp',
+    name: i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
+      defaultMessage: 'Timestamp'
+    }),
     width: '12%',
     render: timestamp => formatDateTimeLocal(timestamp),
   },
   {
     field: 'level',
-    name: 'Level',
+    name: i18n.translate('xpack.monitoring.logs.listing.levelTitle', {
+      defaultMessage: 'Level'
+    }),
     width: '5%',
   },
   {
     field: 'type',
-    name: 'Type',
+    name: i18n.translate('xpack.monitoring.logs.listing.typeTitle', {
+      defaultMessage: 'Type'
+    }),
     width: '10%',
     render: type => capitalize(type),
   },
   {
     field: 'message',
-    name: 'Message',
+    name: i18n.translate('xpack.monitoring.logs.listing.messageTitle', {
+      defaultMessage: 'Message'
+    }),
     width: '55%'
   },
   {
     field: 'component',
-    name: 'Component',
+    name: i18n.translate('xpack.monitoring.logs.listing.componentTitle', {
+      defaultMessage: 'Component'
+    }),
     width: '18%'
   },
 ];
@@ -71,10 +83,18 @@ export class Logs extends PureComponent {
     return (
       <div>
         <EuiTitle>
-          <h1>Logs</h1>
+          <h1>
+            {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {
+              defaultMessage: 'Logs'
+            })}
+          </h1>
         </EuiTitle>
         <EuiText size="s">
-          <p>Showing the most recent logs, up to 10 total logs</p>
+          <p>
+            {i18n.translate('xpack.monitoring.logs.listing.pageDescription', {
+              defaultMessage: 'Showing the most recent logs, up to 10 total logs'
+            })}
+          </p>
         </EuiText>
         <EuiSpacer size="m"/>
         <EuiBasicTable
@@ -84,11 +104,25 @@ export class Logs extends PureComponent {
         <EuiSpacer size="m"/>
         <EuiCallOut
           size="m"
-          title="Want to see more logs?"
+          title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
+            defaultMessage: 'Want to see more logs?'
+          })}
           iconType="loggingApp"
         >
           <p>
-            Visit the <EuiLink href={getLogsUiLink(clusterUuid, nodeId)}>Logs UI</EuiLink> to dive deeper.
+            <FormattedMessage
+              id="xpack.monitoring.logs.listing.linkText"
+              defaultMessage="Visit the {link} to dive deeper."
+              values={{
+                link: (
+                  <EuiLink href={getLogsUiLink(clusterUuid, nodeId)}>
+                    {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
+                      defaultMessage: 'Logs UI'
+                    })}
+                  </EuiLink>
+                )
+              }}
+            />
           </p>
         </EuiCallOut>
       </div>
