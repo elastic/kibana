@@ -1,3 +1,13 @@
+.codeSearch__highlight {
+	background-color: $euiColorVis5;
+	color: black !important;
+	padding: $euiSizeXS / 2;
+	border-radius: $euiSizeXS / 2;
+	font-weight: bold;
+	font-style: oblique;
+}
+
+
 .code-monaco-highlight-line {
   background: $euiCodeBlockBuiltInColor;
 }
