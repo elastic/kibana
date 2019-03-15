@@ -12,10 +12,9 @@
   * Switch to new platform services
   * Migrate to the new plugin system
 * Browser-side plan of action
-  * Decouple UI modules from angular.js
   * Move UI modules into plugins
-  * Introduce new plugin definition shim
-  * Introduce application shim
+  * Provide plugin extension points decoupled from angular.js
+  * Move all webpack alias imports into apiExport entry files
   * Switch to new platform services
   * Migrate to the new plugin system
 * Frequently asked questions
@@ -567,18 +566,54 @@ Details to come...
 
 ## Browser-side plan of action
 
-It is generally a much greater challenge preparing legacy browser-side code for the new platform than it is server-side, and as such there are a few more steps. In general, the level of effort here is proportional to the extent to which a plugin is dependent on angular.js.
+It is generally a much greater challenge preparing legacy browser-side code for the new platform than it is server-side, and as such there are a few more steps. The level of effort here is proportional to the extent to which a plugin is dependent on angular.js.
 
 To complicate matters further, a significant amount of the business logic in Kibana's client-side code exists inside the `ui/public` directory (aka ui modules), and all of that must be migrated as well. Unlike the server-side code where the order in which you migrated plugins was not particularly important, it's important that UI modules be addressed as soon as possible.
 
-### Decouple UI modules from angular.js
+Also unlike the server-side migration, we won't concern ourselves with creating shimmed plugin definitions that then get copied over to complete the migration.
+
 ### Move UI modules into plugins
-### Introduce new plugin definition shim
-### Introduce application shim
+
+Everything inside of the `ui/public` directory is going to be dealt with in one of the following ways:
+
+* Deleted because it doesn't need to be used anymore
+* Moved to or replaced by something in core that isn't coupled to angular
+* Moved to or replaced by an extension point in a specific plugin that "owns" that functionality
+* Copied into each plugin that depends on it and becomes an implementation detail there
+
+To rapidly define ownership and determine interdependencies, UI modules should move to the most appropriate plugins to own them. Modules that are considered "core" can remain in the ui directory as the platform team works to move them out.
+
+Concerns around ownership or duplication of a given module should be raised and resolved with the appropriate team so that the code is either duplicated to break the interdependency or a team agrees to "own" that extension point in one of their plugins and the module moves there.
+
+A great outcome is a module being deleted altogether because it isn't used or it was used so lightly that it was easy to refactor away.
+
+### Provide plugin extension points decoupled from angular.js
+
+There will be no global angular module in the new platform, which means none of the functionality provided by core will be coupled to angular. Since there is no global angular module shared by all applications, plugins providing extension points to be used by other plugins can not couple those extension points to angular either.
+
+All teams that own a plugin are strongly encouraged to remove angular entirely, but if nothing else they must provide non-angular-based extension points for plugins.
+
+One way to address this problem is to go through the code that is currently exposed to plugins and refactor away all of the touch points into angular.js. This might be the easiest option in some cases, but it might be hard in others.
+
+Another way to address this problem is to create an entirely new set of plugin APIs that are not dependendent on angular.js, and then update the implementation within the plugin to "merge" the angular and non-angular capabilities together. This is a good approach if preserving the existing angular API until we remove the old plugin system entirely is of critical importance. Generally speaking though, the removal of angular and introduction of a new set of public plugin APIs is a good reason to make a breaking change to the existing plugin capabilities. Make sure the PRs are tagged appropriate so we add these changes to our plugin changes blog post for each release.
+
+### Move all webpack alias imports into apiExport entry files
+
+Existing plugins import three things using webpack aliases today: services from ui/public (`ui/`), services from other plugins (`plugins/`), and uiExports themselves (`uiExports/`). These webpack aliases will not exist once we remove the legacy plugin system, so part of our migration effort is addressing all of the places where they are used today.
+
+In the new platform, dependencies from core and other plugins will be passed through lifecycle functions in the plugin definition itself. In a sense, they will be run from the "root" of the plugin.
+
+With the legacy plugin system, extensions of core and other plugins are handled through entry files defined as uiExport paths. In other words, when a plugin wants to serve an application (a core-owned thing), it defines a main entry file for the app via the `app` uiExport, and when a plugin wants to extend visTypes (a plugin-owned thing), they do so by specifying an entry file path for the `visType` uiExport.
+
+Each uiExport path is an entry file into one specific set of functionality provided by a client-side plugin. All webpack alias-based imports should be moved to these entry files, where they are appropriate. Moving a deeply nested webpack alias-based import in a plugin to one of the uiExport entry files might require some refactoring to ensure the dependency is now passed down to the appropriate place as function arguments instead of via import statements.
+
 ### Switch to new platform services
+
+
+
 ### Migrate to the new plugin system
 
-With all of your shims converted, you are now ready to complete your migration to the new platform.
+With all of your services converted, you are now ready to complete your migration to the new platform.
 
 Details to come...
 
