@@ -27,9 +27,7 @@ interface FakeRequest {
  * @return {Object}: pseudo-JobDocOutput. See interface JobDocOutput
  */
 function executeJobFn(server: KbnServer) {
-  const crypto = cryptoFactory(server);
   const config = server.config();
-  const serverBasePath = config.get('server.basePath');
   const logger: Logger = {
     debug: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'debug']),
     warning: createTaggedLogger(server, ['reporting', 'savedobject-csv', 'warning']),
@@ -38,14 +36,16 @@ function executeJobFn(server: KbnServer) {
 
   const generateCsv = createGenerateCsv(logger);
   return async function executeJob(job: JobDocPayload): Promise<JobDocOutputPseudo> {
-    const { basePath, objects, headers: serializedEncryptedHeaders, jobParams } = job; // FIXME how to remove payload.objects for cleanup?
-    const { isImmediate, panel, visType } = jobParams;
+    const {
+      jobParams: { isImmediate, panel, visType },
+    } = job;
+
     if (!isImmediate) {
       logger.debug(`Execute job generating [${visType}] csv`);
 
       let decryptedHeaders;
       try {
-        decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
+        decryptedHeaders = await cryptoFactory(server).decrypt(job.headers);
       } catch (err) {
         throw new Error(
           i18n.translate(
@@ -61,7 +61,7 @@ function executeJobFn(server: KbnServer) {
 
       const fakeRequest: FakeRequest = {
         headers: decryptedHeaders,
-        getBasePath: () => basePath || serverBasePath,
+        getBasePath: () => job.basePath || config.get('server.basePath'),
         server,
       };
 
@@ -74,10 +74,9 @@ function executeJobFn(server: KbnServer) {
 
     logger.debug(`Execute job using previously-generated [${visType}] csv`);
 
-    // if job was created with "immediate", just return the data in the job doc
     return {
       content_type: CONTENT_TYPE_CSV,
-      content: objects,
+      content: job.objects || null, // FIXME payload.objects has the stashed job output. There should be an update that sets it to null to reduce data storage: it could be ~100mb
     };
   };
 }
