@@ -248,6 +248,8 @@ export interface Ecs {
 
   _index?: string | null;
 
+  auditd?: AuditdEcsFields | null;
+
   destination?: DestinationEcsFields | null;
 
   event?: EventEcsFields | null;
@@ -273,6 +275,46 @@ export interface Ecs {
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
+}
+
+export interface AuditdEcsFields {
+  result?: string | null;
+
+  session?: string | null;
+
+  data?: AuditdData | null;
+
+  summary?: Summary | null;
+
+  sequence?: number | null;
+}
+
+export interface AuditdData {
+  acct?: string | null;
+
+  terminal?: string | null;
+
+  op?: string | null;
+}
+
+export interface Summary {
+  actor?: PrimarySecondary | null;
+
+  object?: PrimarySecondary | null;
+
+  how?: string | null;
+
+  message_type?: string | null;
+
+  sequence?: number | null;
+}
+
+export interface PrimarySecondary {
+  primary?: string | null;
+
+  secondary?: string | null;
+
+  type?: string | null;
 }
 
 export interface DestinationEcsFields {
@@ -1649,6 +1691,8 @@ export namespace GetTimelineQuery {
 
     event?: Event | null;
 
+    auditd?: Auditd | null;
+
     host?: Host | null;
 
     source?: _Source | null;
@@ -1686,6 +1730,60 @@ export namespace GetTimelineQuery {
     id?: number | null;
 
     dataset?: string | null;
+  };
+
+  export type Auditd = {
+    __typename?: 'AuditdEcsFields';
+
+    result?: string | null;
+
+    session?: string | null;
+
+    data?: Data | null;
+
+    summary?: Summary | null;
+  };
+
+  export type Data = {
+    __typename?: 'AuditdData';
+
+    acct?: string | null;
+
+    terminal?: string | null;
+
+    op?: string | null;
+  };
+
+  export type Summary = {
+    __typename?: 'Summary';
+
+    actor?: Actor | null;
+
+    object?: Object | null;
+
+    how?: string | null;
+
+    message_type?: string | null;
+
+    sequence?: number | null;
+  };
+
+  export type Actor = {
+    __typename?: 'PrimarySecondary';
+
+    primary?: string | null;
+
+    secondary?: string | null;
+  };
+
+  export type Object = {
+    __typename?: 'PrimarySecondary';
+
+    primary?: string | null;
+
+    secondary?: string | null;
+
+    type?: string | null;
   };
 
   export type Host = {
