@@ -33,18 +33,26 @@ describe('getSearchDsl', () => {
   describe('validation', () => {
     it('throws when type is not specified', () => {
       expect(() => {
-        getSearchDsl({}, {}, {
-          type: undefined,
-          sortField: 'title'
-        });
+        getSearchDsl(
+          {},
+          {},
+          {
+            type: undefined,
+            sortField: 'title',
+          }
+        );
       }).toThrowError(/type must be specified/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
-        getSearchDsl({}, {}, {
-          type: 'foo',
-          sortOrder: 'desc'
-        });
+        getSearchDsl(
+          {},
+          {},
+          {
+            type: 'foo',
+            sortOrder: 'desc',
+          }
+        );
       }).toThrowError(/sortOrder requires a sortField/);
     });
   });
@@ -75,7 +83,7 @@ describe('getSearchDsl', () => {
         opts.search,
         opts.searchFields,
         opts.defaultSearchOperator,
-        opts.hasReference,
+        opts.hasReference
       );
     });
 
@@ -86,7 +94,7 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         sortField: 'bar',
-        sortOrder: 'baz'
+        sortOrder: 'baz',
       };
 
       getSearchDsl(mappings, schema, opts);
@@ -95,7 +103,7 @@ describe('getSearchDsl', () => {
         mappings,
         opts.type,
         opts.sortField,
-        opts.sortOrder,
+        opts.sortOrder
       );
     });
 

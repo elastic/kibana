@@ -5,7 +5,7 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 import { register, addRegistries } from '@kbn/interpreter/common';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
