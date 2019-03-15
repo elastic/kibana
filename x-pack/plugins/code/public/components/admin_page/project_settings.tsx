@@ -17,23 +17,15 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { LanguageServer } from '../../../common/language_server';
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { RepositoryConfig } from '../../../model';
 import { RepoConfigPayload, switchLanguageServer } from '../../actions';
 import { RootState } from '../../reducers';
 import { JavaIcon, TypeScriptIcon } from '../shared/icons';
-
-const IconContainer = styled.div`
-  display: inline-block;
-  position: relative;
-  top: ${theme.euiSizeS};
-`;
 
 const defaultConfig = {
   disableGo: true,
@@ -96,13 +88,13 @@ class ProjectSettingsModal extends React.PureComponent<
             label={
               <span>
                 {ls.name === 'Java' ? (
-                  <IconContainer>
+                  <div className="codeSettingsPanel__icon">
                     <JavaIcon />
-                  </IconContainer>
+                  </div>
                 ) : (
-                  <IconContainer>
+                  <div className="codeSettingsPanel__icon">
                     <TypeScriptIcon />
-                  </IconContainer>
+                  </div>
                 )}
                 {ls.name}
               </span>
