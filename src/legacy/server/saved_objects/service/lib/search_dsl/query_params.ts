@@ -38,11 +38,8 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 
 /**
  *  Get the field params based on the types and searchFields
- *  @param  {Array<string>} searchFields
- *  @param  {string|Array<string>} types
- *  @return {Object}
  */
-function getFieldsForTypes(searchFields: string[] | undefined, types: string[]) {
+function getFieldsForTypes(types: string[], searchFields?: string[]) {
   if (!searchFields || !searchFields.length) {
     return {
       lenient: true,
@@ -141,7 +138,7 @@ export function getQueryParams(
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(searchFields, types),
+          ...getFieldsForTypes(types, searchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },
