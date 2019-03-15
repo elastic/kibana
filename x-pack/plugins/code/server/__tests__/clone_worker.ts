@@ -18,23 +18,14 @@ import { Logger } from '../log';
 import { CloneWorker } from '../queue';
 import { IndexWorker } from '../queue';
 import { RepositoryServiceFactory } from '../repository_service_factory';
-import { ServerOptions } from '../server_options';
-import { emptyAsyncFunc, TEST_OPTIONS } from '../test_utils';
+import { createTestServerOption, emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const esQueue = {};
 
-const config = {
-  get(key: string) {
-    if (key === 'path.data') {
-      return '/tmp/test';
-    }
-  },
-};
-
-const serverOptions = new ServerOptions(TEST_OPTIONS, config);
+const serverOptions = createTestServerOption();
 
 function prepareProject(url: string, p: string) {
   return new Promise(resolve => {

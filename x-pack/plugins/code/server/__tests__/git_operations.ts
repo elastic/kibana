@@ -11,10 +11,9 @@ import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
 import { getDefaultBranch, GitOperations } from '../git_operations';
-import { ServerOptions } from "../server_options";
 import * as mkdirp from "mkdirp";
 import Git from '@elastic/nodegit';
-import { TEST_OPTIONS } from '../test_utils';
+import { createTestServerOption } from '../test_utils';
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
@@ -70,16 +69,8 @@ describe('git_operations', () => {
     );
   });
   const repoUri = 'github.com/test/test_repo';
-  const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
-  const config = {
-    get(key: string) {
-      if (key === 'path.data') {
-        return tmpDataPath;
-      }
-    }
-  };
 
-  const serverOptions = new ServerOptions(TEST_OPTIONS, config);
+  const serverOptions = createTestServerOption();
 
   it('can iterate a repo', async () => {
     const g = new GitOperations(serverOptions.repoPath);
