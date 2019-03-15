@@ -5,7 +5,7 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 import { register, addRegistries } from '@kbn/interpreter/common';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -25,7 +25,6 @@ import { tagSpecs } from '../../../canvas_plugin_src/uis/tags';
 import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
 import { functions as commonPluginFunctions } from '../../../canvas_plugin_src/functions/common';
 import { templateSpecs } from '../../../canvas_plugin_src/templates';
-import { commonFunctions } from '../../../common/functions';
 import { clientFunctions } from '../../functions';
 
 import {
@@ -67,10 +66,7 @@ register(registries, {
   viewUIs: viewSpecs,
   datasourceUIs: datasourceSpecs,
   argumentUIs: argSpecs,
-  browserFunctions: browserFunctions
-    .concat(commonFunctions)
-    .concat(clientFunctions)
-    .concat(commonPluginFunctions),
+  browserFunctions: browserFunctions.concat(clientFunctions).concat(commonPluginFunctions),
   templates: templateSpecs,
   tagUIs: tagSpecs,
 });
