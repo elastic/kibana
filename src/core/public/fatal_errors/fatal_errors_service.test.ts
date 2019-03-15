@@ -100,9 +100,7 @@ describe('start.add()', () => {
   it('exposes a function that passes its two arguments to fatalErrors.add()', () => {
     const { fatalErrors, i18n } = setup();
 
-    jest.spyOn(fatalErrors, 'add').mockImplementation(() => {
-      /* noop */
-    });
+    jest.spyOn(fatalErrors, 'add').mockImplementation(() => undefined as never);
 
     expect(fatalErrors.add).not.toHaveBeenCalled();
     const { add } = fatalErrors.start({ i18n });
@@ -134,10 +132,10 @@ describe('start.get$()', () => {
   it('provides info about the errors passed to fatalErrors.add()', () => {
     const { fatalErrors, i18n } = setup();
 
-    const startContract = fatalErrors.start({ i18n });
+    const start = fatalErrors.start({ i18n });
 
     const onError = jest.fn();
-    startContract.get$().subscribe(onError);
+    start.get$().subscribe(onError);
 
     expect(onError).not.toHaveBeenCalled();
     expect(() => {

@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
@@ -71,6 +67,7 @@ module.exports = {
         'packages/kbn-test-subj-selector/**/*',
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
+        'src/legacy/server/saved_objects/**/*',
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
       ],
@@ -208,7 +205,7 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/leadfoot_element_wrapper/scroll_into_view_if_necessary.js',
+        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*',
       ],
       rules: {

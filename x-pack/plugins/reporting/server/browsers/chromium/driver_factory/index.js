@@ -15,7 +15,7 @@ import { args } from './args';
 import { safeChildProcess } from '../../safe_child_process';
 import { getChromeLogLocation } from '../paths';
 
-const compactWhitespace = (str) => {
+const compactWhitespace = str => {
   return str.replace(/\s+/, ' ');
 };
 
@@ -28,7 +28,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  test({ viewport, browserTimezone }, log) {
+  test({ viewport, browserTimezone }, logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -48,9 +48,11 @@ export class HeadlessChromiumDriverFactory {
           TZ: browserTimezone,
         },
       })
-      .catch((error) => {
-        log(`The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: ${error}`);
-        log(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+      .catch(error => {
+        logger.warning(
+          `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
+        );
+        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
         return null;
       });
   }
@@ -75,21 +77,24 @@ export class HeadlessChromiumDriverFactory {
           ignoreHTTPSErrors: true,
           args: chromiumArgs,
           env: {
-            TZ: browserTimezone
+            TZ: browserTimezone,
           },
         });
 
         page = await browser.newPage();
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser: ${err}`));
+        observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
       }
 
-      safeChildProcess({
-        async kill() {
-          await browser.close();
-        }
-      }, observer);
+      safeChildProcess(
+        {
+          async kill() {
+            await browser.close();
+          },
+        },
+        observer
+      );
 
       // Register with a few useful puppeteer event handlers:
       // https://pptr.dev/#?product=Puppeteer&version=v1.10.0&show=api-event-error
@@ -105,25 +110,38 @@ export class HeadlessChromiumDriverFactory {
         partition(msg => msg.match(/\[\d+\/\d+.\d+:\w+:CONSOLE\(\d+\)\]/))
       );
 
-      const driver$ = Rx.of(new HeadlessChromiumDriver(page, {
-        maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
-        logger: this.logger
-      }));
+      const driver$ = Rx.of(
+        new HeadlessChromiumDriver(page, {
+          maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
+          logger: this.logger,
+          inspect: this.browserConfig.inspect,
+        })
+      );
 
       const processError$ = Rx.fromEvent(page, 'error').pipe(
-        mergeMap((err) => Rx.throwError(new Error(`Unable to spawn Chromium: ${err}`))),
+        mergeMap(err => Rx.throwError(new Error(`Unable to spawn Chromium: [${err}]`)))
       );
 
       const processPageError$ = Rx.fromEvent(page, 'pageerror').pipe(
-        mergeMap((err) => Rx.throwError(new Error(`Uncaught exception within the page: ${err}`))),
+        mergeMap(err => Rx.throwError(new Error(`Uncaught exception within the page: [${err}]`)))
       );
 
       const processRequestFailed$ = Rx.fromEvent(page, 'requestfailed').pipe(
-        mergeMap((err) => Rx.throwError(new Error(`Request failed: ${err}`))),
+        mergeMap(req => {
+          const failure = req.failure && req.failure();
+          if (failure) {
+            return Rx.throwError(
+              new Error(`Request to [${req.url()}] failed! [${failure.errorText}]`)
+            );
+          }
+          return Rx.throwError(new Error(`Unknown failure! [${JSON.stringify(req)}]`));
+        })
       );
 
       const processExit$ = Rx.fromEvent(browser, 'disconnected').pipe(
-        mergeMap((code) => Rx.throwError(new Error(`Chromium exited with: [${JSON.stringify({ code })}]`)))
+        mergeMap(code =>
+          Rx.throwError(new Error(`Chromium exited with: [${JSON.stringify({ code })}]`))
+        )
       );
 
       const nssError$ = message$.pipe(
@@ -132,16 +150,26 @@ export class HeadlessChromiumDriverFactory {
       );
 
       const fontError$ = message$.pipe(
-        filter(line => line.includes('Check failed: InitDefaultFont(). Could not find the default font')),
-        mergeMap(() => Rx.throwError(new Error('You must install freetype and ttf-font for Reporting to work')))
+        filter(line =>
+          line.includes('Check failed: InitDefaultFont(). Could not find the default font')
+        ),
+        mergeMap(() =>
+          Rx.throwError(new Error('You must install freetype and ttf-font for Reporting to work'))
+        )
       );
 
       const noUsableSandbox$ = message$.pipe(
         filter(line => line.includes('No usable sandbox! Update your kernel')),
-        mergeMap(() => Rx.throwError(new Error(compactWhitespace(`
+        mergeMap(() =>
+          Rx.throwError(
+            new Error(
+              compactWhitespace(`
           Unable to use Chromium sandbox. This can be disabled at your own risk with
           'xpack.reporting.capture.browser.chromium.disableSandbox'
-        `))))
+        `)
+            )
+          )
+        )
       );
 
       const exit$ = Rx.merge(
@@ -158,17 +186,19 @@ export class HeadlessChromiumDriverFactory {
         driver$,
         consoleMessage$,
         message$,
-        exit$
+        exit$,
       });
 
       // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
       return () => {
-        this.logger.debug(`deleting chromium user data directory at ${userDataDir}`);
+        this.logger.debug(`deleting chromium user data directory at [${userDataDir}]`);
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
-        rimraf(userDataDir, (err) => {
+        rimraf(userDataDir, err => {
           if (err) {
-            return this.logger.error(`error deleting user data directory at ${userDataDir}: ${err}`);
+            return this.logger.error(
+              `error deleting user data directory at [${userDataDir}]: [${err}]`
+            );
           }
         });
       };
