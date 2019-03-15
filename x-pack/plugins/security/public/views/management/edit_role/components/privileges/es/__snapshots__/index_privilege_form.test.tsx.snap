@@ -103,7 +103,6 @@ exports[`it renders without crashing 1`] = `
                     "label": "manage_ilm",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_leader_index",
                   },
                 ]
