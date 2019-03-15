@@ -25,7 +25,7 @@ describe('apm_telemetry', () => {
       expect(apmTelemetry.services_per_agent).toMatchObject({
         go: 2,
         nodejs: 1,
-        ['js-base']: 1
+        'js-base': 1
       });
     });
     it('should ignore undefined or unknown AgentName values', () => {
@@ -40,7 +40,7 @@ describe('apm_telemetry', () => {
       expect(apmTelemetry.services_per_agent).toMatchObject({
         go: 2,
         nodejs: 1,
-        ['js-base']: 1
+        'js-base': 1
       });
     });
   });
@@ -70,7 +70,7 @@ describe('apm_telemetry', () => {
         services_per_agent: {
           go: 2,
           nodejs: 1,
-          ['js-base']: 1
+          'js-base': 1
         }
       };
     });
