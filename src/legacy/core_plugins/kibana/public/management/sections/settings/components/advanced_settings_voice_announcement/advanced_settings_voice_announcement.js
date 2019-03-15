@@ -93,7 +93,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">
           <FormattedMessage
-            id="xpack.settings.AdvancedSettings.voiceAnnouncement"
+            id="kbn.settings.AdvancedSettings.voiceAnnouncement"
             defaultMessage="You searched for {query}. There {are} {optionLenght} {options} in {sectionLenght} {sections}"
             values={{
               query: this.state.query,
