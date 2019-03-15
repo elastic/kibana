@@ -25,9 +25,8 @@ describe('<FollowerIndicesList />', () => {
   let exists;
   let component;
   let getMetadataFromEuiTable;
-  // let userActions;
-  // let getFormErrorsMessages;
-  // let form;
+  let getUserActions;
+  let tableCellsValues;
   let mockLoadFollowerIndices;
 
   beforeEach(() => {
@@ -76,8 +75,9 @@ describe('<FollowerIndicesList />', () => {
       status: 'paused'
     }];
 
-    let rows;
-    let tableCellsValues;
+    let selectFollowerIndexAt;
+    let openContextMenu;
+    let openContextMenuTableRowAt;
 
     beforeEach(async () => {
       // Mock Http Request that loads Follower indices
@@ -88,22 +88,27 @@ describe('<FollowerIndicesList />', () => {
         find,
         exists,
         component,
-        getMetadataFromEuiTable
+        getMetadataFromEuiTable,
+        getUserActions,
       } = initTestBed(FollowerIndicesList));
 
-      // Make sure that the Http request is fulfilled
-      await nextTick();
+      await nextTick(); // Make sure that the Http request is fulfilled
       component.update();
 
+      ({
+        selectFollowerIndexAt,
+        openContextMenu,
+        openContextMenuTableRowAt,
+      } = getUserActions('followerIndicesList'));
+
       // Read the index list table
-      ({ rows, tableCellsValues } = getMetadataFromEuiTable('ccrFollowerIndexListTable'));
+      ({ tableCellsValues } = getMetadataFromEuiTable('ccrFollowerIndexListTable'));
     });
 
     afterEach(async () => {
-      // The <EuiPopover /> sets a Timeout on update
-      // https://github.com/elastic/eui/blob/master/src/components/popover/popover.js#L228
-      // We need for it to have ran before unmounting our component
-      await nextTick();
+      // The <EuiPopover /> updates are not all synchronouse
+      // We need to wait for all the updates to ran before unmounting our component
+      await nextTick(100);
     });
 
     test('should not display the empty prompt', () => {
@@ -133,26 +138,17 @@ describe('<FollowerIndicesList />', () => {
     });
 
     describe('action menu', () => {
-      const selectFollowerIndex = (index = 0) => {
-        const row = rows[index];
-        const checkBox = row.reactWrapper.find('input').hostNodes();
-        checkBox.simulate('change', { target: { checked: true } });
-      };
-
       test('should be visible when a follower index is selected', () => {
         expect(exists('ccrFollowerIndexListContextMenuButton')).toBe(false);
 
-        selectFollowerIndex();
+        selectFollowerIndexAt(0);
 
         expect(exists('ccrFollowerIndexListContextMenuButton')).toBe(true);
       });
 
       test('should have a "pause", "edit" and "unfollow" action when the follower index is active', async () => {
-        // Select a follower index
-        selectFollowerIndex();
-
-        // open the context menu
-        find('ccrFollowerIndexListContextMenuButton').simulate('click');
+        selectFollowerIndexAt(0);
+        openContextMenu();
 
         const contextMenu = find('followerIndexActionContextMenu');
 
@@ -165,21 +161,14 @@ describe('<FollowerIndicesList />', () => {
           'Edit follower index',
           'Unfollow leader index'
         ]);
-
-        await nextTick();
       });
 
       test('should have a "resume", "edit" and "unfollow" action when the follower index is active', async () => {
-        // Select the second follower that is "paused"
-        selectFollowerIndex(1);
-
-        // open the context menu
-        const button = find('ccrFollowerIndexListContextMenuButton');
-        button.simulate('click');
+        selectFollowerIndexAt(1); // Select the second follower that is "paused"
+        openContextMenu();
 
         const contextMenu = find('followerIndexActionContextMenu');
 
-        expect(contextMenu.length).toBeTruthy();
         const contextMenuButtons = contextMenu.find('button');
         const buttonsLabel = contextMenuButtons.map(btn => btn.text());
         expect(buttonsLabel).toEqual([
@@ -187,8 +176,47 @@ describe('<FollowerIndicesList />', () => {
           'Edit follower index',
           'Unfollow leader index'
         ]);
+      });
+    });
 
-        await nextTick();
+    describe('table row action menu', () => {
+      test('should open a context menu when clicking on the button of each row', async () => {
+        expect(component.find('.euiContextMenuPanel').length).toBe(0);
+
+        openContextMenuTableRowAt(0);
+
+        expect(component.find('.euiContextMenuPanel').length).toBe(1);
+      });
+
+      test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
+        openContextMenuTableRowAt(0);
+
+        const buttonLabels = component
+          .find('.euiContextMenuPanel')
+          .find('.euiContextMenuItem')
+          .map(button => button.text());
+
+        expect(buttonLabels).toEqual([
+          'Pause replication',
+          'Edit follower index',
+          'Unfollow leader index'
+        ]);
+      });
+
+      test('should have the "resume", "edit" and "unfollow" options in the row context menu', async () => {
+        // We open the context menu of the second row (index 1) as followerIndices[1].status is "paused"
+        openContextMenuTableRowAt(1);
+
+        const buttonLabels = component
+          .find('.euiContextMenuPanel')
+          .find('.euiContextMenuItem')
+          .map(button => button.text());
+
+        expect(buttonLabels).toEqual([
+          'Resume replication',
+          'Edit follower index',
+          'Unfollow leader index'
+        ]);
       });
     });
   });
