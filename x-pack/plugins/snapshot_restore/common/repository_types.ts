@@ -12,7 +12,16 @@ export const HDFSRepositoryType = 'hdfs';
 export const AzureRepositoryType = 'azure';
 export const GCSRepositoryType = 'gcs';
 
-export type RepostitoryType =
+export const RepositoryTypeDocPath = 'modules-snapshots.html';
+export const FSRepositoryTypeDocPath = 'modules-snapshots.html#_shared_file_system_repository';
+export const ReadonlyRepositoryTypeDocPath = 'modules-snapshots.html#_read_only_url_repository';
+export const SourceRepositoryTypeDocPath = 'modules-snapshots.html#_source_only_repository';
+export const S3RepositoryTypeDocPath = 'repository-s3.html';
+export const HDFSRepositoryTypeDocPath = 'repository-hdfs.html';
+export const AzureRepositoryTypeDocPath = 'repository-azure.html';
+export const GCSRepositoryTypeDocPath = 'repository-gcs.html';
+
+export type RepositoryType =
   | typeof FSRepositoryType
   | typeof ReadonlyRepositoryType
   | typeof SourceRepositoryType

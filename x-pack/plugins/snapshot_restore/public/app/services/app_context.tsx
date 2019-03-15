@@ -5,7 +5,6 @@
  */
 
 import React, { createContext, useContext, useReducer } from 'react';
-import { Repository } from '../../../common/repository_types';
 import { AppCore, AppPlugins } from '../../shim';
 
 export interface AppStateInterface {

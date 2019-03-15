@@ -15,7 +15,7 @@ const REACT_ROOT_ID = 'snapshotRestoreReactRoot';
 
 export class Plugin {
   public start(core: Core, plugins: Plugins): void {
-    const { i18n, routing, http, chrome, notification } = core;
+    const { i18n, routing, http, chrome, notification, documentation } = core;
     const { management } = plugins;
 
     // Register management section
@@ -56,7 +56,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, chrome, notification, http } as AppCore,
+              { i18n, chrome, notification, http, documentation } as AppCore,
               { management } as AppPlugins
             );
           }

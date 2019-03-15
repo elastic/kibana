@@ -11,15 +11,15 @@ import {
   GCSRepositoryType,
   HDFSRepositoryType,
   ReadonlyRepositoryType,
-  RepostitoryType,
+  RepositoryType,
   S3RepositoryType,
   SourceRepositoryType,
 } from '../../../common/repository_types';
 import { AppStateInterface, useStateValue } from '../services/app_context';
 
 interface Props {
-  type: RepostitoryType;
-  delegateType?: RepostitoryType;
+  type: RepositoryType;
+  delegateType?: RepositoryType;
 }
 
 export const RepositoryTypeName = ({ type, delegateType }: Props) => {
@@ -31,13 +31,13 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
     },
   ] = useStateValue() as [AppStateInterface];
 
-  const getTypeName = (repositoryType: RepostitoryType): JSX.Element => {
+  const getTypeName = (repositoryType: RepositoryType): JSX.Element => {
     switch (repositoryType) {
       case FSRepositoryType:
         return (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryType.fileSystemTypeName"
-            defaultMessage="File System"
+            defaultMessage="Shared File System"
           />
         );
         break;
@@ -45,7 +45,7 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
         return (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryType.readonlyTypeName"
-            defaultMessage="Read-only"
+            defaultMessage="Read-only URL"
           />
         );
         break;

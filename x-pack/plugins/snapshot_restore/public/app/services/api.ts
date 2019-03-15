@@ -29,6 +29,7 @@ export const useFetch = ({
   const [data, setData] = useState<any>([]);
 
   const fetch = async () => {
+    setError(null);
     setLoading(true);
     try {
       const response = await http

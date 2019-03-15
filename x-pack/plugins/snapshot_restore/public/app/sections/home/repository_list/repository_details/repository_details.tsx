@@ -3,15 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { Fragment } from 'react';
 
 import { useFetch } from '../../../../services/api';
 import { AppStateInterface, useStateValue } from '../../../../services/app_context';
+import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 
 import { Repository, SourceRepositoryType } from '../../../../../../common/repository_types';
-import { RepositoryTypeName, SectionError, SectionLoading } from '../../../../components';
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { RepositoryTypeName, SectionError, SectionLoading } from '../../../../components';
+import { TypeDetails } from './type_details';
+
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 interface Props {
   repositoryName: Repository['name'];
@@ -21,7 +34,10 @@ interface Props {
 export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
   const [
     {
-      core: { i18n },
+      core: {
+        i18n,
+        documentation: { esDocBasePath, esPluginDocBasePath },
+      },
     },
   ] = useStateValue() as [AppStateInterface];
   const { FormattedMessage } = i18n;
@@ -73,11 +89,41 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
 
   const renderRepository = () => {
     const { type } = repository as Repository;
-    if (type === SourceRepositoryType) {
-      return <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />;
-    } else {
-      return <RepositoryTypeName type={type} />;
-    }
+    return (
+      <Fragment>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.typeTitle"
+                  defaultMessage="Repository type"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            {type === SourceRepositoryType ? (
+              <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
+            ) : (
+              <RepositoryTypeName type={type} />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              size="s"
+              flush="right"
+              href={getRepositoryTypeDocUrl(type, esDocBasePath, esPluginDocBasePath)}
+              target="_blank"
+              iconType="help"
+            >
+              Type docs
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <TypeDetails repository={repository} />
+      </Fragment>
+    );
   };
 
   let content;
@@ -107,6 +153,24 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody data-test-subj="srRepositoryDetailsContent">{content}</EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              flush="left"
+              onClick={onClose}
+              data-test-subj="srRepositoryDetailsFlyoutCloseButton"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryDetails.closeButtonLabel"
+                defaultMessage="Close"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 };

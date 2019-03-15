@@ -7,7 +7,7 @@ import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eu
 import React, { useState } from 'react';
 import {
   Repository,
-  RepostitoryType,
+  RepositoryType,
   SourceRepositoryType,
 } from '../../../../../../common/repository_types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
@@ -47,7 +47,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
       }),
       truncateText: true,
       sortable: true,
-      render: (type: RepostitoryType, repository: Repository) => {
+      render: (type: RepositoryType, repository: Repository) => {
         if (type === SourceRepositoryType) {
           return (
             <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
@@ -177,7 +177,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
         ).map(type => {
           return {
             value: type,
-            name: <RepositoryTypeName type={type as RepostitoryType} />,
+            view: <RepositoryTypeName type={type as RepositoryType} />,
           };
         }),
       },
