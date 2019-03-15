@@ -104,6 +104,8 @@ export class TypescriptServerLauncher implements ILanguageServerLauncher {
     }
     proxy.listen();
     await proxy.connect();
-    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options);
+    return new RequestExpander(proxy, builtinWorkspace, maxWorkspace, this.options, {
+      installNodeDependnecy: this.options.codeSecurity.installNodeDependency,
+    });
   }
 }
