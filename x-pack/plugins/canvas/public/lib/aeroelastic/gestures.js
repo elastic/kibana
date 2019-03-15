@@ -14,9 +14,9 @@ import { select } from './select';
 // actually getting the OS on the server side.
 const appleKeyboard = Boolean(
   window &&
-  window.navigator &&
-  window.navigator.userAgent &&
-  window.navigator.userAgent.match('Macintosh|iPhone|iPad')
+    window.navigator &&
+    window.navigator.userAgent &&
+    window.navigator.userAgent.match('Macintosh|iPhone|iPad')
 );
 
 /**
@@ -43,7 +43,7 @@ const gestureStatePrev = select(
  * Gestures - derived selectors for transient state
  */
 
-      // dispatch the various types of actions
+// dispatch the various types of actions
 const rawCursorPosition = select(action =>
   action.type === 'cursorPosition' ? action.payload : null
 )(primaryUpdate);
