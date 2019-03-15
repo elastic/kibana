@@ -4,8 +4,19 @@
 }
 
 .codeContainer__import {
-  max-width: 50rem;
+  max-width: 56rem;
   margin: auto;
+}
+
+.codeContainer__setup {
+  width: 56rem;
+  margin: 0 auto;
+  padding: 0 0 $euiSizeXXL 0;
+
+  .codeContainer__setup--step {
+    margin-top: $euiSizeXXL;
+    width: 100%;
+  }
 }
 
 .codeFooter--error {
