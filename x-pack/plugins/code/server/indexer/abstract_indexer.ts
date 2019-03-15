@@ -6,8 +6,8 @@
 
 import moment from 'moment';
 
-import { Indexer, IndexProgress, ProgressReporter } from '.';
-import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import { Indexer, ProgressReporter } from '.';
+import { IndexProgress, IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -89,6 +89,7 @@ export abstract class AbstractIndexer implements Indexer {
           success: successCount,
           fail: failCount,
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
+          checkpoint: this.encodeCheckpoint(req),
         };
         if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
           progressReporter(progress);
@@ -105,6 +106,11 @@ export abstract class AbstractIndexer implements Indexer {
 
   protected isCancelled(): boolean {
     return this.cancelled;
+  }
+
+  protected encodeCheckpoint(req: IndexRequest): string {
+    // This is the abstract implementation. You should override this.
+    return req.repoUri;
   }
 
   protected async cleanIndex(): Promise<void> {

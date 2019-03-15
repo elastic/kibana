@@ -125,3 +125,16 @@ export interface CloneProgress {
 export interface CloneWorkerProgress extends WorkerProgress {
   cloneProgress?: CloneProgress;
 }
+
+export interface IndexProgress {
+  type: string;
+  total: number;
+  success: number;
+  fail: number;
+  percentage: number;
+  checkpoint?: string;
+}
+
+export interface IndexWorkerProgress extends WorkerProgress {
+  indexProgress?: IndexProgress;
+}

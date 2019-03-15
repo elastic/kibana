@@ -6,9 +6,17 @@
 
 import moment from 'moment';
 
-import { IndexStats, IndexWorkerResult, RepositoryUri, WorkerProgress } from '../../model';
+import {
+  IndexProgress,
+  IndexStats,
+  IndexWorkerProgress,
+  IndexWorkerResult,
+  RepositoryUri,
+  WorkerProgress,
+  WorkerReservedProgress,
+} from '../../model';
 import { GitOperations } from '../git_operations';
-import { IndexerFactory, IndexProgress } from '../indexer';
+import { IndexerFactory } from '../indexer';
 import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { RepositoryObjectClient } from '../search';
@@ -69,7 +77,7 @@ export class IndexWorker extends AbstractWorker {
     const { uri, revision } = job.payload;
     const progress: WorkerProgress = {
       uri,
-      progress: 0,
+      progress: WorkerReservedProgress.INIT,
       timestamp: new Date(),
       revision,
     };
@@ -77,11 +85,24 @@ export class IndexWorker extends AbstractWorker {
   }
 
   public async updateProgress(uri: RepositoryUri, progress: number) {
-    const p: WorkerProgress = {
+    let p: any = {
       uri,
       progress,
       timestamp: new Date(),
     };
+    if (
+      progress === WorkerReservedProgress.COMPLETED ||
+      progress === WorkerReservedProgress.ERROR ||
+      progress === WorkerReservedProgress.TIMEOUT
+    ) {
+      // Reset the checkpoint if necessary.
+      p = {
+        ...p,
+        indexProgress: {
+          checkpoint: '',
+        },
+      };
+    }
     try {
       return await this.objectClient.updateRepositoryLspIndexStatus(uri, p);
     } catch (error) {
@@ -116,11 +137,12 @@ export class IndexWorker extends AbstractWorker {
     total: number
   ) {
     return async (progress: IndexProgress) => {
-      const p: WorkerProgress = {
+      const p: IndexWorkerProgress = {
         uri: repoUri,
         progress: progress.percentage,
         timestamp: new Date(),
         revision,
+        indexProgress: progress,
       };
       return await this.objectClient.setRepositoryLspIndexStatus(repoUri, p);
     };

@@ -9,7 +9,14 @@ import util from 'util';
 
 import { ProgressReporter } from '.';
 import { toCanonicalUrl } from '../../common/uri_util';
-import { Document, IndexStats, IndexStatsKey, LspIndexRequest, RepositoryUri } from '../../model';
+import {
+  Document,
+  IndexRequest,
+  IndexStats,
+  IndexStatsKey,
+  LspIndexRequest,
+  RepositoryUri,
+} from '../../model';
 import { GitOperations } from '../git_operations';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -56,6 +63,11 @@ export class LspIndexer extends AbstractIndexer {
   public cancel() {
     this.batchIndexHelper.cancel();
     super.cancel();
+  }
+
+  protected encodeCheckpoint(req: IndexRequest): string {
+    const r = req as LspIndexRequest;
+    return `${r.revision} - ${r.filePath}`;
   }
 
   protected async prepareIndexCreationRequests() {

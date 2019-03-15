@@ -159,6 +159,28 @@ export const DocumentSchema = {
       revision: {
         type: 'keyword',
       },
+      indexProgress: {
+        properties: {
+          type: {
+            type: 'keyword',
+          },
+          total: {
+            type: 'integer',
+          },
+          success: {
+            type: 'integer',
+          },
+          fail: {
+            type: 'integer',
+          },
+          percentage: {
+            type: 'integer',
+          },
+          checkpoint: {
+            type: 'text',
+          },
+        },
+      },
     },
   },
 };
