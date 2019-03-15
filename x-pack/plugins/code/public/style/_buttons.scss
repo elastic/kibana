@@ -1,3 +1,19 @@
+.codeButton__project {
+  border-radius: $euiBorderRadius;
+  height: 4rem;
+  padding: $euiSizeS;
+  width: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background-color $euiAnimSpeedFast $euiAnimSlightResistance;
+  &:hover {
+    background-color: $euiColorLightestShade;
+  }
+}
+
 .codeButton__import-project {
   margin-top: $euiSizeL;
 }

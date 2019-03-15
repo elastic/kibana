@@ -124,7 +124,7 @@ class CodeProjectItem extends React.PureComponent<{
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false} style={{ display: 'none' }}>
             <div
-              className="code-project-button"
+              className="codeButton__project"
               data-test-subj="settingsRepositoryButton"
               tabIndex={0}
               onKeyDown={onClickSettings}
@@ -140,7 +140,7 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div
-              className="code-project-button"
+              className="codeButton__project"
               data-test-subj="indexRepositoryButton"
               tabIndex={0}
               onKeyDown={onClickIndex}
@@ -156,7 +156,7 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <div
-              className="code-project-button"
+              className="codeButton__project"
               data-test-subj="deleteRepositoryButton"
               tabIndex={0}
               onKeyDown={onClickDelete}
