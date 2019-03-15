@@ -4,32 +4,11 @@ exports[`it renders without crashing 1`] = `
 <Fragment>
   <EuiHorizontalRule />
   <EuiFlexGroup
-    alignItems="stretch"
     className="index-privilege-form"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+    <EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
             fullWidth={true}
@@ -58,10 +37,7 @@ exports[`it renders without crashing 1`] = `
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
             fullWidth={true}
@@ -140,6 +116,10 @@ exports[`it renders without crashing 1`] = `
                     "isGroupLabelOption": false,
                     "label": "manage_ilm",
                   },
+                  Object {
+                    "isGroupLabelOption": false,
+                    "label": "manage_leader_index",
+                  },
                 ]
               }
               selectedOptions={Array []}
@@ -147,10 +127,7 @@ exports[`it renders without crashing 1`] = `
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiFormRow
             className="indexPrivilegeForm__grantedFieldsRow"
             describedByIds={Array []}
@@ -189,18 +166,9 @@ exports[`it renders without crashing 1`] = `
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiSwitch
             checked={false}
             compressed={true}
@@ -218,7 +186,6 @@ exports[`it renders without crashing 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFormRow

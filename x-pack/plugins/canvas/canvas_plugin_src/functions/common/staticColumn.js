@@ -29,7 +29,7 @@ export const staticColumn = () => ({
   },
   fn: (context, args) => {
     const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
-    const type = getType(rows[0][args.name]);
+    const type = getType(args.value);
     const columns = [...context.columns];
     const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
     const newColumn = { name: args.name, type };
