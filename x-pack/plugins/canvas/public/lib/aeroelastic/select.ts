@@ -7,7 +7,8 @@
 import { ActionId, NodeFunction, NodeResult } from './types';
 
 export const select = (fun: NodeFunction): NodeFunction => (...fns) => {
-  let { prevId, cache } = { prevId: NaN as ActionId, cache: null as NodeResult };
+  let prevId: ActionId = NaN;
+  let cache: NodeResult = null;
   const old = (object: NodeResult): boolean =>
     prevId === (prevId = object.primaryUpdate.payload.uid);
   return (obj: NodeResult) =>
