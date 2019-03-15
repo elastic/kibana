@@ -1,0 +1,12 @@
+.codeFooter--error {
+  color: $euiColorDanger;
+}
+
+.codePanel__project {
+  position: relative;
+  margin-bottom: $euiSizeS;
+}
+
+.codePanel__project--error {
+  border: 2px solid $euiColorDanger;;
+}

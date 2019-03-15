@@ -3,7 +3,6 @@
 @import "./components/codeblock/codeblock.scss";
 @import "./components/file_tree/file_tree.scss";
 @import "./components/file_tree/override_eui_side_nav_styles.scss";
-@import "./components/admin_page/admin.scss";
 @import "./components/editor/references_panel.scss";
 @import "./monaco/monaco.scss";
 @import "./monaco/override_monaco_styles.scss";
@@ -17,5 +16,6 @@
 // TODO: Clean everything up above this line
 
 @import "./style/buttons";
+@import "./style/layout";
 @import "./style/markdown";
 @import "./style/shortcuts";

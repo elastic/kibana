@@ -18,24 +18,9 @@ import moment from 'moment';
 import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import { Repository, WorkerReservedProgress } from '../../../model';
 import { deleteRepo, indexRepo, initRepoCommand } from '../../actions';
 import { RepoState, RepoStatus } from '../../reducers/status';
-
-const errorColor = `#BD271E`;
-const Footer = styled.div``;
-const ErrorFooter = styled(Footer)`
-  color: ${errorColor};
-`;
-
-const ProjectItemPanel = styled(EuiPanel)`
-  position: relative;
-  margin-bottom: 8px;
-`;
-const ErrorProjectItemPanel = styled(ProjectItemPanel)`
-  border: 2px solid ${errorColor};
-`;
 
 const stateColor = {
   [RepoState.CLONING]: 'secondary',
@@ -63,34 +48,37 @@ class CodeProjectItem extends React.PureComponent<{
     let disableRepoLink = false;
     let hasError = false;
     if (!status) {
-      footer = <Footer>INIT...</Footer>;
+      footer = <div className="codeFooter">INIT...</div>;
     } else if (status.state === RepoState.READY) {
       footer = (
-        <Footer data-test-subj="repositoryIndexDone">
+        <div className="codeFooter" data-test-subj="repositoryIndexDone">
           LAST UPDATED: {moment(status.timestamp).fromNow()}
-        </Footer>
+        </div>
       );
     } else if (status.state === RepoState.DELETING) {
-      footer = <Footer>DELETING...</Footer>;
+      footer = <div className="codeFooter">DELETING...</div>;
     } else if (status.state === RepoState.INDEXING) {
-      footer = <Footer data-test-subj="repositoryIndexOngoing">INDEXING...</Footer>;
+      footer = (
+        <div className="codeFooter" data-test-subj="repositoryIndexOngoing">
+          INDEXING...
+        </div>
+      );
     } else if (status.state === RepoState.CLONING) {
-      footer = <Footer>CLONING...</Footer>;
+      footer = <div className="codeFooter">CLONING...</div>;
     } else if (status.state === RepoState.DELETE_ERROR) {
-      footer = <ErrorFooter>ERROR DELETE REPO</ErrorFooter>;
+      footer = <div className="codeFooter codeFooter--error">ERROR DELETE REPO</div>;
       hasError = true;
     } else if (status.state === RepoState.INDEX_ERROR) {
-      footer = <ErrorFooter>ERROR INDEX REPO</ErrorFooter>;
+      footer = <div className="codeFooter codeFooter--error">ERROR INDEX REPO</div>;
       hasError = true;
     } else if (status.state === RepoState.CLONE_ERROR) {
       footer = (
-        <ErrorFooter>
-          ERROR CLONE REPO&nbsp;
+        <div className="codeFooter codeFooter--error">
+          ERROR CLONING REPO&nbsp;
           <EuiToolTip position="top" content={status.errorMessage}>
             <EuiIcon type="iInCircle" />
           </EuiToolTip>
-        </ErrorFooter>
-      );
+        </div>);
       // Disable repo link is clone failed.
       disableRepoLink = true;
       hasError = true;
@@ -101,8 +89,6 @@ class CodeProjectItem extends React.PureComponent<{
         <EuiTextColor color="subdued">{org}</EuiTextColor>/<strong>{name}</strong>
       </EuiText>
     );
-
-    const Panel = hasError ? ErrorProjectItemPanel : ProjectItemPanel;
 
     const settingsShow =
       status && status.state !== RepoState.CLONING && status.state !== RepoState.DELETING;
@@ -183,7 +169,9 @@ class CodeProjectItem extends React.PureComponent<{
     );
 
     return (
-      <Panel>
+      <EuiPanel
+        className={hasError ? 'codePanel__project codePanel__project--error' : 'codePanel__project'}
+      >
         {this.renderProgress()}
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={3}>
@@ -205,7 +193,7 @@ class CodeProjectItem extends React.PureComponent<{
           </EuiFlexItem>
           {enableManagement && projectManagement}
         </EuiFlexGroup>
-      </Panel>
+      </EuiPanel>
     );
   }
 
