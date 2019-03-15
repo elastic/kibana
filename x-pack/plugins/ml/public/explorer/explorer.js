@@ -45,7 +45,11 @@ import { SelectInterval, interval$ } from '../components/controls/select_interva
 import { SelectLimit, limit$ } from './select_limit/select_limit';
 import { SelectSeverity, severity$ } from '../components/controls/select_severity/select_severity';
 import { injectObservablesAsProps } from '../util/observable_utils';
-import { getKqlQueryValues, removeFilterFromQueryString } from '../components/kql_filter_bar/utils';
+import {
+  getKqlQueryValues,
+  removeFilterFromQueryString,
+  getQueryPattern
+} from '../components/kql_filter_bar/utils';
 
 import {
   getClearedSelectedAnomaliesState,
@@ -926,6 +930,11 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const operator = 'and ';
 
       if (action === '+') {
+        // Don't re-add if already exists in the query
+        const queryPattern = getQueryPattern(fieldName, fieldValue);
+        if (queryString.match(queryPattern) !== null) {
+          return;
+        }
         newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${fieldName}:"${fieldValue}"`;
       } else if (action === '-') {
         if (this.state.filterActive === false) {

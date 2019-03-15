@@ -76,10 +76,14 @@ export function getKqlQueryValues(inputValue, indexPattern) {
   };
 }
 
+export function getQueryPattern(fieldName, fieldValue) {
+  return new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i');
+}
+
 export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
   let newQueryString = '';
   // Remove the passed in fieldName and value from the existing filter
-  const queryPattern = new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i', 'g');
+  const queryPattern = getQueryPattern(fieldName, fieldValue);
   newQueryString = currentQueryString.replace(queryPattern, '');
   // match 'and' or 'or' at the start/end of the string
   const endPattern = /\s(and|or)\s*$/ig;
