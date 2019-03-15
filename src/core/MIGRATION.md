@@ -609,7 +609,11 @@ Each uiExport path is an entry file into one specific set of functionality provi
 
 ### Switch to new platform services
 
+At this point, your plugin has one or more uiExport entry files that together contain all of the webpack alias-based import statements needed to run your plugin. Each one of these import statements is either a service that is or will be provided by core or a service provided by another plugin.
 
+As new non-angular-based APIs are added, update your entry files to import the correct service API. The service APIs provided directly from the new platform can be imported through the `ui/new_platform` module for the duration of this migration. As new services are added, they will also be exposed there. This includes all core services as well as any APIs provided by real new platform plugins.
+
+Once all of the existing webpack alias-based imports in your plugin switch to `ui/new_platform`, it no longer depends directly on the legacy "core" features or other legacy plugins, so it is ready to officially migrate to the new platform.
 
 ### Migrate to the new plugin system
 
