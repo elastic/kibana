@@ -10,13 +10,12 @@
 @import "./components/diff_page/diff.scss";
 @import "./components/main/main.scss";
 @import "./components/search_page/search.scss";
-
 @import "./components/admin_page/sidebar.scss";
-@import "./style/markdown.scss";
-@import "./style/shortcuts.scss";
 @import "./components/symbol_tree/symbol_tree.scss";
 @import "./components/query_bar/query_bar.scss";
 
 // TODO: Clean everything up above this line
 
 @import "./style/buttons";
+@import "./style/markdown";
+@import "./style/shortcuts";
