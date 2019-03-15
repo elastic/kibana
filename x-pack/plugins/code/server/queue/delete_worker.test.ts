@@ -5,21 +5,18 @@
  */
 
 import sinon from 'sinon';
-import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
+import { EsClient, Esqueue } from '../lib/esqueue';
 
 import { Logger } from '../log';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
 import { DeleteWorker } from './delete_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esQueue = {};
 

@@ -19,10 +19,11 @@ import {
   RepositoryLspIndexStatusReservedField,
   RepositoryReservedField,
 } from '../indexer/schema';
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { IndexWorker } from '../queue/index_worker';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { IndexScheduler } from './index_scheduler';
 
@@ -33,10 +34,6 @@ const serverOpts = {
   indexRepoFrequencyMs: INDEX_REPO_FREQUENCY_MS,
 };
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   get: emptyAsyncFunc,

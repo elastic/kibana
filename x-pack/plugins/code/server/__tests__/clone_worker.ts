@@ -13,19 +13,16 @@ import rimraf from 'rimraf';
 import sinon from 'sinon';
 
 import { Repository } from '../../model';
-import { AnyObject, EsClient, Esqueue } from '../lib/esqueue';
+import { EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { CloneWorker } from '../queue';
 import { IndexWorker } from '../queue';
 import { RepositoryServiceFactory } from '../repository_service_factory';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc, TEST_OPTIONS } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esQueue = {};
 
@@ -37,23 +34,7 @@ const config = {
   },
 };
 
-const options = {
-  enabled: true,
-  queueIndex: '.code_internal-worker-queue',
-  queueTimeout: 60 * 60 * 1000, // 1 hour by default
-  updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
-  indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lsp: {
-    requestTimeoutMs: 5 * 60, // timeout a request over 30s
-    detach: false,
-    verbose: false,
-  },
-  repos: [],
-  maxWorkspace: 5, // max workspace folder for each language server
-  disableScheduler: true, // Temp option to disable all schedulers.
-};
-
-const serverOptions = new ServerOptions(options, config);
+const serverOptions = new ServerOptions(TEST_OPTIONS, config);
 
 function prepareProject(url: string, p: string) {
   return new Promise(resolve => {

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import JoiNamespace from 'joi';
 import moment from 'moment';
 import { resolve } from 'path';
 
 import { mappings } from './server/code_node_client';
 import { init } from './server/init';
-// tslint:disable-next-line no-default-export
+
 export const code = (kibana: any) =>
   new kibana.Plugin({
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -27,7 +28,7 @@ export const code = (kibana: any) =>
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,
     },
-    config(Joi: any) {
+    config(Joi: typeof JoiNamespace) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         queueIndex: Joi.string().default('.code_internal-worker-queue'),

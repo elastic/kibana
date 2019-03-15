@@ -7,18 +7,15 @@
 import sinon from 'sinon';
 
 import { IndexerFactory } from '../indexer';
-import { AnyObject, CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
+import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { CancellationSerivce } from './cancellation_service';
 import { IndexWorker } from './index_worker';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esQueue = {};
 

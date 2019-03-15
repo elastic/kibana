@@ -10,10 +10,11 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import rimraf from 'rimraf';
-import {getDefaultBranch, GitOperations} from '../git_operations';
-import {ServerOptions} from "../server_options";
+import { getDefaultBranch, GitOperations } from '../git_operations';
+import { ServerOptions } from "../server_options";
 import * as mkdirp from "mkdirp";
 import Git from '@elastic/nodegit';
+import { TEST_OPTIONS } from '../test_utils';
 
 describe('git_operations', () => {
   it('get default branch from a non master repo', async () => {
@@ -77,22 +78,8 @@ describe('git_operations', () => {
       }
     }
   };
-  const options = {
-    enabled: true,
-    queueIndex: '.code_internal-worker-queue',
-    queueTimeout: 60 * 60 * 1000, // 1 hour by default
-    updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
-    indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-    lsp: {
-      requestTimeoutMs: 5 * 60, // timeout a request over 30s
-      detach: false,
-      verbose: false,
-    },
-    repos: [],
-    maxWorkspace: 5, // max workspace folder for each language server
-    disableScheduler: true, // Temp option to disable all schedulers.
-  };
-  const serverOptions = new ServerOptions(options, config);
+
+  const serverOptions = new ServerOptions(TEST_OPTIONS, config);
 
   it('can iterate a repo', async () => {
     const g = new GitOperations(serverOptions.repoPath);

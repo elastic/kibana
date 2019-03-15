@@ -21,8 +21,7 @@ import * as os from "os";
 import assert from 'assert';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { Server } from 'hapi';
-
-
+import { TEST_OPTIONS } from '../test_utils';
 
 const filename = 'hello.ts';
 describe('lsp_service tests', () => {
@@ -42,22 +41,6 @@ describe('lsp_service tests', () => {
     return repo;
   }
 
-  const options = {
-    enabled: true,
-    queueIndex: '.code_internal-worker-queue',
-    queueTimeout: 60 * 60 * 1000, // 1 hour by default
-    updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
-    indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-    lsp: {
-      requestTimeoutMs: 5 * 60, // timeout a request over 30s
-      detach: false,
-      verbose: false,
-    },
-    repos: [],
-    maxWorkspace: 5, // max workspace folder for each language server
-    disableScheduler: true, // Temp option to disable all schedulers.
-  };
-
   const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
   console.log(`tmp data path is ${tmpDataPath}`);
   const config = {
@@ -68,7 +51,7 @@ describe('lsp_service tests', () => {
     }
   };
 
-  const serverOptions = new ServerOptions(options, config);
+  const serverOptions = new ServerOptions(TEST_OPTIONS, config);
   const installManager = new InstallManager(new Server(), serverOptions);
 
   function mockEsClient(): any {

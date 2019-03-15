@@ -6,18 +6,15 @@
 
 import sinon from 'sinon';
 
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexVersionController } from './index_version_controller';
 import pkg from './schema/version.json';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   reindex: emptyAsyncFunc,
