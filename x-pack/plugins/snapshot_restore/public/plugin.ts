@@ -56,7 +56,7 @@ export class Plugin {
           if (elem) {
             renderReact(
               elem,
-              { i18n, chrome, notification } as AppCore,
+              { i18n, chrome, notification, http } as AppCore,
               { management } as AppPlugins
             );
           }

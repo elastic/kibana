@@ -5,3 +5,4 @@
  */
 
 export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
+export type Section = 'repositories' | 'snapshots';

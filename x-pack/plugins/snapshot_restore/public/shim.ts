@@ -24,6 +24,10 @@ export interface AppCore {
   notification: {
     fatalError: typeof fatalError;
   };
+  http: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
 }
 
 export interface AppPlugins {
@@ -40,10 +44,6 @@ export interface Core extends AppCore {
     registerAngularRoute(path: string, config: object): void;
     registerRouter(router: HashRouter): void;
     getRouter(): HashRouter | undefined;
-  };
-  http: {
-    setClient(client: any): void;
-    getClient(): any;
   };
 }
 

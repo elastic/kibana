@@ -9,7 +9,7 @@ import { HashRouter } from 'react-router-dom';
 
 import { AppCore, AppPlugins } from '../shim';
 import { App } from './app';
-import { AppContext, AppContextInterface } from './services/app_context';
+import { AppStateInterface, StateProvider } from './services/app_context';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
@@ -22,17 +22,24 @@ export const renderReact = async (
     i18n: { Context: I18nContext },
   } = core;
 
-  const appContext: AppContextInterface = {
+  const appState: AppStateInterface = {
     core,
     plugins,
+  };
+
+  const appStateReducer = (state: any, action: any) => {
+    switch (action.type) {
+      default:
+        return state;
+    }
   };
 
   render(
     <I18nContext>
       <HashRouter>
-        <AppContext.Provider value={appContext}>
+        <StateProvider initialState={appState} reducer={appStateReducer}>
           <App />
-        </AppContext.Provider>
+        </StateProvider>
       </HashRouter>
     </I18nContext>,
     elem
