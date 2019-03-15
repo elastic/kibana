@@ -112,7 +112,6 @@ interface ProgressEntryProps {
   isLoading: boolean;
 }
 
-// tslint:disable-next-line:max-classes-per-file
 class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   public render() {
     const { alignment, children, className, color, isLoading } = this.props;

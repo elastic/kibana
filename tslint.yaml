@@ -12,6 +12,7 @@ rules:
   prettier: true
   object-literal-sort-keys: false
   interface-name: false
+  max-classes-per-file: false
   no-default-export: true
   react-a11y-anchors: true
   react-a11y-aria-unsupported-elements: true

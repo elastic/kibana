@@ -17,8 +17,6 @@
  * under the License.
  */
 
-// tslint:disable max-classes-per-file
-
 import * as Rx from 'rxjs';
 
 import { ToolingLogWriter, WriterConfig } from './tooling_log_text_writer';

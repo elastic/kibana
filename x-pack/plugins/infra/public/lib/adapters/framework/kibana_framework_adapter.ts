@@ -151,7 +151,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   };
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: InfraKibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>> = [];

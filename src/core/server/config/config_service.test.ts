@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* tslint:disable max-classes-per-file */
-
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
