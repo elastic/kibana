@@ -570,7 +570,8 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', (query) => {
+        $scope.$watch('state.query', (newQuery) => {
+          const query = migrateLegacyQuery(newQuery);
           $scope.updateQueryAndFetch({ query });
         });
 
@@ -692,7 +693,7 @@ function discoverController(
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
     timefilter.setTime(dateRange);
-    $state.query = migrateLegacyQuery(query);
+    $state.query = query;
     $scope.fetch();
   };
 
