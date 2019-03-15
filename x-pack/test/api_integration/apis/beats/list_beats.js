@@ -17,7 +17,7 @@ export default function ({ getService }) {
     afterEach('unload beats archive', () => esArchiver.unload(archive));
 
     it('should return all beats', async () => {
-      const { body: apiResponse } = await supertest.get('/api/beats/agents/all').expect(200);
+      const { body: apiResponse } = await supertest.get('/api/beats/agents/all/0').expect(200);
 
       const beatsFromApi = apiResponse.list;
 
@@ -27,7 +27,7 @@ export default function ({ getService }) {
     });
 
     it('should not return access tokens', async () => {
-      const { body: apiResponse } = await supertest.get('/api/beats/agents/all').expect(200);
+      const { body: apiResponse } = await supertest.get('/api/beats/agents/all/0').expect(200);
 
       const beatsFromApi = apiResponse.list;
 
