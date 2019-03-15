@@ -17,8 +17,13 @@
  * under the License.
  */
 
-import { clog } from './clog';
+import { Registry } from '@kbn/interpreter/common';
+import { RenderFunction } from './render_function';
 
-export const browserFunctions = [
-  clog,
-];
+class RenderFunctionsRegistry extends Registry {
+  wrapper(obj) {
+    return new RenderFunction(obj);
+  }
+}
+
+export { RenderFunctionsRegistry };

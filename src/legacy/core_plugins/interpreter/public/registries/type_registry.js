@@ -17,14 +17,6 @@
  * under the License.
  */
 
-import { typeSpecs as types } from '../plugin/types';
-import { register, TypesRegistry, FunctionsRegistry } from '../common';
+import { TypesRegistry } from '../../common/types_registry';
 
-export const registries = {
-  types: new TypesRegistry(),
-  serverFunctions: new FunctionsRegistry(),
-};
-
-register(registries, {
-  types,
-});
+export const typesRegistry = new TypesRegistry();
