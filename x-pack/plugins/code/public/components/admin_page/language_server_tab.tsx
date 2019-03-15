@@ -19,20 +19,14 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { InstallationType } from '../../../common/installation';
 import { LanguageServer, LanguageServerStatus } from '../../../common/language_server';
 import { requestInstallLanguageServer } from '../../actions/language_server';
 import { RootState } from '../../reducers';
 import { JavaIcon, TypeScriptIcon, GoIcon } from '../shared/icons';
-
-const LanguageServerState = styled(EuiTextColor)`
-  color: ${props => props.color};
-`;
 
 const LanguageServerLi = (props: {
   languageServer: LanguageServer;
@@ -55,11 +49,19 @@ const LanguageServerLi = (props: {
   let button = null;
   let state = null;
   if (status === LanguageServerStatus.RUNNING) {
-    state = <LanguageServerState>Running ...</LanguageServerState>;
+    state = <EuiText size="xs">Running ...</EuiText>;
   } else if (status === LanguageServerStatus.NOT_INSTALLED) {
-    state = <LanguageServerState color={'subdued'}>Not Installed</LanguageServerState>;
+    state = (
+      <EuiText size="xs" color={'subdued'}>
+        Not Installed
+      </EuiText>
+    );
   } else if (status === LanguageServerStatus.READY) {
-    state = <LanguageServerState color={'subdued'}>Installed</LanguageServerState>;
+    state = (
+      <EuiText size="xs" color={'subdued'}>
+        Installed
+      </EuiText>
+    );
   }
   if (props.languageServer.installationType === InstallationType.Plugin) {
     button = (
