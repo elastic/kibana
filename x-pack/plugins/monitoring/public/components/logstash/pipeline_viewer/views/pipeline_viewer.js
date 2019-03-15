@@ -68,9 +68,17 @@ class PipelineViewerUi extends React.Component {
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.filtersTitle', defaultMessage: 'Filters' })}
               elements={filters}
               onShowVertexDetails={this.props.setDetailVertexId}
+            />
+            <EuiSpacer />
+            <StatementSection
+              iconType="logstashOutput"
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.outputsTitle', defaultMessage: 'Outputs' })}
               elements={outputs}
               onShowVertexDetails={this.props.setDetailVertexId}
+            />
+            { this.renderDetailDrawer() }
+          </EuiPageContent>
+        </EuiPageBody>
       </EuiPage>
     );
   }
