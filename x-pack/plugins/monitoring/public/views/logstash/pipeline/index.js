@@ -20,6 +20,7 @@ import { List } from 'plugins/monitoring/components/logstash/pipeline_viewer/mod
 import { PipelineState } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline_state';
 import { PipelineViewer } from 'plugins/monitoring/components/logstash/pipeline_viewer';
 import { Pipeline } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/pipeline';
+import { vertexFactory } from 'plugins/monitoring/components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { MonitoringViewBaseController } from '../../base_controller';
 import { I18nContext } from 'ui/i18n';
 import {
@@ -126,7 +127,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
           return;
         }
         this.pipelineState = new PipelineState(data.pipeline);
-        this.detailVertex = data.vertex;
+        this.detailVertex = data.vertex ? vertexFactory(null, data.vertex) : null;
         this.renderReact(
           <I18nContext>
             <EuiPage>
