@@ -43,7 +43,16 @@ export function getSearchDsl(mappings, schema, options = {}) {
   }
 
   return {
-    ...getQueryParams(mappings, schema, namespace, type, search, searchFields, defaultSearchOperator, hasReference),
+    ...getQueryParams(
+      mappings,
+      schema,
+      namespace,
+      type,
+      search,
+      searchFields,
+      defaultSearchOperator,
+      hasReference
+    ),
     ...getSortingParams(mappings, type, sortField, sortOrder),
   };
 }

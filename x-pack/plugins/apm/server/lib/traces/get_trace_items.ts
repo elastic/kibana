@@ -9,8 +9,8 @@ import {
   PROCESSOR_EVENT,
   TRACE_ID
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { Span } from '../../../typings/es_schemas/Span';
-import { Transaction } from '../../../typings/es_schemas/Transaction';
+import { Span } from '../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 

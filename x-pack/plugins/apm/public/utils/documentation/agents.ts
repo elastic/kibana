@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { APMDoc } from 'x-pack/plugins/apm/typings/es_schemas/APMDoc';
+import { AgentName } from 'x-pack/plugins/apm/typings/es_schemas/ui/fields/Agent';
 import { PropertyTabKey } from '../../components/shared/PropertiesTable/tabConfig';
 
 const AGENT_URL_ROOT = 'https://www.elastic.co/guide/en/apm/agent';
 
-type AgentName = APMDoc['agent']['name'];
 type DocUrls = {
   [tabKey in PropertyTabKey]?: { [agentName in AgentName]: string | undefined }
 };
@@ -17,6 +16,7 @@ type DocUrls = {
 const customUrls = {
   'js-base': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-custom-context`,
   'js-react': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-custom-context`,
+  go: undefined,
   java: undefined,
   nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#apm-set-custom-context`,
   python: `${AGENT_URL_ROOT}/python/2.x/api.html#api-set-custom-context`,
@@ -27,6 +27,7 @@ const AGENT_DOC_URLS: DocUrls = {
   user: {
     'js-base': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-user-context`,
     'js-react': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-user-context`,
+    go: undefined,
     java: `${AGENT_URL_ROOT}/java/0.7/public-api.html#api-transaction-set-user`,
     nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#apm-set-user-context`,
     python: `${AGENT_URL_ROOT}/python/2.x/api.html#api-set-user-context`,
@@ -35,6 +36,7 @@ const AGENT_DOC_URLS: DocUrls = {
   labels: {
     'js-base': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-tags`,
     'js-react': `${AGENT_URL_ROOT}/js-base/0.x/api.html#apm-set-tags`,
+    go: undefined,
     java: `${AGENT_URL_ROOT}/java/0.7/public-api.html#api-transaction-add-tag`,
     nodejs: `${AGENT_URL_ROOT}/nodejs/1.x/agent-api.html#apm-set-tag`,
     python: `${AGENT_URL_ROOT}/python/2.x/api.html#api-tag`,

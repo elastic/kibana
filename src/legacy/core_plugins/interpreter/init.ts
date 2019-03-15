@@ -18,18 +18,31 @@
  */
 
 // @ts-ignore
-import { registryFactory } from '@kbn/interpreter/common';
-
-// @ts-ignore
-import { registries } from '@kbn/interpreter/server';
+import { register, registryFactory } from '@kbn/interpreter/common';
 
 // @ts-ignore
 import { routes } from './server/routes';
 
 import { Legacy } from '../../../../kibana';
 
+// @ts-ignore
+import { FunctionsRegistry } from './common/functions_registry';
+// @ts-ignore
+import { typeSpecs as types } from './common/types';
+// @ts-ignore
+import { TypesRegistry } from './common/types_registry';
+
+export const registries = {
+  types: new TypesRegistry(),
+  serverFunctions: new FunctionsRegistry(),
+};
+
 export async function init(server: Legacy.Server /*options*/) {
   server.injectUiAppVars('canvas', () => {
+    register(registries, {
+      types,
+    });
+
     const config = server.config();
     const basePath = config.get('server.basePath');
     const reportingBrowserType = (() => {
