@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(5);
 
-        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await pieChart.expectPieSliceCount(5);

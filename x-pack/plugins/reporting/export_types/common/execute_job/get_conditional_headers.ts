@@ -15,14 +15,20 @@ export const getConditionalHeaders = ({
   server: KbnServer;
 }) => {
   const config: ConfigObject = server.config();
+  const [hostname, port, basePath, protocol] = [
+    config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
+    config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
+    config.get('server.basePath'),
+    config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+  ] as [string, number, string, string];
 
   const conditionalHeaders: ConditionalHeaders = {
     headers: filteredHeaders,
     conditions: {
-      hostname: config.get('xpack.reporting.kibanaServer.hostname') || config.get('server.host'),
-      port: config.get('xpack.reporting.kibanaServer.port') || config.get('server.port'),
-      basePath: config.get('server.basePath'),
-      protocol: config.get('xpack.reporting.kibanaServer.protocol') || server.info.protocol,
+      hostname: hostname.toLowerCase(),
+      port,
+      basePath,
+      protocol,
     },
   };
 

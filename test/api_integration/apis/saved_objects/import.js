@@ -57,7 +57,7 @@ export default function ({ getService }) {
             });
         });
 
-        it('should return 409 when conflicts exist', async () => {
+        it('should return errors when conflicts exist', async () => {
           await supertest
             .post('/api/saved_objects/_import')
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
@@ -71,24 +71,21 @@ export default function ({ getService }) {
                     id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                     type: 'index-pattern',
                     error: {
-                      statusCode: 409,
-                      message: 'version conflict, document already exists',
+                      type: 'conflict',
                     }
                   },
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                     type: 'visualization',
                     error: {
-                      statusCode: 409,
-                      message: 'version conflict, document already exists',
+                      type: 'conflict',
                     }
                   },
                   {
                     id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
                     type: 'dashboard',
                     error: {
-                      statusCode: 409,
-                      message: 'version conflict, document already exists',
+                      type: 'conflict',
                     }
                   },
                 ],
@@ -126,6 +123,57 @@ export default function ({ getService }) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'Can\'t import more than 10000 objects',
+              });
+            });
+        });
+
+        it('should return errors when index patterns or search are missing', async () => {
+          const objectsToImport = [
+            JSON.stringify({
+              type: 'visualization',
+              id: '1',
+              attributes: {},
+              references: [
+                {
+                  name: 'ref_0',
+                  type: 'index-pattern',
+                  id: 'non-existing',
+                },
+                {
+                  name: 'ref_1',
+                  type: 'search',
+                  id: 'non-existing-search',
+                },
+              ],
+            }),
+          ];
+          await supertest
+            .post('/api/saved_objects/_import')
+            .attach('file', Buffer.from(objectsToImport.join('\n'), 'utf8'), 'export.ndjson')
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                success: false,
+                successCount: 0,
+                errors: [
+                  {
+                    type: 'visualization',
+                    id: '1',
+                    error: {
+                      type: 'missing_references',
+                      references: [
+                        {
+                          type: 'index-pattern',
+                          id: 'non-existing',
+                        },
+                        {
+                          type: 'search',
+                          id: 'non-existing-search',
+                        },
+                      ],
+                    },
+                  },
+                ],
               });
             });
         });
