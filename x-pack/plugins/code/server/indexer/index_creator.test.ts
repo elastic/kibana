@@ -6,13 +6,10 @@
 
 import sinon from 'sinon';
 
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
+import { emptyAsyncFunc } from '../test_utils';
 import { IndexCreationRequest } from './index_creation_request';
 import { IndexCreator } from './index_creator';
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   indices: {

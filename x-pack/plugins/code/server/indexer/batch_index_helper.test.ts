@@ -6,17 +6,15 @@
 
 import sinon from 'sinon';
 
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { BatchIndexHelper } from './batch_index_helper';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
 
 const BATCH_INDEX_SIZE = 5;
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   bulk: emptyAsyncFunc,

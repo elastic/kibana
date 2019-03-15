@@ -14,19 +14,16 @@ import sinon from 'sinon';
 import { WorkerReservedProgress } from '../../model';
 import { LspIndexer } from '../indexer/lsp_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { InstallManager } from '../lsp/install_manager';
 import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc, TEST_OPTIONS } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   bulk: emptyAsyncFunc,
@@ -63,22 +60,6 @@ function prepareProject(url: string, p: string) {
 
 const repoUri = 'github.com/Microsoft/TypeScript-Node-Starter';
 
-const options = {
-  enabled: true,
-  queueIndex: '.code_internal-worker-queue',
-  queueTimeout: 60 * 60 * 1000, // 1 hour by default
-  updateFreqencyMs: 5 * 60 * 1000, // 5 minutes by default
-  indexFrequencyMs: 24 * 60 * 60 * 1000, // 1 day by default
-  lsp: {
-    requestTimeoutMs: 5 * 60, // timeout a request over 30s
-    detach: false,
-    verbose: false,
-  },
-  repos: [],
-  maxWorkspace: 5, // max workspace folder for each language server
-  disableScheduler: true, // Temp option to disable all schedulers.
-};
-
 const config = {
   get(key: string) {
     if (key === 'path.data') {
@@ -87,7 +68,7 @@ const config = {
   },
 };
 
-const serverOptions = new ServerOptions(options, config);
+const serverOptions = new ServerOptions(TEST_OPTIONS, config);
 
 function cleanWorkspace() {
   return new Promise(resolve => {

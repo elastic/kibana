@@ -14,10 +14,11 @@ import {
   WorkerReservedProgress,
 } from '../../model';
 import { RepositoryGitStatusReservedField, RepositoryReservedField } from '../indexer/schema';
-import { AnyObject, EsClient } from '../lib/esqueue';
+import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { UpdateWorker } from '../queue/update_worker';
 import { ServerOptions } from '../server_options';
+import { emptyAsyncFunc } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { UpdateScheduler } from './update_scheduler';
 
@@ -28,10 +29,6 @@ const serverOpts = {
   updateRepoFrequencyMs: UPDATE_REPO_FREQUENCY_MS,
 };
 const log: Logger = new ConsoleLoggerFactory().getLogger(['test']);
-
-const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
-  Promise.resolve({});
-};
 
 const esClient = {
   get: emptyAsyncFunc,
