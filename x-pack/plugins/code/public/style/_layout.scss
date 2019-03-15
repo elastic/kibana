@@ -20,3 +20,9 @@
 .codePanel__project--error {
   border: 2px solid $euiColorDanger;;
 }
+
+.codeSettingsPanel__icon {
+  display: inline-block;
+  position: relative;
+  top: $euiSizeS;
+}
