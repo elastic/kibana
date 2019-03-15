@@ -7,7 +7,7 @@
 import { Job } from './job';
 
 export interface Worker {
-  createJob(payload: any, options: any): Job;
+  createJob(payload: any, options: any): Promise<Job>;
   executeJob(job: Job): void;
   enqueueJob(payload: any, options: any): void;
 

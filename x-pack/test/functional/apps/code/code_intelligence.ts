@@ -45,8 +45,14 @@ export default function codeIntelligenceFunctonalTests({
             'Microsoft/TypeScript-Node-Starter'
           );
 
-          // Wait for the repository to finish index.
-          expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+          // Wait for the index to start.
+          await retry.try(async () => {
+            expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+          });
+          // Wait for the index to end.
+          await retry.try(async () => {
+            expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+          });
         });
       });
 
@@ -105,7 +111,7 @@ export default function codeIntelligenceFunctonalTests({
         });
 
         // Hover on the 'UserModel' reference on line 5.
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[1];
@@ -151,7 +157,7 @@ export default function codeIntelligenceFunctonalTests({
         });
 
         // Hover on the 'UserModel' reference on line 5.
-        await retry.try(async () => {
+        await retry.tryForTime(300000, async () => {
           const spans = await find.allByCssSelector('.mtk31', FIND_TIME);
           expect(spans.length).to.greaterThan(1);
           const userModelSpan = spans[0];

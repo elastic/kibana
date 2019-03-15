@@ -72,7 +72,7 @@ class CodeProjectItem extends React.PureComponent<{
     } else if (status.state === RepoState.DELETING) {
       footer = <Footer>DELETING...</Footer>;
     } else if (status.state === RepoState.INDEXING) {
-      footer = <Footer>INDEXING...</Footer>;
+      footer = <Footer data-test-subj="repositoryIndexOngoing">INDEXING...</Footer>;
     } else if (status.state === RepoState.CLONING) {
       footer = <Footer>CLONING...</Footer>;
     } else if (status.state === RepoState.DELETE_ERROR) {

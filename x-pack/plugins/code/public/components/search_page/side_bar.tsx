@@ -122,7 +122,7 @@ export class SideBar extends React.PureComponent<Props> {
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="s">
+              <EuiTitle size="xxs">
                 <h3>Repositories</h3>
               </EuiTitle>
             </EuiFlexItem>
@@ -137,7 +137,7 @@ export class SideBar extends React.PureComponent<Props> {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="s">
+              <EuiTitle size="xxs">
                 <h3>Languages</h3>
               </EuiTitle>
             </EuiFlexItem>

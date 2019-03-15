@@ -23,11 +23,9 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope = [];
+      let scope: string[] = [];
       if (typeof repoScope === 'string') {
         scope = repoScope.split(',');
-      } else {
-        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -55,11 +53,9 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope = [];
+      let scope: string[] = [];
       if (typeof repoScope === 'string') {
         scope = repoScope.split(',');
-      } else {
-        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: RepositorySearchRequest = {
@@ -89,11 +85,9 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope = [];
+      let scope: string[] = [];
       if (typeof repoScope === 'string') {
         scope = repoScope.split(',');
-      } else {
-        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -123,11 +117,9 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
         page = parseInt(p as string, 10);
       }
 
-      let scope = [];
+      let scope: string[] = [];
       if (typeof repoScope === 'string') {
         scope = repoScope.split(',');
-      } else {
-        return Boom.illegal('Invalid repoScope param');
       }
 
       const searchReq: DocumentSearchRequest = {
@@ -154,11 +146,9 @@ export function symbolSearchRoute(server: hapi.Server, log: Logger) {
       page = parseInt(p as string, 10);
     }
 
-    let scope = [];
+    let scope: string[] = [];
     if (typeof repoScope === 'string') {
       scope = repoScope.split(',');
-    } else {
-      return Boom.illegal('Invalid repoScope param');
     }
 
     const searchReq: SymbolSearchRequest = {

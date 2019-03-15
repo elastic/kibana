@@ -124,7 +124,7 @@ export class DeleteWorker extends AbstractWorker {
     return await this.objectClient.updateRepositoryDeleteStatus(uri, p);
   }
 
-  protected getTimeoutMs(_: any) {
+  protected async getTimeoutMs(_: any) {
     return (
       moment.duration(1, 'hour').asMilliseconds() + moment.duration(10, 'minutes').asMilliseconds()
     );
