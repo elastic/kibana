@@ -111,7 +111,14 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
         moment(xValue).format(dateFormat);
 
       const setDetailVertexId = vertex => {
-        detailVertexId = vertex.id;
+        if (!vertex) {
+          detailVertexId = undefined;
+        } else {
+          detailVertexId = vertex.id;
+        }
+
+        return getPageData($injector)
+          .then(data => this.data = data);
       };
 
       $scope.$watch(() => this.data, data => {

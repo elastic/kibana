@@ -59,7 +59,6 @@ class PipelineViewerUi extends React.Component {
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.inputsTitle', defaultMessage: 'Inputs' })}
               elements={inputs}
               onShowVertexDetails={this.props.setDetailVertexId}
-              detailVertex={this.props.detailVertex}
             />
             <EuiSpacer />
             <Queue queue={queue} />
@@ -69,7 +68,6 @@ class PipelineViewerUi extends React.Component {
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.filtersTitle', defaultMessage: 'Filters' })}
               elements={filters}
               onShowVertexDetails={this.props.setDetailVertexId}
-              detailVertex={this.props.detailVertex}
             />
             <EuiSpacer />
             <StatementSection
@@ -77,7 +75,6 @@ class PipelineViewerUi extends React.Component {
               headingText={intl.formatMessage({ id: 'xpack.monitoring.logstash.pipelineViewer.outputsTitle', defaultMessage: 'Outputs' })}
               elements={outputs}
               onShowVertexDetails={this.props.setDetailVertexId}
-              detailVertex={this.props.detailVertex}
             />
             { this.renderDetailDrawer() }
           </EuiPageContent>
