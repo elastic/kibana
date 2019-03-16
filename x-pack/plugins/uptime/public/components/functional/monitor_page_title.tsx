@@ -16,7 +16,7 @@ export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTi
   <EuiFlexGroup alignItems="baseline">
     <EuiFlexItem grow={false}>
       <EuiTitle>
-        <h2>{name ? name : url}</h2>
+        <h2 data-test-subj="monitor-page-title">{name ? name : url}</h2>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
