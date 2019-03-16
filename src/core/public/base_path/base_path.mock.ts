@@ -30,12 +30,6 @@ const createStartContractMock = () => {
   return startContract;
 };
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 type BasePathServiceContract = PublicMethodsOf<BasePathService>;
 const createMock = () => {
   const mocked: jest.Mocked<BasePathServiceContract> = {

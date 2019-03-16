@@ -18,12 +18,6 @@
  */
 import { LegacyPlatformService } from './legacy_service';
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 type LegacyPlatformServiceContract = PublicMethodsOf<LegacyPlatformService>;
 const createMock = () => {
   const mocked: jest.Mocked<LegacyPlatformServiceContract> = {

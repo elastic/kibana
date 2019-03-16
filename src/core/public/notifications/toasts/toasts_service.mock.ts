@@ -18,12 +18,6 @@
  */
 import { ToastsStart } from './toasts_start';
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 const createStartContractMock = () => {
   const startContract: jest.Mocked<PublicMethodsOf<ToastsStart>> = {
     get$: jest.fn(),
