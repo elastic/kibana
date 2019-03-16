@@ -60,7 +60,9 @@ export const AuditdLoggedinLine = pure<{
     <TokensFlexItem grow={false}>
       <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
     </TokensFlexItem>
-    {processExecutable != null && <TokensFlexItem grow={false}>logged in via</TokensFlexItem>}
+    {processExecutable != null && (
+      <TokensFlexItem grow={false}>attempted a login via</TokensFlexItem>
+    )}
     <TokensFlexItem grow={false}>
       <DraggableBadge
         id={`auditd-loggedin-${id}`}
@@ -69,7 +71,7 @@ export const AuditdLoggedinLine = pure<{
         iconType="console"
       />
     </TokensFlexItem>
-    {result != null && <TokensFlexItem grow={false}>with a</TokensFlexItem>}
+    {result != null && <TokensFlexItem grow={false}>with result</TokensFlexItem>}
     <TokensFlexItem grow={false}>
       <DraggableBadge
         id={`auditd-loggedin-${id}`}

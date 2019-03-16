@@ -34,7 +34,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session14alice@zeek-londonlogged in via/usr/sbin/sshdwith asuccessSource8.42.77.171:--'
+        'Session14alice@zeek-londonattempted a login via/usr/sbin/sshdwith resultsuccessSource8.42.77.171:--'
       );
     });
 
@@ -69,7 +69,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-2asusername-3@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-2asusername-3@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
@@ -88,7 +88,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -108,7 +108,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -128,7 +128,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -148,7 +148,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -168,7 +168,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[primary]as[secondary]@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1[primary]as[secondary]@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -188,7 +188,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1asusername-2@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1asusername-2@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -208,7 +208,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -228,7 +228,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
+        'Sessionsession-1username-1@host-1attempted a login viaexecutable-1with resultsuccess'
       );
     });
 
@@ -301,7 +301,7 @@ describe('AuditdLoggedinDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionlogged in viasome-process-name');
+      expect(wrapper.text()).toEqual('Sessionattempted a login viasome-process-name');
     });
 
     test('it returns only the session-1 if that is all that is sent in', () => {
@@ -337,7 +337,7 @@ describe('AuditdLoggedinDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionwith afailure');
+      expect(wrapper.text()).toEqual('Sessionwith resultfailure');
     });
   });
 });

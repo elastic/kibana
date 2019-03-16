@@ -80,7 +80,7 @@ describe('auditd_loggedin_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children Session14alice@zeek-londonlogged in via/usr/sbin/sshdwith asuccessSource8.42.77.171:--'
+      'some children Session14alice@zeek-londonattempted a login via/usr/sbin/sshdwith resultsuccessSource8.42.77.171:--'
     );
   });
 });
