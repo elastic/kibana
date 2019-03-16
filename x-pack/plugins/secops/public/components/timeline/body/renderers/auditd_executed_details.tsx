@@ -27,15 +27,15 @@ const TokensFlexItem = styled(EuiFlexItem)`
 
 export const AuditdExecutedCommandLine = pure<{
   id: string;
-  hostName?: string | null;
-  userName?: string | null;
-  primary?: string | null;
-  secondary?: string | null;
-  processName?: string | null;
-  processTitle?: string | null;
-  workingDirectory?: string | null;
-  args?: string | null;
-  session?: string | null;
+  hostName: string | null | undefined;
+  userName: string | null | undefined;
+  primary: string | null | undefined;
+  secondary: string | null | undefined;
+  processName: string | null | undefined;
+  processTitle: string | null | undefined;
+  workingDirectory: string | null | undefined;
+  args: string | null | undefined;
+  session: string | null | undefined;
 }>(
   ({
     id,

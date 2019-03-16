@@ -20,8 +20,8 @@ export const nilOrUnSet = (value?: string | null) =>
 
 export const PrimarySecondary = pure<{
   id: string;
-  primary?: string | null;
-  secondary?: string | null;
+  primary: string | null | undefined;
+  secondary: string | null | undefined;
 }>(({ id, primary, secondary }) => {
   if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;
@@ -79,9 +79,9 @@ export const PrimarySecondary = pure<{
 
 export const PrimarySecondaryUserInfo = pure<{
   id: string;
-  userName?: string | null;
-  primary?: string | null;
-  secondary?: string | null;
+  userName: string | null | undefined;
+  primary: string | null | undefined;
+  secondary: string | null | undefined;
 }>(({ id, userName, primary, secondary }) => {
   if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;

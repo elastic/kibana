@@ -31,7 +31,12 @@ describe('UserPrimarySecondary', () => {
     test('should render user name only if that is all that is present', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <PrimarySecondaryUserInfo id="id-123" userName="user-name-1" />
+          <PrimarySecondaryUserInfo
+            id="id-123"
+            userName="user-name-1"
+            primary={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('user-name-1');
@@ -54,7 +59,12 @@ describe('UserPrimarySecondary', () => {
     test('should render primary name only if that is all that is present', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <PrimarySecondaryUserInfo id="id-123" primary="primary-1" />
+          <PrimarySecondaryUserInfo
+            id="id-123"
+            primary="primary-1"
+            userName={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('primary-1');
@@ -77,7 +87,12 @@ describe('UserPrimarySecondary', () => {
     test('should render the secondary name only if that is all that is present', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <PrimarySecondaryUserInfo id="id-123" secondary="secondary-1" />
+          <PrimarySecondaryUserInfo
+            id="id-123"
+            userName={undefined}
+            primary={undefined}
+            secondary="secondary-1"
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('secondary-1');

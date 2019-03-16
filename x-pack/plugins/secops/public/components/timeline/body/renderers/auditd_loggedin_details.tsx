@@ -30,13 +30,13 @@ const TokensFlexItem = styled(EuiFlexItem)`
 
 export const AuditdLoggedinLine = pure<{
   id: string;
-  hostName?: string | null;
-  result?: string | null;
-  session?: string | null;
-  userName?: string | null;
-  primary?: string | null;
-  secondary?: string | null;
-  processExecutable?: string | null;
+  hostName: string | null | undefined;
+  result: string | null | undefined;
+  session: string | null | undefined;
+  userName: string | null | undefined;
+  primary: string | null | undefined;
+  secondary: string | null | undefined;
+  processExecutable: string | null | undefined;
 }>(({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
   <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
     <TokensFlexItem grow={false}>Session</TokensFlexItem>

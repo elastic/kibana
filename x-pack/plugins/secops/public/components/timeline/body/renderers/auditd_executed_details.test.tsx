@@ -56,6 +56,9 @@ describe('AuditExecutedDetails', () => {
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="username-1"
+            session="session-1"
+            primary="username-1"
+            secondary="username-1"
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -64,7 +67,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -74,6 +77,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
             userName="username-1"
             primary="username-1"
             secondary="username-1"
@@ -85,7 +89,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -95,6 +99,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
             userName="username-1"
             primary="unset"
             secondary="unset"
@@ -106,7 +111,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -117,6 +122,7 @@ describe('AuditExecutedDetails', () => {
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="username-1"
+            session="session-1"
             primary="Unset"
             secondary="uNseT"
             processName="process-1"
@@ -127,7 +133,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -137,6 +143,9 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
+            primary={undefined}
+            secondary={undefined}
             userName="username-1"
             processName="process-1"
             processTitle="process-title-1"
@@ -146,7 +155,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -156,6 +165,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
             userName="[username-1]"
             primary="[username-2]"
             secondary="[username-3]"
@@ -167,7 +177,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-2]as[username-3]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -177,6 +187,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
             userName="[username-1]"
             primary="[username-1]"
             secondary="[username-2]"
@@ -188,7 +199,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-1]as[username-2]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -199,6 +210,7 @@ describe('AuditExecutedDetails', () => {
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="unseT"
+            session="session-1"
             primary="[username-primary]"
             secondary="unset"
             processName="process-1"
@@ -209,7 +221,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -219,7 +231,10 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            session="session-1"
             primary="[username-primary]"
+            userName={undefined}
+            secondary={undefined}
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
@@ -228,14 +243,25 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns just a session if only given an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            userName={undefined}
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processName={undefined}
+            processTitle={undefined}
+            workingDirectory={undefined}
+            args={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionin');
@@ -244,7 +270,18 @@ describe('AuditExecutedDetails', () => {
     test('it returns only hostName if only hostname and an id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" hostName="some-host-name" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            hostName="some-host-name"
+            userName={undefined}
+            secondary={undefined}
+            session={undefined}
+            primary={undefined}
+            processName={undefined}
+            processTitle={undefined}
+            workingDirectory={undefined}
+            args={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session@some-host-namein');
@@ -253,7 +290,18 @@ describe('AuditExecutedDetails', () => {
     test('it returns only a user name if only a user name and id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" userName="some-user-name" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            userName="some-user-name"
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processName={undefined}
+            processTitle={undefined}
+            workingDirectory={undefined}
+            args={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsome-user-namein');
@@ -262,7 +310,18 @@ describe('AuditExecutedDetails', () => {
     test('it returns only a process name if only given a process name and id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" processName="some-process-name" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            userName={undefined}
+            processName="some-process-name"
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processTitle={undefined}
+            workingDirectory={undefined}
+            args={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessioninexecutedsome-process-name');
@@ -271,10 +330,21 @@ describe('AuditExecutedDetails', () => {
     test('it returns only session if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" processTitle="some-process-title" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            processTitle="some-process-title"
+            userName="some-user-name"
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processName={undefined}
+            workingDirectory={undefined}
+            args={undefined}
+          />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionin');
+      expect(wrapper.text()).toEqual('Sessionsome-user-namein');
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
@@ -283,6 +353,14 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine
             id={'hello-i-am-an-id'}
             workingDirectory="some-working-directory"
+            userName={undefined}
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processName={undefined}
+            processTitle={undefined}
+            args={undefined}
           />
         </TestProviders>
       );
@@ -292,7 +370,18 @@ describe('AuditExecutedDetails', () => {
     test('it returns only the args with id if that is all that is given (very unlikely situation)', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" args="arg1 arg 2 arg 3" />
+          <AuditdExecutedCommandLine
+            id="hello-i-am-an-id"
+            args="arg1 arg 2 arg 3"
+            userName={undefined}
+            secondary={undefined}
+            session={undefined}
+            hostName={undefined}
+            primary={undefined}
+            processName={undefined}
+            processTitle={undefined}
+            workingDirectory={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessioninarg1 arg 2 arg 3');

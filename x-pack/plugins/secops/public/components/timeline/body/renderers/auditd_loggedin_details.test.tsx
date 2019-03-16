@@ -142,6 +142,8 @@ describe('AuditdLoggedinDetails', () => {
             session="session-1"
             userName="username-1"
             processExecutable="executable-1"
+            primary={undefined}
+            secondary={undefined}
           />
         </TestProviders>
       );
@@ -221,6 +223,7 @@ describe('AuditdLoggedinDetails', () => {
             session="session-1"
             userName="username-1"
             processExecutable="executable-1"
+            secondary={undefined}
           />
         </TestProviders>
       );
@@ -232,7 +235,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only Session if you just send in an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            hostName={undefined}
+            primary={undefined}
+            result={undefined}
+            session={undefined}
+            userName={undefined}
+            processExecutable={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session');
@@ -241,7 +253,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only session and some host name just send in an id and hostName', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} hostName={'some-host-name'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            hostName={'some-host-name'}
+            primary={undefined}
+            result={undefined}
+            session={undefined}
+            userName={undefined}
+            processExecutable={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session@some-host-name');
@@ -250,7 +271,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only session and some-user-name if that is all you sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} userName={'some-user-name'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            userName={'some-user-name'}
+            hostName={undefined}
+            primary={undefined}
+            result={undefined}
+            session={undefined}
+            processExecutable={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsome-user-name');
@@ -259,7 +289,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only processExecutable some-process-name if that is all you sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} processExecutable={'some-process-name'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            processExecutable={'some-process-name'}
+            hostName={undefined}
+            primary={undefined}
+            result={undefined}
+            session={undefined}
+            userName={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionlogged in viasome-process-name');
@@ -268,7 +307,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only the session-1 if that is all that is sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} session={'session-1'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            session={'session-1'}
+            hostName={undefined}
+            primary={undefined}
+            result={undefined}
+            userName={undefined}
+            processExecutable={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-1');
@@ -277,7 +325,16 @@ describe('AuditdLoggedinDetails', () => {
     test('it returns only the result if that is all that is sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdLoggedinLine id={'hello-i-am-an-id'} result={'failure'} />
+          <AuditdLoggedinLine
+            id={'hello-i-am-an-id'}
+            result={'failure'}
+            hostName={undefined}
+            primary={undefined}
+            session={undefined}
+            userName={undefined}
+            processExecutable={undefined}
+            secondary={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionwith afailure');
