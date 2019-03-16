@@ -50,7 +50,7 @@ export const AuditdExecutedCommandLine = pure<{
     session,
   }) => (
     <Details>
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
         <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge

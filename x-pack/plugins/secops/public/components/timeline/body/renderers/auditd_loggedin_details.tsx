@@ -38,7 +38,7 @@ export const AuditdLoggedinLine = pure<{
   secondary?: string | null;
   processExecutable?: string | null;
 }>(({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
-  <EuiFlexGroup justifyContent="center" gutterSize="none">
+  <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
     <TokensFlexItem grow={false}>Session</TokensFlexItem>
     <TokensFlexItem grow={false}>
       <DraggableBadge
