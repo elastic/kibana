@@ -15,14 +15,17 @@ const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
+export const nilOrUnSet = (value?: string | null) =>
+  value == null || value.toLowerCase() === 'unset';
+
 export const PrimarySecondary = pure<{
   id: string;
   primary?: string | null;
   secondary?: string | null;
 }>(({ id, primary, secondary }) => {
-  if (primary == null && secondary == null) {
+  if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;
-  } else if (primary != null && secondary == null) {
+  } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return (
       <DraggableBadge
         id={id}
@@ -31,7 +34,7 @@ export const PrimarySecondary = pure<{
         iconType="user"
       />
     );
-  } else if (primary == null && secondary != null) {
+  } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
     return (
       <DraggableBadge
         id={id}
@@ -80,17 +83,17 @@ export const PrimarySecondaryUserInfo = pure<{
   primary?: string | null;
   secondary?: string | null;
 }>(({ id, userName, primary, secondary }) => {
-  if (userName == null && primary == null && secondary == null) {
+  if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;
   } else if (
-    userName != null &&
-    primary != null &&
-    secondary != null &&
+    !nilOrUnSet(userName) &&
+    !nilOrUnSet(primary) &&
+    !nilOrUnSet(secondary) &&
     userName === primary &&
     userName === secondary
   ) {
     return <DraggableBadge id={id} field="user.name" value={userName} iconType="user" />;
-  } else if (userName != null && primary == null && secondary == null) {
+  } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return <DraggableBadge id={id} field="user.name" value={userName} iconType="user" />;
   } else {
     return <PrimarySecondary id={id} primary={primary} secondary={secondary} />;

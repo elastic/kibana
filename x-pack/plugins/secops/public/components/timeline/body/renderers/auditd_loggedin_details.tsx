@@ -30,15 +30,16 @@ const TokensFlexItem = styled(EuiFlexItem)`
 
 export const AuditdLoggedinLine = pure<{
   id: string;
+  hostName?: string | null;
   result?: string | null;
   session?: string | null;
   userName?: string | null;
   primary?: string | null;
   secondary?: string | null;
-  processPid?: string | null;
   processExecutable?: string | null;
-}>(({ id, result, session, processPid, processExecutable, userName, primary, secondary }) => (
+}>(({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
   <EuiFlexGroup justifyContent="center" gutterSize="none">
+    <TokensFlexItem grow={false}>Session</TokensFlexItem>
     <TokensFlexItem grow={false}>
       <DraggableBadge
         id={`auditd-loggedin-${id}`}
@@ -55,22 +56,26 @@ export const AuditdLoggedinLine = pure<{
         secondary={secondary}
       />
     </TokensFlexItem>
+    <TokensFlexItem grow={false}>@</TokensFlexItem>
+    <TokensFlexItem grow={false}>
+      <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
+    </TokensFlexItem>
+    <TokensFlexItem grow={false}>logged in via</TokensFlexItem>
     <TokensFlexItem grow={false}>
       <DraggableBadge
         id={`auditd-loggedin-${id}`}
-        field="process.pid"
-        queryValue={processPid}
+        field="process.executable"
         value={processExecutable}
         iconType="console"
       />
     </TokensFlexItem>
+    <TokensFlexItem grow={false}>with a</TokensFlexItem>
     <TokensFlexItem grow={false}>
       <DraggableBadge
         id={`auditd-loggedin-${id}`}
         field="auditd.result"
         queryValue={result}
-        value={`Result: ${result}`}
-        iconType="tag"
+        value={result}
       />
     </TokensFlexItem>
   </EuiFlexGroup>
@@ -79,21 +84,21 @@ export const AuditdLoggedinLine = pure<{
 export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
   ({ browserFields, data }) => {
     const id = data._id;
+    const session: string | null | undefined = get('auditd.session', data);
+    const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
     const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     const result: string | null | undefined = get('auditd.result', data);
-    const session: string | null | undefined = get('auditd.session', data);
-    const processPid: string | null | undefined = get('process.pid', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
     if (data.process != null) {
       return (
         <Details>
           <AuditdLoggedinLine
             id={id}
+            hostName={hostName}
             result={result}
             session={session}
-            processPid={processPid}
             processExecutable={processExecutable}
             primary={primary}
             secondary={secondary}

@@ -31,7 +31,6 @@ export const AuditdExecutedCommandLine = pure<{
   userName?: string | null;
   primary?: string | null;
   secondary?: string | null;
-  processPid?: string | null;
   processName?: string | null;
   processTitle?: string | null;
   workingDirectory?: string | null;
@@ -44,7 +43,6 @@ export const AuditdExecutedCommandLine = pure<{
     userName,
     primary,
     secondary,
-    processPid,
     processName,
     processTitle,
     workingDirectory,
@@ -53,6 +51,7 @@ export const AuditdExecutedCommandLine = pure<{
   }) => (
     <Details>
       <EuiFlexGroup justifyContent="center" gutterSize="none">
+        <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-loggedin-${id}`}
@@ -69,9 +68,11 @@ export const AuditdExecutedCommandLine = pure<{
             secondary={secondary}
           />
         </TokensFlexItem>
+        <TokensFlexItem grow={false}>@</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
         </TokensFlexItem>
+        <TokensFlexItem grow={false}>in</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-executed-element-${id}`}
@@ -80,22 +81,24 @@ export const AuditdExecutedCommandLine = pure<{
             iconType="folderOpen"
           />
         </TokensFlexItem>
+        <TokensFlexItem grow={false}>executed</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-executed-element-${id}`}
-            field="process.pid"
-            queryValue={processPid}
+            field="process.name"
             value={processName}
             iconType="console"
           />
         </TokensFlexItem>
         <TokensFlexItem grow={false}>
-          <DraggableBadge
-            id={`auditd-executed-element-${id}`}
-            field="process.title"
-            queryValue={processTitle != null ? processTitle : ''}
-            value={args}
-          />
+          {args !== '' && (
+            <DraggableBadge
+              id={`auditd-executed-element-${id}`}
+              field="process.title"
+              queryValue={processTitle != null ? processTitle : ''}
+              value={args}
+            />
+          )}
         </TokensFlexItem>
       </EuiFlexGroup>
     </Details>
@@ -107,7 +110,6 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
   const session: string | null | undefined = get('auditd.session', data);
   const hostName: string | null | undefined = get('host.name', data);
   const userName: string | null | undefined = get('user.name', data);
-  const processPid: string | null | undefined = get('process.pid', data);
   const processName: string | null | undefined = get('process.name', data);
   const processTitle: string | null | undefined = get('process.title', data);
   const workingDirectory: string | null | undefined = get('process.working_directory', data);
@@ -121,7 +123,6 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
         id={id}
         hostName={hostName}
         userName={userName}
-        processPid={processPid}
         processName={processName}
         processTitle={processTitle}
         workingDirectory={workingDirectory}
