@@ -51,11 +51,11 @@ describe('ZeekSignature', () => {
     });
 
     test('it returns null given null', () => {
-      expect(extractStateValue(null)).toEqual(null);
+      expect(extractStateValue(null)).toBeNull();
     });
 
     test('it returns null given an invalid string', () => {
-      expect(extractStateValue('garbage')).toEqual(null);
+      expect(extractStateValue('garbage')).toBeNull();
     });
   });
 
@@ -76,7 +76,7 @@ describe('ZeekSignature', () => {
   describe('#TotalVirusLinkSha', () => {
     test('should return null if value is null', () => {
       const wrapper = mountWithIntl(<TotalVirusLinkSha value={null} />);
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
 
     test('should render value', () => {
@@ -93,7 +93,7 @@ describe('ZeekSignature', () => {
   describe('#Link', () => {
     test('should return null if value is null', () => {
       const wrapper = mountWithIntl(<Link value={null} />);
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
 
     test('should render value', () => {
@@ -116,7 +116,7 @@ describe('ZeekSignature', () => {
           <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
 
     test('it renders the default ZeekSignature', () => {

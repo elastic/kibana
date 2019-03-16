@@ -96,7 +96,7 @@ describe('ZeekDetails', () => {
           <ZeekDetails data={mockEcsData[0]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
   });
 });

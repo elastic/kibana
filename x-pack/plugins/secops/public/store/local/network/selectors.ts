@@ -30,7 +30,7 @@ export const topNFlowSelector = () =>
 export const networkFilterQueryExpression = () =>
   createSelector(
     selectNetwork,
-    network => (network.filterQuery! ? network.filterQuery!.query.expression : null)
+    network => (network.filterQuery ? network.filterQuery.query.expression : null)
   );
 
 export const networkFilterQueryAsJson = () =>

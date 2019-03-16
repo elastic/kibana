@@ -23,6 +23,34 @@ export const ecsSchema = gql`
     region_name: String
   }
 
+  type PrimarySecondary {
+    primary: String
+    secondary: String
+    type: String
+  }
+
+  type Summary {
+    actor: PrimarySecondary
+    object: PrimarySecondary
+    how: String
+    message_type: String
+    sequence: Float
+  }
+
+  type AuditdData {
+    acct: String
+    terminal: String
+    op: String
+  }
+
+  type AuditdEcsFields {
+    result: String
+    session: String
+    data: AuditdData
+    summary: Summary
+    sequence: Float
+  }
+
   type OsEcsFields {
     platform: String
     name: String
@@ -221,6 +249,7 @@ export const ecsSchema = gql`
   type ECS {
     _id: String!
     _index: String
+    auditd: AuditdEcsFields
     destination: DestinationEcsFields
     event: EventEcsFields
     geo: GeoEcsFields

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, isNil, isString } from 'lodash/fp';
+import { get, isString } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -40,7 +40,7 @@ export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
 };
 
 export const getOrEmptyTagFromValue = (value: string | number | null | undefined): JSX.Element => {
-  if (isNil(value)) {
+  if (value == null) {
     return getEmptyTagValue();
   } else if (value === '') {
     return getEmptyStringTag();

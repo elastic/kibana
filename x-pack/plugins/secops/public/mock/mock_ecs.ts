@@ -784,4 +784,68 @@ export const mockEcsData: Ecs[] = [
     },
     zeek: null,
   },
+  {
+    _id: '21',
+    _index: 'auditbeat-8.0.0-2019.02.19-000001',
+    timestamp: '2019-03-14T22:30:25.527Z',
+    event: {
+      action: 'logged-in',
+      severity: null,
+      module: 'auditd',
+      category: 'user-login',
+      id: null,
+      dataset: null,
+    },
+    auditd: {
+      result: 'success',
+      session: '14',
+      data: {
+        acct: null,
+        terminal: '/dev/pts/0',
+        op: 'login',
+      },
+      summary: {
+        actor: {
+          primary: 'alice',
+          secondary: 'alice',
+        },
+        object: {
+          primary: '/dev/pts/0',
+          secondary: '8.42.77.171',
+          type: 'user-session',
+        },
+        how: '/usr/sbin/sshd',
+        message_type: null,
+        sequence: null,
+      },
+    },
+    host: {
+      id: '7c21f5ed03b04d0299569d221fe18bbc',
+      name: 'zeek-london',
+      ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
+    },
+    source: {
+      ip: '8.42.77.171',
+      port: null,
+    },
+    destination: null,
+    geo: null,
+    suricata: null,
+    network: null,
+    http: null,
+    url: null,
+    user: {
+      name: 'root',
+    },
+    process: {
+      pid: 17471,
+      name: null,
+      ppid: null,
+      args: null,
+      executable: '/usr/sbin/sshd',
+      title: null,
+      working_directory: null,
+    },
+    zeek: null,
+  },
 ];

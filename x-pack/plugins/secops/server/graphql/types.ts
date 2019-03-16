@@ -279,6 +279,8 @@ export interface Ecs {
 
   _index?: string | null;
 
+  auditd?: AuditdEcsFields | null;
+
   destination?: DestinationEcsFields | null;
 
   event?: EventEcsFields | null;
@@ -304,6 +306,46 @@ export interface Ecs {
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
+}
+
+export interface AuditdEcsFields {
+  result?: string | null;
+
+  session?: string | null;
+
+  data?: AuditdData | null;
+
+  summary?: Summary | null;
+
+  sequence?: number | null;
+}
+
+export interface AuditdData {
+  acct?: string | null;
+
+  terminal?: string | null;
+
+  op?: string | null;
+}
+
+export interface Summary {
+  actor?: PrimarySecondary | null;
+
+  object?: PrimarySecondary | null;
+
+  how?: string | null;
+
+  message_type?: string | null;
+
+  sequence?: number | null;
+}
+
+export interface PrimarySecondary {
+  primary?: string | null;
+
+  secondary?: string | null;
+
+  type?: string | null;
 }
 
 export interface DestinationEcsFields {
@@ -1702,6 +1744,8 @@ export namespace EcsResolvers {
 
     _index?: IndexResolver<string | null, TypeParent, Context>;
 
+    auditd?: AuditdResolver<AuditdEcsFields | null, TypeParent, Context>;
+
     destination?: DestinationResolver<DestinationEcsFields | null, TypeParent, Context>;
 
     event?: EventResolver<EventEcsFields | null, TypeParent, Context>;
@@ -1739,6 +1783,11 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
+  export type AuditdResolver<
+    R = AuditdEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
     R = DestinationEcsFields | null,
     Parent = Ecs,
@@ -1802,6 +1851,138 @@ export namespace EcsResolvers {
   export type ProcessResolver<
     R = ProcessEcsFields | null,
     Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuditdEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuditdEcsFields> {
+    result?: ResultResolver<string | null, TypeParent, Context>;
+
+    session?: SessionResolver<string | null, TypeParent, Context>;
+
+    data?: DataResolver<AuditdData | null, TypeParent, Context>;
+
+    summary?: SummaryResolver<Summary | null, TypeParent, Context>;
+
+    sequence?: SequenceResolver<number | null, TypeParent, Context>;
+  }
+
+  export type ResultResolver<
+    R = string | null,
+    Parent = AuditdEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SessionResolver<
+    R = string | null,
+    Parent = AuditdEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DataResolver<
+    R = AuditdData | null,
+    Parent = AuditdEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SummaryResolver<
+    R = Summary | null,
+    Parent = AuditdEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SequenceResolver<
+    R = number | null,
+    Parent = AuditdEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuditdDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AuditdData> {
+    acct?: AcctResolver<string | null, TypeParent, Context>;
+
+    terminal?: TerminalResolver<string | null, TypeParent, Context>;
+
+    op?: OpResolver<string | null, TypeParent, Context>;
+  }
+
+  export type AcctResolver<
+    R = string | null,
+    Parent = AuditdData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TerminalResolver<
+    R = string | null,
+    Parent = AuditdData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type OpResolver<
+    R = string | null,
+    Parent = AuditdData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SummaryResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = Summary> {
+    actor?: ActorResolver<PrimarySecondary | null, TypeParent, Context>;
+
+    object?: ObjectResolver<PrimarySecondary | null, TypeParent, Context>;
+
+    how?: HowResolver<string | null, TypeParent, Context>;
+
+    message_type?: MessageTypeResolver<string | null, TypeParent, Context>;
+
+    sequence?: SequenceResolver<number | null, TypeParent, Context>;
+  }
+
+  export type ActorResolver<
+    R = PrimarySecondary | null,
+    Parent = Summary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ObjectResolver<
+    R = PrimarySecondary | null,
+    Parent = Summary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type HowResolver<R = string | null, Parent = Summary, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type MessageTypeResolver<
+    R = string | null,
+    Parent = Summary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SequenceResolver<
+    R = number | null,
+    Parent = Summary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PrimarySecondaryResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = PrimarySecondary> {
+    primary?: PrimaryResolver<string | null, TypeParent, Context>;
+
+    secondary?: SecondaryResolver<string | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PrimaryResolver<
+    R = string | null,
+    Parent = PrimarySecondary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type SecondaryResolver<
+    R = string | null,
+    Parent = PrimarySecondary,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = PrimarySecondary,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

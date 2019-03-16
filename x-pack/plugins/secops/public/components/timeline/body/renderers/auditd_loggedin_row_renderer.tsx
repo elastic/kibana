@@ -9,9 +9,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { RowRenderer, RowRendererContainer } from '.';
-import { AuditdExecutedDetails } from './auditd_executed_details';
+import { AuditdLoggedinDetails } from './auditd_loggedin_details';
 
-const AuditExecutedRow = styled.div`
+const AuditLoggedinRow = styled.div`
   width: 100%;
   overflow: hidden;
   &:hover {
@@ -19,7 +19,7 @@ const AuditExecutedRow = styled.div`
   }
 `;
 
-export const auditdExecutedRowRenderer: RowRenderer = {
+export const auditdLoggedinRowRenderer: RowRenderer = {
   isInstance: ecs => {
     const module: string | null = get('event.module', ecs);
     const action: string | null = get('event.action', ecs);
@@ -27,15 +27,15 @@ export const auditdExecutedRowRenderer: RowRenderer = {
       module != null &&
       module.toLowerCase() === 'auditd' &&
       action != null &&
-      action.toLowerCase() === 'executed'
+      action.toLowerCase() === 'logged-in'
     );
   },
-  renderRow: ({ data, width, children }) => (
-    <AuditExecutedRow>
+  renderRow: ({ browserFields, data, width, children }) => (
+    <AuditLoggedinRow>
       {children}
       <RowRendererContainer width={width}>
-        <AuditdExecutedDetails data={data} />
+        <AuditdLoggedinDetails browserFields={browserFields} data={data} />
       </RowRendererContainer>
-    </AuditExecutedRow>
+    </AuditLoggedinRow>
   ),
 };

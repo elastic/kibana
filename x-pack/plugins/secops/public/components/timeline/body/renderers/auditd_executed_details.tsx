@@ -11,10 +11,9 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ecs } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { Provider } from '../../../timeline/data_providers/provider';
+import { DraggableBadge } from '../../../draggables';
+
+import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
 const Details = styled.div`
   margin-left: 10px;
@@ -22,97 +21,100 @@ const Details = styled.div`
   margin-bottom: 10px;
 `;
 
-const MarginLeftFlexItem = styled(EuiFlexItem)`
+const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-const MarginRightFlexItem = styled(EuiFlexItem)`
-  margin-right: 3px;
-`;
-
-export const DraggableAuditdExecutedElement = pure<{
-  id: string;
-  name?: string;
-  field: string;
-  value?: string | null;
-  queryValue?: string | null;
-}>(({ id, name, field, value, queryValue }) =>
-  value != null ? (
-    <DraggableWrapper
-      dataProvider={{
-        and: [],
-        enabled: true,
-        id: escapeDataProviderId(`auditd-executed-element-${id}-${field}-${value}`),
-        name: name ? name : value,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field,
-          value: escapeQueryValue(queryValue ? queryValue : value),
-        },
-      }}
-      render={(dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <>{value}</>
-        )
-      }
-    />
-  ) : null
-);
-
 export const AuditdExecutedCommandLine = pure<{
   id: string;
-  hostName?: string | null;
-  userName?: string | null;
-  processName?: string | null;
-  processTitle?: string | null;
-  workingDirectory?: string | null;
-  args?: string | null;
-}>(({ id, hostName, userName, processName, processTitle, workingDirectory, args }) => (
-  <Details>
-    <EuiFlexGroup justifyContent="flexStart" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <DraggableAuditdExecutedElement id={id} field="user.name" value={userName} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>@</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <DraggableAuditdExecutedElement id={id} field="host.name" value={hostName} />
-      </EuiFlexItem>
-      <MarginRightFlexItem grow={false}>:</MarginRightFlexItem>
-      <EuiFlexItem grow={false}>
-        <DraggableAuditdExecutedElement
-          id={id}
-          field="process.working_directory"
-          value={workingDirectory}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>></EuiFlexItem>
-      <MarginLeftFlexItem grow={false}>
-        <DraggableAuditdExecutedElement id={id} field="process.name" value={processName} />
-      </MarginLeftFlexItem>
-      <MarginLeftFlexItem grow={false}>
-        <DraggableAuditdExecutedElement
-          id={id}
-          field="process.title"
-          queryValue={processTitle != null ? processTitle : ''}
-          value={args}
-        />
-      </MarginLeftFlexItem>
-    </EuiFlexGroup>
-  </Details>
-));
+  hostName: string | null | undefined;
+  userName: string | null | undefined;
+  primary: string | null | undefined;
+  secondary: string | null | undefined;
+  processName: string | null | undefined;
+  processTitle: string | null | undefined;
+  workingDirectory: string | null | undefined;
+  args: string | null | undefined;
+  session: string | null | undefined;
+}>(
+  ({
+    id,
+    hostName,
+    userName,
+    primary,
+    secondary,
+    processName,
+    processTitle,
+    workingDirectory,
+    args,
+    session,
+  }) => (
+    <Details>
+      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+        <TokensFlexItem grow={false}>Session</TokensFlexItem>
+        <TokensFlexItem grow={false}>
+          <DraggableBadge
+            id={`auditd-loggedin-${id}`}
+            field="auditd.session"
+            value={session}
+            iconType="number"
+          />
+        </TokensFlexItem>
+        <TokensFlexItem grow={false}>
+          <PrimarySecondaryUserInfo
+            id={`auditd-executed-element-${id}`}
+            userName={userName}
+            primary={primary}
+            secondary={secondary}
+          />
+        </TokensFlexItem>
+        {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
+        <TokensFlexItem grow={false}>
+          <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
+        </TokensFlexItem>
+        <TokensFlexItem grow={false}>in</TokensFlexItem>
+        <TokensFlexItem grow={false}>
+          <DraggableBadge
+            id={`auditd-executed-element-${id}`}
+            field="process.working_directory"
+            value={workingDirectory}
+            iconType="folderOpen"
+          />
+        </TokensFlexItem>
+        {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
+        <TokensFlexItem grow={false}>
+          <DraggableBadge
+            id={`auditd-executed-element-${id}`}
+            field="process.name"
+            value={processName}
+            iconType="console"
+          />
+        </TokensFlexItem>
+        <TokensFlexItem grow={false}>
+          {args !== '' && (
+            <DraggableBadge
+              id={`auditd-executed-element-${id}`}
+              field="process.title"
+              queryValue={processTitle != null ? processTitle : ''}
+              value={args}
+            />
+          )}
+        </TokensFlexItem>
+      </EuiFlexGroup>
+    </Details>
+  )
+);
 
 export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
+  const session: string | null | undefined = get('auditd.session', data);
   const hostName: string | null | undefined = get('host.name', data);
   const userName: string | null | undefined = get('user.name', data);
   const processName: string | null | undefined = get('process.name', data);
   const processTitle: string | null | undefined = get('process.title', data);
   const workingDirectory: string | null | undefined = get('process.working_directory', data);
+  const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
+  const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
   const rawArgs: string[] | null | undefined = get('process.args', data);
   const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
   if (data.process != null) {
@@ -125,6 +127,9 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
         processTitle={processTitle}
         workingDirectory={workingDirectory}
         args={args}
+        session={session}
+        primary={primary}
+        secondary={secondary}
       />
     );
   } else {

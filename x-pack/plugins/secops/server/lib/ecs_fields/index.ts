@@ -6,6 +6,22 @@
 
 import { extendMap } from './extend_map';
 
+export const auditdMap: Readonly<Record<string, string>> = {
+  'auditd.result': 'auditd.result',
+  'auditd.session': 'auditd.session',
+  'auditd.data.acct': 'auditd.data.acct',
+  'auditd.data.terminal': 'auditd.data.terminal',
+  'auditd.data.op': 'auditd.data.op',
+  'auditd.summary.actor.primary': 'auditd.summary.actor.primary',
+  'auditd.summary.actor.secondary': 'auditd.summary.actor.secondary',
+  'auditd.summary.object.primary': 'auditd.summary.object.primary',
+  'auditd.summary.object.secondary': 'auditd.summary.object.secondary',
+  'auditd.summary.object.type': 'auditd.summary.object.type',
+  'auditd.summary.how': 'auditd.summary.how',
+  'auditd.summary.message_type': 'auditd.summary.message_type',
+  'auditd.summary.sequence': 'auditd.summary.sequence',
+};
+
 export const osFieldsMap: Readonly<Record<string, string>> = {
   'os.platform': 'os.platform',
   'os.name': 'os.name',
@@ -167,6 +183,7 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
 
 export const eventFieldsMap: Readonly<Record<string, string>> = {
   timestamp: '@timestamp',
+  ...{ ...auditdMap },
   ...{ ...destinationFieldsMap },
   ...{ ...eventBaseFieldsMap },
   ...{ ...geoFieldsMap },

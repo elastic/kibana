@@ -37,6 +37,29 @@ export const timelineQuery = gql`
               id
               dataset
             }
+            auditd {
+              result
+              session
+              data {
+                acct
+                terminal
+                op
+              }
+              summary {
+                actor {
+                  primary
+                  secondary
+                }
+                object {
+                  primary
+                  secondary
+                  type
+                }
+                how
+                message_type
+                sequence
+              }
+            }
             host {
               id
               name
