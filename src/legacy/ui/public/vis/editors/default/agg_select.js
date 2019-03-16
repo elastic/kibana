@@ -30,12 +30,10 @@ uiModules
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
-    ['setValidity', { watchDepth: 'reference' }],
-    ['setDirty', { watchDepth: 'reference' }],
     'value',
     'isSubAggregation',
     'aggHelpLink',
-    'isSelectValid'
+    'isSelectInvalid'
   ]))
   .directive('visAggSelect', function () {
     return {
@@ -47,12 +45,10 @@ uiModules
             agg="agg"
             value="paramValue"
             set-value="onChange"
-            set-validity="setValidity"
-            set-dirty="setDirty"
             is-sub-aggregation="isSubAggregation"
             agg-help-link="aggHelpLink"
             agg-type-options="aggTypeOptions"
-            is-select-valid="isSelectValid"
+            is-select-invalid="isSelectInvalid"
           ></vis-agg-select-react-wrapper>`;
       },
       link: {
@@ -62,6 +58,10 @@ uiModules
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
+          const setValidity = (isValid) => {
+            ngModelCtrl.$setValidity('required', isValid);
+          };
+
           $scope.$watch('agg.type', (value) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
@@ -71,26 +71,29 @@ uiModules
             if (has($scope, 'agg.type.name')) {
               $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
             }
-
-            $scope.isSelectValid = Boolean(get($scope, 'agg.type'));
-          }, true);
-
-          ngModelCtrl.$isEmpty = () => !$scope.agg.type;
+          });
 
           $scope.onChange = (value) => {
-            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onAggTypeChange($scope.agg, value);
+            const isValueEmpty = !value;
+
+            // The model is changed if the agg type is selected
+            if (!isValueEmpty) {
+              // This is obviously not a good code quality, but without using scope binding (which we can't see above)
+              // to bind function values, this is right now the best temporary fix, until all of this will be gone.
+              $scope.$parent.onAggTypeChange($scope.agg, value);
+            } else {
+              // If nothing is selected, the paramValue is reset, otherwise it is set to the value in the watcher.
+              $scope.paramValue = value;
+            }
+
             ngModelCtrl.$setDirty();
-
-            $scope.setValidity(!!value);
+            // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
+            setValidity(!isValueEmpty);
+            $scope.isSelectInvalid = isValueEmpty;
           };
 
-          $scope.setDirty = () => ngModelCtrl.$setDirty();
-
-          $scope.setValidity = (isValid) => {
-            ngModelCtrl.$setValidity('requiredAggType', isValid);
-          };
+          // Since it's required field we set validity to prevent submiting the form when agg isn't selected initially.
+          setValidity(!!$scope.agg.type);
         }
       }
     };

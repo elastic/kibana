@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -28,29 +28,29 @@ import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
-  value: any;
+  value: AggType;
   setValue: (aggType: AggType) => void;
-  setValidity: (isValid: boolean) => void;
-  setDirty: () => void;
   aggHelpLink: string;
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
-  isSelectValid: boolean;
+  isSelectInvalid: boolean;
 }
 
 function DefaultEditorAggSelect({
   // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
-  // we added default value for agg and aggTypeOptions. It can be removed after 'agg_params' is converted to React
+  // we added default value for agg, value and aggTypeOptions. It can be removed after 'agg_params' is converted to React
   agg = {},
   value = { title: '' },
   setValue,
   aggTypeOptions = [],
   aggHelpLink,
-  isSelectValid,
+  isSelectInvalid,
   isSubAggregation,
 }: DefaultEditorAggSelectProps) {
-  const selectedOptions: ComboBoxGroupedOption[] =
-    value && value.title ? [{ label: value.title, value }] : [];
+  const isAggTypeDefined = value && Boolean(value.title);
+  const selectedOptions: ComboBoxGroupedOption[] = isAggTypeDefined
+    ? [{ label: value.title, value }]
+    : [];
 
   const label = isSubAggregation ? (
     <FormattedMessage
@@ -74,22 +74,18 @@ function DefaultEditorAggSelect({
       <FormattedMessage
         id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
         defaultMessage="{aggTitle} help"
-        values={{ aggTitle: value && value.title ? value.title : '' }}
+        values={{ aggTitle: isAggTypeDefined ? value.title : '' }}
       />
     </EuiLink>
   );
-
-  const onChange = (options: ComboBoxGroupedOption[]) => {
-    const comboBoxValue = get(options, '0.value');
-    setValue(comboBoxValue);
-  };
 
   return (
     <EuiFormRow
       label={label}
       labelAppend={helpLink}
       className="form-group"
-      isInvalid={!isSelectValid}
+      isInvalid={isSelectInvalid}
+      fullWidth={true}
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
@@ -99,10 +95,11 @@ function DefaultEditorAggSelect({
         options={aggTypeOptions}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        onChange={onChange}
+        onChange={options => setValue(get(options, '0.value'))}
         data-test-subj="defaultEditorAggSelect"
         isClearable={false}
-        isInvalid={!isSelectValid}
+        isInvalid={isSelectInvalid}
+        fullWidth={true}
       />
     </EuiFormRow>
   );

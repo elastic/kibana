@@ -19,16 +19,16 @@
 
 import $ from 'jquery';
 import { get } from 'lodash';
-import advancedToggleHtml from './advanced_toggle.html';
+import { aggTypes } from '../../../agg_types';
+import { aggTypeFilters } from '../../../agg_types/filter';
+import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 import '../../../filters/match_any';
+import { uiModules } from '../../../modules';
+import { editorConfigProviders } from '../config/editor_config_providers';
+import advancedToggleHtml from './advanced_toggle.html';
 import './agg_param';
 import './agg_select';
-import { aggTypes } from '../../../agg_types';
-import { uiModules } from '../../../modules';
 import aggParamsTemplate from './agg_params.html';
-import { aggTypeFilters } from '../../../agg_types/filter';
-import { editorConfigProviders } from '../config/editor_config_providers';
-import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
 import { groupAggregationsBy } from './default_editor_utils';
 
 uiModules
