@@ -595,7 +595,7 @@ All teams that own a plugin are strongly encouraged to remove angular entirely, 
 
 One way to address this problem is to go through the code that is currently exposed to plugins and refactor away all of the touch points into angular.js. This might be the easiest option in some cases, but it might be hard in others.
 
-Another way to address this problem is to create an entirely new set of plugin APIs that are not dependendent on angular.js, and then update the implementation within the plugin to "merge" the angular and non-angular capabilities together. This is a good approach if preserving the existing angular API until we remove the old plugin system entirely is of critical importance. Generally speaking though, the removal of angular and introduction of a new set of public plugin APIs is a good reason to make a breaking change to the existing plugin capabilities. Make sure the PRs are tagged appropriate so we add these changes to our plugin changes blog post for each release.
+Another way to address this problem is to create an entirely new set of plugin APIs that are not dependendent on angular.js, and then update the implementation within the plugin to "merge" the angular and non-angular capabilities together. This is a good approach if preserving the existing angular API until we remove the old plugin system entirely is of critical importance. Generally speaking though, the removal of angular and introduction of a new set of public plugin APIs is a good reason to make a breaking change to the existing plugin capabilities. Make sure the PRs are tagged appropriately so we add these changes to our plugin changes blog post for each release.
 
 ### Move all webpack alias imports into apiExport entry files
 
