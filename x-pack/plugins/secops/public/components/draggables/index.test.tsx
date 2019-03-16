@@ -45,7 +45,7 @@ describe('draggables', () => {
   });
 
   describe('DefaultDraggable', () => {
-    test('it works with just an id, field, and value and is the default', () => {
+    test('it works with just an id, field, and value and is some value', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DefaultDraggable id="draggable-id" field="some-field" value="some value" />
@@ -57,7 +57,7 @@ describe('draggables', () => {
     test('it returns null if value is undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <DefaultDraggable id="draggable-id" field="some-field" />
+          <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(null);
@@ -91,7 +91,12 @@ describe('draggables', () => {
     test('it returns null if value is undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <DraggableBadge id="draggable-id" field="some-field" iconType="number" />
+          <DraggableBadge
+            id="draggable-id"
+            field="some-field"
+            iconType="number"
+            value={undefined}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(null);

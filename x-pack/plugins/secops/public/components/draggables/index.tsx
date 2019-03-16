@@ -17,7 +17,7 @@ import { Provider } from '../timeline/data_providers/provider';
 export interface DefaultDraggableType {
   id: string;
   field: string;
-  value?: string | null;
+  value: string | null | undefined;
   name?: string | null;
   queryValue?: string | null;
   children?: React.ReactNode;
