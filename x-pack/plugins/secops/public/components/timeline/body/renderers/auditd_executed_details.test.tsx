@@ -59,12 +59,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -80,12 +80,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -101,12 +101,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -122,12 +122,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -141,12 +141,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -162,12 +162,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-2]as[username-3]@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Session[username-2]as[username-3]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -183,12 +183,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-1]as[username-2]@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Session[username-1]as[username-2]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -204,12 +204,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -223,12 +223,12 @@ describe('AuditExecutedDetails', () => {
             processName="process-1"
             processTitle="process-title-1"
             workingDirectory="working-directory-1"
-            args="arg1 arg 2 arg3"
+            args="arg1 arg2 arg3"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg 2 arg3'
+        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arg2 arg3'
       );
     });
 
