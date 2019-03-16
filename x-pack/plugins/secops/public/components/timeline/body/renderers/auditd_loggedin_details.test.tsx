@@ -8,36 +8,37 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+import { mockBrowserFields } from '../../../../containers/source/mock';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
-import { AuditdExecutedCommandLine, AuditdExecutedDetails } from './auditd_executed_details';
+import { AuditdLoggedinDetails, AuditdLoggedinLine } from './auditd_loggedin_details';
 
-describe('AuditExecutedDetails', () => {
+describe('AuditdLoggedinDetails', () => {
   describe('rendering', () => {
-    test('it renders the default AuditExecutedDetails', () => {
+    test('it renders the default AuditdLoggedinDetails', () => {
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <AuditdExecutedDetails data={mockEcsData[19]} />
+          <AuditdLoggedinDetails data={mockEcsData[20]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it returns auditd executed if the data does contain auditd executed data', () => {
+    test('it returns auditd executed if the data does contain auditd loggedin data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedDetails data={mockEcsData[19]} />
+          <AuditdLoggedinDetails data={mockEcsData[20]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/executedgpgconf--list-dirs agent-socket'
+        'Session14alice@zeek-londonlogged in via/usr/sbin/sshdwith asuccessSource8.42.77.171:--'
       );
     });
 
-    test('it returns null for text if the data contains no auditd executed data', () => {
+    test('it returns null for text if the data contains no auditd loggedin data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedDetails data={mockEcsData[0]} />
+          <AuditdLoggedinDetails data={mockEcsData[0]} browserFields={mockBrowserFields} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(null);
@@ -48,254 +49,235 @@ describe('AuditExecutedDetails', () => {
   // you have something wrong with your beats. These tests are to ensure the function does not
   // crash. If you need to format things prettier because not all the data is there, then update
   // these tests with those changes
-  describe('#AuditdExecutedCommandLine', () => {
+  describe('#AuditdLoggedinLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            result="success"
+            session="session-1"
             userName="username-1"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            primary="username-2"
+            secondary="username-3"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-2asusername-3@host-1logged in viaexecutable-1with asuccess'
       );
     });
-
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            result="success"
+            session="session-1"
             userName="username-1"
             primary="username-1"
             secondary="username-1"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            result="success"
+            session="session-1"
             userName="username-1"
             primary="unset"
             secondary="unset"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset with different casing', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            result="success"
+            session="session-1"
             userName="username-1"
-            primary="Unset"
-            secondary="uNseT"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            primary="unsEt"
+            secondary="uNset"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with username if primary and secondary are undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
+            result="success"
+            session="session-1"
             userName="username-1"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with "as" wording if username, primary, and secondary are all different', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
-            userName="[username-1]"
-            primary="[username-2]"
-            secondary="[username-3]"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            userName="[username]"
+            primary="[primary]"
+            secondary="[secondary]"
+            result="success"
+            session="session-1"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-2]as[username-3]@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1[primary]as[secondary]@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with "as" wording if username and primary are the same but secondary is different', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
-            userName="[username-1]"
-            primary="[username-1]"
-            secondary="[username-2]"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            userName="username-1"
+            primary="username-1"
+            secondary="username-2"
+            result="success"
+            session="session-1"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-1]as[username-2]@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1asusername-2@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with primary if username and secondary are unset with different casing', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
-            userName="unseT"
-            primary="[username-primary]"
-            secondary="unset"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            userName="UnSet"
+            primary="username-1"
+            secondary="UnSET"
+            result="success"
+            session="session-1"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns a session with primary if username and secondary are undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
+          <AuditdLoggedinLine
             id="hello-i-am-an-id"
             hostName="host-1"
-            primary="[username-primary]"
-            processName="process-1"
-            processTitle="process-title-1"
-            workingDirectory="working-directory-1"
-            args="arg1 arge 2 arg3"
+            primary="username-1"
+            result="success"
+            session="session-1"
+            userName="username-1"
+            processExecutable="executable-1"
           />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session[username-primary]@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
+        'Sessionsession-1username-1@host-1logged in viaexecutable-1with asuccess'
       );
     });
 
     test('it returns ugly output if you just send in an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecuted');
+      expect(wrapper.text()).toEqual('Session@logged in viawith a');
     });
 
     test('it returns slightly less ugly output if you just send in an id and hostName', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" hostName="some-host-name" />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} hostName={'some-host-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@some-host-nameinexecuted');
+      expect(wrapper.text()).toEqual('Session@some-host-namelogged in viawith a');
     });
 
     test('it returns slightly less ugly output if you just send in a username', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" userName="some-user-name" />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} userName={'some-user-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name@inexecuted');
+      expect(wrapper.text()).toEqual('Sessionsome-user-name@logged in viawith a');
     });
 
-    test('it returns slightly less ugly output if you just send in a processName', () => {
+    test('it returns slightly less ugly output if you just send in a processExecutable', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" processName="some-process-name" />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} processExecutable={'some-process-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecutedsome-process-name');
+      expect(wrapper.text()).toEqual('Session@logged in viasome-process-namewith a');
     });
 
-    test('it returns slightly less ugly output if you just send in a processTitle', () => {
+    test('it returns slightly less ugly output if you just send in a session', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" processTitle="some-process-title" />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} session={'session-1'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecuted');
+      expect(wrapper.text()).toEqual('Sessionsession-1@logged in viawith a');
     });
 
-    test('it returns slightly less ugly output if you just send in a workingDirectory', () => {
+    test('it returns slightly less ugly output if you just send in a result', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdExecutedCommandLine
-            id={'hello-i-am-an-id'}
-            workingDirectory="some-working-directory"
-          />
+          <AuditdLoggedinLine id={'hello-i-am-an-id'} result={'failure'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@insome-working-directoryexecuted');
-    });
-
-    test('it returns slightly less ugly output if you just send in args', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuditdExecutedCommandLine id="hello-i-am-an-id" args="arg1 arg 2 arg 3" />
-        </TestProviders>
-      );
-      expect(wrapper.text()).toEqual('Session@inexecutedarg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Session@logged in viawith afailure');
     });
   });
 });
