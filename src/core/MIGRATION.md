@@ -1,28 +1,28 @@
 # Migrating legacy plugins to the new platform
 
-* Overview
-  * Architectural
-  * Services
-  * Integrating with other plugins
-  * Challenges to overcome with legacy plugins
-  * Plan of action
-* Server-side plan of action
-  * De-couple from hapi.js server and request objects
-  * Introduce new plugin definition shim
-  * Switch to new platform services
-  * Migrate to the new plugin system
-* Browser-side plan of action
-  * Move UI modules into plugins
-  * Provide plugin extension points decoupled from angular.js
-  * Move all webpack alias imports into apiExport entry files
-  * Switch to new platform services
-  * Migrate to the new plugin system
-* Frequently asked questions
-  * Is migrating a plugin an all-or-nothing thing?
-  * Do plugins need to be converted to TypeScript?
-  * How is static code shared between plugins?
-  * How is "common" code shared on both the client and server?
-  * When does code go into a plugin, core, or packages?
+* [Overview](#overview)
+  * [Architectural](#architectural)
+  * [Services](#services)
+  * [Integrating with other plugins](#integrating-with-other-plugins)
+  * [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
+  * [Plan of action](#plan-of-action)
+* [Server-side plan of action](#server-side-plan-of-action)
+  * [De-couple from hapi.js server and request objects](#de-couple-from-hapijs-server-and-request-objects)
+  * [Introduce new plugin definition shim](#introduce-new-plugin-definition-shim)
+  * [Switch to new platform services](#switch-to-new-platform-services)
+  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system)
+* [Browser-side plan of action](#browser-side-plan-of-action)
+  * [Move UI modules into plugins](#move-ui-modules-into-plugins)
+  * [Provide plugin extension points decoupled from angular.js](#provide-plugin-extension-points-decoupled-from-angularjs)
+  * [Move all webpack alias imports into apiExport entry files](#move-all-webpack-alias-imports-into-apiexport-entry-files)
+  * [Switch to new platform services](#switch-to-new-platform-services-1)
+  * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system-1)
+* [Frequently asked questions](#frequently-asked-questions)
+  * [Is migrating a plugin an all-or-nothing thing?](#is-migrating-a-plugin-an-all-or-nothing-thing)
+  * [Do plugins need to be converted to TypeScript?](#do-plugins-need-to-be-converted-to-typescript)
+  * [How is static code shared between plugins?](#how-is-static-code-shared-between-plugins)
+  * [How is "common" code shared on both the client and server?](#how-is-common-code-shared-on-both-the-client-and-server)
+  * [When does code go into a plugin, core, or packages?](#when-does-code-go-into-a-plugin-core-or-packages)
 
 Make no mistake, it is going to take a lot of work to move certain plugins to the new platform. Our target is to migrate the entire repo over to the new platform throughout 7.x and to remove the legacy plugin system no later than 8.0, and this is only possible if teams start on the effort now.
 
