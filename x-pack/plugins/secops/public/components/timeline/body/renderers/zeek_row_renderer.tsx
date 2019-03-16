@@ -15,7 +15,7 @@ const ZeekRow = styled.div`
   width: 100%;
   overflow: hidden;
   &:hover {
-    border: 1px solid ${props => props.theme.eui.euiColorMediumShade};
+    background-color: ${props => props.theme.eui.euiTableHoverColor};
   }
 `;
 
