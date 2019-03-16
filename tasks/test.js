@@ -52,14 +52,15 @@ module.exports = function (grunt) {
   grunt.registerTask('test:coverage', ['run:testCoverageServer', 'karma:coverage']);
 
   grunt.registerTask('test:quick', [
-    'checkPlugins',
-    'test:server',
-    'run:functionalTests',
-    'test:jest',
-    'test:jest_integration',
-    'test:projects',
-    'test:browser',
-    'run:apiIntegrationTests',
+    // 'checkPlugins',
+    // 'test:server',
+    // 'run:functionalTests',
+    // 'test:jest',
+    // 'test:jest_integration',
+    // 'test:projects',
+    // 'test:browser',
+    // 'run:apiIntegrationTests',
+    'run:pluginFunctionalTestsRelease'
   ]);
 
   grunt.registerTask('test:dev', ['checkPlugins', 'run:devBrowserTestServer', 'karma:dev']);

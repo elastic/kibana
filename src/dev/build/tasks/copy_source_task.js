@@ -29,6 +29,8 @@ export const CopySourceTask = {
         'yarn.lock',
         'src/**',
         '!src/**/*.test.{js,ts,tsx}',
+        '!src/**/*.test.mocks.{js,ts,tsx}',
+        '!src/**/*.mock.{js,ts,tsx}',
         '!src/**/{__tests__,__snapshots__}/**',
         '!src/test_utils/**',
         '!src/fixtures/**',

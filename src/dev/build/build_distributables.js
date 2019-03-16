@@ -47,7 +47,7 @@ import {
   RemovePackageJsonDepsTask,
   RemoveWorkspacesTask,
   TranspileBabelTask,
-  TranspileTypescriptTask,
+  TranspileTypescriptTypesTask,
   TranspileScssTask,
   UpdateLicenseFileTask,
   VerifyEnvTask,
@@ -110,12 +110,11 @@ export async function buildDistributables(options) {
   await run(CreateEmptyDirsAndFilesTask);
   await run(CreateReadmeTask);
   await run(TranspileBabelTask);
-  await run(TranspileTypescriptTask);
+  await run(TranspileTypescriptTypesTask);
   await run(BuildPackagesTask);
   await run(CreatePackageJsonTask);
   await run(InstallDependenciesTask);
   await run(RemoveWorkspacesTask);
-  await run(CleanTypescriptTask);
   await run(CleanPackagesTask);
   await run(CreateNoticeFileTask);
   await run(UpdateLicenseFileTask);
@@ -123,6 +122,7 @@ export async function buildDistributables(options) {
   await run(TranspileScssTask);
   await run(OptimizeBuildTask);
   await run(CleanClientModulesOnDLLTask);
+  await run(CleanTypescriptTask);
   await run(CleanExtraFilesFromModulesTask);
   await run(CleanEmptyFoldersTask);
 

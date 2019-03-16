@@ -22,31 +22,63 @@ import vfs from 'vinyl-fs';
 
 import { createPromiseFromStreams } from '../../../legacy/utils';
 
+const transpileWithBabel = async (srcGlobs, dest, cwd, presets) => {
+  await createPromiseFromStreams([
+    vfs.src(
+      srcGlobs,
+      {
+        cwd,
+      }
+    ),
+
+    gulpBabel({
+      babelrc: false,
+      presets,
+    }),
+
+    vfs.dest(dest),
+  ]);
+};
+
 export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
-    await createPromiseFromStreams([
-      vfs.src(
-        [
-          '**/*.js',
-          '!packages/**',
-          '!**/public/**',
-          '!**/node_modules/**',
-          '!**/bower_components/**',
-          '!**/__tests__/**',
-        ],
-        {
-          cwd: build.resolvePath(),
-        }
-      ),
+    const buildRoot = build.resolvePath();
 
-      gulpBabel({
-        babelrc: false,
-        presets: [require.resolve('@kbn/babel-preset/node_preset')],
-      }),
+    // Transpile server code
+    await transpileWithBabel(
+      [
+        '**/*.{js,ts,tsx}',
+        '!**/*.d.ts',
+        '!packages/**',
+        '!**/public/**',
+        '!**/node_modules/**',
+        '!**/bower_components/**',
+        '!**/__tests__/**',
+      ],
+      buildRoot,
+      buildRoot,
+      [
+        require.resolve('@kbn/babel-preset/node_preset')
+      ]
+    );
 
-      vfs.dest(build.resolvePath()),
-    ]);
+    // Transpile client code
+    await transpileWithBabel(
+      [
+        '**/public/**/*.{js,ts,tsx}',
+        '!**/*.d.ts',
+        '!packages/**',
+        '!**/node_modules/**',
+        '!**/bower_components/**',
+        '!**/__tests__/**',
+      ],
+      buildRoot,
+      buildRoot,
+      [
+        require.resolve('@kbn/babel-preset/node_preset')
+      ]
+    );
   },
 };
