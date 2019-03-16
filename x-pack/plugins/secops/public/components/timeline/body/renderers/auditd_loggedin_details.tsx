@@ -15,8 +15,8 @@ import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
+import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 import { SourceDest } from './source_dest_ip';
-import { PrimarySecondaryUserInfo } from './user_primary_secondary';
 
 const Details = styled.div`
   margin-left: 10px;

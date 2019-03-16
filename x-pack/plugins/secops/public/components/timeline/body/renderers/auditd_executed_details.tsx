@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
-import { PrimarySecondaryUserInfo } from './user_primary_secondary';
+import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
 const Details = styled.div`
   margin-left: 10px;
