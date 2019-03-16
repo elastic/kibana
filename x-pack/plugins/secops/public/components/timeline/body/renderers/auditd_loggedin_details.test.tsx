@@ -8,6 +8,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+import { BrowserFields } from '../../../../containers/source';
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
@@ -16,9 +17,11 @@ import { AuditdLoggedinDetails, AuditdLoggedinLine } from './auditd_loggedin_det
 describe('AuditdLoggedinDetails', () => {
   describe('rendering', () => {
     test('it renders the default AuditdLoggedinDetails', () => {
+      // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+      const browserFields: BrowserFields = {};
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <AuditdLoggedinDetails data={mockEcsData[20]} browserFields={mockBrowserFields} />
+          <AuditdLoggedinDetails data={mockEcsData[20]} browserFields={browserFields} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();

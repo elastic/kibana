@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
+import { BrowserFields } from '../../../../containers/source';
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData, TestProviders } from '../../../../mock';
@@ -25,8 +26,10 @@ describe('auditd_loggedin_row_renderer', () => {
   });
 
   test('renders correctly against snapshot', () => {
+    // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+    const browserFields: BrowserFields = {};
     const children = auditdLoggedinRowRenderer.renderRow({
-      browserFields: mockBrowserFields,
+      browserFields,
       data: auditdExecuted,
       width: 100,
       children: <span>some children</span>,
