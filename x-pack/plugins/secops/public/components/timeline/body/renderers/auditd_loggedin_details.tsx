@@ -16,6 +16,7 @@ import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
 import { SourceDest } from './source_dest_ip';
+import { PrimarySecondaryUserInfo } from './user_primary_secondary';
 
 const Details = styled.div`
   margin-left: 10px;
@@ -31,10 +32,12 @@ export const AuditdLoggedinLine = pure<{
   id: string;
   result?: string | null;
   session?: string | null;
+  userName?: string | null;
+  primary?: string | null;
+  secondary?: string | null;
   processPid?: string | null;
   processExecutable?: string | null;
-  secondary?: string | null;
-}>(({ id, result, session, processPid, processExecutable, secondary }) => (
+}>(({ id, result, session, processPid, processExecutable, userName, primary, secondary }) => (
   <EuiFlexGroup justifyContent="center" gutterSize="none">
     <TokensFlexItem grow={false}>
       <DraggableBadge
@@ -45,11 +48,11 @@ export const AuditdLoggedinLine = pure<{
       />
     </TokensFlexItem>
     <TokensFlexItem grow={false}>
-      <DraggableBadge
+      <PrimarySecondaryUserInfo
         id={`auditd-loggedin-${id}`}
-        field="auditd.summary.actor.secondary"
-        value={secondary}
-        iconType="user"
+        userName={userName}
+        primary={primary}
+        secondary={secondary}
       />
     </TokensFlexItem>
     <TokensFlexItem grow={false}>
@@ -76,11 +79,13 @@ export const AuditdLoggedinLine = pure<{
 export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
   ({ browserFields, data }) => {
     const id = data._id;
+    const userName: string | null | undefined = get('user.name', data);
+    const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
+    const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     const result: string | null | undefined = get('auditd.result', data);
     const session: string | null | undefined = get('auditd.session', data);
     const processPid: string | null | undefined = get('process.pid', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
-    const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     if (data.process != null) {
       return (
         <Details>
@@ -90,7 +95,9 @@ export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: 
             session={session}
             processPid={processPid}
             processExecutable={processExecutable}
+            primary={primary}
             secondary={secondary}
+            userName={userName}
           />
           <EuiSpacer size="s" />
           <SourceDest data={data} browserFields={browserFields} />

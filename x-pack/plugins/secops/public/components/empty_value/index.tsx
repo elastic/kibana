@@ -40,7 +40,7 @@ export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
 };
 
 export const getOrEmptyTagFromValue = (value: string | number | null | undefined): JSX.Element => {
-  if (isNil(value)) {
+  if (value == null) {
     return getEmptyTagValue();
   } else if (value === '') {
     return getEmptyStringTag();

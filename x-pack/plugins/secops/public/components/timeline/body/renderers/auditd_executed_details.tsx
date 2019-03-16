@@ -13,6 +13,8 @@ import styled from 'styled-components';
 import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
+import { PrimarySecondaryUserInfo } from './user_primary_secondary';
+
 const Details = styled.div`
   margin-left: 10px;
   margin-top: 10px;
@@ -27,6 +29,8 @@ export const AuditdExecutedCommandLine = pure<{
   id: string;
   hostName?: string | null;
   userName?: string | null;
+  primary?: string | null;
+  secondary?: string | null;
   processPid?: string | null;
   processName?: string | null;
   processTitle?: string | null;
@@ -38,6 +42,8 @@ export const AuditdExecutedCommandLine = pure<{
     id,
     hostName,
     userName,
+    primary,
+    secondary,
     processPid,
     processName,
     processTitle,
@@ -56,11 +62,11 @@ export const AuditdExecutedCommandLine = pure<{
           />
         </TokensFlexItem>
         <TokensFlexItem grow={false}>
-          <DraggableBadge
+          <PrimarySecondaryUserInfo
             id={`auditd-executed-element-${id}`}
-            field="user.name"
-            value={userName}
-            iconType="user"
+            userName={userName}
+            primary={primary}
+            secondary={secondary}
           />
         </TokensFlexItem>
         <TokensFlexItem grow={false}>
@@ -105,6 +111,8 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
   const processName: string | null | undefined = get('process.name', data);
   const processTitle: string | null | undefined = get('process.title', data);
   const workingDirectory: string | null | undefined = get('process.working_directory', data);
+  const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
+  const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
   const rawArgs: string[] | null | undefined = get('process.args', data);
   const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
   if (data.process != null) {
@@ -119,6 +127,8 @@ export const AuditdExecutedDetails = pure<{ data: Ecs }>(({ data }) => {
         workingDirectory={workingDirectory}
         args={args}
         session={session}
+        primary={primary}
+        secondary={secondary}
       />
     );
   } else {
