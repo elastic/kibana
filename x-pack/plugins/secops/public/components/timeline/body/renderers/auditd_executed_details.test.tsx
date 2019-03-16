@@ -29,7 +29,9 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedDetails data={mockEcsData[19]} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('johnson@zeek-sanfran:/>gpgconf--list-dirs agent-socket');
+      expect(wrapper.text()).toEqual(
+        'Sessionjohnson@zeek-sanfranin/executedgpgconf--list-dirs agent-socket'
+      );
     });
 
     test('it returns null for text if the data contains no auditd executed data', () => {
@@ -62,7 +64,7 @@ describe('AuditExecutedDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'username-1@host-1:working-directory-1>process-1arg1 arge 2 arg3'
+        'Sessionusername-1@host-1inworking-directory-1executedprocess-1arg1 arge 2 arg3'
       );
     });
 
@@ -72,7 +74,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@:>');
+      expect(wrapper.text()).toEqual('Session@inexecuted');
     });
 
     test('it returns slightly less ugly output if you just send in an id and hostName', () => {
@@ -81,7 +83,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} hostName={'some-host-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@some-host-name:>');
+      expect(wrapper.text()).toEqual('Session@some-host-nameinexecuted');
     });
 
     test('it returns slightly less ugly output if you just send in a username', () => {
@@ -90,7 +92,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} userName={'some-user-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('some-user-name@:>');
+      expect(wrapper.text()).toEqual('Sessionsome-user-name@inexecuted');
     });
 
     test('it returns slightly less ugly output if you just send in a processName', () => {
@@ -99,7 +101,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} processName={'some-process-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@:>some-process-name');
+      expect(wrapper.text()).toEqual('Session@inexecutedsome-process-name');
     });
 
     test('it returns slightly less ugly output if you just send in a processTitle', () => {
@@ -108,7 +110,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} processTitle={'some-process-title'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@:>');
+      expect(wrapper.text()).toEqual('Session@inexecuted');
     });
 
     test('it returns slightly less ugly output if you just send in a workingDirectory', () => {
@@ -120,7 +122,7 @@ describe('AuditExecutedDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@:some-working-directory>');
+      expect(wrapper.text()).toEqual('Session@insome-working-directoryexecuted');
     });
 
     test('it returns slightly less ugly output if you just send in args', () => {
@@ -129,7 +131,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedCommandLine id={'hello-i-am-an-id'} args={'arg1 arg 2 arg 3'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('@:>arg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Session@inexecutedarg1 arg 2 arg 3');
     });
   });
 });

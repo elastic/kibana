@@ -77,7 +77,7 @@ describe('auditd_executed_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children johnson@zeek-sanfran:/>gpgconf--list-dirs agent-socket'
+      'some children Sessionjohnson@zeek-sanfranin/executedgpgconf--list-dirs agent-socket'
     );
   });
 });
