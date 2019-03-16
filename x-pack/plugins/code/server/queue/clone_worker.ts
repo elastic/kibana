@@ -38,7 +38,13 @@ export class CloneWorker extends AbstractGitWorker {
 
   public async executeJob(job: Job) {
     const { url } = job.payload;
-    if (!isValidGitUrl(url)) {
+    if (
+      !isValidGitUrl(
+        url,
+        this.serverOptions.security.gitHostWhitelist,
+        this.serverOptions.security.gitProtocolWhitelist
+      )
+    ) {
       this.log.error(`Invalid git url ${url}`);
       return {
         uri: url,

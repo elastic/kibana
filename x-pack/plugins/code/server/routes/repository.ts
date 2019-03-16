@@ -15,6 +15,7 @@ import { Logger } from '../log';
 import { CloneWorker, DeleteWorker, IndexWorker } from '../queue';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
+import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 
 export function repositoryRoute(
@@ -23,7 +24,8 @@ export function repositoryRoute(
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
   repoIndexInitializerFactory: RepositoryIndexInitializerFactory,
-  repoConfigController: RepositoryConfigController
+  repoConfigController: RepositoryConfigController,
+  options: ServerOptions
 ) {
   // Clone a git repository
   server.securedRoute({
@@ -35,7 +37,13 @@ export function repositoryRoute(
       const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
-      if (!isValidGitUrl(repoUrl)) {
+      if (
+        !isValidGitUrl(
+          repoUrl,
+          options.security.gitHostWhitelist,
+          options.security.gitProtocolWhitelist
+        )
+      ) {
         return Boom.badRequest('Invalid git url.');
       }
 
