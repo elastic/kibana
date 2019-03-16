@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
 import { ApolloProvider } from 'react-apollo';
@@ -42,20 +43,13 @@ interface UptimeAppColors {
 export interface UptimeCommonProps {
   autorefreshIsPaused: boolean;
   autorefreshInterval: number;
+  client: ApolloClient<NormalizedCacheObject>;
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
   registerWatch: (client: () => void) => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setHeadingText: (text: string) => void;
-}
-
-export interface QueryCommonProps {
-  client: ApolloClient<any>;
-}
-
-export interface UptimeCommonState {
-  lastForceRefresh?: number;
 }
 
 export interface UptimePersistedState {
@@ -67,7 +61,7 @@ export interface UptimePersistedState {
 
 export interface UptimeAppProps {
   darkMode: boolean;
-  graphQLClient: UMGraphQLClient;
+  client: UMGraphQLClient;
   initialDateRangeStart: string;
   initialDateRangeEnd: string;
   initialAutorefreshInterval: number;
@@ -78,7 +72,7 @@ export interface UptimeAppProps {
   persistState(state: UptimePersistedState): void;
 }
 
-type forceRefreshClient = () => void;
+type RefreshListener = () => void;
 
 interface UptimeAppState {
   autorefreshIsPaused: boolean;
@@ -88,8 +82,7 @@ interface UptimeAppState {
   dateRangeStart: string;
   dateRangeEnd: string;
   headingText?: string;
-  lastForceRefresh?: number;
-  forceRefreshClients: forceRefreshClient[];
+  refreshListeners: RefreshListener[];
 }
 
 // TODO: when EUI exports types for this, this should be replaced
@@ -144,7 +137,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       colors,
       dateRangeStart,
       dateRangeEnd,
-      forceRefreshClients: [],
+      refreshListeners: [],
     };
   }
 
@@ -153,11 +146,11 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   }
 
   public render() {
-    const { routerBasename, graphQLClient } = this.props;
+    const { routerBasename, client } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
-          <ApolloProvider client={graphQLClient}>
+          <ApolloProvider client={client}>
             <EuiPage className="app-wrapper-panel ">
               <div>
                 <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -221,7 +214,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...this.state}
                         registerWatch={this.addForceRefreshListener}
                         setHeadingText={this.setHeadingText}
-                        query={this.props.graphQLClient.query}
+                        query={this.props.client.query}
                       />
                     )}
                   />
@@ -249,11 +242,11 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   };
 
   private addForceRefreshListener = (newClient: () => void): void => {
-    this.setState({ forceRefreshClients: [...this.state.forceRefreshClients, newClient] });
+    this.setState({ refreshListeners: [...this.state.refreshListeners, newClient] });
   };
 
   private refreshApp = () => {
-    this.state.forceRefreshClients.forEach(handler => handler());
+    this.state.refreshListeners.forEach(handler => handler());
   };
 }
 

@@ -52,7 +52,14 @@ export class OverviewPage extends React.Component<Props, OverviewPageState> {
             }}
           />
           <EuiSpacer size="s" />
-          <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
+          <SnapshotQuery
+            variables={{
+              dateRangeStart: this.props.dateRangeStart,
+              dateRangeEnd: this.props.dateRangeEnd,
+              filters: this.state.currentFilterQuery,
+            }}
+            {...this.props}
+          />
           <EuiSpacer size="s" />
           <MonitorListQuery filters={this.state.currentFilterQuery} {...this.props} />
           <EuiSpacer size="s" />
