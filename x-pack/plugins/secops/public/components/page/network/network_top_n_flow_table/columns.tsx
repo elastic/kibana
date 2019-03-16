@@ -32,7 +32,8 @@ export const getNetworkTopNFlowColumns = (
   startDate: number,
   topNFlowDirection: NetworkTopNFlowDirection,
   topNFlowType: NetworkTopNFlowType,
-  type: networkModel.NetworkType
+  type: networkModel.NetworkType,
+  tableId: string
 ): Array<Columns<NetworkTopNFlowEdges>> => [
   {
     name: getIpTitle(topNFlowType),
@@ -42,7 +43,7 @@ export const getNetworkTopNFlowColumns = (
       const ipAttr = `${topNFlowType}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(
-        `networkTopNFlow-table--${topNFlowType}-${topNFlowDirection}-ip-${ip}`
+        `${tableId}-table--${topNFlowType}-${topNFlowDirection}-ip-${ip}`
       );
       if (ip != null) {
         return (
@@ -93,7 +94,7 @@ export const getNetworkTopNFlowColumns = (
       if (Array.isArray(domains) && domains.length > 0) {
         const domain = domains[0];
         const id = escapeDataProviderId(
-          `networkTopNFlow-table-${ip}-${topNFlowType}-${topNFlowDirection}-domain-${domain}`
+          `${tableId}-table-${ip}-${topNFlowType}-${topNFlowDirection}-domain-${domain}`
         );
         return (
           <DraggableWrapper
@@ -164,7 +165,7 @@ export const getNetworkTopNFlowColumns = (
         : get('network.direction', node).map((direction: NetworkDirectionEcs) => (
             <AddToKql
               key={escapeDataProviderId(
-                `networkTopNFlow-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
+                `${tableId}-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
               )}
               content={i18n.FILTER_TO_KQL}
               expression={`network.direction: ${escapeQueryValue(direction)}`}

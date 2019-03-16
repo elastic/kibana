@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsEdges } from '../../graphql/types';
-import { getOrEmptyTag } from '../empty_value';
+import { getOrEmptyTagFromValue } from '../empty_value';
 
 import { Columns, ItemsPerRow } from './index';
 
@@ -47,30 +46,34 @@ export const mockData = {
   },
 };
 
-export const getHostsColumns = (): Array<Columns<HostsEdges>> => [
+export const getHostsColumns = (): Array<Columns<string>> => [
   {
+    field: 'node.host.name',
     name: 'Host',
     truncateText: false,
     hideForMobile: false,
-    render: node => getOrEmptyTag('host.name', node),
+    render: (name: string) => getOrEmptyTagFromValue(name),
   },
   {
+    field: 'node.host.firstSeen',
     name: 'First seen',
     truncateText: false,
     hideForMobile: false,
-    render: node => getOrEmptyTag('host.firstSeen', node),
+    render: (firstSeen: string) => getOrEmptyTagFromValue(firstSeen),
   },
   {
+    field: 'node.host.os',
     name: 'OS',
     truncateText: false,
     hideForMobile: false,
-    render: node => getOrEmptyTag('host.os', node),
+    render: (os: string) => getOrEmptyTagFromValue(os),
   },
   {
+    field: 'node.host.version',
     name: 'Version',
     truncateText: false,
     hideForMobile: false,
-    render: node => getOrEmptyTag('host.version', node),
+    render: (version: string) => getOrEmptyTagFromValue(version),
   },
 ];
 

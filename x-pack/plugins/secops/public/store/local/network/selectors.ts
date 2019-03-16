@@ -15,6 +15,12 @@ import { GenericNetworkModel, NetworkType } from './model';
 const selectNetwork = (state: State, networkType: NetworkType): GenericNetworkModel =>
   get(networkType, state.local.network);
 
+export const dnsSelector = () =>
+  createSelector(
+    selectNetwork,
+    network => network.queries!.dns
+  );
+
 export const topNFlowSelector = () =>
   createSelector(
     selectNetwork,

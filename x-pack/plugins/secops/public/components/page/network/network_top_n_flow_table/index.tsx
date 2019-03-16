@@ -82,6 +82,8 @@ const CountBadge = styled(EuiBadge)`
   margin-left: 5px;
 `;
 
+export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
+
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
   public render() {
     const {
@@ -100,7 +102,13 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     } = this.props;
     return (
       <LoadMoreTable
-        columns={getNetworkTopNFlowColumns(startDate, topNFlowDirection, topNFlowType, type)}
+        columns={getNetworkTopNFlowColumns(
+          startDate,
+          topNFlowDirection,
+          topNFlowType,
+          type,
+          NetworkTopNFlowTableId
+        )}
         loadingTitle={i18n.TOP_TALKERS}
         loading={loading}
         pageOfItems={data}
@@ -121,8 +129,12 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                     <CountBadge color="hollow">{totalCount}</CountBadge>
                   </h3>
                 </EuiFlexItem>
-                <SelectTypeItem grow={false}>
+                <SelectTypeItem
+                  grow={false}
+                  data-test-subj={`${NetworkTopNFlowTableId}-select-type`}
+                >
                   <SelectType
+                    id={`${NetworkTopNFlowTableId}-select-type`}
                     selectedDirection={topNFlowDirection}
                     selectedType={topNFlowType}
                     onChangeType={this.onChangeTopNFlowType}
@@ -133,7 +145,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SelectDirection
-                id="top-talkers-select-direction"
+                id={`${NetworkTopNFlowTableId}-select-direction`}
                 selectedDirection={topNFlowDirection}
                 onChangeDirection={this.onChangeTopNFlowDirection}
               />

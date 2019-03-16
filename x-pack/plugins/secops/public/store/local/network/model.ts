@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
+import {
+  NetworkDnsSortField,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowType,
+} from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum NetworkType {
@@ -21,8 +25,14 @@ export interface TopNFlowQuery extends BasicQuery {
   topNFlowDirection: NetworkTopNFlowDirection;
 }
 
+export interface DnsQuery extends BasicQuery {
+  dnsSortField: NetworkDnsSortField;
+  isPtrIncluded: boolean;
+}
+
 interface NetworkQueries {
   topNFlow: TopNFlowQuery;
+  dns: DnsQuery;
 }
 
 export interface GenericNetworkModel {

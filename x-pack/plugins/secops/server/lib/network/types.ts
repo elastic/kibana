@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDirectionEcs, NetworkTopNFlowData } from '../../graphql/types';
+import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
-export interface NetworkTopNFlowAdapter {
+export interface NetworkAdapter {
   getNetworkTopNFlow(req: FrameworkRequest, options: RequestOptions): Promise<NetworkTopNFlowData>;
+  getNetworkDns(req: FrameworkRequest, options: RequestOptions): Promise<NetworkDnsData>;
 }
 
 export interface GenericBuckets {
   key: string;
+  doc_count: number;
 }
 
 export interface DirectionBuckets {
@@ -53,6 +55,35 @@ export interface NetworkTopNFlowData extends SearchHit {
     };
     top_bi_flow?: {
       buckets: NetworkTopNFlowBuckets[];
+    };
+  };
+}
+
+export interface NetworkDnsBuckets {
+  key: string;
+  doc_count: number;
+  timestamp: {
+    value: number;
+    value_as_string: string;
+  };
+  unique_domains: {
+    value: number;
+  };
+  dns_bytes_in: {
+    value: number;
+  };
+  dns_bytes_out: {
+    value: number;
+  };
+}
+
+export interface NetworkDnsData extends SearchHit {
+  aggregations: {
+    dns_count?: {
+      value: number;
+    };
+    dns_name_query_count?: {
+      buckets: NetworkDnsBuckets[];
     };
   };
 }

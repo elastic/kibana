@@ -11,7 +11,7 @@ import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { KpiNetwork } from './kpi_network';
-import { NetworkTopNFlow } from './network_top_n_flow';
+import { Network } from './network';
 import { SourceStatus } from './source_status';
 import { SourceConfigurations, Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
@@ -23,7 +23,7 @@ export interface AppDomainLibs {
   events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  networkTopNFlow: NetworkTopNFlow;
+  network: Network;
   kpiNetwork: KpiNetwork;
   uncommonProcesses: UncommonProcesses;
 }

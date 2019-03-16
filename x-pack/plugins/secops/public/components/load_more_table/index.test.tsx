@@ -10,6 +10,8 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import { Direction } from '../../graphql/types';
+
 import { LoadMoreTable } from './index';
 import { getHostsColumns, mockData, rowItems } from './index.mock';
 
@@ -190,6 +192,28 @@ describe('Load More Table Component', () => {
 
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
     });
+
+    test('It should render a sort icon if sorting is defined', () => {
+      const mockOnChange = jest.fn();
+      const wrapper = mount(
+        <LoadMoreTable
+          columns={getHostsColumns().map(h => ({ ...h, sortable: true }))}
+          loadingTitle="Hosts"
+          loading={false}
+          pageOfItems={mockData.Hosts.edges}
+          loadMore={jest.fn()}
+          limit={2}
+          hasNextPage={true}
+          onChange={mockOnChange}
+          itemsPerRow={rowItems}
+          sorting={{ direction: Direction.ascending, field: 'node.host.name' }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          title={<h3>Hosts</h3>}
+        />
+      );
+
+      expect(wrapper.find('.euiTable thead tr th button svg')).toBeTruthy();
+    });
   });
 
   describe('Events', () => {
@@ -243,6 +267,36 @@ describe('Load More Table Component', () => {
         .first()
         .simulate('click');
       expect(updateLimitPagination).toBeCalled();
+    });
+
+    test('Should call onChange when you choose a new sort in the table', () => {
+      const mockOnChange = jest.fn();
+      const wrapper = mount(
+        <LoadMoreTable
+          columns={getHostsColumns().map(h => ({ ...h, sortable: true }))}
+          loadingTitle="Hosts"
+          loading={false}
+          pageOfItems={mockData.Hosts.edges}
+          loadMore={jest.fn()}
+          limit={2}
+          hasNextPage={true}
+          onChange={mockOnChange}
+          itemsPerRow={rowItems}
+          sorting={{ direction: Direction.ascending, field: 'node.host.name' }}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          title={<h3>Hosts</h3>}
+        />
+      );
+
+      wrapper
+        .find('.euiTable thead tr th button')
+        .first()
+        .simulate('click');
+
+      expect(mockOnChange).toBeCalled();
+      expect(mockOnChange.mock.calls[0]).toEqual([
+        { page: undefined, sort: { direction: 'desc', field: 'node.host.name' } },
+      ]);
     });
   });
 });

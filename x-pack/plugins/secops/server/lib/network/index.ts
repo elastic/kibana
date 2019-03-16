@@ -5,26 +5,41 @@
  */
 
 import {
+  NetworkDnsSortField,
   NetworkTopNFlowData,
   NetworkTopNFlowDirection,
   NetworkTopNFlowType,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 export * from './elasticsearch_adapter';
-import { NetworkTopNFlowAdapter } from './types';
+import { NetworkAdapter } from './types';
+
+export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptions {
   networkTopNFlowType: NetworkTopNFlowType;
   networkTopNFlowDirection: NetworkTopNFlowDirection;
 }
 
-export class NetworkTopNFlow {
-  constructor(private readonly adapter: NetworkTopNFlowAdapter) {}
+export interface NetworkDnsRequestOptions extends RequestOptions {
+  isPtrIncluded: boolean;
+  networkDnsSortField: NetworkDnsSortField;
+}
+
+export class Network {
+  constructor(private readonly adapter: NetworkAdapter) {}
 
   public async getNetworkTopNFlow(
     req: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
     return await this.adapter.getNetworkTopNFlow(req, options);
+  }
+
+  public async getNetworkDns(
+    req: FrameworkRequest,
+    options: NetworkDnsRequestOptions
+  ): Promise<NetworkTopNFlowData> {
+    return await this.adapter.getNetworkDns(req, options);
   }
 }

@@ -45,6 +45,8 @@ export interface Source {
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
+
+  NetworkDns: NetworkDnsData;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -609,6 +611,36 @@ export interface TopNFlowItem {
   ip?: string | null;
 }
 
+export interface NetworkDnsData {
+  edges: NetworkDnsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface NetworkDnsEdges {
+  node: NetworkDnsItem;
+
+  cursor: CursorType;
+}
+
+export interface NetworkDnsItem {
+  _id?: string | null;
+
+  dnsBytesIn?: number | null;
+
+  dnsBytesOut?: number | null;
+
+  dnsName?: string | null;
+
+  queryCount?: number | null;
+
+  timestamp?: Date | null;
+
+  uniqueDomains?: number | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -676,6 +708,12 @@ export interface SortField {
   direction?: Direction | null;
 }
 
+export interface NetworkDnsSortField {
+  field: NetworkDnsFields;
+
+  direction: Direction;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
@@ -715,17 +753,30 @@ export interface HostsSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
+  direction: NetworkTopNFlowDirection;
+
+  filterQuery?: string | null;
+
   id?: string | null;
 
-  direction: NetworkTopNFlowDirection;
+  pagination: PaginationInput;
 
   type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
+}
+export interface NetworkDnsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  isPtrIncluded: boolean;
 
   pagination: PaginationInput;
 
-  filterQuery?: string | null;
+  sort: NetworkDnsSortField;
+
+  timerange: TimerangeInput;
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -779,6 +830,14 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
+}
+
+export enum NetworkDnsFields {
+  dnsName = 'dnsName',
+  queryCount = 'queryCount',
+  uniqueDomains = 'uniqueDomains',
+  dnsBytesIn = 'dnsBytesIn',
+  dnsBytesOut = 'dnsBytesOut',
 }
 
 // ====================================================
@@ -1339,6 +1398,85 @@ export namespace GetKpiNetworkQuery {
     uniqueFlowId: number;
 
     activeAgents?: number | null;
+  };
+}
+
+export namespace GetNetworkDnsQuery {
+  export type Variables = {
+    sourceId: string;
+    sort: NetworkDnsSortField;
+    isPtrIncluded: boolean;
+    timerange: TimerangeInput;
+    pagination: PaginationInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    NetworkDns: NetworkDns;
+  };
+
+  export type NetworkDns = {
+    __typename?: 'NetworkDnsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'NetworkDnsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'NetworkDnsItem';
+
+    _id?: string | null;
+
+    dnsBytesIn?: number | null;
+
+    dnsBytesOut?: number | null;
+
+    dnsName?: string | null;
+
+    queryCount?: number | null;
+
+    uniqueDomains?: number | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
   };
 }
 

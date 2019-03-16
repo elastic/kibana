@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash/fp';
 import { NetworkTopNFlowData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
-import { ElasticsearchNetworkTopNFlowAdapter } from './elasticsearch_adapter';
+import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
 
 describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=source and NetworkTopNFlowDirection=uniDirectional', () => {
@@ -28,7 +28,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
     }));
 
     test('getNetworkTopNFlow', async () => {
-      const EsNetworkTopNFlow = new ElasticsearchNetworkTopNFlowAdapter(mockFramework);
+      const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
       const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
         mockRequest as FrameworkRequest,
         mockOptions
@@ -55,7 +55,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
     }));
 
     test('getNetworkTopNFlow', async () => {
-      const EsNetworkTopNFlow = new ElasticsearchNetworkTopNFlowAdapter(mockFramework);
+      const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
       const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
         mockRequest as FrameworkRequest,
         mockOptions
@@ -89,7 +89,7 @@ describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=sour
     }));
 
     test('getNetworkTopNFlow', async () => {
-      const EsNetworkTopNFlow = new ElasticsearchNetworkTopNFlowAdapter(mockFramework);
+      const EsNetworkTopNFlow = new ElasticsearchNetworkAdapter(mockFramework);
       const data: NetworkTopNFlowData = await EsNetworkTopNFlow.getNetworkTopNFlow(
         mockRequest as FrameworkRequest,
         mockOptions
