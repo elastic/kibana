@@ -56,7 +56,7 @@ const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient,
   inst.stop = jest.fn();
 });
 
-import { basePathServiceMock } from '../base_path/base_path.mock';
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';

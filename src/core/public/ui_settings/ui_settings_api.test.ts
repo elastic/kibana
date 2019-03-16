@@ -22,7 +22,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
-import { basePathServiceMock } from '../base_path/base_path.mock';
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {

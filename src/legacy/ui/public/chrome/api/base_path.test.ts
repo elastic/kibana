@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { basePathServiceMock } from '../../../../../core/public/base_path/base_path.mock';
+import { basePathServiceMock } from '../../../../../core/public/mocks';
 import { __newPlatformInit__, initChromeBasePathApi } from './base_path';
 
 function initChrome() {

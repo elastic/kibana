@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-import { chromeServiceMock } from '../../../../../core/public/chrome/chrome_service.mock';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
 import { __newPlatformInit__, initChromeThemeApi } from './theme';
 
 const newPlatformChrome = chromeServiceMock.createStartContract();
