@@ -561,7 +561,9 @@ At this point, your legacy server-side plugin's logic is no longer coupled to le
 
 With both shims converted, you are now ready to complete your migration to the new platform.
 
-Details to come...
+Many plugins will copy and paste all of their plugin code into a new plugin directory and then delete their legacy shims.
+
+With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
 
 ## Browser-side plan of action
@@ -619,8 +621,9 @@ Once all of the existing webpack alias-based imports in your plugin switch to `u
 
 With all of your services converted, you are now ready to complete your migration to the new platform.
 
-Details to come...
+Many plugins at this point will create a new plugin definition class and copy and paste the code from their various uiExport entry files directly into the new plugin class. The legacy uiExport entry files can then simply be deleted.
 
+With the previous steps resolved, this final step should be easy, but the exact process may vary plugin by plugin, so when you're at this point talk to the platform team to figure out the exact changes you need.
 
 ## Frequently asked questions
 
