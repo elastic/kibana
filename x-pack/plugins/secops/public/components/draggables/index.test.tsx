@@ -60,7 +60,7 @@ describe('draggables', () => {
           <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
 
     test('it returns null if value is null', () => {
@@ -69,7 +69,7 @@ describe('draggables', () => {
           <DefaultDraggable id="draggable-id" field="some-field" value={null} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
   });
 
@@ -99,7 +99,7 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
 
     test('it returns null if value is null', () => {
@@ -108,7 +108,7 @@ describe('draggables', () => {
           <DraggableBadge id="draggable-id" field="some-field" value={null} iconType="number" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
   });
 });

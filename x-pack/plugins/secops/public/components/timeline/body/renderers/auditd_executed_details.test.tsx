@@ -40,7 +40,7 @@ describe('AuditExecutedDetails', () => {
           <AuditdExecutedDetails data={mockEcsData[0]} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(null);
+      expect(wrapper.text()).toBeNull();
     });
   });
 
