@@ -1,7 +1,7 @@
 # Migrating legacy plugins to the new platform
 
 * [Overview](#overview)
-  * [Architectural](#architectural)
+  * [Architecture](#architecture)
   * [Services](#services)
   * [Integrating with other plugins](#integrating-with-other-plugins)
   * [Challenges to overcome with legacy plugins](#challenges-to-overcome-with-legacy-plugins)
