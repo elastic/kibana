@@ -8,7 +8,7 @@ import { FieldNode } from 'graphql';
 
 import { Logger } from '../../utils/logger';
 import { SecOpsContext } from '../index';
-import { NetworkDirectionEcs, NetworkTopNFlowData } from '../types';
+import { NetworkDirectionEcs, NetworkDnsData, NetworkTopNFlowData } from '../types';
 
 export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } = {
   NetworkTopNFlow: {
@@ -62,14 +62,50 @@ export const mockNetworkTopNFlowData: { NetworkTopNFlow: NetworkTopNFlowData } =
   },
 };
 
-export const getNetworkTopNFlowQueryMock = (logger: Logger) => ({
+export const mockNetworkDnsData: { NetworkDns: NetworkDnsData } = {
+  NetworkDns: {
+    totalCount: 80,
+    edges: [
+      {
+        node: {
+          _id: 'nflxvideo.net',
+          dnsBytesIn: 2964,
+          dnsBytesOut: 12546,
+          dnsName: 'nflxvideo.net',
+          queryCount: 52,
+          uniqueDomains: 21,
+        },
+        cursor: { value: 'nflxvideo.net' },
+      },
+      {
+        node: {
+          _id: 'apple.com',
+          dnsBytesIn: 2680,
+          dnsBytesOut: 31687,
+          dnsName: 'apple.com',
+          queryCount: 75,
+          uniqueDomains: 20,
+        },
+        cursor: { value: 'apple.com' },
+      },
+    ],
+    pageInfo: {
+      endCursor: { value: '10' },
+      hasNextPage: true,
+    },
+  },
+};
+
+export const getNetworkQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SecOpsContext) => {
     logger.info('Mock source');
     const operationName = context.req.payload.operationName.toLowerCase();
     switch (operationName) {
-      case 'test': {
-        logger.info(`Using mock for test ${mockNetworkTopNFlowData}`);
+      case 'top-n-flow': {
         return mockNetworkTopNFlowData;
+      }
+      case 'dns': {
+        return mockNetworkDnsData;
       }
       default: {
         return {};
@@ -267,6 +303,233 @@ export const mockNetworkTopNFlowFields: FieldNode = {
                         },
                       ],
                     },
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: '__typename',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                ],
+              },
+            },
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: 'cursor',
+              },
+              arguments: [],
+              directives: [],
+              selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'value',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: '__typename',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                ],
+              },
+            },
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: '__typename',
+              },
+              arguments: [],
+              directives: [],
+            },
+          ],
+        },
+      },
+      {
+        kind: 'Field',
+        name: {
+          kind: 'Name',
+          value: 'pageInfo',
+        },
+        arguments: [],
+        directives: [],
+        selectionSet: {
+          kind: 'SelectionSet',
+          selections: [
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: 'endCursor',
+              },
+              arguments: [],
+              directives: [],
+              selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'value',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: '__typename',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                ],
+              },
+            },
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: 'hasNextPage',
+              },
+              arguments: [],
+              directives: [],
+            },
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: '__typename',
+              },
+              arguments: [],
+              directives: [],
+            },
+          ],
+        },
+      },
+      {
+        kind: 'Field',
+        name: {
+          kind: 'Name',
+          value: '__typename',
+        },
+        arguments: [],
+        directives: [],
+      },
+    ],
+  },
+};
+
+export const mockNetworkDnsFields: FieldNode = {
+  kind: 'Field',
+  name: {
+    kind: 'Name',
+    value: 'NetworkDns',
+  },
+  selectionSet: {
+    kind: 'SelectionSet',
+    selections: [
+      {
+        kind: 'Field',
+        name: {
+          kind: 'Name',
+          value: 'totalCount',
+        },
+        arguments: [],
+        directives: [],
+      },
+      {
+        kind: 'Field',
+        name: {
+          kind: 'Name',
+          value: 'edges',
+        },
+        arguments: [],
+        directives: [],
+        selectionSet: {
+          kind: 'SelectionSet',
+          selections: [
+            {
+              kind: 'Field',
+              name: {
+                kind: 'Name',
+                value: 'node',
+              },
+              arguments: [],
+              directives: [],
+              selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: '_id',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'dnsBytesIn',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'dnsBytesOut',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'dnsName',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'queryCount',
+                    },
+                    arguments: [],
+                    directives: [],
+                  },
+                  {
+                    kind: 'Field',
+                    name: {
+                      kind: 'Name',
+                      value: 'uniqueDomains',
+                    },
+                    arguments: [],
+                    directives: [],
                   },
                   {
                     kind: 'Field',

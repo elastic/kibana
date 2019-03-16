@@ -15,7 +15,7 @@ import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
 import { kpiNetworkSchema } from './kpi_network';
-import { networkTopNFlowSchema } from './network_top_n_flow';
+import { networkSchema } from './network';
 import { dateSchema } from './scalar_date';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
@@ -28,7 +28,7 @@ export const schemas = [
   eventsSchema,
   dateSchema,
   hostsSchema,
-  networkTopNFlowSchema,
+  networkSchema,
   rootSchema,
   sourcesSchema,
   sourceStatusSchema,

@@ -42,9 +42,9 @@ interface Props {
 
 export const SelectDirection = pure<Props>(({ id, onChangeDirection, selectedDirection }) => (
   <MyEuiButtonGroup
-    name="direction"
+    name={`${id}-${selectedDirection}`}
     options={getToggleButtonDirection(id)}
-    idSelected={selectedDirection}
+    idSelected={`${id}-${selectedDirection}`}
     onChange={onChangeDirection}
     color="primary"
     type="single"

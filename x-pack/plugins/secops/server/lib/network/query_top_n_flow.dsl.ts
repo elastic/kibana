@@ -74,7 +74,7 @@ const getCountAgg = (networkTopNFlowType: NetworkTopNFlowType) => ({
   },
 });
 
-export const buildQuery = ({
+export const buildTopNFlowQuery = ({
   fields,
   filterQuery,
   networkTopNFlowDirection,

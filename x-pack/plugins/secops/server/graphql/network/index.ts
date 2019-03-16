@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createNetworkTopNFlowResolvers } from './resolvers';
-export { networkTopNFlowSchema } from './schema.gql';
+export { createNetworkResolvers } from './resolvers';
+export { networkSchema } from './schema.gql';
