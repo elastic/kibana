@@ -229,58 +229,58 @@ describe('AuditdLoggedinDetails', () => {
       );
     });
 
-    test('it returns ugly output if you just send in an id', () => {
+    test('it returns only Session if you just send in an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@logged in viawith a');
+      expect(wrapper.text()).toEqual('Session');
     });
 
-    test('it returns slightly less ugly output if you just send in an id and hostName', () => {
+    test('it returns only session and some host name just send in an id and hostName', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} hostName={'some-host-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@some-host-namelogged in viawith a');
+      expect(wrapper.text()).toEqual('Session@some-host-name');
     });
 
-    test('it returns slightly less ugly output if you just send in a username', () => {
+    test('it returns only session and some-user-name if that is all you sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} userName={'some-user-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name@logged in viawith a');
+      expect(wrapper.text()).toEqual('Sessionsome-user-name');
     });
 
-    test('it returns slightly less ugly output if you just send in a processExecutable', () => {
+    test('it returns only processExecutable some-process-name if that is all you sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} processExecutable={'some-process-name'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@logged in viasome-process-namewith a');
+      expect(wrapper.text()).toEqual('Sessionlogged in viasome-process-name');
     });
 
-    test('it returns slightly less ugly output if you just send in a session', () => {
+    test('it returns only the session-1 if that is all that is sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} session={'session-1'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsession-1@logged in viawith a');
+      expect(wrapper.text()).toEqual('Sessionsession-1');
     });
 
-    test('it returns slightly less ugly output if you just send in a result', () => {
+    test('it returns only the result if that is all that is sent in', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdLoggedinLine id={'hello-i-am-an-id'} result={'failure'} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@logged in viawith afailure');
+      expect(wrapper.text()).toEqual('Sessionwith afailure');
     });
   });
 });

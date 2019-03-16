@@ -68,7 +68,7 @@ export const AuditdExecutedCommandLine = pure<{
             secondary={secondary}
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>@</TokensFlexItem>
+        {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
         </TokensFlexItem>
@@ -81,7 +81,7 @@ export const AuditdExecutedCommandLine = pure<{
             iconType="folderOpen"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>executed</TokensFlexItem>
+        {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-executed-element-${id}`}

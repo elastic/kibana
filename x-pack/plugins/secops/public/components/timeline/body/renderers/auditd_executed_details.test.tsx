@@ -232,52 +232,52 @@ describe('AuditExecutedDetails', () => {
       );
     });
 
-    test('it returns ugly output if you just send in an id', () => {
+    test('it returns just a session if only given an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecuted');
+      expect(wrapper.text()).toEqual('Sessionin');
     });
 
-    test('it returns slightly less ugly output if you just send in an id and hostName', () => {
+    test('it returns only hostName if only hostname and an id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" hostName="some-host-name" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@some-host-nameinexecuted');
+      expect(wrapper.text()).toEqual('Session@some-host-namein');
     });
 
-    test('it returns slightly less ugly output if you just send in a username', () => {
+    test('it returns only a user name if only a user name and id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" userName="some-user-name" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionsome-user-name@inexecuted');
+      expect(wrapper.text()).toEqual('Sessionsome-user-namein');
     });
 
-    test('it returns slightly less ugly output if you just send in a processName', () => {
+    test('it returns only a process name if only given a process name and id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" processName="some-process-name" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecutedsome-process-name');
+      expect(wrapper.text()).toEqual('Sessioninexecutedsome-process-name');
     });
 
-    test('it returns slightly less ugly output if you just send in a processTitle', () => {
+    test('it returns only session if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" processTitle="some-process-title" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecuted');
+      expect(wrapper.text()).toEqual('Sessionin');
     });
 
-    test('it returns slightly less ugly output if you just send in a workingDirectory', () => {
+    test('it returns only a working directory if that is all that is given with a id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine
@@ -286,16 +286,16 @@ describe('AuditExecutedDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@insome-working-directoryexecuted');
+      expect(wrapper.text()).toEqual('Sessioninsome-working-directory');
     });
 
-    test('it returns slightly less ugly output if you just send in args', () => {
+    test('it returns only the args with id if that is all that is given (very unlikely situation)', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdExecutedCommandLine id="hello-i-am-an-id" args="arg1 arg 2 arg 3" />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Session@inexecutedarg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Sessioninarg1 arg 2 arg 3');
     });
   });
 });
