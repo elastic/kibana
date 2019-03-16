@@ -36,6 +36,7 @@ module.exports = () => {
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
+          modules: 'cjs'
         },
       ],
       require('./common_preset'),

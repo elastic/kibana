@@ -24,13 +24,8 @@ module.exports = {
   ],
   plugins: [
     require.resolve('babel-plugin-add-module-exports'),
-    // stage 3
-    require.resolve('@babel/plugin-proposal-async-generator-functions'),
-    require.resolve('@babel/plugin-proposal-export-default-from'),
-    require.resolve('@babel/plugin-proposal-object-rest-spread'),
-    require.resolve('@babel/plugin-transform-modules-commonjs'),
 
-    // the class properties proposal was merged with the private fields proposal
+    // The class properties proposal was merged with the private fields proposal
     // into the "class fields" proposal. Babel doesn't support this combined
     // proposal yet, which includes private field, so this transform is
     // TECHNICALLY stage 2, but for all intents and purposes it's stage 3

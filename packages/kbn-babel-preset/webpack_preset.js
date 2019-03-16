@@ -31,6 +31,7 @@ module.exports = () => {
             ],
           },
           useBuiltIns: 'entry',
+          modules: 'cjs'
         },
       ],
       require('./common_preset'),
