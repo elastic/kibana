@@ -17,6 +17,8 @@ export interface SecurityOptions {
   enableMavenImport: boolean;
   enableGradleImport: boolean;
   installNodeDependency: boolean;
+  gitHostWhitelist: string[];
+  gitProtocolWhitelist: string[];
 }
 
 export class ServerOptions {

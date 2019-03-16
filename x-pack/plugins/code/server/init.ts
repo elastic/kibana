@@ -221,7 +221,8 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     deleteWorker,
     indexWorker,
     repoIndexInitializerFactory,
-    repoConfigController
+    repoConfigController,
+    serverOptions
   );
   repositorySearchRoute(server, log);
   documentSearchRoute(server, log);
