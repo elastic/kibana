@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
+import * as os from 'os';
+import path from 'path';
+
 import { AnyObject } from './lib/esqueue';
+import { ServerOptions } from './server_options';
 
 // TODO migrate other duplicate classes, functions
 
 export const emptyAsyncFunc = async (_: AnyObject): Promise<any> => {
   Promise.resolve({});
 };
-export const TEST_OPTIONS = {
+
+const TEST_OPTIONS = {
   enabled: true,
   queueIndex: '.code_internal-worker-queue',
   queueTimeout: 60 * 60 * 1000, // 1 hour by default
@@ -31,3 +37,17 @@ export const TEST_OPTIONS = {
   maxWorkspace: 5, // max workspace folder for each language server
   disableScheduler: true, // Temp option to disable all schedulers.
 };
+
+export function createTestServerOption() {
+  const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
+
+  const config = {
+    get(key: string) {
+      if (key === 'path.data') {
+        return tmpDataPath;
+      }
+    },
+  };
+
+  return new ServerOptions(TEST_OPTIONS, config);
+}

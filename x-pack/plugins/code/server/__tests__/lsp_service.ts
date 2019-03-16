@@ -13,15 +13,13 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 
 import { LspService } from "../lsp/lsp_service";
-import { ServerOptions } from "../server_options";
 import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
 import { RepositoryGitStatusReservedField, RepositoryConfigReservedField } from '../indexer/schema';
 import { InstallManager } from "../lsp/install_manager";
-import * as os from "os";
 import assert from 'assert';
 import { RepositoryConfigController } from '../repository_config_controller';
+import { createTestServerOption } from '../test_utils';
 import { Server } from 'hapi';
-import { TEST_OPTIONS } from '../test_utils';
 
 const filename = 'hello.ts';
 describe('lsp_service tests', () => {
@@ -41,17 +39,7 @@ describe('lsp_service tests', () => {
     return repo;
   }
 
-  const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
-  console.log(`tmp data path is ${tmpDataPath}`);
-  const config = {
-    get(key: string) {
-      if (key === 'path.data') {
-        return tmpDataPath;
-      }
-    }
-  };
-
-  const serverOptions = new ServerOptions(TEST_OPTIONS, config);
+  const serverOptions = createTestServerOption();
   const installManager = new InstallManager(new Server(), serverOptions);
 
   function mockEsClient(): any {

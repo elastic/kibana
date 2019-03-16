@@ -5,34 +5,21 @@
  */
 
 import fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
-import rimraf from 'rimraf';
-import { TEST_OPTIONS } from '../test_utils';
+import { createTestServerOption } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { TYPESCRIPT } from './language_servers';
 import { TypescriptServerLauncher } from './ts_launcher';
 
 jest.setTimeout(10000);
-const tmpDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 
 // @ts-ignore
-const options: ServerOptions = {
-  workspacePath: `${tmpDataPath}/workspace`,
-  jdtWorkspacePath: `${tmpDataPath}/jdt`,
-  lsp: TEST_OPTIONS.lsp,
-  security: TEST_OPTIONS.security,
-};
+const options: ServerOptions = createTestServerOption();
 
 beforeAll(async () => {
   if (!fs.existsSync(options.workspacePath)) {
-    fs.mkdirSync(options.workspacePath);
-    fs.mkdirSync(options.jdtWorkspacePath);
+    fs.mkdirSync(options.workspacePath, { recursive: true });
+    fs.mkdirSync(options.jdtWorkspacePath, { recursive: true });
   }
-});
-
-afterAll(() => {
-  rimraf.sync(tmpDataPath);
 });
 
 function delay(seconds: number) {
