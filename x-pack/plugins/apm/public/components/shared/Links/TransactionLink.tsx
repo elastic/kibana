@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { KibanaLink } from './KibanaLink';
 import { legacyEncodeURIComponent } from './url_helpers';
 

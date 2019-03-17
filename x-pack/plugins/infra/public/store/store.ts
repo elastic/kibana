@@ -48,7 +48,6 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     selectLogFilterQueryAsJson: logFilterSelectors.selectLogFilterQueryAsJson,
     selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
     selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
-    selectVisibleLogSummary: logPositionSelectors.selectVisibleSummary,
     selectWaffleTimeUpdatePolicyInterval: waffleTimeSelectors.selectTimeUpdatePolicyInterval,
     selectMetricTimeUpdatePolicyInterval: metricTimeSelectors.selectTimeUpdatePolicyInterval,
     selectMetricRangeFromTimeRange: metricTimeSelectors.selectRangeFromTimeRange,
