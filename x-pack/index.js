@@ -75,10 +75,7 @@ module.exports = function (kibana) {
     translations(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
-<<<<<<< HEAD
     ossTelemetry(kibana),
-=======
     siemRules(kibana),
->>>>>>> Rebased on top of feature-secops. Not quite working yet
   ];
 };
