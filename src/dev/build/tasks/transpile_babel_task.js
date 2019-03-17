@@ -77,7 +77,7 @@ export const TranspileBabelTask = {
       buildRoot,
       buildRoot,
       [
-        require.resolve('@kbn/babel-preset/node_preset')
+        require.resolve('@kbn/babel-preset/webpack_preset')
       ]
     );
   },
