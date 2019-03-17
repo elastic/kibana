@@ -118,7 +118,7 @@ export class RulesService {
       taskType: 'siemRuleQuery',
       runAt: new Date(),
       interval: payload.interval + 'm',
-      scope: 'siem_rules',
+      scope: ['siem_rules'],
       params: {
         payload,
         encryptedHeaders,
@@ -130,7 +130,7 @@ export class RulesService {
     const task = {
       title: `SIEM rules: query`,
       description: 'Test SIEM rule',
-      timeOut: '5m',
+      timeout: '5m',
       numWorkers: 1,
       createTaskRunner(context: RunContext) {
         return {
@@ -258,10 +258,10 @@ async function getRequestContext(encryptedHeaders: string, kbnServer: any, basep
     getBasePath: () => basePath || serverBasePath,
   };
 
-  if (server.plugins.security) {
-    const { authorization } = server.plugins.security;
-    await authorization.mode.initialize(fakeRequest);
-  }
+  //if (server.plugins.security) {
+  //  const { authorization } = server.plugins.security;
+  //  await authorization.mode.initialize(fakeRequest);
+  //}
 
   return fakeRequest;
 }
