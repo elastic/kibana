@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient, OperationVariables } from 'apollo-client';
+import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
 import React from 'react';
-import { withApollo } from 'react-apollo';
-import { UptimeCommonProps } from '../../uptime_app';
+import { withApollo, WithApolloClient } from 'react-apollo';
 
 export interface UptimeGraphQLQueryProps<T> {
   loading: boolean;
@@ -18,7 +16,6 @@ export interface UptimeGraphQLQueryProps<T> {
 }
 
 interface UptimeGraphQLProps {
-  client: ApolloClient<NormalizedCacheObject>;
   registerWatch: (handler: () => void) => void;
   variables: OperationVariables;
 }
@@ -40,10 +37,10 @@ interface State<T> {
 export function withUptimeGraphQL<T>(WrappedComponent: any, query: any) {
   return withApollo(
     class UptimeGraphQLQuery extends React.Component<
-      UptimeGraphQLProps & UptimeCommonProps,
+      UptimeGraphQLProps & WithApolloClient<T>,
       State<T>
     > {
-      constructor(props: UptimeGraphQLProps & UptimeCommonProps) {
+      constructor(props: UptimeGraphQLProps & WithApolloClient<T>) {
         super(props);
         this.state = {
           loading: true,

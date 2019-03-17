@@ -45,27 +45,23 @@ class Query extends React.Component<Props, State> {
       colors: { success, danger },
       data,
       errors,
-      loading,
     } = this.props;
     const { windowWidth } = this.state;
 
-    if (loading || !data) {
-      return <SnapshotLoading />;
+    if (data && data.snapshot) {
+      return (
+        <Snapshot
+          dangerColor={danger}
+          successColor={success}
+          snapshot={data.snapshot}
+          windowWidth={windowWidth}
+        />
+      );
     }
     if (errors && errors.length) {
-      formatUptimeGraphQLErrorList(errors);
+      return formatUptimeGraphQLErrorList(errors);
     }
-
-    const { snapshot } = data;
-
-    return (
-      <Snapshot
-        dangerColor={danger}
-        successColor={success}
-        snapshot={snapshot}
-        windowWidth={windowWidth}
-      />
-    );
+    return <SnapshotLoading />;
   }
 
   private updateWindowSize = () => {
