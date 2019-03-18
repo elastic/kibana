@@ -88,7 +88,9 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
   };
 
   render() {
-    if (this.state.query === '') { return null; }
+    if (this.state.query === '') {
+      return null;
+    }
     return (
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">
