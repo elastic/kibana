@@ -195,6 +195,8 @@ const TimeseriesSeries = injectI18n(function (props) {
             cloneTooltip={intl.formatMessage({ id: 'tsvb.timeSeries.cloneSeriesTooltip', defaultMessage: 'Clone Series' })}
             onDelete={onDelete}
             onClone={props.onClone}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             onAdd={onAdd}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
@@ -232,7 +234,8 @@ TimeseriesSeries.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
 };
 
 export default injectI18n(TimeseriesSeries);
