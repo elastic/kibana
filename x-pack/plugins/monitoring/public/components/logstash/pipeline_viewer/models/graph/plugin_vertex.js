@@ -73,9 +73,7 @@ export class PluginVertex extends Vertex {
     }
 
     const numTimeseriesBuckets = this.eventsPerSecond.data.length;
-    // Discard last bucket as it typically contains partial data
-    const latestCompleteBucketIndex = numTimeseriesBuckets - 2;
-    return this.eventsPerSecond.data[latestCompleteBucketIndex][1];
+    return this.eventsPerSecond.data[numTimeseriesBuckets - 1][1];
   }
 
   isTimeConsuming() {
