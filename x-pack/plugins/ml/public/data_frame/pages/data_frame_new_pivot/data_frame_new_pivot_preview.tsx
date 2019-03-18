@@ -79,12 +79,7 @@ export const DataFrameNewPivotPreview: React.SFC<Props> = ({
   );
 
   if (dataFramePreviewData.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        title={<h2>Please disperse, nothing to see here ...</h2>}
-        body={<p>... or check your configuration to get some better results.</p>}
-      />
-    );
+    return null;
   }
 
   const columnKeys = Object.keys(dataFramePreviewData[0]);
@@ -113,6 +108,7 @@ export const DataFrameNewPivotPreview: React.SFC<Props> = ({
 
   return (
     <Fragment>
+      <h3>Data Frame Pivot Preview</h3>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
       <EuiInMemoryTable

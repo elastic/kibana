@@ -172,14 +172,12 @@ export const DataFrameNewPivotWizard: SFC<Props> = ({ indexPattern }) => {
 
       <EuiFlexItem>
         <EuiText>
-          <h3>Source Index {indexPattern.title}</h3>
           <DataFrameSourceIndexPreview
             cellClick={addToSearch}
             indexPattern={indexPattern}
             query={pivotQuery}
           />
 
-          <h3>Data Frame Pivot Preview</h3>
           <DataFrameNewPivotPreview
             aggs={pivotAggs}
             groupBy={pivotGroupBy}

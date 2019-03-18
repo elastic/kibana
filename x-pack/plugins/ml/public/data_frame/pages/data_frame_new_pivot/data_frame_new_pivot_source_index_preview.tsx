@@ -89,6 +89,7 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
 
   return (
     <Fragment>
+      <h3>Source Index {indexPattern.title}</h3>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
       <EuiInMemoryTable
@@ -97,6 +98,10 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
         items={tableData}
         columns={columns}
         pagination={true}
+        responsive={true}
+        hasActions={false}
+        isExpandable={false}
+        isSelectable={false}
       />
     </Fragment>
   );
