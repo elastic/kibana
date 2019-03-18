@@ -10,14 +10,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { has } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
 import { KpiNetworkData } from '../../../../graphql/types';
 import { getEmptyTagValue } from '../../../empty_value';
-import { LoadingPanel } from '../../../loading';
 
 import * as i18n from './translations';
 
@@ -26,51 +26,44 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const kpiNetworkCards = (data: KpiNetworkData) => [
+const loadMatrix = (loading: boolean, data: KpiNetworkData, property: string) => {
+  const matrix = get(property, data);
+
+  if (typeof matrix !== 'undefined' && matrix !== null) {
+    return numeral(matrix).format('0,0');
+  } else {
+    if (loading) {
+      return <EuiLoadingSpinner size="m" />;
+    } else {
+      getEmptyTagValue();
+    }
+  }
+};
+
+const kpiNetworkCards = (loading: boolean, data: KpiNetworkData) => [
   {
-    title:
-      has('networkEvents', data) && data.networkEvents !== null
-        ? numeral(data.networkEvents).format('0,0')
-        : getEmptyTagValue(),
+    title: loadMatrix(loading, data, 'networkEvents'),
     description: i18n.NETWORK_EVENTS,
   },
   {
-    title:
-      has('uniqueFlowId', data) && data.uniqueFlowId !== null
-        ? numeral(data.uniqueFlowId).format('0,0')
-        : getEmptyTagValue(),
+    title: loadMatrix(loading, data, 'uniqueFlowId'),
     description: i18n.UNIQUE_ID,
   },
   {
-    title:
-      has('activeAgents', data) && data.activeAgents !== null
-        ? numeral(data.activeAgents).format('0,0')
-        : getEmptyTagValue(),
+    title: loadMatrix(loading, data, 'activeAgents'),
     description: i18n.ACTIVE_AGENTS,
   },
   {
-    title:
-      has('uniquePrivateIps', data) && data.uniquePrivateIps !== null
-        ? numeral(data.uniquePrivateIps).format('0,0')
-        : getEmptyTagValue(),
+    title: loadMatrix(loading, data, 'uniquePrivateIps'),
     description: i18n.UNIQUE_PRIVATE_IP,
   },
 ];
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) =>
-  loading ? (
-    <LoadingPanel
-      height="auto"
-      width="100%"
-      text={i18n.LOADING}
-      data-test-subj="InitialLoadingUniquePrivateIps"
-    />
-  ) : (
-    <EuiFlexGroup>
-      {kpiNetworkCards(data).map(item => (
-        <EuiFlexItem key={item.description}>
-          <EuiCard title={item.title} description={item.description} />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  )
-);
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
+  <EuiFlexGroup>
+    {kpiNetworkCards(loading, data).map(item => (
+      <EuiFlexItem key={item.description}>
+        <EuiCard title={item.title} description={item.description} />
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+));

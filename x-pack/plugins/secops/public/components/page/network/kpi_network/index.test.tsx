@@ -25,7 +25,7 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the loading panel', () => {
+    test('it renders loading icons', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <KpiNetworkComponent data={mockData.KpiNetwork} loading={true} />
