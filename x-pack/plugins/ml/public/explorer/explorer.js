@@ -951,11 +951,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
 
         toastNotifications.addDanger(this.props.intl.formatMessage({
-          id: 'xpack.ml.explorer.invalidKuerySyntaxErrorMessageWithError',
-          defaultMessage: 'Invalid kuery syntax. {errorMessage}'
-        },
-        {
-          errorMessage: e.message || '',
+          id: 'xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable',
+          defaultMessage: 'Uh oh! Looks like the filter syntax is invalid. Please check your input and try again.'
         }));
       }
     }
