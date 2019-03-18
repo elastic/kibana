@@ -6,8 +6,9 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses, nextTick } from './test_helpers';
+import { initTestBed, mockServerResponses, nextTick, getRandomString } from './test_helpers';
 import { FollowerIndicesList } from '../../public/app/sections/home/follower_indices_list';
+import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',
@@ -63,22 +64,19 @@ describe('<FollowerIndicesList />', () => {
   });
 
   describe('when there are follower indices', async () => {
-    const followerIndices = [{
-      name: 'follower-index-1',
-      remoteCluster: 'new-york',
-      leaderIndex: 'leader-index-1',
-      status: 'started'
-    }, {
-      name: 'follower-index-2',
-      remoteCluster: 'paris',
-      leaderIndex: 'leader-index-2',
-      status: 'paused'
-    }];
+    // For deterministic tests, we need to make sure that index1 comes before index2
+    // in the table list that is rendered. As the table orders alphabetically by index name
+    // we prefix the random name to make sure that index1 name comes before index2.
+    const index1 = getFollowerIndexMock({ name: `a${getRandomString()}` });
+    const index2 = getFollowerIndexMock({ name: `b${getRandomString()}`, status: 'paused' });
+
+    const followerIndices = [index1, index2];
 
     let selectFollowerIndexAt;
     let openContextMenu;
     let openTableRowContextMenuAt;
     let clickContextMenuButtonAt;
+    let clickFollowerIndexAt;
 
     beforeEach(async () => {
       // Mock Http Request that loads Follower indices
@@ -101,6 +99,7 @@ describe('<FollowerIndicesList />', () => {
         openContextMenu,
         openTableRowContextMenuAt,
         clickContextMenuButtonAt,
+        clickFollowerIndexAt,
       } = getUserActions('followerIndicesList'));
 
       // Read the index list table
@@ -124,17 +123,17 @@ describe('<FollowerIndicesList />', () => {
     test('should list the follower indices in the table', () => {
       expect(tableCellsValues.length).toEqual(followerIndices.length);
       expect(tableCellsValues).toEqual([
-        [ '', // First column is the checkbox to select row
-          'follower-index-1',
+        [ '', // Empty because the first column is the checkbox to select row
+          index1.name,
           'Active',
-          'new-york',
-          'leader-index-1',
-          '' // Last column is for the "actions" on the resource
+          index1.remoteCluster,
+          index1.leaderIndex,
+          '' // Empty because the last column is for the "actions" on the resource
         ], [ '',
-          'follower-index-2',
+          index2.name,
           'Paused',
-          'paris',
-          'leader-index-2',
+          index2.remoteCluster,
+          index2.leaderIndex,
           '' ]
       ]);
     });
@@ -266,6 +265,79 @@ describe('<FollowerIndicesList />', () => {
         find('ccrFollowerIndexListUnfollowActionButton').simulate('click');
 
         expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(true);
+      });
+    });
+
+    describe('detail panel', () => {
+      test('should open a detail panel when clicking on a follower index', () => {
+        expect(exists('ccrFollowerIndexDetailsFlyout')).toBe(false);
+
+        clickFollowerIndexAt(0);
+
+        expect(exists('ccrFollowerIndexDetailsFlyout')).toBe(true);
+      });
+
+      test('should set the title the index that has been selected', () => {
+        clickFollowerIndexAt(0); // Open the detail panel
+        expect(find('followerIndexDetailsFlyoutTitle').text()).toEqual(index1.name);
+      });
+
+      test('should have a "settings" section', () => {
+        clickFollowerIndexAt(0);
+        expect(find('ccrFollowerIndexDetailPanelSettingsSection').find('h3').text()).toEqual('Settings');
+        expect(exists('ccrFollowerIndexDetailPanelSettingsValues')).toBe(true);
+      });
+
+      test('should set the correct follower index settings values', () => {
+        const mapSettingsToFollowerIndexProp = {
+          'Status': 'status',
+          'RemoteCluster': 'remoteCluster',
+          'LeaderIndex': 'leaderIndex',
+          'MaxReadReqOpCount': 'maxReadRequestOperationCount',
+          'MaxOutstandingReadReq': 'maxOutstandingReadRequests',
+          'MaxReadReqSize': 'maxReadRequestSize',
+          'MaxWriteReqOpCount': 'maxWriteRequestOperationCount',
+          'MaxWriteReqSize': 'maxWriteRequestSize',
+          'MaxOutstandingWriteReq': 'maxOutstandingWriteRequests',
+          'MaxWriteBufferCount': 'maxWriteBufferCount',
+          'MaxWriteBufferSize': 'maxWriteBufferSize',
+          'MaxRetryDelay': 'maxRetryDelay',
+          'ReadPollTimeout': 'readPollTimeout'
+        };
+
+        clickFollowerIndexAt(0);
+
+        Object.entries(mapSettingsToFollowerIndexProp).forEach(([setting, prop]) => {
+          const wrapper = find(`ccrFollowerIndexDetail${setting}`);
+
+          if (!wrapper.length) {
+            throw new Error(`Could not find description for setting "${setting}"`);
+          }
+
+          expect(wrapper.text()).toEqual(index1[prop].toString());
+        });
+      });
+
+      test('should not have settings values for a "paused" follower index', () => {
+        clickFollowerIndexAt(1); // the second follower index is paused
+        expect(exists('ccrFollowerIndexDetailPanelSettingsValues')).toBe(false);
+        expect(find('ccrFollowerIndexDetailPanelSettingsSection').text()).toContain('paused follower index does not have settings');
+      });
+
+      test('should have a section to render the follower index shards stats', () => {
+        clickFollowerIndexAt(0);
+        expect(exists('ccrFollowerIndexDetailPanelShardsStatsSection')).toBe(true);
+      });
+
+      test('should render a EuiCodeEditor for each shards stats', () => {
+        clickFollowerIndexAt(0);
+
+        const codeEditors = component.find(`EuiCodeEditor`);
+
+        expect(codeEditors.length).toBe(index1.shards.length);
+        codeEditors.forEach((codeEditor, i) => {
+          expect(JSON.parse(codeEditor.props().value)).toEqual(index1.shards[i]);
+        });
       });
     });
   });

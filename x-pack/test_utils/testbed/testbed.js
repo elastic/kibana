@@ -7,7 +7,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { mountWithIntl } from '../enzyme_helpers';
-import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test';
+import { findTestSubject as findTestSubjectHelper } from '../index';
 
 const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
 

@@ -9,4 +9,4 @@ import Chance from 'chance';
 const chance = new Chance();
 const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 
-export const getRandomString = () => `${chance.string({ pool: CHARS_POOL })}-${Date.now()}`;
+export const getRandomString = (options = {}) => `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;

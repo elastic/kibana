@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed } from '../../../../test_utils';
+import { registerTestBed, findTestSubject } from '../../../../test_utils';
 import { ccrStore } from '../../public/app/store';
 import { setHttpClient } from '../../public/app/services/api';
 import routing from '../../public/app/services/routing';
@@ -56,11 +56,17 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
       button.simulate('click');
     };
 
+    const clickFollowerIndexAt = (index = 0) => {
+      const followerIndexLink = findTestSubject(rows[index].reactWrapper, 'ccrFollowerIndexListFollowerIndexLink');
+      followerIndexLink.simulate('click');
+    };
+
     return {
       selectFollowerIndexAt,
       openContextMenu,
       clickContextMenuButtonAt,
       openTableRowContextMenuAt,
+      clickFollowerIndexAt,
     };
   };
 
@@ -74,7 +80,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
   }
 };
 
-export { nextTick } from '../../../../test_utils';
+export { nextTick, getRandomString } from '../../../../test_utils';
 
 export const initTestBed = (component, props = {}) => {
   const testBed = registerTestBed(component, {}, ccrStore)(props);
