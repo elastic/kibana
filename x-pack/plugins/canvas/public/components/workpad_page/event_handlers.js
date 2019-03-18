@@ -6,7 +6,7 @@
 
 const ancestorElement = element => {
   if (!element) {
-    return element;
+    return false;
   }
   // IE11 has no classList on SVG elements, but we're not interested in SVG elements
   do {
