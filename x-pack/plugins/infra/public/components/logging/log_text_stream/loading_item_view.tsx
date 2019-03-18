@@ -5,10 +5,9 @@
  */
 
 import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import * as React from 'react';
 import styled from 'styled-components';
-import { RelativeTime } from './relative_time';
 
 interface LogTextStreamLoadingItemViewProps {
   alignment: 'top' | 'bottom';
@@ -52,10 +51,10 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
                 <EuiIcon type="clock" />
                 <FormattedMessage
                   id="xpack.infra.logs.lastStreamingUpdateText"
-                  defaultMessage=" last updated {lastUpdateTime} ago"
+                  defaultMessage=" last updated {lastUpdateTime}"
                   values={{
                     lastUpdateTime: (
-                      <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />
+                      <FormattedRelative value={lastStreamingUpdate} updateInterval={1000} />
                     ),
                   }}
                 />
