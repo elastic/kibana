@@ -197,7 +197,17 @@ module.controller('MlExplorerController', function (
 
   // Listen for changes to job selection.
   $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
-    jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
+    const filterData = {
+      influencersFilterQuery: $scope.appState.mlExplorerFilter.influencersFilterQuery,
+      filterActive: $scope.appState.mlExplorerFilter.filterActive,
+      filteredFields: $scope.appState.mlExplorerFilter.filteredFields,
+      queryString: $scope.appState.mlExplorerFilter.queryString,
+    };
+    jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, {
+      fullJobs: mlJobService.jobs,
+      selectedJobIds,
+      filterData
+    });
   });
 
   // Refresh all the data when the time range is altered.

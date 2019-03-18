@@ -42,8 +42,10 @@ export function createJobs(jobs) {
 export function getClearedSelectedAnomaliesState() {
   return {
     anomalyChartRecords: [],
+    filterActive: false,
+    influencersFilterQuery: undefined,
     selectedCells: null,
-    viewByLoadedForTimeFormatted: null,
+    viewByLoadedForTimeFormatted: null
   };
 }
 

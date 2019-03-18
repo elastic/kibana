@@ -246,17 +246,35 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         // Listen for changes to job selection.
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-          const { selectedJobs } = payload;
+          const { selectedJobs, filterData } = payload;
           const stateUpdate = {
             noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
             selectedJobs,
           };
 
-          const indexPattern = await this.getIndexPattern(selectedJobs);
-          stateUpdate.indexPattern = indexPattern;
-
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
           Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+          // clear filter if selected jobs have no influencers
+          if (stateUpdate.noInfluencersConfigured === true) {
+            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+            const noFilterState = {
+              filterActive: false,
+              filteredFields: [],
+              influencersFilterQuery: undefined,
+              maskAll: false,
+              queryString: undefined
+            };
+
+            Object.assign(stateUpdate, noFilterState);
+          } else {
+            // Put filter data back into stateUpdate if selected jobs have influencers
+            if (filterData !== undefined && filterData.influencersFilterQuery !== undefined) {
+              Object.assign(stateUpdate, { ...filterData });
+            }
+
+            const indexPattern = await this.getIndexPattern(selectedJobs);
+            stateUpdate.indexPattern = indexPattern;
+          }
 
           if (selectedJobs.length > 1) {
             this.props.appStateHandler(
