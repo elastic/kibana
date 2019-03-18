@@ -15,11 +15,16 @@ export const App = () => {
 
   return (
     <HashRouter>
-      <Switch>
-        <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
-        <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
-        <Route path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList}/>
-      </Switch>
+      <AppWithoutRouter />
     </HashRouter>
   );
 };
+
+// Exoprt this so we can test it with a different router.
+export const AppWithoutRouter = () => (
+  <Switch>
+    <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}indices`}/>
+    <Route exact path={`${BASE_PATH}indices`} component={IndexList} />
+    <Route path={`${BASE_PATH}indices/filter/:filter?`} component={IndexList}/>
+  </Switch>
+);
