@@ -17,5 +17,14 @@
  * under the License.
  */
 
-export { AggParam } from './agg_param';
-export { AggType } from './agg_type';
+import { AggParam } from '../../../agg_types';
+import { AggConfig } from '../../agg_config';
+
+interface AggParamEditorProps<T> {
+  agg: AggConfig;
+  aggParam: AggParam;
+  value: T;
+  setValue(value: T): void;
+}
+
+export { AggParamEditorProps };
