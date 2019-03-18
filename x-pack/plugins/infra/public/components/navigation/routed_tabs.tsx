@@ -29,7 +29,10 @@ export class RoutedTabs extends React.Component<RoutedTabsProps> {
           key={`${tab.path}${tab.title}`}
           path={tab.path}
           children={({ match, history }) => (
-            <EuiTab onClick={() => history.push(tab.path)} isSelected={match !== null}>
+            <EuiTab
+              onClick={() => (match ? undefined : history.push(tab.path))}
+              isSelected={match !== null}
+            >
               {tab.title}
             </EuiTab>
           )}
