@@ -37,9 +37,9 @@ export function ComboBoxProvider({ getService }) {
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
 
-      // if it doesn't find the item where the text mates exactly, it will chose the first option
+      // if it doesn't find the item which text matches exactly, it will choose the first option
       try {
-        await find.clickByCssSelector(`.euiComboBoxOption[title^="${value.trim()}"]`, 3000);
+        await find.clickByCssSelector(`.euiComboBoxOption[title="${value.trim()}"]`, 3000);
       } catch (err) {
         await find.clickByCssSelector('.euiComboBoxOption');
       }
