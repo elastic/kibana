@@ -8,7 +8,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { EuiBasicTable, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -115,7 +115,12 @@ export const DataFrameNewPivotPreview: React.SFC<Props> = ({
     <Fragment>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <EuiBasicTable condensed="true" items={dataFramePreviewData.slice(0, 10)} columns={columns} />
+      <EuiInMemoryTable
+        condensed="true"
+        items={dataFramePreviewData}
+        columns={columns}
+        pagination={true}
+      />
     </Fragment>
   );
 };

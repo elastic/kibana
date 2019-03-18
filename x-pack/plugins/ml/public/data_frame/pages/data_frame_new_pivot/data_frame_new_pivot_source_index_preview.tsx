@@ -10,7 +10,7 @@ import { SearchResponse } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { EuiBasicTable, EuiButtonEmpty, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -21,6 +21,8 @@ interface Props {
   query: SimpleQuery;
   cellClick(search: string): void;
 }
+
+const SEARCH_SIZE = 1000;
 
 export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
   cellClick,
@@ -37,7 +39,7 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
       ml.esSearch({
         index: indexPattern.title,
         rest_total_hits_as_int: true,
-        size: 10,
+        size: SEARCH_SIZE,
         body: query,
       })
         .then((resp: SearchResponse<any>) => {
@@ -75,7 +77,7 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
       return {
         field: k,
         name: k,
-        // sortable: true,
+        sortable: true,
         truncateText: true,
         render: (d: string) => (
           <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
@@ -89,11 +91,12 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
     <Fragment>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <EuiBasicTable
+      <EuiInMemoryTable
         className="mlDataFrameTable"
         condensed="true"
         items={tableData}
         columns={columns}
+        pagination={true}
       />
     </Fragment>
   );
