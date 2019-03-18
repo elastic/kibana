@@ -2,7 +2,6 @@
 
 exports[`renders without crashing 1`] = `
 <EuiFlexItem
-  component="div"
   grow={false}
 >
   <EuiFormRow

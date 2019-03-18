@@ -24,21 +24,13 @@ exports[`StepTimeField should render a loading state when creating the index pat
 >
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiLoadingSpinner />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText

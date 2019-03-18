@@ -3,15 +3,9 @@
 exports[`LoadingIndices should render normally 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
-  gutterSize="l"
   justifyContent="center"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiLoadingSpinner
@@ -19,7 +13,6 @@ exports[`LoadingIndices should render normally 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiText
