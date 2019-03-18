@@ -44,7 +44,7 @@ export const TimeRuler: React.SFC<TimeRulerProps> = ({ end, height, start, tickC
 TimeRuler.displayName = 'TimeRuler';
 
 const TimeRulerTickLabel = styled.text`
-  font-size: ${props => props.theme.eui.euiFontSizeXs};
+  font-size: ${props => props.theme.eui.euiFontSizeXS};
   line-height: ${props => props.theme.eui.euiLineHeight};
   fill: ${props => props.theme.eui.textColors.subdued};
 `;
