@@ -128,4 +128,51 @@ describe('NetworkTopNFlow Table Component', () => {
       ).toEqual('by destination ip');
     });
   });
+
+  describe('Sorting on Table', () => {
+    test('when you click on the column header, you should show the sorting icon', () => {
+      const wrapper = mount(
+        <MockedProvider>
+          <TestProviders>
+            <NetworkTopNFlowTable
+              loading={false}
+              data={mockData.NetworkTopNFlow.edges}
+              totalCount={mockData.NetworkTopNFlow.totalCount}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)!}
+              loadMore={loadMore}
+              startDate={startDate}
+              type={networkModel.NetworkType.page}
+            />
+          </TestProviders>
+        </MockedProvider>
+      );
+
+      wrapper
+        .find('.euiTable thead tr th button')
+        .at(1)
+        .simulate('click');
+
+      wrapper.update();
+
+      expect(
+        wrapper
+          .find('.euiTable thead tr th button')
+          .first()
+          .text()
+      ).toEqual('BytesClick to sort in ascending order');
+      expect(
+        wrapper
+          .find('.euiTable thead tr th button')
+          .at(1)
+          .text()
+      ).toEqual('PacketsClick to sort in descending order');
+      expect(
+        wrapper
+          .find('.euiTable thead tr th button')
+          .at(1)
+          .find('svg')
+      ).toBeTruthy();
+    });
+  });
 });

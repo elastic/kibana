@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
+import {
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowSortField,
+  NetworkTopNFlowType,
+} from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
@@ -78,6 +83,7 @@ export const buildTopNFlowQuery = ({
   fields,
   filterQuery,
   networkTopNFlowDirection,
+  networkTopNFlowSort,
   networkTopNFlowType,
   timerange: { from, to },
   pagination: { limit },
@@ -89,14 +95,7 @@ export const buildTopNFlowQuery = ({
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    {
-      range: {
-        [timestamp]: {
-          gte: from,
-          lte: to,
-        },
-      },
-    },
+    { range: { [timestamp]: { gte: from, lte: to } } },
   ];
 
   const dslQuery = {
@@ -106,8 +105,18 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(networkTopNFlowType),
-        ...getUniDirectionAggs(networkTopNFlowDirection, networkTopNFlowType, limit),
-        ...getBiDirectionAggs(networkTopNFlowDirection, networkTopNFlowType, limit),
+        ...getUniDirectionAggs(
+          networkTopNFlowDirection,
+          networkTopNFlowSort,
+          networkTopNFlowType,
+          limit
+        ),
+        ...getBiDirectionAggs(
+          networkTopNFlowDirection,
+          networkTopNFlowSort,
+          networkTopNFlowType,
+          limit
+        ),
       },
       query: {
         bool: {
@@ -125,6 +134,7 @@ export const buildTopNFlowQuery = ({
 
 const getUniDirectionAggs = (
   networkTopNFlowDirection: NetworkTopNFlowDirection,
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
   networkTopNFlowType: NetworkTopNFlowType,
   limit: number
 ) =>
@@ -135,7 +145,7 @@ const getUniDirectionAggs = (
             field: `${networkTopNFlowType}.ip`,
             size: limit + 1,
             order: {
-              bytes: 'desc',
+              ...getQueryOrder(networkTopNFlowSortField),
             },
           },
           aggs: {
@@ -190,6 +200,7 @@ const getUniDirectionAggs = (
 
 const getBiDirectionAggs = (
   networkTopNFlowDirection: NetworkTopNFlowDirection,
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
   networkTopNFlowType: NetworkTopNFlowType,
   limit: number
 ) =>
@@ -200,7 +211,7 @@ const getBiDirectionAggs = (
             field: `${networkTopNFlowType}.ip`,
             size: limit + 1,
             order: {
-              bytes: 'desc',
+              ...getQueryOrder(networkTopNFlowSortField),
             },
           },
           aggs: {
@@ -258,5 +269,15 @@ const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType) => {
     return NetworkTopNFlowType.server;
   } else if (networkTopNFlowType === NetworkTopNFlowType.server) {
     return NetworkTopNFlowType.client;
+  }
+};
+
+const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField) => {
+  if (networkTopNFlowSortField.field === NetworkTopNFlowFields.bytes) {
+    return { bytes: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopNFlowFields.packets) {
+    return { packets: networkTopNFlowSortField.direction };
+  } else if (networkTopNFlowSortField.field === NetworkTopNFlowFields.ipCount) {
+    return { ip_count: networkTopNFlowSortField.direction };
   }
 };

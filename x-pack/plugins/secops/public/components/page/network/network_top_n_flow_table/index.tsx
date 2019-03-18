@@ -5,6 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -13,10 +14,12 @@ import { ActionCreator } from 'typescript-fsa';
 import {
   NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowSortField,
   NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
 import { getNetworkTopNFlowColumns } from './columns';
 import { SelectDirection } from './select_direction';
@@ -37,6 +40,7 @@ interface OwnProps {
 interface NetworkTopNFlowTableReduxProps {
   limit: number;
   topNFlowDirection: NetworkTopNFlowDirection;
+  topNFlowSort: NetworkTopNFlowSortField;
   topNFlowType: NetworkTopNFlowType;
 }
 
@@ -47,6 +51,10 @@ interface NetworkTopNFlowTableDispatchProps {
   }>;
   updateTopNFlowLimit: ActionCreator<{
     limit: number;
+    networkType: networkModel.NetworkType;
+  }>;
+  updateTopNFlowSort: ActionCreator<{
+    topNFlowSort: NetworkTopNFlowSortField;
     networkType: networkModel.NetworkType;
   }>;
   updateTopNFlowType: ActionCreator<{
@@ -97,9 +105,16 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       updateTopNFlowLimit,
       startDate,
       topNFlowDirection,
+      topNFlowSort,
       topNFlowType,
       type,
     } = this.props;
+
+    const field =
+      topNFlowSort.field === NetworkTopNFlowFields.ipCount
+        ? `node.${topNFlowType}.count`
+        : `node.network.${topNFlowSort.field}`;
+
     return (
       <LoadMoreTable
         columns={getNetworkTopNFlowColumns(
@@ -116,9 +131,11 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         limit={limit}
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
+        onChange={this.onChange}
         updateLimitPagination={newLimit =>
           updateTopNFlowLimit({ limit: newLimit, networkType: type })
         }
+        sorting={{ field, direction: topNFlowSort.direction }}
         title={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -156,6 +173,23 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     );
   }
 
+  private onChange = (criteria: Criteria) => {
+    if (criteria.sort) {
+      const splitField = criteria.sort.field.split('.');
+      const field = last(splitField) === 'count' ? NetworkTopNFlowFields.ipCount : last(splitField);
+      const newTopNFlowSort: NetworkTopNFlowSortField = {
+        field: field as NetworkTopNFlowFields,
+        direction: criteria.sort.direction,
+      };
+      if (!isEqual(newTopNFlowSort, this.props.topNFlowSort)) {
+        this.props.updateTopNFlowSort({
+          topNFlowSort: newTopNFlowSort,
+          networkType: this.props.type,
+        });
+      }
+    }
+  };
+
   private onChangeTopNFlowType = (topNFlowType: NetworkTopNFlowType) =>
     this.props.updateTopNFlowType({ topNFlowType, networkType: this.props.type });
 
@@ -174,6 +208,7 @@ export const NetworkTopNFlowTable = connect(
   makeMapStateToProps,
   {
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
+    updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateTopNFlowType: networkActions.updateTopNFlowType,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
   }

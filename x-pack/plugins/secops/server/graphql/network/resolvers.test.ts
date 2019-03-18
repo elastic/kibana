@@ -10,6 +10,7 @@ import {
   Direction,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
   NetworkTopNFlowType,
   Source,
 } from '../../graphql/types';
@@ -99,6 +100,7 @@ describe('Test Source Resolvers', () => {
           limit: 2,
           cursor: null,
         },
+        sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         type: NetworkTopNFlowType.source,
         direction: NetworkTopNFlowDirection.uniDirectional,
       },

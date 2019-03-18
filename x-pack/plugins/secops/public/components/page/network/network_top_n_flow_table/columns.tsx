@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { get, isEmpty } from 'lodash/fp';
+import { get, isEmpty, isNil } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,13 +14,14 @@ import {
   NetworkDirectionEcs,
   NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowItem,
   NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -28,13 +29,15 @@ import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from './add_to_kql';
 import * as i18n from './translations';
 
+type valueof<T> = T[keyof T];
+
 export const getNetworkTopNFlowColumns = (
   startDate: number,
   topNFlowDirection: NetworkTopNFlowDirection,
   topNFlowType: NetworkTopNFlowType,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<NetworkTopNFlowEdges>> => [
+): Array<Columns<NetworkTopNFlowEdges | valueof<NetworkTopNFlowItem>>> => [
   {
     name: getIpTitle(topNFlowType),
     truncateText: false,
@@ -56,14 +59,8 @@ export const getNetworkTopNFlowColumns = (
               name: ip,
               excluded: false,
               kqlQuery: '',
-              queryMatch: {
-                field: ipAttr,
-                value: ip,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryMatch: { field: ipAttr, value: ip },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -106,14 +103,8 @@ export const getNetworkTopNFlowColumns = (
               name: domain,
               excluded: false,
               kqlQuery: '',
-              queryMatch: {
-                field: domainAttr,
-                value: domain,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryMatch: { field: domainAttr, value: domain },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -176,34 +167,46 @@ export const getNetworkTopNFlowColumns = (
           )),
   },
   {
+    field: 'node.network.bytes',
     name: i18n.BYTES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (node.network && node.network.bytes) {
-        return numeral(node.network.bytes).format('0.000b');
+    sortable: true,
+    render: (bytes: number) => {
+      if (!isNil(bytes)) {
+        return numeral(bytes).format('0.000b');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: 'node.network.packets',
     name: i18n.PACKETS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (node.network && node.network.packets) {
-        return numeral(node.network.packets).format('0,000');
+    sortable: true,
+    render: (packets: number) => {
+      if (!isNil(packets)) {
+        return numeral(packets).format('0,000');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: `node.${topNFlowType}.count`,
     name: getUniqueTitle(topNFlowType),
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag(`${topNFlowType}.count`, node),
+    sortable: true,
+    render: (ipCount: number) => {
+      if (!isNil(ipCount)) {
+        return numeral(ipCount).format('0');
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
 ];
 

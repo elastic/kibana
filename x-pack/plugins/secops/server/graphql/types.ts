@@ -779,6 +779,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface NetworkTopNFlowSortField {
+  field: NetworkTopNFlowFields;
+
+  direction: Direction;
+}
+
 export interface NetworkDnsSortField {
   field: NetworkDnsFields;
 
@@ -831,6 +837,8 @@ export interface NetworkTopNFlowSourceArgs {
   id?: string | null;
 
   pagination: PaginationInput;
+
+  sort: NetworkTopNFlowSortField;
 
   type: NetworkTopNFlowType;
 
@@ -894,6 +902,12 @@ export enum NetworkDirectionEcs {
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
+}
+
+export enum NetworkTopNFlowFields {
+  bytes = 'bytes',
+  packets = 'packets',
+  ipCount = 'ipCount',
 }
 
 export enum NetworkTopNFlowType {
@@ -1057,6 +1071,8 @@ export namespace SourceResolvers {
     id?: string | null;
 
     pagination: PaginationInput;
+
+    sort: NetworkTopNFlowSortField;
 
     type: NetworkTopNFlowType;
 

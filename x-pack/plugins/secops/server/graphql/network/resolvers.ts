@@ -37,6 +37,7 @@ export const createNetworkResolvers = (
       const options = {
         ...createOptions(source, args, info),
         networkTopNFlowType: args.type,
+        networkTopNFlowSort: args.sort,
         networkTopNFlowDirection: args.direction,
       };
       return libs.network.getNetworkTopNFlow(req, options);

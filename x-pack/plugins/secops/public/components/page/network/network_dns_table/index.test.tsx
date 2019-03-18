@@ -75,7 +75,12 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(wrapper.find('.euiTable thead tr th button svg')).toBeTruthy();
+      expect(
+        wrapper
+          .find('.euiTable thead tr th button')
+          .first()
+          .find('svg')
+      ).toBeTruthy();
     });
   });
 });
