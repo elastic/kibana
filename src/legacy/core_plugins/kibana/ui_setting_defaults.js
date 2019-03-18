@@ -302,19 +302,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
-    'courier:maxSegmentCount': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
-        defaultMessage: 'Maximum segment count',
-      }),
-      value: 30,
-      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
-        defaultMessage:
-          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
-          'This setting attempts to prevent the list of segments from getting too long, ' +
-          'which might cause requests to take much longer to process.',
-      }),
-      category: ['search'],
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
