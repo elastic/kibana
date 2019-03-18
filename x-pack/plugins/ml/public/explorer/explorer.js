@@ -48,6 +48,7 @@ import { injectObservablesAsProps } from '../util/observable_utils';
 
 import {
   getClearedSelectedAnomaliesState,
+  getClearedFilterState,
   getDefaultViewBySwimlaneData,
   getFilteredTopInfluencers,
   getSelectionInfluencers,
@@ -246,14 +247,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         // Listen for changes to job selection.
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-          const { selectedJobs, filterData } = payload;
+          const { selectedJobs } = payload;
           const stateUpdate = {
             noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
             selectedJobs,
           };
 
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-          Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+          Object.assign(stateUpdate, getClearedSelectedAnomaliesState()); // not passing in true for clearFilter
           // clear filter if selected jobs have no influencers
           if (stateUpdate.noInfluencersConfigured === true) {
             this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
@@ -267,11 +268,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
             Object.assign(stateUpdate, noFilterState);
           } else {
-            // Put filter data back into stateUpdate if selected jobs have influencers
-            if (filterData !== undefined && filterData.influencersFilterQuery !== undefined) {
-              Object.assign(stateUpdate, { ...filterData });
-            }
-
             const indexPattern = await this.getIndexPattern(selectedJobs);
             stateUpdate.indexPattern = indexPattern;
           }
@@ -295,7 +291,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         // RELOAD reloads full Anomaly Explorer and clears the selection.
         if (action === EXPLORER_ACTION.RELOAD) {
           this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-          this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState() }, true);
+          this.updateExplorer({ ...payload, ...getClearedSelectedAnomaliesState(), ...getClearedFilterState() }, true);
         }
 
         // REDRAW reloads Anomaly Explorer and tries to retain the selection.

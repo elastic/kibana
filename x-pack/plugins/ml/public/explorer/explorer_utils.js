@@ -39,11 +39,16 @@ export function createJobs(jobs) {
   });
 }
 
+export function getClearedFilterState() {
+  return {
+    filterActive: false,
+    influencersFilterQuery: undefined
+  };
+}
+
 export function getClearedSelectedAnomaliesState() {
   return {
     anomalyChartRecords: [],
-    filterActive: false,
-    influencersFilterQuery: undefined,
     selectedCells: null,
     viewByLoadedForTimeFormatted: null
   };
