@@ -31,9 +31,9 @@ import {
 
 import { getHttpClient } from './api';
 
-export function trackUserAction(actionType) {
+export function trackUserAction(actionType, httpClient = getHttpClient()) {
   const userActionUri = createUserActionUri(UA_APP_NAME, actionType);
-  getHttpClient().post(userActionUri);
+  httpClient.post(userActionUri);
 }
 
 export function getUserActionsForPhases(phases) {
