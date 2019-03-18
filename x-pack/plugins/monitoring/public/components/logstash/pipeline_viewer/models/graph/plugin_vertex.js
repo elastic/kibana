@@ -51,15 +51,31 @@ export class PluginVertex extends Vertex {
     return get(this.stats, 'percent_of_total_processor_duration');
   }
 
-  get eventsPerSecond() {
-    const eventsPerMillisecond = this.isInput
+  get eventsPerMillisecond() {
+    return this.isInput
       ? this.stats.events_out_per_millisecond
       : this.stats.events_in_per_millisecond;
-    return eventsPerMillisecond * 1000;
+  }
+
+  get eventsPerSecond() {
+    if (!this.eventsPerMillisecond.hasOwnProperty('data')) {
+      return this.eventsPerMillisecond * 1000;
+    }
+
+    const eps = { ...this.eventsPerMillisecond }; // Clone the object so we don't modify the original one
+    eps.data = this.eventsPerMillisecond.data.map(([timestamp, value]) => [ timestamp, value * 1000]);
+    return eps;
   }
 
   get latestEventsPerSecond() {
-    return this.eventsPerSecond;
+    if (!this.eventsPerSecond.hasOwnProperty('data')) {
+      return this.eventsPerSecond;
+    }
+
+    const numTimeseriesBuckets = this.eventsPerSecond.data.length;
+    // Discard last bucket as it typically contains partial data
+    const latestCompleteBucketIndex = numTimeseriesBuckets - 2;
+    return this.eventsPerSecond.data[latestCompleteBucketIndex][1];
   }
 
   isTimeConsuming() {

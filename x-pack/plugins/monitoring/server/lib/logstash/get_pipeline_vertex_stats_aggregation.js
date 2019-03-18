@@ -63,6 +63,7 @@ function createNestedVertexAgg(vertexId, maxBucketSize) {
             ...scalarCounterAggregation('events_in', fieldPath, ephemeralIdField, maxBucketSize),
             ...scalarCounterAggregation('events_out', fieldPath, ephemeralIdField, maxBucketSize),
             ...scalarCounterAggregation('duration_in_millis', fieldPath, ephemeralIdField, maxBucketSize),
+            ...scalarCounterAggregation('queue_push_duration_in_millis', fieldPath, ephemeralIdField, maxBucketSize)
           }
         }
       }
@@ -131,6 +132,7 @@ function fetchPipelineVertexTimeSeriesStats(query, logstashIndexPattern, pipelin
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_in_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_out_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.duration_in_millis_total',
+      'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.queue_push_duration_in_millis_total',
       'aggregations.pipelines.scoped.total_processor_duration_stats'
     ],
     body: {

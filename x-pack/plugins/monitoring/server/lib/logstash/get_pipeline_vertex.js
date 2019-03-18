@@ -23,6 +23,7 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   const durationInMillis = vertexStatsBucket.duration_in_millis_total.value;
 
+  const inputStats = {};
   const processorStats = {};
   const eventsProcessedStats = {
     events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis
@@ -32,6 +33,8 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   if (isInput) {
     eventsTotal = eventsOutTotal;
+    inputStats.queue_push_duration_in_millis = vertexStatsBucket.queue_push_duration_in_millis_total.value;
+    inputStats.queue_push_duration_in_millis_per_event = inputStats.queue_push_duration_in_millis / eventsTotal;
   }
 
   if (isProcessor) {
@@ -41,7 +44,11 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   }
 
   return {
+    events_in: eventsInTotal,
+    events_out: eventsOutTotal,
+    duration_in_millis: durationInMillis,
     millis_per_event: durationInMillis / eventsTotal,
+    ...inputStats,
     ...processorStats,
     ...eventsProcessedStats
   };
@@ -62,7 +69,7 @@ export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStat
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
   // First, filter out the vertex we care about
-  const vertex = vertices.find(v => v.id = vertexId);
+  const vertex = vertices.find(v => v.id === vertexId);
   vertex.stats = {};
 
   // Gather total duration stats needed later for computing each timeseries bucket stats for the vertex
