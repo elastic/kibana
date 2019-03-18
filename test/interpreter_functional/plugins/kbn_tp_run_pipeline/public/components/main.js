@@ -80,7 +80,7 @@ class Main extends React.Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPageContent>
+          <EuiPageContent data-test-subj="pluginContent">
             <EuiPageContentHeader>
               runPipeline tests are running ...
             </EuiPageContentHeader>

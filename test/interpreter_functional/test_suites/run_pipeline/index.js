@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const appsMenu = getService('appsMenu');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('runPipeline', function () {
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('settings');
       await appsMenu.clickLink('Run Pipeline');
+      await testSubjects.find('pluginContent');
     });
 
     loadTestFile(require.resolve('./basic'));
