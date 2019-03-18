@@ -42,7 +42,7 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
 
   const metric = { timestampField: 'event.created' };
   const filter = [
-    { term: { 'service.type': 'elasticsearch2' } },
+    { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric })
   ];
   if (clusterUuid) {
