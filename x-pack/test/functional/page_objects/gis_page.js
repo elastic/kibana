@@ -170,6 +170,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await this.waitForLayersToLoad();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getView() {
@@ -193,6 +194,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('fitToBoundsButton');
       await this.waitForLayersToLoad();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async openLayerTocActionsPanel(layerName) {

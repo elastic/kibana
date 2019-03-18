@@ -394,7 +394,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async waitForDeletedByCssSelector(selector) {
-    await this._driver.manage().setTimeouts({ implicit: 2000 });
+    await this._driver.manage().setTimeouts({ implicit: 1000 });
     await this._driver.wait(async () => {
       const found = await this._webElement.findElements(this._By.css(selector));
       return found.length === 0;

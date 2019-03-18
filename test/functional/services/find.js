@@ -309,7 +309,7 @@ export async function FindProvider({ getService }) {
     }
     async waitForDeletedByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
-      await this._withTimeout(WAIT_FOR_EXISTS_TIME);
+      await this._withTimeout(1000);
       await driver.wait(async () => {
         const found  =  await driver.findElements(By.css(selector));
         return found.length === 0;

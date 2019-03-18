@@ -9,6 +9,7 @@ import expect from 'expect.js';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const retry = getService('retry');
 
   describe('elasticsearch document layer', () => {
     before(async () => {
@@ -77,10 +78,13 @@ export default function ({ getPageObjects, getService }) {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
-        const { lat, lon, zoom } = await PageObjects.maps.getView();
-        expect(Math.round(lat)).to.equal(41);
-        expect(Math.round(lon)).to.equal(-102);
-        expect(Math.round(zoom)).to.equal(5);
+        // there is no way to wait for canvas been reloaded
+        await retry.try(async () => {
+          const { lat, lon, zoom } = await PageObjects.maps.getView();
+          expect(Math.round(lat)).to.equal(41);
+          expect(Math.round(lon)).to.equal(-102);
+          expect(Math.round(zoom)).to.equal(4);
+        });
       });
     });
 
