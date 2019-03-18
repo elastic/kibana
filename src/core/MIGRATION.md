@@ -14,7 +14,7 @@
 * [Browser-side plan of action](#browser-side-plan-of-action)
   * [Move UI modules into plugins](#move-ui-modules-into-plugins)
   * [Provide plugin extension points decoupled from angular.js](#provide-plugin-extension-points-decoupled-from-angularjs)
-  * [Move all webpack alias imports into apiExport entry files](#move-all-webpack-alias-imports-into-apiexport-entry-files)
+  * [Move all webpack alias imports into uiExport entry files](#move-all-webpack-alias-imports-into-uiexport-entry-files)
   * [Switch to new platform services](#switch-to-new-platform-services-1)
   * [Migrate to the new plugin system](#migrate-to-the-new-plugin-system-1)
 * [Frequently asked questions](#frequently-asked-questions)
@@ -170,8 +170,10 @@ export class Plugin {
   }
 
   public stop() {
-    getBar() {
-      return 'bar';
+    return {
+      getBar() {
+        return 'bar';
+      }
     }
   }
 }
@@ -273,7 +275,7 @@ The server object is introduced to your plugin in its legacy `init` function, so
 
 The `request` object is introduced to your plugin in every route handler, so at the root of every route handler, you will create a new interface by "picking" the request information (e.g. body, headers) and core and plugin capabilities from the `request` object that you actually use and pass that in all the places you previously were passing `request`.
 
-Any calls to mutate either the server or request objects (e.g. server.decorate()) will be moved toward the root of the legacy `init` function if they aren't already there.
+Any calls to mutate either the server or request objects (e.g. `server.decorate()`) will be moved toward the root of the legacy `init` function if they aren't already there.
 
 Let's take a look at an example legacy plugin definition that uses both `server` and `request`.
 
@@ -355,7 +357,7 @@ export default (kibana) => {
 }
 ```
 
-This change might seem trivial, but its important for two reasons.
+This change might seem trivial, but it's important for two reasons.
 
 First, the business logic built into `search` is now coupled to an object you created manually and have complete control over rather than hapi itself. This will allow us in a future step to replace the dependency on hapi without necessarily having to modify the business logic of the plugin.
 
@@ -363,7 +365,7 @@ Second, it forced you to clearly define the dependencies you have on capabilitie
 
 ### Introduce new plugin definition shim
 
-While most plugin logic is now decoupled from hapi, the plugin definition itself still uses hapi to expose functionality for other plugins to consume and accesses functionality from both core and a different plugin.
+While most plugin logic is now decoupled from hapi, the plugin definition itself still uses hapi to expose functionality for other plugins to consume and access functionality from both core and a different plugin.
 
 ```ts
 // index.ts
@@ -526,7 +528,7 @@ init(server) {
 }
 ```
 
-At this point, your legacy server-side plugin's logic is no longer coupled to the legacy core.
+At this point, your legacy server-side plugin logic is no longer coupled to the legacy core.
 
 A similar approach can be taken for your plugins shim. First, update your plugin shim in `init` to extend `server.newPlatform.setup.plugins`.
 
@@ -555,7 +557,7 @@ init(server) {
 }
 ```
 
-At this point, your legacy server-side plugin's logic is no longer coupled to legacy plugins.
+At this point, your legacy server-side plugin logic is no longer coupled to legacy plugins.
 
 ### Migrate to the new plugin system
 
@@ -601,7 +603,7 @@ Another way to address this problem is to create an entirely new set of plugin A
 
 Please talk with the platform team when formalizing _any_ client-side extension points that you intend to move to the new platform as there are some bundling considerations to consider.
 
-### Move all webpack alias imports into apiExport entry files
+### Move all webpack alias imports into uiExport entry files
 
 Existing plugins import three things using webpack aliases today: services from ui/public (`ui/`), services from other plugins (`plugins/`), and uiExports themselves (`uiExports/`). These webpack aliases will not exist once we remove the legacy plugin system, so part of our migration effort is addressing all of the places where they are used today.
 
