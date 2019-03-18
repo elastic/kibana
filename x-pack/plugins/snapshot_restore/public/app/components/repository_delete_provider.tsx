@@ -18,5 +18,10 @@ export const RepositoryDeleteProvider = ({ children }: Props) => {
     setIsModalOpen(true);
     setRepositoryNames(names);
   };
+
+  if (isModalOpen && repositoryNames.length) {
+    /* placeholder */
+  }
+
   return <Fragment>{children(deleteRepository)}</Fragment>;
 };
