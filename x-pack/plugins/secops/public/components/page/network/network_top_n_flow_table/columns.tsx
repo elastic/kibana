@@ -202,7 +202,7 @@ export const getNetworkTopNFlowColumns = (
     sortable: true,
     render: (ipCount: number) => {
       if (!isNil(ipCount)) {
-        return numeral(ipCount).format('0');
+        return numeral(ipCount).format('0,000');
       } else {
         return getEmptyTagValue();
       }
