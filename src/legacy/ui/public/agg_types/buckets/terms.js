@@ -233,7 +233,7 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {

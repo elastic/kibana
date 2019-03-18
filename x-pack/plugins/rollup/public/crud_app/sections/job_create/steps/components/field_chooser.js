@@ -27,10 +27,12 @@ export class FieldChooser extends Component {
     onSelectField: PropTypes.func.isRequired,
     columns: PropTypes.array.isRequired,
     prompt: PropTypes.string,
+    dataTestSubj: PropTypes.string,
   }
 
   static defaultProps = {
     prompt: 'Search',
+    dataTestSubj: 'rollupJobFieldChooser'
   }
 
   constructor(props) {
@@ -68,6 +70,7 @@ export class FieldChooser extends Component {
       selectedFields,
       prompt,
       onSelectField,
+      dataTestSubj,
     } = this.props;
 
     const { isOpen, searchValue } = this.state;
@@ -80,9 +83,7 @@ export class FieldChooser extends Component {
       };
     };
 
-    let flyout;
-
-    if (isOpen) {
+    const renderFlyout = () => {
       // Derive the fields which the user can select.
       const selectedFieldNames = selectedFields.map(({ name }) => name);
       const unselectedFields = fields.filter(({ name }) => {
@@ -95,15 +96,20 @@ export class FieldChooser extends Component {
           item.type.toLowerCase().includes(normalizedSearchValue);
       }) : unselectedFields;
 
-      flyout = (
+      return (
         <EuiFlyout
           onClose={this.close}
           aria-labelledby="fieldChooserFlyoutTitle"
           size="m"
           maxWidth={400}
+          data-test-subj={dataTestSubj}
         >
           <EuiFlyoutHeader>
-            <EuiTitle size="m" id="fieldChooserFlyoutTitle">
+            <EuiTitle
+              size="m"
+              id="fieldChooserFlyoutTitle"
+              data-test-subj="rollupJobCreateFlyoutTitle"
+            >
               <h2>{buttonLabel}</h2>
             </EuiTitle>
 
@@ -124,21 +130,23 @@ export class FieldChooser extends Component {
               columns={columns}
               rowProps={getRowProps}
               responsive={false}
+              data-test-subj={`${dataTestSubj}-table`}
             />
           </EuiFlyoutBody>
         </EuiFlyout>
       );
-    }
+    };
 
     return (
       <Fragment>
         <EuiButton
           onClick={this.onButtonClick}
+          data-test-subj="rollupJobShowFieldChooserButton"
         >
           {buttonLabel}
         </EuiButton>
 
-        {flyout}
+        {isOpen ? renderFlyout() : null}
       </Fragment>
     );
   }
