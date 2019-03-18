@@ -42,25 +42,16 @@ class CodeMain extends React.Component<Props> {
 
   public componentDidUpdate() {
     chrome.breadcrumbs.pop();
-    chrome.breadcrumbs.pop();
     this.setBreadcrumbs();
   }
 
   public setBreadcrumbs() {
-    const { resource, org, repo } = this.props.match.params;
-    chrome.breadcrumbs.push({
-      text: `${org} → ${repo}`,
-      href: `#/${resource}/${org}/${repo}`,
-      // @ts-ignore
-      className: 'code-no-max-width',
-    });
-    chrome.breadcrumbs.push({ text: '' });
+    const { org, repo } = this.props.match.params;
+    chrome.breadcrumbs.push({ text: `${org} → ${repo}` });
   }
 
   public componentWillUnmount() {
     chrome.breadcrumbs.pop();
-    chrome.breadcrumbs.pop();
-    chrome.breadcrumbs.push({ text: '' });
   }
 
   public render() {
