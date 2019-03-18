@@ -93,15 +93,14 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">
           <FormattedMessage
-            id="kbn.settings.AdvancedSettings.voiceAnnouncement"
-            defaultMessage="You searched for {query}. There {are} {optionLenght} {options} in {sectionLenght} {sections}"
+            id="kbn.settings.advancedSettings.voiceAnnouncement.screenReaderMessage"
+            defaultMessage="You searched for {query}.
+              There {optionLenght, plural, one {is # option} other {are # options}}
+              in {sectionLenght, plural, one {# section} other {# sections}}"
             values={{
               query: this.state.query,
               sectionLenght: this.state.filteredSections.length,
-              are: this.state.filteredOptions.length > 1 ? 'are' : 'is',
-              optionLenght: this.state.filteredOptions.length,
-              options: this.state.filteredOptions.length > 1 ? 'options' : 'option',
-              sections: this.state.filteredSections.length > 1 ? 'sections' : 'section'
+              optionLenght: this.state.filteredOptions.length
             }}
           />
         </div>
