@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import querystring from 'querystring';
 import React from 'react';
-import styled from 'styled-components';
 import Url from 'url';
 
 import { SearchScope } from '../../../model';
@@ -22,12 +20,6 @@ import {
   RepositorySuggestionsProvider,
   SymbolSuggestionsProvider,
 } from '../query_bar';
-
-const SearchBarContainer = styled.div`
-  height: 4rem;
-  padding: ${theme.paddingSizes.s};
-  border-bottom: ${theme.euiBorderWidthThin} solid ${theme.euiBorderColor};
-`;
 
 interface Props {
   query: string;
@@ -67,7 +59,7 @@ export class SearchBar extends React.PureComponent<Props> {
     ];
 
     return (
-      <SearchBarContainer>
+      <div className="codeSearchbar__container">
         <Shortcut
           keyCode="p"
           help={SearchScopeText[SearchScope.REPOSITORY]}
@@ -97,7 +89,7 @@ export class SearchBar extends React.PureComponent<Props> {
           suggestionProviders={suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
         />
-      </SearchBarContainer>
+      </div>
     );
   }
 }

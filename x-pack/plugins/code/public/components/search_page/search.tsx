@@ -167,7 +167,7 @@ class SearchPage extends React.PureComponent<Props, State> {
       const statsComp = (
         <EuiTitle size="m">
           <h1>
-            Showing {from + 1} - {to} of {total} results.
+            Showing {total > 0 ? from : 0} - {to} of {total} results.
           </h1>
         </EuiTitle>
       );
@@ -181,17 +181,16 @@ class SearchPage extends React.PureComponent<Props, State> {
     } else if (
       scope === SearchScope.DEFAULT &&
       documentSearchResults &&
-      documentSearchResults.total > 0
+      (documentSearchResults.total > 0 || languages!.size > 0 || repositories!.size > 0)
     ) {
       const { stats, results } = documentSearchResults!;
       const { total, from, to, page, totalPage } = stats!;
       languageStats = stats!.languageStats;
       repoStats = stats!.repoStats;
-
       const statsComp = (
         <EuiTitle size="m">
           <h1>
-            Showing {from} - {to} of {total} results.
+            Showing {total > 0 ? from : 0} - {to} of {total} results.
           </h1>
         </EuiTitle>
       );
