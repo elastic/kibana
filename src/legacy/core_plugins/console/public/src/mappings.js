@@ -256,68 +256,64 @@ function clear() {
   templates = [];
 }
 
-function getPromise(settingsKey, changedFields) {
+function retrieveSettings(settingsKey, changedFields) {
   const autocompleteSettings = settings.getAutocomplete();
-  const settingsMetadata = {
-    fields: { path: '_mapping' },
-    indices: { path: '_aliases' },
-    templates: { path: '_template' },
+  const settingKeyToPathMap = {
+    fields: '_mapping',
+    indices: '_aliases',
+    templates: '_template',
   };
-  let settingsPromise;
-  changedFields = changedFields ? changedFields : autocompleteSettings;
   // Fetch autocomplete info if setting is set to true, and if user has made changes
   if (autocompleteSettings[settingsKey] && changedFields[settingsKey]) {
-    settingsPromise = es.send('GET', settingsMetadata[settingsKey].path, null, null, true);
+    return es.send('GET', settingKeyToPathMap[settingsKey], null, null, true);
   } else {
-    settingsPromise = new $.Deferred();
-    // If a user has saved settings, but a field remains true, no need to make changes
+    const settingsPromise = new $.Deferred();
+    // If a user has saved settings, but a field remains checked and unchanged, no need to make changes
     if (autocompleteSettings[settingsKey]) {
-      settingsPromise.resolveWith(this, [{ unchanged: true }]);
-    } else {
-      settingsPromise.resolveWith(this, [ [JSON.stringify({})] ]);
+      return settingsPromise.resolve();
     }
+    // If the user doesn't want autocomplete suggestions, then clear any that exist
+    return settingsPromise.resolveWith(this, [ [JSON.stringify({})] ]);
   }
-  return settingsPromise;
 }
 
 function retrieveAutocompleteInfoFromServer(changedFields) {
-  const mappingPromise = getPromise('fields', changedFields);
-  const aliasesPromise = getPromise('indices', changedFields);
-  const templatesPromise = getPromise('templates', changedFields);
+  const mappingPromise = retrieveSettings('fields', changedFields);
+  const aliasesPromise = retrieveSettings('indices', changedFields);
+  const templatesPromise = retrieveSettings('templates', changedFields);
 
   $.when(mappingPromise, aliasesPromise, templatesPromise)
     .done((mappings, aliases, templates) => {
-      const mappingsUnchanged = mappings && mappings.unchanged;
-      const aliasesUnchanged = aliases && aliases.unchanged;
-      const templatesUnchanged = templates && templates.unchanged;
-      if (!mappingsUnchanged) {
+      let mappingsResponse;
+      if (mappings) {
         const maxMappingSize = mappings[0].length > 10 * 1024 * 1024;
         if (maxMappingSize) {
           console.warn(`Mapping size is larger than 10MB (${mappings[0].length / 1024 / 1024} MB). Ignoring...`);
-          mappings = [{}];
+          mappingsResponse = '[{}]';
         } else {
-          mappings = JSON.parse(mappings[0]);
+          mappingsResponse = mappings[0];
         }
-        loadMappings(mappings);
+        loadMappings(JSON.parse(mappingsResponse));
       }
 
-      if (!aliasesUnchanged) {
+      if (aliases) {
         loadAliases(JSON.parse(aliases[0]));
       }
 
-      if (!templatesUnchanged) {
+      if (templates) {
         loadTemplates(JSON.parse(templates[0]));
       }
 
-      if (!mappingsUnchanged && !aliasesUnchanged) {
+      if (mappings && aliases) {
         // Trigger an update event with the mappings, aliases
-        $(mappingObj).trigger('update', [mappings[0], aliases[0]]);
+        $(mappingObj).trigger('update', [mappingsResponse, aliases[0]]);
       }
     });
 }
 
 function autocompleteRetriever() {
-  retrieveAutocompleteInfoFromServer();
+  const changedFields = settings.getAutocomplete();
+  retrieveAutocompleteInfoFromServer(changedFields);
   setTimeout(function () {
     autocompleteRetriever();
   }, 60000);

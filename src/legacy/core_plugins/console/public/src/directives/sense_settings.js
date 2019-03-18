@@ -38,10 +38,10 @@ require('ui/modules')
           // Find which, if any, autocomplete settings have changed
           const settingsDiff = Object.keys(prevSettings).filter(key => prevSettings[key] !== this.vals.autocomplete[key]);
           if (settingsDiff.length > 0) {
-            const changedSettings = {};
-            settingsDiff.forEach(setting => {
-              changedSettings[setting] = this.vals.autocomplete[setting];
-            });
+            const changedSettings = settingsDiff.reduce((changedSettingsAccum, setting) => {
+              changedSettingsAccum[setting] = this.vals.autocomplete[setting];
+              return changedSettingsAccum;
+            }, {});
             // Update autocomplete info based on changes so new settings takes effect immediately.
             mappings.retrieveAutoCompleteInfo(changedSettings);
           }
