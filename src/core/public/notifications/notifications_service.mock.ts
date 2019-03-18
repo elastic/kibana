@@ -16,36 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { NotificationsService, NotificationsStart } from './notifications_service';
+import { toastsServiceMock } from './toasts/toasts_service.mock';
+import { ToastsStart } from './toasts/toasts_start';
 
 const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+  const startContract: jest.Mocked<NotificationsStart> = {
+    // we have to suppress type errors until decide how to mock es6 class
+    toasts: (toastsServiceMock.createStartContract() as unknown) as ToastsStart,
   };
   return startContract;
 };
 
-type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
+type NotificationsServiceContract = PublicMethodsOf<NotificationsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+  const mocked: jest.Mocked<NotificationsServiceContract> = {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  mocked.stop.mockResolvedValue();
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const elasticsearchServiceMock = {
+export const notificationServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

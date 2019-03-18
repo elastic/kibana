@@ -16,36 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { BasePathService, BasePathStart } from './base_path_service';
 
 const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+  const startContract: jest.Mocked<BasePathStart> = {
+    get: jest.fn(),
+    addToPath: jest.fn(),
+    removeFromPath: jest.fn(),
   };
+  startContract.get.mockReturnValue('get');
+  startContract.addToPath.mockReturnValue('addToPath');
+  startContract.removeFromPath.mockReturnValue('removeFromPath');
   return startContract;
 };
 
-type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
+type BasePathServiceContract = PublicMethodsOf<BasePathService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+  const mocked: jest.Mocked<BasePathServiceContract> = {
     start: jest.fn(),
-    stop: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  mocked.stop.mockResolvedValue();
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const elasticsearchServiceMock = {
+export const basePathServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

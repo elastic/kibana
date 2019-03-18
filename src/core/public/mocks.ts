@@ -16,30 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server, ServerOptions } from 'hapi';
-import { HttpService } from './http_service';
 
-const createStartContractMock = () => {
-  const startContract = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
-    options: {} as ServerOptions,
-  };
-  return startContract;
-};
-
-type HttpSericeContract = PublicMethodsOf<HttpService>;
-const createHttpServiceMock = () => {
-  const mocked: jest.Mocked<HttpSericeContract> = {
-    start: jest.fn(),
-    stop: jest.fn(),
-    registerRouter: jest.fn(),
-  };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  return mocked;
-};
-
-export const httpServiceMock = {
-  create: createHttpServiceMock,
-  createStartContract: createStartContractMock,
-};
+export { basePathServiceMock } from './base_path/base_path_service.mock';
+export { chromeServiceMock } from './chrome/chrome_service.mock';
+export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+export { httpServiceMock } from './http/http_service.mock';
+export { i18nServiceMock } from './i18n/i18n_service.mock';
+export { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+export { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
+export { notificationServiceMock } from './notifications/notifications_service.mock';
+export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
