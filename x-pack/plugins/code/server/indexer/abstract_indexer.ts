@@ -35,15 +35,17 @@ export abstract class AbstractIndexer implements Indexer {
     );
     this.cancelled = false;
 
-    // Prepare the ES index
-    const res = await this.prepareIndex();
-    if (!res) {
-      this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
-      return new Map<IndexStatsKey, number>();
-    }
+    if (!checkpoint) {
+      // Prepare the ES index
+      const res = await this.prepareIndex();
+      if (!res) {
+        this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
+        return new Map<IndexStatsKey, number>();
+      }
 
-    // Clean up the index if necessary
-    await this.cleanIndex();
+      // Clean up the index if necessary
+      await this.cleanIndex();
+    }
 
     // Prepare all the index requests
     let totalCount = 0;

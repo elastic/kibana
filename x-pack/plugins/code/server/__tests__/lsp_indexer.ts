@@ -152,7 +152,6 @@ describe('lsp_indexer', () => {
   it('Normal LSP index process.', async () => {
     // Setup the esClient spies
     const {
-      getSpy,
       existsAliasSpy,
       createSpy,
       putAliasSpy,
@@ -181,9 +180,6 @@ describe('lsp_indexer', () => {
     );
     await indexer.start();
 
-    // Expect EsClient get called once to get the repo git status.
-    assert.ok(getSpy.calledOnce);
-
     // Expect EsClient deleteByQuery called 3 times for repository cleaning before
     // the index for document, symbol and reference, respectively.
     assert.strictEqual(deleteByQuerySpy.callCount, 3);
@@ -204,7 +200,6 @@ describe('lsp_indexer', () => {
   it('Cancel LSP index process.', async () => {
     // Setup the esClient spies
     const {
-      getSpy,
       existsAliasSpy,
       createSpy,
       putAliasSpy,
@@ -235,9 +230,6 @@ describe('lsp_indexer', () => {
     indexer.cancel();
     await indexer.start();
 
-    // Expect EsClient get called once to get the repo git status.
-    assert.ok(getSpy.calledOnce);
-
     // Expect EsClient deleteByQuery called 3 times for repository cleaning before
     // the index for document, symbol and reference, respectively.
     assert.strictEqual(deleteByQuerySpy.callCount, 3);
@@ -251,5 +243,56 @@ describe('lsp_indexer', () => {
     // indexed and thus bulk won't be called.
     assert.ok(bulkSpy.notCalled);
   });
+
+  it('Index continues from checkpoint', async () => {
+    // Setup the esClient spies
+    const {
+      existsAliasSpy,
+      createSpy,
+      putAliasSpy,
+      deleteByQuerySpy,
+      bulkSpy,
+    } = setupEsClientSpy();
+
+    const lspservice = new LspService(
+      '127.0.0.1',
+      serverOptions,
+      esClient as EsClient,
+      {} as InstallManager,
+      new ConsoleLoggerFactory(),
+      new RepositoryConfigController(esClient as EsClient)
+    );
+
+    lspservice.sendRequest = setupLsServiceSendRequestSpy();
+
+    const indexer = new LspIndexer(
+      'github.com/Microsoft/TypeScript-Node-Starter',
+      '4779cb7',
+      lspservice,
+      serverOptions,
+      esClient as EsClient,
+      log
+    );
+
+    // Apply a checkpoint in here.
+    await indexer.start(undefined, '4779cb7 - src/public/js/main.ts');
+
+    // Expect EsClient deleteByQuery called 0 times for repository cleaning while
+    // dealing with repository checkpoint.
+    assert.strictEqual(deleteByQuerySpy.callCount, 0);
+
+    // Ditto for index and alias creation
+    assert.strictEqual(existsAliasSpy.callCount, 0);
+    assert.strictEqual(createSpy.callCount, 0);
+    assert.strictEqual(putAliasSpy.callCount, 0);
+
+    // There are 22 files in the repo, but only 11 files after the checkpoint.
+    // 1 file + 1 symbol + 1 reference = 3 objects to index for each file.
+    // Total doc indexed should be 3 * 11 = 33, which can be fitted into a
+    // single batch index.
+    assert.ok(bulkSpy.calledOnce);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
+    // @ts-ignore
+  }).timeout(20000);
   // @ts-ignore
 }).timeout(20000);
