@@ -22,19 +22,17 @@ export const getNewSortDirectionOnClick = ({
   clickedHeader,
   currentSort,
 }: GetNewSortDirectionOnClickParams): Direction =>
-  clickedHeader.id === currentSort.columnId
-    ? getNextSortDirection(currentSort)
-    : Direction.descending;
+  clickedHeader.id === currentSort.columnId ? getNextSortDirection(currentSort) : Direction.desc;
 
 /** Given a current sort direction, it returns the next sort direction */
 export const getNextSortDirection = (currentSort: Sort): Direction => {
   switch (currentSort.sortDirection) {
-    case Direction.descending:
-      return Direction.ascending;
-    case Direction.ascending:
-      return Direction.descending;
+    case Direction.desc:
+      return Direction.asc;
+    case Direction.asc:
+      return Direction.desc;
     case 'none':
-      return Direction.descending;
+      return Direction.desc;
     default:
       return unhandledSortDirection(currentSort.sortDirection);
   }

@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 
 import { eventsQuery } from '../../../../plugins/secops/public/containers/events/index.gql_query';
-import { GetEventsQuery } from '../../../../plugins/secops/public/graphql/types';
+import { Direction, GetEventsQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -45,7 +45,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             },
             sortField: {
               sortFieldId: 'timestamp',
-              direction: 'descending',
+              direction: Direction.desc,
             },
           },
         })
@@ -75,7 +75,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             },
             sortField: {
               sortFieldId: 'timestamp',
-              direction: 'descending',
+              direction: Direction.desc,
             },
           },
         })

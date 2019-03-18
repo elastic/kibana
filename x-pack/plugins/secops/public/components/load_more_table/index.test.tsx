@@ -206,7 +206,7 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           onChange={mockOnChange}
           itemsPerRow={rowItems}
-          sorting={{ direction: Direction.ascending, field: 'node.host.name' }}
+          sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />
@@ -282,7 +282,7 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           onChange={mockOnChange}
           itemsPerRow={rowItems}
-          sorting={{ direction: Direction.ascending, field: 'node.host.name' }}
+          sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
           title={<h3>Hosts</h3>}
         />

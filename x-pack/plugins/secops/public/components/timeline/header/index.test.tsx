@@ -33,7 +33,7 @@ describe('Header', () => {
           show={true}
           sort={{
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           }}
         />
       );
@@ -55,7 +55,7 @@ describe('Header', () => {
             show={true}
             sort={{
               columnId: '@timestamp',
-              sortDirection: Direction.descending,
+              sortDirection: Direction.desc,
             }}
           />
         </TestProviders>

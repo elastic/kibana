@@ -11,12 +11,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import {
-  Direction,
-  NetworkDnsEdges,
-  NetworkDnsFields,
-  NetworkDnsSortField,
-} from '../../../../graphql/types';
+import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 
@@ -142,7 +137,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     if (criteria.sort) {
       const newDnsSortField: NetworkDnsSortField = {
         field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-        direction: criteria.sort.direction === 'asc' ? Direction.ascending : Direction.descending,
+        direction: criteria.sort.direction,
       };
       if (!isEqual(newDnsSortField, this.props.dnsSortField)) {
         this.props.updateDnsSort({ dnsSortField: newDnsSortField, networkType: this.props.type });

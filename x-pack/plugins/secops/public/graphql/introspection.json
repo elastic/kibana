@@ -1589,18 +1589,8 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          {
-            "name": "ascending",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "descending",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
+          { "name": "asc", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "desc", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

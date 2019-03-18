@@ -40,7 +40,7 @@ describe('createOptions', () => {
         to: 0,
         interval: '12 hours ago',
       },
-      sortField: { sortFieldId: 'sort-1', direction: Direction.ascending },
+      sortField: { sortFieldId: 'sort-1', direction: Direction.asc },
     };
     info = {
       fieldNodes: [
@@ -71,7 +71,7 @@ describe('createOptions', () => {
           timestamp: 'timestamp-1',
         },
       },
-      sortField: { sortFieldId: 'sort-1', direction: Direction.ascending },
+      sortField: { sortFieldId: 'sort-1', direction: Direction.asc },
       pagination: {
         limit: 5,
       },

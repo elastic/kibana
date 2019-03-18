@@ -74,7 +74,7 @@ export const mockGlobalState: State = {
             limit: 10,
             dnsSortField: {
               field: NetworkDnsFields.queryCount,
-              direction: Direction.descending,
+              direction: Direction.desc,
             },
             isPtrIncluded: false,
           },
@@ -131,7 +131,7 @@ export const mockGlobalState: State = {
           itemsPerPageOptions: [5, 10, 20],
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           width: defaultWidth,
         },

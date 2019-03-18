@@ -7,7 +7,7 @@
 import expect from 'expect.js';
 
 import { timelineQuery } from '../../../../plugins/secops/public/containers/timeline/index.gql_query';
-import { GetTimelineQuery } from '../../../../plugins/secops/public/graphql/types';
+import { Direction, GetTimelineQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const LTE = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -72,7 +72,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             sortField: {
               sortFieldId: 'timestamp',
-              direction: 'descending',
+              direction: Direction.desc,
             },
           },
         })
@@ -98,7 +98,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
             },
             sortField: {
               sortFieldId: 'timestamp',
-              direction: 'descending',
+              direction: Direction.desc,
             },
           },
         })

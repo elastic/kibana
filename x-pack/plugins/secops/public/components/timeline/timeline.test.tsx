@@ -26,7 +26,7 @@ const testFlyoutHeight = 980;
 describe('Timeline', () => {
   const sort: Sort = {
     columnId: '@timestamp',
-    sortDirection: Direction.descending,
+    sortDirection: Direction.desc,
   };
 
   const indexPattern = mockIndexPattern;

@@ -139,7 +139,7 @@ describe('Test Source Resolvers', () => {
           cursor: null,
         },
         isPtrIncluded: false,
-        sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.ascending },
+        sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
       },
       context,
       {} as GraphQLResolveInfo

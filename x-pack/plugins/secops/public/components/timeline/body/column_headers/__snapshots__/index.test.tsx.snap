@@ -55,7 +55,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
   sort={
     Object {
       "columnId": "fooColumn",
-      "sortDirection": "descending",
+      "sortDirection": "desc",
     }
   }
   timelineId="test"

@@ -31,8 +31,8 @@ export const sharedSchema = gql`
   }
 
   enum Direction {
-    ascending
-    descending
+    asc
+    desc
   }
 
   input SortField {

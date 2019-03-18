@@ -60,7 +60,7 @@ export const buildQuery = (options: RequestOptions) => {
     if (sortField.sortFieldId) {
       const field: string =
         sortField.sortFieldId === 'timestamp' ? '@timestamp' : sortField.sortFieldId;
-      const dir: SortRequestDirection = sortField.direction === 'descending' ? 'desc' : 'asc';
+      const dir: SortRequestDirection = sortField.direction || 'desc';
 
       return [{ [field]: dir }, { [options.sourceConfiguration.fields.tiebreaker]: dir }];
     }

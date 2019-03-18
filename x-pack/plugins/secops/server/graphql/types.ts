@@ -879,8 +879,8 @@ export enum IndexType {
 }
 
 export enum Direction {
-  ascending = 'ascending',
-  descending = 'descending',
+  asc = 'asc',
+  desc = 'desc',
 }
 
 export enum NetworkDirectionEcs {

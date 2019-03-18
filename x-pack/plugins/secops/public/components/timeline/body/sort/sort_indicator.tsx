@@ -22,9 +22,9 @@ export type SortDirectionIndicator = undefined | SortDirectionIndicatorEnum;
 /** Returns the symbol that corresponds to the specified `SortDirection` */
 export const getDirection = (sortDirection: SortDirection): SortDirectionIndicator => {
   switch (sortDirection) {
-    case Direction.ascending:
+    case Direction.asc:
       return SortDirectionIndicatorEnum.SORT_UP;
-    case Direction.descending:
+    case Direction.desc:
       return SortDirectionIndicatorEnum.SORT_DOWN;
     case 'none':
       return undefined;

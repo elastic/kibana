@@ -16,9 +16,14 @@ import { TestProviders } from '../../../mock/test_providers';
 
 import { Body } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
+import { Sort } from './sort';
 
 const testBodyHeight = 700;
 const mockGetNotesByIds = (eventId: string[]) => [];
+const mockSort: Sort = {
+  columnId: '@timestamp',
+  sortDirection: Direction.desc,
+};
 
 describe('Body', () => {
   describe('rendering', () => {
@@ -45,10 +50,7 @@ describe('Body', () => {
           pinnedEventIds={{}}
           range={'1 Day'}
           rowRenderers={rowRenderers}
-          sort={{
-            columnId: '@timestamp',
-            sortDirection: Direction.descending,
-          }}
+          sort={mockSort}
           updateNote={jest.fn()}
           width={100}
         />
@@ -80,10 +82,7 @@ describe('Body', () => {
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.descending,
-            }}
+            sort={mockSort}
             updateNote={jest.fn()}
             width={100}
           />
@@ -122,10 +121,7 @@ describe('Body', () => {
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.descending,
-            }}
+            sort={mockSort}
             updateNote={jest.fn()}
             width={100}
           />
@@ -164,10 +160,7 @@ describe('Body', () => {
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.descending,
-            }}
+            sort={mockSort}
             updateNote={jest.fn()}
             width={100}
           />
@@ -208,10 +201,7 @@ describe('Body', () => {
             pinnedEventIds={{}}
             range={'1 Day'}
             rowRenderers={rowRenderers}
-            sort={{
-              columnId: '@timestamp',
-              sortDirection: Direction.descending,
-            }}
+            sort={mockSort}
             updateNote={jest.fn()}
             width={100}
           />

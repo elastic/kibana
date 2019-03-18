@@ -41,7 +41,7 @@ export const initialNetworkState: NetworkState = {
         limit: DEFAULT_TABLE_LIMIT,
         dnsSortField: {
           field: NetworkDnsFields.uniqueDomains,
-          direction: Direction.descending,
+          direction: Direction.desc,
         },
         isPtrIncluded: false,
       },

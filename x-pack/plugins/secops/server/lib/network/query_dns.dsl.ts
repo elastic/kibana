@@ -4,34 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
+import { NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkDnsRequestOptions } from './index';
 
-type DslSort = 'asc' | 'desc';
-const getDslSorting = (dir: Direction): DslSort => (dir === Direction.ascending ? 'asc' : 'desc');
-
 const getQueryOrder = (networkDnsSortField: NetworkDnsSortField) => {
   if (networkDnsSortField.field === NetworkDnsFields.queryCount) {
     return {
-      _count: getDslSorting(networkDnsSortField.direction),
+      _count: networkDnsSortField.direction,
     };
   } else if (networkDnsSortField.field === NetworkDnsFields.dnsName) {
     return {
-      _key: getDslSorting(networkDnsSortField.direction),
+      _key: networkDnsSortField.direction,
     };
   } else if (networkDnsSortField.field === NetworkDnsFields.uniqueDomains) {
     return {
-      unique_domains: getDslSorting(networkDnsSortField.direction),
+      unique_domains: networkDnsSortField.direction,
     };
   } else if (networkDnsSortField.field === NetworkDnsFields.dnsBytesIn) {
     return {
-      dns_bytes_in: getDslSorting(networkDnsSortField.direction),
+      dns_bytes_in: networkDnsSortField.direction,
     };
   } else if (networkDnsSortField.field === NetworkDnsFields.dnsBytesOut) {
     return {
-      dns_bytes_out: getDslSorting(networkDnsSortField.direction),
+      dns_bytes_out: networkDnsSortField.direction,
     };
   }
 };
