@@ -22,9 +22,11 @@ import processors from '../response_processors/table';
 import getLastValue from '../../../../common/get_last_value';
 import regression from 'regression';
 import { first, get } from 'lodash';
+import { getActiveSeries } from '../helpers/get_active_series';
+
 export default function processBucket(panel) {
   return bucket => {
-    const series = panel.series.map(series => {
+    const series = getActiveSeries(panel).map(series => {
       const processor = buildProcessorFunction(processors, bucket, panel, series);
       const result = first(processor([]));
       if (!result) return null;
