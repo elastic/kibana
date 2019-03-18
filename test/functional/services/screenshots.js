@@ -23,16 +23,15 @@ import { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
-import Canvas from 'canvas';
+import { createCanvas, Image } from 'canvas';
 
 const mkdirAsync = promisify(mkdirp);
 const writeFileAsync = promisify(writeFile);
 
-const Image = Canvas.Image;
 const BASE64_IMAGE_PREFIX = 'data:image/png;base64,';
 
 
-function takeScreenshotOfArea({ x, y }, { width, height }, browser) {
+function takeScreenshotOfArea({ x, y, width, height }, browser) {
 
   x = x || 0;
   y = y || 0;
@@ -54,17 +53,19 @@ function takeScreenshotOfArea({ x, y }, { width, height }, browser) {
 
     })
     .then(image => {
-      const deltaScrollTop = y - currentScrollTop;
-      const deltaScrollLeft = x - currentScrollLeft;
-      const canvas = new Canvas(width, height);
+      const deltaScrollTop = 2 * y - currentScrollTop;
+      const deltaScrollLeft = 2 * x - currentScrollLeft;
+      const canvas = createCanvas(width * 2, height * 2);
       const ctx = canvas.getContext('2d');
       const img = new Image();
 
       img.src = BASE64_IMAGE_PREFIX + image;
 
+      console.log('scroll top', deltaScrollLeft, deltaScrollTop);
+
       ctx.drawImage(img, -deltaScrollLeft, -deltaScrollTop, img.width, img.height);
 
-      return canvas.toDataURL();
+      return canvas.toBuffer();
 
     });
 
@@ -119,12 +120,9 @@ export async function ScreenshotsProvider({ getService }) {
         log.info(`Taking screenshot "${path}"`);
         let screenshot;
         if (el) {
-          const [location, size] = await Promise.all([
-            el.getLocation(),
-            el.getSize()
-          ]);
-
-          screenshot = await takeScreenshotOfArea(location, size, browser);
+          const position = await el.getPosition();
+          log.debug('element position:', position);
+          screenshot = await takeScreenshotOfArea(position, browser);
         } else {
           screenshot = await browser.takeScreenshot();
         }
