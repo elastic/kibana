@@ -47,6 +47,7 @@ export interface UptimeCommonProps {
   colors: UptimeAppColors;
   dateRangeStart: string;
   dateRangeEnd: string;
+  refreshApp: () => void;
   registerWatch: (client: () => void) => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setHeadingText: (text: string) => void;
@@ -160,34 +161,37 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiSuperDatePicker
-                      start={this.state.dateRangeStart}
-                      end={this.state.dateRangeEnd}
-                      isPaused={this.state.autorefreshIsPaused}
-                      refreshInterval={this.state.autorefreshInterval}
-                      onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
-                        this.setState(
-                          { dateRangeStart: start, dateRangeEnd: end },
-                          this.persistState
-                        );
-                        this.refreshApp();
-                      }}
+                    {
                       // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
-                      onRefresh={() => this.refreshApp()}
-                      onRefreshChange={({
-                        isPaused,
-                        refreshInterval,
-                      }: SuperDateRangePickerRefreshChangedEvent) => {
-                        const autorefreshInterval =
-                          refreshInterval === undefined
-                            ? this.state.autorefreshInterval
-                            : refreshInterval;
-                        this.setState(
-                          { autorefreshIsPaused: isPaused, autorefreshInterval },
-                          this.persistState
-                        );
-                      }}
-                    />
+                      <EuiSuperDatePicker
+                        start={this.state.dateRangeStart}
+                        end={this.state.dateRangeEnd}
+                        isPaused={this.state.autorefreshIsPaused}
+                        refreshInterval={this.state.autorefreshInterval}
+                        onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
+                          this.setState(
+                            { dateRangeStart: start, dateRangeEnd: end },
+                            this.persistState
+                          );
+                          this.refreshApp();
+                        }}
+                        // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
+                        onRefresh={() => this.refreshApp()}
+                        onRefreshChange={({
+                          isPaused,
+                          refreshInterval,
+                        }: SuperDateRangePickerRefreshChangedEvent) => {
+                          const autorefreshInterval =
+                            refreshInterval === undefined
+                              ? this.state.autorefreshInterval
+                              : refreshInterval;
+                          this.setState(
+                            { autorefreshIsPaused: isPaused, autorefreshInterval },
+                            this.persistState
+                          );
+                        }}
+                      />
+                    }
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
@@ -201,6 +205,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...this.props}
                         {...this.state}
                         registerWatch={this.addForceRefreshListener}
+                        refreshApp={this.refreshApp}
                         setHeadingText={this.setHeadingText}
                       />
                     )}
@@ -213,6 +218,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...this.props}
                         {...this.state}
                         registerWatch={this.addForceRefreshListener}
+                        refreshApp={this.refreshApp}
                         setHeadingText={this.setHeadingText}
                         query={this.props.client.query}
                       />

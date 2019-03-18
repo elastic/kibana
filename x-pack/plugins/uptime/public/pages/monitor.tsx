@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiComboBoxOptionProps,
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
   // @ts-ignore No typings for EuiSuperSelect
@@ -36,6 +37,7 @@ type Props = MonitorPageProps & UptimeCommonProps;
 
 interface MonitorPageState {
   monitorId: string;
+  selectedPingListOption?: EuiComboBoxOptionProps;
 }
 
 export class MonitorPage extends React.Component<Props, MonitorPageState> {
@@ -73,16 +75,49 @@ export class MonitorPage extends React.Component<Props, MonitorPageState> {
   }
 
   public render() {
+    const { dateRangeStart, dateRangeEnd } = this.props;
+    const { monitorId } = this.state;
+
     return (
       <Fragment>
-        <MonitorPageTitleQuery {...this.state} {...this.props} />
+        <MonitorPageTitleQuery variables={{ monitorId }} {...this.props} {...this.state} />
         <EuiSpacer size="s" />
-        <MonitorStatusBarQuery {...this.state} {...this.props} />
+        <MonitorStatusBarQuery
+          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+          {...this.props}
+          {...this.state}
+        />
         <EuiSpacer size="s" />
-        <MonitorChartsQuery {...this.state} {...this.props} />
+        <MonitorChartsQuery
+          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+          {...this.props}
+          {...this.state}
+        />
         <EuiSpacer size="s" />
-        <PingListQuery {...this.state} {...this.props} />
+        {
+          // @ts-ignore
+          <PingListQuery
+            variables={{
+              dateRangeStart,
+              dateRangeEnd,
+              monitorId,
+              status: this.state.selectedPingListOption
+                ? this.state.selectedPingListOption.value
+                : 'down',
+            }}
+            {...this.props}
+            {...this.state}
+            onStatusSelectionChange={this.onPingListStatusSelectionChange}
+            selectedOption={this.state.selectedPingListOption}
+          />
+        }
       </Fragment>
     );
   }
+
+  private onPingListStatusSelectionChange = (selectedOptions: EuiComboBoxOptionProps[]) => {
+    if (selectedOptions[0]) {
+      this.setState({ selectedPingListOption: selectedOptions[0] }, () => this.props.refreshApp());
+    }
+  };
 }

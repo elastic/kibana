@@ -34,6 +34,6 @@ query MonitorCharts($dateRangeStart: String!, $dateRangeEnd: String!, $monitorId
 }
 `;
 
-export const createGetMonitorChartsQuery = gql`
+export const getMonitorChartsQuery = gql`
   ${getMonitorChartsQueryString}
 `;

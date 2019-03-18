@@ -28,9 +28,7 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 
 interface PingListProps {
   loading: boolean;
-  maxSearchSize: number;
-  pingResults: PingResults;
-  searchSizeOnBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  pingResults?: PingResults;
   selectedOption: EuiComboBoxOptionProps;
   selectedOptionChanged: (selectedOptions: EuiComboBoxOptionProps[]) => void;
   statusOptions: EuiComboBoxOptionProps[];

@@ -6,14 +6,13 @@
 
 import React from 'react';
 import { Snapshot as SnapshotType } from '../../../../common/graphql/types';
-import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { Snapshot, SnapshotLoading } from '../../functional';
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getSnapshotQuery } from './get_snapshot';
 
 interface SnapshotQueryResult {
-  snapshot: SnapshotType;
+  snapshot?: SnapshotType;
 }
 
 interface SnapshotQueryState {
@@ -44,7 +43,6 @@ class Query extends React.Component<Props, State> {
     const {
       colors: { success, danger },
       data,
-      errors,
     } = this.props;
     const { windowWidth } = this.state;
 
@@ -57,9 +55,6 @@ class Query extends React.Component<Props, State> {
           windowWidth={windowWidth}
         />
       );
-    }
-    if (errors && errors.length) {
-      return formatUptimeGraphQLErrorList(errors);
     }
     return <SnapshotLoading />;
   }

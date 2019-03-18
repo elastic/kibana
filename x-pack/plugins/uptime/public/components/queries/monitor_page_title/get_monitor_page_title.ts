@@ -6,7 +6,7 @@
 
 import gql from 'graphql-tag';
 
-export const getMonitorPageTitle = gql`
+export const getMonitorPageTitleQuery = gql`
   query MonitorPageTitle($monitorId: String!) {
     monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
       id

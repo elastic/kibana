@@ -8,6 +8,7 @@ import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
 import React from 'react';
 import { withApollo, WithApolloClient } from 'react-apollo';
+import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
 
 export interface UptimeGraphQLQueryProps<T> {
   loading: boolean;
@@ -16,6 +17,7 @@ export interface UptimeGraphQLQueryProps<T> {
 }
 
 interface UptimeGraphQLProps {
+  implementsCustomErrorState?: boolean;
   registerWatch: (handler: () => void) => void;
   variables: OperationVariables;
 }
@@ -48,6 +50,10 @@ export function withUptimeGraphQL<T>(WrappedComponent: any, query: any) {
       }
 
       public render() {
+        const { errors } = this.state;
+        if (!this.props.implementsCustomErrorState && errors && errors.length > 0) {
+          return formatUptimeGraphQLErrorList(errors);
+        }
         return <WrappedComponent {...this.state} {...this.props} />;
       }
 
