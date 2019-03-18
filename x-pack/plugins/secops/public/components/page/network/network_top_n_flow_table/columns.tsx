@@ -147,13 +147,14 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    field: 'node.network.direction',
     name: i18n.DIRECTION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      isEmpty(get('network.direction', node))
+    render: (directions: NetworkDirectionEcs[]) =>
+      isEmpty(directions)
         ? getEmptyTagValue()
-        : get('network.direction', node).map((direction: NetworkDirectionEcs) => (
+        : directions.map((direction: NetworkDirectionEcs, index: number) => (
             <AddToKql
               key={escapeDataProviderId(
                 `${tableId}-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
@@ -162,7 +163,10 @@ export const getNetworkTopNFlowColumns = (
               expression={`network.direction: ${escapeQueryValue(direction)}`}
               type={type}
             >
-              {defaultToEmptyTag(direction)}
+              <>
+                {defaultToEmptyTag(direction)}
+                {index < directions.length - 1 ? '\u00A0' : null}
+              </>
             </AddToKql>
           )),
   },
