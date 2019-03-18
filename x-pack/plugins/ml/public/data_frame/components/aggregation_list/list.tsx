@@ -6,6 +6,8 @@
 
 import React from 'react';
 
+import { MlListGroup, MlListGroupItem } from '../../pages/data_frame_new_pivot/type_definitions';
+
 import {
   EuiFieldText,
   EuiFlexGroup,
@@ -17,7 +19,7 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { Dictionary } from '../../common/types/common';
+import { Dictionary } from '../../../../common/types/common';
 
 interface OptionsDataElement {
   agg: string;
@@ -31,12 +33,14 @@ interface ListProps {
   deleteHandler(l: string): void;
 }
 
-export const List: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
-  <EuiListGroup>
+const ListGroup: MlListGroup = EuiListGroup;
+const ListGroupItem: MlListGroupItem = EuiListGroupItem;
+
+export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
+  <ListGroup flush={true}>
     {list.map((l: string) => (
-      <EuiListGroupItem
+      <ListGroupItem
         key={l}
-        id={`walterra-item-${l}`}
         label={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -56,9 +60,7 @@ export const List: React.SFC<ListProps> = ({ deleteHandler, list, optionsData })
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        isActive
         extraAction={{
-          color: 'subdued',
           onClick: () => deleteHandler(l),
           iconType: 'cross',
           iconSize: 's',
@@ -67,5 +69,5 @@ export const List: React.SFC<ListProps> = ({ deleteHandler, list, optionsData })
         }}
       />
     ))}
-  </EuiListGroup>
+  </ListGroup>
 );

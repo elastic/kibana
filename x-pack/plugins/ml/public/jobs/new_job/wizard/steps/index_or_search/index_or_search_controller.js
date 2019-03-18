@@ -29,6 +29,11 @@ uiRoutes
   });
 
 uiRoutes
+  .when('/data_frame/new_job', {
+    redirectTo: '/data_frame/new_job/step/index_or_search'
+  });
+
+uiRoutes
   .when('/jobs/new_job/step/index_or_search', {
     template,
     k7Breadcrumbs: getCreateJobBreadcrumbs,
@@ -51,6 +56,18 @@ uiRoutes
       privileges: checkFindFileStructurePrivilege,
       indexPatterns: loadIndexPatterns,
       nextStepPath: () => '#jobs/new_job/datavisualizer',
+    }
+  });
+
+uiRoutes
+  .when('/data_frame/new_job/step/index_or_search', {
+    template,
+    k7Breadcrumbs: getDataVisualizerIndexOrSearchBreadcrumbs,
+    resolve: {
+      CheckLicense: checkBasicLicense,
+      privileges: checkFindFileStructurePrivilege,
+      indexPatterns: loadIndexPatterns,
+      nextStepPath: () => '#data_frame/new_job/step/pivot',
     }
   });
 

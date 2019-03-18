@@ -105,6 +105,16 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
     method: 'POST'
   });
 
+  ml.dataFramePreview = ca({
+    urls: [
+      {
+        fmt: '/_data_frame/transforms/_preview'
+      }
+    ],
+    needBody: true,
+    method: 'POST'
+  });
+
   ml.deleteJob = ca({
     urls: [
       {

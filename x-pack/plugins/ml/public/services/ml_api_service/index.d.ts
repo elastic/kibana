@@ -16,6 +16,11 @@ declare interface Ml {
     indexAnnotation(annotation: Annotation): Promise<object>;
   };
 
+  dataFrame: {
+    getDataFrameTransformsPreview(payload: any): Promise<any>;
+  };
+  esSearch: any;
+
   getTimeFieldRange(obj: object): Promise<any>;
 }
 

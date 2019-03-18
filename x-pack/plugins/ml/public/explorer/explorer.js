@@ -24,8 +24,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { DropDown } from './dropdown';
-
 import { annotationsRefresh$ } from '../services/annotations_service';
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
@@ -1031,21 +1029,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     }
 
     render() {
-      return (
-        <div style={{ textAlign: 'center', margin: 'auto', width: '1200px' }}>
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <br />
-          <DropDown />
-        </div>
-      );
-
       const {
         intl,
         MlTimeBuckets,
