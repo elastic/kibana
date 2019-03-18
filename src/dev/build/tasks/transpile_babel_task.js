@@ -27,13 +27,13 @@ const transpileWithBabel = async (srcGlobs, build, presets) => {
 
   await createPromiseFromStreams([
     vfs.src(
-      [
+      srcGlobs.concat([
         '!**/*.d.ts',
         '!packages/**',
         '!**/node_modules/**',
         '!**/bower_components/**',
         '!**/__tests__/**',
-      ].concat(srcGlobs),
+      ]),
       {
         cwd: buildRoot,
       }
