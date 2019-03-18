@@ -91,6 +91,15 @@ export const CalendarForm = injectI18n(function CalendarForm({
     <EuiForm>
       {!isEdit &&
         <Fragment>
+          <EuiTitle>
+            <h1>
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+                defaultMessage="Create new calendar"
+              />
+            </h1>
+          </EuiTitle>
+          <EuiSpacer size="m"/>
           <EuiFormRow
             label={<FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.calendarIdLabel"
