@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDetails 1`] = `
+exports[`AuditDisposedCredsDetails rendering it renders the default AuditDisposedCredsDetails 1`] = `
 <Component
   intl={
     Object {

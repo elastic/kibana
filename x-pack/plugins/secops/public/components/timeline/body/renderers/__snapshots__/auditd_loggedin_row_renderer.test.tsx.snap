@@ -14,7 +14,6 @@ exports[`auditd_loggedin_row_renderer renders correctly against snapshot 1`] = `
         data={
           Object {
             "_id": "21",
-            "_index": "auditbeat-8.0.0-2019.02.19-000001",
             "auditd": Object {
               "data": Object {
                 "acct": null,

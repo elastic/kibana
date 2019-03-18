@@ -54,7 +54,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-loggedin-${id}`}
+            id={`auditd-executed-element-${id}`}
             field="auditd.session"
             value={session}
             iconType="number"
@@ -72,7 +72,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>
           <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>in</TokensFlexItem>
+        {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-executed-element-${id}`}
