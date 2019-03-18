@@ -257,7 +257,7 @@ The approach and level of effort varies significantly between server and browser
 
 First, decouple your plugin's business logic from the dependencies that are not exposed through the new platform, hapi.js and angular.js. Then introduce plugin definitions that more accurately reflect how plugins are defined in the new platform. Finally, replace the functionality you consume from core and other plugins with their new platform equivalents.
 
-Once those things are finished for any given plugin, it can offically be switched to the new plugin system.
+Once those things are finished for any given plugin, it can officially be switched to the new plugin system.
 
 ## Server-side plan of action
 
@@ -597,7 +597,7 @@ All teams that own a plugin are strongly encouraged to remove angular entirely, 
 
 One way to address this problem is to go through the code that is currently exposed to plugins and refactor away all of the touch points into angular.js. This might be the easiest option in some cases, but it might be hard in others.
 
-Another way to address this problem is to create an entirely new set of plugin APIs that are not dependendent on angular.js, and then update the implementation within the plugin to "merge" the angular and non-angular capabilities together. This is a good approach if preserving the existing angular API until we remove the old plugin system entirely is of critical importance. Generally speaking though, the removal of angular and introduction of a new set of public plugin APIs is a good reason to make a breaking change to the existing plugin capabilities. Make sure the PRs are tagged appropriately so we add these changes to our plugin changes blog post for each release.
+Another way to address this problem is to create an entirely new set of plugin APIs that are not dependent on angular.js, and then update the implementation within the plugin to "merge" the angular and non-angular capabilities together. This is a good approach if preserving the existing angular API until we remove the old plugin system entirely is of critical importance. Generally speaking though, the removal of angular and introduction of a new set of public plugin APIs is a good reason to make a breaking change to the existing plugin capabilities. Make sure the PRs are tagged appropriately so we add these changes to our plugin changes blog post for each release.
 
 Please talk with the platform team when formalizing _any_ client-side extension points that you intend to move to the new platform as there are some bundling considerations to consider.
 
@@ -653,7 +653,7 @@ Plugins are strongly discouraged from sharing static code for other plugins to i
 
 If you must share code statically, regardless of whether static code is on the server or in the browser, it can be imported via relative paths.
 
-For some background, this has long been problemmatic in Kibana for two reasons:
+For some background, this has long been problematic in Kibana for two reasons:
 
 * Plugin directories were configurable, so there was no reliably relative path for imports across plugins and from core. This has since been addressed and all plugins in the Kibana repo have reliable locations relative to the Kibana root.
 * The `x-pack` directory moved into `node_modules` at build time, so a relative import from `x-pack` to `src` that worked during development would break once a Kibana distribution was built. This is still a problem today, but the fix is in flight via issue [#32722](https://github.com/elastic/kibana/pull/32722).
@@ -670,7 +670,7 @@ A plugin author that decides some set of code should diverge from having a singl
 
 ### When does code go into a plugin, core, or packages?
 
-This is an impossible question to answer definitively for all circumstances. For each time this question is raised, we must carefully consider to what extent we think that code is relevant to almost everyone developing in Kbana, what license the code is shipping under, which teams are most appropriate to "own" that code, is the code stateless etc.
+This is an impossible question to answer definitively for all circumstances. For each time this question is raised, we must carefully consider to what extent we think that code is relevant to almost everyone developing in Kibana, what license the code is shipping under, which teams are most appropriate to "own" that code, is the code stateless etc.
 
 As a general rule of thumb, most code in Kibana should exist in plugins. Plugins are the most obvious way that we break Kibana down into sets of specialized domains with controls around interdependency communication and management. It's always possible to move code from a plugin into core if we ever decide to do so, but it's much more disruptive to move code from core to a plugin.
 
