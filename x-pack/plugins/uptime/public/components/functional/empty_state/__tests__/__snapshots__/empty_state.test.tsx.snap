@@ -446,101 +446,70 @@ exports[`EmptyState component renders message while loading 1`] = `
   loading={true}
 >
   <Component>
-    <EuiPanel
-      grow={true}
-      hasShadow={false}
-      paddingSize="m"
+    <EuiEmptyPrompt
+      body={
+        <React.Fragment>
+          <EuiLoadingSpinner
+            size="xl"
+          />
+          <EuiSpacer />
+          <EuiTitle
+            size="l"
+            textTransform="none"
+          >
+            <h2>
+              Loading…
+            </h2>
+          </EuiTitle>
+        </React.Fragment>
+      }
+      iconColor="subdued"
     >
       <div
-        className="euiPanel euiPanel--paddingMedium"
+        className="euiEmptyPrompt"
       >
-        <EuiEmptyPrompt
-          iconColor="subdued"
-          title={
-            <EuiFlexGroup>
-              <EuiFlexItem>
+        <EuiTextColor
+          color="subdued"
+          component="span"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiText
+              grow={true}
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <EuiLoadingSpinner
+                  size="xl"
+                >
+                  <div
+                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                  />
+                </EuiLoadingSpinner>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
                 <EuiTitle
                   size="l"
                   textTransform="none"
                 >
-                  <h3>
-                    Loading…
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLoadingSpinner
-                  size="xl"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <div
-            className="euiEmptyPrompt"
-          >
-            <EuiTextColor
-              color="subdued"
-              component="span"
-            >
-              <span
-                className="euiTextColor euiTextColor--subdued"
-              >
-                <EuiTitle
-                  size="m"
-                  textTransform="none"
-                >
-                  <EuiFlexGroup
-                    className="euiTitle euiTitle--medium"
+                  <h2
+                    className="euiTitle euiTitle--large"
                   >
-                    <div
-                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiTitle euiTitle--medium"
-                    >
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiTitle
-                            size="l"
-                            textTransform="none"
-                          >
-                            <h3
-                              className="euiTitle euiTitle--large"
-                            >
-                              Loading…
-                            </h3>
-                          </EuiTitle>
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <div
-                          className="euiFlexItem"
-                        >
-                          <EuiLoadingSpinner
-                            size="xl"
-                          >
-                            <div
-                              className="euiLoadingSpinner euiLoadingSpinner--xLarge"
-                            />
-                          </EuiLoadingSpinner>
-                        </div>
-                      </EuiFlexItem>
-                    </div>
-                  </EuiFlexGroup>
+                    Loading…
+                  </h2>
                 </EuiTitle>
-                <EuiSpacer
-                  size="m"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--m"
-                  />
-                </EuiSpacer>
-              </span>
-            </EuiTextColor>
-          </div>
-        </EuiEmptyPrompt>
+              </div>
+            </EuiText>
+          </span>
+        </EuiTextColor>
       </div>
-    </EuiPanel>
+    </EuiEmptyPrompt>
   </Component>
 </Component>
 `;

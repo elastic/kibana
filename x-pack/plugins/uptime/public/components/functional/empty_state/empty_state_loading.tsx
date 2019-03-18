@@ -4,36 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 
 export const EmptyStateLoading = () => (
-  <EuiPanel>
-    <EuiEmptyPrompt
-      title={
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h3>
-                {i18n.translate('xpack.uptime.emptyState.loadingMessage', {
-                  defaultMessage: 'Loading…',
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-    />
-  </EuiPanel>
+  <EuiEmptyPrompt
+    body={
+      <Fragment>
+        <EuiLoadingSpinner size="xl" />
+        <EuiSpacer />
+        <EuiTitle size="l">
+          <h2>
+            {i18n.translate('xpack.uptime.emptyState.loadingMessage', {
+              defaultMessage: 'Loading…',
+            })}
+          </h2>
+        </EuiTitle>
+      </Fragment>
+    }
+  />
 );
