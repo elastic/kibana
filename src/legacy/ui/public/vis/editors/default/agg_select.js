@@ -93,7 +93,7 @@ uiModules
           };
 
           // Since it's required field we set validity to prevent submiting the form when agg isn't selected initially.
-          setValidity(!!$scope.agg.type);
+          setValidity(!!($scope.agg && $scope.agg.type));
         }
       }
     };
