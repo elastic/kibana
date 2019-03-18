@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// linear algebra
 type f64 = number; // eventual AssemblyScript compatibility; doesn't hurt with vanilla TS either
 type f = f64; // shorthand
 
@@ -15,16 +16,36 @@ export type transformMatrix2d = [f, f, f, f, f, f, f, f, f] &
 export type transformMatrix3d = [f, f, f, f, f, f, f, f, f, f, f, f, f, f, f, f] &
   ReadonlyArray<f> & { __nominal: 'transformMatrix3d' };
 
+// plain, JSON-bijective value
+export type Json = JsonPrimitive | JsonArray | JsonMap;
+type JsonPrimitive = null | boolean | number | string;
+interface JsonArray extends Array<Json> {}
+interface JsonMap extends IMap<Json> {}
+interface IMap<T> {
+  [key: string]: T;
+}
+
+// state object
+export type State = JsonMap & WithActionId;
+export type ActionId = number;
+interface WithActionId {
+  primaryUpdate: { type: string; payload: { uid: ActionId; [propName: string]: Json } };
+  [propName: string]: Json; // allow other arbitrary props
+}
+
+// reselect-based data flow
+export type PlainFun = (...args: Json[]) => Json;
+export type Selector = (...fns: Resolve[]) => Resolve;
+type Resolve = ((obj: State) => Json);
+
+//
 export interface Meta {
   silent: boolean;
 }
-export type ActionId = number;
 export type TypeName = string;
-export type NodeResult = any;
-export type Payload = any;
-export type NodeFunction = (...args: any[]) => any;
-export type UpdaterFunction = (arg: NodeResult) => NodeResult;
+export type Payload = JsonMap;
+export type UpdaterFunction = (arg: State) => State;
 export type ChangeCallbackFunction = (
-  { type, state }: { type: TypeName; state: NodeResult },
+  { type, state }: { type: TypeName; state: State },
   meta: Meta
 ) => void;
