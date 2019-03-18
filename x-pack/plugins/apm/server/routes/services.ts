@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
-import { AgentName } from '../../typings/es_schemas/fields/AgentName';
+import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';

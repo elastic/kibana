@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
+ * Support additional agent types by appending definitions in mappings.json
+ * (for telemetry) and the AgentName type.
+ */
 export type AgentName =
   | 'go'
   | 'java'

@@ -9,18 +9,18 @@
  * that we might want to target specifically eg. linking to their documentation
  * & telemetry reporting. Support additional agent types by appending
  * definitions in mappings.json (for telemetry), the AgentName type, and the
- * agentNames Set.
+ * agentNames object.
  */
-import { AgentName } from '../typings/es_schemas/fields/AgentName';
+import { AgentName } from '../typings/es_schemas/ui/fields/Agent';
 
-const agentNames: { [key: string]: AgentName } = {
-  PYTHON: 'python',
-  JAVA: 'java',
-  NODEJS: 'nodejs',
-  JS_BASE: 'js-base',
-  RUM_JS: 'rum-js',
-  RUBY: 'ruby',
-  GO: 'go'
+const agentNames: { [agentName in AgentName]: agentName } = {
+  python: 'python',
+  java: 'java',
+  nodejs: 'nodejs',
+  'js-base': 'js-base',
+  'rum-js': 'rum-js',
+  ruby: 'ruby',
+  go: 'go'
 };
 
 export function isAgentName(agentName: string): boolean {
@@ -28,7 +28,7 @@ export function isAgentName(agentName: string): boolean {
 }
 
 export function isRumAgentName(agentName: string): boolean {
-  return [agentNames.JS_BASE, agentNames.RUM_JS].includes(
-    agentName as AgentName
+  return ([agentNames['js-base'], agentNames['rum-js']] as string[]).includes(
+    agentName
   );
 }
