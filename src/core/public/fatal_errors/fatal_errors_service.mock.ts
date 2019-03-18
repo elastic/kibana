@@ -16,36 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { FatalErrorsService, FatalErrorsStart } from './fatal_errors_service';
 
 const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+  const startContract: jest.Mocked<FatalErrorsStart> = {
+    add: jest.fn<never, any>(() => undefined as never),
+    get$: jest.fn(),
   };
+
   return startContract;
 };
 
-type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
+type FatalErrorsServiceContract = PublicMethodsOf<FatalErrorsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+  const mocked: jest.Mocked<FatalErrorsServiceContract> = {
     start: jest.fn(),
-    stop: jest.fn(),
+    add: jest.fn<never, any>(() => undefined as never),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  mocked.stop.mockResolvedValue();
+
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const elasticsearchServiceMock = {
+export const fatalErrorsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

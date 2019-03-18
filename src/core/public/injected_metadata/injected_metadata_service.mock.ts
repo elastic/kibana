@@ -16,36 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { InjectedMetadataService, InjectedMetadataStart } from './injected_metadata_service';
 
 const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+  const startContract: jest.Mocked<InjectedMetadataStart> = {
+    getBasePath: jest.fn(),
+    getKibanaVersion: jest.fn(),
+    getCspConfig: jest.fn(),
+    getLegacyMetadata: jest.fn(),
+    getInjectedVar: jest.fn(),
+    getInjectedVars: jest.fn(),
   };
+  startContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+  startContract.getKibanaVersion.mockReturnValue('kibanaVersion');
+  startContract.getLegacyMetadata.mockReturnValue({
+    uiSettings: {
+      defaults: { legacyInjectedUiSettingDefaults: true },
+      user: { legacyInjectedUiSettingUserValues: true },
+    },
+  } as any);
   return startContract;
 };
 
-type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
+type InjectedMetadataServiceContract = PublicMethodsOf<InjectedMetadataService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+  const mocked: jest.Mocked<InjectedMetadataServiceContract> = {
     start: jest.fn(),
-    stop: jest.fn(),
+    getKibanaVersion: jest.fn(),
+    getKibanaBuildNumber: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  mocked.stop.mockResolvedValue();
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const elasticsearchServiceMock = {
+export const injectedMetadataServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };
