@@ -13,6 +13,7 @@ import { createHostsResolvers } from './graphql/hosts';
 import { createIpOverviewResolvers } from './graphql/ip_overview';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
+import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
 import { createSourceStatusResolvers } from './graphql/source_status';
 import { createSourcesResolvers } from './graphql/sources';
@@ -37,6 +38,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createIpOverviewResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarToStringArrayValueResolvers() as IResolvers,
+      createOverviewResolvers(libs) as IResolvers,
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,

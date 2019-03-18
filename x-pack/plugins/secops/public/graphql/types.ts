@@ -55,6 +55,10 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  OverviewNetwork?: OverviewNetworkData | null;
+
+  OverviewHost?: OverviewHostData | null;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -873,6 +877,32 @@ export interface NetworkDnsItem {
   uniqueDomains?: number | null;
 }
 
+export interface OverviewNetworkData {
+  packetbeatFlow: number;
+
+  packetbeatDNS: number;
+
+  filebeatSuricata: number;
+
+  filebeatZeek?: number | null;
+
+  auditbeatSocket?: number | null;
+}
+
+export interface OverviewHostData {
+  auditbeatAuditd: number;
+
+  auditbeatFIM: number;
+
+  auditbeatLogin: number;
+
+  auditbeatPackage?: number | null;
+
+  auditbeatProcess?: number | null;
+
+  auditbeatUser?: number | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -1034,6 +1064,20 @@ export interface NetworkDnsSourceArgs {
   sort: NetworkDnsSortField;
 
   timerange: TimerangeInput;
+}
+export interface OverviewNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface OverviewHostSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
 }
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
@@ -2067,6 +2111,80 @@ export namespace GetNetworkTopNFlowQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetOverviewHostQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    OverviewHost?: OverviewHost | null;
+  };
+
+  export type OverviewHost = {
+    __typename?: 'OverviewHostData';
+
+    auditbeatAuditd: number;
+
+    auditbeatFIM: number;
+
+    auditbeatLogin: number;
+
+    auditbeatPackage?: number | null;
+
+    auditbeatProcess?: number | null;
+
+    auditbeatUser?: number | null;
+  };
+}
+
+export namespace GetOverviewNetworkQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    OverviewNetwork?: OverviewNetwork | null;
+  };
+
+  export type OverviewNetwork = {
+    __typename?: 'OverviewNetworkData';
+
+    packetbeatFlow: number;
+
+    packetbeatDNS: number;
+
+    filebeatSuricata: number;
+
+    filebeatZeek?: number | null;
+
+    auditbeatSocket?: number | null;
   };
 }
 

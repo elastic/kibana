@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { pure } from 'recompose';
-
-import { OverviewComponent } from './overview';
-
-export const Overview = pure(() => <OverviewComponent />);
+export { createOverviewResolvers } from './resolvers';
+export { overviewSchema } from './schema.gql';

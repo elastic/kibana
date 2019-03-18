@@ -17,6 +17,8 @@ import { ElasticsearchIpOverviewAdapter, IpOverview } from '../ip_overview';
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
+import { Overview } from '../overview';
+import { ElasticsearchOverviewAdapter } from '../overview/elasticsearch_adapter';
 import { ElasticsearchSourceStatusAdapter, SourceStatus } from '../source_status';
 import { ConfigurationSourcesAdapter, Sources } from '../sources';
 import { AppBackendLibs, AppDomainLibs, Configuration } from '../types';
@@ -36,6 +38,7 @@ export function compose(server: Server): AppBackendLibs {
     ipOverview: new IpOverview(new ElasticsearchIpOverviewAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),
+    overview: new Overview(new ElasticsearchOverviewAdapter(framework)),
     uncommonProcesses: new UncommonProcesses(new ElasticsearchUncommonProcessesAdapter(framework)),
   };
 

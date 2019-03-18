@@ -84,6 +84,10 @@ export interface Source {
   NetworkTopNFlow: NetworkTopNFlowData;
 
   NetworkDns: NetworkDnsData;
+
+  OverviewNetwork?: OverviewNetworkData | null;
+
+  OverviewHost?: OverviewHostData | null;
   /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
@@ -902,6 +906,32 @@ export interface NetworkDnsItem {
   uniqueDomains?: number | null;
 }
 
+export interface OverviewNetworkData {
+  packetbeatFlow: number;
+
+  packetbeatDNS: number;
+
+  filebeatSuricata: number;
+
+  filebeatZeek?: number | null;
+
+  auditbeatSocket?: number | null;
+}
+
+export interface OverviewHostData {
+  auditbeatAuditd: number;
+
+  auditbeatFIM: number;
+
+  auditbeatLogin: number;
+
+  auditbeatPackage?: number | null;
+
+  auditbeatProcess?: number | null;
+
+  auditbeatUser?: number | null;
+}
+
 export interface UncommonProcessesData {
   edges: UncommonProcessesEdges[];
 
@@ -1064,6 +1094,20 @@ export interface NetworkDnsSourceArgs {
 
   timerange: TimerangeInput;
 }
+export interface OverviewNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
+export interface OverviewHostSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
@@ -1193,6 +1237,14 @@ export namespace SourceResolvers {
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
     NetworkDns?: NetworkDnsResolver<NetworkDnsData, TypeParent, Context>;
+
+    OverviewNetwork?: OverviewNetworkResolver<
+      OverviewNetworkData | null,
+      TypeParent,
+      Context
+    >;
+
+    OverviewHost?: OverviewHostResolver<OverviewHostData | null, TypeParent, Context>;
     /** Gets UncommonProcesses based on a timerange, or all UncommonProcesses if no criteria is specified */
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, Context>;
     /** Just a simple example to get the app name */
@@ -1351,6 +1403,32 @@ export namespace SourceResolvers {
     sort: NetworkDnsSortField;
 
     timerange: TimerangeInput;
+  }
+
+  export type OverviewNetworkResolver<
+    R = OverviewNetworkData | null,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, OverviewNetworkArgs>;
+  export interface OverviewNetworkArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+  }
+
+  export type OverviewHostResolver<
+    R = OverviewHostData | null,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, OverviewHostArgs>;
+  export interface OverviewHostArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
   }
 
   export type UncommonProcessesResolver<
@@ -4072,6 +4150,93 @@ export namespace NetworkDnsItemResolvers {
   export type UniqueDomainsResolver<
     R = number | null,
     Parent = NetworkDnsItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace OverviewNetworkDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = OverviewNetworkData> {
+    packetbeatFlow?: PacketbeatFlowResolver<number, TypeParent, Context>;
+
+    packetbeatDNS?: PacketbeatDnsResolver<number, TypeParent, Context>;
+
+    filebeatSuricata?: FilebeatSuricataResolver<number, TypeParent, Context>;
+
+    filebeatZeek?: FilebeatZeekResolver<number | null, TypeParent, Context>;
+
+    auditbeatSocket?: AuditbeatSocketResolver<number | null, TypeParent, Context>;
+  }
+
+  export type PacketbeatFlowResolver<
+    R = number,
+    Parent = OverviewNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketbeatDnsResolver<
+    R = number,
+    Parent = OverviewNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FilebeatSuricataResolver<
+    R = number,
+    Parent = OverviewNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FilebeatZeekResolver<
+    R = number | null,
+    Parent = OverviewNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatSocketResolver<
+    R = number | null,
+    Parent = OverviewNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace OverviewHostDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = OverviewHostData> {
+    auditbeatAuditd?: AuditbeatAuditResolver<number, TypeParent, Context>;
+
+    auditbeatFIM?: AuditbeatFimResolver<number, TypeParent, Context>;
+
+    auditbeatLogin?: AuditbeatLoginResolver<number, TypeParent, Context>;
+
+    auditbeatPackage?: AuditbeatPackageResolver<number | null, TypeParent, Context>;
+
+    auditbeatProcess?: AuditbeatProcessResolver<number | null, TypeParent, Context>;
+
+    auditbeatUser?: AuditbeatUserResolver<number | null, TypeParent, Context>;
+  }
+
+  export type AuditbeatAuditResolver<
+    R = number,
+    Parent = OverviewHostData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatFimResolver<
+    R = number,
+    Parent = OverviewHostData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatLoginResolver<
+    R = number,
+    Parent = OverviewHostData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatPackageResolver<
+    R = number | null,
+    Parent = OverviewHostData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatProcessResolver<
+    R = number | null,
+    Parent = OverviewHostData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AuditbeatUserResolver<
+    R = number | null,
+    Parent = OverviewHostData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
