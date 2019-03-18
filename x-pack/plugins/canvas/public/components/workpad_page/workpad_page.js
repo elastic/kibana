@@ -86,8 +86,7 @@ export class WorkpadPage extends PureComponent {
       elementLayer,
       groupElements,
       ungroupElements,
-      updateCount,
-      setUpdateCount,
+      forceUpdate,
     } = this.props;
 
     let shortcuts = null;
@@ -95,6 +94,7 @@ export class WorkpadPage extends PureComponent {
     if (isEditable && isSelected) {
       const shortcutProps = {
         elementLayer,
+        forceUpdate,
         groupElements,
         insertNodes,
         pageId: page.id,
@@ -104,8 +104,6 @@ export class WorkpadPage extends PureComponent {
         selectedPrimaryShapes,
         selectElement,
         ungroupElements,
-        updateCount,
-        setUpdateCount,
       };
       shortcuts = <WorkpadShortcuts {...shortcutProps} />;
     }

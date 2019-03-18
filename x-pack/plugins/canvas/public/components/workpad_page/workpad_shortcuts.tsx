@@ -28,20 +28,18 @@ export interface Props {
   elementLayer: (pageId: string, selectedElement: any, movement: any) => void;
   groupElements: () => void;
   ungroupElements: () => void;
-  updateCount: number;
-  setUpdateCount: (count: number) => void;
+  forceUpdate: () => void;
 }
 
 export class WorkpadShortcuts extends Component<Props> {
   public render() {
-    const { pageId, updateCount, setUpdateCount } = this.props;
-    const forceRerender = () => setUpdateCount(updateCount + 1);
+    const { pageId, forceUpdate } = this.props;
     return (
       <Shortcuts
         name="ELEMENT"
         handler={(action: string, event: Event) => {
           this._keyHandler(action, event);
-          forceRerender();
+          forceUpdate();
         }}
         targetNodeSelector={`#${pageId}`}
         global
