@@ -140,6 +140,11 @@ export class MBMapContainer extends React.Component {
   }
 
   _getFeaturesUnderPointer(mbLngLatPoint) {
+
+    if (!this._mbMap) {
+      return [];
+    }
+
     const mbLayerIds = this._getMbLayerIdsForTooltips();
     const PADDING = 2;//in pixels
     const mbBbox = [
@@ -153,10 +158,6 @@ export class MBMapContainer extends React.Component {
       }
 
     ];
-
-    if (!this._mbMap) {
-      return [];
-    }
     return this._mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
