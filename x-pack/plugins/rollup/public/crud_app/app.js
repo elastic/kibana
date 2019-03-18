@@ -13,7 +13,7 @@ import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUserAction } from './services';
 import { JobList, JobCreate } from './sections';
 
-export class App extends Component {
+class ShareRouter extends Component {
   static contextTypes = {
     router: PropTypes.shape({
       history: PropTypes.shape({
@@ -34,6 +34,12 @@ export class App extends Component {
     registerRouter(router);
   }
 
+  render() {
+    return this.props.children;
+  }
+}
+
+export class App extends Component { // eslint-disable-line react/no-multi-comp
   componentDidMount() {
     trackUserAction(UA_APP_LOAD);
   }
@@ -46,11 +52,13 @@ export class App extends Component {
   render() {
     return (
       <HashRouter>
-        <Switch>
-          <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
-          <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
-        </Switch>
+        <ShareRouter>
+          <Switch>
+            <Redirect exact from={`${CRUD_APP_BASE_PATH}`} to={`${CRUD_APP_BASE_PATH}/job_list`} />
+            <Route exact path={`${CRUD_APP_BASE_PATH}/job_list`} component={JobList} />
+            <Route exact path={`${CRUD_APP_BASE_PATH}/create`} component={JobCreate} />
+          </Switch>
+        </ShareRouter>
       </HashRouter>
     );
   }
