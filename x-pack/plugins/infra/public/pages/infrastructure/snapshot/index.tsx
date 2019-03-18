@@ -7,31 +7,31 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { RouteComponentProps } from 'react-router-dom';
 
-import { HomePageContent } from './page_content';
-import { HomeToolbar } from './toolbar';
+import { SnapshotPageContent } from './page_content';
+import { SnapshotToolbar } from './toolbar';
 
-import { DocumentTitle } from '../../components/document_title';
-import { NoIndices } from '../../components/empty_states/no_indices';
-import { Header } from '../../components/header';
-import { HelpCenterContent } from '../../components/help_center_content';
-import { ColumnarPage } from '../../components/page';
+import { DocumentTitle } from '../../../components/document_title';
+import { NoIndices } from '../../../components/empty_states/no_indices';
+import { Header } from '../../../components/header';
+import { ColumnarPage } from '../../../components/page';
 
-import { SourceConfigurationFlyout } from '../../components/source_configuration';
-import { WithSourceConfigurationFlyoutState } from '../../components/source_configuration/source_configuration_flyout_state';
-import { WithWaffleFilterUrlState } from '../../containers/waffle/with_waffle_filters';
-import { WithWaffleOptionsUrlState } from '../../containers/waffle/with_waffle_options';
-import { WithWaffleTimeUrlState } from '../../containers/waffle/with_waffle_time';
-import { WithKibanaChrome } from '../../containers/with_kibana_chrome';
-import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../containers/with_source';
+import { SourceConfigurationFlyout } from '../../../components/source_configuration';
+import { WithSourceConfigurationFlyoutState } from '../../../components/source_configuration/source_configuration_flyout_state';
+import { WithWaffleFilterUrlState } from '../../../containers/waffle/with_waffle_filters';
+import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffle_options';
+import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
+import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
+import { SourceErrorPage, SourceLoadingPage, WithSource } from '../../../containers/with_source';
 
-interface HomePageProps {
+interface SnapshotPageProps extends RouteComponentProps {
   intl: InjectedIntl;
 }
 
-export const HomePage = injectI18n(
-  class extends React.Component<HomePageProps, {}> {
-    public static displayName = 'HomePage';
+export const SnapshotPage = injectI18n(
+  class extends React.Component<SnapshotPageProps, {}> {
+    public static displayName = 'SnapshotPage';
 
     public render() {
       const { intl } = this.props;
@@ -39,17 +39,17 @@ export const HomePage = injectI18n(
       return (
         <ColumnarPage>
           <DocumentTitle
-            title={intl.formatMessage({
-              id: 'xpack.infra.homePage.documentTitle',
-              defaultMessage: 'Infrastructure',
-            })}
-          />
-          <HelpCenterContent
-            feedbackLink="https://discuss.elastic.co/c/infrastructure"
-            feedbackLinkText={intl.formatMessage({
-              id: 'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-              defaultMessage: 'Provide feedback for Infrastructure',
-            })}
+            title={(previousTitle: string) =>
+              intl.formatMessage(
+                {
+                  id: 'xpack.infra.infrastructureSnapshotPage.documentTitle',
+                  defaultMessage: '{previousTitle} | Snapshot',
+                },
+                {
+                  previousTitle,
+                }
+              )
+            }
           />
           <Header
             breadcrumbs={[
@@ -79,8 +79,8 @@ export const HomePage = injectI18n(
                   <WithWaffleTimeUrlState />
                   <WithWaffleFilterUrlState indexPattern={derivedIndexPattern} />
                   <WithWaffleOptionsUrlState />
-                  <HomeToolbar />
-                  <HomePageContent />
+                  <SnapshotToolbar />
+                  <SnapshotPageContent />
                 </>
               ) : hasFailed ? (
                 <SourceErrorPage errorMessage={lastFailureMessage || ''} retry={load} />

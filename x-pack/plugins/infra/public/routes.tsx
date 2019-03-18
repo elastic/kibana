@@ -9,7 +9,7 @@ import React from 'react';
 import { Redirect, Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
-import { HomePage } from './pages/home';
+import { InfrastructurePage } from './pages/infrastructure';
 import { LinkToPage } from './pages/link_to';
 import { LogsPage } from './pages/logs';
 import { MetricDetail } from './pages/metrics';
@@ -22,9 +22,11 @@ export const PageRouter: React.SFC<RouterProps> = ({ history }) => {
   return (
     <Router history={history}>
       <Switch>
-        <Redirect from="/" exact={true} to="/home" />
+        <Redirect from="/" exact={true} to="/infrastructure/snapshot" />
+        <Redirect from="/infrastructure" exact={true} to="/infrastructure/snapshot" />
+        <Redirect from="/home" exact={true} to="/infrastructure/snapshot" />
         <Route path="/logs" component={LogsPage} />
-        <Route path="/home" component={HomePage} />
+        <Route path="/infrastructure" component={InfrastructurePage} />
         <Route path="/link-to" component={LinkToPage} />
         <Route path="/metrics/:type/:node" component={MetricDetail} />
         <Route component={NotFoundPage} />
