@@ -718,10 +718,10 @@ function discoverController(
 
   function logInspectorRequest() {
     inspectorAdapters.requests.reset();
-    const title = i18n('common.ui.docTable.inspectorRequestDataTitle', {
+    const title = i18n('kbn.discover.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
-    const description = i18n('common.ui.docTable.inspectorRequestDescription', {
+    const description = i18n('kbn.discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
