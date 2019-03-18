@@ -73,8 +73,11 @@ function renderLogs(props) {
         <Fragment key={index}>
           <EuiDescriptionListTitle>
             <FormattedMessage
-              id={`xpack.monitoring.cluster.overview.logsPanel.${log.type}LogLabel`}
-              defaultMessage={capitalize(log.type)}
+              id="xpack.monitoring.cluster.overview.logsPanel.logTypeTitle"
+              defaultMessage="{type}:"
+              values={{
+                type: capitalize(log.type),
+              }}
             />
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -85,7 +88,7 @@ function renderLogs(props) {
       {props.logs.types.length === 0
         ? (
           <FormattedMessage
-            id={`xpack.monitoring.cluster.overview.logsPanel.noLogsFound`}
+            id="xpack.monitoring.cluster.overview.logsPanel.noLogsFound"
             defaultMessage="No logs found."
           />
         )
