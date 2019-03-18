@@ -25,7 +25,8 @@
         <div class="prfDevTool__shardDetailsWrapper">
           <div class="prfDevTool__shardDetails--dim">
             <span class="euiBadge euiBadge--default prfDevTool__progress--time" style="--prfDevToolProgressPercentage: {{shard.relative[target]}}%">
-              {{shard.time[target] | msToPretty: 3}}
+              <span class="prfDevTool__progress--percent-ie" ng-style="{'width': shard.relative[target] + '%'}"></span>
+              <span class="prfDevTool__progressText">{{shard.time[target] | msToPretty: 3}}</span>
             </span>
           </div>
           <button class="euiLink prfDevTool__shardDetails" ng-click="shardVisibility = !shardVisibility">
@@ -77,18 +78,19 @@
                 </button>
               </div>
               <div class="prfDevTool__cell prfDevTool__time">
-                <span class="euiBadge prfDevTool__badge" style="background-color:{{row.absoluteColor}}">
+                <span class="euiBadge prfDevTool__badge" ng-style="{'background-color': row.absoluteColor}">
                   {{row.selfTime | msToPretty: 1}}
                 </span>
               </div>
               <div class="prfDevTool__cell prfDevTool__totalTime">
-                <span class="euiBadge prfDevTool__badge" style="background-color:{{row.absoluteColor}}">
+                <span class="euiBadge prfDevTool__badge" ng-style="{'background-color': row.absoluteColor}">
                   {{row.time | msToPretty: 1}}
                 </span>
               </div>
               <div class="prfDevTool__cell prfDevTool__percentage">
                 <span class="euiBadge euiBadge--default prfDevTool__progress--percent" style="--prfDevToolProgressPercentage: {{row.timePercentage}}%">
-                  {{row.timePercentage}}%
+                  <span class="prfDevTool__progress--percent-ie" ng-style="{'width': row.timePercentage + '%'}"></span>
+                  <span class="prfDevTool__progressText">{{row.timePercentage}}%</span>
                 </span>
               </div>
             </div>

@@ -48,13 +48,14 @@
     <tr ng-repeat="breakdown in detailRow.breakdown">
       <td class="prfDevTool__cell prfDevTool__description"><span tooltip="{{breakdown.tip}}" tooltip-placement="left">{{breakdown.key}}</span></td>
       <td class="prfDevTool__cell prfDevTool__time">
-        <span class="euiBadge prfDevTool__badge" style="background-color:{{breakdown.color}}">
+        <span class="euiBadge prfDevTool__badge" ng-style="{'background-color': breakdown.color}">
           {{breakdown.time | nsToPretty: 1}}
         </span>
       </td>
       <td class="prfDevTool__cell prfDevTool__percentage">
         <span class="euiBadge euiBadge--default prfDevTool__progress--percent" style="--prfDevToolProgressPercentage: {{breakdown.relative}}%">
-          {{breakdown.relative}}%
+          <span class="prfDevTool__progress--percent-ie" ng-style="{'width': breakdown.relative + '%'}"></span>
+          <span class="prfDevTool__progressText">{{breakdown.relative}}%</span>
         </span>
       </td>
     </tr>

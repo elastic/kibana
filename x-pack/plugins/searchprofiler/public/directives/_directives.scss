@@ -105,35 +105,16 @@
 }
 
 .prfDevTool__progress--percent {
-  border: none;
-  display: block;
+  @include prfDevToolProgress;
   width: $euiSize * 4;
-  $progressColor: tintOrShade($euiColorPrimary, 60%, 60%);
-  background-image:
-    linear-gradient(
-      to left,
-      $progressColor 0%,
-      $progressColor var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade 100%
-    );
 }
 
 .prfDevTool__progress--time {
-  border: none;
-  display: block;
+  @include prfDevToolProgress(#FFAFAF);
+  background-color: #F5F5F5; // Must be light at all times
   width: $euiSize * 15.5;
   // Force text to always be dark on top of white -> pink color
   color: lightOrDarkTheme($euiColorDarkestShade, $euiColorLightestShade);
-  $progressColor: #ffafaf;
-  background-image:
-    linear-gradient(
-      to left,
-      $progressColor 0%,
-      $progressColor var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade var(--prfDevToolProgressPercentage, auto),
-      $euiColorLightestShade 100%
-    );
 }
 
 // Breakdown table
