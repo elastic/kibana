@@ -96,10 +96,4 @@ SearchProfilerTabs.propTypes = {
   profileResponse: PropTypes.array.isRequired,
 };
 
-SearchProfilerTabs.propTypes = {
-  activeTab: PropTypes.string.isRequired,
-  activateTab: PropTypes.func.isRequired,
-  profileResponse: PropTypes.array.isRequired,
-};
-
 export { SearchProfilerTabs };
