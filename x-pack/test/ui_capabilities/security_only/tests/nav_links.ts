@@ -45,7 +45,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('navLinks');
             expect(uiCapabilities.value!.navLinks).to.eql(
-              navLinksBuilder.except('apm', 'ml', 'monitoring')
+              navLinksBuilder.except('ml', 'monitoring')
             );
             break;
           case 'foo_all':
