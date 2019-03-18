@@ -85,7 +85,7 @@ class Main extends React.Component {
               runPipeline tests are running ...
             </EuiPageContentHeader>
             <div>{this.state.expression}</div>
-            <div ref={ref => this.chartDiv = ref} style={pStyle}/>
+            <div data-test-subj="pluginChart" ref={ref => this.chartDiv = ref} style={pStyle}/>
           </EuiPageContent>
         </EuiPageBody>
       </EuiPage>

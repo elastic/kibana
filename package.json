@@ -323,6 +323,7 @@
     "babel-eslint": "^9.0.0",
     "babel-jest": "^23.6.0",
     "backport": "4.4.1",
+    "canvas": "^2.4.0",
     "chai": "3.5.0",
     "chance": "1.0.10",
     "cheerio": "0.22.0",

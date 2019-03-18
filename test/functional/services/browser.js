@@ -331,6 +331,31 @@ export async function BrowserProvider({ getService }) {
         }
       }));
     }
+
+    getScrollTop() {
+      return driver
+        .executeScript('return document.body.scrollTop')
+        .then(scrollSize => parseInt(scrollSize, 10));
+    }
+
+    getScrollLeft() {
+      return driver
+        .executeScript('return document.body.scrollLeft')
+        .then(scrollSize => parseInt(scrollSize, 10));
+    }
+
+    // return promise with REAL scroll position
+    setScrollTop(scrollSize) {
+      return driver
+        .executeScript('document.body.scrollTop = ' + scrollSize)
+        .then(() => this.getScrollTop(driver));
+    }
+
+    setScrollLeft(scrollSize) {
+      return driver
+        .executeScript('document.body.scrollLeft = ' + scrollSize)
+        .then(() => this.getScrollLeft(driver));
+    }
   }
 
   return  new BrowserService();

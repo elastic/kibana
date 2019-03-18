@@ -26,7 +26,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
   const screenshot = getService('screenshots');
   const snapshots = getService('snapshots');
   const log = getService('log');
-
+  const testSubjects = getService('testSubjects');
   /**
    * returns a handler object to test a given expression
    * @name: name of the test
@@ -116,7 +116,8 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
         }, pipelineResponse);
         await delay(1000);
 
-        const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines);
+        const chartEl = await testSubjects.find('pluginChart');
+        const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);
         expect(percentDifference).to.be.lessThan(0.05);
         return handler;
       }

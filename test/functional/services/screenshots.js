@@ -23,9 +23,52 @@ import { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
+import Canvas from 'canvas';
 
 const mkdirAsync = promisify(mkdirp);
 const writeFileAsync = promisify(writeFile);
+
+const Image = Canvas.Image;
+const BASE64_IMAGE_PREFIX = 'data:image/png;base64,';
+
+
+function takeScreenshotOfArea({ x, y }, { width, height }, browser) {
+
+  x = x || 0;
+  y = y || 0;
+
+  let currentScrollTop;
+  let currentScrollLeft;
+
+  return Promise
+    .all([
+      browser.setScrollTop(y),
+      browser.setScrollLeft(x)
+    ])
+    .then(dataList => {
+
+      currentScrollTop = dataList[0];
+      currentScrollLeft = dataList[1];
+
+      return browser.takeScreenshot();
+
+    })
+    .then(image => {
+      const deltaScrollTop = y - currentScrollTop;
+      const deltaScrollLeft = x - currentScrollLeft;
+      const canvas = new Canvas(width, height);
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+
+      img.src = BASE64_IMAGE_PREFIX + image;
+
+      ctx.drawImage(img, -deltaScrollLeft, -deltaScrollTop, img.width, img.height);
+
+      return canvas.toDataURL();
+
+    });
+
+}
 
 export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
@@ -45,10 +88,10 @@ export async function ScreenshotsProvider({ getService }) {
      * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
      * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
      */
-    async compareAgainstBaseline(name, updateBaselines) {
+    async compareAgainstBaseline(name, updateBaselines, el) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
-      await this._take(sessionPath);
+      await this._take(sessionPath, el);
 
       const baselinePath = resolve(BASELINE_DIRECTORY, `${name}.png`);
       const failurePath = resolve(FAILURE_DIRECTORY, `${name}.png`);
@@ -63,21 +106,29 @@ export async function ScreenshotsProvider({ getService }) {
       }
     }
 
-    async take(name) {
-      return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`));
+    async take(name, el) {
+      return await this._take(resolve(SESSION_DIRECTORY, `${name}.png`), el);
     }
 
-    async takeForFailure(name) {
-      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`));
+    async takeForFailure(name, el) {
+      await this._take(resolve(FAILURE_DIRECTORY, `${name}.png`), el);
     }
 
-    async _take(path) {
+    async _take(path, el) {
       try {
         log.info(`Taking screenshot "${path}"`);
-        const [screenshot] = await Promise.all([
-          browser.takeScreenshot(),
-          fcb(cb => mkdirp(dirname(path), cb)),
-        ]);
+        let screenshot;
+        if (el) {
+          const [location, size] = await Promise.all([
+            el.getLocation(),
+            el.getSize()
+          ]);
+
+          screenshot = await takeScreenshotOfArea(location, size, browser);
+        } else {
+          screenshot = await browser.takeScreenshot();
+        }
+        await fcb(cb => mkdirp(dirname(path), cb));
         await fcb(cb => writeFile(path, screenshot, 'base64', cb));
       } catch (err) {
         log.error('SCREENSHOT FAILED');
