@@ -52,10 +52,6 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
           // these users have no access to even get the ui capabilities
           case 'legacy_all':
           case 'no_kibana_privileges':
-          case 'apm_user':
-          case 'machine_learning_admin':
-          case 'machine_learning_user':
-          case 'monitoring_user':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
             break;

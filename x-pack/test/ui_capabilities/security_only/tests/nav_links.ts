@@ -56,11 +56,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
               navLinksBuilder.only('management', 'foo')
             );
             break;
-          case 'apm_user':
           case 'legacy_all':
-          case 'machine_learning_admin':
-          case 'machine_learning_user':
-          case 'monitoring_user':
           case 'no_kibana_privileges':
             expect(uiCapabilities.success).to.be(false);
             expect(uiCapabilities.failureReason).to.be(GetUICapabilitiesFailureReason.NotFound);
