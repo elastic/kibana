@@ -7,27 +7,14 @@
 import { Server } from 'hapi';
 import { countBy } from 'lodash';
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
-
-// Support telemetry for additional agent types by appending definitions in
-// mappings.json and the AgentName enum.
-
-export enum AgentName {
-  Python = 'python',
-  Java = 'java',
-  NodeJs = 'nodejs',
-  JsBase = 'js-base',
-  Ruby = 'ruby',
-  GoLang = 'go'
-}
+import { isAgentName } from '../../../common/agent_name';
 
 export const APM_TELEMETRY_DOC_ID = 'apm-telemetry';
 
 export function createApmTelementry(
-  agentNames: AgentName[] = []
+  agentNames: string[] = []
 ): SavedObjectAttributes {
-  const validAgentNames = agentNames.filter(agentName =>
-    Object.values(AgentName).includes(agentName)
-  );
+  const validAgentNames = agentNames.filter(isAgentName);
   return {
     has_any_services: validAgentNames.length > 0,
     services_per_agent: countBy(validAgentNames)
