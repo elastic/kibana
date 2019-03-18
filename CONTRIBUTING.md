@@ -463,7 +463,7 @@ To include your change in the Release Notes:
     * For a new feature or functionality, use `release_note:enhancement`.
     * For an external-facing fix, use `release_note:fix`.  Exception: docs, build, and test fixes do not go in the Release Notes.
     * For a deprecated feature, use `release_note:deprecation`.
-    * For a breaking change, use `release-breaking:note`.
+    * For a breaking change, use `release_note:breaking`.
 
 To NOT include your changes in the Release Notes, please use label`non-issue`. PRs with the following labels also won't be included in the Release Notes:
 `build`, `docs`, `test`, `non-issue`, `jenkins`, `backport`,  and `chore`.

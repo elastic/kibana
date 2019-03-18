@@ -298,7 +298,6 @@
     "common.ui.courier.requestTimeDescription": "请求从浏览器到 Elasticsearch 以及返回的时间。不包括请求在队列中等候的时间。",
     "common.ui.courier.requestTimeLabel": "请求时间",
     "common.ui.courier.requestTimeValue": "{requestTime}ms",
-    "common.ui.directives.confirmClickButtonLabel": "是否确定？",
     "common.ui.directives.fieldNameIcons.booleanAriaLabel": "布尔字段",
     "common.ui.directives.fieldNameIcons.conflictFieldAriaLabel": "冲突字段",
     "common.ui.directives.fieldNameIcons.dateFieldAriaLabel": "日期字段",

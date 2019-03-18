@@ -14,8 +14,8 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 const List = styled.ul`
   width: 100%;
   border: 1px solid ${theme.euiColorLightShade};
-  border-radius: ${theme.euiSizeXs};
-  box-shadow: 0px ${theme.euiSizeXs} ${theme.euiSizeXl}
+  border-radius: ${theme.euiSizeXS};
+  box-shadow: 0px ${theme.euiSizeXS} ${theme.euiSizeXL}
     ${rgba(theme.euiTextColor, 0.1)};
   position: absolute;
   background: #fff;
