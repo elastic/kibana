@@ -80,8 +80,8 @@ class SearchProfilerTabs extends Component {
             onClick={() => this.handleClick('aggregations')}
           >
             <FormattedMessage
-              id="tsvb.gauge.optionsTab.panelOptionsButtonLabel"
-              defaultMessage="Panel options"
+              id="xpack.searchProfiler.aggregationProfileTabTitle"
+              defaultMessage="Aggregation Profile"
             />
           </EuiTab>
         </EuiTabs>
