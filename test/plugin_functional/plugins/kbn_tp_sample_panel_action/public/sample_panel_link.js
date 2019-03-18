@@ -23,14 +23,18 @@ import {
 
 class SamplePanelLink extends ContextMenuAction {
   constructor() {
-    super({
-      displayName: 'Sample Panel Link',
-      id: 'samplePanelLink',
-      parentPanelId: 'mainMenu',
-    });
-  }
-  getHref() {
-    return 'https://example.com/kibana/test';
+    super(
+      {
+        displayName: 'Sample Panel Link',
+        id: 'samplePanelLink',
+        parentPanelId: 'mainMenu',
+      },
+      {
+        getHref() {
+          return 'https://example.com/kibana/test';
+        }
+      }
+    );
   }
 }
 

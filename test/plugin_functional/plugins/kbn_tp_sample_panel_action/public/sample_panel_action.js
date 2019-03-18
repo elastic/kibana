@@ -27,27 +27,31 @@ import {
 
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
-    super({
-      displayName: 'Sample Panel Action',
-      id: 'samplePanelAction',
-      parentPanelId: 'mainMenu',
-    });
-  }
-  onClick({ embeddable }) {
-    openFlyout(
-      <React.Fragment>
-        <EuiFlyoutHeader>
-          <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
-            <h1>{embeddable.metadata.title}</h1>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
-        </EuiFlyoutBody>
-      </React.Fragment>,
+    super(
       {
-        'data-test-subj': 'samplePanelActionFlyout',
+        displayName: 'Sample Panel Action',
+        id: 'samplePanelAction',
+        parentPanelId: 'mainMenu',
       },
+      {
+        onClick({ embeddable }) {
+          openFlyout(
+            <React.Fragment>
+              <EuiFlyoutHeader>
+                <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
+                  <h1>{embeddable.metadata.title}</h1>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
+              </EuiFlyoutBody>
+            </React.Fragment>,
+            {
+              'data-test-subj': 'samplePanelActionFlyout',
+            },
+          );
+        }
+      }
     );
   }
 }
