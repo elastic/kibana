@@ -22,12 +22,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getPageObjects }: FtrProviderContext) {
-  const { visualBuilder, timePicker } = getPageObjects([
-    'visualBuilder',
-    'timePicker',
-    'visualize',
-    'common',
-  ]);
+  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
