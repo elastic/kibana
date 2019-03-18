@@ -21,7 +21,7 @@ interface PingListQueryResult {
 
 interface PingListProps {
   monitorId?: string;
-  selectedPingListOption?: EuiComboBoxOptionProps;
+  selectedOption?: EuiComboBoxOptionProps;
   sort?: UMPingSortDirectionArg;
   size?: number;
   onStatusSelectionChange: (selectedOptions: EuiComboBoxOptionProps[]) => void;
@@ -73,7 +73,7 @@ export class Query extends React.Component<Props, PingListState> {
       <PingList
         loading={loading}
         pingResults={allPings}
-        selectedOption={this.props.selectedPingListOption || this.state.statusOptions[2]}
+        selectedOption={this.props.selectedOption || this.state.statusOptions[2]}
         selectedOptionChanged={this.props.onStatusSelectionChange}
         statusOptions={this.state.statusOptions}
       />
@@ -81,4 +81,7 @@ export class Query extends React.Component<Props, PingListState> {
   }
 }
 
-export const PingListQuery = withUptimeGraphQL<PingListQueryResult>(Query, getPingsQuery);
+export const PingListQuery = withUptimeGraphQL<PingListQueryResult, PingListProps>(
+  Query,
+  getPingsQuery
+);

@@ -248,7 +248,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
   };
 
   private addForceRefreshListener = (newClient: () => void): void => {
-    this.setState({ refreshListeners: [...this.state.refreshListeners, newClient] });
+    this.setState(state => ({
+      ...state,
+      refreshListeners: [...state.refreshListeners, newClient],
+    }));
   };
 
   private refreshApp = () => {

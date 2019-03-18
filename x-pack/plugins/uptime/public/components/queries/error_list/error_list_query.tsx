@@ -4,40 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Query } from 'react-apollo';
+import { ErrorListItem } from '../../../../common/graphql/types';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { ErrorList } from '../../functional';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getErrorListQuery } from './get_error_list';
 
-interface ErrorListProps {
-  filters?: string;
+interface ErrorListQueryResult {
+  errorList?: ErrorListItem[];
 }
 
-type Props = ErrorListProps & UptimeCommonProps;
+type Props = UptimeCommonProps & UptimeGraphQLQueryProps<ErrorListQueryResult>;
 
-export const ErrorListQuery = ({
-  autorefreshInterval,
-  autorefreshIsPaused,
-  dateRangeStart,
-  dateRangeEnd,
-  filters,
-}: Props) => (
-  <Query
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-    query={getErrorListQuery}
-    variables={{ dateRangeStart, dateRangeEnd, filters }}
-  >
-    {({ loading, error, data }) => {
-      if (error) {
-        return i18n.translate('xpack.uptime.errorList.errorMessage', {
-          values: { message: error.message },
-          defaultMessage: 'Error {message}',
-        });
-      }
-      const { errorList } = data;
-      return <ErrorList loading={loading} errorList={errorList} />;
-    }}
-  </Query>
+export const makeErrorListQuery = ({ data, loading }: Props) => {
+  const errorList: ErrorListItem[] | undefined = data ? data.errorList : undefined;
+  return <ErrorList loading={loading} errorList={errorList} />;
+};
+
+export const ErrorListQuery = withUptimeGraphQL<ErrorListQueryResult>(
+  makeErrorListQuery,
+  getErrorListQuery
 );

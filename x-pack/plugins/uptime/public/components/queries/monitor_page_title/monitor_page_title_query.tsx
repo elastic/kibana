@@ -31,7 +31,7 @@ export const makeMonitorPageTitleQuery = ({ loading, data }: Props) => {
   return <MonitorPageTitle pageTitle={data.monitorPageTitle} />;
 };
 
-export const MonitorPageTitleQuery = withUptimeGraphQL<MonitorPageTitleQueryResult>(
-  makeMonitorPageTitleQuery,
-  getMonitorPageTitleQuery
-);
+export const MonitorPageTitleQuery = withUptimeGraphQL<
+  MonitorPageTitleQueryResult,
+  MonitorPageTitleProps
+>(makeMonitorPageTitleQuery, getMonitorPageTitleQuery);

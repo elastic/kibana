@@ -50,7 +50,7 @@ const makeMonitorStatusBar = ({ monitorId, loading, data }: Props) => {
   return <MonitorStatusBar duration={duration} status={status} timestamp={timestamp} url={full} />;
 };
 
-export const MonitorStatusBarQuery = withUptimeGraphQL<MonitorStatusBarQueryResult>(
-  makeMonitorStatusBar,
-  getMonitorStatusBarQuery
-);
+export const MonitorStatusBarQuery = withUptimeGraphQL<
+  MonitorStatusBarQueryResult,
+  MonitorStatusBarProps
+>(makeMonitorStatusBar, getMonitorStatusBarQuery);

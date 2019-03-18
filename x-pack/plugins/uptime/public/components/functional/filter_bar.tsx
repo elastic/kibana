@@ -9,16 +9,19 @@ import { EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
+import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
 import { filterBarSearchSchema } from './search_schema';
 
 interface FilterBarProps {
+  currentQuery?: object;
   filterBar: FilterBarType;
-  updateQuery: (query: object | undefined) => void;
+  updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
 const SEARCH_THRESHOLD = 2;
 
 export const FilterBar = ({
+  currentQuery,
   filterBar: { names, ports, ids, schemes },
   updateQuery,
 }: FilterBarProps) => {
@@ -113,21 +116,11 @@ export const FilterBar = ({
   ];
   return (
     <EuiSearchBar
-      box={{ incremental: true }}
+      box={{ incremental: false }}
       className="euiFlexGroup--gutterSmall"
-      // TODO: update typing
-      onChange={({ query }: { query?: { text: string } }) => {
-        try {
-          let esQuery;
-          if (query && query.text) {
-            esQuery = EuiSearchBar.Query.toESQuery(query);
-          }
-          updateQuery(esQuery);
-        } catch (e) {
-          updateQuery(undefined);
-        }
-      }}
+      onChange={updateQuery}
       filters={filters}
+      query={currentQuery}
       schema={filterBarSearchSchema}
     />
   );

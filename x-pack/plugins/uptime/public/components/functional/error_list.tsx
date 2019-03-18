@@ -22,7 +22,7 @@ import { ErrorListItem, Ping } from '../../../common/graphql/types';
 
 interface ErrorListProps {
   loading: boolean;
-  errorList: ErrorListItem[];
+  errorList?: ErrorListItem[];
 }
 
 export const ErrorList = ({ loading, errorList }: ErrorListProps) => (

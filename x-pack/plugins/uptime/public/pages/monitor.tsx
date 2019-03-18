@@ -80,37 +80,41 @@ export class MonitorPage extends React.Component<Props, MonitorPageState> {
 
     return (
       <Fragment>
-        <MonitorPageTitleQuery variables={{ monitorId }} {...this.props} {...this.state} />
-        <EuiSpacer size="s" />
-        <MonitorStatusBarQuery
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+        <MonitorPageTitleQuery
           {...this.props}
           {...this.state}
+          monitorId={monitorId}
+          variables={{ monitorId }}
+        />
+        <EuiSpacer size="s" />
+        <MonitorStatusBarQuery
+          {...this.props}
+          {...this.state}
+          monitorId={monitorId}
+          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
         />
         <EuiSpacer size="s" />
         <MonitorChartsQuery
-          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
           {...this.props}
           {...this.state}
+          monitorId={monitorId}
+          variables={{ dateRangeStart, dateRangeEnd, monitorId }}
         />
         <EuiSpacer size="s" />
-        {
-          // @ts-ignore
-          <PingListQuery
-            variables={{
-              dateRangeStart,
-              dateRangeEnd,
-              monitorId,
-              status: this.state.selectedPingListOption
-                ? this.state.selectedPingListOption.value
-                : 'down',
-            }}
-            {...this.props}
-            {...this.state}
-            onStatusSelectionChange={this.onPingListStatusSelectionChange}
-            selectedOption={this.state.selectedPingListOption}
-          />
-        }
+        <PingListQuery
+          variables={{
+            dateRangeStart,
+            dateRangeEnd,
+            monitorId,
+            status: this.state.selectedPingListOption
+              ? this.state.selectedPingListOption.value
+              : 'down',
+          }}
+          {...this.props}
+          {...this.state}
+          onStatusSelectionChange={this.onPingListStatusSelectionChange}
+          selectedOption={this.state.selectedPingListOption}
+        />
       </Fragment>
     );
   }

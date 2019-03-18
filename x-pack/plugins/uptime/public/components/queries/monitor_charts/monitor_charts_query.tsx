@@ -75,7 +75,7 @@ export class Query extends React.Component<Props, MonitorChartsState> {
     this.setState({ crosshairLocation });
 }
 
-export const MonitorChartsQuery = withUptimeGraphQL<MonitorChartsQueryResult>(
+export const MonitorChartsQuery = withUptimeGraphQL<MonitorChartsQueryResult, MonitorChartsProps>(
   Query,
   getMonitorChartsQuery
 );

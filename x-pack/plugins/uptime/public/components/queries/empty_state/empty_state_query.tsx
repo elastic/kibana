@@ -4,42 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
-import { Query } from 'react-apollo';
+import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { UptimeCommonProps } from '../../../uptime_app';
 import { EmptyState } from '../../functional/empty_state';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
 import { getDocCountQuery } from './get_doc_count';
+
+interface EmptyStateQueryResult {
+  data?: {
+    getDocCount: {
+      count: number;
+    };
+  };
+}
 
 interface EmptyStateProps {
   children: JSX.Element[];
 }
 
-type Props = EmptyStateProps & UptimeCommonProps;
+type Props = EmptyStateProps & UptimeCommonProps & UptimeGraphQLQueryProps<EmptyStateQueryResult>;
 
-export const EmptyStateQuery = ({ autorefreshInterval, autorefreshIsPaused, children }: Props) => (
-  <Query
-    query={getDocCountQuery}
-    pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-  >
-    {({ loading, error, data }) => {
-      const count = get(data, 'getDocCount.count', 0);
-      return (
-        <EmptyState
-          children={children}
-          count={count}
-          error={
-            error
-              ? i18n.translate('xpack.uptime.emptyState.errorMessage', {
-                  values: { message: error.message },
-                  defaultMessage: 'Error {message}',
-                })
-              : undefined
-          }
-          loading={loading}
-        />
-      );
-    }}
-  </Query>
+export const makeEmptyStateQuery = ({ children, data, errors, loading }: Props) => {
+  const count = get(data, 'getDocCount.count', 0);
+  return (
+    <EmptyState
+      children={children}
+      count={count}
+      error={formatUptimeGraphQLErrorList(errors || [])}
+      loading={loading}
+    />
+  );
+};
+
+export const EmptyStateQuery = withUptimeGraphQL<EmptyStateQueryResult, EmptyStateProps>(
+  makeEmptyStateQuery,
+  getDocCountQuery
 );

@@ -33,16 +33,15 @@ interface State<T> {
  * which eliminates the need for a lot of boilerplate code in the other components.
  *
  * @type T - the expected result's type
+ * @type P - any props the wrapped component will require
  * @param WrappedComponent - the consuming component
  * @param query - the graphQL query
  */
-export function withUptimeGraphQL<T>(WrappedComponent: any, query: any) {
+export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) {
+  type Props = UptimeGraphQLProps & WithApolloClient<T> & P;
   return withApollo(
-    class UptimeGraphQLQuery extends React.Component<
-      UptimeGraphQLProps & WithApolloClient<T>,
-      State<T>
-    > {
-      constructor(props: UptimeGraphQLProps & WithApolloClient<T>) {
+    class UptimeGraphQLQuery extends React.Component<Props, State<T>> {
+      constructor(props: Props) {
         super(props);
         this.state = {
           loading: true,
