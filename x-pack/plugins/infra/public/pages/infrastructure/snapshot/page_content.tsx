@@ -6,17 +6,17 @@
 
 import React from 'react';
 
-import { NodesOverview } from '../../components/nodes_overview';
-import { PageContent } from '../../components/page';
+import { NodesOverview } from '../../../components/nodes_overview';
+import { PageContent } from '../../../components/page';
 
-import { WithWaffleFilter } from '../../containers/waffle/with_waffle_filters';
-import { WithWaffleNodes } from '../../containers/waffle/with_waffle_nodes';
-import { WithWaffleOptions } from '../../containers/waffle/with_waffle_options';
-import { WithWaffleTime } from '../../containers/waffle/with_waffle_time';
-import { WithOptions } from '../../containers/with_options';
-import { WithSource } from '../../containers/with_source';
+import { WithWaffleFilter } from '../../../containers/waffle/with_waffle_filters';
+import { WithWaffleNodes } from '../../../containers/waffle/with_waffle_nodes';
+import { WithWaffleOptions } from '../../../containers/waffle/with_waffle_options';
+import { WithWaffleTime } from '../../../containers/waffle/with_waffle_time';
+import { WithOptions } from '../../../containers/with_options';
+import { WithSource } from '../../../containers/with_source';
 
-export const HomePageContent: React.SFC = () => (
+export const SnapshotPageContent: React.SFC = () => (
   <PageContent>
     <WithSource>
       {({ configuration, derivedIndexPattern, sourceId }) => (
