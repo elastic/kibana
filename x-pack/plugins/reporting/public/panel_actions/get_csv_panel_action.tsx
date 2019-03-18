@@ -6,7 +6,7 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
-import { SearchEmbeddable } from 'src/legacy/core_plugins/kibana/public/discover/embeddable/search_embeddable';
+import { SearchEmbeddable } from 'plugins/kibana/discover/embeddable/search_embeddable';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
@@ -68,6 +68,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
 
     const id = `search:${embeddable.savedSearch.id}`;
     const filename = embeddable.savedSearch.title;
+    const timezone = embeddable.$rootScope.chrome.getUiSettingsClient().get('dateFormat:tz');
     const fromTime = dateMath.parse(from);
     const toTime = dateMath.parse(to);
 
@@ -81,7 +82,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       timerange: {
         min: fromTime.valueOf(),
         max: toTime.valueOf(),
-        timezone: 'PST',
+        timezone,
       },
       state,
     });
