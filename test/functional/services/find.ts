@@ -339,7 +339,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
       return await retry.tryForTime(timeout, async () => {
-        const elem = element instanceof WebElementWrapper ? element._webElement : element;
+        const elem = element instanceof WebElementWrapper ? (element as any)._webElement : element;
         const allButtons = wrapAll(await elem.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(
           allButtons.map(async el => {
