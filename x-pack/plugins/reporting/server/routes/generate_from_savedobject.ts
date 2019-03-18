@@ -81,7 +81,7 @@ export function registerGenerateCsvFromSavedObject(
           timezone: Joi.string().default('UTC'),
           min: Joi.date().required(),
           max: Joi.date().required(),
-        }).required(),
+        }).optional(),
       }),
     },
   };

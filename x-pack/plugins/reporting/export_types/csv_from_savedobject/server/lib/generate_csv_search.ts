@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
+import { buildEsQuery } from '@kbn/es-query';
 import { Request } from 'hapi';
 import moment from 'moment';
 import { KbnServer, Logger } from '../../../../types';
@@ -11,8 +13,15 @@ import { KbnServer, Logger } from '../../../../types';
 import { fieldFormatMapFactory } from '../../../csv/server/lib/field_format_map';
 // @ts-ignore
 import { createGenerateCsv } from '../../../csv/server/lib/generate_csv';
-import { SavedSearchObjectAttributes, SearchPanel, SearchRequest } from '../../types';
-import { getIndexPatternById } from './get_index_pattern_by_id';
+import {
+  IndexPatternSavedObject,
+  SavedSearchObjectAttributes,
+  SearchPanel,
+  SearchRequest,
+  SearchSource,
+  TimeRangeParams,
+} from '../../types';
+import { getDataSource } from './get_data_source';
 
 interface SavedSearchGeneratorResult {
   content: string;
@@ -39,11 +48,60 @@ interface GenerateCsvParams {
   settings: {
     separator: string;
     quoteValues: boolean;
-    timezone: string;
+    timezone: string | null;
     maxSizeBytes: number;
     scroll: { duration: string; size: number };
   };
 }
+
+const getEsQueryConfig = async (config: any) => {
+  const configs = await Promise.all([
+    config.get('query:allowLeadingWildcards'),
+    config.get('query:queryString:options'),
+    config.get('courier:ignoreFilterIfFieldNotInIndex'),
+  ]);
+  const [allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex] = configs;
+  return { allowLeadingWildcards, queryStringOptions, ignoreFilterIfFieldNotInIndex };
+};
+
+const getUiSettings = async (config: any) => {
+  const configs = await Promise.all([config.get('csv:separator'), config.get('csv:quoteValues')]);
+  const [separator, quoteValues] = configs;
+  return { separator, quoteValues };
+};
+
+const getTimebasedParts = (
+  indexPatternSavedObject: IndexPatternSavedObject,
+  timerange: TimeRangeParams,
+  savedSearchObjectAttr: SavedSearchObjectAttributes,
+  searchSourceFilter: any[]
+) => {
+  let includes: string[];
+  let timeFilter: any | null;
+  let timezone: string | null;
+
+  if (indexPatternSavedObject.timeFieldName) {
+    includes = [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns];
+    timeFilter = {
+      range: {
+        [indexPatternSavedObject.timeFieldName]: {
+          format: 'epoch_millis',
+          gte: moment(timerange.min).valueOf(),
+          lte: moment(timerange.max).valueOf(),
+        },
+      },
+    };
+    timezone = timerange.timezone;
+  } else {
+    includes = savedSearchObjectAttr.columns;
+    timeFilter = null;
+    timezone = null;
+  }
+
+  const combinedFilter = timeFilter ? [timeFilter].concat(searchSourceFilter) : searchSourceFilter;
+
+  return { combinedFilter, includes, timezone };
+};
 
 export async function generateCsvSearch(
   req: Request,
@@ -52,82 +110,67 @@ export async function generateCsvSearch(
   searchPanel: SearchPanel
 ): Promise<CsvResultFromSearch> {
   const { savedObjects, uiSettingsServiceFactory, fieldFormatServiceFactory } = server;
-
   const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(req);
-  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
   const { indexPatternSavedObjectId, timerange } = searchPanel;
-
-  const indexPatternSavedObject = await getIndexPatternById(
+  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const { indexPatternSavedObject } = await getDataSource(
     savedObjectsClient,
     indexPatternSavedObjectId
   );
+  const uiConfig = uiSettingsServiceFactory({ savedObjectsClient });
 
-  const [formatsMap, uiSettings] = await Promise.all([
-    (async () => {
-      const fieldFormats = await fieldFormatServiceFactory(uiConfig);
-      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
-    })(),
-    (async () => {
-      const [separator, quoteValues] = await Promise.all([
-        uiConfig.get('csv:separator'),
-        uiConfig.get('csv:quoteValues'),
-      ]);
+  const kibanaSavedObjectMeta = savedSearchObjectAttr.kibanaSavedObjectMeta;
+  const { searchSource } = kibanaSavedObjectMeta as { searchSource: SearchSource };
 
-      return {
-        quoteValues: !!quoteValues,
-        separator,
-      };
-    })(),
-  ]);
-
-  const savedSearchObjectAttr = searchPanel.attributes as SavedSearchObjectAttributes;
+  const { filter: searchSourceFilter, query: searchSourceQuery } = searchSource;
+  const { combinedFilter, includes, timezone } = getTimebasedParts(
+    indexPatternSavedObject,
+    timerange,
+    savedSearchObjectAttr,
+    searchSourceFilter
+  );
+  const esQueryConfig = await getEsQueryConfig(uiConfig);
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
-  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
-  const config = server.config();
+
   const searchRequest: SearchRequest = {
     index: indexPatternSavedObject.title,
     body: {
-      _source: {
-        includes: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
-      },
+      _source: { includes },
       docvalue_fields: [],
-      query: {
-        bool: {
-          filter: [],
-          must_not: [],
-          should: [],
-          must: [
-            { match_all: {} },
-            {
-              range: {
-                [indexPatternSavedObject.timeFieldName]: {
-                  format: 'epoch_millis',
-                  gte: moment(timerange.min).valueOf(),
-                  lte: moment(timerange.max).valueOf(),
-                },
-              },
-            },
-          ],
-        },
-      },
+      query: buildEsQuery(
+        indexPatternSavedObject,
+        searchSourceQuery,
+        combinedFilter,
+        esQueryConfig
+      ),
       script_fields: {},
       sort: [{ [sortField]: { order: sortOrder } }],
     },
   };
+
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+  const callCluster = (...params: any[]) => callWithRequest(req, ...params);
+  const config = server.config();
+  const [formatsMap, uiSettings] = await Promise.all([
+    fieldFormatServiceFactory(uiConfig).then((fieldFormats: any) =>
+      fieldFormatMapFactory(indexPatternSavedObject, fieldFormats)
+    ),
+    getUiSettings(uiConfig),
+  ]);
+
   const generateCsvParams: GenerateCsvParams = {
     searchRequest,
     callEndpoint: callCluster,
-    fields: [indexPatternSavedObject.timeFieldName, ...savedSearchObjectAttr.columns],
+    fields: includes,
     formatsMap,
     metaFields: [],
     conflictedTypesFields: [],
     cancellationToken: [],
     settings: {
       ...uiSettings,
-      timezone: timerange.timezone,
       maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
       scroll: config.get('xpack.reporting.csv.scroll'),
+      timezone,
     },
   };
 

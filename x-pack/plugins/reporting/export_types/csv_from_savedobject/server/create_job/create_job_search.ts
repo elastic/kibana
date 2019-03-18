@@ -19,22 +19,14 @@ interface SearchPanelData {
 }
 
 export async function createJobSearch(
-  savedObjectsClient: any,
   timerange: TimeRangeParams,
   attributes: SavedSearchObjectAttributes,
   references: SavedObjectReference[],
   kibanaSavedObjectMeta: SavedObjectMeta
 ): Promise<SearchPanelData> {
-  const { searchSourceJSON } = kibanaSavedObjectMeta;
-  if (!searchSourceJSON || !references) {
+  const { searchSource } = kibanaSavedObjectMeta;
+  if (!searchSource || !references) {
     throw new Error('The saved search object is missing configuration fields!');
-  }
-
-  let searchSource;
-  try {
-    searchSource = JSON.parse(searchSourceJSON);
-  } catch (err) {
-    throw new Error(`Could not get search source! ${err}`);
   }
 
   const indexPatternMeta = references.find(
