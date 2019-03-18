@@ -106,6 +106,10 @@
 // Adapted from https://github.com/vega/vega-tooltip
 
 .vgaVis__tooltip {
+
+  $vegaTooltipMaxWidth: $euiSize * 25;
+  max-width: $vegaTooltipMaxWidth + $euiSizeL;
+
   h2 {
     margin-bottom: $euiSizeS;
   }
@@ -118,12 +122,12 @@
 
   td.key {
     color: $euiColorMediumShade;
-    max-width: $euiSize * 10;
+    max-width: $vegaTooltipMaxWidth * 0.4;
     text-align: right;
     padding-right: $euiSizeXS;
   }
   td.value {
-    max-width: $euiSizeL * 10;
+    max-width: $vegaTooltipMaxWidth * 0.6;
     text-align: left;
   }
 }
