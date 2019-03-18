@@ -56,31 +56,19 @@ const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient,
   inst.stop = jest.fn();
 });
 
-// Load the service
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 
-const httpStart = {
-  addLoadingCount: jest.fn(),
-};
+const httpStart = httpServiceMock.createStartContract();
 
-const defaultDeps: any = {
-  notifications: {
-    notificationsStart: true,
-  },
+const defaultDeps = {
+  notifications: notificationServiceMock.createStartContract(),
   http: httpStart,
-  injectedMetadata: {
-    injectedMetadataStart: true,
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-    getLegacyMetadata: jest.fn().mockReturnValue({
-      uiSettings: {
-        defaults: { legacyInjectedUiSettingDefaults: true },
-        user: { legacyInjectedUiSettingUserValues: true },
-      },
-    }),
-  },
-  basePath: {
-    basePathStart: true,
-  },
+  injectedMetadata: injectedMetadataServiceMock.createStartContract(),
+  basePath: basePathServiceMock.createStartContract(),
 };
 
 afterEach(() => {

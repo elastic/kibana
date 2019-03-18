@@ -7,6 +7,12 @@
 import { connect } from 'react-redux';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import {
+  TAB_SETTINGS,
+  TAB_MAPPING,
+  TAB_STATS,
+  TAB_EDIT_SETTINGS,
+} from '../../../../constants';
+import {
   clearCacheIndices,
   closeIndices,
   deleteIndices,
@@ -69,18 +75,18 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
       dispatch(forcemergeIndices({ indexNames, maxNumSegments }));
     },
     showSettings: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Settings' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_SETTINGS }));
     },
     showMapping: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Mapping' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_MAPPING }));
     },
     showStats: () => {
-      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: 'Stats' }));
+      dispatch(openDetailPanel({ indexName: indexNames[0], panelType: TAB_STATS }));
     },
     editIndex: () => {
       const indexName = indexNames ? indexNames[0] : null;
       if (indexName) {
-        dispatch(openDetailPanel({ indexName, panelType: 'Edit settings' }));
+        dispatch(openDetailPanel({ indexName, panelType: TAB_EDIT_SETTINGS }));
       }
     },
     deleteIndices: () => {
