@@ -62,7 +62,7 @@ import './modal/modal';
 import './pagination/pagination';
 import './popover/popover';
 import './position/position';
-import './progressbar/progressbar';=
+import './progressbar/progressbar';
 import './timepicker/timepicker';
 import './tooltip/tooltip';
 import './transition/transition';
