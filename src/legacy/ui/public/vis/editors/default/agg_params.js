@@ -65,6 +65,12 @@ uiModules
           }
         };
 
+        $scope.onParamChange = (agg, paramName, value) => {
+          if(agg.params[paramName] !== value) {
+            agg.params[paramName] = value;
+          }
+        };
+
         function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
             aggTypes.byType[$scope.groupName],
@@ -182,16 +188,25 @@ uiModules
         // build HTML editor given an aggParam and index
         function getAggParamHTML(param, idx) {
         // don't show params without an editor
-          if (!param.editor) {
+          if (!param.editor && !param.editorComponent) {
             return;
           }
 
           const attrs = {
-            'agg-param': 'agg.type.params[' + idx + ']'
+            'agg-param': 'agg.type.params[' + idx + ']',
+            'agg': 'agg',
           };
 
           if (param.advanced) {
             attrs['ng-show'] = 'advancedToggled';
+          }
+
+          if (param.editorComponent) {
+            attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
+            // The form should interact with reactified components as well.
+            // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
+            // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.
+            attrs['ng-model'] = `_internalNgModelState${$scope.agg.id}${param.name}`;
           }
 
           return $('<vis-agg-param-editor>')

@@ -17,5 +17,23 @@
  * under the License.
  */
 
-export { AggParam } from './agg_param';
-export { AggType } from './agg_type';
+import React from 'react';
+
+import { AggParam } from '../../../agg_types';
+import { AggConfig } from '../../agg_config';
+import { AggParamEditorProps } from './agg_param_editor_props';
+
+interface AggParamReactWrapperProps<T> {
+  agg: AggConfig;
+  aggParam: AggParam;
+  paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
+  value: T;
+  onChange(value: T): void;
+}
+
+function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
+  const { agg, aggParam, paramEditor: ParamEditor, onChange, value } = props;
+  return <ParamEditor value={value} setValue={onChange} aggParam={aggParam} agg={agg} />;
+}
+
+export { AggParamReactWrapper };
