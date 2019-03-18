@@ -13,7 +13,6 @@ export const UA_POLICY_DELETE = 'policy_delete';
 export const UA_POLICY_ATTACH_INDEX = 'policy_attach_index';
 export const UA_POLICY_ATTACH_INDEX_TEMPLATE = 'policy_attach_index_template';
 export const UA_POLICY_DETACH_INDEX = 'policy_detach_index';
-export const UA_POLICY_EDIT_CLICK = 'policy_edit_click';
 export const UA_CONFIG_COLD_PHASE = 'config_cold_phase';
 export const UA_CONFIG_WARM_PHASE = 'config_warm_phase';
 export const UA_CONFIG_SET_PRIORITY = 'config_set_priority';
@@ -29,7 +28,6 @@ export const USER_ACTIONS = [
   UA_POLICY_ATTACH_INDEX,
   UA_POLICY_ATTACH_INDEX_TEMPLATE,
   UA_POLICY_DETACH_INDEX,
-  UA_POLICY_EDIT_CLICK,
   UA_CONFIG_COLD_PHASE,
   UA_CONFIG_WARM_PHASE,
   UA_CONFIG_SET_PRIORITY,
