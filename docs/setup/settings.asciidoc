@@ -121,8 +121,10 @@ queries.
 
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
 
-`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to store saved searches, visualizations and
-dashboards. Kibana creates a new index if the index doesn’t already exist.
+`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
+store saved searches, visualizations and dashboards. Kibana creates a new index
+if the index doesn’t already exist. If you configure a custom index, the name must 
+be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana stores log output.
 
