@@ -29,6 +29,7 @@ import {
   EuiPageContent,
 } from '@elastic/eui';
 
+let previousPipelineHash = undefined;
 let detailVertexId = undefined;
 
 function getPageData($injector) {
@@ -41,6 +42,14 @@ function getPageData($injector) {
   const { ccs, cluster_uuid: clusterUuid } = globalState;
   const pipelineId = $route.current.params.id;
   const pipelineHash = $route.current.params.hash || '';
+
+  // Pipeline version was changed, so clear out detailVertexId since that vertex won't
+  // exist in the updated pipeline version
+  if (pipelineHash !== previousPipelineHash) {
+    previousPipelineHash = pipelineHash;
+    detailVertexId = undefined;
+  }
+
   const url = pipelineHash
     ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
     : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
