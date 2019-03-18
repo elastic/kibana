@@ -24,11 +24,16 @@ import { AggParamEditorProps } from '../../vis/editors/default';
 
 function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
   return (
-    <EuiFormRow label={aggParam.displayName || aggParam.name} className="form-group">
+    <EuiFormRow
+      label={aggParam.displayName || aggParam.name}
+      className="form-group"
+      fullWidth={true}
+    >
       <EuiFieldText
         value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={ev => setValue(ev.target.value)}
+        fullWidth={true}
       />
     </EuiFormRow>
   );
