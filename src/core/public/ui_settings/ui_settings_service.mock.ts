@@ -16,36 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BehaviorSubject } from 'rxjs';
-import { ClusterClient } from './cluster_client';
-import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { UiSettingsService, UiSettingsStart } from './ui_settings_service';
 
 const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
-
-    createClient: jest.fn(),
-    adminClient$: new BehaviorSubject({} as ClusterClient),
-    dataClient$: new BehaviorSubject({} as ClusterClient),
+  const startContract: jest.Mocked<PublicMethodsOf<UiSettingsStart>> = {
+    getAll: jest.fn(),
+    get: jest.fn(),
+    get$: jest.fn(),
+    set: jest.fn(),
+    remove: jest.fn(),
+    isDeclared: jest.fn(),
+    isDefault: jest.fn(),
+    isCustom: jest.fn(),
+    isOverridden: jest.fn(),
+    overrideLocalDefault: jest.fn(),
+    getUpdate$: jest.fn(),
+    getSaved$: jest.fn(),
+    stop: jest.fn(),
   };
-  return startContract;
+  // we have to suppress type errors until decide how to mock es6 class
+  return (startContract as unknown) as UiSettingsStart;
 };
 
-type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
+type UiSettingsServiceContract = PublicMethodsOf<UiSettingsService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ElasticsearchServiceContract> = {
+  const mocked: jest.Mocked<UiSettingsServiceContract> = {
     start: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
-  mocked.stop.mockResolvedValue();
+
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
-export const elasticsearchServiceMock = {
+export const uiSettingsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,
 };

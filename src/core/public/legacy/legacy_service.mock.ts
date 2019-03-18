@@ -16,30 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server, ServerOptions } from 'hapi';
-import { HttpService } from './http_service';
+import { LegacyPlatformService } from './legacy_service';
 
-const createStartContractMock = () => {
-  const startContract = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
-    options: {} as ServerOptions,
-  };
-  return startContract;
-};
-
-type HttpSericeContract = PublicMethodsOf<HttpService>;
-const createHttpServiceMock = () => {
-  const mocked: jest.Mocked<HttpSericeContract> = {
+type LegacyPlatformServiceContract = PublicMethodsOf<LegacyPlatformService>;
+const createMock = () => {
+  const mocked: jest.Mocked<LegacyPlatformServiceContract> = {
     start: jest.fn(),
     stop: jest.fn(),
-    registerRouter: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
   return mocked;
 };
 
-export const httpServiceMock = {
-  create: createHttpServiceMock,
-  createStartContract: createStartContractMock,
+export const legacyPlatformServiceMock = {
+  create: createMock,
 };
