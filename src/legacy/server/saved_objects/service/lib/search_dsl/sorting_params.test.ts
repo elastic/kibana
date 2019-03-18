@@ -64,12 +64,6 @@ const MAPPINGS = {
 };
 
 describe('searchDsl/getSortParams', () => {
-  describe('no sortField, type, or order', () => {
-    it('returns no params', () => {
-      expect(getSortingParams(MAPPINGS, undefined as any)).toEqual({});
-    });
-  });
-
   describe('type, no sortField', () => {
     it('returns no params', () => {
       expect(getSortingParams(MAPPINGS, 'pending')).toEqual({});

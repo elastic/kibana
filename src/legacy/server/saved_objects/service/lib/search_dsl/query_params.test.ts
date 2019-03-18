@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { SCHEMA } from '../../../schema/schema.mock';
 import { getQueryParams } from './query_params';
 
 const MAPPINGS = {
@@ -58,11 +59,6 @@ const MAPPINGS = {
       },
     },
   },
-};
-
-const SCHEMA = {
-  isHiddenType: (type: string) => false,
-  isNamespaceAgnostic: (type: string) => type === 'global',
 };
 
 // create a type clause to be used within the "should", if a namespace is specified
