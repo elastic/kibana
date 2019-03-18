@@ -10,7 +10,7 @@ import { getBaseBreadcrumb, getWorkpadBreadcrumb, setBreadcrumb } from '../../li
 import { getDefaultWorkpad } from '../../state/defaults';
 import { setWorkpad } from '../../state/actions/workpad';
 import { setAssets, resetAssets } from '../../state/actions/assets';
-import { gotoPage } from '../../state/actions/pages';
+import { setPage } from '../../state/actions/pages';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { WorkpadApp } from './workpad_app';
 
@@ -69,7 +69,7 @@ export const routes = [
           // set the active page using the number provided in the url
           const pageIndex = pageNumber - 1;
           if (pageIndex !== workpad.page) {
-            dispatch(gotoPage(pageIndex));
+            dispatch(setPage(pageIndex));
           }
 
           // update the application's breadcrumb

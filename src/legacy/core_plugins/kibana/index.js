@@ -143,11 +143,13 @@ export default function (kibana) {
           uiCapabilities: {
             discover: {
               show: true,
-              save: true
+              createShortUrl: true,
+              save: true,
             },
             visualize: {
               show: true,
-              save: true
+              createShortUrl: true,
+              save: true,
             },
             dashboard: {
               createNew: true,
