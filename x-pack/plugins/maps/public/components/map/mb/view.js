@@ -141,7 +141,23 @@ export class MBMapContainer extends React.Component {
 
   _getFeaturesUnderPointer(mbLngLatPoint) {
     const mbLayerIds = this._getMbLayerIdsForTooltips();
-    return this._mbMap.queryRenderedFeatures(mbLngLatPoint, { layers: mbLayerIds });
+    const PADDING = 2;//in pixels
+    const mbBbox = [
+      {
+        x: mbLngLatPoint.x - PADDING,
+        y: mbLngLatPoint.y - PADDING
+      },
+      {
+        x: mbLngLatPoint.x + PADDING,
+        y: mbLngLatPoint.y + PADDING
+      }
+
+    ];
+
+    if (!this._mbMap) {
+      return [];
+    }
+    return this._mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
 
   componentDidUpdate() {
