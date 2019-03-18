@@ -95,7 +95,7 @@ export function esNodeRoute(server) {
             stateUuid, // for debugging/troubleshooting
           };
 
-          logs = await getLogs(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end });
+          logs = await getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end });
         }
 
         return {

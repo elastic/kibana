@@ -17,6 +17,7 @@ import {
 import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Reason } from './reason';
 
 const columns = [
   {
@@ -77,9 +78,64 @@ function getLogsUiLink(clusterUuid, nodeId) {
 }
 
 export class Logs extends PureComponent {
-  render() {
-    const { clusterUuid, nodeId, logs }  = this.props;
+  renderLogs() {
+    const { logs: { enabled, logs } } = this.props;
+    if (!enabled) {
+      return null;
+    }
 
+    return (
+      <EuiBasicTable
+        items={logs || []}
+        columns={columns}
+      />
+    );
+  }
+
+  renderNoLogs() {
+    const { logs: { enabled, reason } } = this.props;
+    if (enabled) {
+      return null;
+    }
+
+    return <Reason reason={reason}/>;
+  }
+
+  renderCallout() {
+    const { logs: { enabled }, nodeId, clusterUuid } = this.props;
+
+    if (!enabled) {
+      return null;
+    }
+
+    return (
+      <EuiCallOut
+        size="m"
+        title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
+          defaultMessage: 'Want to see more logs?'
+        })}
+        iconType="loggingApp"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.monitoring.logs.listing.linkText"
+            defaultMessage="Visit the {link} to dive deeper."
+            values={{
+              link: (
+                <EuiLink href={getLogsUiLink(clusterUuid, nodeId)}>
+                  {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
+                    defaultMessage: 'Logs UI'
+                  })}
+                </EuiLink>
+              )
+            }}
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
+
+  render() {
     return (
       <div>
         <EuiTitle>
@@ -97,34 +153,10 @@ export class Logs extends PureComponent {
           </p>
         </EuiText>
         <EuiSpacer size="m"/>
-        <EuiBasicTable
-          items={logs || []}
-          columns={columns}
-        />
+        {this.renderLogs()}
+        {this.renderNoLogs()}
         <EuiSpacer size="m"/>
-        <EuiCallOut
-          size="m"
-          title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
-            defaultMessage: 'Want to see more logs?'
-          })}
-          iconType="loggingApp"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.monitoring.logs.listing.linkText"
-              defaultMessage="Visit the {link} to dive deeper."
-              values={{
-                link: (
-                  <EuiLink href={getLogsUiLink(clusterUuid, nodeId)}>
-                    {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
-                      defaultMessage: 'Logs UI'
-                    })}
-                  </EuiLink>
-                )
-              }}
-            />
-          </p>
-        </EuiCallOut>
+        {this.renderCallout()}
       </div>
     );
   }

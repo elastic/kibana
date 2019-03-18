@@ -25,6 +25,7 @@ import {
 import { LicenseText } from './license_text';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { Reason } from '../../logs/reason';
 
 const calculateShards = shards => {
   const total = get(shards, 'total', 0);
@@ -57,6 +58,43 @@ function getBadgeColorFromLogLevel(level) {
   }
 }
 
+function renderLogs(props) {
+  if (!props.logs.enabled) {
+    return (
+      <EuiDescriptionList>
+        <Reason reason={props.logs.reason}/>
+      </EuiDescriptionList>
+    );
+  }
+
+  return (
+    <EuiDescriptionList type="column">
+      {props.logs.types.map((log, index) => (
+        <Fragment key={index}>
+          <EuiDescriptionListTitle>
+            <FormattedMessage
+              id={`xpack.monitoring.cluster.overview.logsPanel.${log.type}LogLabel`}
+              defaultMessage={capitalize(log.type)}
+            />
+          </EuiDescriptionListTitle>
+          <EuiDescriptionListDescription>
+            {renderLog(log)}
+          </EuiDescriptionListDescription>
+        </Fragment>
+      ))}
+      {props.logs.types.length === 0
+        ? (
+          <FormattedMessage
+            id={`xpack.monitoring.cluster.overview.logsPanel.noLogsFound`}
+            defaultMessage="No logs found."
+          />
+        )
+        : null
+      }
+    </EuiDescriptionList>
+  );
+}
+
 function renderLog(log) {
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
@@ -82,7 +120,6 @@ function renderLog(log) {
 }
 
 function ElasticsearchPanelUi(props) {
-
   const clusterStats = props.cluster_stats || {};
   const nodes = clusterStats.nodes;
   const indices = clusterStats.indices;
@@ -298,30 +335,7 @@ function ElasticsearchPanelUi(props) {
               </h3>
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
-            <EuiDescriptionList type="column">
-              {props.logs.map((log, index) => (
-                <Fragment key={index}>
-                  <EuiDescriptionListTitle>
-                    <FormattedMessage
-                      id={`xpack.monitoring.cluster.overview.logsPanel.${log.type}LogLabel`}
-                      defaultMessage={capitalize(log.type)}
-                    />
-                  </EuiDescriptionListTitle>
-                  <EuiDescriptionListDescription>
-                    {renderLog(log)}
-                  </EuiDescriptionListDescription>
-                </Fragment>
-              ))}
-              {props.logs.length === 0
-                ? (
-                  <FormattedMessage
-                    id={`xpack.monitoring.cluster.overview.logsPanel.noLogsFound`}
-                    defaultMessage="No logs found."
-                  />
-                )
-                : null
-              }
-            </EuiDescriptionList>
+            {renderLogs(props)}
           </EuiPanel>
         </EuiFlexItem>
 

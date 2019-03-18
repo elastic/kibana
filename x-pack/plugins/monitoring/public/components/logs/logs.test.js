@@ -14,67 +14,72 @@ jest.mock('ui/chrome', () => {
   };
 });
 
-const logs = [{
-  'timestamp': '2019-03-18T12:49:33.783Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:49:26.781Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:49:24.414Z',
-  'component': 'o.e.c.r.a.DiskThresholdMonitor',
-  'level': 'WARN',
-  'type': 'server',
-  'message': 'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.5gb[6.3%], shards will be relocated away from this node' // eslint-disable-line max-len
-}, {
-  'timestamp': '2019-03-18T12:49:24.414Z',
-  'component': 'o.e.c.r.a.DiskThresholdMonitor',
-  'level': 'INFO',
-  'type': 'server',
-  'message': 'rerouting shards: [high disk watermark exceeded on one or more nodes]'
-}, {
-  'timestamp': '2019-03-18T12:49:11.776Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:49:08.770Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:48:59.409Z',
-  'component': 'o.e.c.r.a.DiskThresholdMonitor',
-  'level': 'WARN',
-  'type': 'server',
-  'message': 'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.3gb[6.2%], shards will be relocated away from this node' // eslint-disable-line max-len
-}, {
-  'timestamp': '2019-03-18T12:48:53.753Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:48:53.753Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}, {
-  'timestamp': '2019-03-18T12:48:46.745Z',
-  'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
-  'level': 'WARN',
-  'type': 'deprecation',
-  'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
-}];
+const logs = {
+  enabled: true,
+  logs: [
+    {
+      'timestamp': '2019-03-18T12:49:33.783Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:49:26.781Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:49:24.414Z',
+      'component': 'o.e.c.r.a.DiskThresholdMonitor',
+      'level': 'WARN',
+      'type': 'server',
+      'message': 'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.5gb[6.3%], shards will be relocated away from this node' // eslint-disable-line max-len
+    }, {
+      'timestamp': '2019-03-18T12:49:24.414Z',
+      'component': 'o.e.c.r.a.DiskThresholdMonitor',
+      'level': 'INFO',
+      'type': 'server',
+      'message': 'rerouting shards: [high disk watermark exceeded on one or more nodes]'
+    }, {
+      'timestamp': '2019-03-18T12:49:11.776Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:49:08.770Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:48:59.409Z',
+      'component': 'o.e.c.r.a.DiskThresholdMonitor',
+      'level': 'WARN',
+      'type': 'server',
+      'message': 'high disk watermark [90%] exceeded on [-pH5RhfsRl6FDeTPwD5vEw][Elastic-MBP.local][/Users/chris/Development/repos/kibana/.es/8.0.0/data/nodes/0] free: 29.3gb[6.2%], shards will be relocated away from this node' // eslint-disable-line max-len
+    }, {
+      'timestamp': '2019-03-18T12:48:53.753Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:48:53.753Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }, {
+      'timestamp': '2019-03-18T12:48:46.745Z',
+      'component': 'o.e.d.x.m.r.a.RestMonitoringBulkAction',
+      'level': 'WARN',
+      'type': 'deprecation',
+      'message': '[POST /_xpack/monitoring/_bulk] is deprecated! Use [POST /_monitoring/bulk] instead.'
+    }
+  ]
+};
 
 describe('Logs', () => {
   it('should render normally', () => {
@@ -90,5 +95,10 @@ describe('Logs', () => {
   it('should render a link to filter by cluster uuid and node uuid', () => {
     const component = shallow(<Logs logs={logs} clusterUuid="12345" nodeId="6789"/>);
     expect(component.find('EuiCallOut')).toMatchSnapshot();
+  });
+
+  it('should render a reason if the logs are disabled', () => {
+    const component = shallow(<Logs logs={{ enabled: false, reason: {} }}/>);
+    expect(component).toMatchSnapshot();
   });
 });

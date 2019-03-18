@@ -7,10 +7,18 @@
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
+import { detectReason } from './detect_reason';
 
-function handleResponse(response) {
-  return get(response, 'aggregations.types.buckets', [])
-    .map(typeBucket => {
+async function handleResponse(response, req, filebeatIndexPattern, { start, end }) {
+  const result = {
+    enabled: false,
+    types: []
+  };
+
+  const typeBuckets = get(response, 'aggregations.types.buckets', []);
+  if (typeBuckets.length) {
+    result.enabled = true;
+    result.types = typeBuckets.map(typeBucket => {
       return {
         type: typeBucket.key.split('.')[1],
         levels: typeBucket.levels.buckets.map(levelBucket => {
@@ -21,6 +29,12 @@ function handleResponse(response) {
         })
       };
     });
+  }
+  else {
+    result.reason = await detectReason(req, filebeatIndexPattern, { start, end });
+  }
+
+  return result;
 }
 
 export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
@@ -28,7 +42,7 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
 
   const metric = { timestampField: 'event.created' };
   const filter = [
-    { term: { 'service.type': 'elasticsearch' } },
+    { term: { 'service.type': 'elasticsearch2' } },
     createTimeFilter({ start, end, metric })
   ];
   if (clusterUuid) {
@@ -72,5 +86,5 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return handleResponse(response);
+  return await handleResponse(response, req, filebeatIndexPattern, { start, end });
 }

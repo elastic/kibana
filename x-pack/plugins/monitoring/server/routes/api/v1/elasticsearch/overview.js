@@ -49,7 +49,7 @@ export function esOverviewRoute(server) {
           getClusterStats(req, esIndexPattern, clusterUuid),
           getMetrics(req, esIndexPattern, metricSet),
           getLastRecovery(req, esIndexPattern),
-          getLogs(req, filebeatIndexPattern, { clusterUuid, start, end })
+          getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end })
         ]);
         const shardStats = await getShardStats(req, esIndexPattern, clusterStats);
 
