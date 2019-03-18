@@ -378,6 +378,12 @@ export class CodeQueryBar extends Component<Props, State> {
     this.componentIsUnmounting = true;
   }
 
+  public focusInput() {
+    if (this.inputRef) {
+      this.inputRef.focus();
+    }
+  }
+
   public render() {
     const inputRef = (node: HTMLInputElement | null) => {
       if (node) {
@@ -475,5 +481,7 @@ const mapDispatchToProps = {
 
 export const QueryBar = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  null,
+  { withRef: true }
 )(CodeQueryBar);

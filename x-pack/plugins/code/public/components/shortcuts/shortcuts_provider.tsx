@@ -123,10 +123,17 @@ class ShortcutsComponent extends React.Component<Props> {
       }
       return key === s.key;
     };
+
+    let isTriggered = false;
     for (const shortcut of this.props.shortcuts) {
       if (isPressed(shortcut) && shortcut.onPress) {
         shortcut.onPress(this.props.dispatch);
+        isTriggered = true;
       }
+    }
+    if (isTriggered) {
+      // Discard this input since it's been triggered already.
+      event.preventDefault();
     }
   };
 
