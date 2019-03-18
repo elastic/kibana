@@ -6,8 +6,8 @@
 
 import Boom from 'boom';
 import { Server } from 'hapi';
+import { AgentName } from '../../typings/es_schemas/fields/AgentName';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
-import { AgentName } from '../lib/apm_telemetry/agent_name';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getService } from '../lib/services/get_service';

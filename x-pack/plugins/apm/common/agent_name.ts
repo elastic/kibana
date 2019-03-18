@@ -11,35 +11,24 @@
  * definitions in mappings.json (for telemetry), the AgentName type, and the
  * agentNames Set.
  */
+import { AgentName } from '../typings/es_schemas/fields/AgentName';
 
-export type AgentName =
-  | 'python'
-  | 'java'
-  | 'nodejs'
-  | 'js-base'
-  | 'rum-js'
-  | 'ruby'
-  | 'go';
-
-export const agentNames: Set<AgentName> = new Set<AgentName>([
-  'python',
-  'java',
-  'nodejs',
-  'js-base',
-  'rum-js',
-  'ruby',
-  'go'
-]);
-
-export const rumAgentNames: Set<AgentName> = new Set<AgentName>([
-  'js-base',
-  'rum-js'
-]);
+const agentNames: { [key: string]: AgentName } = {
+  PYTHON: 'python',
+  JAVA: 'java',
+  NODEJS: 'nodejs',
+  JS_BASE: 'js-base',
+  RUM_JS: 'rum-js',
+  RUBY: 'ruby',
+  GO: 'go'
+};
 
 export function isAgentName(agentName: string): boolean {
-  return agentNames.has(agentName as AgentName);
+  return Object.values(agentNames).includes(agentName as AgentName);
 }
 
 export function isRumAgentName(agentName: string): boolean {
-  return rumAgentNames.has(agentName as AgentName);
+  return [agentNames.JS_BASE, agentNames.RUM_JS].includes(
+    agentName as AgentName
+  );
 }

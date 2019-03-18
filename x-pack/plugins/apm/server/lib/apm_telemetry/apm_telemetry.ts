@@ -7,12 +7,12 @@
 import { Server } from 'hapi';
 import { countBy } from 'lodash';
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
-import { AgentName, isAgentName } from './agent_name';
+import { isAgentName } from '../../../common/agent_name';
 
 export const APM_TELEMETRY_DOC_ID = 'apm-telemetry';
 
 export function createApmTelementry(
-  agentNames: AgentName[] = []
+  agentNames: string[] = []
 ): SavedObjectAttributes {
   const validAgentNames = agentNames.filter(isAgentName);
   return {
