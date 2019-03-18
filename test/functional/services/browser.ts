@@ -32,7 +32,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Keyboard events
      */
-    public keys = Key;
+    public readonly keys = Key;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
