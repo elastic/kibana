@@ -13,12 +13,24 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { LayerTOC } from './layer_toc';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export function LayerControl(props) {
+export function LayerControl({ showAddLayerWizard }) {
   const addLayer = (
-    <EuiButtonEmpty size="xs" flush="right" data-test-subj="addLayerButton" onClick={props.showAddLayerWizard}>
-      Add layer
-    </EuiButtonEmpty>);
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        size="xs"
+        flush="right"
+        onClick={showAddLayerWizard}
+        data-test-subj="addLayerButton"
+      >
+        <FormattedMessage
+          id="xpack.maps.layerControl.addLayerButtonLabel"
+          defaultMessage="Add layer"
+        />
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  );
 
   return (
     <EuiPanel className="mapWidgetControl mapWidgetControl-hasShadow" paddingSize="none" grow={false}>
@@ -31,12 +43,15 @@ export function LayerControl(props) {
         >
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h2>Layers</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.maps.layerControl.layersTitle"
+                  defaultMessage="Layers"
+                />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {addLayer}
-          </EuiFlexItem>
+          {addLayer}
         </EuiFlexGroup>
       </EuiFlexItem>
 
