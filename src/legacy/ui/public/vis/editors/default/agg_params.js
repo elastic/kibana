@@ -209,13 +209,17 @@ uiModules
             // The form should interact with reactified components as well.
             // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
             // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.
-            attrs['ng-model'] = `_internalNgModelState${$scope.agg.id}${param.name}`;
+            attrs['ng-model'] = normalizeModelName(`_internalNgModelState${$scope.agg.id}${param.name}`);
           }
 
           return $('<vis-agg-param-editor>')
             .attr(attrs)
             .append(param.editor)
             .get(0);
+        }
+
+        function normalizeModelName(modelName = '') {
+          return modelName.replace('-', '_');
         }
       }
     };
