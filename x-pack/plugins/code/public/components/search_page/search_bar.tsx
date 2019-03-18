@@ -36,6 +36,8 @@ interface Props {
 }
 
 export class SearchBar extends React.PureComponent<Props> {
+  public queryBar: any | null = null;
+
   public onSearchChanged = (query: string) => {
     // Update the url and push to history as well.
     const queries = querystring.parse(history.location.search.replace('?', ''));
@@ -73,6 +75,9 @@ export class SearchBar extends React.PureComponent<Props> {
           help={SearchScopeText[SearchScope.REPOSITORY]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.REPOSITORY);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <Shortcut
@@ -80,6 +85,9 @@ export class SearchBar extends React.PureComponent<Props> {
           help={SearchScopeText[SearchScope.SYMBOL]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.SYMBOL);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <Shortcut
@@ -87,6 +95,9 @@ export class SearchBar extends React.PureComponent<Props> {
           help={SearchScopeText[SearchScope.DEFAULT]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.DEFAULT);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <QueryBar
@@ -96,6 +107,12 @@ export class SearchBar extends React.PureComponent<Props> {
           appName="code"
           suggestionProviders={suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          ref={instance => {
+            if (instance) {
+              // @ts-ignore
+              this.queryBar = instance.getWrappedInstance();
+            }
+          }}
         />
       </SearchBarContainer>
     );

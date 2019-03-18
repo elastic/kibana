@@ -32,6 +32,8 @@ export class CodeSearchBar extends React.Component<Props> {
     searchScope: SearchScope.DEFAULT,
   };
 
+  public queryBar: any | null = null;
+
   public suggestionProviders = [
     new SymbolSuggestionsProvider(),
     new FileSuggestionsProvider(),
@@ -66,6 +68,9 @@ export class CodeSearchBar extends React.Component<Props> {
           help={SearchScopeText[SearchScope.REPOSITORY]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.REPOSITORY);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <Shortcut
@@ -73,6 +78,9 @@ export class CodeSearchBar extends React.Component<Props> {
           help={SearchScopeText[SearchScope.SYMBOL]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.SYMBOL);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <Shortcut
@@ -80,6 +88,9 @@ export class CodeSearchBar extends React.Component<Props> {
           help={SearchScopeText[SearchScope.DEFAULT]}
           onPress={() => {
             this.props.onSearchScopeChanged(SearchScope.DEFAULT);
+            if (this.queryBar) {
+              this.queryBar.focusInput();
+            }
           }}
         />
         <QueryBar
@@ -90,6 +101,12 @@ export class CodeSearchBar extends React.Component<Props> {
           disableAutoFocus={true}
           suggestionProviders={this.suggestionProviders}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
+          ref={instance => {
+            if (instance) {
+              // @ts-ignore
+              this.queryBar = instance.getWrappedInstance();
+            }
+          }}
         />
       </SearchBarContainer>
     );

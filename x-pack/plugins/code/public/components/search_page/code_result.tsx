@@ -30,7 +30,7 @@ export class CodeResult extends React.PureComponent<Props> {
       };
       return (
         <div key={`resultitem${key}`} data-test-subj="codeSearchResultList">
-          <p style={{ marginBottom: '.5rem' }}>
+          <div style={{ marginBottom: '.5rem' }}>
             <Link to={repoLinkUrl}>
               <EuiFlexGroup
                 direction="row"
@@ -50,7 +50,7 @@ export class CodeResult extends React.PureComponent<Props> {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </Link>
-          </p>
+          </div>
           <EuiFlexGroup
             alignItems="center"
             justifyContent="flexStart"
