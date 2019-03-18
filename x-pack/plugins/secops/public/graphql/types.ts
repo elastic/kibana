@@ -745,9 +745,9 @@ export interface PaginationInput {
 }
 
 export interface SortField {
-  sortFieldId?: string | null;
+  sortFieldId: string;
 
-  direction?: Direction | null;
+  direction: Direction;
 }
 
 export interface NetworkDnsSortField {

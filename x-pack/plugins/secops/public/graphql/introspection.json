@@ -1567,13 +1567,21 @@
           {
             "name": "sortFieldId",
             "description": "",
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+            },
             "defaultValue": null
           },
           {
             "name": "direction",
             "description": "",
-            "type": { "kind": "ENUM", "name": "Direction", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "Direction", "ofType": null }
+            },
             "defaultValue": null
           }
         ],

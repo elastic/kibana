@@ -36,8 +36,8 @@ export const sharedSchema = gql`
   }
 
   input SortField {
-    sortFieldId: String
-    direction: Direction
+    sortFieldId: String!
+    direction: Direction!
   }
 
   type PageInfo {
