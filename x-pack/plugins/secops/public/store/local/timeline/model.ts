@@ -106,7 +106,7 @@ export const timelineDefaults: Readonly<
   show: false,
   sort: {
     columnId: '@timestamp',
-    sortDirection: Direction.descending,
+    sortDirection: Direction.desc,
   },
   width: defaultWidth,
 };

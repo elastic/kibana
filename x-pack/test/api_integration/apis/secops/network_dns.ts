@@ -36,7 +36,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               isPtrIncluded: false,
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.ascending },
+              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -66,7 +66,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               isPtrIncluded: false,
-              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.descending },
+              sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
               pagination: {
                 limit: 10,
                 cursor: null,

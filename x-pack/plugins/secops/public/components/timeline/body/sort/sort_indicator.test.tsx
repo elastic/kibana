@@ -15,12 +15,12 @@ import { getDirection, SortIndicator } from './sort_indicator';
 describe('SortIndicator', () => {
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(<SortIndicator sortDirection={Direction.descending} />);
+      const wrapper = shallow(<SortIndicator sortDirection={Direction.desc} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it renders the sort indicator', () => {
-      const wrapper = mount(<SortIndicator sortDirection={Direction.descending} />);
+      const wrapper = mount(<SortIndicator sortDirection={Direction.desc} />);
 
       expect(
         wrapper
@@ -33,11 +33,11 @@ describe('SortIndicator', () => {
 
   describe('getDirection', () => {
     test('it returns the expected symbol when the direction is ascending', () => {
-      expect(getDirection(Direction.ascending)).toEqual('sortUp');
+      expect(getDirection(Direction.asc)).toEqual('sortUp');
     });
 
     test('it returns the expected symbol when the direction is descending', () => {
-      expect(getDirection(Direction.descending)).toEqual('sortDown');
+      expect(getDirection(Direction.desc)).toEqual('sortDown');
     });
 
     test('it returns the expected symbol (undefined) when the direction is neither ascending, nor descending', () => {

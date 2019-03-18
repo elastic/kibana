@@ -69,7 +69,7 @@ class EventsComponentQuery extends QueryTemplate<
           },
           sortField: {
             sortFieldId: 'timestamp',
-            direction: Direction.descending,
+            direction: Direction.desc,
           },
           timerange: {
             interval: '12h',

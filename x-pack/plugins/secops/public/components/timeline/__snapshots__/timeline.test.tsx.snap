@@ -640,7 +640,7 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
   sort={
     Object {
       "columnId": "@timestamp",
-      "sortDirection": "descending",
+      "sortDirection": "desc",
     }
   }
 />

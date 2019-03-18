@@ -37,7 +37,7 @@ export interface SortingBasicTable {
 
 export interface Criteria {
   page: { index: number; size: number };
-  sort: { field: string; direction: 'asc' | 'desc'; allowNeutralSort?: boolean };
+  sort: SortingBasicTable;
 }
 
 interface BasicTableProps<T> {
@@ -175,7 +175,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
               ? {
                   sort: {
                     field: sorting.field,
-                    direction: sorting.direction === Direction.ascending ? 'asc' : 'desc',
+                    direction: sorting.direction,
                   },
                 }
               : null

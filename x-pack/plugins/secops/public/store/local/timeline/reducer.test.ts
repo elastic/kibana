@@ -75,7 +75,7 @@ const timelineByIdMock: TimelineById = {
     show: true,
     sort: {
       columnId: '@timestamp',
-      sortDirection: Direction.descending,
+      sortDirection: Direction.desc,
     },
     width: defaultWidth,
   },
@@ -731,7 +731,7 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: Direction.descending,
+          sortDirection: Direction.desc,
         },
         timelineById: timelineByIdMock,
       });
@@ -743,14 +743,14 @@ describe('Timeline', () => {
         id: 'foo',
         sort: {
           columnId: 'some column',
-          sortDirection: Direction.descending,
+          sortDirection: Direction.desc,
         },
         timelineById: timelineByIdMock,
       });
       expect(update).toEqual(
         set(
           'foo.sort',
-          { columnId: 'some column', sortDirection: Direction.descending },
+          { columnId: 'some column', sortDirection: Direction.desc },
           timelineByIdMock
         )
       );
@@ -821,7 +821,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -908,7 +908,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -1103,7 +1103,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -1190,7 +1190,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -1373,7 +1373,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 50,
@@ -1437,7 +1437,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,
@@ -1527,7 +1527,7 @@ describe('Timeline', () => {
           show: true,
           sort: {
             columnId: '@timestamp',
-            sortDirection: Direction.descending,
+            sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
           itemsPerPage: 25,

@@ -31,13 +31,13 @@ export const sharedSchema = gql`
   }
 
   enum Direction {
-    ascending
-    descending
+    asc
+    desc
   }
 
   input SortField {
-    sortFieldId: String
-    direction: Direction
+    sortFieldId: String!
+    direction: Direction!
   }
 
   type PageInfo {

@@ -25,7 +25,7 @@ describe('Header', () => {
   const columnHeader = defaultHeaders[0];
   const sort: Sort = {
     columnId: columnHeader.id,
-    sortDirection: Direction.descending,
+    sortDirection: Direction.desc,
   };
   const timelineId = 'fakeId';
 
@@ -169,7 +169,7 @@ describe('Header', () => {
 
       expect(mockOnColumnSorted).toBeCalledWith({
         columnId: columnHeader.id,
-        sortDirection: 'ascending', // (because the previous state was Direction.descending)
+        sortDirection: 'asc', // (because the previous state was Direction.desc)
       });
     });
   });
@@ -199,7 +199,7 @@ describe('Header', () => {
     test('it returns "none" when sort direction when the header id does NOT match the sort column id', () => {
       const nonMatching: Sort = {
         columnId: 'differentSocks',
-        sortDirection: Direction.descending,
+        sortDirection: Direction.desc,
       };
 
       expect(getSortDirection({ header: columnHeader, sort: nonMatching })).toEqual('none');
@@ -207,31 +207,28 @@ describe('Header', () => {
   });
 
   describe('getNextSortDirection', () => {
-    test('it returns "ascending" when the current direction is "descending"', () => {
-      const sortDescending: Sort = {
-        columnId: columnHeader.id,
-        sortDirection: Direction.descending,
-      };
+    test('it returns "asc" when the current direction is "desc"', () => {
+      const sortDescending: Sort = { columnId: columnHeader.id, sortDirection: Direction.desc };
 
-      expect(getNextSortDirection(sortDescending)).toEqual('ascending');
+      expect(getNextSortDirection(sortDescending)).toEqual('asc');
     });
 
-    test('it returns "descending" when the current direction is "ascending"', () => {
+    test('it returns "desc" when the current direction is "asc"', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
-        sortDirection: Direction.ascending,
+        sortDirection: Direction.asc,
       };
 
-      expect(getNextSortDirection(sortAscending)).toEqual(Direction.descending);
+      expect(getNextSortDirection(sortAscending)).toEqual(Direction.desc);
     });
 
-    test('it returns "descending" by default', () => {
+    test('it returns "desc" by default', () => {
       const sortNone: Sort = {
         columnId: columnHeader.id,
         sortDirection: 'none',
       };
 
-      expect(getNextSortDirection(sortNone)).toEqual(Direction.descending);
+      expect(getNextSortDirection(sortNone)).toEqual(Direction.desc);
     });
   });
 
@@ -239,7 +236,7 @@ describe('Header', () => {
     test('it returns the expected new sort direction when the header id matches the sort column id', () => {
       const sortMatches: Sort = {
         columnId: columnHeader.id,
-        sortDirection: Direction.descending,
+        sortDirection: Direction.desc,
       };
 
       expect(
@@ -247,7 +244,7 @@ describe('Header', () => {
           clickedHeader: columnHeader,
           currentSort: sortMatches,
         })
-      ).toEqual(Direction.ascending);
+      ).toEqual(Direction.asc);
     });
 
     test('it returns the expected new sort direction when the header id does NOT match the sort column id', () => {
@@ -261,7 +258,7 @@ describe('Header', () => {
           clickedHeader: columnHeader,
           currentSort: sortDoesNotMatch,
         })
-      ).toEqual(Direction.descending);
+      ).toEqual(Direction.desc);
     });
   });
 

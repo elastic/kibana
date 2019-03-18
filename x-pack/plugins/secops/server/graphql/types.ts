@@ -774,9 +774,9 @@ export interface PaginationInput {
 }
 
 export interface SortField {
-  sortFieldId?: string | null;
+  sortFieldId: string;
 
-  direction?: Direction | null;
+  direction: Direction;
 }
 
 export interface NetworkDnsSortField {
@@ -879,8 +879,8 @@ export enum IndexType {
 }
 
 export enum Direction {
-  ascending = 'ascending',
-  descending = 'descending',
+  asc = 'asc',
+  desc = 'desc',
 }
 
 export enum NetworkDirectionEcs {

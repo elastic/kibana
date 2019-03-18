@@ -20,7 +20,7 @@ describe('ColumnHeaders', () => {
   describe('rendering', () => {
     const sort: Sort = {
       columnId: 'fooColumn',
-      sortDirection: Direction.descending,
+      sortDirection: Direction.desc,
     };
 
     test('renders correctly against snapshot', () => {

@@ -106,7 +106,7 @@ const testCaseSource = {
     },
     sortField: {
       sortFieldId: '@timestamp',
-      direction: 'descending',
+      direction: 'desc',
     },
   },
   context: {

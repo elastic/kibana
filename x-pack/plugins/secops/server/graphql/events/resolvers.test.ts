@@ -86,7 +86,7 @@ describe('Test Source Resolvers', () => {
         },
         sortField: {
           sortFieldId: 'timestamp',
-          direction: Direction.descending,
+          direction: Direction.desc,
         },
       },
       context,

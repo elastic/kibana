@@ -153,7 +153,7 @@ const testNetworkDnsSource = {
       from: 1546318799999,
     },
     isPtrIncluded: false,
-    sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.ascending },
+    sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
     pagination: {
       limit: 2,
       cursor: null,

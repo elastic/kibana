@@ -2,6 +2,6 @@
 
 exports[`SortIndicator rendering renders correctly against snapshot 1`] = `
 <Component
-  sortDirection="descending"
+  sortDirection="desc"
 />
 `;

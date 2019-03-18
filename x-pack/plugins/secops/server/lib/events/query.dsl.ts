@@ -9,7 +9,7 @@ import { createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { eventFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
-import { SortRequest, SortRequestDirection } from '../types';
+import { SortRequest } from '../types';
 
 import { TimerangeFilter } from './types';
 
@@ -60,9 +60,11 @@ export const buildQuery = (options: RequestOptions) => {
     if (sortField.sortFieldId) {
       const field: string =
         sortField.sortFieldId === 'timestamp' ? '@timestamp' : sortField.sortFieldId;
-      const dir: SortRequestDirection = sortField.direction === 'descending' ? 'desc' : 'asc';
 
-      return [{ [field]: dir }, { [options.sourceConfiguration.fields.tiebreaker]: dir }];
+      return [
+        { [field]: sortField.direction },
+        { [options.sourceConfiguration.fields.tiebreaker]: sortField.direction },
+      ];
     }
     return [];
   };
