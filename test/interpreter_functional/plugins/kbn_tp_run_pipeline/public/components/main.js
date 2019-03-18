@@ -18,7 +18,6 @@
  */
 
 import React from 'react';
-import { unmountComponentAtNode } from 'react-dom';
 import {
   EuiPage,
   EuiPageBody,
@@ -34,13 +33,16 @@ class Main extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      expression: '',
+    };
+
     window.runPipeline = async (expression, context = {}, initialContext = {}) => {
+      this.setState({ expression });
       const adapters = {
         requests: new props.RequestAdapter(),
         data: new props.DataAdapter(),
       };
-      console.log('running expression', expression);
-      this.exprDiv.innerText = expression;
       return await props.runPipeline(expression, context, {
         inspectorAdapters: adapters,
         getInitialContext: () => initialContext,
@@ -53,15 +55,15 @@ class Main extends React.Component {
 
     window.renderPipelineResponse = async (context = {}) => {
       if (context.type !== 'render') {
-        this.exprDiv.innerText = 'Expression did not return render type!\n\n' + JSON.stringify(context);
+        this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
         return;
       }
       const renderer = props.registries.renderers.get(context.as);
       if (!renderer) {
-        this.exprDiv.innerText = 'Renderer was not found in registry!\n\n' + JSON.stringify(context);
+        this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
         return;
       }
-      unmountComponentAtNode(this.chartDiv);
+      props.visualizationLoader.destroy(this.chartDiv);
       renderer.render(this.chartDiv, context.value, handlers);
     };
 
@@ -82,7 +84,7 @@ class Main extends React.Component {
             <EuiPageContentHeader>
               runPipeline tests are running ...
             </EuiPageContentHeader>
-            <div ref={ref => this.exprDiv = ref} />
+            <div>{this.state.expression}</div>
             <div ref={ref => this.chartDiv = ref} style={pStyle}/>
           </EuiPageContent>
         </EuiPageBody>

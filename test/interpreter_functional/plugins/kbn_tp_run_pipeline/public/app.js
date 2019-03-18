@@ -26,8 +26,8 @@ import chrome from 'ui/chrome';
 import { RequestAdapter } from 'ui/inspector/adapters/request';
 import { DataAdapter } from 'ui/inspector/adapters/data';
 import { runPipeline } from 'ui/visualize/loader/pipeline_helpers';
+import { visualizationLoader } from 'ui/visualize/loader/visualization_loader';
 
-// todo: registries must be taken out of package
 import { registries } from 'plugins/interpreter/registries';
 
 // This is required so some default styles and required scripts/Angular modules are loaded,
@@ -63,7 +63,13 @@ function RootController($scope, $element) {
   const domNode = $element[0];
 
   // render react to DOM
-  render(<Main RequestAdapter={RequestAdapter} DataAdapter={DataAdapter} runPipeline={runPipeline} registries={registries}/>, domNode);
+  render(<Main
+    RequestAdapter={RequestAdapter}
+    DataAdapter={DataAdapter}
+    runPipeline={runPipeline}
+    registries={registries}
+    visualizationLoader={visualizationLoader}
+  />, domNode);
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {
