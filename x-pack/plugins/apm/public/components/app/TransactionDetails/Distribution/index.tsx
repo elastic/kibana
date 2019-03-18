@@ -52,7 +52,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 
 interface Props {
   location: Location;
-  distribution: ITransactionDistributionAPIResponse;
+  distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
@@ -95,8 +95,53 @@ export class TransactionDistribution extends Component<Props> {
         );
   };
 
+  public redirectToTransactionType() {
+    const { urlParams, location, distribution } = this.props;
+
+    if (!distribution || !distribution.defaultSample) {
+      return;
+    }
+
+    const { traceId, transactionId } = distribution.defaultSample;
+    const hasIncorrectSample =
+      traceId !== urlParams.traceId ||
+      transactionId !== urlParams.transactionId;
+
+    if (hasIncorrectSample) {
+      history.replace({
+        ...location,
+        search: fromQuery({
+          ...toQuery(location.search),
+          traceId,
+          transactionId
+        })
+      });
+    }
+  }
+
+  public componentDidMount() {
+    this.redirectToTransactionType();
+  }
+
+  public componentDidUpdate() {
+    this.redirectToTransactionType();
+  }
+
   public render() {
     const { location, distribution, urlParams } = this.props;
+
+    if (!distribution) {
+      return null;
+    }
+
+    // delay rendering until after redirect
+    const hasIncorrectSample =
+      distribution.defaultSample &&
+      (distribution.defaultSample.traceId !== urlParams.traceId ||
+        distribution.defaultSample.transactionId !== urlParams.transactionId);
+    if (hasIncorrectSample) {
+      return null;
+    }
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -163,7 +208,7 @@ export class TransactionDistribution extends Component<Props> {
           bucketIndex={bucketIndex}
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
-              history.replace({
+              history.push({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),

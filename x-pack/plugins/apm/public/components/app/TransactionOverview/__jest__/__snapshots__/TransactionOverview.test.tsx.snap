@@ -18,12 +18,12 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
       options={
         Array [
           Object {
-            "text": "a",
-            "value": "a",
+            "text": "firstType",
+            "value": "firstType",
           },
           Object {
-            "text": "b",
-            "value": "b",
+            "text": "secondType",
+            "value": "secondType",
           },
         ]
       }

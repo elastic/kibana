@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { shallow } from 'enzyme';
+import { History } from 'history';
+import React from 'react';
+import { RouteComponentProps } from 'react-router';
 import { TransactionOverviewView } from '..';
 
 jest.mock(
   'ui/chrome',
   () => ({
     getBasePath: () => `/some/base/path`,
-    getInjected: key => {
+    getInjected: (key: string) => {
       if (key === 'mlEnabled') {
         return true;
       }
@@ -20,7 +22,7 @@ jest.mock(
     },
     getUiSettingsClient: () => {
       return {
-        get: key => {
+        get: (key: string) => {
           switch (key) {
             case 'timepicker:timeDefaults':
               return { from: 'now-15m', to: 'now', mode: 'quick' };
@@ -37,14 +39,19 @@ jest.mock(
 );
 
 const setup = () => {
+  const routerProps = {
+    location: { search: '' },
+    history: {
+      push: jest.fn() as History['push'],
+      replace: jest.fn() as History['replace']
+    }
+  } as RouteComponentProps;
+
   const props = {
+    ...routerProps,
     agentName: 'test-agent',
     serviceName: 'test-service',
-    serviceTransactionTypes: ['a', 'b'],
-    location: {},
-    history: {
-      push: jest.fn()
-    },
+    serviceTransactionTypes: ['firstType', 'secondType'],
     urlParams: { transactionType: 'test-type', serviceName: 'MyServiceName' }
   };
 
@@ -53,10 +60,21 @@ const setup = () => {
 };
 
 describe('TransactionOverviewView', () => {
-  it('should render null if there is no transaction type in the search string', () => {
-    const { wrapper } = setup();
-    wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
-    expect(wrapper).toMatchInlineSnapshot(`""`);
+  describe('when  no transaction type is given', () => {
+    it('should render null', () => {
+      const { wrapper } = setup();
+      wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
+      expect(wrapper).toMatchInlineSnapshot(`""`);
+    });
+
+    it('should redirect to first type', () => {
+      const { wrapper, props } = setup();
+      wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
+      expect(props.history.replace).toHaveBeenCalledWith({
+        pathname: '/MyServiceName/transactions/firstType',
+        search: ''
+      });
+    });
   });
 
   it('should render with type filter controls', () => {
@@ -67,8 +85,9 @@ describe('TransactionOverviewView', () => {
   it('should render without type filter controls if there is just a single type', () => {
     const { wrapper } = setup();
     wrapper.setProps({
-      serviceTransactionTypes: ['a']
+      serviceTransactionTypes: ['singleType']
     });
+    expect(wrapper.find('EuiFormRow').exists()).toBe(false);
     expect(wrapper).toMatchSnapshot();
   });
 });

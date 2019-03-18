@@ -28,11 +28,9 @@ import { SyncChartGroup } from '../SyncChartGroup';
 
 interface TransactionChartProps {
   charts: ITransactionChartData;
-  chartWrapper?: React.ComponentClass | React.SFC;
   location: Location;
   urlParams: IUrlParams;
   mlAvailable: boolean;
-  hasMLJob: boolean;
 }
 
 const ShiftedIconWrapper = styled.span`
@@ -78,7 +76,8 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
   };
 
   public renderMLHeader() {
-    if (!this.props.mlAvailable || !this.props.hasMLJob) {
+    const hasMLJob = this.props.charts.hasMLJob;
+    if (!this.props.mlAvailable || !hasMLJob) {
       return null;
     }
 
@@ -123,11 +122,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
   }
 
   public render() {
-    const {
-      charts,
-      urlParams,
-      chartWrapper: ChartWrapper = React.Fragment
-    } = this.props;
+    const { charts, urlParams } = this.props;
     const { noHits, responseTimeSeries, tpmSeries } = charts;
     const { transactionType } = urlParams;
 
@@ -137,7 +132,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
               <EuiPanel>
-                <ChartWrapper>
+                <React.Fragment>
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem>
                       <EuiTitle size="xs">
@@ -153,13 +148,13 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
                     tickFormatY={this.getResponseTimeTickFormatter}
                     formatTooltipValue={this.getResponseTimeTooltipFormatter}
                   />
-                </ChartWrapper>
+                </React.Fragment>
               </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
               <EuiPanel>
-                <ChartWrapper>
+                <React.Fragment>
                   <EuiTitle size="xs">
                     <span>{tpmLabel(transactionType)}</span>
                   </EuiTitle>
@@ -171,7 +166,7 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
                     formatTooltipValue={this.getTPMTooltipFormatter}
                     truncateLegends
                   />
-                </ChartWrapper>
+                </React.Fragment>
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGrid>
