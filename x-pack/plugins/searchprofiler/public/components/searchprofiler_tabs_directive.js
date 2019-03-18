@@ -11,7 +11,7 @@ import 'ngreact';
 
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml', ['react']);
+const module = uiModules.get('apps/searchprofiler', ['react']);
 
 import { SearchProfilerTabs } from './searchprofiler_tabs';
 
