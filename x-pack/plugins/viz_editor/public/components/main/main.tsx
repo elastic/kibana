@@ -13,7 +13,6 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { Dispatch, useEffect, useReducer } from 'react';
-import { API_PREFIX } from '../../../common';
 import * as ds from '../../lib/es_data_source';
 import { FieldPanel } from '../field_panel';
 
@@ -27,18 +26,21 @@ interface State {
   loading: boolean;
   errorMessage: string;
   dataSource: ds.DataSource;
+  query: any;
   rawData: any; // TODO: Properly type this...
 }
 
 type Action =
   | { type: 'loaded'; dataSource: ds.DataSource; rawData: any }
-  | { type: 'loadError'; message: string };
+  | { type: 'loadError'; message: string }
+  | { type: 'setQuery'; query: any; rawData: any };
 
 function initialState(): State {
   return {
     loading: true,
     errorMessage: '',
     dataSource: ds.empty(),
+    query: { limit: 50 },
     rawData: emptyRawData,
   };
 }
@@ -58,28 +60,59 @@ function reducer(state: State, action: Action): State {
         loading: false,
         errorMessage: action.message,
       };
+    case 'setQuery':
+      return {
+        ...state,
+        query: action.query,
+        rawData: action.rawData,
+      };
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
   }
 }
 
 async function fetchInitialState(kfetch: any, dispatch: Dispatch<Action>) {
-  const dataSource = await ds.load();
+  const dataSource = await ds.load({ kfetch });
   let rawData: any = emptyRawData;
 
   if (dataSource.fields.length) {
-    rawData = await kfetch({
-      pathname: `${API_PREFIX}/search`,
-      method: 'POST',
-      body: JSON.stringify({ index: dataSource.name, size: 25 }),
-    });
-
+    rawData = await dataSource.query({ limit: 50 });
     rawData.columns = rawData.columns.sort((a: any, b: any) => a.name.localeCompare(b.name));
   }
 
   dispatch({
     type: 'loaded',
     dataSource,
+    rawData,
+  });
+}
+
+function generateQuery(field: ds.DataSourceField) {
+  switch (field.type) {
+    case 'string':
+      return {
+        select: [{ op: 'col', arg: field.name }, { op: 'count' }],
+      };
+    case 'number':
+      return {
+        select: [{ op: 'avg', arg: { op: 'col', arg: field.name } }],
+      };
+    default:
+      return { limit: 50 };
+  }
+}
+
+async function setGeneratedQuery(
+  dispatch: React.Dispatch<Action>,
+  dataSource: ds.DataSource,
+  field: ds.DataSourceField
+) {
+  const query = generateQuery(field);
+  const rawData = await dataSource.query(query);
+
+  dispatch({
+    type: 'setQuery',
+    query,
     rawData,
   });
 }
@@ -102,7 +135,10 @@ export function Main({ kfetch }: Props) {
         <EuiButtonEmpty className="vzDataSource-link" size="l">
           {dataSource.name}
         </EuiButtonEmpty>
-        <FieldPanel fields={dataSource.fields} />
+        <FieldPanel
+          fields={dataSource.fields}
+          generateQuery={(field: any) => setGeneratedQuery(dispatch, dataSource, field)}
+        />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
         <EuiPageContent>

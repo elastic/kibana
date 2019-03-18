@@ -43,17 +43,22 @@ export function vizEditor(kibana: any) {
         async handler(req) {
           const { payload } = req;
           const result = await callWithRequest(req, 'search', payload);
+          const { aggregations, hits } = result;
 
-          if (result.aggregations) {
+          if (aggregations && aggregations.groupby) {
             return tablify(
-              result.aggregations.groupBy.buckets.map(({ key, ...agg }: any) => ({
+              result.aggregations.groupby.buckets.map(({ key, ...agg }: any) => ({
                 ...key,
                 ...agg,
               }))
             );
           }
 
-          if (!result.hits || !result.hits.hits) {
+          if (aggregations) {
+            return tablify([aggregations]);
+          }
+
+          if (!hits || !hits.hits) {
             return {
               columns: [],
               rows: [],

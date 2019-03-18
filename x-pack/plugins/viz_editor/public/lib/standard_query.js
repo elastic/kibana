@@ -6,13 +6,56 @@
 
 import { isEmpty, assocPath, partition } from 'lodash/fp';
 
-const aggregationOps = {
-  count: () => {},
-  sum: () => {},
+const aggOps = {
+  sum({ alias, arg: { op, arg } }) {
+    if (op !== 'col') {
+      throw new Error(`SUM only supports a single column as its argument.`);
+    }
+
+    return {
+      [alias || `sum_${arg}`]: {
+        sum: {
+          field: arg,
+        },
+      },
+    };
+  },
+  avg({ alias, arg: { op, arg } }) {
+    if (op !== 'col') {
+      throw new Error(`AVG only supports a single column as its argument.`);
+    }
+
+    return {
+      [alias || `avg_${arg}`]: {
+        avg: {
+          field: arg,
+        },
+      },
+    };
+  },
+  count({ alias, arg }) {
+    if (isEmpty(arg)) {
+      return {};
+    }
+
+    const { op, arg: field } = arg;
+
+    if (op === 'distinct') {
+      return {
+        [alias || `count_distinct(${field})`]: {
+          cardinality: {
+            field,
+          },
+        },
+      };
+    }
+
+    throw new Error(`Unrecognized argument to count: ${op}`);
+  },
 };
 
 function isAggregationOp({ op }) {
-  return aggregationOps.hasOwnProperty(op);
+  return aggOps.hasOwnProperty(op);
 }
 
 function esRange(col, clause) {
@@ -145,42 +188,6 @@ function toEsGroupBy(cols) {
   };
 }
 
-
-const aggOps = {
-  sum({ alias, arg: { op, arg } }) {
-    if (op !== 'col') {
-      throw new Error(`SUM only supports a single column as its argument.`);
-    }
-
-    return {
-      [alias || `sum(${arg})`]: {
-        sum: {
-          field: arg,
-        },
-      },
-    };
-  },
-  count({ alias, arg }) {
-    if (isEmpty(arg)) {
-      return {};
-    }
-
-    const { op, arg: field } = arg;
-
-    if (op === 'distinct') {
-      return {
-        [alias || `count_distinct(${field})`]: {
-          cardinality: {
-            field,
-          },
-        },
-      };
-    }
-
-    throw new Error(`Unrecognized argument to count: ${op}`);
-  },
-};
-
 function toEsAgg(agg) {
   const { op } = agg;
   const fn = aggOps[op];
@@ -197,6 +204,13 @@ function toEsAggs(query, esQuery) {
   const esAggs = Object.assign.apply({}, aggs.map(toEsAgg));
   const aggsQuery = isEmpty(esAggs) ? {} : { aggregations: esAggs };
 
+  if (isEmpty(cols)) {
+    return {
+      ...esQuery,
+      ...aggsQuery,
+    };
+  }
+
   return {
     ...esQuery,
     aggregations: {
@@ -204,7 +218,7 @@ function toEsAggs(query, esQuery) {
         ...toEsGroupBy(cols),
         ...aggsQuery,
       },
-    },
+    }
   };
 }
 

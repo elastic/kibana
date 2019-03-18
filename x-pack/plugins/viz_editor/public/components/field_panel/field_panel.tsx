@@ -12,9 +12,10 @@ import { DataSourceField } from '../../lib/es_data_source';
 
 interface Props {
   fields: DataSourceField[];
+  generateQuery: (field: DataSourceField) => any;
 }
 
-export function FieldPanel({ fields }: Props) {
+export function FieldPanel({ fields, generateQuery }: Props) {
   return (
     <div className="vzFieldPanel">
       {fields.map(field => (
@@ -22,6 +23,7 @@ export function FieldPanel({ fields }: Props) {
           type="button"
           key={field.name}
           className={`vzFieldPanel-field vzFieldPanel-field-btn-${field.type}`}
+          onDoubleClick={() => generateQuery(field)}
         >
           {fieldIcon(field)} <span className="vzFieldPanel-field-name">{field.name}</span>
         </button>

@@ -50,7 +50,7 @@ describe('StandardQuery', () => {
             ],
             size: 1000,
           },
-          aggregations: { 'sum(AvgTicketPrice)': { sum: { field: 'AvgTicketPrice' } } },
+          aggregations: { sum_AvgTicketPrice: { sum: { field: 'AvgTicketPrice' } } },
         },
       },
       size: 0,
