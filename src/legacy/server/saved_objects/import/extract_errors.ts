@@ -18,24 +18,29 @@
  */
 
 import { SavedObject } from '../service';
-
-export interface CustomError {
-  id: string;
-  type: string;
-  error: {
-    message: string;
-    statusCode: number;
-  };
-}
+import { ImportError } from './types';
 
 export function extractErrors(savedObjects: SavedObject[]) {
-  const errors: CustomError[] = [];
+  const errors: ImportError[] = [];
   for (const savedObject of savedObjects) {
     if (savedObject.error) {
+      if (savedObject.error.statusCode === 409) {
+        errors.push({
+          id: savedObject.id,
+          type: savedObject.type,
+          error: {
+            type: 'conflict',
+          },
+        });
+        continue;
+      }
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
-        error: savedObject.error,
+        error: {
+          ...savedObject.error,
+          type: 'unknown',
+        },
       });
     }
   }

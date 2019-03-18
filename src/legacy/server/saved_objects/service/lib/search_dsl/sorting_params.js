@@ -31,27 +31,33 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
 
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
-      sort: [{
-        [sortField]: {
-          order: sortOrder,
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+          },
         },
-      }],
+      ],
     };
   }
 
   if (types.length > 1) {
     const rootField = getProperty(mappings, sortField);
     if (!rootField) {
-      throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
+      throw Boom.badRequest(
+        `Unable to sort multiple types by field ${sortField}, not a root property`
+      );
     }
 
     return {
-      sort: [{
-        [sortField]: {
-          order: sortOrder,
-          unmapped_type: rootField.type
-        }
-      }]
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+            unmapped_type: rootField.type,
+          },
+        },
+      ],
     };
   }
 
@@ -63,11 +69,13 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   }
 
   return {
-    sort: [{
-      [key]: {
-        order: sortOrder,
-        unmapped_type: field.type
-      }
-    }]
+    sort: [
+      {
+        [key]: {
+          order: sortOrder,
+          unmapped_type: field.type,
+        },
+      },
+    ],
   };
 }
