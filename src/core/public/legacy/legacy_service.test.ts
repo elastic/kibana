@@ -18,7 +18,6 @@
  */
 
 import angular from 'angular';
-import * as Rx from 'rxjs';
 
 const mockLoadOrder: string[] = [];
 
@@ -142,34 +141,24 @@ jest.mock('ui/chrome/services/global_nav_state', () => {
   };
 });
 
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { chromeServiceMock } from '../chrome/chrome_service.mock';
+import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 
-const fatalErrorsStart = {} as any;
-const notificationsStart = {
-  toasts: {},
-} as any;
-
-const injectedMetadataStart: any = {
-  getBasePath: jest.fn(),
-  getLegacyMetadata: jest.fn(),
-};
-
-const httpStart = {
-  addLoadingCount: jest.fn(),
-  getLoadingCount$: jest
-    .fn()
-    .mockImplementation(() => new Rx.Observable(observer => observer.next(0))),
-};
-
-const basePathStart = {
-  get: jest.fn(),
-  addToPath: jest.fn(),
-  removeFromPath: jest.fn(),
-};
-
-const uiSettingsStart: any = {};
-const chromeStart: any = {};
-const i18nStart: any = { Context: () => '' };
+const basePathStart = basePathServiceMock.createStartContract();
+const chromeStart = chromeServiceMock.createStartContract();
+const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
+const httpStart = httpServiceMock.createStartContract();
+const i18nStart = i18nServiceMock.createStartContract();
+const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
+const notificationsStart = notificationServiceMock.createStartContract();
+const uiSettingsStart = uiSettingsServiceMock.createStartContract();
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -200,7 +189,7 @@ describe('#start()', () => {
   describe('default', () => {
     it('passes legacy metadata from injectedVars to ui/metadata', () => {
       const legacyMetadata = { isLegacyMetadata: true };
-      injectedMetadataStart.getLegacyMetadata.mockReturnValue(legacyMetadata);
+      injectedMetadataStart.getLegacyMetadata.mockReturnValue(legacyMetadata as any);
 
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
@@ -422,7 +411,7 @@ describe('#stop()', () => {
     expect(targetDomElement).toMatchSnapshot();
   });
 
-  it('destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement', () => {
+  it('destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement', () => {
     const targetDomElement = document.createElement('div');
     const scopeDestroySpy = jest.fn();
 
@@ -431,7 +420,7 @@ describe('#stop()', () => {
       targetDomElement,
     });
 
-    // simulate bootstraping with a module "foo"
+    // simulate bootstrapping with a module "foo"
     angular.module('foo', []).directive('bar', () => ({
       restrict: 'E',
       link($scope) {

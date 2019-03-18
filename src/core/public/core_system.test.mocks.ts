@@ -17,118 +17,76 @@
  * under the License.
  */
 
-import { BasePathService } from './base_path';
-import { ChromeService } from './chrome';
-import { FatalErrorsService } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
-import { InjectedMetadataService } from './injected_metadata';
-import { LegacyPlatformService } from './legacy';
-import { NotificationsService } from './notifications';
-import { UiSettingsService } from './ui_settings';
+import { basePathServiceMock } from './base_path/base_path_service.mock';
+import { chromeServiceMock } from './chrome/chrome_service.mock';
+import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
+import { httpServiceMock } from './http/http_service.mock';
+import { i18nServiceMock } from './i18n/i18n_service.mock';
+import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
+import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
+import { notificationServiceMock } from './notifications/notifications_service.mock';
+import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
-export const MockLegacyPlatformService = jest.fn<LegacyPlatformService, any>(
-  function _MockLegacyPlatformService(this: any) {
-    this.start = jest.fn();
-    this.stop = jest.fn();
-    return this;
-  }
-);
-
-jest.mock('./legacy', () => ({
-  LegacyPlatformService: MockLegacyPlatformService,
+export const MockLegacyPlatformService = legacyPlatformServiceMock.create();
+export const LegacyPlatformServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockLegacyPlatformService);
+jest.doMock('./legacy', () => ({
+  LegacyPlatformService: LegacyPlatformServiceConstructor,
 }));
 
-export const mockInjectedMetadataStart = {};
-export const MockInjectedMetadataService = jest.fn<InjectedMetadataService, any>(
-  function _MockInjectedMetadataService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockInjectedMetadataStart);
-    return this;
-  }
-);
-jest.mock('./injected_metadata', () => ({
-  InjectedMetadataService: MockInjectedMetadataService,
+export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
+export const InjectedMetadataServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockInjectedMetadataService);
+jest.doMock('./injected_metadata', () => ({
+  InjectedMetadataService: InjectedMetadataServiceConstructor,
 }));
 
-export const mockFatalErrorsStart = {};
-export const MockFatalErrorsService = jest.fn<FatalErrorsService, any>(
-  function _MockFatalErrorsService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockFatalErrorsStart);
-    this.add = jest.fn();
-    return this;
-  }
-);
-jest.mock('./fatal_errors', () => ({
-  FatalErrorsService: MockFatalErrorsService,
+export const MockFatalErrorsService = fatalErrorsServiceMock.create();
+export const FatalErrorsServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockFatalErrorsService);
+jest.doMock('./fatal_errors', () => ({
+  FatalErrorsService: FatalErrorsServiceConstructor,
 }));
 
-export const mockI18nStart = {};
-export const MockI18nService = jest.fn<I18nService, any>(function _MockI18nService(this: any) {
-  this.start = jest.fn().mockReturnValue(mockI18nStart);
-  this.stop = jest.fn();
-  return this;
-});
-jest.mock('./i18n', () => ({
-  I18nService: MockI18nService,
+export const MockI18nService = i18nServiceMock.create();
+export const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
+jest.doMock('./i18n', () => ({
+  I18nService: I18nServiceConstructor,
 }));
 
-export const mockNotificationStart = {};
-export const MockNotificationsService = jest.fn<NotificationsService, any>(
-  function _MockNotificationsService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockNotificationStart);
-    this.add = jest.fn();
-    this.stop = jest.fn();
-    return this;
-  }
-);
-
-jest.mock('./notifications', () => ({
-  NotificationsService: MockNotificationsService,
+export const MockNotificationsService = notificationServiceMock.create();
+export const NotificationServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockNotificationsService);
+jest.doMock('./notifications', () => ({
+  NotificationsService: NotificationServiceConstructor,
 }));
 
-export const mockHttp = {};
-export const MockHttpService = jest.fn<HttpService, any>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockHttp);
-  this.stop = jest.fn();
-  return this;
-});
-jest.mock('./http', () => ({
-  HttpService: MockHttpService,
+export const MockHttpService = httpServiceMock.create();
+export const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
+jest.doMock('./http', () => ({
+  HttpService: HttpServiceConstructor,
 }));
 
-export const mockBasePathStart = {};
-export const MockBasePathService = jest.fn<BasePathService, any>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockBasePathStart);
-  return this;
-});
-jest.mock('./base_path', () => ({
-  BasePathService: MockBasePathService,
+export const MockBasePathService = basePathServiceMock.create();
+export const BasePathServiceConstructor = jest.fn().mockImplementation(() => MockBasePathService);
+jest.doMock('./base_path', () => ({
+  BasePathService: BasePathServiceConstructor,
 }));
 
-const mockUiSettings = {};
-export const MockUiSettingsService = jest.fn<UiSettingsService, any>(
-  function _MockNotificationsService(this: any) {
-    this.start = jest.fn().mockReturnValue(mockUiSettings);
-    this.stop = jest.fn();
-    return this;
-  }
-);
-jest.mock('./ui_settings', () => ({
-  UiSettingsService: MockUiSettingsService,
+export const MockUiSettingsService = uiSettingsServiceMock.create();
+export const UiSettingsServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockUiSettingsService);
+jest.doMock('./ui_settings', () => ({
+  UiSettingsService: UiSettingsServiceConstructor,
 }));
 
-const mockChromeStart = {};
-export const MockChromeService = jest.fn<ChromeService, any>(function _MockNotificationsService(
-  this: any
-) {
-  this.start = jest.fn().mockReturnValue(mockChromeStart);
-  this.stop = jest.fn();
-  return this;
-});
-jest.mock('./chrome', () => ({
-  ChromeService: MockChromeService,
+export const MockChromeService = chromeServiceMock.create();
+export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
+jest.doMock('./chrome', () => ({
+  ChromeService: ChromeServiceConstructor,
 }));

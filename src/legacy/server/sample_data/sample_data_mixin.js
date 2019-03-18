@@ -29,6 +29,9 @@ import {
   logsSpecProvider,
   ecommerceSpecProvider
 } from './data_sets';
+import {
+  makeSampleDataUsageCollector
+} from './usage';
 
 export function sampleDataMixin(kbnServer, server) {
   server.route(createListRoute());
@@ -94,4 +97,6 @@ export function sampleDataMixin(kbnServer, server) {
   server.registerSampleDataset(flightsSpecProvider);
   server.registerSampleDataset(logsSpecProvider);
   server.registerSampleDataset(ecommerceSpecProvider);
+
+  makeSampleDataUsageCollector(server);
 }
