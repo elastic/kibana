@@ -23,6 +23,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { LicenseText } from './license_text';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const calculateShards = shards => {
@@ -63,7 +64,12 @@ function renderLog(log) {
         <EuiFlexItem grow={false} key={index}>
           <EuiToolTip
             position="top"
-            content={`The number of ${capitalize(level.level)} logs`}
+            content={i18n.translate('xpack.monitoring.cluster.overview.esPanel.logsTooltipText', {
+              defaultMessage: 'The number of {type} logs',
+              values: {
+                type: capitalize(level.level),
+              }
+            })}
           >
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
               {level.count}
