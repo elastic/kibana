@@ -11,7 +11,7 @@ import { IndexList } from './sections/index_list';
 import { trackUserAction } from './services';
 
 export const App = () => {
-  useEffect(() => trackUserAction(UA_APP_LOAD, []));
+  useEffect(() => trackUserAction(UA_APP_LOAD), []);
 
   return (
     <HashRouter>

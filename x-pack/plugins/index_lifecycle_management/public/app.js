@@ -12,7 +12,7 @@ import { PolicyTable } from './sections/policy_table';
 import { trackUserAction } from './services';
 
 export const App = () => {
-  useEffect(() => trackUserAction(UA_APP_LOAD, []));
+  useEffect(() => trackUserAction(UA_APP_LOAD), []);
 
   return (
     <HashRouter>
