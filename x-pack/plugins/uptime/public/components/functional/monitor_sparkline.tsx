@@ -40,6 +40,7 @@ export const MonitorSparkline = ({
       style={{ marginBottom: -24 }}
       xType={EuiSeriesChartUtils.SCALE.TIME}
       xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+      showCrosshair={false}
     >
       <EuiHistogramSeries
         data={formatSparklineCounts(downSeries || [])}
