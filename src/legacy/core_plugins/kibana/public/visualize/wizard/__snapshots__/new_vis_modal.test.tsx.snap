@@ -990,40 +990,26 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       className="visNewVisDialog__body"
                     >
                       <EuiFlexGroup
-                        alignItems="stretch"
-                        component="div"
-                        direction="row"
                         gutterSize="xl"
-                        justifyContent="flexStart"
-                        responsive={true}
-                        wrap={false}
                       >
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <EuiFlexItem
-                            component="div"
-                            grow={true}
-                          >
+                          <EuiFlexItem>
                             <div
                               className="euiFlexItem"
                             >
                               <EuiFlexGroup
-                                alignItems="stretch"
                                 className="visNewVisDialog__list"
-                                component="div"
                                 direction="column"
                                 gutterSize="none"
-                                justifyContent="flexStart"
                                 responsive={false}
-                                wrap={false}
                               >
                                 <div
                                   className="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
                                 >
                                   <EuiFlexItem
                                     className="visNewVisDialog__searchWrapper"
-                                    component="div"
                                     grow={false}
                                   >
                                     <div
@@ -1128,7 +1114,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   </EuiFlexItem>
                                   <EuiFlexItem
                                     className="visNewVisDialog__typesWrapper"
-                                    component="div"
                                     grow={1}
                                   >
                                     <div
@@ -1366,7 +1351,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           </EuiFlexItem>
                           <EuiFlexItem
                             className="visNewVisDialog__description"
-                            component="div"
                             grow={false}
                           >
                             <div
@@ -2428,40 +2412,26 @@ exports[`NewVisModal should render as expected 1`] = `
                       className="visNewVisDialog__body"
                     >
                       <EuiFlexGroup
-                        alignItems="stretch"
-                        component="div"
-                        direction="row"
                         gutterSize="xl"
-                        justifyContent="flexStart"
-                        responsive={true}
-                        wrap={false}
                       >
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
-                          <EuiFlexItem
-                            component="div"
-                            grow={true}
-                          >
+                          <EuiFlexItem>
                             <div
                               className="euiFlexItem"
                             >
                               <EuiFlexGroup
-                                alignItems="stretch"
                                 className="visNewVisDialog__list"
-                                component="div"
                                 direction="column"
                                 gutterSize="none"
-                                justifyContent="flexStart"
                                 responsive={false}
-                                wrap={false}
                               >
                                 <div
                                   className="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
                                 >
                                   <EuiFlexItem
                                     className="visNewVisDialog__searchWrapper"
-                                    component="div"
                                     grow={false}
                                   >
                                     <div
@@ -2566,7 +2536,6 @@ exports[`NewVisModal should render as expected 1`] = `
                                   </EuiFlexItem>
                                   <EuiFlexItem
                                     className="visNewVisDialog__typesWrapper"
-                                    component="div"
                                     grow={1}
                                   >
                                     <div
@@ -2789,7 +2758,6 @@ exports[`NewVisModal should render as expected 1`] = `
                           </EuiFlexItem>
                           <EuiFlexItem
                             className="visNewVisDialog__description"
-                            component="div"
                             grow={false}
                           >
                             <div

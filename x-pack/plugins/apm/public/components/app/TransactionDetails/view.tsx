@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
@@ -14,8 +14,7 @@ import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-// @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 
@@ -34,7 +33,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <KueryBar />
+      <FilterBar />
 
       <EuiSpacer size="s" />
 
@@ -51,16 +50,18 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <TransactionDistributionRequest
-        urlParams={urlParams}
-        render={({ data }) => (
-          <TransactionDistribution
-            distribution={data}
-            urlParams={urlParams}
-            location={location}
-          />
-        )}
-      />
+      <EuiPanel>
+        <TransactionDistributionRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <TransactionDistribution
+              distribution={data}
+              urlParams={urlParams}
+              location={location}
+            />
+          )}
+        />
+      </EuiPanel>
 
       <EuiSpacer size="l" />
       <WaterfallRequest

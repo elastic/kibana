@@ -38,10 +38,13 @@ continue by reindexing fewer indices at a time.
 
 Additional considerations:
 
-* During a reindex of a Watcher (`.watches`) index, the Watcher process 
-pauses and no alerts are triggered.  
+* If you use {alert-features}, when you reindex the internal indices
+(`.watches`), the {watcher} process pauses and no alerts are triggered.  
 
-* During a reindex of a Machine Learning (`.ml-state`) index, the Machine 
-Learning job pauses and models are not trained or updated. 
+* If you use {ml-features}, when you reindex the internal indices (`.ml-state`),
+the {ml} jobs pause and models are not trained or updated. 
 
-
+* If you use {security-features}, before you reindex the internal indices
+(`.security*`), it is a good idea to create a temporary superuser account in the
+`file` realm. For more information, see
+{ref}/configuring-file-realm.html[Configuring a file realm].

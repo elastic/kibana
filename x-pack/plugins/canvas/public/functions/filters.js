@@ -5,7 +5,7 @@
  */
 
 import { interpretAst } from 'plugins/interpreter/interpreter';
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
