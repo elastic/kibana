@@ -8,10 +8,28 @@ import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
 import { FilterBar } from './filter_bar';
-import { EuiCallOut } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiLink,
+  EuiText
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { metadata } from 'ui/metadata';
 import { getSuggestions, getKqlQueryValues } from './utils';
 
+function getErrorWithLink(errorMessage) {
+  return (
+    <EuiText>
+      {`${errorMessage} Input must be valid `}
+      <EuiLink
+        href={`https://www.elastic.co/guide/en/kibana/${metadata.branch}/kuery-query.html`}
+        target="_blank"
+      >
+        {'Kibana Query Language'}
+      </EuiLink>
+      {' (KQL) syntax.'}
+    </EuiText>);
+}
 
 export class KqlFilterBar extends Component {
   state = {
@@ -62,10 +80,11 @@ export class KqlFilterBar extends Component {
       onSubmit(kqlQueryValues);
     } catch (e) {
       console.log('Invalid kuery syntax', e); // eslint-disable-line no-console
+      const errorWithLink = getErrorWithLink(e.message);
       const errorMessage = i18n.translate('xpack.ml.explorer.invalidKuerySyntaxErrorMessage', {
         defaultMessage: 'Invalid kuery syntax'
       });
-      this.setState({ error: (e.message ? e.message : errorMessage) });
+      this.setState({ error: (e.message ? errorWithLink : errorMessage) });
     }
   };
 

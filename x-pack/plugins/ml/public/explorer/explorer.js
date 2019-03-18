@@ -952,7 +952,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         toastNotifications.addDanger(this.props.intl.formatMessage({
           id: 'xpack.ml.explorer.invalidKuerySyntaxErrorMessageFromTable',
-          defaultMessage: 'Uh oh! Looks like the filter syntax is invalid. Please check your input and try again.'
+          defaultMessage: 'Invalid syntax in query bar. The input must be valid Kibana Query Language (KQL)'
         }));
       }
     }
