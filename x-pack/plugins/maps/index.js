@@ -7,8 +7,8 @@
 import { resolve } from 'path';
 import { initRoutes } from './server/routes';
 import { getEcommerceSavedObjects } from './server/sample_data/ecommerce_saved_objects';
-import { getFlightsSavedObjects } from './server/sample_data/flights_saved_objects.js';
-import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_objects.js';
+import { getFlightsSavedObjects } from './server/sample_data/flights_saved_objects';
+import { getWebLogsSavedObjects } from './server/sample_data/web_logs_saved_objects';
 import mappings from './mappings.json';
 import { checkLicense } from './check_license';
 import { watchStatusAndLicenseToInitialize } from
