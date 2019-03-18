@@ -4,7 +4,7 @@ exports[`FilterBar component renders the component without errors 1`] = `
 <EuiSearchBar
   box={
     Object {
-      "incremental": true,
+      "incremental": false,
     }
   }
   className="euiFlexGroup--gutterSmall"
@@ -166,7 +166,7 @@ exports[`FilterBar component renders the component without errors 1`] = `
       },
     ]
   }
-  onChange={[Function]}
+  onChange={[MockFunction]}
   schema={
     Object {
       "fields": Object {
