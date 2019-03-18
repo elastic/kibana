@@ -22,6 +22,7 @@ import handleResponseBody from './series/handle_response_body';
 import handleErrorResponse from './handle_error_response';
 import getAnnotations from './get_annotations';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
@@ -29,7 +30,7 @@ export async function getSeriesData(req, panel) {
   const esQueryConfig = await getEsQueryConfig(req);
 
   try {
-    const bodiesPromises = panel.series.map(series => getRequestParams(req, panel, series, esQueryConfig));
+    const bodiesPromises = getActiveSeries(panel).map(series => getRequestParams(req, panel, series, esQueryConfig));
     const bodies = await Promise.all(bodiesPromises);
     const params = {
       rest_total_hits_as_int: true,
