@@ -6,8 +6,8 @@
 
 import { ESFilter } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,

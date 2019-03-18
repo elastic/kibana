@@ -4,6 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Url {
-  full: string;
+export type AgentName =
+  | 'go'
+  | 'java'
+  | 'js-base'
+  | 'js-react'
+  | 'nodejs'
+  | 'python'
+  | 'ruby';
+
+export interface Agent {
+  name: AgentName;
+  version: string;
 }
