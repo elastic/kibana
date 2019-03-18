@@ -7,7 +7,7 @@
 import { Location } from 'history';
 import React from 'react';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { getAgentMarks } from './get_agent_marks';
 import { ServiceLegends } from './ServiceLegends';
 import { Waterfall } from './Waterfall';

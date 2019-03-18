@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getId } from './../../lib/get_id';
 import { landmarkPoint, shapesAt } from './geometry';
 
 import {
@@ -40,6 +39,17 @@ import {
   removeDuplicates,
   shallowEqual,
 } from './functional';
+
+import { getId as rawGetId } from './../../lib/get_id';
+
+const idMap = {};
+const getId = (name, extension) => {
+  // ensures that `axisAlignedBoundingBoxShape` is pure-ish - a new call with the same input will not yield a new id
+  // (while it's possible for the same group to have the same members - ungroup then make the same group again -
+  // it's okay if the newly arising group gets the same id)
+  const key = name + '|' + extension;
+  return idMap[key] || (idMap[key] = rawGetId(name));
+};
 
 const resizeVertexTuples = [
   [-1, -1, 315],
@@ -926,7 +936,7 @@ const idsMatch = selectedShapes => shape => selectedShapes.find(idMatch(shape));
 const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
   const axisAlignedBoundingBox = getAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
-  const id = getId(config.groupName);
+  const id = getId(config.groupName, shapesToBox.map(s => s.id).join('|'));
   const aabbShape = {
     id,
     type: config.groupName,
@@ -1014,11 +1024,7 @@ const getLeafs = (descendCondition, allShapes, shapes) =>
 
 const preserveCurrentGroups = (shapes, selectedShapes) => ({ shapes, selectedShapes });
 
-export const getScene = state => state.currentScene;
-
-export const configuration = state => {
-  return state.configuration;
-};
+export const getConfiguration = scene => scene.configuration;
 
 export const getShapes = scene => scene.shapes;
 
@@ -1063,7 +1069,7 @@ const multiSelect = (prev, config, hoveredShapes, metaHeld, uid, selectedShapeOb
   };
 };
 
-export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
+export const getGroupingTuple = (config, shapes, selectedShapes) => {
   const childOfGroup = shape => shape.parent && shape.parent.startsWith(config.groupName);
   const isAdHocGroup = shape =>
     shape.type === config.groupName && shape.subtype === config.adHocGroupName;
@@ -1076,7 +1082,21 @@ export const getGrouping = (config, shapes, selectedShapes, groupAction) => {
   const isOrBelongsToGroup = shape => isGroup(shape) || childOfGroup(shape);
   const someSelectedShapesAreGrouped = selectedShapes.some(isOrBelongsToGroup);
   const selectionOutsideGroup = !someSelectedShapesAreGrouped;
+  return {
+    selectionOutsideGroup,
+    freshSelectedShapes,
+    freshNonSelectedShapes,
+    preexistingAdHocGroups,
+  };
+};
 
+export const getGrouping = (config, shapes, selectedShapes, groupAction, tuple) => {
+  const {
+    selectionOutsideGroup,
+    freshSelectedShapes,
+    freshNonSelectedShapes,
+    preexistingAdHocGroups,
+  } = tuple;
   if (groupAction === 'group') {
     const selectedAdHocGroupsToPersist = selectedShapes.filter(
       s => s.subtype === config.adHocGroupName
@@ -1179,11 +1199,6 @@ export const getCursor = (config, shape, draggedPrimaryShape) => {
       return draggedPrimaryShape ? 'grabbing' : 'grab';
   }
 };
-
-/**
- * Selectors directly from a state object
- */
-export const primaryUpdate = state => state.primaryUpdate;
 
 export const getSelectedShapesPrev = scene =>
   scene.selectionState || {
@@ -1306,14 +1321,16 @@ export const getAdHocChildrenAnnotations = (config, { shapes }) => {
     .map(borderAnnotation(config.getAdHocChildAnnotationName, config.hoverLift));
 };
 
-export const getHoverAnnotations = (config, shape, selectedPrimaryShapeIds, draggedShape) => {
-  return shape &&
-    shape.type !== 'annotation' &&
-    selectedPrimaryShapeIds.indexOf(shape.id) === -1 &&
-    !draggedShape
-    ? [borderAnnotation(config.hoverAnnotationName, config.hoverLift)(shape)]
-    : [];
-};
+export const getHoverAnnotations = (config, shapes, selectedPrimaryShapeIds, draggedShape) =>
+  shapes
+    .filter(
+      shape =>
+        shape &&
+        shape.type !== 'annotation' &&
+        selectedPrimaryShapeIds.indexOf(shape.id) === -1 &&
+        !draggedShape
+    )
+    .map(borderAnnotation(config.hoverAnnotationName, config.hoverLift));
 
 export const getSnappedShapes = (
   config,
@@ -1410,7 +1427,8 @@ export const getNextScene = (
   cursor,
   selectionState,
   mouseTransformState,
-  selectedShapes
+  selectedShapes,
+  gestureState
 ) => {
   const selectedLeafShapes = getLeafs(
     shape => shape.type === config.groupName,
@@ -1432,7 +1450,13 @@ export const getNextScene = (
     draggedShape,
     cursor,
     selectionState,
+    gestureState,
     mouseTransformState,
     selectedShapeObjects: selectedShapes,
   };
 };
+
+export const updaterFun = (nextScene, primaryUpdate) => ({
+  primaryUpdate,
+  currentScene: nextScene,
+});
