@@ -398,6 +398,12 @@ class TableListViewUi extends React.Component {
             data-test-subj="newItemButton"
             iconType="plusInCircle"
             fill
+            aria-haspopup="menu"
+            aria-label={
+              i18n.translate('kbn.visualize.listing.createNew.createButtonLabel.screenReaderLabel', {
+                defaultMessage: 'Create new visualization by opening a modal popover and choose a type of chart.'
+              })
+            }
           >
             <FormattedMessage
               id="kbn.table_list_view.listing.createNewItemButtonLabel"
