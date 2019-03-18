@@ -22,12 +22,20 @@ import vfs from 'vinyl-fs';
 
 import { createPromiseFromStreams } from '../../../legacy/utils';
 
-const transpileWithBabel = async (srcGlobs, dest, cwd, presets) => {
+const transpileWithBabel = async (srcGlobs, build, presets) => {
+  const buildRoot = build.resolvePath();
+
   await createPromiseFromStreams([
     vfs.src(
-      srcGlobs,
+      [
+        '!**/*.d.ts',
+        '!packages/**',
+        '!**/node_modules/**',
+        '!**/bower_components/**',
+        '!**/__tests__/**',
+      ].concat(srcGlobs),
       {
-        cwd,
+        cwd: buildRoot,
       }
     ),
 
@@ -36,7 +44,7 @@ const transpileWithBabel = async (srcGlobs, dest, cwd, presets) => {
       presets,
     }),
 
-    vfs.dest(dest),
+    vfs.dest(buildRoot),
   ]);
 };
 
@@ -44,38 +52,26 @@ export const TranspileBabelTask = {
   description: 'Transpiling sources with babel',
 
   async run(config, log, build) {
-    const buildRoot = build.resolvePath();
-
     // Transpile server code
     await transpileWithBabel(
       [
         '**/*.{js,ts,tsx}',
-        '!**/*.d.ts',
-        '!packages/**',
         '!**/public/**',
-        '!**/node_modules/**',
-        '!**/bower_components/**',
-        '!**/__tests__/**',
       ],
-      buildRoot,
-      buildRoot,
+      build,
       [
         require.resolve('@kbn/babel-preset/node_preset')
       ]
     );
 
     // Transpile client code
+    // NOTE: For the client, as we have the optimizer, we are only
+    // pre-transpiling the typescript based files
     await transpileWithBabel(
       [
-        '**/public/**/*.{js,ts,tsx}',
-        '!**/*.d.ts',
-        '!packages/**',
-        '!**/node_modules/**',
-        '!**/bower_components/**',
-        '!**/__tests__/**',
+        '**/public/**/*.{ts,tsx}',
       ],
-      buildRoot,
-      buildRoot,
+      build,
       [
         require.resolve('@kbn/babel-preset/webpack_preset')
       ]
