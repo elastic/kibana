@@ -63,7 +63,7 @@ function DefaultEditorAggSelect({
       defaultMessage="Aggregation"
     />
   );
-  const helpLink = aggHelpLink && (
+  const helpLink = isAggTypeDefined && aggHelpLink && (
     <EuiLink
       href={aggHelpLink}
       target="_blank"

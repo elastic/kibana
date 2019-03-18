@@ -62,10 +62,16 @@ uiModules
             ngModelCtrl.$setValidity('required', isValid);
           };
 
-          $scope.$watch('agg.type', (value) => {
+          $scope.$watch('agg.type', (value, oldValue) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
+            setValidity(!!value);
+
+            if (value !== oldValue) {
+              // we should set isSelectInvalid here in case the foem is reseted
+              $scope.isSelectInvalid = !value;
+            }
 
             $scope.aggHelpLink = null;
             if (has($scope, 'agg.type.name')) {
@@ -74,22 +80,14 @@ uiModules
           });
 
           $scope.onChange = (value) => {
-            const isValueEmpty = !value;
+            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
+            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
+            $scope.$parent.onAggTypeChange($scope.agg, value);
 
-            // The model is changed if the agg type is selected
-            if (!isValueEmpty) {
-              // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-              // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-              $scope.$parent.onAggTypeChange($scope.agg, value);
-            } else {
-              // If nothing is selected, the paramValue is reset, otherwise it is set to the value in the watcher.
-              $scope.paramValue = value;
-            }
-
-            ngModelCtrl.$setDirty();
             // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
-            setValidity(!isValueEmpty);
-            $scope.isSelectInvalid = isValueEmpty;
+            setValidity(!!value);
+            $scope.isSelectInvalid = !value;
+            ngModelCtrl.$setDirty();
           };
 
           // Since it's required field we set validity to prevent submiting the form when agg isn't selected initially.
