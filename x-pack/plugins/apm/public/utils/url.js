@@ -103,7 +103,10 @@ export const KibanaLink = withLocation(KibanaLinkComponent);
 // It was supposedly fixed in https://github.com/angular/angular.js/commit/1b779028fdd339febaa1fff5f3bd4cfcda46cc09 but still seeing the issue
 export function legacyEncodeURIComponent(url) {
   return (
-    url && encodeURIComponent(url.replace(/\//g, '~2F').replace(/ /g, '~20'))
+    url &&
+    encodeURIComponent(url)
+      .replace(/~/g, '%7E')
+      .replace(/%/g, '~')
   );
 }
 
