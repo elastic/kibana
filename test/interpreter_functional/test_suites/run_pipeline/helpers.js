@@ -18,15 +18,15 @@
  */
 
 import expect from 'expect.js';
-import { delay } from 'bluebird';
 
 // helper for testing interpreter expressions
-export const expectExpressionProvider = ({ getService, updateBaselines }) => {
+export const expectExpressionProvider = ({ getService, getPageObjects, updateBaselines }) => {
   const browser = getService('browser');
   const screenshot = getService('screenshots');
   const snapshots = getService('snapshots');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['visualize']);
   /**
    * returns a handler object to test a given expression
    * @name: name of the test
@@ -114,7 +114,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
             done(result);
           });
         }, pipelineResponse);
-        await delay(1000);
+        PageObjects.visualize.waitForVisualization();
 
         const chartEl = await testSubjects.find('pluginChart');
         const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);
