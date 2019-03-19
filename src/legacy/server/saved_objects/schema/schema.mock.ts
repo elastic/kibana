@@ -19,7 +19,15 @@
 
 import { SavedObjectsSchema } from './schema';
 
-export const SCHEMA: PublicMethodsOf<SavedObjectsSchema> = {
-  isHiddenType: jest.fn().mockReturnValue(false),
-  isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+type Schema = PublicMethodsOf<SavedObjectsSchema>;
+const createSchemaMock = () => {
+  const mocked: jest.Mocked<Schema> = {
+    isHiddenType: jest.fn().mockReturnValue(false),
+    isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+  };
+  return mocked;
+};
+
+export const schemaMock = {
+  create: createSchemaMock,
 };

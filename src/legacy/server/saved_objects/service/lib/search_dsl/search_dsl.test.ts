@@ -20,6 +20,7 @@
 jest.mock('./query_params');
 jest.mock('./sorting_params');
 
+import { schemaMock } from '../../../schema/schema.mock';
 import * as queryParamsNS from './query_params';
 import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
@@ -27,11 +28,8 @@ import * as sortParamsNS from './sorting_params';
 const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
 const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
 
+const SCHEMA = schemaMock.create();
 const MAPPINGS = { properties: {} };
-const SCHEMA = {
-  isHiddenType: (type: string) => false,
-  isNamespaceAgnostic: (type: string) => type === 'global',
-};
 
 describe('getSearchDsl', () => {
   afterEach(() => {

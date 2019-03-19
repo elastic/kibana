@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { SCHEMA } from '../../../schema/schema.mock';
+import { schemaMock } from '../../../schema/schema.mock';
 import { getQueryParams } from './query_params';
 
+const SCHEMA = schemaMock.create();
 const MAPPINGS = {
   properties: {
     type: {
