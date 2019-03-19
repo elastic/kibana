@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await PageObjects.dashboard.loadSavedDashboard('dashboard with everything');
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     it('should have data-shared-items-count set to the number of embeddables on the dashboard', async () => {

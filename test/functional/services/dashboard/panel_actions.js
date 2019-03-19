@@ -45,7 +45,12 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
 
     async toggleContextMenu(parent) {
       log.debug('toggleContextMenu');
-      await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      //may fail in Firefox
+      try {
+        await (parent ? browser.moveMouseTo(parent) : testSubjects.moveMouseTo('dashboardPanelTitle'));
+      } catch(err) {
+        log.debug(err);
+      }
       const toggleMenuItem = await this.findContextMenu(parent);
       await toggleMenuItem.click();
     }
