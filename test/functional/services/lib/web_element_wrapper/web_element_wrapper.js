@@ -141,16 +141,13 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  async pressKeys(...args) {
-    let chord;
-    //leadfoot compatibility
-    if (Array.isArray(args[0])) {
-      chord = this._Keys.chord(...args[0]);
+  async pressKeys(keys) {
+    if (Array.isArray(keys)) {
+      const chord = this._Keys.chord(keys);
+      await this._webElement.sendKeys(chord);
     } else {
-      chord = this._Keys.chord(...args);
+      await this._webElement.sendKeys(keys);
     }
-
-    await this._webElement.sendKeys(chord);
   }
 
   /**
