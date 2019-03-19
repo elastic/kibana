@@ -58,8 +58,11 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
 
   function findContainer(
     tree: SymbolWithMembers[],
-    containerName: string
+    containerName?: string
   ): SymbolInformation | undefined {
+    if (containerName === undefined) {
+      return undefined;
+    }
     const regex = new RegExp(`^${containerName}[<(]?.*[>)]?$`);
     const result = tree.find((s: SymbolInformation) => {
       return regex.test(s.name);
@@ -93,7 +96,7 @@ const generateStructureTree: (symbols: SymbolInformation[]) => any = symbols => 
           (sy: SymbolInformation) => sy.name === SPECIAL_SYMBOL_NAME
         );
       } else {
-        container = findContainer(structureTree, s.containerName || '');
+        container = findContainer(structureTree, s.containerName);
       }
       if (container) {
         if (!container.path) {
