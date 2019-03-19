@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {
@@ -71,6 +67,7 @@ module.exports = {
         'packages/kbn-test-subj-selector/**/*',
         'packages/kbn-test/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
+        'src/legacy/server/saved_objects/**/*',
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
       ],
@@ -158,6 +155,7 @@ module.exports = {
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
+        'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],

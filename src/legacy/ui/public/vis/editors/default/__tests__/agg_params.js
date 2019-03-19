@@ -111,7 +111,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
       aggFilter: aggFilter
     });
 
-    const customLabelElement = $elem.find('label:contains("Custom Label")');
+    const customLabelElement = $elem.find('label:contains("Custom label")');
     expect(customLabelElement.length).to.be(1);
   });
 
@@ -124,7 +124,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
       aggFilter: aggFilter
     });
 
-    const customLabelElement = $elem.find('label:contains("Custom Label")');
+    const customLabelElement = $elem.find('label:contains("Custom label")');
     expect(customLabelElement.length).to.be(0);
   });
 });

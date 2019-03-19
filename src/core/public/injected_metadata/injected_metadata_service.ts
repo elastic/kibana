@@ -59,7 +59,9 @@ export interface InjectedMetadataParams {
  * and is read from the DOM in most cases.
  */
 export class InjectedMetadataService {
-  private state = deepFreeze(this.params.injectedMetadata);
+  private state = deepFreeze(
+    this.params.injectedMetadata
+  ) as InjectedMetadataParams['injectedMetadata'];
 
   constructor(private readonly params: InjectedMetadataParams) {}
 

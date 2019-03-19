@@ -9,7 +9,7 @@ import { Location } from 'history';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
 

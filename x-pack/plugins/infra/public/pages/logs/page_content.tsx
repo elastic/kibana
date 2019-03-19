@@ -11,10 +11,10 @@ import { AutoSizer } from '../../components/auto_sizer';
 import { LogMinimap } from '../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../components/logging/log_text_stream';
 import { PageContent } from '../../components/page';
+import { WithSummary } from '../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
 import { WithStreamItems } from '../../containers/logs/with_stream_items';
-import { WithSummary } from '../../containers/logs/with_summary';
 
 interface Props {
   setFlyoutItem: (id: string) => void;
@@ -79,19 +79,13 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
               <WithSummary>
                 {({ buckets }) => (
                   <WithLogPosition>
-                    {({
-                      jumpToTargetPosition,
-                      reportVisibleSummary,
-                      visibleMidpointTime,
-                      visibleTimeInterval,
-                    }) => (
+                    {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
                       <LogMinimap
                         height={height}
                         width={width}
                         highlightedInterval={visibleTimeInterval}
                         intervalSize={intervalSize}
                         jumpToTarget={jumpToTargetPosition}
-                        reportVisibleInterval={reportVisibleSummary}
                         summaryBuckets={buckets}
                         target={visibleMidpointTime}
                       />
