@@ -21,8 +21,8 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 describe('Create Rollup Job, step 3: Terms', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
+  let find;
+  let exists;
   let userActions;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
@@ -34,8 +34,8 @@ describe('Create Rollup Job, step 3: Terms', () => {
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      findTestSubject,
-      testSubjectExists,
+      find,
+      exists,
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
@@ -52,7 +52,7 @@ describe('Create Rollup Job, step 3: Terms', () => {
 
   const goToStepAndOpenFieldChooser = async () => {
     await goToStep(3);
-    findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+    find('rollupJobShowFieldChooserButton').simulate('click');
   };
 
   describe('layout', () => {
@@ -65,17 +65,17 @@ describe('Create Rollup Job, step 3: Terms', () => {
     });
 
     it('should have the title set to "Terms"', () => {
-      expect(testSubjectExists('rollupJobCreateTermsTitle')).toBe(true);
+      expect(exists('rollupJobCreateTermsTitle')).toBe(true);
     });
 
     it('should have a link to the documentation', () => {
-      expect(testSubjectExists('rollupJobCreateTermsDocsButton')).toBe(true);
+      expect(exists('rollupJobCreateTermsDocsButton')).toBe(true);
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(true);
+      expect(exists('rollupJobSaveButton')).toBe(false);
     });
 
     it('should go to the "Date histogram" step when clicking the back button', async () => {
@@ -89,11 +89,11 @@ describe('Create Rollup Job, step 3: Terms', () => {
     });
 
     it('should have a button to display the list of terms to chose from', () => {
-      expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(false);
+      expect(exists('rollupJobTermsFieldChooser')).toBe(false);
 
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
-      expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(true);
+      expect(exists('rollupJobTermsFieldChooser')).toBe(true);
     });
   });
 
@@ -104,15 +104,15 @@ describe('Create Rollup Job, step 3: Terms', () => {
       });
 
       it('should have the title set to "Add terms fields"', async () => {
-        expect(findTestSubject('rollupJobCreateFlyoutTitle').text()).toEqual('Add terms fields');
+        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add terms fields');
       });
 
       it('should have a button to close the flyout', () => {
-        expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(true);
+        expect(exists('rollupJobTermsFieldChooser')).toBe(true);
 
-        findTestSubject('euiFlyoutCloseButton').simulate('click');
+        find('euiFlyoutCloseButton').simulate('click');
 
-        expect(testSubjectExists('rollupJobTermsFieldChooser')).toBe(false);
+        expect(exists('rollupJobTermsFieldChooser')).toBe(false);
       });
     });
 

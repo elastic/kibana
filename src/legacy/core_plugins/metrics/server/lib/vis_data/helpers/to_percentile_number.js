@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const percentileNumberTest = /\d+\.\d+/;
 
-export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
-export { Logger, LoggerFactory } from './logging';
-export { PluginInitializerContext, PluginName, PluginStartContext } from './plugins';
+export const toPercentileNumber = value =>
+  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
