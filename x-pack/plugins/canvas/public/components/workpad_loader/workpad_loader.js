@@ -30,6 +30,11 @@ import { uploadWorkpad } from './upload_workpad';
 
 const formatDate = date => date && moment(date).format('MMM D, YYYY @ h:mma');
 
+const getDisplayName = (name, workpad, loadedWorkpad) => {
+  const workpadName = name.length ? name : <em>{workpad.id}</em>;
+  return workpad.id === loadedWorkpad ? <strong>{workpadName}</strong> : workpadName;
+};
+
 export class WorkpadLoader extends React.PureComponent {
   static propTypes = {
     workpadId: PropTypes.string.isRequired,
@@ -173,8 +178,7 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
-          let workpadName = name.length ? name : <em>{workpad.id}</em>;
-          workpadName = workpad.id === loadedWorkpad ? <strong>{workpadName}</strong> : workpadName;
+          const workpadName = getDisplayName(name, workpad, loadedWorkpad);
 
           return (
             <Link
