@@ -1,0 +1,30 @@
+.configEditor {
+  margin-left: 8px;
+  min-width: 256px;
+}
+
+.configEditor-axis {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.configEditor-axis-title {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.configEditor-summary {
+  background: white;
+  padding: 8px;
+  display: flex;
+}
+
+.configEditor-summary-text {
+  margin-left: 8px;
+}
+
+.configEditor-summary-subtitle {
+  display: block;
+}
