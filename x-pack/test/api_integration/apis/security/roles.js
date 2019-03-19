@@ -100,39 +100,6 @@ export default function ({ getService }) {
           }
         });
       });
-
-      it('should create a role with kibana reserved privileges', async () => {
-        await supertest.put('/api/security/role/role_with_kibana_reserved_privileges')
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            kibana: [
-              {
-                _reserved: ['ml', 'monitoring']
-              }
-            ]
-          })
-          .expect(204);
-
-        const role = await es.shield.getRole({ name: 'role_with_kibana_reserved_privileges' });
-        expect(role).to.eql({
-          role_with_kibana_reserved_privileges: {
-            cluster: [],
-            indices: [],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: ['reserved_ml', 'reserved_monitoring'],
-                resources: ['*'],
-              }
-            ],
-            run_as: [],
-            metadata: {},
-            transient_metadata: {
-              enabled: true,
-            },
-          }
-        });
-      });
     });
 
     describe('Update Role', () => {
@@ -155,7 +122,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'reserved_ml'],
+                privileges: ['read'],
                 resources: ['*'],
               },
               {
@@ -195,7 +162,6 @@ export default function ({ getService }) {
             },
             kibana: [
               {
-                _reserved: ['monitoring'],
                 base: ['read'],
                 feature: {
                   dashboard: ['read'],
@@ -235,7 +201,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_monitoring'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {
@@ -262,97 +228,99 @@ export default function ({ getService }) {
     });
 
     describe('Get Role', async () => {
-      await es.shield.putRole({
-        name: 'role_to_get',
-        body: {
-          cluster: ['manage'],
-          indices: [
-            {
-              names: ['logstash-*'],
-              privileges: ['read', 'view_index_metadata'],
-              allow_restricted_indices: false,
-              field_security: {
-                grant: ['*'],
-                except: ['geo.*']
-              },
-              query: `{ "match": { "geo.src": "CN" } }`,
-            },
-          ],
-          applications: [
-            {
-              application: 'kibana-.kibana',
-              privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_apm', 'reserved_monitoring'],
-              resources: ['*'],
-            },
-            {
-              application: 'kibana-.kibana',
-              privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
-              resources: ['space:marketing', 'space:sales'],
-            },
-            {
-              application: 'logstash-default',
-              privileges: ['logstash-privilege'],
-              resources: ['*'],
-            },
-          ],
-          run_as: ['watcher_user'],
-          metadata: {
-            foo: 'test-metadata',
-          },
-          transient_metadata: {
-            enabled: true,
-          },
-        }
-      });
-
-      await supertest.get('/api/security/role/role_to_get')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200, {
+      it('should get roles', async () => {
+        await es.shield.putRole({
           name: 'role_to_get',
-          metadata: {
-            foo: 'test-metadata',
-          },
-          transient_metadata: { enabled: true },
-          elasticsearch: {
+          body: {
             cluster: ['manage'],
             indices: [
               {
+                names: ['logstash-*'],
+                privileges: ['read', 'view_index_metadata'],
+                allow_restricted_indices: false,
                 field_security: {
                   grant: ['*'],
                   except: ['geo.*']
                 },
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
                 query: `{ "match": { "geo.src": "CN" } }`,
-                allow_restricted_indices: false
+              },
+            ],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_apm', 'reserved_monitoring'],
+                resources: ['*'],
+              },
+              {
+                application: 'kibana-.kibana',
+                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                resources: ['space:marketing', 'space:sales'],
+              },
+              {
+                application: 'logstash-default',
+                privileges: ['logstash-privilege'],
+                resources: ['*'],
               },
             ],
             run_as: ['watcher_user'],
-          },
-          kibana: [
-            {
-              _reserved: ['apm', 'monitoring'],
-              base: ['read'],
-              feature: {
-                dashboard: ['read'],
-                dev_tools: ['all'],
-              },
-              spaces: ['*']
+            metadata: {
+              foo: 'test-metadata',
             },
-            {
-              base: ['all'],
-              feature: {
-                dashboard: ['read'],
-                discover: ['all'],
-                ml: ['all']
-              },
-              spaces: ['marketing', 'sales']
-            }
-          ],
-
-          _transform_error: [],
-          _unrecognized_applications: [ 'logstash-default' ]
+            transient_metadata: {
+              enabled: true,
+            },
+          }
         });
+
+        await supertest.get('/api/security/role/role_to_get')
+          .set('kbn-xsrf', 'xxx')
+          .expect(200, {
+            name: 'role_to_get',
+            metadata: {
+              foo: 'test-metadata',
+            },
+            transient_metadata: { enabled: true },
+            elasticsearch: {
+              cluster: ['manage'],
+              indices: [
+                {
+                  field_security: {
+                    grant: ['*'],
+                    except: ['geo.*']
+                  },
+                  names: ['logstash-*'],
+                  privileges: ['read', 'view_index_metadata'],
+                  query: `{ "match": { "geo.src": "CN" } }`,
+                  allow_restricted_indices: false
+                },
+              ],
+              run_as: ['watcher_user'],
+            },
+            kibana: [
+              {
+                _reserved: ['apm', 'monitoring'],
+                base: ['read'],
+                feature: {
+                  dashboard: ['read'],
+                  dev_tools: ['all'],
+                },
+                spaces: ['*']
+              },
+              {
+                base: ['all'],
+                feature: {
+                  dashboard: ['read'],
+                  discover: ['all'],
+                  ml: ['all']
+                },
+                spaces: ['marketing', 'sales']
+              }
+            ],
+
+            _transform_error: [],
+            _unrecognized_applications: [ 'logstash-default' ]
+          });
+      });
     });
     describe('Delete Role', () => {
       it('should delete the three roles we created', async () => {

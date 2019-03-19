@@ -19,7 +19,7 @@ export function initPutRolesApi(
 ) {
 
   const transformKibanaPrivilegesToEs = (kibanaPrivileges = []) => {
-    return kibanaPrivileges.map(({ base, feature, spaces, _reserved }) => {
+    return kibanaPrivileges.map(({ base, feature, spaces }) => {
       if (spaces.length === 1 && spaces[0] === GLOBAL_RESOURCE) {
         return {
           privileges: [
@@ -32,9 +32,6 @@ export function initPutRolesApi(
                   privilege => PrivilegeSerializer.serializeFeaturePrivilege(featureName, privilege)
                 )
               )
-            ) : [],
-            ..._reserved ? _reserved.map(
-              privilege => PrivilegeSerializer.serializeReservedPrivilege(privilege)
             ) : []
           ],
           application,
@@ -97,11 +94,6 @@ export function initPutRolesApi(
           allSpacesSchema,
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
         ).default([GLOBAL_RESOURCE]),
-        _reserved: Joi.alternatives().when('spaces', {
-          is: allSpacesSchema,
-          then: Joi.array().items(Joi.string().valid(Object.keys(privileges.reserved))),
-          otherwise: Joi.any().forbidden(),
-        })
       })
     ).unique((a, b) => {
       return intersection(a.spaces, b.spaces).length !== 0;

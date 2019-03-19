@@ -43,12 +43,22 @@ export function initGetRolesApi(server, callWithRequest, routePreCheckLicenseFn,
       };
     }
 
-    // if any application entry contains the '*' resource in addition to another resource, we can't transform these
-    if (roleKibanaApplications.some(entry => entry.resources.includes(GLOBAL_RESOURCE) && entry.resources.length > 1)) {
+    // if reserved privilege assigned with feature or base privileges, we won't transform these
+    if (roleKibanaApplications.some(entry =>
+      entry.privileges.some(privilege => PrivilegeSerializer.isSerializedReservedPrivilege(privilege)) &&
+      entry.privileges.some(privilege => !PrivilegeSerializer.isSerializedReservedPrivilege(privilege)))
+    ) {
       return {
         success: false
       };
     }
+
+    // if any application entry contains the '*' resource in addition to another resource, we can't transform these
+    {if (roleKibanaApplications.some(entry => entry.resources.includes(GLOBAL_RESOURCE) && entry.resources.length > 1)) {
+      return {
+        success: false
+      };
+    }}
 
     const allResources = _.flatten(roleKibanaApplications.map(entry => entry.resources));
     // if we have improperly formatted resource entries, we can't transform these

@@ -224,12 +224,12 @@ describe('PUT role', () => {
         },
       });
 
-      putRoleTest(`only allows known Kibana reserved privileges`, {
+      putRoleTest(`doesn't allow Kibana reserved privileges`, {
         name: 'foo-role',
         payload: {
           kibana: [
             {
-              _reserved: ['customApplication3'],
+              _reserved: ['customApplication1'],
               spaces: ['*']
             }
           ]
@@ -239,10 +239,10 @@ describe('PUT role', () => {
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"_reserved\" fails because [\"_reserved\" at position 0 fails because [\"0\" must be one of [customApplication1, customApplication2]]]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
             statusCode: 400,
             validation: {
-              keys: ['kibana.0._reserved.0'],
+              keys: ['kibana.0._reserved'],
               source: 'payload',
             },
           },
@@ -391,7 +391,7 @@ describe('PUT role', () => {
         },
       });
 
-      putRoleTest(`can't assign _reserved privilege at a space`, {
+      putRoleTest(`doesn't allow Kibana reserved privileges`, {
         name: 'foo-role',
         payload: {
           kibana: [
@@ -406,7 +406,7 @@ describe('PUT role', () => {
           result: {
             error: 'Bad Request',
             //eslint-disable-next-line max-len
-            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"_reserved\" fails because [\"_reserved\" is not allowed]]]`,
+            message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
             statusCode: 400,
             validation: {
               keys: ['kibana.0._reserved'],
@@ -528,7 +528,6 @@ describe('PUT role', () => {
               bar: ['bar-privilege-1', 'bar-privilege-2']
             },
             spaces: ['*'],
-            _reserved: ['customApplication1', 'customApplication2']
           },
           {
             base: ['all', 'read'],
@@ -566,8 +565,6 @@ describe('PUT role', () => {
                       'feature_foo.foo-privilege-2',
                       'feature_bar.bar-privilege-1',
                       'feature_bar.bar-privilege-2',
-                      'reserved_customApplication1',
-                      'reserved_customApplication2',
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },
