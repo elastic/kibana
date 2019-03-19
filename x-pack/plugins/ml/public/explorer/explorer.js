@@ -268,7 +268,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
               Object.assign(stateUpdate, noFilterState);
             } else {
-              // Only load indexPattern if there are influencers
+              // indexPattern will not be used if there are no influencers so set up can be skipped
+              // indexPattern is passed to KqlFilterBar which is only shown if (noInfluencersConfigured === false)
               const indexPattern = await this.getIndexPattern(selectedJobs);
               stateUpdate.indexPattern = indexPattern;
             }
