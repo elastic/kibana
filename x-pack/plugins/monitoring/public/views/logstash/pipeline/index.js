@@ -127,8 +127,7 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
           detailVertexId = vertex.id;
         }
 
-        return getPageData($injector)
-          .then(data => this.data = data);
+        return this.updateData();
       };
 
       $scope.$watch(() => this.data, data => {
