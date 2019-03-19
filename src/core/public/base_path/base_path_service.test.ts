@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { BasePathService } from './base_path_service';
 
 function setup(options: any = {}) {
@@ -25,9 +26,8 @@ function setup(options: any = {}) {
 
   const service = new BasePathService();
 
-  const injectedMetadata = {
-    getBasePath: jest.fn().mockReturnValue(injectedBasePath),
-  } as any;
+  const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+  injectedMetadata.getBasePath.mockReturnValue(injectedBasePath);
 
   const start = service.start({
     injectedMetadata,

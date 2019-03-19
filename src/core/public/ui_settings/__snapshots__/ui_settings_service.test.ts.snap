@@ -5,7 +5,9 @@ exports[`#start constructs UiSettingsClient and UiSettingsApi: UiSettingsApi arg
   "calls": Array [
     Array [
       Object {
-        "basePathStart": true,
+        "addToPath": [MockFunction],
+        "get": [MockFunction],
+        "removeFromPath": [MockFunction],
       },
       "kibanaVersion",
     ],

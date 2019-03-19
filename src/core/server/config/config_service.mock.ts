@@ -21,12 +21,6 @@ import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 import { ConfigService } from './config_service';
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 type ConfigSericeContract = PublicMethodsOf<ConfigService>;
 const createConfigServiceMock = () => {
   const mocked: jest.Mocked<ConfigSericeContract> = {
