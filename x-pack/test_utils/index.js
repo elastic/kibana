@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  storeApmTelemetry,
-  createApmTelementry,
-  APM_TELEMETRY_DOC_ID
-} from './apm_telemetry';
-export { makeApmUsageCollector } from './make_apm_usage_collector';
+export { registerTestBed } from './testbed';
+export { getRandomString } from './lib';

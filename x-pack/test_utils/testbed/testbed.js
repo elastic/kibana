@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../enzyme_helpers';
 import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test';
 
 const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
@@ -30,8 +30,8 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
     )
   });
 
-  const testSubjectExists = registerTestSubjExists(component);
-  const findTestSubject = testSubject => findTestSubjectHelper(component, testSubject);
+  const exists = registerTestSubjExists(component);
+  const find = testSubject => findTestSubjectHelper(component, testSubject);
 
   const getFormErrorsMessages = () => {
     const errorMessagesWrappers = component.find('.euiFormErrorText');
@@ -39,7 +39,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
   };
 
   const setInputValue = (inputTestSubject, value, isAsync = false) => {
-    const formInput = findTestSubject(inputTestSubject);
+    const formInput = find(inputTestSubject);
     formInput.simulate('change', { target: { value } });
     component.update();
 
@@ -54,7 +54,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
   };
 
   const selectCheckBox = (checkboxTestSubject) => {
-    findTestSubject(checkboxTestSubject).simulate('change', { target: { checked: true } });
+    find(checkboxTestSubject).simulate('change', { target: { checked: true } });
   };
 
   /**
@@ -63,7 +63,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
    * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
    */
   const getMetadataFromEuiTable = (tableTestSubject) => {
-    const rows = findTestSubject(tableTestSubject)
+    const rows = find(tableTestSubject)
       .find('tr')
       .slice(1) // we remove the first row as it is the table header
       .map(row => ({
@@ -71,7 +71,7 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
         columns: row.find('td').map(col => ({
           reactWrapper: col,
           // We can't access the td value with col.text() because
-          // eui adds an extra div inside the table > tr > td on mobile => (".euiTableRowCell__mobileHeader")
+          // eui adds an extra div in td on mobile => (.euiTableRowCell__mobileHeader)
           value: col.find('.euiTableCellContent').text()
         }))
       }));
@@ -83,8 +83,8 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
 
   return {
     component,
-    testSubjectExists,
-    findTestSubject,
+    exists,
+    find,
     setProps,
     getFormErrorsMessages,
     getMetadataFromEuiTable,
