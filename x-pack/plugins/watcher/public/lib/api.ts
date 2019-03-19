@@ -5,6 +5,7 @@
  */
 import { Watch } from 'plugins/watcher/models/watch';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
+import { WatchStatus } from 'plugins/watcher/models/watch_status';
 
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
@@ -61,4 +62,18 @@ export const deleteWatches = async (watchIds: string[]) => {
     data: { results },
   } = await getHttpClient().post(`${basePath}/watches/delete`, body);
   return results;
+};
+
+export const deactivateWatch = async (id: string) => {
+  const {
+    data: { watchStatus },
+  } = await getHttpClient().put(`${basePath}/watch/${id}/deactivate`, null);
+  return WatchStatus.fromUpstreamJson(watchStatus);
+};
+
+export const activateWatch = async (id: string) => {
+  const {
+    data: { watchStatus },
+  } = await getHttpClient().put(`${basePath}/watch/${id}/activate`, null);
+  return WatchStatus.fromUpstreamJson(watchStatus);
 };

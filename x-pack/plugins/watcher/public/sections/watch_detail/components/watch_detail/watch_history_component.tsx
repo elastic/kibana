@@ -8,12 +8,20 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import React, { useEffect, useState } from 'react';
 
-import { fetchWatchDetail, fetchWatchHistory, fetchWatchHistoryDetail } from '../../../../lib/api';
+import {
+  activateWatch,
+  deactivateWatch,
+  fetchWatchDetail,
+  fetchWatchHistory,
+  fetchWatchHistoryDetail,
+} from '../../../../lib/api';
 
 import { i18n } from '@kbn/i18n';
 import { WATCH_STATES } from '../../../../../common/constants';
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,6 +47,7 @@ const stateToIcon: { [key: string]: JSX.Element } = {
 
 const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isActivated, setIsActivated] = useState<boolean>(true);
   const [history, setWatchHistory] = useState([]);
   const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
   const [itemDetail, setItemDetail] = useState<{
@@ -64,8 +73,6 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       truncateText: true,
       render: (startTime: Moment, item: any) => {
         const formattedDate = startTime.format();
-        // "#/management/elasticsearch/watcher/watches/watch/{{watchHistoryTable.watch.id}}/history-item/{{item.historyItem.id}}"
-        // href={`#/management/elasticsearch/watcher/watches/watch/${watchId}/history-item/${watchId}`}
         return (
           <EuiLink
             className="indTable__link euiTableCellContent"
@@ -126,6 +133,16 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
     setItemDetail(watchHistoryItemDetail);
     return setIsDetailVisible(true);
+  };
+
+  const toggleWatchActivation = async () => {
+    if (isActivated) {
+      await deactivateWatch(watchId);
+    } else {
+      await activateWatch(watchId);
+    }
+    // TODO[pcs]: error handling, response checking, etc...
+    setIsActivated(!isActivated);
   };
 
   useEffect(() => {
@@ -198,8 +215,20 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       </EuiFlyout>
     );
   }
+  const activationButtonText = isActivated ? 'Deactivate Watch' : 'Activate Watch';
   return (
     <EuiPageContent>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={() => window.alert('Button clicked')}>
+            Delete Watch
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">

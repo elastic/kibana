@@ -10,3 +10,7 @@ declare module 'plugins/watcher/models/watch' {
 declare module 'plugins/watcher/models/watch_history_item' {
   export const WatchHistoryItem: any;
 }
+
+declare module 'plugins/watcher/models/watch_status' {
+  export const WatchStatus: any;
+}
