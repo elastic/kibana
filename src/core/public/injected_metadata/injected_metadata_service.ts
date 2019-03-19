@@ -65,7 +65,7 @@ export class InjectedMetadataService {
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
-  public start() {
+  public setup() {
     return {
       getBasePath: () => {
         return this.state.basePath;
@@ -102,4 +102,4 @@ export class InjectedMetadataService {
   }
 }
 
-export type InjectedMetadataStart = ReturnType<InjectedMetadataService['start']>;
+export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
