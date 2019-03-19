@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import Joi from 'joi';
+import { usage } from '../usage';
 import { createIndexName } from './lib/create_index_name';
 
 export const createUninstallRoute = () => ({
@@ -69,6 +70,9 @@ export const createUninstallRoute = () => ({
             .code(403);
         }
       }
+
+      // track the usage operation in a non-blocking way
+      usage(request).addUninstall(params.id);
 
       return {};
     },

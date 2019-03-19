@@ -188,7 +188,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
     }
 
     async getTimeDurationInHours() {
-      const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+      const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm:ss.SSS';
       const { start, end } = await this.getTimeConfigAsAbsoluteTimes();
 
       const startMoment = moment(start, DEFAULT_DATE_FORMAT);

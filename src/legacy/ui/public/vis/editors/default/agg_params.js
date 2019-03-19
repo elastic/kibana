@@ -18,18 +18,18 @@
  */
 
 import $ from 'jquery';
-import { has, get } from 'lodash';
-import aggSelectHtml from './agg_select.html';
-import advancedToggleHtml from './advanced_toggle.html';
-import '../../../filters/match_any';
-import './agg_param';
+import { get, has } from 'lodash';
 import { aggTypes } from '../../../agg_types';
-import { uiModules } from '../../../modules';
-import { documentationLinks } from '../../../documentation_links/documentation_links';
-import aggParamsTemplate from './agg_params.html';
 import { aggTypeFilters } from '../../../agg_types/filter';
-import { editorConfigProviders } from '../config/editor_config_providers';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
+import { documentationLinks } from '../../../documentation_links/documentation_links';
+import '../../../filters/match_any';
+import { uiModules } from '../../../modules';
+import { editorConfigProviders } from '../config/editor_config_providers';
+import advancedToggleHtml from './advanced_toggle.html';
+import './agg_param';
+import aggParamsTemplate from './agg_params.html';
+import aggSelectHtml from './agg_select.html';
 
 uiModules
   .get('app/visualize')
@@ -55,6 +55,12 @@ uiModules
           updateAggParamEditor();
           updateEditorConfig('default');
         });
+
+        $scope.onParamChange = (agg, paramName, value) => {
+          if(agg.params[paramName] !== value) {
+            agg.params[paramName] = value;
+          }
+        };
 
         function updateEditorConfig(property = 'fixedValue') {
           $scope.editorConfig = editorConfigProviders.getConfigForAgg(
@@ -185,22 +191,35 @@ uiModules
         // build HTML editor given an aggParam and index
         function getAggParamHTML(param, idx) {
         // don't show params without an editor
-          if (!param.editor) {
+          if (!param.editor && !param.editorComponent) {
             return;
           }
 
           const attrs = {
-            'agg-param': 'agg.type.params[' + idx + ']'
+            'agg-param': 'agg.type.params[' + idx + ']',
+            'agg': 'agg',
           };
 
           if (param.advanced) {
             attrs['ng-show'] = 'advancedToggled';
           }
 
+          if (param.editorComponent) {
+            attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
+            // The form should interact with reactified components as well.
+            // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
+            // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.
+            attrs['ng-model'] = normalizeModelName(`_internalNgModelState${$scope.agg.id}${param.name}`);
+          }
+
           return $('<vis-agg-param-editor>')
             .attr(attrs)
             .append(param.editor)
             .get(0);
+        }
+
+        function normalizeModelName(modelName = '') {
+          return modelName.replace('-', '_');
         }
       }
     };

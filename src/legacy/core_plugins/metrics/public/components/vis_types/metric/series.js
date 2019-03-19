@@ -193,6 +193,8 @@ function MetricSeriesUi(props) {
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
@@ -228,7 +230,8 @@ MetricSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
 };
 
 const MetricSeries = injectI18n(MetricSeriesUi);
