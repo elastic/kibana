@@ -33,6 +33,39 @@ describe('workpad selectors', () => {
           },
         ],
       },
+      'element-3': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'demodata',
+            arguments: {},
+          },
+          {
+            type: 'function',
+            function: 'dropdownControl',
+            arguments: {
+              valueColumn: ['project'],
+              filterColumn: ['project'],
+            },
+          },
+          {
+            type: 'function',
+            function: 'render',
+            arguments: {},
+          },
+        ],
+      },
+      'element-4': {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'timefilterControl',
+            arguments: { compact: [true], column: ['@timestamp'] },
+          },
+        ],
+      },
     };
 
     state = {
@@ -63,10 +96,23 @@ describe('workpad selectors', () => {
                 {
                   id: 'element-0',
                   expression: 'markdown',
+                  filter: '',
                 },
                 {
                   id: 'element-1',
                   expression: 'demodata',
+                  filter: '',
+                },
+                {
+                  id: 'element-3',
+                  expression:
+                    'demodata | dropdownControl valueColumn=project filterColumn=project | render',
+                  filter: 'exactly value="beats" column="project"',
+                },
+                {
+                  id: 'element-4',
+                  expression: 'timefilterControl compact=true column=@timestamp',
+                  filter: 'timefilter column=@timestamp from=now-24h to=now',
                 },
               ],
             },
@@ -135,6 +181,7 @@ describe('workpad selectors', () => {
 
     it('returns all elements on the page', () => {
       const { elements } = state.persistent.workpad.pages[0];
+
       const expected = elements.map(element => ({
         ...element,
         ast: asts[element.id],
