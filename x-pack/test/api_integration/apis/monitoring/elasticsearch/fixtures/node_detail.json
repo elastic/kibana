@@ -10,7 +10,16 @@
     "status": "Offline",
     "isOnline": false
   },
-  "logs": [],
+  "logs": {
+    "enabled": false,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "nodeExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  },
   "metrics": {
     "node_latency": [{
       "bucket_size": "10 seconds",

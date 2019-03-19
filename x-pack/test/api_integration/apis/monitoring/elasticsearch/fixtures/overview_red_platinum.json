@@ -14,7 +14,16 @@
       "7.0.0-alpha1"
     ]
   },
-  "logs": [],
+  "logs": {
+    "enabled": false,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "nodeExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  },
   "metrics": {
     "cluster_index_latency": [
       {

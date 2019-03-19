@@ -5749,5 +5749,14 @@
       }
     }
   ],
-  "logs": []
+  "logs": {
+    "enabled": false,
+    "reason": {
+      "clusterExists": false,
+      "indexPatternExists": false,
+      "nodeExists": false,
+      "typeExists": false
+    },
+    "logs": []
+  }
 }

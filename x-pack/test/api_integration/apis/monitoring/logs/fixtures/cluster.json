@@ -1,1 +1,4 @@
-[{"type":"server","levels":[{"level":"info","count":38},{"level":"warn","count":1}]},{"type":"deprecation","levels":[{"level":"warn","count":3}]}]
+{
+  "enabled": true,
+  "types": [{"type":"server","levels":[{"level":"info","count":38},{"level":"warn","count":1}]},{"type":"deprecation","levels":[{"level":"warn","count":3}]}]
+}
