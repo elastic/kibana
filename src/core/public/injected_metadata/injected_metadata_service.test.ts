@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { DiscoveredPlugin } from 'src/core/server';
+import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('#getKibanaVersion', () => {

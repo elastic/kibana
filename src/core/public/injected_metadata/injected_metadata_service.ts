@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { DiscoveredPlugin, PluginName } from 'src/core/server';
+import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
 import { deepFreeze } from './deep_freeze';
 
