@@ -253,11 +253,25 @@ export const Explorer = injectI18n(injectObservablesAsProps(
               selectedJobs,
             };
 
-            const indexPattern = await this.getIndexPattern(selectedJobs);
-            stateUpdate.indexPattern = indexPattern;
-
             this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
             Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+            // clear filter if selected jobs have no influencers
+            if (stateUpdate.noInfluencersConfigured === true) {
+              this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+              const noFilterState = {
+                filterActive: false,
+                filteredFields: [],
+                influencersFilterQuery: undefined,
+                maskAll: false,
+                queryString: undefined
+              };
+
+              Object.assign(stateUpdate, noFilterState);
+            } else {
+              // Only load indexPattern if there are influencers
+              const indexPattern = await this.getIndexPattern(selectedJobs);
+              stateUpdate.indexPattern = indexPattern;
+            }
 
             if (selectedJobs.length > 1) {
               this.props.appStateHandler(
