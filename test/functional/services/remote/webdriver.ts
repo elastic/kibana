@@ -23,17 +23,12 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 
-// @ts-ignore types for 4.0 not available yet
-import { Builder, By, Key, logging, until } from 'selenium-webdriver';
-// @ts-ignore types not available
+import { Builder, By, Executor, Key, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
-// @ts-ignore types not available
 import firefox from 'selenium-webdriver/firefox';
-// @ts-ignore internal modules are not typed
+// @ts-ignore not supported yet
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
-// @ts-ignore internal modules are not typed
-import { Executor } from 'selenium-webdriver/lib/http';
-// @ts-ignore internal modules are not typed
+// @ts-ignore not supported yet
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
 import { preventParallelCalls } from './prevent_parallel_calls';
@@ -52,7 +47,7 @@ const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
  * progress.
  */
 Executor.prototype.execute = preventParallelCalls(
-  Executor.prototype.execute,
+  (Executor as any).prototype.execute,
   (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
 );
 
@@ -100,7 +95,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 
-    session.setNetworkConditions({
+    (session as any).setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).
       download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
