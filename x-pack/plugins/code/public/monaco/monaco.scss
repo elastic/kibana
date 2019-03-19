@@ -18,6 +18,7 @@
 .monaco-editor-hover {
   min-width: 350px;
   border: $euiBorderThin;
+  border-bottom: 0;
   cursor: default;
   position: absolute;
   overflow-y: auto;
@@ -43,7 +44,7 @@
   background: linear-gradient(-180deg, $euiColorLightestShade 0%, $euiColorEmptyShade 100%);
   border-radius: 0 0 4px 4px;
   box-shadow: 0 -1px 0 0 $euiBorderColor;
-  height: 32px;
+  height: 33px;
 }
 
 .monaco-editor-hover .button-group button:not(:first-child) {
