@@ -3,28 +3,34 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+const mockCheckPrivilegesWithRequestFactory = jest.fn();
 jest.mock('./check_privileges', () => ({
-  checkPrivilegesWithRequestFactory: jest.fn(),
+  checkPrivilegesWithRequestFactory: mockCheckPrivilegesWithRequestFactory,
 }));
 
+const mockCheckPrivilegesDynamicallyWithRequestFactory = jest.fn();
 jest.mock('./check_privileges_dynamically', () => ({
-  checkPrivilegesDynamicallyWithRequestFactory: jest.fn(),
+  checkPrivilegesDynamicallyWithRequestFactory: mockCheckPrivilegesDynamicallyWithRequestFactory,
 }));
 
+const mockGetClient = jest.fn();
 jest.mock('../../../../../server/lib/get_client_shield', () => ({
-  getClient: jest.fn(),
+  getClient: mockGetClient,
 }));
 
+const mockActionsFactory = jest.fn();
 jest.mock('./actions', () => ({
-  actionsFactory: jest.fn(),
+  actionsFactory: mockActionsFactory,
 }));
 
+const mockPrivilegesFactory = jest.fn();
 jest.mock('./privileges', () => ({
-  privilegesFactory: jest.fn(),
+  privilegesFactory: mockPrivilegesFactory,
 }));
 
+const mockAuthorizationModeFactory = jest.fn();
 jest.mock('./mode', () => ({
-  authorizationModeFactory: jest.fn(),
+  authorizationModeFactory: mockAuthorizationModeFactory,
 }));
 
 // @ts-ignore
@@ -59,24 +65,24 @@ test(`returns exposed services`, () => {
     log: Symbol(),
   };
   const mockShieldClient = Symbol();
-  getClient.mockReturnValue(mockShieldClient);
+  mockGetClient.mockReturnValue(mockShieldClient);
   const mockCheckPrivilegesWithRequest = Symbol();
-  (checkPrivilegesWithRequestFactory as jest.Mock).mockReturnValue(mockCheckPrivilegesWithRequest);
+  mockCheckPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
   const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
-  (checkPrivilegesDynamicallyWithRequestFactory as jest.Mock).mockReturnValue(
+  mockCheckPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
     mockCheckPrivilegesDynamicallyWithRequest
   );
   const mockActions = Symbol();
-  (actionsFactory as jest.Mock).mockReturnValue(mockActions);
+  mockActionsFactory.mockReturnValue(mockActions);
   const mockXpackInfoFeature = Symbol();
   const mockFeatures = Symbol();
   const mockXpackMainPlugin = {
     getFeatures: () => mockFeatures,
   };
   const mockPrivilegesService = Symbol();
-  (privilegesFactory as jest.Mock).mockReturnValue(mockPrivilegesService);
+  mockPrivilegesFactory.mockReturnValue(mockPrivilegesService);
   const mockAuthorizationMode = Symbol();
-  (authorizationModeFactory as jest.Mock).mockReturnValue(mockAuthorizationMode);
+  mockAuthorizationModeFactory.mockReturnValue(mockAuthorizationMode);
   const mockSpaces = Symbol();
 
   const authorization = createAuthorizationService(

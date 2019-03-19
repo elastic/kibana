@@ -11,7 +11,7 @@ import { actionsFactory } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 
 const actions = actionsFactory({
-  get: (key: string) => {
+  get(key: string) {
     if (key === 'pkg.version') {
       return `1.0.0-zeta1`;
     }
