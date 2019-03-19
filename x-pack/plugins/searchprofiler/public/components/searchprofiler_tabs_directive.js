@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
 import 'ngreact';
 
 import { wrapInI18nContext } from 'ui/i18n';

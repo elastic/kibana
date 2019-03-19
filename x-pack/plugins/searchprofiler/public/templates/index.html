@@ -4,6 +4,7 @@
       <div class="prfDevTool__main">
 
         <search-profiler-tabs
+          ng-if="profileResponse.length > 0"
           profile-response="profileResponse"
           activate-tab="activateTab"
           active-tab="activeTab"

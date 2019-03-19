@@ -5,13 +5,9 @@
  */
 
 
-
-
+import _ from 'lodash';
 import PropTypes from 'prop-types';
-
-import React, {
-  Component
-} from 'react';
+import React from 'react';
 
 import {
   EuiTabs,
@@ -20,72 +16,46 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class SearchProfilerTabs extends Component {
-  constructor(props) {
-    super(props);
-  }
+function hasSearch(profileResponse) {
+  const aggs = _.get(profileResponse, '[0].searches', []);
+  return aggs.length > 0;
+}
 
-  componentDidMount() {
-    this.handleClick('search');
-  }
+function hasAggregations(profileResponse) {
+  const aggs = _.get(profileResponse, '[0].aggregations', []);
+  return aggs.length > 0;
+}
 
-  hasData() {
-    const { profileResponse } = this.props;
-    return !!profileResponse &&
-      profileResponse.length > 0;
-  }
 
-  hasSearch() {
-    const { profileResponse } = this.props;
-    return this.hasData() &&
-      profileResponse[0].searches != null &&
-      profileResponse[0].searches.length > 0;
-  }
+function handleClick(activateTab, tabName) {
+  activateTab(tabName);
+}
 
-  hasAggregations() {
-    const { profileResponse } = this.props;
-    return this.hasData() &&
-    profileResponse[0].aggregations != null &&
-    profileResponse[0].aggregations.length > 0;
-  }
-
-  handleClick(tabName) {
-    const { activateTab } = this.props;
-    activateTab(tabName);
-  }
-
-  render() {
-    const { activeTab } = this.props;
-
-    if (!this.hasData()) {
-      return null;
-    }
-
-    return (
-      <EuiTabs>
-        <EuiTab
-          isSelected={activeTab.search}
-          disabled={!this.hasSearch()}
-          onClick={() => this.handleClick('search')}
-        >
-          <FormattedMessage
-            id="xpack.searchProfiler.queryProfileTabTitle"
-            defaultMessage="Query Profile"
-          />
-        </EuiTab>
-        <EuiTab
-          isSelected={activeTab.aggregations}
-          disabled={!this.hasAggregations()}
-          onClick={() => this.handleClick('aggregations')}
-        >
-          <FormattedMessage
-            id="xpack.searchProfiler.aggregationProfileTabTitle"
-            defaultMessage="Aggregation Profile"
-          />
-        </EuiTab>
-      </EuiTabs>
-    );
-  }
+export function SearchProfilerTabs(props) {
+  return (
+    <EuiTabs>
+      <EuiTab
+        isSelected={props.activeTab.search}
+        disabled={!hasSearch(props.profileResponse)}
+        onClick={() => handleClick(props.activateTab, 'search')}
+      >
+        <FormattedMessage
+          id="xpack.searchProfiler.queryProfileTabTitle"
+          defaultMessage="Query Profile"
+        />
+      </EuiTab>
+      <EuiTab
+        isSelected={props.activeTab.aggregations}
+        disabled={!hasAggregations(props.profileResponse)}
+        onClick={() => handleClick(props.activateTab, 'aggregations')}
+      >
+        <FormattedMessage
+          id="xpack.searchProfiler.aggregationProfileTabTitle"
+          defaultMessage="Aggregation Profile"
+        />
+      </EuiTab>
+    </EuiTabs>
+  );
 }
 
 SearchProfilerTabs.propTypes = {
@@ -93,5 +63,3 @@ SearchProfilerTabs.propTypes = {
   activateTab: PropTypes.func.isRequired,
   profileResponse: PropTypes.array.isRequired,
 };
-
-export { SearchProfilerTabs };

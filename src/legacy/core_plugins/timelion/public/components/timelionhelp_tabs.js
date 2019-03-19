@@ -17,12 +17,8 @@
  * under the License.
  */
 
-
 import PropTypes from 'prop-types';
-
-import React, {
-  Component
-} from 'react';
+import React from 'react';
 
 import {
   EuiTabs,
@@ -31,44 +27,33 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-class TimelionHelpTabs extends Component {
-  constructor(props) {
-    super(props);
-  }
+function handleClick(activateTab, tabName) {
+  activateTab(tabName);
+}
 
-  handleClick(tabName) {
-    const { activateTab } = this.props;
-    activateTab(tabName);
-  }
-
-  render() {
-    const { activeTab } = this.props;
-
-    return (
-      <div>
-        <EuiTabs size="s">
-          <EuiTab
-            isSelected={activeTab === 'funcref'}
-            onClick={() => this.handleClick('funcref')}
-          >
-            <FormattedMessage
-              id="timelion.help.mainPage.functionReferenceTitle"
-              defaultMessage="Function reference"
-            />
-          </EuiTab>
-          <EuiTab
-            isSelected={activeTab === 'keyboardtips'}
-            onClick={() => this.handleClick('keyboardtips')}
-          >
-            <FormattedMessage
-              id="timelion.help.mainPage.keyboardTipsTitle"
-              defaultMessage="Keyboard tips"
-            />
-          </EuiTab>
-        </EuiTabs>
-      </div>
-    );
-  }
+export function TimelionHelpTabs(props) {
+  return (
+    <EuiTabs size="s">
+      <EuiTab
+        isSelected={props.activeTab === 'funcref'}
+        onClick={() => handleClick(props.activateTab, 'funcref')}
+      >
+        <FormattedMessage
+          id="timelion.help.mainPage.functionReferenceTitle"
+          defaultMessage="Function reference"
+        />
+      </EuiTab>
+      <EuiTab
+        isSelected={props.activeTab === 'keyboardtips'}
+        onClick={() => handleClick(props.activateTab, 'keyboardtips')}
+      >
+        <FormattedMessage
+          id="timelion.help.mainPage.keyboardTipsTitle"
+          defaultMessage="Keyboard tips"
+        />
+      </EuiTab>
+    </EuiTabs>
+  );
 }
 
 TimelionHelpTabs.propTypes = {
@@ -76,4 +61,3 @@ TimelionHelpTabs.propTypes = {
   activateTab: PropTypes.func.isRequired
 };
 
-export { TimelionHelpTabs };
