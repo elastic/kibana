@@ -17,4 +17,24 @@
  * under the License.
  */
 
+import { BasePathStart } from './base_path';
+import { ChromeStart } from './chrome';
+import { FatalErrorsStart } from './fatal_errors';
+import { HttpStart } from './http';
+import { I18nStart } from './i18n';
+import { InjectedMetadataStart } from './injected_metadata';
+import { NotificationsStart } from './notifications';
+import { UiSettingsClient } from './ui_settings';
+
 export { CoreSystem } from './core_system';
+
+export interface CoreStart {
+  i18n: I18nStart;
+  injectedMetadata: InjectedMetadataStart;
+  fatalErrors: FatalErrorsStart;
+  notifications: NotificationsStart;
+  http: HttpStart;
+  basePath: BasePathStart;
+  uiSettings: UiSettingsClient;
+  chrome: ChromeStart;
+}
