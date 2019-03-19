@@ -87,8 +87,7 @@ const steps = [
         <p>
           Once the repo is added and indexed successfully, you can verify that the repo is
           searchable and the code intelligence is available. You can find more details of how the
-          search and code intelligence work in
-          <Link to="">our docs</Link>.
+          search and code intelligence work in <Link to="">our docs</Link>.
         </p>
       </EuiText>
     ),
@@ -109,9 +108,12 @@ const SetupGuidePage = (props: { setupOk?: boolean }) => {
           </EuiCallOut>
         )}
         {props.setupOk === true && (
-          <EuiButton iconType="sortLeft">
-            <Link to="/admin">Back To Project Dashboard</Link>
-          </EuiButton>
+          <React.Fragment>
+            <EuiSpacer size="xs" />
+            <EuiButton iconType="sortLeft">
+              <Link to="/admin">Back To Project Dashboard</Link>
+            </EuiButton>
+          </React.Fragment>
         )}
         <EuiPanel>
           <EuiTitle>
