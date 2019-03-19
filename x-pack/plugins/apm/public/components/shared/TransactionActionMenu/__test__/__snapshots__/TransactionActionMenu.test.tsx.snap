@@ -26,18 +26,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -46,7 +37,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -62,18 +52,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -82,7 +63,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -98,18 +78,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -118,7 +89,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -134,18 +104,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -154,7 +115,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -170,18 +130,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -190,7 +141,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -206,18 +156,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -226,7 +167,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon
@@ -242,18 +182,9 @@ exports[`TransactionActionMenu component should render with data 1`] = `
           toolTipPosition="right"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
             gutterSize="s"
-            justifyContent="flexStart"
-            responsive={true}
-            wrap={false}
           >
-            <EuiFlexItem
-              component="div"
-              grow={true}
-            >
+            <EuiFlexItem>
               <EuiLink
                 color="primary"
                 type="button"
@@ -262,7 +193,6 @@ exports[`TransactionActionMenu component should render with data 1`] = `
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <EuiIcon

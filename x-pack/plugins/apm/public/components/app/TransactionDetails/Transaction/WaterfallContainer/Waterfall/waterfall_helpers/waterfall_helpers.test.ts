@@ -5,8 +5,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import {
   getClockSkew,
   getOrderedWaterfallItems,

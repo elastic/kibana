@@ -4,6 +4,8 @@
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
+      "kibana/public": ["./src/core/public"],
+      "kibana/server": ["./src/core/server"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],

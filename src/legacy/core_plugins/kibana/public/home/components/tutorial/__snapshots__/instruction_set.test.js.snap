@@ -3,16 +3,11 @@
 exports[`render 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -25,7 +20,6 @@ exports[`render 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -93,16 +87,11 @@ exports[`render 1`] = `
 exports[`statusCheckState checking status 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -115,7 +104,6 @@ exports[`statusCheckState checking status 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -178,23 +166,14 @@ exports[`statusCheckState checking status 1`] = `
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <Content
                   text="custom status check description"
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -226,16 +205,11 @@ exports[`statusCheckState checking status 1`] = `
 exports[`statusCheckState failed status check - error 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -248,7 +222,6 @@ exports[`statusCheckState failed status check - error 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -311,23 +284,14 @@ exports[`statusCheckState failed status check - error 1`] = `
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <Content
                   text="custom status check description"
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -364,16 +328,11 @@ exports[`statusCheckState failed status check - error 1`] = `
 exports[`statusCheckState failed status check - no data 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -386,7 +345,6 @@ exports[`statusCheckState failed status check - no data 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -449,23 +407,14 @@ exports[`statusCheckState failed status check - no data 1`] = `
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <Content
                   text="custom status check description"
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -502,16 +451,11 @@ exports[`statusCheckState failed status check - no data 1`] = `
 exports[`statusCheckState initial state - no check has been attempted 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -524,7 +468,6 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -587,23 +530,14 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <Content
                   text="custom status check description"
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton
@@ -635,16 +569,11 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
 exports[`statusCheckState successful status check 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -657,7 +586,6 @@ exports[`statusCheckState successful status check 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>
@@ -720,23 +648,14 @@ exports[`statusCheckState successful status check 1`] = `
           "children": <React.Fragment>
             <EuiFlexGroup
               alignItems="center"
-              component="div"
-              direction="row"
-              gutterSize="l"
               justifyContent="spaceBetween"
-              responsive={true}
-              wrap={false}
             >
-              <EuiFlexItem
-                component="div"
-                grow={true}
-              >
+              <EuiFlexItem>
                 <Content
                   text="custom status check description"
                 />
               </EuiFlexItem>
               <EuiFlexItem
-                component="div"
                 grow={false}
               >
                 <EuiButton

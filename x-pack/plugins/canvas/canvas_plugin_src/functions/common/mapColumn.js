@@ -47,7 +47,7 @@ export const mapColumn = () => ({
 
     return Promise.all(rowPromises).then(rows => {
       const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-      const type = getType(rows[0][args.name]);
+      const type = rows.length ? getType(rows[0][args.name]) : 'null';
       const newColumn = { name: args.name, type };
       if (existingColumnIndex === -1) {
         columns.push(newColumn);
