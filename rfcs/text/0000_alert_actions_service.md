@@ -91,6 +91,9 @@ will define the particular integration such as slack, email, etc.
 server.actions.registerConnector({
   actionType: 'notification',
   connectorType: 'slack',
+  connectorParams: {
+    { name: 'channel', type: 'string' },
+  },
   async handler({ params, connectorParams }) {
     try {
       const body = JSON.stringify({
@@ -121,7 +124,7 @@ whatever service integration they provide.
 ```JS
 server.actions.registerActionType({
   name: 'notification',
-  fire: [
+  params: [
     { name: 'destination', type: 'string' },
     { name: 'message', type: 'string' },
     { name: 'title', type: 'string', optional: true },
