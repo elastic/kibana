@@ -546,7 +546,8 @@ function discoverController(
           }
         });
 
-        $scope.$watch('state.query', (query) => {
+        $scope.$watch('state.query', (newQuery) => {
+          const query = migrateLegacyQuery(newQuery);
           $scope.updateQueryAndFetch({ query });
         });
 
@@ -668,7 +669,7 @@ function discoverController(
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
     timefilter.setTime(dateRange);
-    $state.query = migrateLegacyQuery(query);
+    $state.query = query;
     $scope.fetch();
   };
 
@@ -785,7 +786,8 @@ function discoverController(
         const tabifiedData = tabifyAggResponse($scope.vis.aggs, merged);
         $scope.searchSource.rawResponse = merged;
         Promise
-          .resolve(responseHandler(tabifiedData, buildVislibDimensions($scope.vis, $scope.timeRange)))
+          .resolve(buildVislibDimensions($scope.vis, { timeRange: $scope.timeRange, searchSource: $scope.searchSource }))
+          .then(resp => responseHandler(tabifiedData, resp))
           .then(resp => {
             visualizeHandler.render({
               as: 'visualization',

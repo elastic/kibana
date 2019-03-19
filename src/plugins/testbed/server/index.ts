@@ -19,7 +19,7 @@
 
 import { map, mergeMap } from 'rxjs/operators';
 
-import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from 'kibana';
+import { Logger, PluginInitializerContext, PluginName, PluginStartContext } from 'kibana/server';
 import { TestBedConfig } from './config';
 
 class Plugin {

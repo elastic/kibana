@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { matrixToCSS } from './dom';
-import { nextScene } from './layout';
-import { primaryUpdate } from './layout_functions';
+import { updater } from './layout';
 import { multiply, rotateZ, translate } from './matrix';
-import { createStore, select } from './state';
+import { createStore } from './store';
 
-export const layout = { nextScene, primaryUpdate };
 export const matrix = { multiply, rotateZ, translate };
-export const state = { createStore, select };
-export const toCSS = matrixToCSS;
+
+export const createLayoutStore = (initialState, onChangeCallback) =>
+  createStore(initialState, updater, onChangeCallback);
