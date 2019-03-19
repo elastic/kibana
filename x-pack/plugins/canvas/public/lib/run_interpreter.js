@@ -6,6 +6,8 @@
 
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { fromExpression, getType } from '@kbn/interpreter/common';
+import { getState } from '../state/store';
+import { getGlobalFilterExpression } from '../state/selectors/workpad';
 import { notify } from './notify';
 
 /**
@@ -19,7 +21,14 @@ import { notify } from './notify';
  * @returns {promise}
  */
 export function runInterpreter(ast, context = null, options = {}) {
-  return interpretAst(ast, context)
+  return interpretAst(ast, context, {
+    getInitialContext: () => {
+      return {
+        filters: getGlobalFilterExpression(getState()),
+        assets: getState().assets,
+      };
+    },
+  })
     .then(renderable => {
       if (getType(renderable) === 'render') {
         return renderable;

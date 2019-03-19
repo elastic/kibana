@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getState } from '../state/store';
-import { getAssetById } from '../state/selectors/assets';
-
 export const asset = () => ({
   name: 'asset',
   aliases: [],
@@ -23,9 +20,9 @@ export const asset = () => ({
       multi: false,
     },
   },
-  fn: (context, args) => {
+  fn: (context, args, handlers) => {
     const assetId = args.id;
-    const asset = getAssetById(getState(), assetId);
+    const asset = handlers.getInitialContext().assets[assetId];
     if (asset !== undefined) {
       return asset.value;
     }

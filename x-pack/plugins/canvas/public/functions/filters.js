@@ -7,8 +7,6 @@
 import { interpretAst } from 'plugins/interpreter/interpreter';
 import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
-import { getState } from '../state/store';
-import { getGlobalFilterExpression } from '../state/selectors/workpad';
 
 export const filters = () => ({
   name: 'filters',
@@ -17,8 +15,8 @@ export const filters = () => ({
     types: ['null'],
   },
   help: 'Collect element filters on the workpad, usually to provide them to a data source',
-  fn: () => {
-    const filterExpression = getGlobalFilterExpression(getState());
+  fn: (context, args, handlers) => {
+    const filterExpression = handlers.getInitialContext().filters;
 
     if (filterExpression && filterExpression.length) {
       const filterAST = fromExpression(filterExpression);
