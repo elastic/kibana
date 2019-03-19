@@ -32,9 +32,7 @@
 // This file contains a section of code taken from angular-ui-bootstrap@0.13.1
 // and adds it to kibana's included version of 0.12.1
 // It adds the ability to allow html to be used as the content of the popover component
-// and also adds support for dropdown-append-to-body flag, allowing the dropdown
-// menu to be appended to be the body and for the menu to be right aligned to the dropdown
-// (by addition of the dropdown-menu-right class to the dropdown-menu)
+
 import 'ui/angular-bootstrap';
 
 import { uiModules } from 'ui/modules';
