@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquiredCredsDetails 1`] = `
+<Component
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+>
+  <pure(Component)
+    browserFields={Object {}}
+    data={
+      Object {
+        "_id": "25",
+        "_index": "auditbeat-8.0.0-2019.02.19-000001",
+        "auditd": Object {
+          "data": Object {
+            "__typename": "AuditdData",
+            "acct": null,
+            "op": null,
+            "terminal": "/dev/pts/0",
+          },
+          "result": "success",
+          "session": "338",
+          "summary": Object {
+            "__typename": "Summary",
+            "actor": Object {
+              "__typename": "PrimarySecondary",
+              "primary": "root",
+              "secondary": "alice",
+            },
+            "how": "/sbin/pam_tally2",
+            "message_type": null,
+            "object": Object {
+              "__typename": "PrimarySecondary",
+              "primary": "/dev/pts/0",
+              "secondary": null,
+              "type": "user-session",
+            },
+            "sequence": null,
+          },
+        },
+        "destination": null,
+        "event": Object {
+          "action": "was-authorized",
+          "category": "user-login",
+          "dataset": null,
+          "id": null,
+          "module": "auditd",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
+          "ip": Array [
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
+          ],
+          "name": "suricata-bangalore",
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": null,
+          "executable": "/sbin/pam_tally2",
+          "name": null,
+          "pid": 21170,
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
+        },
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-13T03:34:08.890Z",
+        "url": null,
+        "user": Object {
+          "name": "alice",
+        },
+        "zeek": null,
+      }
+    }
+  />
+</Component>
+`;
