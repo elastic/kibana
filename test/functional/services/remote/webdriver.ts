@@ -23,11 +23,13 @@ import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
 
-import { Builder, By, Executor, Key, logging, until } from 'selenium-webdriver';
+import { Builder, By, Key, logging, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 // @ts-ignore not supported yet
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
+// @ts-ignore not supported yet
+import { Executor } from 'selenium-webdriver/lib/http';
 // @ts-ignore not supported yet
 import { getLogger } from 'selenium-webdriver/lib/logging';
 
@@ -47,11 +49,12 @@ const NO_QUEUE_COMMANDS = ['getStatus', 'newSession', 'quit'];
  * progress.
  */
 Executor.prototype.execute = preventParallelCalls(
-  (Executor as any).prototype.execute,
+  Executor.prototype.execute,
   (command: { getName: () => string }) => NO_QUEUE_COMMANDS.includes(command.getName())
 );
 
 let attemptCounter = 0;
+
 async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | 'firefox') {
   const attemptId = ++attemptCounter;
   log.debug('[webdriver] Creating session');
