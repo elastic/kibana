@@ -83,7 +83,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               defaultMessage: 'ID',
             }),
             render: (id: string, monitor: LatestMonitor) => (
-              <Link to={`/monitor/${id}`}>
+              <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
                 {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                   ? monitor.ping.monitor.name
                   : id}

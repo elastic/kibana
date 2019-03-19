@@ -21,6 +21,8 @@ import { relative } from 'path';
 
 import getopts from 'getopts';
 
+import { Options } from './run';
+
 export interface Flags {
   verbose: boolean;
   quiet: boolean;
@@ -57,11 +59,11 @@ export function getFlags(argv: string[]): Flags {
   };
 }
 
-export function getHelp() {
+export function getHelp(options: Options) {
   return `
   node ${relative(process.cwd(), process.argv[1])}
 
-  Runs a dev task
+  ${options.helpDescription || 'Runs a dev task'}
 
   Options:
     --verbose, -v      Log verbosely
