@@ -6,7 +6,7 @@
 
 import { Pager } from '@elastic/eui';
 
-import { registerTestBed } from '../../../../../__jest__/utils';
+import { registerTestBed } from '../../../../../../../test_utils';
 import { getJobs } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
@@ -32,8 +32,8 @@ describe('<JobTable />', () => {
     const totalJobs = 5;
     const jobs = getJobs(totalJobs);
     const openDetailPanel = jest.fn();
-    const { findTestSubject } = initTestBed({ jobs, openDetailPanel });
-    const tableRows = findTestSubject('jobTableRow');
+    const { find } = initTestBed({ jobs, openDetailPanel });
+    const tableRows = find('jobTableRow');
 
     it('should create 1 table row per job', () => {
       expect(tableRows.length).toEqual(totalJobs);
@@ -52,7 +52,7 @@ describe('<JobTable />', () => {
       ];
 
       const tableColumns = expectedColumns.reduce((tableColumns, columnId) => (
-        findTestSubject(`jobTableHeaderCell-${columnId}`).length
+        find(`jobTableHeaderCell-${columnId}`).length
           ? tableColumns.concat(columnId)
           : tableColumns
       ), []);
@@ -107,16 +107,16 @@ describe('<JobTable />', () => {
   });
 
   describe('action menu', () => {
-    let findTestSubject;
-    let testSubjectExists;
+    let find;
+    let exists;
     let selectJob;
     let jobs;
     let tableRows;
 
     beforeEach(() => {
       jobs = getJobs();
-      ({ findTestSubject, testSubjectExists } = initTestBed({ jobs }));
-      tableRows = findTestSubject('jobTableRow');
+      ({ find, exists } = initTestBed({ jobs }));
+      tableRows = find('jobTableRow');
 
       selectJob = (index = 0) => {
         const job = jobs[index];
@@ -127,11 +127,11 @@ describe('<JobTable />', () => {
     });
 
     it('should be visible when a job is selected', () => {
-      expect(testSubjectExists('jobActionMenuButton')).toBeFalsy();
+      expect(exists('jobActionMenuButton')).toBeFalsy();
 
       selectJob();
 
-      expect(testSubjectExists('jobActionMenuButton')).toBeTruthy();
+      expect(exists('jobActionMenuButton')).toBeTruthy();
     });
 
     it('should have a "start" and "delete" action for a job that is stopped', () => {
@@ -140,10 +140,10 @@ describe('<JobTable />', () => {
       job.status = 'stopped';
 
       selectJob(index);
-      const menuButton = findTestSubject('jobActionMenuButton');
+      const menuButton = find('jobActionMenuButton');
       menuButton.simulate('click'); // open the context menu
 
-      const contextMenu = findTestSubject('jobActionContextMenu');
+      const contextMenu = find('jobActionContextMenu');
       expect(contextMenu.length).toBeTruthy();
 
       const contextMenuButtons = contextMenu.find('button');
@@ -157,9 +157,9 @@ describe('<JobTable />', () => {
       job.status = 'started';
 
       selectJob(index);
-      findTestSubject('jobActionMenuButton').simulate('click');
+      find('jobActionMenuButton').simulate('click');
 
-      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
       expect(buttonsLabel).toEqual(['Stop job']);
     });
@@ -172,9 +172,9 @@ describe('<JobTable />', () => {
 
       selectJob(0);
       selectJob(1);
-      findTestSubject('jobActionMenuButton').simulate('click');
+      find('jobActionMenuButton').simulate('click');
 
-      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
       expect(buttonsLabel).toEqual(['Start jobs', 'Stop jobs']);
     });
