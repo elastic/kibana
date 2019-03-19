@@ -17,32 +17,25 @@
  * under the License.
  */
 
-import { IsRequestProvider } from './is_request';
 import { RequestStatus } from './req_status';
+import { SearchRequest } from './request';
 
-export function MergeDuplicatesRequestProvider(Private) {
-  const isRequest = Private(IsRequestProvider);
-  const DUPLICATE = RequestStatus.DUPLICATE;
+export function mergeDuplicateRequests(requests) {
+  // dedupe requests
+  const index = {};
+  return requests.map(function (req) {
+    if (!(req instanceof SearchRequest)) return req;
 
-  function mergeDuplicateRequests(requests) {
-    // dedupe requests
-    const index = {};
-    return requests.map(function (req) {
-      if (!isRequest(req)) return req;
+    const searchSourceId = req.source.getId();
+    if (!index[searchSourceId]) {
+      // this request is unique so far
+      index[searchSourceId] = req;
+      // keep the request
+      return req;
+    }
 
-      const searchSourceId = req.source.getId();
-      if (!index[searchSourceId]) {
-        // this request is unique so far
-        index[searchSourceId] = req;
-        // keep the request
-        return req;
-      }
-
-      // the source was requested at least twice
-      req._uniq = index[searchSourceId];
-      return DUPLICATE;
-    });
-  }
-
-  return mergeDuplicateRequests;
+    // the source was requested at least twice
+    req._uniq = index[searchSourceId];
+    return RequestStatus.DUPLICATE;
+  });
 }

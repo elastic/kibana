@@ -19,20 +19,18 @@
 
 import _ from 'lodash';
 
-export function NormalizeSortRequestProvider(config) {
-  const defaultSortOptions = config.get('sort:options');
 
-  /**
-   * Decorate queries with default parameters
-   * @param {query} query object
-   * @returns {object}
-   */
-  return function (sortObject, indexPattern) {
-    // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
-    return [].concat(sortObject).map(function (sortable) {
-      return normalize(sortable, indexPattern);
-    });
-  };
+/**
+ * Decorate queries with default parameters
+ * @param defaultSortOptions the config value for sort options
+ * @param {query} query object
+ * @param {indexPattern}
+ * @returns {object}
+ */
+export function normalizeSortRequest(defaultSortOptions, sortObject, indexPattern) {
+  return [].concat(sortObject).map(function (sortable) {
+    return normalize(sortable, indexPattern);
+  });
 
   /*
     Normalize the sort description to the more verbose format:

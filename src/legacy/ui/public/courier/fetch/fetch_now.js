@@ -19,8 +19,8 @@
 
 import { fatalError } from '../../notify';
 import { CallClientProvider } from './call_client';
-import { CallResponseHandlersProvider } from './call_response_handlers';
-import { ContinueIncompleteProvider } from './continue_incomplete';
+import { callResponseHandlers } from './call_response_handlers';
+import { continueIncompleteRequests } from './continue_incomplete';
 import { RequestStatus } from './req_status';
 import { i18n } from '@kbn/i18n';
 
@@ -38,8 +38,6 @@ import { i18n } from '@kbn/i18n';
 export function FetchNowProvider(Private, Promise) {
   // core tasks
   const callClient = Private(CallClientProvider);
-  const callResponseHandlers = Private(CallResponseHandlersProvider);
-  const continueIncomplete = Private(ContinueIncompleteProvider);
 
   const ABORTED = RequestStatus.ABORTED;
   const DUPLICATE = RequestStatus.DUPLICATE;
@@ -86,7 +84,7 @@ export function FetchNowProvider(Private, Promise) {
       })
       .then(function (responses) {
         replaceAbortedRequests();
-        return continueIncomplete(searchRequests, responses, fetchSearchResults);
+        return continueIncompleteRequests(searchRequests, responses, fetchSearchResults);
       })
       .then(function (responses) {
         replaceAbortedRequests();

@@ -19,16 +19,14 @@
 
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
 import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
-import { IsRequestProvider } from './is_request';
-import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
+import { mergeDuplicateRequests } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 import { i18n } from '@kbn/i18n';
+import { SearchRequest } from './request';
 
 export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
-  const isRequest = Private(IsRequestProvider);
-  const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
   const serializeFetchParams = Private(SerializeFetchParamsProvider);
 
   const ABORTED = RequestStatus.ABORTED;
@@ -42,7 +40,7 @@ export function CallClientProvider(Private, Promise, es, config) {
     const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
 
     // get the actual list of requests that we will be fetching
-    const requestsToFetch = searchRequestsAndStatuses.filter(isRequest);
+    const requestsToFetch = searchRequestsAndStatuses.filter(req => req instanceof SearchRequest);
     let requestsToFetchCount = requestsToFetch.length;
 
     if (requestsToFetchCount === 0) {
@@ -122,7 +120,7 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     // attach abort handlers, close over request index
     searchRequestsAndStatuses.forEach(function (searchRequest, index) {
-      if (!isRequest(searchRequest)) {
+      if (!(searchRequest instanceof SearchRequest)) {
         return;
       }
 

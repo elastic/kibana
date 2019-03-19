@@ -20,31 +20,30 @@
 import '../../../private';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { NormalizeSortRequestProvider } from '../_normalize_sort_request';
+import { normalizeSortRequest } from '../_normalize_sort_request';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import _ from 'lodash';
 
 describe('SearchSource#normalizeSortRequest', function () {
-  let normalizeSortRequest;
   let indexPattern;
-  let normalizedSort;
+  const normalizedSort = [{
+    someField: {
+      order: 'desc',
+      unmapped_type: 'boolean'
+    }
+  }];
+  const defaultSortOptions = {
+    unmapped_type: 'boolean'
+  };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    normalizeSortRequest = Private(NormalizeSortRequestProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-
-    normalizedSort = [{
-      someField: {
-        order: 'desc',
-        unmapped_type: 'boolean'
-      }
-    }];
   }));
 
   it('should return an array', function () {
     const sortable = { someField: 'desc' };
-    const result = normalizeSortRequest(sortable, indexPattern);
+    const result = normalizeSortRequest(defaultSortOptions, sortable, indexPattern);
     expect(result).to.be.an(Array);
     expect(result).to.eql(normalizedSort);
     // ensure object passed in is not mutated
@@ -53,18 +52,17 @@ describe('SearchSource#normalizeSortRequest', function () {
   });
 
   it('should make plain string sort into the more verbose format', function () {
-    const result = normalizeSortRequest([{ someField: 'desc' }], indexPattern);
+    const result = normalizeSortRequest(defaultSortOptions, [{ someField: 'desc' }], indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
   it('should append default sort options', function () {
     const sortState = [{
       someField: {
-        order: 'desc',
-        unmapped_type: 'boolean'
+        order: 'desc'
       }
     }];
-    const result = normalizeSortRequest(sortState, indexPattern);
+    const result = normalizeSortRequest(defaultSortOptions, sortState, indexPattern);
     expect(result).to.eql(normalizedSort);
   });
 
@@ -75,7 +73,7 @@ describe('SearchSource#normalizeSortRequest', function () {
 
     const sortState = {};
     sortState[fieldName] = direction;
-    normalizedSort = {
+    const expected = {
       _script: {
         script: {
           source: indexField.script,
@@ -86,12 +84,12 @@ describe('SearchSource#normalizeSortRequest', function () {
       }
     };
 
-    let result = normalizeSortRequest(sortState, indexPattern);
-    expect(result).to.eql([normalizedSort]);
+    let result = normalizeSortRequest(defaultSortOptions, sortState, indexPattern);
+    expect(result).to.eql([expected]);
 
     sortState[fieldName] = { order: direction };
-    result = normalizeSortRequest([sortState], indexPattern);
-    expect(result).to.eql([normalizedSort]);
+    result = normalizeSortRequest(defaultSortOptions, [sortState], indexPattern);
+    expect(result).to.eql([expected]);
   });
 
   it('should use script based sorting only on sortable types', function () {
@@ -100,14 +98,15 @@ describe('SearchSource#normalizeSortRequest', function () {
 
     const sortState = {};
     sortState[fieldName] = direction;
-    normalizedSort = {};
-    normalizedSort[fieldName] = {
-      order: direction,
-      unmapped_type: 'boolean'
+    const expected = {
+      [fieldName]: {
+        order: direction,
+        unmapped_type: 'boolean'
+      }
     };
-    const result = normalizeSortRequest([sortState], indexPattern);
 
-    expect(result).to.eql([normalizedSort]);
+    const result = normalizeSortRequest(defaultSortOptions, [sortState], indexPattern);
+    expect(result).to.eql([expected]);
   });
 
   it('should remove unmapped_type parameter from _score sorting', function () {
@@ -118,8 +117,7 @@ describe('SearchSource#normalizeSortRequest', function () {
       }
     }];
 
-    const result = normalizeSortRequest(sortable, indexPattern);
+    const result = normalizeSortRequest(defaultSortOptions, sortable, indexPattern);
     expect(_.isEqual(result, expected)).to.be.ok();
-
   });
 });

@@ -19,33 +19,27 @@
 
 import { RequestStatus } from './req_status';
 
-export function ContinueIncompleteProvider() {
-  const INCOMPLETE = RequestStatus.INCOMPLETE;
+export function continueIncompleteRequests(searchRequests, responses, fetchSearchResults) {
+  const incompleteSearchRequests = [];
 
-  function continueIncompleteRequests(searchRequests, responses, fetchSearchResults) {
-    const incompleteSearchRequests = [];
-
-    responses.forEach(function (response, index) {
-      if (response === INCOMPLETE) {
-        incompleteSearchRequests.push(searchRequests[index]);
-      }
-    });
-
-    if (!incompleteSearchRequests.length) {
-      return responses;
+  responses.forEach(function (response, index) {
+    if (response === RequestStatus.INCOMPLETE) {
+      incompleteSearchRequests.push(searchRequests[index]);
     }
+  });
 
-    return fetchSearchResults(incompleteSearchRequests)
-      .then(function (completedResponses) {
-        return responses.map(function (prevResponse) {
-          if (prevResponse !== INCOMPLETE) {
-            return prevResponse;
-          }
-
-          return completedResponses.shift();
-        });
-      });
+  if (!incompleteSearchRequests.length) {
+    return responses;
   }
 
-  return continueIncompleteRequests;
+  return fetchSearchResults(incompleteSearchRequests)
+    .then(function (completedResponses) {
+      return responses.map(function (prevResponse) {
+        if (prevResponse !== RequestStatus.INCOMPLETE) {
+          return prevResponse;
+        }
+
+        return completedResponses.shift();
+      });
+    });
 }

@@ -74,8 +74,8 @@ import angular from 'angular';
 import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-query';
 
 import '../../promises';
-import { NormalizeSortRequestProvider } from './_normalize_sort_request';
-import { SearchRequestProvider } from '../fetch/request';
+import { normalizeSortRequest } from './_normalize_sort_request';
+import { SearchRequest } from '../fetch/request';
 
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -115,8 +115,6 @@ function isIndexPattern(val) {
 }
 
 export function SearchSourceProvider(Promise, Private, config) {
-  const SearchRequest = Private(SearchRequestProvider);
-  const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
@@ -306,7 +304,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       if (!req) {
         const errorHandler = (request, error) => {
-          request.defer.reject(error);
+          request.reject(error);
           request.abort();
         };
         req = self._createRequest({ errorHandler });
@@ -377,14 +375,12 @@ export function SearchSourceProvider(Promise, Private, config) {
       const self = this;
 
       return new Promise(function (resolve, reject) {
-        const defer = Promise.defer();
-        defer.promise.then(resolve, reject);
-
         const errorHandler = (request, error) => {
           reject(error);
           request.abort();
         };
-        self._createRequest({ defer, errorHandler });
+        const request = self._createRequest({ errorHandler });
+        request.promise.then(resolve, reject);
       });
     }
 
@@ -426,12 +422,10 @@ export function SearchSourceProvider(Promise, Private, config) {
      * be put into the pending request queue, for this search
      * source
      *
-     * @param {Deferred} defer - the deferred object that should be resolved
-     *                         when the request is complete
      * @return {SearchRequest}
      */
-    _createRequest({ defer, errorHandler }) {
-      return new SearchRequest({ source: this, defer, errorHandler });
+    _createRequest({ errorHandler }) {
+      return new SearchRequest({ source: this, errorHandler });
     }
 
     /**
@@ -481,7 +475,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           addToBody();
           break;
         case 'sort':
-          val = normalizeSortRequest(val, this.getField('index'));
+          val = normalizeSortRequest(config.get('sort:options'), val, this.getField('index'));
           addToBody();
           break;
         case 'query':

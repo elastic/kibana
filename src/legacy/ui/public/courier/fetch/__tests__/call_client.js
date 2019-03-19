@@ -25,8 +25,7 @@ import { delay } from 'bluebird';
 
 import { CallClientProvider } from '../call_client';
 import { RequestStatus } from '../req_status';
-import { SearchRequestProvider } from '../request';
-import { MergeDuplicatesRequestProvider } from '../merge_duplicate_requests';
+import { SearchRequest } from '../request';
 import { addSearchStrategy } from '../../search_strategy';
 
 describe('callClient', () => {
@@ -34,7 +33,6 @@ describe('callClient', () => {
 
   const ABORTED = RequestStatus.ABORTED;
 
-  let SearchRequest;
   let callClient;
   let fakeSearch;
   let searchRequests;
@@ -57,18 +55,6 @@ describe('callClient', () => {
     searchRequest.__testId__ = id;
     return searchRequest;
   };
-
-  beforeEach(ngMock.module('kibana', PrivateProvider => {
-    // We mock this so that we don't need to stub out methods for searchRequest.source, e.g. getId(),
-    // which is used by mergeDuplicateRequests.
-    function FakeMergeDuplicatesRequestProvider() {
-      return function mergeDuplicateRequests(searchRequests) {
-        return searchRequests;
-      };
-    }
-
-    PrivateProvider.swap(MergeDuplicatesRequestProvider, FakeMergeDuplicatesRequestProvider);
-  }));
 
   beforeEach(ngMock.module(function stubEs($provide) {
     esRequestDelay = 0;
@@ -100,7 +86,6 @@ describe('callClient', () => {
 
   beforeEach(ngMock.inject(Private => {
     callClient = Private(CallClientProvider);
-    SearchRequest = Private(SearchRequestProvider);
   }));
 
   describe('basic contract', () => {

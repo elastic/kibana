@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchRequestProvider } from './search_request';
+export { SearchRequest } from './search_request';

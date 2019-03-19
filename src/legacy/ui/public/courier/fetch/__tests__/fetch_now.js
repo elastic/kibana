@@ -22,8 +22,6 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import { CallClientProvider } from '../call_client';
-import { CallResponseHandlersProvider } from '../call_response_handlers';
-import { ContinueIncompleteProvider } from '../continue_incomplete';
 import { FetchNowProvider } from '../fetch_now';
 
 function mockRequest() {
@@ -58,8 +56,6 @@ describe('FetchNowProvider', () => {
     }
 
     PrivateProvider.swap(CallClientProvider, FakeResponsesProvider);
-    PrivateProvider.swap(CallResponseHandlersProvider, FakeResponsesProvider);
-    PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
   }));
 
   beforeEach(ngMock.inject((Private, $injector) => {
