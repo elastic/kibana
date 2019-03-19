@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import { AggParams } from './agg_params';
 import { fieldFormats } from '../registry/field_formats';
+import { i18n } from '@kbn/i18n';
 
 /**
  * Generic AggType Constructor
@@ -118,6 +119,7 @@ function AggType(config) {
     if (config.customLabels !== false) {
       this.params.push({
         name: 'customLabel',
+        displayName: i18n.translate('common.ui.aggTypes.string.customLabel', { defaultMessage: 'Custom label' }),
         type: 'string',
         write: _.noop
       });

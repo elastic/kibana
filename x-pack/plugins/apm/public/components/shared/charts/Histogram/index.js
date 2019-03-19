@@ -72,8 +72,8 @@ export class HistogramInner extends PureComponent {
         ...item,
         color:
           item === selectedItem
-            ? theme.euiColorPrimary
-            : tint(0.5, theme.euiColorPrimary),
+            ? theme.euiColorVis1
+            : tint(0.5, theme.euiColorVis1),
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -181,7 +181,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: theme.euiColorPrimary,
+                stroke: theme.euiColorVis1,
                 rx: '0px',
                 ry: '0px'
               }}

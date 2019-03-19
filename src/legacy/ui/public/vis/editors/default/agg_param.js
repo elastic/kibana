@@ -17,31 +17,81 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { isFunction } from 'lodash';
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
+import { AggParamReactWrapper } from './agg_param_react_wrapper';
 
 uiModules
   .get('app/visualize')
+  .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
+    ['agg', { watchDepth: 'collection' }],
+    ['aggParam', { watchDepth: 'reference' }],
+    ['paramEditor', { wrapApply: false }],
+    ['onChange', { watchDepth: 'reference' }],
+    'value',
+  ]))
   .directive('visAggParamEditor', function (config) {
     return {
       restrict: 'E',
+      // We can't use scope binding here yet, since quiet a lot of child directives arbitrary access
+      // parent scope values right now. So we cannot easy change this, until we remove the whole directive.
       scope: true,
-      template: function ($el) {
+      require: '?^ngModel',
+      template: function ($el, attrs) {
+        if (attrs.editorComponent) {
+          // Why do we need the `ng-if` here?
+          // Short answer: Preventing black magic
+          // Longer answer: The way this component is mounted in agg_params.js (by manually compiling)
+          //   and adding to some array, once you switch an aggregation type, this component will once
+          //   render once with a "broken state" (something like new aggParam, but still old template),
+          //   before agg_params.js actually removes it from the DOM and create a correct version with
+          //   the correct template. That ng-if check prevents us from crashing during that broken render.
+          return `<vis-agg-param-react-wrapper
+            ng-if="editorComponent"
+            param-editor="editorComponent"
+            agg="agg"
+            agg-param="aggParam"
+            on-change="onChange"
+            value="paramValue"
+          ></vis-agg-param-react-wrapper>`;
+        }
+
         return $el.html();
       },
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('aggParam', attr.aggParam);
+          $scope.$bind('agg', attr.agg);
+          $scope.$bind('editorComponent', attr.editorComponent);
         },
-        post: function ($scope) {
+        post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.config = config;
 
           $scope.optionEnabled = function (option) {
-            if (option && _.isFunction(option.enabled)) {
+            if (option && isFunction(option.enabled)) {
               return option.enabled($scope.agg);
             }
 
             return true;
+          };
+
+          if (attr.editorComponent) {
+            $scope.$watch('agg.params[aggParam.name]', (value) => {
+              // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
+              // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
+              $scope.paramValue = value;
+            }, true);
+          }
+
+          $scope.onChange = (value) => {
+            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
+            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
+            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
+
+            if(ngModelCtrl) {
+              ngModelCtrl.$setDirty();
+            }
           };
         }
       }

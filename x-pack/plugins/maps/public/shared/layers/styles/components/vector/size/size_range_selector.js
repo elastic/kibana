@@ -9,66 +9,36 @@ import PropTypes from 'prop-types';
 import {
   EuiFormRow,
   EuiFlexGroup,
-  EuiFlexItem,
+  EuiFlexItem
 } from '@elastic/eui';
-import { ValidatedRange } from '../../../../../components/validated_range';
-import { i18n } from '@kbn/i18n';
+import { ValidatedDualRange } from 'ui/validated_range';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
+
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
 
-  const onSizeChange = (min, max) => {
+  const onSizeChange = ([min, max]) => {
     onChange({
-      minSize: min,
-      maxSize: max
+      minSize: Math.max(DEFAULT_MIN_SIZE, parseInt(min, 10)),
+      maxSize: Math.min(DEFAULT_MAX_SIZE, parseInt(max, 10))
     });
-  };
-
-  const onMinSizeChange = (updatedMinSize) => {
-    onSizeChange(updatedMinSize, updatedMinSize > maxSize ? updatedMinSize : maxSize);
-  };
-
-  const onMaxSizeChange = (updatedMaxSize) => {
-    onSizeChange(updatedMaxSize < minSize ? updatedMaxSize : minSize, updatedMaxSize);
   };
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.styles.vector.size.minLabel', {
-              defaultMessage: 'Min size'
-            })
-          }
           compressed
         >
-          <ValidatedRange
+          <ValidatedDualRange
             min={DEFAULT_MIN_SIZE}
             max={DEFAULT_MAX_SIZE}
-            value={minSize}
-            onChange={onMinSizeChange}
+            step={1}
+            value={[minSize, maxSize]}
             showInput
             showRange
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormRow
-          label={
-            i18n.translate('xpack.maps.styles.vector.size.maxLabel', {
-              defaultMessage: 'Max size'
-            })
-          }
-          compressed
-        >
-          <ValidatedRange
-            min={DEFAULT_MIN_SIZE}
-            max={DEFAULT_MAX_SIZE}
-            value={maxSize}
-            onChange={onMaxSizeChange}
-            showInput
-            showRange
+            onChange={onSizeChange}
+            allowEmptyRange={false}
           />
         </EuiFormRow>
       </EuiFlexItem>
