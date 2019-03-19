@@ -31,7 +31,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
   public async launch(builtinWorkspace: boolean, maxWorkspace: number, installationPath: string) {
     let port = 2090;
 
-    if (!this.options) {
+    if (!this.options.lsp.detach) {
       port = await getPort();
     }
     const log = this.loggerFactory.getLogger(['code', `java@${this.targetHost}:${port}`]);
@@ -178,7 +178,7 @@ export class JavaLauncher implements ILanguageServerLauncher {
     this.isRunning = true;
     p.on('exit', () => (this.isRunning = false));
     log.info(
-      `Launch Java Language Server at port ${process.env.CLIENT_PORT}, pid:${
+      `Launch Java Language Server at port ${port.toString()}, pid:${
         p.pid
       }, JAVA_HOME:${javaHomePath}`
     );
