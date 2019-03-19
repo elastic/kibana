@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('filter pills', async function () {
       before(async () => {
+        await filterBar.ensureFieldEditorModalIsClosed();
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.dashboard.setTimepickerInDataRange();
