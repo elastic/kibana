@@ -5,9 +5,9 @@
  */
 
 import { duplicatePage } from '../actions/pages';
-import { fetchRenderable } from '../actions/elements';
+import { fetchAllRenderables } from '../actions/elements';
 import { setWriteable } from '../actions/workpad';
-import { getPages, getWorkpadName, isWriteable } from '../selectors/workpad';
+import { getWorkpadName, isWriteable } from '../selectors/workpad';
 import { getWindow } from '../../lib/get_window';
 import { setDocTitle } from '../../lib/doc_title';
 
@@ -24,12 +24,7 @@ export const workpadUpdate = ({ dispatch, getState }) => next => action => {
 
   // This middleware fetches all of the renderable elements on new, duplicate page
   if (action.type === duplicatePage.toString()) {
-    // When a page has been duplicated, it will be added as the last page, so fetch it
-    const pages = getPages(getState());
-    const newPage = pages[pages.length - 1];
-
-    // For each element on that page, dispatch the action to update it
-    newPage.elements.forEach(element => dispatch(fetchRenderable(element)));
+    dispatch(fetchAllRenderables());
   }
 
   // This middleware clears any page selection when the writeable mode changes

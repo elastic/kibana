@@ -44,27 +44,24 @@ const setupHandler = (commit, canvasOrigin) => {
 const handleMouseMove = (
   commit,
   { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
-  isEditable,
   canvasOrigin
 ) => {
-  if (isEditable) {
-    const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
-    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
-  }
+  const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
+  commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
 };
 
 const handleMouseLeave = (commit, { buttons }) => {
-  if (buttons !== 1) {
+  if (buttons !== 1 && commit) {
     commit('cursorPosition', {}); // reset hover only if we're not holding down left key (ie. drag in progress)
   }
 };
 
-const handleMouseDown = (commit, e, isEditable, canvasOrigin) => {
+const handleMouseDown = (commit, e, canvasOrigin) => {
   e.stopPropagation();
   const { clientX, clientY, buttons, altKey, metaKey, shiftKey, ctrlKey } = e;
-  if (buttons !== 1 || !isEditable) {
+  if (buttons !== 1) {
     resetHandler();
-    return; // left-click and edit mode only
+    return; // left-click only
   }
   setupHandler(commit, canvasOrigin);
   const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
@@ -72,9 +69,9 @@ const handleMouseDown = (commit, e, isEditable, canvasOrigin) => {
 };
 
 export const eventHandlers = {
-  onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable, props.canvasOrigin),
-  onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
+  onMouseDown: props => e => handleMouseDown(props.commit, e, props.canvasOrigin),
+  onMouseMove: props => e => handleMouseMove(props.commit, e, props.canvasOrigin),
   onMouseLeave: props => e => handleMouseLeave(props.commit, e),
-  onWheel: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
+  onWheel: props => e => handleMouseMove(props.commit, e, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
 };

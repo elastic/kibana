@@ -18,11 +18,11 @@ export const transientReducer = handleActions(
     [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
-      const { selectedElement } = transientState;
+      const { selectedToplevelNodes } = transientState;
       return del(
         {
           ...transientState,
-          selectedElement: elementIds.indexOf(selectedElement) === -1 ? selectedElement : null,
+          selectedToplevelNodes: selectedToplevelNodes.filter(n => elementIds.indexOf(n) < 0),
         },
         ['resolvedArgs', elementIds]
       );
@@ -44,10 +44,10 @@ export const transientReducer = handleActions(
       return set(transientState, 'elementStats', payload);
     },
 
-    [actions.selectElement]: (transientState, { payload }) => {
+    [actions.selectToplevelNodes]: (transientState, { payload }) => {
       return {
         ...transientState,
-        selectedElement: payload || null,
+        selectedToplevelNodes: payload,
       };
     },
 
