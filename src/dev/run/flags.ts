@@ -19,6 +19,7 @@
 
 import { relative } from 'path';
 
+import dedent from 'dedent';
 import getopts from 'getopts';
 
 import { Options } from './run';
@@ -30,21 +31,39 @@ export interface Flags {
   debug: boolean;
   help: boolean;
   _: string[];
+  unexpected: string[];
 
   [key: string]: undefined | boolean | string | string[];
 }
 
-export function getFlags(argv: string[]): Flags {
+export function getFlags(argv: string[], options: Options): Flags {
+  const unexpected: string[] = [];
+
+  const userAliases = (options.getopts && options.getopts.alias) || {};
+  const userDefaults = (options.getopts && options.getopts.default) || {};
+
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
+    ...options.getopts,
     alias: {
+      ...userAliases,
       v: 'verbose',
     },
     default: {
+      ...userDefaults,
       verbose: false,
       quiet: false,
       silent: false,
       debug: false,
       help: false,
+    },
+    unknown: name => {
+      unexpected.push(name);
+
+      if (options.getopts && options.getopts.allowUnexpected) {
+        return true;
+      }
+
+      return false;
     },
   });
 
@@ -55,22 +74,35 @@ export function getFlags(argv: string[]): Flags {
     debug,
     help,
     _,
+    unexpected,
     ...others,
   };
 }
 
 export function getHelp(options: Options) {
+  const optionHelp = (
+    dedent(options.helpOptions || '') +
+    '\n' +
+    dedent`
+      --verbose, -v      Log verbosely
+      --debug            Log debug messages (less than verbose)
+      --quiet            Only log errors
+      --silent           Don't log anything
+      --help             Show this message
+    `
+  )
+    .split('\n')
+    .filter(Boolean)
+    .join('\n    ');
+
   return `
   node ${relative(process.cwd(), process.argv[1])}
 
-  ${options.helpDescription || 'Runs a dev task'}
+  ${dedent(options.helpDescription || 'Runs a dev task')
+    .split('\n')
+    .join('\n  ')}
 
   Options:
-    --verbose, -v      Log verbosely
-    --debug            Log debug messages (less than verbose)
-    --quiet            Only log errors
-    --silent           Don't log anything
-    --help             Show this message
-
+    ${optionHelp}
 `;
 }

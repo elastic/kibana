@@ -104,5 +104,10 @@ run(
         log.error(e);
       }
     }
+  },
+  {
+    getopts: {
+      allowUnexpected: true,
+    },
   }
 );

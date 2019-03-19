@@ -18,17 +18,26 @@
  */
 
 import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
-import { isFailError } from './fail';
+import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
 type RunFn = (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void;
 
 export interface Options {
   helpDescription?: string;
+  helpOptions?: string;
+  getopts?: {
+    alias?: { [key: string]: string | string[] };
+    boolean?: string[];
+    string?: string[];
+    default?: { [key: string]: any };
+    allowUnexpected?: boolean;
+  };
 }
 
 export async function run(fn: RunFn, options: Options = {}) {
-  const flags = getFlags(process.argv.slice(2));
+  const flags = getFlags(process.argv.slice(2), options);
+  const allowUnexpected = options.getopts ? options.getopts.allowUnexpected : false;
 
   if (flags.help) {
     process.stderr.write(getHelp(options));
@@ -41,10 +50,19 @@ export async function run(fn: RunFn, options: Options = {}) {
   });
 
   try {
+    if (!allowUnexpected && flags.unexpected.length) {
+      throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
+    }
+
     await fn({ log, flags });
   } catch (error) {
     if (isFailError(error)) {
       log.error(error.message);
+
+      if (error.showHelp) {
+        log.write(getHelp(options));
+      }
+
       process.exit(error.exitCode);
     } else {
       log.error('UNHANDLED ERROR');

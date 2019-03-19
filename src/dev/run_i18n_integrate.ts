@@ -87,5 +87,10 @@ run(
       config,
       log,
     });
+  },
+  {
+    getopts: {
+      allowUnexpected: true,
+    },
   }
 );
