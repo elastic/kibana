@@ -25,7 +25,7 @@ run(
     `,
     flags: {
       string: ['path'],
-      helpText: `
+      help: `
         --path             Required, path to the file to operate on
       `
     },
@@ -78,22 +78,39 @@ $ node scripts/my_task
 
       The parsed CLI flags, created by [`getopts`](https://www.npmjs.com/package/getopts). Includes the default flags for controlling the log level of the ToolingLog, and `flags.unexpected`, which is an array of flag names which were passed but not expected.
 
-    **Options:**
+    **`Options`:**
+    - *`usage: string`*
+
+      A bit of text to replace the default usage in the `--help` text.
+
     - *`description: string`*
 
       A bit of text to replace the default description in the `--help` text.
 
-    - *`flags: string`*
+    - *`flags.help: string`*
 
-      A bit of text that should be placed above the standard logging level options in the `--help` text.
+      A bit of text included at the top of the `Options:` section of the `--help` text.
 
-    - *[`getopts: GetoptsOptions`](https://www.npmjs.com/package/getopts#opts)*
+    - *`flags.string: string[]`*
 
-      Options object that is merged with the default options for parsing logging level and passed to getopts.
+      An array of flag names that are expected to have a string value.
 
-    **Unexpected Flag Check:**
+    - *`flags.boolean: string[]`*
 
-    By default, any flag that is passed but not mentioned in `getopts.string`, `getopts.boolean`, `getopts.alias` or `getopts.default` is included in `flags.unexpected` and will trigger an error, preventing the run function from calling its first argument. If you would rather allow arbitrary flags to be passed through then set `getopts.allowUnexpected: true`.
+      An array of flag names that are expected to have a boolean value.
+
+    - *`flags.alias: { [short: string], string }`*
+
+      A map of short flag names to long flag names, used to expand short flags like `-v` to `--verbose`.
+
+    - *`flags.default: { [name: string]: string | string[] | boolean | undefined }`*
+
+      A map of flag names to their default value. If the flag is not defined this value will be set in the flags object passed to the run `fn`.
+
+    - *`flags.allowUnexpected: boolean`*
+
+      By default, any flag that is passed but not mentioned in `flags.string`, `flags.boolean`, `flags.alias` or `flags.default` will trigger an error, preventing the run function from calling its first argument. If you have a reason to disable this behavior set this option to `true`.
+
 
 - ***`createFailError(reason: string, options: { exitCode: number, showHelp: boolean }): FailError`***
     
