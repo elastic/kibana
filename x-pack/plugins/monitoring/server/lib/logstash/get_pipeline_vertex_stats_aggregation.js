@@ -45,6 +45,11 @@ function scalarCounterAggregation(field, fieldPath, ephemeralIdField, maxBucketS
   return aggs;
 }
 
+
+function createAggsObjectFromAggsList(aggsList) {
+  return aggsList.reduce((aggsSoFar, agg) => ({ ...aggsSoFar, ...agg }), {});
+}
+
 function createNestedVertexAgg(vertexId, maxBucketSize) {
   const fieldPath = 'logstash_stats.pipelines.vertices';
   const ephemeralIdField = 'logstash_stats.pipelines.vertices.pipeline_ephemeral_id';
@@ -72,15 +77,16 @@ function createNestedVertexAgg(vertexId, maxBucketSize) {
 }
 
 function createTotalProcessorDurationStatsAgg() {
-  return {};
   return {
     total_processor_duration_stats: {
-      // TODO
+      stats: {
+        field: 'logstash_stats.pipelines.events.duration_in_millis'
+      }
     }
   };
 }
 
-function createScopedAgg(pipelineId, pipelineHash, agg) {
+function createScopedAgg(pipelineId, pipelineHash, ...aggsList) {
   return {
     pipelines: {
       nested: { path: 'logstash_stats.pipelines' },
@@ -94,21 +100,21 @@ function createScopedAgg(pipelineId, pipelineHash, agg) {
               ]
             }
           },
-          aggs: agg
+          aggs: createAggsObjectFromAggsList(aggsList)
         }
       }
     }
   };
 }
 
-function createTimeSeriesAgg(timeSeriesIntervalInSeconds, agg) {
+function createTimeSeriesAgg(timeSeriesIntervalInSeconds, ...aggsList) {
   return {
     timeseries: {
       date_histogram: {
         field: 'timestamp',
         interval: timeSeriesIntervalInSeconds + 's'
       },
-      aggs: agg
+      aggs: createAggsObjectFromAggsList(aggsList)
     }
   };
 }
@@ -118,9 +124,10 @@ function fetchPipelineVertexTimeSeriesStats(query, logstashIndexPattern, pipelin
   const aggs = {
     ...createTimeSeriesAgg(timeSeriesIntervalInSeconds,
       createScopedAgg(pipelineId, version.hash,
-        createNestedVertexAgg(vertexId, maxBucketSize))),
-    ...createScopedAgg(pipelineId, version.hash,
-      createTotalProcessorDurationStatsAgg())
+        createNestedVertexAgg(vertexId, maxBucketSize),
+        createTotalProcessorDurationStatsAgg()
+      )
+    )
   };
 
   const params = {
@@ -133,7 +140,7 @@ function fetchPipelineVertexTimeSeriesStats(query, logstashIndexPattern, pipelin
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.events_out_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.duration_in_millis_total',
       'aggregations.timeseries.buckets.pipelines.scoped.vertices.vertex_id.queue_push_duration_in_millis_total',
-      'aggregations.pipelines.scoped.total_processor_duration_stats'
+      'aggregations.timeseries.buckets.pipelines.scoped.total_processor_duration_stats'
     ],
     body: {
       query: query,

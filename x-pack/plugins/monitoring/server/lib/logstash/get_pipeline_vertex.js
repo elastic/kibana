@@ -72,15 +72,13 @@ export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStat
   const vertex = vertices.find(v => v.id === vertexId);
   vertex.stats = {};
 
-  // Gather total duration stats needed later for computing each timeseries bucket stats for the vertex
-  // const totalDurationStats = vertexStatsAggregation.aggregations.pipelines.scoped.total_processor_duration_stats;
-  // const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
-  // TODO
-  const totalProcessorsDurationInMillis = 100000;
-
   // Next, iterate over timeseries metrics and attach them to vertex
   const timeSeriesBuckets = vertexStatsAggregation.aggregations.timeseries.buckets;
   timeSeriesBuckets.forEach(timeSeriesBucket => {
+    // each bucket calculates stats for total pipeline CPU time for the associated timeseries
+    const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
+    const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
+
     const timestamp = timeSeriesBucket.key;
 
     const vertexStatsBucket = timeSeriesBucket.pipelines.scoped.vertices.vertex_id;
