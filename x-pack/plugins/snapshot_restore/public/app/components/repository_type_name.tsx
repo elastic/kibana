@@ -31,68 +31,53 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
     },
   ] = useAppState() as [AppStateInterface];
 
+  const typeNameMap: { [key in RepositoryType]: JSX.Element } = {
+    [FSRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.fileSystemTypeName"
+        defaultMessage="Shared File System"
+      />
+    ),
+    [ReadonlyRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.readonlyTypeName"
+        defaultMessage="Read-only URL"
+      />
+    ),
+    [S3RepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.s3TypeName"
+        defaultMessage="AWS S3"
+      />
+    ),
+    [HDFSRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.hdfsTypeName"
+        defaultMessage="HDFS File System"
+      />
+    ),
+    [AzureRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.azureTypeName"
+        defaultMessage="Azure"
+      />
+    ),
+    [GCSRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.gcsTypeName"
+        defaultMessage="Google Cloud Storage"
+      />
+    ),
+    [SourceRepositoryType]: (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryType.sourceTypeName"
+        defaultMessage="Source"
+      />
+    ),
+  };
+
   const getTypeName = (repositoryType: RepositoryType): JSX.Element => {
-    switch (repositoryType) {
-      case FSRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.fileSystemTypeName"
-            defaultMessage="Shared File System"
-          />
-        );
-        break;
-      case ReadonlyRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.readonlyTypeName"
-            defaultMessage="Read-only URL"
-          />
-        );
-        break;
-      case S3RepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.s3TypeName"
-            defaultMessage="AWS S3"
-          />
-        );
-        break;
-      case HDFSRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.hdfsTypeName"
-            defaultMessage="HDFS File System"
-          />
-        );
-        break;
-      case AzureRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.azureTypeName"
-            defaultMessage="Azure"
-          />
-        );
-        break;
-      case GCSRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.gcsTypeName"
-            defaultMessage="Google Cloud Storage"
-          />
-        );
-        break;
-      case SourceRepositoryType:
-        return (
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryType.sourceTypeName"
-            defaultMessage="Source"
-          />
-        );
-        break;
-      default:
-        return <Fragment>{type}</Fragment>;
-        break;
-    }
+    return typeNameMap[repositoryType] || <Fragment>{type}</Fragment>;
   };
 
   if (type === SourceRepositoryType && delegateType) {

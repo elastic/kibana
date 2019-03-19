@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { API_BASE_PATH } from '../../../common/constants';
 import { AppStateInterface, useAppState } from './app_context';
 
-export const useFetch = ({
+export const useRequest = ({
   path,
   method,
   body,
@@ -28,18 +28,17 @@ export const useFetch = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
 
-  const fetch = async () => {
+  const request = async () => {
     setError(null);
     setLoading(true);
     try {
       const response = await http
         .getClient()
         [method](chrome.addBasePath(`${API_BASE_PATH}${path}`), body);
-      if (response.data) {
-        setData(response.data);
-      } else {
-        setError(new Error(response.statusText));
+      if (!response.data) {
+        throw new Error(response.statusText);
       }
+      setData(response.data);
     } catch (e) {
       setError(e);
     }
@@ -48,11 +47,11 @@ export const useFetch = ({
 
   useEffect(
     () => {
-      fetch();
+      request();
       if (interval) {
-        const intervalFetch = setInterval(fetch, interval);
+        const intervalRequest = setInterval(request, interval);
         return () => {
-          clearInterval(intervalFetch);
+          clearInterval(intervalRequest);
         };
       }
     },
@@ -63,6 +62,6 @@ export const useFetch = ({
     error,
     loading,
     data,
-    fetch,
+    request,
   };
 };

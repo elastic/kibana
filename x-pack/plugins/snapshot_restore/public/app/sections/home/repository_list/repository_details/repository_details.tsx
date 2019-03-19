@@ -5,7 +5,7 @@
  */
 import React, { Fragment } from 'react';
 
-import { useFetch } from '../../../../services/api';
+import { useRequest } from '../../../../services/api';
 import { AppStateInterface, useAppState } from '../../../../services/app_context';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 
@@ -46,7 +46,7 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
     },
   ] = useAppState() as [AppStateInterface];
   const { FormattedMessage } = i18n;
-  const { error, loading, data: repository } = useFetch({
+  const { error, loading, data: repository } = useRequest({
     path: `repositories/${repositoryName}`,
     method: 'get',
   });
