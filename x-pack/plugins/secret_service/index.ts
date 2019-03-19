@@ -16,7 +16,6 @@ export const secretService = (kibana: any) => {
     id: 'SecretService',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.secret_service',
-    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       mappings,
       savedObjectSchemas: {
