@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config as sampleConfig } from './sampleVisPlugin/sampleConfig';
+import { config as sampleConfig } from './sample_vis_plugin';
 
 export interface StandardVisState {
   title: string;
@@ -36,8 +36,10 @@ export type EditorPanelsBuilder<S = any> = (
 export interface EditorConfig<S = any> {
   editorPanels: EditorPanelsBuilder<S>;
   toExpression: (standardVisState: StandardVisState, customVisState: S) => string;
-  toSuggestionExpression: (standardVisState: StandardVisState, customVisState?: S) => string;
+  toSuggestionExpression: (standardVisState: StandardVisState, customVisState: S) => string;
   suggestionScore: (pluginName: string, state: StandardVisState) => number;
+  defaultStandardState: StandardVisState;
+  defaultCustomState: S;
 }
 
 const configMap: { [key: string]: EditorConfig } = {

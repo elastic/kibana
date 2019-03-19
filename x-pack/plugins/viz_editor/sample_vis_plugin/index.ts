@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config } from './sampleConfig';
-import { registerPipeline } from './sampleVis';
+import { registerPipeline } from './sample_vis';
 
-registerPipeline();
+// TODO somehow get the registries and register everything
+// registerPipeline();
 
 // TODO register config instead
-let c = config;
-c = c;
+export { config } from './sample_config';

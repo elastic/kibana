@@ -5,19 +5,26 @@
  */
 
 import {
+  // @ts-ignore
+  EuiCodeEditor,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
   EuiPageHeader,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Dispatch, useEffect, useReducer } from 'react';
 
-import { registry, StandardVisState } from '../../../editorConfigRegistry';
+import 'brace/ext/language_tools';
+import 'brace/mode/javascript';
+import 'brace/snippets/javascript';
+import 'brace/theme/github';
+
+import { registry, StandardVisState } from '../../../editor_config_registry';
 
 interface Props {
   kfetch: (opts: any) => Promise<any>;
@@ -29,7 +36,7 @@ interface State {
   errorMessage: string;
   currentEditorConfig: string;
   standardVisState: StandardVisState;
-  customVisState: object;
+  customVisState: { [key: string]: object };
 }
 
 type Action =
@@ -100,17 +107,24 @@ export function Main({ kfetch }: Props) {
   const [state, dispatch] = useReducer(reducer, initialState());
   const { time, loading, errorMessage } = state;
 
-  useEffect(() => fetchInitialState(kfetch, dispatch), []);
+  useEffect(() => {
+    fetchInitialState(kfetch, dispatch);
+  }, []);
 
   if (loading) {
     return <h1>Loading...</h1>;
   }
 
-  const { editorPanels, toExpression } = registry.getByName(state.currentEditorConfig);
+  const {
+    editorPanels,
+    toExpression,
+    defaultCustomState,
+    defaultStandardState,
+  } = registry.getByName(state.currentEditorConfig);
 
   const { leftPanel, rightPanel } = editorPanels({
-    standardState: state.standardVisState,
-    customState: state.customVisState,
+    standardState: state.standardVisState || defaultStandardState,
+    customState: state.customVisState[state.currentEditorConfig] || defaultCustomState,
     onChangeStandardState: (newState: StandardVisState) => {
       dispatch({ type: 'updateStandardVisState', newState });
     },
@@ -118,6 +132,11 @@ export function Main({ kfetch }: Props) {
       dispatch({ type: 'updateCustomVisState', newState });
     },
   });
+
+  const expression = toExpression(
+    state.standardVisState || defaultStandardState,
+    state.customVisState[state.currentEditorConfig] || defaultCustomState
+  );
 
   return (
     <EuiPage>
@@ -139,22 +158,39 @@ export function Main({ kfetch }: Props) {
           ) : null}
         </EuiPageHeader>
         <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="vizEditor.congratulationsTitle"
-                  defaultMessage="Congratulations"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
           <EuiPageContentBody>
-            {leftPanel}
-            Current Expression: {toExpression(state.standardVisState, state.customVisState)}
-            {/* TODO execute the expression and render it to a node inside here */}
-            {rightPanel}
-            {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={5}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>{leftPanel}</EuiFlexItem>
+                  <EuiFlexItem>
+                    The expression will be rendered here: {expression}
+                    {/* TODO execute the expression and render it to a node inside here */}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {rightPanel}
+                    {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {/* TODO as soon as something changes here, switch to the "expression"-editor */}
+                <EuiCodeEditor
+                  mode="javascript"
+                  theme="github"
+                  width="100%"
+                  height="30px"
+                  value={expression}
+                  setOptions={{
+                    fontSize: '14px',
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: true,
+                  }}
+                  aria-label="Code Editor"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
