@@ -261,7 +261,6 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
     pluginsSystem.addPlugin(plugin);
   });
 
-  // Expect that they're ordered
   expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
 Array [
   "order-0",

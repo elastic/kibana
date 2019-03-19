@@ -42,7 +42,7 @@ export class PluginsSystem {
   public async startPlugins(deps: PluginsServiceStartDeps) {
     const exposedValues = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
-      return new Map();
+      return exposedValues;
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
