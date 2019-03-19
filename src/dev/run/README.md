@@ -33,7 +33,7 @@ run(
 );
 ```
 
-Define the script which will setup node for the script and load the script source:
+Define the script which will setup node and load the script source:
 
 ```js
 // scripts/my_task.js
@@ -42,7 +42,7 @@ require('../src/setup_node_env');
 require('../src/dev/my_task/run_my_task');
 ```
 
-Execute the script:
+Try out the script:
 
 ```sh
 $ node scripts/my_task
