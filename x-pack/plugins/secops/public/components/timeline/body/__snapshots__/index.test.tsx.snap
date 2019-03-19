@@ -1392,7 +1392,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "_index": "auditbeat-8.0.0-2019.02.19-000001",
         "auditd": Object {
           "data": Object {
-            "__typename": "AuditdData",
             "acct": null,
             "op": null,
             "terminal": "/dev/pts/0",
@@ -1400,16 +1399,13 @@ Can be one or multiple IPv4 or IPv6 addresses.",
           "result": "success",
           "session": "338",
           "summary": Object {
-            "__typename": "Summary",
             "actor": Object {
-              "__typename": "PrimarySecondary",
               "primary": "root",
               "secondary": "alice",
             },
             "how": "/sbin/pam_tally2",
             "message_type": null,
             "object": Object {
-              "__typename": "PrimarySecondary",
               "primary": "/dev/pts/0",
               "secondary": null,
               "type": "user-session",
