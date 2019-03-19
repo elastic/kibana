@@ -18,5 +18,6 @@ export const TabTerms = ({ terms }) => (
   <FieldList
     columns={columns}
     fields={terms}
+    dataTestSubj="detailPanelTermsTabTable"
   />
 );
