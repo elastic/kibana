@@ -885,6 +885,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
+                'allHack:',
               ],
               read: [
                 'login:',
@@ -1167,6 +1168,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
+                'allHack:',
               ],
               read: [
                 'login:',

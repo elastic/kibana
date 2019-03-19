@@ -339,6 +339,7 @@ describe('features', () => {
           actions.ui.get('management', 'foo', 'management-1'),
           actions.ui.get('management', 'foo', 'management-2'),
           actions.ui.get('navLinks', 'kibana:foo'),
+          actions.allHack,
         ],
         read: [
           actions.login,
@@ -518,6 +519,7 @@ describe('features', () => {
         actions.ui.get('savedObjectsManagement', 'read-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
+        actions.allHack,
       ]);
     });
 

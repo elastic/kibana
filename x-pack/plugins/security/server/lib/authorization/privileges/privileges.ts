@@ -66,11 +66,12 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             ...allActions,
+            actions.allHack,
           ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions],
+          all: [actions.login, actions.version, ...allActions, actions.allHack],
           read: [actions.login, actions.version, ...readActions],
         },
       };
