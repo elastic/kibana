@@ -102,6 +102,9 @@ exports[`it renders without crashing 1`] = `
                   Object {
                     "label": "manage_ilm",
                   },
+                  Object {
+                    "label": "manage_leader_index",
+                  },
                 ]
               }
               selectedOptions={Array []}

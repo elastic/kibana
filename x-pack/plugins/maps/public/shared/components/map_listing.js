@@ -369,7 +369,7 @@ export class MapListing extends React.Component {
 
   renderListing() {
     let createButton;
-    if (!this.props.hideWriteControls) {
+    if (!this.props.readOnly) {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton

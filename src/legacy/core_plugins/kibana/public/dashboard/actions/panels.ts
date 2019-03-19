@@ -19,7 +19,7 @@
 
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
-import { PanelId, PanelsMap, PanelState } from '../selectors';
+import { PanelId, PanelState, PanelStateMap } from '../selectors';
 
 export enum PanelActionTypeKeys {
   DELETE_PANEL = 'DELETE_PANEL',
@@ -37,7 +37,7 @@ export interface UpdatePanelAction
   extends KibanaAction<PanelActionTypeKeys.UPDATE_PANEL, PanelState> {}
 
 export interface UpdatePanelsAction
-  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, PanelsMap> {}
+  extends KibanaAction<PanelActionTypeKeys.UPDATE_PANELS, PanelStateMap> {}
 
 export interface ResetPanelTitleAction
   extends KibanaAction<PanelActionTypeKeys.RESET_PANEl_TITLE, PanelId> {}
@@ -50,7 +50,8 @@ export interface SetPanelTitleActionPayload {
 export interface SetPanelTitleAction
   extends KibanaAction<PanelActionTypeKeys.SET_PANEl_TITLE, SetPanelTitleActionPayload> {}
 
-export interface SetPanelsAction extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelsMap> {}
+export interface SetPanelsAction
+  extends KibanaAction<PanelActionTypeKeys.SET_PANELS, PanelStateMap> {}
 
 export type PanelActions =
   | DeletePanelAction
@@ -66,5 +67,5 @@ export const resetPanelTitle = createAction<PanelId>(PanelActionTypeKeys.RESET_P
 export const setPanelTitle = createAction<SetPanelTitleActionPayload>(
   PanelActionTypeKeys.SET_PANEl_TITLE
 );
-export const updatePanels = createAction<PanelsMap>(PanelActionTypeKeys.UPDATE_PANELS);
-export const setPanels = createAction<PanelsMap>(PanelActionTypeKeys.SET_PANELS);
+export const updatePanels = createAction<PanelStateMap>(PanelActionTypeKeys.UPDATE_PANELS);
+export const setPanels = createAction<PanelStateMap>(PanelActionTypeKeys.SET_PANELS);
