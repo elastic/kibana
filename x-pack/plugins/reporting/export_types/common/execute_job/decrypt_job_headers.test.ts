@@ -23,7 +23,17 @@ describe('headers', () => {
   test(`fails if it can't decrypt headers`, async () => {
     await expect(
       decryptJobHeaders({
-        job: { relativeUrl: '/app/kibana#/something', timeRange: {} },
+        job: {
+          title: 'cool-job-bro',
+          type: 'csv',
+          jobParams: {
+            savedObjectId: 'abc-123',
+            isImmediate: false,
+            savedObjectType: 'search',
+          },
+          relativeUrl: '/app/kibana#/something',
+          timeRange: {},
+        },
         server: mockServer,
       })
     ).rejects.toBeDefined();
@@ -37,7 +47,17 @@ describe('headers', () => {
 
     const encryptedHeaders = await encryptHeaders(headers);
     const { decryptedHeaders } = await decryptJobHeaders({
-      job: { relativeUrl: '/app/kibana#/something', headers: encryptedHeaders },
+      job: {
+        title: 'cool-job-bro',
+        type: 'csv',
+        jobParams: {
+          savedObjectId: 'abc-123',
+          isImmediate: false,
+          savedObjectType: 'search',
+        },
+        relativeUrl: '/app/kibana#/something',
+        headers: encryptedHeaders,
+      },
       server: mockServer,
     });
     expect(decryptedHeaders).toEqual(headers);
