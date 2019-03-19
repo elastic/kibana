@@ -16,8 +16,8 @@ import { LoadingState } from '../../../../types';
  * Matches Beats code here:
  * https://github.com/elastic/beats/blob/eee127cb59b56f2ed7c7e317398c3f79c4158216/libbeat/template/processor.go#L104
  */
-const METRICBEAT_DEFAULT_FIELD_TYPES: ReadonlySet<string> = new Set(['keyword', 'text', 'ip']);
-const METRICBEAT_OTHER_DEFAULT_FIELDS: ReadonlySet<string> = new Set(['fields.*']);
+const BEAT_DEFAULT_FIELD_TYPES: ReadonlySet<string> = new Set(['keyword', 'text', 'ip']);
+const BEAT_OTHER_DEFAULT_FIELDS: ReadonlySet<string> = new Set(['fields.*']);
 
 interface FixDefaultFieldsButtonProps {
   indexName: string;
@@ -42,11 +42,11 @@ export class FixDefaultFieldsButton extends React.Component<
   public render() {
     const { fixLoadingState } = this.state;
 
-    if (!this.isMetricbeatIndex()) {
+    if (!this.isBeatsIndex()) {
       return null;
     }
 
-    const buttonProps: any = { size: 's', onClick: this.fixMetricbeatIndex };
+    const buttonProps: any = { size: 's', onClick: this.fixBeatsIndex };
     let buttonContent: ReactNode;
 
     switch (fixLoadingState) {
@@ -94,12 +94,13 @@ export class FixDefaultFieldsButton extends React.Component<
     return <EuiButton {...buttonProps}>{buttonContent}</EuiButton>;
   }
 
-  private isMetricbeatIndex = () => {
-    return this.props.indexName.startsWith('metricbeat-');
+  private isBeatsIndex = () => {
+    const { indexName } = this.props;
+    return indexName.startsWith('metricbeat-') || indexName.startsWith('filebeat-');
   };
 
-  private fixMetricbeatIndex = async () => {
-    if (!this.isMetricbeatIndex()) {
+  private fixBeatsIndex = async () => {
+    if (!this.isBeatsIndex()) {
       return;
     }
 
@@ -112,8 +113,8 @@ export class FixDefaultFieldsButton extends React.Component<
         pathname: `/api/upgrade_assistant/add_query_default_field/${this.props.indexName}`,
         method: 'POST',
         body: JSON.stringify({
-          fieldTypes: [...METRICBEAT_DEFAULT_FIELD_TYPES],
-          otherFields: [...METRICBEAT_OTHER_DEFAULT_FIELDS],
+          fieldTypes: [...BEAT_DEFAULT_FIELD_TYPES],
+          otherFields: [...BEAT_OTHER_DEFAULT_FIELDS],
         }),
       });
 
