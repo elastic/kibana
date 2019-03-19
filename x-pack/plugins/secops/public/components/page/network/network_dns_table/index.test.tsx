@@ -53,7 +53,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <MockedProvider>
-          <TestProviders>
+          <TestProviders store={store}>
             <NetworkDnsTable
               loading={false}
               data={mockData.NetworkDns.edges}
@@ -68,6 +68,11 @@ describe('NetworkTopNFlow Table Component', () => {
         </MockedProvider>
       );
 
+      expect(store.getState().local.network.page.queries!.dns.dnsSortField).toEqual({
+        direction: 'desc',
+        field: 'queryCount',
+      });
+
       wrapper
         .find('.euiTable thead tr th button')
         .first()
@@ -75,6 +80,10 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
+      expect(store.getState().local.network.page.queries!.dns.dnsSortField).toEqual({
+        direction: 'asc',
+        field: 'dnsName',
+      });
       expect(
         wrapper
           .find('.euiTable thead tr th button')

@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEqual, last } from 'lodash/fp';
+import { isEqual, isNil, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -174,7 +174,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   }
 
   private onChange = (criteria: Criteria) => {
-    if (criteria.sort) {
+    if (!isNil(criteria.sort)) {
       const splitField = criteria.sort.field.split('.');
       const field = last(splitField) === 'count' ? NetworkTopNFlowFields.ipCount : last(splitField);
       const newTopNFlowSort: NetworkTopNFlowSortField = {

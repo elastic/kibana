@@ -58,7 +58,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       const wrapper = mount(
         <MockedProvider>
-          <TestProviders>
+          <TestProviders store={store}>
             <NetworkTopNFlowTable
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
@@ -92,7 +92,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('when you click on the sorting dropdown, and picked destination', () => {
       const wrapper = mount(
         <MockedProvider>
-          <TestProviders>
+          <TestProviders store={store}>
             <NetworkTopNFlowTable
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
@@ -133,7 +133,7 @@ describe('NetworkTopNFlow Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <MockedProvider>
-          <TestProviders>
+          <TestProviders store={store}>
             <NetworkTopNFlowTable
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
@@ -147,6 +147,10 @@ describe('NetworkTopNFlow Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
+      expect(store.getState().local.network.page.queries!.topNFlow.topNFlowSort).toEqual({
+        direction: 'desc',
+        field: 'bytes',
+      });
 
       wrapper
         .find('.euiTable thead tr th button')
@@ -155,6 +159,10 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
+      expect(store.getState().local.network.page.queries!.topNFlow.topNFlowSort).toEqual({
+        direction: 'asc',
+        field: 'packets',
+      });
       expect(
         wrapper
           .find('.euiTable thead tr th button')

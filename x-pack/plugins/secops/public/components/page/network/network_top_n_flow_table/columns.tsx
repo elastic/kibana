@@ -42,7 +42,7 @@ export const getNetworkTopNFlowColumns = (
     name: getIpTitle(topNFlowType),
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
+    render: ({ node }: { node: NetworkTopNFlowItem }) => {
       const ipAttr = `${topNFlowType}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(
@@ -82,7 +82,7 @@ export const getNetworkTopNFlowColumns = (
     name: i18n.DOMAIN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
+    render: ({ node }: { node: NetworkTopNFlowItem }) => {
       const domainAttr = `${topNFlowType}.domain`;
       const ipAttr = `${topNFlowType}.ip`;
       const domains: string[] = get(domainAttr, node);
@@ -151,10 +151,11 @@ export const getNetworkTopNFlowColumns = (
     name: i18n.DIRECTION,
     truncateText: false,
     hideForMobile: false,
-    render: (directions: NetworkDirectionEcs[]) =>
+    render: (directions: NetworkDirectionEcs[] | null | undefined) =>
       isEmpty(directions)
         ? getEmptyTagValue()
-        : directions.map((direction: NetworkDirectionEcs, index: number) => (
+        : directions &&
+          directions.map((direction, index) => (
             <AddToKql
               key={escapeDataProviderId(
                 `${tableId}-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
@@ -176,7 +177,7 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (bytes: number) => {
+    render: (bytes: number | null | undefined) => {
       if (!isNil(bytes)) {
         return numeral(bytes).format('0.000b');
       } else {
@@ -190,7 +191,7 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (packets: number) => {
+    render: (packets: number | null | undefined) => {
       if (!isNil(packets)) {
         return numeral(packets).format('0,000');
       } else {
@@ -204,7 +205,7 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (ipCount: number) => {
+    render: (ipCount: number | null | undefined) => {
       if (!isNil(ipCount)) {
         return numeral(ipCount).format('0,000');
       } else {
