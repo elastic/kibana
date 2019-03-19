@@ -19,13 +19,29 @@ test(`gets logo from uiSettings`, async () => {
   };
 
   const { conditionalHeaders } = await getConditionalHeaders({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     filteredHeaders: permittedHeaders,
     server: mockServer,
   });
 
   const { logo } = await getCustomLogo({
-    job: {},
+    job: {
+      title: 'cool-job-bro',
+      type: 'csv',
+      jobParams: {
+        savedObjectId: 'abc-123',
+        isImmediate: false,
+        savedObjectType: 'search',
+      },
+    },
     conditionalHeaders,
     server: mockServer,
   });

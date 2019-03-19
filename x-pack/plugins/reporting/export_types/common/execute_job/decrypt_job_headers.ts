@@ -5,13 +5,13 @@
  */
 // @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
-import { CryptoFactory, KbnServer, ReportingJob } from '../../../types';
+import { CryptoFactory, JobDocPayload, KbnServer } from '../../../types';
 
 export const decryptJobHeaders = async ({
   job,
   server,
 }: {
-  job: ReportingJob;
+  job: JobDocPayload;
   server: KbnServer;
 }) => {
   const crypto: CryptoFactory = cryptoFactory(server);
