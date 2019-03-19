@@ -30,7 +30,7 @@ interface PanelMap {
 }
 
 interface DashboardGridContainerStateProps {
-  panels: PanelMap;
+  panels: PanelStateMap;
   dashboardViewMode: DashboardViewMode;
   useMargins: boolean;
 }

@@ -39,13 +39,13 @@ export type PanelId = string;
 export type SavedObjectId = string;
 
 export interface PanelState {
-  readonly id: SavedObjectId;
-  readonly version: string;
-  readonly type: string;
+  id: SavedObjectId;
+  version: string;
+  type: string;
   panelIndex: PanelId;
-  readonly embeddableConfig: any;
-  readonly gridData: GridData;
-  readonly title?: string;
+  embeddableConfig: any;
+  gridData: GridData;
+  title?: string;
 }
 
 export interface EmbeddableReduxState {
