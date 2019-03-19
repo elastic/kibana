@@ -155,6 +155,11 @@ uiRoutes.when('/logstash/pipelines/:id/:hash?', {
           </I18nContext>
         );
       });
+
+      $scope.$on('$destroy', () => {
+        previousPipelineHash = undefined;
+        detailVertexId = undefined;
+      });
     }
   }
 });
