@@ -117,7 +117,7 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
 
         const chartEl = await testSubjects.find('pluginChart');
         const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);
-        expect(percentDifference).to.be.lessThan(0.05);
+        expect(percentDifference).to.be.lessThan(0.1);
         return handler;
       }
     };
