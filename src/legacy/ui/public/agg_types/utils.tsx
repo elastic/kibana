@@ -17,7 +17,7 @@
  * under the License.
  */
 
-function isValidJson(value: string) {
+function isValidJson(value: string): boolean {
   if (!value || value.length === 0) {
     return true;
   }

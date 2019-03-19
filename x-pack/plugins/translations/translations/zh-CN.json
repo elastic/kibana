@@ -161,7 +161,6 @@
     "common.ui.aggTypes.ipRanges.toLabel": "到",
     "common.ui.aggTypes.ipRanges.useCidrMasksButtonLabel": "使用 CIDR 掩码",
     "common.ui.aggTypes.ipRanges.useFromToButtonLabel": "使用“从”/“到”",
-    "common.ui.aggTypes.jsonInputLabel": "JSON 输入",
     "common.ui.aggTypes.jsonInputTooltip": "此处以 JSON 格式添加的任何属性将与此部分的 elasticsearch 聚合定义合并。例如，词聚合上的“shard_size”。",
     "common.ui.aggTypes.metricLabel": "指标",
     "common.ui.aggTypes.metrics.aggNotValidErrorMessage": "- 聚合无效 -",

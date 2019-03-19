@@ -16,31 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import React, { useState } from 'react';
-import { AggConfig } from 'ui/vis/agg_config';
-import { isValidJson } from '../utils';
+import { AggParamRequiredEditorProps } from '../../vis/editors/default';
 
-interface RawJSONSelectProps {
-  agg: AggConfig;
-  onParamsChange: (
-    type: string,
-    agg: AggConfig,
-    field: any,
-    options?: { isValid?: boolean }
-  ) => void;
-}
-
-function RawJSONSelect({ agg = {}, onParamsChange }: RawJSONSelectProps) {
-  const [isInvalid, setIsInvalid] = useState(false);
-
+function RawJsonParamEditor({
+  agg,
+  value,
+  setValue,
+  isInvalid,
+}: AggParamRequiredEditorProps<string>) {
   const label = (
     <>
-      <FormattedMessage id="common.ui.aggTypes.jsonInputLabel" defaultMessage="JSON Input" />{' '}
+      <FormattedMessage id="common.ui.aggTypes.jsonInputLabel" defaultMessage="JSON input" />{' '}
       <EuiToolTip
         position="right"
         content={i18n.translate('common.ui.aggTypes.jsonInputTooltip', {
@@ -52,23 +43,18 @@ function RawJSONSelect({ agg = {}, onParamsChange }: RawJSONSelectProps) {
       </EuiToolTip>
     </>
   );
-  const onTextAreaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value: string = get(e, 'target.value');
-    const isValid = isValidJson(value);
-    setIsInvalid(!isValid);
-    onParamsChange('json', agg, value, { isValid });
-  };
 
   return (
     <EuiFormRow label={label} isInvalid={isInvalid} className="form-group">
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
         isInvalid={isInvalid}
-        onChange={onTextAreaChange}
+        value={value}
+        onChange={ev => setValue(ev.target.value)}
         rows={2}
       />
     </EuiFormRow>
   );
 }
 
-export { RawJSONSelect };
+export { RawJsonParamEditor };

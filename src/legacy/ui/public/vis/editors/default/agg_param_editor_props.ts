@@ -22,9 +22,13 @@ import { AggConfig } from '../../agg_config';
 
 interface AggParamEditorProps<T> {
   agg: AggConfig;
-  aggParam: AggParam;
+  aggParam?: AggParam;
   value: T;
   setValue(value: T): void;
 }
 
-export { AggParamEditorProps };
+interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
+  isInvalid: boolean;
+}
+
+export { AggParamEditorProps, AggParamRequiredEditorProps };

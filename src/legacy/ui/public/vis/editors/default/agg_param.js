@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, noop } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
+import { isValidJson } from '../../../agg_types/utils';
 
 uiModules
   .get('app/visualize')
@@ -30,6 +31,7 @@ uiModules
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     'value',
+    'isInvalid'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -54,6 +56,7 @@ uiModules
             agg-param="aggParam"
             on-change="onChange"
             value="paramValue"
+            is-invalid="isInvalid"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -81,6 +84,10 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
+
+              if(ngModelCtrl) {
+                ngModelCtrl.$$runValidators(value, null, noop);
+              }
             }, true);
           }
 
@@ -93,6 +100,15 @@ uiModules
               ngModelCtrl.$setDirty();
             }
           };
+
+          if(ngModelCtrl && $scope.aggParam.name === 'json') {
+            ngModelCtrl.$validators.jsonInput = (modelValue) => {
+              const isJsonValid = isValidJson(modelValue);
+              $scope.isInvalid = !isJsonValid;
+
+              return isJsonValid;
+            };
+          }
         }
       }
     };
