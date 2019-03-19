@@ -97,5 +97,6 @@ export default {
   reporters: [
     'default',
     '<rootDir>/src/dev/jest/junit_reporter.js',
+    '<rootDir>/src/dev/test_stats/jest_reporter.js',
   ],
 };

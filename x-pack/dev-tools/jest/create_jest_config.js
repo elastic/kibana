@@ -50,7 +50,10 @@ export function createJestConfig({
       'default',
       [`${kibanaDirectory}/src/dev/jest/junit_reporter.js`, {
         reportName: 'X-Pack Jest Tests',
-      }]
+      }],
+      [`${kibanaDirectory}/src/dev/test_stats/jest_reporter.js`, {
+        reportName: 'X-Pack Jest Tests',
+      }],
     ],
   };
 }

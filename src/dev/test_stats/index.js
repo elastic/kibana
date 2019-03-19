@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import mocha from 'mocha';
-import { setupJUnitReportGeneration } from './junit_report_generation';
-import { setupTestStatsMochaReporter } from '../test_stats';
-
-const MochaSpecReporter = mocha.reporters.spec;
-
-export function createAutoJUnitReporter(junitReportOptions) {
-  return class AutoJUnitReporter {
-    constructor(runner, options) {
-      // setup a spec reporter for console output
-      new MochaSpecReporter(runner, options);
-
-      // in CI we also setup the JUnit reporter
-      if (process.env.CI) {
-        setupJUnitReportGeneration(runner, junitReportOptions);
-        setupTestStatsMochaReporter(runner, junitReportOptions);
-      }
-    }
-  };
-}
+export { setupTestStatsMochaReporter } from './mocha_reporter';

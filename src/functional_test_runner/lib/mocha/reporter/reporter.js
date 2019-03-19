@@ -23,7 +23,7 @@ import Mocha from 'mocha';
 import { ToolingLogTextWriter } from '@kbn/dev-utils';
 import moment from 'moment';
 
-import { setupJUnitReportGeneration } from '../../../../dev';
+import { setupJUnitReportGeneration, setupTestStatsMochaReporter } from '../../../../dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
@@ -53,6 +53,9 @@ export function MochaReporterProvider({ getService }) {
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
+          reportName: config.get('junit.reportName'),
+        });
+        setupTestStatsMochaReporter(runner, {
           reportName: config.get('junit.reportName'),
         });
       }

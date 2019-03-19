@@ -23,5 +23,9 @@ export {
 } from './mocha';
 
 export {
+  setupTestStatsMochaReporter,
+} from './test_stats';
+
+export {
   generateNoticeFromSource,
 } from './notice';

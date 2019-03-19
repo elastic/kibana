@@ -50,6 +50,7 @@ module.exports = function (grunt) {
         'karma-junit-reporter',
         'karma-mocha',
         'karma-safari-launcher',
+        require.resolve('../../src/dev/test_stats/karma_reporter.js')
       ],
       port: 9876,
       colors: true,
@@ -68,7 +69,7 @@ module.exports = function (grunt) {
       },
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-      reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
+      reporters: process.env.CI ? ['dots', 'testStats', 'junit'] : ['progress'],
 
       junitReporter: {
         outputFile: resolve(ROOT, 'target/junit/TEST-karma.xml'),
