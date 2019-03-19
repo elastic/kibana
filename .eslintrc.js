@@ -33,7 +33,11 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
+  extends: [
+    '@elastic/eslint-config-kibana',
+    '@elastic/eslint-config-kibana/jest',
+    '@elastic/eslint-config-kibana/typescript',
+  ],
 
   settings: {
     'import/resolver': {
@@ -70,6 +74,7 @@ module.exports = {
         'src/legacy/server/saved_objects/**/*',
         'x-pack/plugins/apm/**/*',
         'x-pack/plugins/canvas/**/*',
+        '**/*.{ts,tsx}',
       ],
       plugins: ['prettier'],
       rules: Object.assign(
@@ -154,7 +159,8 @@ module.exports = {
         'packages/kbn-interpreter/src/plugin/**/*',
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
-        'x-pack/**/*.test.js',
+        'x-pack/**/*.test.{js,ts,tsx}',
+        'x-pack/**/*.test.mocks.{js,ts,tsx}',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],
@@ -265,7 +271,7 @@ module.exports = {
      * Licence headers
      */
     {
-      files: ['**/*.js'],
+      files: ['**/*.{js,ts,tsx}'],
       plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
         '@kbn/license-header/require-license-header': [
@@ -287,7 +293,7 @@ module.exports = {
      * Files that require Elastic license headers instead of Apache 2.0 header
      */
     {
-      files: ['x-pack/**/*.js'],
+      files: ['x-pack/**/*.{js,ts,tsx}'],
       plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
         '@kbn/license-header/require-license-header': [
