@@ -15,7 +15,7 @@ import {
   history,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, units } from '../../../../style/variables';
 import { HeightRetainer } from '../../../shared/HeightRetainer';
