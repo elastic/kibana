@@ -15,6 +15,7 @@ interface Props extends KibanaHrefArgs {
   disabled?: boolean;
   to?: StringMap;
   className?: string;
+  [prop: string]: any;
 }
 
 /**

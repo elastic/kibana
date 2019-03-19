@@ -20,7 +20,7 @@ import {
   IStickyProperty,
   StickyProperties
 } from '../../../shared/StickyProperties';
-import { ErrorsOverviewLink } from './ErrorsOverviewLink';
+import { ErrorCountBadge } from './ErrorCountBadge';
 
 interface Props {
   transaction: Transaction;
@@ -98,10 +98,10 @@ export function StickyTransactionProperties({
         }
       ),
       val: errorCount ? (
-        <ErrorsOverviewLink
+        <ErrorCountBadge
           errorCount={errorCount}
           transaction={transaction}
-          showLabel
+          verbose
         />
       ) : (
         noErrorsText

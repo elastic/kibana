@@ -7,37 +7,48 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { legacyEncodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { Transaction } from '../../../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { fontSize } from '../../../../style/variables';
 
 const LinkLabel = styled.span`
   font-size: ${fontSize};
-  color: ${euiThemeLight.euiColorDanger};
 `;
 
-interface ErrorsOverviewLinkProps {
+interface Props {
   errorCount: number;
   transaction: Transaction;
-  showLabel?: boolean;
+  verbose?: boolean;
 }
 
-export const ErrorsOverviewLink: React.SFC<ErrorsOverviewLinkProps> = ({
-  errorCount,
+export const ErrorCountBadge: React.SFC<Props> = ({
+  errorCount = 0,
   transaction,
-  showLabel
+  verbose
 }) => {
   const toolTipContent = i18n.translate(
     'xpack.apm.transactionDetails.errorsOverviewLinkTooltip',
     {
-      values: { errorCount: errorCount || 0 },
+      values: { errorCount },
       defaultMessage:
         '{errorCount, plural, one {View 1 related error} other {View # related errors}}'
     }
+  );
+
+  const errorCountBadge = (
+    <EuiBadge
+      color={euiThemeLight.euiColorDanger}
+      onClick={(event: any) => {
+        (event as MouseEvent).stopPropagation();
+      }}
+      onClickAriaLabel={toolTipContent}
+    >
+      {errorCount}
+    </EuiBadge>
   );
 
   return (
@@ -51,34 +62,24 @@ export const ErrorsOverviewLink: React.SFC<ErrorsOverviewLinkProps> = ({
           }"`
         )
       }}
+      color="danger"
+      style={{ textDecoration: 'none' }}
     >
-      <EuiToolTip content={toolTipContent}>
-        <span>
-          <EuiBadge
-            color={euiThemeLight.euiColorDanger}
-            onClick={(event: any) => {
-              (event as MouseEvent).stopPropagation();
-            }}
-            onClickAriaLabel={toolTipContent}
-          >
-            {errorCount}
-          </EuiBadge>
-
-          {showLabel ? (
-            <LinkLabel>
-              &nbsp;
-              {i18n.translate(
-                'xpack.apm.transactionDetails.errorsOverviewLink',
-                {
-                  values: { errorCount: errorCount || 0 },
-                  defaultMessage:
-                    '{errorCount, plural, one {Related error} other {Related errors}}'
-                }
-              )}
-            </LinkLabel>
-          ) : null}
-        </span>
-      </EuiToolTip>
+      {verbose ? (
+        <Fragment>
+          {errorCountBadge}
+          <LinkLabel>
+            &nbsp;
+            {i18n.translate('xpack.apm.transactionDetails.errorsOverviewLink', {
+              values: { errorCount },
+              defaultMessage:
+                '{errorCount, plural, one {Related error} other {Related errors}}'
+            })}
+          </LinkLabel>
+        </Fragment>
+      ) : (
+        <EuiToolTip content={toolTipContent}>{errorCountBadge}</EuiToolTip>
+      )}
     </KibanaLink>
   );
 };

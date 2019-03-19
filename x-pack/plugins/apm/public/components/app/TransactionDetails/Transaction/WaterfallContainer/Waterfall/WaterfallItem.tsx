@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
@@ -12,7 +12,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
-import { ErrorsOverviewLink } from '../../ErrorsOverviewLink';
+import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
@@ -30,6 +30,10 @@ interface IBarStyleProps {
   color: string;
 }
 
+const DurationStyled = styled(Duration)`
+  display: none;
+`;
+
 const Container = styled<IContainerStyleProps, 'div'>('div')`
   position: relative;
   display: block;
@@ -42,8 +46,13 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   background-color: ${props =>
     props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
+
   &:hover {
     background-color: ${theme.euiColorLightestShade};
+
+    ${DurationStyled} {
+      display: block;
+    }
   }
 `;
 
@@ -107,19 +116,9 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   return <EuiIcon type="merge" />;
 }
 
-function Duration({
-  item,
-  isVisible
-}: {
-  item: IWaterfallItem;
-  isVisible: boolean;
-}) {
+function Duration({ item, ...props }: { item: IWaterfallItem }) {
   return (
-    <EuiText
-      color="subdued"
-      size="xs"
-      style={{ visibility: isVisible ? 'visible' : 'hidden' }}
-    >
+    <EuiText color="subdued" size="xs" {...props}>
       {asTime(item.duration)}
     </EuiText>
   );
@@ -167,20 +166,12 @@ export function WaterfallItem({
   const width = (item.duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
-  const [isHovering, setIsHovering] = useState(false);
-
   return (
     <Container
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
       onClick={onClick}
-      onMouseEnter={() => {
-        setIsHovering(true);
-      }}
-      onMouseLeave={() => {
-        setIsHovering(false);
-      }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
         style={{ left: `${left}%`, width: `${width}%` }}
@@ -194,12 +185,12 @@ export function WaterfallItem({
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
-          <ErrorsOverviewLink
+          <ErrorCountBadge
             errorCount={errorCount}
             transaction={item.transaction}
           />
         ) : null}
-        <Duration item={item} isVisible={isHovering} />
+        <DurationStyled item={item} />
       </ItemText>
     </Container>
   );
