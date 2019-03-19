@@ -62,30 +62,28 @@ class SearchProfilerTabs extends Component {
     }
 
     return (
-      <div>
-        <EuiTabs size="s">
-          <EuiTab
-            isSelected={activeTab.search}
-            disabled={!this.hasSearch()}
-            onClick={() => this.handleClick('search')}
-          >
-            <FormattedMessage
-              id="xpack.searchProfiler.queryProfileTabTitle"
-              defaultMessage="Query Profile"
-            />
-          </EuiTab>
-          <EuiTab
-            isSelected={activeTab.aggregations}
-            disabled={!this.hasAggregations()}
-            onClick={() => this.handleClick('aggregations')}
-          >
-            <FormattedMessage
-              id="xpack.searchProfiler.aggregationProfileTabTitle"
-              defaultMessage="Aggregation Profile"
-            />
-          </EuiTab>
-        </EuiTabs>
-      </div>
+      <EuiTabs>
+        <EuiTab
+          isSelected={activeTab.search}
+          disabled={!this.hasSearch()}
+          onClick={() => this.handleClick('search')}
+        >
+          <FormattedMessage
+            id="xpack.searchProfiler.queryProfileTabTitle"
+            defaultMessage="Query Profile"
+          />
+        </EuiTab>
+        <EuiTab
+          isSelected={activeTab.aggregations}
+          disabled={!this.hasAggregations()}
+          onClick={() => this.handleClick('aggregations')}
+        >
+          <FormattedMessage
+            id="xpack.searchProfiler.aggregationProfileTabTitle"
+            defaultMessage="Aggregation Profile"
+          />
+        </EuiTab>
+      </EuiTabs>
     );
   }
 }
