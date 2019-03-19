@@ -11,12 +11,13 @@ Define the function that should validate the CLI arguments and call your task fn
 import { createFlagError, run } from '../run';
 
 run(
-  async ({ flags }) => {
+  async ({ flags, log }) => {
     if (typeof flags.path !== 'string') {
       throw createFlagError('please provide a single --path flag');
     }
 
     await runTask(flags.path);
+    log.success('task complete');
   },
   {
     getopts: {
