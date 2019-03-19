@@ -20,19 +20,17 @@
 import { cloneDeep } from 'lodash';
 
 import { modifyUrl } from '../../../src/core/utils';
-// @ts-ignore not supported typescript yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-import { FtrProviderContext } from '../ftr_provider_context.d';
 
-export async function BrowserProvider({ getService }: FtrProviderContext) {
+export async function BrowserProvider({ getService }) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   class BrowserService {
     /**
      * Keyboard events
      */
-    public readonly keys = Key;
+    keys = Key;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
@@ -40,8 +38,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
-    public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
-      return await (driver.manage().window() as any).getRect();
+    async getWindowSize() {
+      return await driver.manage().window().getRect();
     }
 
     /**
@@ -52,8 +50,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} height
      * @return {Promise<void>}
      */
-    public async setWindowSize(...args: any[]) {
-      await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
+    async setWindowSize(...args) {
+      await driver.manage().window().setRect({ width: args[0], height: args[1] });
     }
 
     /**
@@ -62,11 +60,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getCurrentUrl() {
+    async getCurrentUrl() {
       // strip _t=Date query param when url is read
       const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
-        delete (parsed.query as any)._t;
+        delete parsed.query._t;
         return undefined;
       });
       return currentWithoutTime;
@@ -80,10 +78,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    public async get(url: string, insertTimestamp = true) {
+    async get(url, insertTimestamp = true) {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
-          (parsed.query as any)._t = Date.now();
+          parsed.query._t = Date.now();
           return undefined;
         });
 
@@ -102,9 +100,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async moveMouseTo(element: { _webElement: any }, xOffset: number, yOffset: number) {
-      const mouse = (driver.actions() as any).mouse();
-      const actions = (driver as any).actions({ bridge: true });
+    async moveMouseTo(element, xOffset, yOffset) {
+      const mouse = driver.actions().mouse();
+      const actions = driver.actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions
           .pause(mouse)
@@ -128,19 +126,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
-    public async dragAndDrop(
-      from: { offset: { x: any; y: any }; location: { _webElement: any } },
-      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+    async dragAndDrop(
+      from,
+      to
     ) {
-      // tslint:disable-next-line: variable-name
       let _from;
-      // tslint:disable-next-line: variable-name
       let _to;
-      // tslint:disable-next-line: variable-name
       const _fromOffset = from.offset
         ? { x: from.offset.x || 0, y: from.offset.y || 0 }
         : { x: 0, y: 0 };
-      // tslint:disable-next-line: variable-name
       const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
 
       if (from.location instanceof WebElementWrapper) {
@@ -156,7 +150,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       }
 
       if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
-        const actions = (driver as any).actions({ bridge: true });
+        const actions = driver.actions({ bridge: true });
         return await actions
           .move({ origin: _from })
           .press()
@@ -179,7 +173,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async refresh() {
+    async refresh() {
       await driver.navigate().refresh();
     }
 
@@ -189,7 +183,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async goBack() {
+    async goBack() {
       await driver.navigate().back();
     }
 
@@ -200,8 +194,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param  {string|string[]} keys
      * @return {Promise<void>}
      */
-    public async pressKeys(...args: string[]) {
-      const actions = (driver as any).actions({ bridge: true });
+    async pressKeys(...args) {
+      const actions = driver.actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
@@ -217,9 +211,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async clickMouseButton(...args: any[]) {
-      const mouse = (driver.actions() as any).mouse();
-      const actions = (driver as any).actions({ bridge: true });
+    async clickMouseButton(...args) {
+      const mouse = driver.actions().mouse();
+      const actions = driver.actions({ bridge: true });
       if (args[0] instanceof WebElementWrapper) {
         await actions
           .pause(mouse)
@@ -244,7 +238,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getPageSource() {
+    async getPageSource() {
       return await driver.getPageSource();
     }
 
@@ -256,11 +250,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
-    public async getLogsFor(type: any) {
+    async getLogsFor(type) {
       // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       // See: https://github.com/w3c/webdriver/issues/406
       // See: https://w3c.github.io/webdriver/#endpoints
-      if ((driver as any).executor_.w3c === true) {
+      if (driver.executor_.w3c === true) {
         return [];
       } else {
         return await driver
@@ -276,7 +270,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Buffer>}
      */
-    public async takeScreenshot() {
+    async takeScreenshot() {
       return await driver.takeScreenshot();
     }
 
@@ -286,8 +280,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element: { _webElement: any }) {
-      const actions = (driver as any).actions({ bridge: true });
+    async doubleClick(element) {
+      const actions = driver.actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions.doubleClick(element._webElement).perform();
       } else {
@@ -303,7 +297,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {string} handle
      * @return {Promise<void>}
      */
-    public async switchToWindow(handle: string) {
+    async switchToWindow(handle) {
       await driver.switchTo().window(handle);
     }
 
@@ -313,7 +307,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string[]>}
      */
-    public async getAllWindowHandles() {
+    async getAllWindowHandles() {
       return await driver.getAllWindowHandles();
     }
 
@@ -324,7 +318,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {string} value
      * @return {Promise<void>}
      */
-    public async setLocalStorageItem(key: string, value: string) {
+    async setLocalStorageItem(key, value) {
       await driver.executeScript(
         'return window.localStorage.setItem(arguments[0], arguments[1]);',
         key,
@@ -339,7 +333,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async closeCurrentWindow() {
+    async closeCurrentWindow() {
       await driver.close();
     }
 
@@ -350,7 +344,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param  {string|function} function
      * @param  {...any[]} args
      */
-    public async execute<A extends any[], R>(fn: ((...args: A) => R) | string, ...args: A) {
+    async execute(fn, ...args) {
       return await driver.executeScript(
         fn,
         ...cloneDeep(args, arg => {
