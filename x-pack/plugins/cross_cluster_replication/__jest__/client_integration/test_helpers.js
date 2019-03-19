@@ -14,6 +14,7 @@ import routing from '../../public/app/services/routing';
 // Mock React router
 const reactRouter = {
   history: {
+    push: () => {},
     createHref: (location) => location.pathname,
     location: ''
   }
