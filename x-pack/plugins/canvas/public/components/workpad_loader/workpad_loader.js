@@ -134,7 +134,7 @@ export class WorkpadLoader extends React.PureComponent {
 
   renderWorkpadTable = ({ rows, pageNumber, totalPages, setPage }) => {
     const { sortField, sortDirection } = this.state;
-    const { canUserWrite, createPending } = this.props;
+    const { canUserWrite, createPending, workpadId: loadedWorkpad } = this.props;
 
     const actions = [
       {
@@ -173,7 +173,8 @@ export class WorkpadLoader extends React.PureComponent {
         sortable: true,
         dataType: 'string',
         render: (name, workpad) => {
-          const workpadName = workpad.name.length ? workpad.name : <em>{workpad.id}</em>;
+          let workpadName = name.length ? name : <em>{workpad.id}</em>;
+          workpadName = workpad.id === loadedWorkpad ? <strong>{workpadName}</strong> : workpadName;
 
           return (
             <Link
