@@ -246,32 +246,34 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         // Listen for changes to job selection.
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-          const { selectedJobs } = payload;
-          const stateUpdate = {
-            noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
-            selectedJobs,
-          };
+          this.setState(...getExplorerDefaultState(), async () => {
+            const { selectedJobs } = payload;
+            const stateUpdate = {
+              noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
+              selectedJobs,
+            };
 
-          const indexPattern = await this.getIndexPattern(selectedJobs);
-          stateUpdate.indexPattern = indexPattern;
+            const indexPattern = await this.getIndexPattern(selectedJobs);
+            stateUpdate.indexPattern = indexPattern;
 
-          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-          Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+            Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
 
-          if (selectedJobs.length > 1) {
-            this.props.appStateHandler(
-              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-              { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
-            );
-            stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-            // enforce a state update for swimlaneViewByFieldName
-            this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
-              this.updateExplorer(stateUpdate, true);
-            });
-            return;
-          }
+            if (selectedJobs.length > 1) {
+              this.props.appStateHandler(
+                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
+              );
+              stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+              // enforce a state update for swimlaneViewByFieldName
+              this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
+                this.updateExplorer(stateUpdate, true);
+              });
+              return;
+            }
 
-          this.updateExplorer(stateUpdate, true);
+            this.updateExplorer(stateUpdate, true);
+          });
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
