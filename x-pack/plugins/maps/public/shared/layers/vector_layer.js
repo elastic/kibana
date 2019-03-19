@@ -475,6 +475,7 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._addTooltipListeners(mbMap, lineLayerId);
     this._addTooltipListeners(mbMap, fillLayerId);
   }
 
