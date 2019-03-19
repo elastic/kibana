@@ -475,6 +475,7 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._addTooltipListeners(mbMap, lineLayerId);
     this._addTooltipListeners(mbMap, fillLayerId);
   }
 
@@ -569,7 +570,18 @@ export class VectorLayer extends AbstractLayer {
         return;
       }
 
-      const features = mbMap.queryRenderedFeatures(e.point)
+      const PADDING = 2;//in pixels
+      const mbBbox = [
+        {
+          x: e.point.x - PADDING,
+          y: e.point.y - PADDING
+        },
+        {
+          x: e.point.x + PADDING,
+          y: e.point.y + PADDING
+        }
+      ];
+      const features = mbMap.queryRenderedFeatures(mbBbox)
         .filter(feature => {
           return feature.layer.source === this.getId();
         });
