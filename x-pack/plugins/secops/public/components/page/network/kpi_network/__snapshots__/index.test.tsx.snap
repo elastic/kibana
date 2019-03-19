@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`NetworkTopNFlow Table Component rendering it renders loading icons 1`] = `
+<pure(Component)
+  data={
+    Object {
+      "activeAgents": 60015,
+      "networkEvents": 16,
+      "uniqueFlowId": 10277307,
+      "uniquePrivateIps": 383,
+    }
+  }
+  loading={true}
+/>
+`;
+
 exports[`NetworkTopNFlow Table Component rendering it renders the default widget 1`] = `
 <pure(Component)
   data={
@@ -11,19 +25,5 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default widget
     }
   }
   loading={false}
-/>
-`;
-
-exports[`NetworkTopNFlow Table Component rendering it renders the loading panel 1`] = `
-<pure(Component)
-  data={
-    Object {
-      "activeAgents": 60015,
-      "networkEvents": 16,
-      "uniqueFlowId": 10277307,
-      "uniquePrivateIps": 383,
-    }
-  }
-  loading={true}
 />
 `;
