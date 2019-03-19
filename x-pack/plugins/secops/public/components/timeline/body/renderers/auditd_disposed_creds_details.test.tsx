@@ -21,7 +21,7 @@ describe('AuditDisposedCredsDetails', () => {
       const browserFields: BrowserFields = {};
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <AuditdDisposedDetails browserFields={browserFields} data={mockEcsData[20]} />
+          <AuditdDisposedDetails browserFields={browserFields} data={mockEcsData[21]} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
