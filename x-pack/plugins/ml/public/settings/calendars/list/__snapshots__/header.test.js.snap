@@ -30,7 +30,9 @@ exports[`CalendarListsHeader renders header 1`] = `
             </h1>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
           <EuiTextColor
             color="subdued"
             component="span"

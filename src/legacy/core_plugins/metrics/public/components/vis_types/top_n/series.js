@@ -188,6 +188,8 @@ const TopNSeries = injectI18n(function (props) {
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
@@ -222,7 +224,8 @@ TopNSeries.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
 };
 
 export default TopNSeries;
