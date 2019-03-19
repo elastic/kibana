@@ -12,6 +12,8 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 import React from 'react';
+// @ts-ignore
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { EditorConfig, EditorPanelsBuilder, StandardVisState } from '../editor_config_registry';
 
 interface SampleVisState {
@@ -19,19 +21,32 @@ interface SampleVisState {
 }
 
 const Editor: EditorPanelsBuilder<SampleVisState> = ({ customState, onChangeCustomState }) => {
+  const fields = ['Field 1', 'Field 2', 'Field 3', 'Field 4'];
   return {
     leftPanel: (
       <>
-        TODO: Use Chris' data panel here
-        <EuiListGroup>
-          <EuiListGroupItem label="Field 1" />
-
-          <EuiListGroupItem label="Field 2" />
-
-          <EuiListGroupItem label="Field 3" />
-
-          <EuiListGroupItem label="Field 4" />
-        </EuiListGroup>
+        <Droppable droppableId="fieldList">
+          {(provided: any) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              TODO: Use Chris' data panel here
+              <EuiListGroup>
+                {fields.map((field, index) => (
+                  <Draggable draggableId={field} index={index} key={field}>
+                    {(provided2: any) => (
+                      <div
+                        ref={provided2.innerRef}
+                        {...provided2.draggableProps}
+                        {...provided2.dragHandleProps}
+                      >
+                        <EuiListGroupItem label={field} />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+              </EuiListGroup>
+            </div>
+          )}
+        </Droppable>
       </>
     ),
     rightPanel: (
@@ -60,8 +75,15 @@ function toExpression(standardState: StandardVisState, customState?: SampleVisSt
 export const config: EditorConfig<SampleVisState> = {
   editorPanels: Editor,
   toExpression,
-  toSuggestionExpression: toExpression,
-  suggestionScore: () => 0.5,
+  getSuggestions: (standardVisState, customVisState) => [
+    {
+      expression: toExpression(standardVisState, customVisState),
+      score: 0.5,
+      standardVisState,
+      customVisState,
+      title: 'Sample Vis',
+    },
+  ],
   defaultCustomState: { xAxisField: 'not initialized' },
   defaultStandardState: { query: {}, title: 'Unsaved Sample Vis', columns: [] },
 };

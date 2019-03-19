@@ -24,20 +24,27 @@ export type EditorPanelsBuilder<S = any> = (
   props: EditorComponentProps<S>
 ) => { leftPanel: JSX.Element; rightPanel: JSX.Element };
 
+export interface Suggestion<S = any> {
+  expression: string;
+  score: number;
+  standardVisState: StandardVisState;
+  customVisState: S;
+  title: string;
+}
+
 /**
  * each editorconfig has to register itself and has to provide these four things:
  * >> an editor panels builder, which gets passed the current state and updater functions
  *    for the current state and returns two rendered react elements for the left and the right panel (might be extended later)
  * >> a toExpression function which takes the current state and turns it into an expression. should be completely pure
- * >> a toSuggestionExpression function - same thing, but is used to build the expression for the suggestions. There might be no customVisState (because the user started configuring in another plugin)
- * >> a suggestionScore function - takes the name of the currently active plugin and the current standard state and returns a score which is used to sort the suggestions. 0 means it wont be rendered at all
+ * >> a toSuggestions function - returns suggestions of how this plugin could render the current state (used to populate a list of suggested configurations in the side bar)
+ *    Also contains a score which is used to sort the suggestions from all plugins
  */
 
 export interface EditorConfig<S = any> {
   editorPanels: EditorPanelsBuilder<S>;
   toExpression: (standardVisState: StandardVisState, customVisState: S) => string;
-  toSuggestionExpression: (standardVisState: StandardVisState, customVisState: S) => string;
-  suggestionScore: (pluginName: string, state: StandardVisState) => number;
+  getSuggestions: (standardVisState: StandardVisState, customVisState: S) => Array<Suggestion<S>>;
   defaultStandardState: StandardVisState;
   defaultCustomState: S;
 }
