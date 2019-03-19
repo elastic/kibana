@@ -17,15 +17,14 @@
  * under the License.
  */
 
-import { getRootPropertiesObjects } from '../../../../mappings';
+import { getRootPropertiesObjects, IndexMapping } from '../../../../mappings';
+import { SavedObjectsSchema } from '../../../schema';
 
 /**
  * Gets the types based on the type. Uses mappings to support
  * null type (all types), a single type string or an array
- * @param {EsMapping} mappings
- * @param {(string|Array<string>)} type
  */
-function getTypes(mappings, type) {
+function getTypes(mappings: IndexMapping, type?: string | string[]) {
   if (!type) {
     return Object.keys(getRootPropertiesObjects(mappings));
   }
@@ -39,11 +38,8 @@ function getTypes(mappings, type) {
 
 /**
  *  Get the field params based on the types and searchFields
- *  @param  {Array<string>} searchFields
- *  @param  {string|Array<string>} types
- *  @return {Object}
  */
-function getFieldsForTypes(searchFields, types) {
+function getFieldsForTypes(types: string[], searchFields?: string[]) {
   if (!searchFields || !searchFields.length) {
     return {
       lenient: true,
@@ -51,27 +47,19 @@ function getFieldsForTypes(searchFields, types) {
     };
   }
 
-  return {
-    fields: searchFields.reduce(
-      (acc, field) => [...acc, ...types.map(prefix => `${prefix}.${field}`)],
-      []
-    ),
-  };
+  let fields: string[] = [];
+  for (const field of searchFields) {
+    fields = fields.concat(types.map(prefix => `${prefix}.${field}`));
+  }
+
+  return { fields };
 }
 
 /**
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
- *  @param  {SavedObjectsSchema} schema
- *  @param  {string} namespace
- *  @param  {string} type
- *  @return {Object}
  */
-function getClauseForType(schema, namespace, type) {
-  if (!type) {
-    throw new Error(`type is required to build filter clause`);
-  }
-
+function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
   if (namespace && !schema.isNamespaceAgnostic(type)) {
     return {
       bool: {
@@ -90,27 +78,22 @@ function getClauseForType(schema, namespace, type) {
 
 /**
  *  Get the "query" related keys for the search body
- *  @param  {EsMapping} mapping mappings from Ui
- * *@param  {SavedObjectsSchema} schema
- *  @param  {(string|Array<string>)} type
- *  @param  {String} search
- *  @param  {Array<string>} searchFields
- *  @param  {String} defaultSearchOperator
- *  @param  {Object} hasReference
- *  @return {Object}
  */
 export function getQueryParams(
-  mappings,
-  schema,
-  namespace,
-  type,
-  search,
-  searchFields,
-  defaultSearchOperator,
-  hasReference
+  mappings: IndexMapping,
+  schema: SavedObjectsSchema,
+  namespace?: string,
+  type?: string | string[],
+  search?: string,
+  searchFields?: string[],
+  defaultSearchOperator?: string,
+  hasReference?: {
+    type: string;
+    id: string;
+  }
 ) {
   const types = getTypes(mappings, type);
-  const bool = {
+  const bool: any = {
     filter: [
       {
         bool: {
@@ -139,7 +122,7 @@ export function getQueryParams(
                 },
               ]
             : undefined,
-          should: types.map(type => getClauseForType(schema, namespace, type)),
+          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
           minimum_should_match: 1,
         },
       },
@@ -151,7 +134,7 @@ export function getQueryParams(
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(searchFields, types),
+          ...getFieldsForTypes(types, searchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },
