@@ -8,6 +8,7 @@ import React from 'react';
 
 import {
   EuiButton,
+  EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -31,11 +32,14 @@ export const DataFrameList = () => (
               <h2>Data Frame</h2>
             </EuiTitle>
           </EuiPageContentHeaderSection>
+          <EuiPageContentHeaderSection>
+            <EuiButton fill onClick={newJob} iconType="plusInCircle">
+              Create Data Frame
+            </EuiButton>
+          </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
-          <EuiButton onClick={newJob} iconType="plusInCircle">
-            Create Data Frame
-          </EuiButton>
+          <EuiEmptyPrompt title={<h2>Here be Data Frame dragons!</h2>} iconType="editorStrike" />
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>
