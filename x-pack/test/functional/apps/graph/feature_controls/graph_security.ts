@@ -134,7 +134,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`doesn't show delete button`, async () => {
         await PageObjects.common.navigateToApp('graph');
         await testSubjects.existOrFail('graphOpenButton');
-        await testSubjects.missingOrFail('graphSaveButton');
+        await testSubjects.missingOrFail('graphDeleteButton');
       });
     });
 
