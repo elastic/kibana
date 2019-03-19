@@ -226,7 +226,7 @@ GaugeSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
 };
 
 const GaugeSeries = injectI18n(GaugeSeriesUi);

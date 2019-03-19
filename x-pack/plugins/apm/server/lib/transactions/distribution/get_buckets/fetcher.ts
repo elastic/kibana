@@ -20,7 +20,7 @@ import {
   TRANSACTION_TYPE
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { Setup } from 'x-pack/plugins/apm/server/lib/helpers/setup_request';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { rangeFilter } from '../../../helpers/range_filter';
 
 interface Bucket {

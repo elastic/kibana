@@ -95,7 +95,6 @@ function getExplorerDefaultState() {
     filterPlaceHolder: undefined,
     indexPattern: { title: ML_RESULTS_INDEX_PATTERN, fields: [] },
     influencersFilterQuery: undefined,
-    isAndOperator: false,
     hasResults: false,
     influencers: {},
     loading: true,
@@ -247,32 +246,49 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         // Listen for changes to job selection.
         if (action === EXPLORER_ACTION.JOB_SELECTION_CHANGE) {
-          const { selectedJobs } = payload;
-          const stateUpdate = {
-            noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
-            selectedJobs,
-          };
+          this.setState(...getExplorerDefaultState(), async () => {
+            const { selectedJobs } = payload;
+            const stateUpdate = {
+              noInfluencersConfigured: (getInfluencers(selectedJobs).length === 0),
+              selectedJobs,
+            };
 
-          const indexPattern = await this.getIndexPattern(selectedJobs);
-          stateUpdate.indexPattern = indexPattern;
+            this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
+            Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+            // clear filter if selected jobs have no influencers
+            if (stateUpdate.noInfluencersConfigured === true) {
+              this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+              const noFilterState = {
+                filterActive: false,
+                filteredFields: [],
+                influencersFilterQuery: undefined,
+                maskAll: false,
+                queryString: undefined
+              };
 
-          this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
-          Object.assign(stateUpdate, getClearedSelectedAnomaliesState());
+              Object.assign(stateUpdate, noFilterState);
+            } else {
+              // indexPattern will not be used if there are no influencers so set up can be skipped
+              // indexPattern is passed to KqlFilterBar which is only shown if (noInfluencersConfigured === false)
+              const indexPattern = await this.getIndexPattern(selectedJobs);
+              stateUpdate.indexPattern = indexPattern;
+            }
 
-          if (selectedJobs.length > 1) {
-            this.props.appStateHandler(
-              APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
-              { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
-            );
-            stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
-            // enforce a state update for swimlaneViewByFieldName
-            this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
-              this.updateExplorer(stateUpdate, true);
-            });
-            return;
-          }
+            if (selectedJobs.length > 1) {
+              this.props.appStateHandler(
+                APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
+                { swimlaneViewByFieldName: VIEW_BY_JOB_LABEL },
+              );
+              stateUpdate.swimlaneViewByFieldName = VIEW_BY_JOB_LABEL;
+              // enforce a state update for swimlaneViewByFieldName
+              this.setState({ swimlaneViewByFieldName: VIEW_BY_JOB_LABEL }, () => {
+                this.updateExplorer(stateUpdate, true);
+              });
+              return;
+            }
 
-          this.updateExplorer(stateUpdate, true);
+            this.updateExplorer(stateUpdate, true);
+          });
         }
 
         // RELOAD reloads full Anomaly Explorer and clears the selection.
@@ -707,7 +723,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             topFieldValues,
             overallSwimlaneData,
             selectedJobs,
-            viewBySwimlaneOptions.swimlaneViewByFieldName
+            viewBySwimlaneOptions.swimlaneViewByFieldName,
+            influencersFilterQuery
           ),
           { viewByLoadedForTimeFormatted: formatHumanReadableDateTime(timerange.earliestMs) }
         );
@@ -903,8 +920,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     applyInfluencersFilterQuery = ({
       influencersFilterQuery,
       filteredFields,
-      queryString,
-      isAndOperator }) => {
+      queryString }) => {
       const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
@@ -914,7 +930,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           filterActive: false,
           filteredFields: [],
           influencersFilterQuery: undefined,
-          isAndOperator: false,
           maskAll: false,
           queryString: undefined,
           ...getClearedSelectedAnomaliesState()
@@ -941,7 +956,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           filterActive: true,
           filteredFields,
           influencersFilterQuery,
-          isAndOperator,
           queryString,
           maskAll: (selectedViewByFieldName === VIEW_BY_JOB_LABEL ||
             filteredFields.includes(selectedViewByFieldName) === false),
@@ -963,7 +977,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         filterActive,
         filterPlaceHolder,
         indexPattern,
-        isAndOperator,
         maskAll,
         influencers,
         hasResults,
@@ -1163,7 +1176,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 {!showViewBySwimlane && !viewBySwimlaneDataLoading && swimlaneViewByFieldName !== null && (
                   <ExplorerNoInfluencersFound
                     swimlaneViewByFieldName={swimlaneViewByFieldName}
-                    showFilterMessage={(filterActive === true && isAndOperator === true)}
+                    showFilterMessage={(filterActive === true)}
                   />
                 )}
               </React.Fragment>

@@ -3,7 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get, max, min } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
@@ -132,7 +134,21 @@ export const NodesOverview = injectI18n(
       return (
         <MainContainer>
           <ViewSwitcherContainer>
-            <ViewSwitcher view={view} onChange={this.handleViewChange} />
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <ViewSwitcher view={view} onChange={this.handleViewChange} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.infra.homePage.toolbar.showingLastOneMinuteDataText"
+                      defaultMessage="Showing the last 1 minute of data from the time period"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </ViewSwitcherContainer>
           {view === 'table' ? (
             <TableContainer>

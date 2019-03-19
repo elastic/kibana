@@ -359,12 +359,9 @@ export const reindexServiceFactory = (
       const { count } = await callCluster('count', { index: reindexOp.attributes.indexName });
 
       if (taskResponse.task.status.created < count) {
-        if (taskResponse.response.failures && taskResponse.response.failures.length > 0) {
-          const failureExample = JSON.stringify(taskResponse.response.failures[0]);
-          throw Boom.badData(`Reindexing failed with failures like: ${failureExample}`);
-        } else {
-          throw Boom.badData('Reindexing failed due to new documents created in original index.');
-        }
+        // Include the entire task result in the error message. This should be guaranteed
+        // to be JSON-serializable since it just came back from Elasticsearch.
+        throw Boom.badData(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
       }
 
       // Update the status
