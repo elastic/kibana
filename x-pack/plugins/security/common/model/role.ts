@@ -19,6 +19,7 @@ export interface RoleKibanaPrivilege {
   spaces: string[];
   base: string[];
   feature: FeaturesPrivileges;
+  _reserved?: string[];
 }
 
 export interface Role {

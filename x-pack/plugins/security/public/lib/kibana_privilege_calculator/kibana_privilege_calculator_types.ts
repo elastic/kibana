@@ -34,6 +34,7 @@ export interface CalculatedPrivilege {
   feature: {
     [featureId: string]: PrivilegeExplanation;
   };
+  _reserved: undefined | string[];
 }
 
 export interface PrivilegeScenario {
