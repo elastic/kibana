@@ -48,7 +48,9 @@ describe('auditdEndedSessionRowRenderer', () => {
   });
 
   test('should return false when action is set to some other value', () => {
-    auditd.event ? (auditd.event.action = 'some other value') : expect(auditd.event).toBeDefined();
+    auditd.event != null
+      ? (auditd.event.action = 'some other value')
+      : expect(auditd.event).toBeDefined();
     expect(auditdEndedSessionRowRenderer.isInstance(auditd)).toBe(false);
   });
 
