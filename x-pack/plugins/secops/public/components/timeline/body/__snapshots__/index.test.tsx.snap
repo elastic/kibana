@@ -1387,6 +1387,70 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         },
         "zeek": null,
       },
+      Object {
+        "_id": "23",
+        "auditd": Object {
+          "data": Object {
+            "acct": "alice",
+            "op": "PAM:session_close",
+            "terminal": "ssh",
+          },
+          "result": "success",
+          "session": "340",
+          "summary": Object {
+            "actor": Object {
+              "primary": "alice",
+              "secondary": "alice",
+            },
+            "how": "/usr/sbin/sshd",
+            "message_type": null,
+            "object": Object {
+              "primary": "ssh",
+              "secondary": "8.42.77.171",
+              "type": "user-session",
+            },
+            "sequence": null,
+          },
+        },
+        "destination": null,
+        "event": Object {
+          "action": "ended-session",
+          "category": "user-login",
+          "dataset": null,
+          "id": null,
+          "module": "auditd",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
+          "ip": Array [
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
+          ],
+          "name": "suricata-bangalore",
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": null,
+          "executable": "/usr/sbin/sshd",
+          "name": null,
+          "pid": 21202,
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
+        },
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-13T03:35:21.614Z",
+        "url": null,
+        "user": Object {
+          "name": "root",
+        },
+        "zeek": null,
+      },
     ]
   }
   eventIdToNoteIds={Object {}}
@@ -1405,6 +1469,10 @@ Can be one or multiple IPv4 or IPv6 addresses.",
   range="1 Day"
   rowRenderers={
     Array [
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
       Object {
         "isInstance": [Function],
         "renderRow": [Function],
