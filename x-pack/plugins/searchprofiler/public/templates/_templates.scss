@@ -1,8 +1,17 @@
+@import '@elastic/eui/src/components/header/variables';
 @import '@elastic/eui/src/components/panel/mixins';
+
+.prfDevTool {
+  height: calc(100vh - #{$euiHeaderChildSize});
+
+  .devApp__container {
+    flex-shrink: 1;
+  }
+}
 
 .prfDevTool__container {
   display: flex;
-  flex: 1 0 auto;
+  flex: 1 1 auto;
   padding: $euiSize;
 
   // SASSTODO/EUITODO/HACK: Reset font styles of headers
@@ -14,13 +23,26 @@
 @include euiPanel('prfDevTool__main');
 
 .prfDevTool__main {
-  overflow-y: auto;
   flex: 3;
   order: 2;
   margin-left: $euiSize;
+  display: flex;
+  overflow: hidden;
 
   .nav-tabs {
     margin: -1px 0 0 -1px;
+  }
+
+  // Make only the tab content scroll
+
+  > * {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .tab-content {
+    overflow-y: auto;
   }
 }
 
