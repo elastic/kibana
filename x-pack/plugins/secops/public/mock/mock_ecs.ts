@@ -867,24 +867,20 @@ export const mockEcsData: Ecs[] = [
         acct: null,
         terminal: '/dev/pts/0',
         op: null,
-        __typename: 'AuditdData',
       },
       summary: {
         actor: {
           primary: 'root',
           secondary: 'alice',
-          __typename: 'PrimarySecondary',
         },
         object: {
           primary: '/dev/pts/0',
           secondary: null,
           type: 'user-session',
-          __typename: 'PrimarySecondary',
         },
         how: '/sbin/pam_tally2',
         message_type: null,
         sequence: null,
-        __typename: 'Summary',
       },
     },
     host: {
