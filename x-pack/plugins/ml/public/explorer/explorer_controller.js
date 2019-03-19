@@ -206,7 +206,6 @@ module.controller('MlExplorerController', function (
 
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    // explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
@@ -215,7 +214,6 @@ module.controller('MlExplorerController', function (
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
-    // explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.RELOAD });
     }
@@ -240,7 +238,6 @@ module.controller('MlExplorerController', function (
   });
 
   function redrawOnResize() {
-    // explorer$.next({ action: EXPLORER_ACTION.REDRAW });
     if ($scope.jobSelectionUpdateInProgress === false) {
       explorer$.next({ action: EXPLORER_ACTION.REDRAW });
     }
