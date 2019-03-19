@@ -12,6 +12,9 @@ import { CheckPrivilegesAtResourceResponse, CheckPrivilegesWithRequest } from '.
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SpacesPlugin } from 'x-pack/plugins/spaces/types';
+import { OptionalPlugin } from '../optional_plugin';
+
 export type CheckPrivilegesDynamically = (
   privilegeOrPrivileges: string | string[]
 ) => Promise<CheckPrivilegesAtResourceResponse>;
@@ -22,7 +25,7 @@ export type CheckPrivilegesDynamicallyWithRequest = (
 
 export function checkPrivilegesDynamicallyWithRequestFactory(
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
-  spaces: any
+  spaces: OptionalPlugin<SpacesPlugin>
 ): CheckPrivilegesDynamicallyWithRequest {
   return function checkPrivilegesDynamicallyWithRequest(request: Record<string, any>) {
     const checkPrivileges = checkPrivilegesWithRequest(request);
