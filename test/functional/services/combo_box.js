@@ -128,7 +128,7 @@ export function ComboBoxProvider({ getService }) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
         const input = await comboBoxElement.findByTagName('input');
-        await input.pressKeys(browser.keys.RETURN);
+        await input.pressKeys(browser.keys.ESCAPE);
       }
     }
 
