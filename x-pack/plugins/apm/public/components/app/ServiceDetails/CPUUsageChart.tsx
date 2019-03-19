@@ -19,6 +19,9 @@ interface Props {
   hoverXHandlers: HoverXHandlers;
 }
 
+const tickFormatY = (y: number | null) => `${(y || 0) * 100}%`;
+const formatTooltipValue = (c: Coordinate) => asPercent(c.y || 0, 1);
+
 export function CPUUsageChart({ data, hoverXHandlers }: Props) {
   return (
     <React.Fragment>
@@ -36,8 +39,8 @@ export function CPUUsageChart({ data, hoverXHandlers }: Props) {
         {...hoverXHandlers}
         noHits={data.totalHits === 0}
         series={data.series}
-        tickFormatY={(y: number | null) => `${(y || 0) * 100}%`}
-        formatTooltipValue={(c: Coordinate) => asPercent(c.y || 0, 1)}
+        tickFormatY={tickFormatY}
+        formatTooltipValue={formatTooltipValue}
         yMax={1}
       />
     </React.Fragment>
