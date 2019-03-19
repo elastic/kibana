@@ -30,7 +30,7 @@ const apiExtractorConfig: IExtractorConfig = {
     rootFolder: '.',
   },
   project: {
-    entryPointSourceFile: 'target/types/type_exports.d.ts',
+    entryPointSourceFile: 'target/types/server/index.d.ts',
   },
   apiReviewFile: {
     enabled: true,
@@ -161,34 +161,47 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
 
   log.info('Kibana Core API: checking for changes in API signature...');
 
-  await runBuildTypes();
+  await runBuildTypes().catch(e => {
+    if (e) {
+      log.error(e);
+      process.exit(1);
+    }
+  });
 
   const { apiChanged, warnings, errors } = runApiExtractor(opts.accept);
 
-  if (apiChanged) {
-    if (opts.accept) {
-      log.warning('You have changed the public signature of the Kibana Core API');
-      log.warning(
-        'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
-      );
-    } else {
-      log.warning('You have changed the public signature of the Kibana Core API');
-      log.warning(
-        'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
-          '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
-          "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
-      );
+  if (apiChanged && opts.accept) {
+    log.warning('You have changed the public signature of the Kibana Core API');
+    log.warning(
+      'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
+    );
+  }
 
-      // If the API changed and we're not accepting the changes, exit process with error
-      process.exit(1);
-    }
-  } else {
+  if (apiChanged && !opts.accept) {
+    log.warning('You have changed the public signature of the Kibana Core API');
+    log.warning(
+      'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
+        '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
+        "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
+    );
+  }
+
+  if (!apiChanged) {
     log.info('Kibana Core API: no changes detected ✔');
   }
 
   if (opts.accept || opts.docs) {
-    await runApiDocumenter();
+    await runApiDocumenter().catch(e => {
+      log.error(e);
+      process.exit(1);
+    });
+
     log.info('Kibana Core API: updated documentation ✔');
+  }
+
+  // If the API changed and we're not accepting the changes, exit process with error
+  if (apiChanged && !opts.accept) {
+    process.exit(1);
   }
 
   // If any errors or warnings occured, exit with an error
