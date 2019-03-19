@@ -5,6 +5,7 @@
  */
 
 import fs from 'fs';
+import { ServerOptions } from '../server_options';
 import { createTestServerOption } from '../test_utils';
 import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 import { TYPESCRIPT } from './language_servers';

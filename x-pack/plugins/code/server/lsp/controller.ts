@@ -25,7 +25,7 @@ import { LanguageServerDefinition, LanguageServers } from './language_servers';
 import { ILanguageServerHandler } from './proxy';
 
 export interface LanguageServerHandlerMap {
-  [workspaceUri: string]: ILanguageServerHandler;
+  [workspaceUri: string]: Promise<ILanguageServerHandler>;
 }
 
 interface LanguageServerData {
@@ -34,7 +34,7 @@ interface LanguageServerData {
   maxWorkspace: number;
   languages: string[];
   launcher: ILanguageServerLauncher;
-  languageServerHandlers?: ILanguageServerHandler | LanguageServerHandlerMap;
+  languageServerHandlers?: Promise<ILanguageServerHandler> | LanguageServerHandlerMap;
 }
 
 /**
@@ -95,15 +95,15 @@ export class LanguageServerController implements ILanguageServerHandler {
     if (lang) {
       const ls = this.findLanguageServer(lang);
       if (ls.builtinWorkspaceFolders) {
-        if (!ls.launcher.running) {
-          ls.languageServerHandlers = await ls.launcher.launch(
+        if (!ls.languageServerHandlers && !ls.launcher.running) {
+          ls.languageServerHandlers = ls.launcher.launch(
             ls.builtinWorkspaceFolders,
             ls.maxWorkspace,
             this.installManager.installationPath(ls.definition)
           );
         }
-        const handler = ls.languageServerHandlers as ILanguageServerHandler;
-        return handler.handleRequest(request);
+        const handler = ls.languageServerHandlers as Promise<ILanguageServerHandler>;
+        return (await handler).handleRequest(request);
       } else {
         const handler = await this.findOrCreateHandler(ls, request);
         handler.lastAccess = Date.now();
@@ -127,11 +127,13 @@ export class LanguageServerController implements ILanguageServerHandler {
       if (ls.languageServerHandlers) {
         if (ls.builtinWorkspaceFolders) {
           if (ls.languageServerHandlers) {
-            await (ls.languageServerHandlers as ILanguageServerHandler).exit();
+            const h = await (ls.languageServerHandlers as Promise<ILanguageServerHandler>);
+            await h.exit();
           }
         } else {
           const handlers = ls.languageServerHandlers as LanguageServerHandlerMap;
-          for (const handler of Object.values(handlers)) {
+          for (const handlerPromise of Object.values(handlers)) {
+            const handler = await handlerPromise;
             await handler.exit();
           }
         }
@@ -145,7 +147,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       // for those language server has builtin workspace support, we can launch them during kibana startup
       if (installed && ls.builtinWorkspaceFolders) {
         try {
-          ls.languageServerHandlers = await ls.launcher.launch(
+          ls.languageServerHandlers = ls.launcher.launch(
             true,
             ls.maxWorkspace,
             this.installManager.installationPath(ls.definition)!
@@ -161,14 +163,16 @@ export class LanguageServerController implements ILanguageServerHandler {
     for (const languageServer of this.languageServers) {
       if (languageServer.languageServerHandlers) {
         if (languageServer.builtinWorkspaceFolders) {
-          const handler = languageServer.languageServerHandlers as ILanguageServerHandler;
+          const handler = await (languageServer.languageServerHandlers as Promise<
+            ILanguageServerHandler
+          >);
           await handler.unloadWorkspace(workspaceDir);
         } else {
           const handlers = languageServer.languageServerHandlers as LanguageServerHandlerMap;
           const realPath = fs.realpathSync(workspaceDir);
           const handler = handlers[realPath];
           if (handler) {
-            await handler.unloadWorkspace(realPath);
+            await (await handler).unloadWorkspace(realPath);
             delete handlers[realPath];
           }
         }
@@ -213,7 +217,7 @@ export class LanguageServerController implements ILanguageServerHandler {
       const maxWorkspace = languageServer.maxWorkspace;
       const handlerArray = Object.entries(handlers);
       if (handlerArray.length < maxWorkspace) {
-        handler = await languageServer.launcher.launch(
+        handler = languageServer.launcher.launch(
           languageServer.builtinWorkspaceFolders,
           maxWorkspace,
           this.installManager.installationPath(languageServer.definition)
@@ -222,13 +226,15 @@ export class LanguageServerController implements ILanguageServerHandler {
         return handler;
       } else {
         let [oldestWorkspace, oldestHandler] = handlerArray[0];
-        handlerArray.forEach(p => {
-          const [ws, h] = p;
-          if (h.lastAccess! < oldestHandler.lastAccess!) {
+        for (const e of handlerArray) {
+          const [ws, handlePromise] = e;
+          const h = await handlePromise;
+          const oldestAccess = (await oldestHandler).lastAccess!;
+          if (h.lastAccess! < oldestAccess!) {
             oldestWorkspace = ws;
-            oldestHandler = h;
+            oldestHandler = handlePromise;
           }
-        });
+        }
         delete handlers[oldestWorkspace];
         handlers[request.workspacePath] = oldestHandler;
         return oldestHandler;
