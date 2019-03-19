@@ -41,6 +41,7 @@
   .dropdown-toggle {
     cursor: pointer;
   }
+  
   button.dropdown-toggle {
     width: 170px; // SASSTODO: Proper calc
     text-align: left;
@@ -49,23 +50,6 @@
     // SASSTODO: Proper calc
     span {
       font-size: $euiFontSizeXS;
-    }
-  }
-
-  .dropdown-menu {
-    min-width: 120px; // SASSTODO: Proper calc
-    font-size: $euiFontSizeXS;
-
-    // SASSTODO: Proper selector
-    li > a {
-      color: $euiColorDarkShade;
-      text-decoration: none;
-      box-shadow: none;
-    }
-
-    // SASSTODO: Proper selector
-    li > a:hover, li > a:active, li > a:focus {
-      color: $euiColorEmptyShade;
     }
   }
 

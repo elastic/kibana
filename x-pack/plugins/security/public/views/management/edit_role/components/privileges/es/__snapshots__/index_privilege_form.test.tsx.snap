@@ -116,6 +116,10 @@ exports[`it renders without crashing 1`] = `
                     "isGroupLabelOption": false,
                     "label": "manage_ilm",
                   },
+                  Object {
+                    "isGroupLabelOption": false,
+                    "label": "manage_leader_index",
+                  },
                 ]
               }
               selectedOptions={Array []}

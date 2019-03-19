@@ -49,7 +49,8 @@ const createAgent = (legacyConfig) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (legacyConfig.ssl && legacyConfig.ssl.certificateAuthorities.length > 0) {
+  if (legacyConfig.ssl && Array.isArray(legacyConfig.ssl.certificateAuthorities)
+      && legacyConfig.ssl.certificateAuthorities.length > 0) {
     agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
