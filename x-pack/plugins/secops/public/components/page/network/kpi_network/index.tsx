@@ -27,7 +27,7 @@ interface KpiNetworkProps {
 }
 
 const loadMatrix = (loading: boolean, data: KpiNetworkData, property: string) => {
-  const matrix = get(property, data);
+  const matrix: number | null | undefined = get(property, data);
 
   if (typeof matrix !== 'undefined' && matrix !== null) {
     return numeral(matrix).format('0,0');
