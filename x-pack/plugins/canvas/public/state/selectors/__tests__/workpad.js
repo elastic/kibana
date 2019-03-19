@@ -245,6 +245,15 @@ describe('workpad selectors', () => {
     });
   });
 
+  describe('getGlobalFilterExpression', () => {
+    it('gets filters from all elements', () => {
+      const filters = selector.getGlobalFilterExpression(state);
+      expect(filters).to.equal(
+        'exactly value="beats" column="project" | timefilter column=@timestamp from=now-24h to=now'
+      );
+    });
+  });
+
   describe('isWriteable', () => {
     it('returns boolean for if the workpad is writeable', () => {
       expect(selector.isWriteable(state)).to.equal(false);
