@@ -7844,8 +7844,6 @@
     "xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel": "平均持续时间",
     "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间 (ms)",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
-    "xpack.uptime.monitorList.ipColumnLabel": "IP",
-    "xpack.uptime.monitorList.lastUpdatedColumnLabel": "最后更新时间：1/23/2016",
     "xpack.uptime.monitorList.monitorHistoryColumnLabel": "监测历史记录",
     "xpack.uptime.monitorList.monitoringStatusTitle": "检测状态",
     "xpack.uptime.monitorList.statusColumn.downLabel": "关闭",
