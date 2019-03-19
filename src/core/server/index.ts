@@ -20,4 +20,4 @@
 export { bootstrap } from './bootstrap';
 export { CallAPIOptions, ClusterClient } from './elasticsearch';
 export { Logger, LoggerFactory } from './logging';
-export { PluginInitializerContext, PluginName, PluginStartContext } from './plugins';
+export { PluginInitializerContext, PluginName, PluginSetupContext } from './plugins';

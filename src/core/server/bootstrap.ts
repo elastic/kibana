@@ -83,7 +83,7 @@ export async function bootstrap({
   }
 
   try {
-    await root.start();
+    await root.setup();
   } catch (err) {
     await shutdown(err);
   }
