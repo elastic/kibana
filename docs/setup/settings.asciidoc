@@ -134,9 +134,9 @@ suppress all logging output other than error messages.
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to
 suppress all logging output.
 
-`logging.timezone`:: *Default: UTC* Set to the canonical timezone id (e.g.
-`US/Pacific`) to log events using that timezone. A list of timezones can be
-referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+`logging.timezone`:: *Default: UTC* Set to the canonical timezone id
+(for example, `America/Los_Angeles`) to log events using that timezone. A list of timezones can
+be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this
 setting to `true` to log all events, including system usage information and all
