@@ -16,20 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+const percentileNumberTest = /\d+\.\d+/;
 
-export const METRIC_TYPES = {
-  PERCENTILE: 'percentile',
-  PERCENTILE_RANK: 'percentile_rank',
-  TOP_HIT: 'top_hit',
-  COUNT: 'count',
-  DERIVATIVE: 'derivative',
-  STD_DEVIATION: 'std_deviation',
-  VARIANCE: 'variance',
-  SUM_OF_SQUARES: 'sum_of_squares',
-};
-
-export const EXTENDED_STATS_TYPES = [
-  METRIC_TYPES.STD_DEVIATION,
-  METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES
-];
+export const toPercentileNumber = value =>
+  percentileNumberTest.test(`${value}`) ? value : `${value}.0`;
