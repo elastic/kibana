@@ -258,10 +258,11 @@ async function getRequestContext(encryptedHeaders: string, kbnServer: any, basep
     getBasePath: () => basePath || serverBasePath,
   };
 
-  //if (server.plugins.security) {
+  // no longer needed?
+  // if (server.plugins.security) {
   //  const { authorization } = server.plugins.security;
   //  await authorization.mode.initialize(fakeRequest);
-  //}
+  // }
 
   return fakeRequest;
 }
