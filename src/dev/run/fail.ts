@@ -23,13 +23,28 @@ const FAIL_TAG = Symbol('fail error');
 
 interface FailError extends Error {
   exitCode: number;
+  showHelp: boolean;
   [FAIL_TAG]: true;
 }
 
-export function createFailError(reason: string, exitCode = 1): FailError {
+interface FailErrorOptions {
+  exitCode?: number;
+  showHelp?: boolean;
+}
+
+export function createFailError(reason: string, options: FailErrorOptions = {}): FailError {
+  const { exitCode = 1, showHelp = false } = options;
+
   return Object.assign(new Error(reason), {
     exitCode,
+    showHelp,
     [FAIL_TAG]: true as true,
+  });
+}
+
+export function createFlagError(reason: string) {
+  return createFailError(reason, {
+    showHelp: true,
   });
 }
 
@@ -46,6 +61,8 @@ export function combineErrors(errors: Array<Error | FailError>) {
     .filter(isFailError)
     .reduce((acc, error) => Math.max(acc, error.exitCode), 1);
 
+  const showHelp = errors.some(error => isFailError(error) && error.showHelp);
+
   const message = errors.reduce((acc, error) => {
     if (isFailError(error)) {
       return acc + '\n' + error.message;
@@ -54,5 +71,8 @@ export function combineErrors(errors: Array<Error | FailError>) {
     return acc + `\nUNHANDLED ERROR\n${inspect(error)}`;
   }, '');
 
-  return createFailError(`${errors.length} errors:\n${message}`, exitCode);
+  return createFailError(`${errors.length} errors:\n${message}`, {
+    exitCode,
+    showHelp,
+  });
 }
