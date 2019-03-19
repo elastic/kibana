@@ -18,36 +18,50 @@
  */
 
 import Boom from 'boom';
-
 import { getProperty } from '../../../../mappings';
+
+const TOP_LEVEL_FIELDS = ['_id'];
 
 export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (!sortField) {
     return {};
   }
 
-  let typeField = type;
+  const types = [].concat(type);
 
-  if (Array.isArray(type)) {
-    if (type.length === 1) {
-      typeField = type[0];
-    } else {
-      const rootField = getProperty(mappings, sortField);
-      if (!rootField) {
-        throw Boom.badRequest(`Unable to sort multiple types by field ${sortField}, not a root property`);
-      }
-
-      return {
-        sort: [{
+  if (TOP_LEVEL_FIELDS.includes(sortField)) {
+    return {
+      sort: [
+        {
           [sortField]: {
             order: sortOrder,
-            unmapped_type: rootField.type
-          }
-        }]
-      };
-    }
+          },
+        },
+      ],
+    };
   }
 
+  if (types.length > 1) {
+    const rootField = getProperty(mappings, sortField);
+    if (!rootField) {
+      throw Boom.badRequest(
+        `Unable to sort multiple types by field ${sortField}, not a root property`
+      );
+    }
+
+    return {
+      sort: [
+        {
+          [sortField]: {
+            order: sortOrder,
+            unmapped_type: rootField.type,
+          },
+        },
+      ],
+    };
+  }
+
+  const [typeField] = types;
   const key = `${typeField}.${sortField}`;
   const field = getProperty(mappings, key);
   if (!field) {
@@ -55,11 +69,13 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
   }
 
   return {
-    sort: [{
-      [key]: {
-        order: sortOrder,
-        unmapped_type: field.type
-      }
-    }]
+    sort: [
+      {
+        [key]: {
+          order: sortOrder,
+          unmapped_type: field.type,
+        },
+      },
+    ],
   };
 }

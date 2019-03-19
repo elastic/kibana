@@ -214,6 +214,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       fullWidth={false}
       hasEmptyLabelSpace={true}
       helpText="No access to spaces"
+      labelType="label"
     >
       <PrivilegeSelector
         allowNone={true}
@@ -230,9 +231,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -324,15 +323,8 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -352,10 +344,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
         />
       </EuiButton>
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <InjectIntl(ImpactedSpacesFlyoutUI)
         role={
           Object {

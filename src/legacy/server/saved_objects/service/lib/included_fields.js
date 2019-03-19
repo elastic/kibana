@@ -31,7 +31,8 @@ export function includedFields(type, fields) {
   const sourceFields = typeof fields === 'string' ? [fields] : fields;
   const sourceType = type || '*';
 
-  return sourceFields.map(f => `${sourceType}.${f}`)
+  return sourceFields
+    .map(f => `${sourceType}.${f}`)
     .concat('namespace')
     .concat('type')
     .concat(fields); // v5 compatibility
