@@ -60,8 +60,8 @@ export class VegaActionsMenu extends Component {
         onClick={this.onButtonClick}
         aria-label={
           <FormattedMessage
-            id="vega.editor.vegaHelpButtonAriaLabel"
-            defaultMessage="Vega help"
+            id="vega.editor.vegaEditorOptionsButtonAriaLabel"
+            defaultMessage="Vega editor options"
           />
         }
       />
