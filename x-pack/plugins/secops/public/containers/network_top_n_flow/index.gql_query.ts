@@ -10,19 +10,21 @@ export const networkTopNFlowQuery = gql`
   query GetNetworkTopNFlowQuery(
     $sourceId: ID!
     $direction: NetworkTopNFlowDirection!
+    $filterQuery: String
+    $pagination: PaginationInput!
+    $sort: NetworkTopNFlowSortField!
     $type: NetworkTopNFlowType!
     $timerange: TimerangeInput!
-    $pagination: PaginationInput!
-    $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
       NetworkTopNFlow(
-        type: $type
         direction: $direction
-        timerange: $timerange
-        pagination: $pagination
         filterQuery: $filterQuery
+        pagination: $pagination
+        sort: $sort
+        timerange: $timerange
+        type: $type
       ) {
         totalCount
         edges {

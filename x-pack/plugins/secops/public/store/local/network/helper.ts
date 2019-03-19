@@ -4,22 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../../graphql/types';
+import {
+  Direction,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowSortField,
+  NetworkTopNFlowType,
+} from '../../../graphql/types';
 
 export const helperUpdateTopNFlowDirection = (
   topNFlowType: NetworkTopNFlowType,
   topNFlowDirection: NetworkTopNFlowDirection
 ) => {
+  const topNFlowSort: NetworkTopNFlowSortField = {
+    field: NetworkTopNFlowFields.bytes,
+    direction: Direction.desc,
+  };
   if (
     topNFlowDirection === NetworkTopNFlowDirection.uniDirectional &&
     [NetworkTopNFlowType.client, NetworkTopNFlowType.server].includes(topNFlowType)
   ) {
-    return {
-      topNFlowDirection,
-      topNFlowType: NetworkTopNFlowType.source,
-    };
+    return { topNFlowDirection, topNFlowType: NetworkTopNFlowType.source, topNFlowSort };
   }
-  return {
-    topNFlowDirection,
-  };
+  return { topNFlowDirection, topNFlowSort };
 };

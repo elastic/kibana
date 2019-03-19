@@ -9,6 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import {
   NetworkDnsSortField,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowSortField,
   NetworkTopNFlowType,
 } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -34,6 +35,11 @@ export const updateIsPtrIncluded = actionCreator<{
 export const updateTopNFlowLimit = actionCreator<{ limit: number; networkType: NetworkType }>(
   'UPDATE_TOP_N_FLOW_LIMIT'
 );
+
+export const updateTopNFlowSort = actionCreator<{
+  topNFlowSort: NetworkTopNFlowSortField;
+  networkType: NetworkType;
+}>('UPDATE_TOP_N_FLOW_SORT');
 
 export const updateTopNFlowType = actionCreator<{
   topNFlowType: NetworkTopNFlowType;

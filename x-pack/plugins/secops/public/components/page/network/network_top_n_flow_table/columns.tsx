@@ -6,7 +6,7 @@
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { get, isEmpty } from 'lodash/fp';
+import { get, isEmpty, isNil } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,13 +14,14 @@ import {
   NetworkDirectionEcs,
   NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowItem,
   NetworkTopNFlowType,
 } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -28,18 +29,20 @@ import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from './add_to_kql';
 import * as i18n from './translations';
 
+type valueof<T> = T[keyof T];
+
 export const getNetworkTopNFlowColumns = (
   startDate: number,
   topNFlowDirection: NetworkTopNFlowDirection,
   topNFlowType: NetworkTopNFlowType,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<NetworkTopNFlowEdges>> => [
+): Array<Columns<NetworkTopNFlowEdges | valueof<NetworkTopNFlowItem>>> => [
   {
     name: getIpTitle(topNFlowType),
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
+    render: ({ node }: { node: NetworkTopNFlowItem }) => {
       const ipAttr = `${topNFlowType}.ip`;
       const ip: string | null = get(ipAttr, node);
       const id = escapeDataProviderId(
@@ -56,14 +59,8 @@ export const getNetworkTopNFlowColumns = (
               name: ip,
               excluded: false,
               kqlQuery: '',
-              queryMatch: {
-                field: ipAttr,
-                value: ip,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryMatch: { field: ipAttr, value: ip },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -85,7 +82,7 @@ export const getNetworkTopNFlowColumns = (
     name: i18n.DOMAIN,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
+    render: ({ node }: { node: NetworkTopNFlowItem }) => {
       const domainAttr = `${topNFlowType}.domain`;
       const ipAttr = `${topNFlowType}.ip`;
       const domains: string[] = get(domainAttr, node);
@@ -106,14 +103,8 @@ export const getNetworkTopNFlowColumns = (
               name: domain,
               excluded: false,
               kqlQuery: '',
-              queryMatch: {
-                field: domainAttr,
-                value: domain,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryMatch: { field: domainAttr, value: domain },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -156,13 +147,15 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
+    field: 'node.network.direction',
     name: i18n.DIRECTION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) =>
-      isEmpty(get('network.direction', node))
+    render: (directions: NetworkDirectionEcs[] | null | undefined) =>
+      isEmpty(directions)
         ? getEmptyTagValue()
-        : get('network.direction', node).map((direction: NetworkDirectionEcs) => (
+        : directions &&
+          directions.map((direction, index) => (
             <AddToKql
               key={escapeDataProviderId(
                 `${tableId}-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
@@ -171,39 +164,54 @@ export const getNetworkTopNFlowColumns = (
               expression={`network.direction: ${escapeQueryValue(direction)}`}
               type={type}
             >
-              {defaultToEmptyTag(direction)}
+              <>
+                {defaultToEmptyTag(direction)}
+                {index < directions.length - 1 ? '\u00A0' : null}
+              </>
             </AddToKql>
           )),
   },
   {
+    field: 'node.network.bytes',
     name: i18n.BYTES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (node.network && node.network.bytes) {
-        return numeral(node.network.bytes).format('0.000b');
+    sortable: true,
+    render: (bytes: number | null | undefined) => {
+      if (!isNil(bytes)) {
+        return numeral(bytes).format('0.000b');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: 'node.network.packets',
     name: i18n.PACKETS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      if (node.network && node.network.packets) {
-        return numeral(node.network.packets).format('0,000');
+    sortable: true,
+    render: (packets: number | null | undefined) => {
+      if (!isNil(packets)) {
+        return numeral(packets).format('0,000');
       } else {
         return getEmptyTagValue();
       }
     },
   },
   {
+    field: `node.${topNFlowType}.count`,
     name: getUniqueTitle(topNFlowType),
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag(`${topNFlowType}.count`, node),
+    sortable: true,
+    render: (ipCount: number | null | undefined) => {
+      if (!isNil(ipCount)) {
+        return numeral(ipCount).format('0,000');
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
 ];
 

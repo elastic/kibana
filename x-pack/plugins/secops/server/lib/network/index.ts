@@ -8,6 +8,7 @@ import {
   NetworkDnsSortField,
   NetworkTopNFlowData,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowSortField,
   NetworkTopNFlowType,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
@@ -17,6 +18,7 @@ import { NetworkAdapter } from './types';
 export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptions {
+  networkTopNFlowSort: NetworkTopNFlowSortField;
   networkTopNFlowType: NetworkTopNFlowType;
   networkTopNFlowDirection: NetworkTopNFlowDirection;
 }

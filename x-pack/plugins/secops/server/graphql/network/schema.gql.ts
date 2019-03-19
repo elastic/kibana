@@ -13,6 +13,17 @@ export const networkSchema = gql`
     ip: String
   }
 
+  enum NetworkTopNFlowFields {
+    bytes
+    packets
+    ipCount
+  }
+
+  input NetworkTopNFlowSortField {
+    field: NetworkTopNFlowFields!
+    direction: Direction!
+  }
+
   type NetworkTopNFlowItem {
     _id: String
     timestamp: Date
@@ -87,6 +98,7 @@ export const networkSchema = gql`
       filterQuery: String
       id: String
       pagination: PaginationInput!
+      sort: NetworkTopNFlowSortField!
       type: NetworkTopNFlowType!
       timerange: TimerangeInput!
     ): NetworkTopNFlowData!

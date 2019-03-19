@@ -36,8 +36,8 @@ export interface SortingBasicTable {
 }
 
 export interface Criteria {
-  page: { index: number; size: number };
-  sort: SortingBasicTable;
+  page?: { index: number; size: number };
+  sort?: SortingBasicTable;
 }
 
 interface BasicTableProps<T> {
