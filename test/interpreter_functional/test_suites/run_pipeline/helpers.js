@@ -20,13 +20,12 @@
 import expect from 'expect.js';
 
 // helper for testing interpreter expressions
-export const expectExpressionProvider = ({ getService, getPageObjects, updateBaselines }) => {
+export const expectExpressionProvider = ({ getService, updateBaselines }) => {
   const browser = getService('browser');
   const screenshot = getService('screenshots');
   const snapshots = getService('snapshots');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['visualize']);
   /**
    * returns a handler object to test a given expression
    * @name: name of the test
@@ -109,12 +108,12 @@ export const expectExpressionProvider = ({ getService, getPageObjects, updateBas
        */
       toMatchScreenshot: async () => {
         const pipelineResponse = await handler.getResponse();
-        await browser.executeAsync((context, done) => {
+        const result = await browser.executeAsync((context, done) => {
           window.renderPipelineResponse(context).then(result => {
             done(result);
           });
         }, pipelineResponse);
-        PageObjects.visualize.waitForVisualization();
+        log.debug('response of rendering: ', result);
 
         const chartEl = await testSubjects.find('pluginChart');
         const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);

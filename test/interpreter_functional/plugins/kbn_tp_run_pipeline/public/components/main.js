@@ -54,17 +54,25 @@ class Main extends React.Component {
     };
 
     window.renderPipelineResponse = async (context = {}) => {
-      if (context.type !== 'render') {
-        this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
-        return;
-      }
-      const renderer = props.registries.renderers.get(context.as);
-      if (!renderer) {
-        this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
-        return;
-      }
-      props.visualizationLoader.destroy(this.chartDiv);
-      renderer.render(this.chartDiv, context.value, handlers);
+      return new Promise(resolve => {
+        if (context.type !== 'render') {
+          this.setState({ expression: 'Expression did not return render type!\n\n' + JSON.stringify(context) });
+          return resolve();
+        }
+        const renderer = props.registries.renderers.get(context.as);
+        if (!renderer) {
+          this.setState({ expression: 'Renderer was not found in registry!\n\n' + JSON.stringify(context) });
+          return resolve();
+        }
+        props.visualizationLoader.destroy(this.chartDiv);
+        const renderCompleteHandler = () => {
+          resolve('render complete');
+          this.chartDiv.removeEventListener('renderComplete', renderCompleteHandler);
+        };
+        this.chartDiv.addEventListener('renderComplete', renderCompleteHandler);
+        renderer.render(this.chartDiv, context.value, handlers);
+      });
+
     };
 
   }
