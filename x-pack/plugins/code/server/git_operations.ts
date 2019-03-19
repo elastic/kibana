@@ -7,6 +7,7 @@
 import {
   Blame,
   Commit,
+  Diff as NodeGitDiff,
   Error,
   Object,
   Oid,
@@ -18,7 +19,7 @@ import {
 import Boom from 'boom';
 import * as Path from 'path';
 import { GitBlame } from '../common/git_blame';
-import { CommitDiff, DiffKind } from '../common/git_diff';
+import { CommitDiff, Diff, DiffKind } from '../common/git_diff';
 import { FileTree, FileTreeItemType, RepositoryUri, sortFileTree } from '../model';
 import { CommitInfo, ReferenceInfo, ReferenceType } from '../model/commit';
 import { detectLanguage } from './utils/detect_language';
@@ -334,6 +335,65 @@ export class GitOperations {
       }
     }
     return commitDiff;
+  }
+
+  public async getDiff(uri: string, oldRevision: string, newRevision: string): Promise<Diff> {
+    const repo = await this.openRepo(uri);
+    const oldCommit = await this.getCommit(repo, oldRevision);
+    const newCommit = await this.getCommit(repo, newRevision);
+    const oldTree = await oldCommit.getTree();
+    const newTree = await newCommit.getTree();
+
+    const diff = await NodeGitDiff.treeToTree(repo, oldTree, newTree);
+
+    const res: Diff = {
+      additions: 0,
+      deletions: 0,
+      files: [],
+    };
+    const patches = await diff.patches();
+    for (const patch of patches) {
+      const { total_deletions, total_additions } = patch.lineStats();
+      res.additions += total_additions;
+      res.deletions += total_deletions;
+      if (patch.isAdded()) {
+        const path = patch.newFile().path();
+        res.files.push({
+          path,
+          additions: total_additions,
+          deletions: total_deletions,
+          kind: DiffKind.ADDED,
+        });
+      } else if (patch.isDeleted()) {
+        const path = patch.oldFile().path();
+        res.files.push({
+          path,
+          kind: DiffKind.DELETED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      } else if (patch.isModified()) {
+        const path = patch.newFile().path();
+        const originPath = patch.oldFile().path();
+        res.files.push({
+          path,
+          originPath,
+          kind: DiffKind.MODIFIED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      } else if (patch.isRenamed()) {
+        const path = patch.newFile().path();
+        res.files.push({
+          path,
+          originPath: patch.oldFile().path(),
+          kind: DiffKind.RENAMED,
+          additions: total_additions,
+          deletions: total_deletions,
+        });
+      }
+    }
+    return res;
   }
 
   private async getOriginCode(commit: Commit, repo: Repository, path: string) {

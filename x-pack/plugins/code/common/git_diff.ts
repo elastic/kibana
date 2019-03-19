@@ -6,11 +6,14 @@
 
 import { CommitInfo } from '../model/commit';
 
-export interface CommitDiff {
-  commit: CommitInfo;
+export interface Diff {
   additions: number;
   deletions: number;
   files: FileDiff[];
+}
+
+export interface CommitDiff extends Diff {
+  commit: CommitInfo;
 }
 
 export interface FileDiff {

@@ -27,7 +27,7 @@ import { ALL_RESERVED, DocumentIndexName, ReferenceIndexName, SymbolIndexName } 
 
 export class LspIndexer extends AbstractIndexer {
   protected type: string = 'lsp';
-  private batchIndexHelper: BatchIndexHelper;
+  protected batchIndexHelper: BatchIndexHelper;
 
   constructor(
     protected readonly repoUri: RepositoryUri,
