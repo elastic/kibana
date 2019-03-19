@@ -19,10 +19,30 @@
 
 import Boom from 'boom';
 
+import { IndexMapping } from '../../../../mappings';
+import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
 
-export function getSearchDsl(mappings, schema, options = {}) {
+interface GetSearchDslOptions {
+  type: string;
+  search?: string;
+  defaultSearchOperator?: string;
+  searchFields?: string[];
+  sortField?: string;
+  sortOrder?: string;
+  namespace?: string;
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+}
+
+export function getSearchDsl(
+  mappings: IndexMapping,
+  schema: SavedObjectsSchema,
+  options: GetSearchDslOptions
+) {
   const {
     type,
     search,
