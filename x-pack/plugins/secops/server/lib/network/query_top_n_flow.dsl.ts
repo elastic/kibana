@@ -5,6 +5,7 @@
  */
 
 import {
+  Direction,
   NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
@@ -260,24 +261,34 @@ const getBiDirectionAggs = (
       }
     : {};
 
-const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType) => {
-  if (networkTopNFlowType === NetworkTopNFlowType.source) {
-    return NetworkTopNFlowType.destination;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.destination) {
-    return NetworkTopNFlowType.source;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.client) {
-    return NetworkTopNFlowType.server;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.server) {
-    return NetworkTopNFlowType.client;
+const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType): NetworkTopNFlowType => {
+  switch (networkTopNFlowType) {
+    case NetworkTopNFlowType.source:
+      return NetworkTopNFlowType.destination;
+    case NetworkTopNFlowType.destination:
+      return NetworkTopNFlowType.source;
+    case NetworkTopNFlowType.server:
+      return NetworkTopNFlowType.client;
+    case NetworkTopNFlowType.client:
+      return NetworkTopNFlowType.server;
   }
+  assertUnreachable(networkTopNFlowType);
 };
 
-const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField) => {
-  if (networkTopNFlowSortField.field === NetworkTopNFlowFields.bytes) {
-    return { bytes: networkTopNFlowSortField.direction };
-  } else if (networkTopNFlowSortField.field === NetworkTopNFlowFields.packets) {
-    return { packets: networkTopNFlowSortField.direction };
-  } else if (networkTopNFlowSortField.field === NetworkTopNFlowFields.ipCount) {
-    return { ip_count: networkTopNFlowSortField.direction };
+const assertUnreachable = (x: never): never => {
+  throw new Error(`Unknown Field in switch statement ${x}`);
+};
+
+type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };
+
+const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
+  switch (networkTopNFlowSortField.field) {
+    case NetworkTopNFlowFields.bytes:
+      return { bytes: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.packets:
+      return { packets: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.ipCount:
+      return { ip_count: networkTopNFlowSortField.direction };
   }
+  assertUnreachable(networkTopNFlowSortField.field);
 };
