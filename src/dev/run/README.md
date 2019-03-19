@@ -20,15 +20,15 @@ run(
     log.success('task complete');
   },
   {
-    getopts: {
-      string: ['path'],
-    },
-    helpDescription: `
+    description: `
       Run my special task
     `,
-    helpOptions: `
-      --path             Required, path to the file to operate on
-    `,
+    flags: {
+      string: ['path'],
+      helpText: `
+        --path             Required, path to the file to operate on
+      `
+    },
   }
 );
 ```
@@ -65,11 +65,11 @@ $ node scripts/my_task
 
 ## API
 
-- ***`run(async ({ flags: Flags, log: ToolingLog }) => Promise<void>, Options)`***
+- ***`run(fn: async ({ flags: Flags, log: ToolingLog }) => Promise<void>, options: Options)`***
   
     Execte an async function, passing it the parsed flags and a tooling log that is configured to the requested logging level. If the returned promise is rejected with an error created by `createFailError(...)` or `createFlagError(...)` the process will exit as described by the error, otherwise the process will exit with code 1.
     
-    **Fn Params:**
+    **`fn` Params:**
     - *[`log: ToolingLog`](../../../packages/kbn-dev-utils/src/tooling_log/tooling_log.js)*:
 
       An instance of the `ToolingLog` that is configured with the standard flags: `--verbose`, `--quiet`, `--silent`, and `--debug`
@@ -79,11 +79,11 @@ $ node scripts/my_task
       The parsed CLI flags, created by [`getopts`](https://www.npmjs.com/package/getopts). Includes the default flags for controlling the log level of the ToolingLog, and `flags.unexpected`, which is an array of flag names which were passed but not expected.
 
     **Options:**
-    - *`helpDescription: string`*
+    - *`description: string`*
 
       A bit of text to replace the default description in the `--help` text.
 
-    - *`helpOptions: string`*
+    - *`flags: string`*
 
       A bit of text that should be placed above the standard logging level options in the `--help` text.
 

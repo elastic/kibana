@@ -38,34 +38,33 @@ export interface Flags {
 
 export function getFlags(argv: string[], options: Options): Flags {
   const unexpected: string[] = [];
-
-  const userAliases = (options.getopts && options.getopts.alias) || {};
-  const userDefaults = (options.getopts && options.getopts.default) || {};
+  const flagOpts = options.flags || {};
 
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
-    ...options.getopts,
+    string: flagOpts.string,
+    boolean: flagOpts.boolean,
     alias: {
-      ...userAliases,
+      ...(flagOpts.alias || {}),
       v: 'verbose',
     },
     default: {
-      ...userDefaults,
+      ...(flagOpts.default || {}),
       verbose: false,
       quiet: false,
       silent: false,
       debug: false,
       help: false,
     },
-    unknown: name => {
+    unknown: (name: string) => {
       unexpected.push(name);
 
-      if (options.getopts && options.getopts.allowUnexpected) {
+      if (options.flags && options.flags.allowUnexpected) {
         return true;
       }
 
       return false;
     },
-  });
+  } as any);
 
   return {
     verbose,
@@ -80,8 +79,10 @@ export function getFlags(argv: string[], options: Options): Flags {
 }
 
 export function getHelp(options: Options) {
+  const usage = options.usage || `node ${relative(process.cwd(), process.argv[1])}`;
+
   const optionHelp = (
-    dedent(options.helpOptions || '') +
+    dedent((options.flags && options.flags.help) || '') +
     '\n' +
     dedent`
       --verbose, -v      Log verbosely
@@ -96,9 +97,9 @@ export function getHelp(options: Options) {
     .join('\n    ');
 
   return `
-  node ${relative(process.cwd(), process.argv[1])}
+  ${usage}
 
-  ${dedent(options.helpDescription || 'Runs a dev task')
+  ${dedent(options.description || 'Runs a dev task')
     .split('\n')
     .join('\n  ')}
 

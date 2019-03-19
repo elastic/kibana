@@ -89,7 +89,7 @@ run(
     });
   },
   {
-    getopts: {
+    flags: {
       allowUnexpected: true,
     },
   }

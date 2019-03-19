@@ -24,20 +24,21 @@ import { Flags, getFlags, getHelp } from './flags';
 type RunFn = (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void;
 
 export interface Options {
-  helpDescription?: string;
-  helpOptions?: string;
-  getopts?: {
+  usage?: string;
+  description?: string;
+  flags?: {
+    allowUnexpected?: boolean;
+    help?: string;
     alias?: { [key: string]: string | string[] };
     boolean?: string[];
     string?: string[];
     default?: { [key: string]: any };
-    allowUnexpected?: boolean;
   };
 }
 
 export async function run(fn: RunFn, options: Options = {}) {
   const flags = getFlags(process.argv.slice(2), options);
-  const allowUnexpected = options.getopts ? options.getopts.allowUnexpected : false;
+  const allowUnexpected = options.flags ? options.flags.allowUnexpected : false;
 
   if (flags.help) {
     process.stderr.write(getHelp(options));
