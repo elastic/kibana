@@ -19,33 +19,93 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import { get, isArray, assign, last  } from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
+  EuiFieldNumber,
   EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import AddDeleteButtons from '../add_delete_buttons';
+
+const getRankValues = model => isArray(model.value) && model.value.length ? model.value : [model.value || ''];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
-  const defaults = { value: '' };
+  const defaults = { value: [''] };
   const model = { ...defaults, ...props.model };
-
-  const handleChange = createChangeHandler(props.onChange, model);
-  const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
+
+  const isTablePanel = panel.type === 'table';
+  const percentileRankValueRows = getRankValues(model);
+
+  const handleChange = createChangeHandler(props.onChange, model);
+  const handleSelectChange = createSelectHandler(handleChange);
+
+  const handlePercentileRankValueChange = (value) => {
+    handleChange(assign({}, model, {
+      value,
+    }));
+  };
+
+  const onChangeValue = (index, event) => {
+    percentileRankValueRows[index] = get(event, 'target.value');
+
+    handlePercentileRankValueChange(percentileRankValueRows);
+  };
+
+  const onDeleteValue = index => (
+    handlePercentileRankValueChange(
+      percentileRankValueRows
+        .filter((item, currentIndex) => index !== currentIndex))
+  );
+
+  const onAddValue = () => handlePercentileRankValueChange([...percentileRankValueRows, '']);
+
+  const renderValuesRows = (value, key) => (
+    <div className="tvbAggRow__percentileRankValue" key={key}>
+      <EuiFlexGroup responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFormLabel htmlFor={htmlId('value')} >
+            <FormattedMessage
+              id="tsvb.percentileRank.valueLabel"
+              defaultMessage="Value:"
+            />
+          </EuiFormLabel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFieldNumber
+            value={value === '' ? '' : Number(value)}
+            placeholder={0}
+            onChange={onChangeValue.bind(null, key)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <AddDeleteButtons
+            onAdd={onAddValue}
+            onDelete={onDeleteValue.bind(null, key)}
+            disableDelete={isTablePanel || percentileRankValueRows.length < 2}
+            disableAdd={isTablePanel}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer/>
+    </div>
+  );
+
+  const percentileRankRenderedRows = percentileRankValueRows.map(renderValuesRows);
 
   return (
     <AggRow
@@ -89,20 +149,10 @@ export const PercentileRankAgg = props => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('value')}
-            label={(<FormattedMessage
-              id="tsvb.percentileRank.valueLabel"
-              defaultMessage="Value"
-            />)}
-          >
-            <EuiFieldText
-              value={model.value}
-              onChange={handleTextChange('value')}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer/>
+      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+        {isTablePanel ? last(percentileRankRenderedRows) : percentileRankRenderedRows}
       </EuiFlexGroup>
     </AggRow>
   );

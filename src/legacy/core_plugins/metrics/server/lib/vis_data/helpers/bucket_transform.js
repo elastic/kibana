@@ -20,7 +20,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
 import { parseInterval } from './parse_interval';
-import { set } from 'lodash';
+import { set, isEmpty, isArray } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function checkMetric(metric, fields) {
@@ -124,13 +124,15 @@ export default {
 
   percentile_rank: bucket => {
     checkMetric(bucket, ['type', 'field', 'value']);
-    const body = {
+    const values = (isArray(bucket.value) ? bucket.value : [bucket.value])
+      .map(value => isEmpty(value) ? 0 : value);
+
+    return {
       percentile_ranks: {
         field: bucket.field,
-        values: [bucket.value],
+        values: values,
       },
     };
-    return body;
   },
 
   avg_bucket: extendStatsBucket,

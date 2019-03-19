@@ -18,8 +18,8 @@
  */
 
 import { startsWith } from 'lodash';
-import { METRIC_TYPES } from './metric_types';
 import { toPercentileNumber } from './to_percentile_number';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 
 const percentileTest = /\[[0-9\.]+\]$/;
 

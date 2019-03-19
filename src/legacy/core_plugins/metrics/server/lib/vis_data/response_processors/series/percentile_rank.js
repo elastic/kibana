@@ -16,42 +16,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { isArray } from 'lodash';
+import getAggValue from '../../helpers/get_agg_value';
+import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-import mapBucket from '../../helpers/map_bucket';
+import { toPercentileNumber } from '../../helpers/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function stdMetric(bucket, panel, series) {
+const getValues = metric => isArray(metric.value) ? metric.value : [metric.value];
+
+export default function percentile(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 
-    if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
+    if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 
-    if ([METRIC_TYPES.PERCENTILE_RANK, METRIC_TYPES.PERCENTILE].includes(metric.type)) {
-      return next(results);
-    }
+    getSplits(resp, panel, series, meta).forEach(split => {
+      getValues(metric).forEach(percentileRank => {
+        const data = split.timeseries.buckets.map(bucket => (
+          [bucket.key, getAggValue(bucket, {
+            ...metric,
+            value: toPercentileNumber(percentileRank)
+          })]
+        ));
 
-    if (/_bucket$/.test(metric.type)) {
-      return next(results);
-    }
-
-    const fakeResp = {
-      aggregations: bucket,
-    };
-
-    getSplits(fakeResp, panel, series).forEach(split => {
-      const data = split.timeseries.buckets.map(mapBucket(metric));
-      results.push({
-        id: split.id,
-        label: split.label,
-        data,
+        results.push({
+          data,
+          id: `${split.id}:${percentileRank}`,
+          label: `${split.label} (${percentileRank || 0})`,
+          color: split.color,
+          ...getDefaultDecoration(series),
+        });
       });
     });
-
     return next(results);
   };
 }
-

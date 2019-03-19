@@ -16,25 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { last, isArray } from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-import mapBucket from '../../helpers/map_bucket';
+import { toPercentileNumber } from '../../helpers/to_percentile_number';
+import getAggValue from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function stdMetric(bucket, panel, series) {
+const getLastRankValue = metric => isArray(metric.value) ? last(metric.value) : metric.value;
+
+export default function percentile(bucket, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
 
-    if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
-      return next(results);
-    }
-
-    if ([METRIC_TYPES.PERCENTILE_RANK, METRIC_TYPES.PERCENTILE].includes(metric.type)) {
-      return next(results);
-    }
-
-    if (/_bucket$/.test(metric.type)) {
+    if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
       return next(results);
     }
 
@@ -43,15 +38,25 @@ export default function stdMetric(bucket, panel, series) {
     };
 
     getSplits(fakeResp, panel, series).forEach(split => {
-      const data = split.timeseries.buckets.map(mapBucket(metric));
+
+      // table allows only one percentile in a series (the last one will be chosen in case of several)
+      const lastRankValue = getLastRankValue(metric);
+      const percentileRank = toPercentileNumber(lastRankValue);
+
+      const data = split.timeseries.buckets.map(bucket => (
+        [bucket.key, getAggValue(bucket, {
+          ...metric,
+          value: percentileRank
+        })]
+      ));
+
       results.push({
-        id: split.id,
-        label: split.label,
         data,
+        id: split.id,
+        label: `${split.label} (${percentileRank || 0})`,
       });
     });
 
     return next(results);
   };
 }
-
