@@ -14,7 +14,7 @@ import { createGenerateCsv } from './lib/generate_csv';
 
 interface JobDocOutputPseudo {
   content_type: 'text/csv';
-  content: string | null;
+  content: string | null | undefined;
 }
 
 interface FakeRequest {
