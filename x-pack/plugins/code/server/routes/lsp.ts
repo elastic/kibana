@@ -35,6 +35,7 @@ export function lspRoute(
   lspService: LspService,
   serverOptions: ServerOptions
 ) {
+  const log = new Logger(server);
   server.route({
     path: '/api/lsp/textDocument/{method}',
     async handler(req, h: hapi.ResponseToolkit) {
@@ -51,18 +52,18 @@ export function lspRoute(
             if (error instanceof ResponseError) {
               // hide some errors;
               if (error.code !== UnknownFileLanguage) {
-                const log = new Logger(server);
-                log.error(error);
+                log.info(error);
               }
               return h
-                .response({ code: error.code, msg: LANG_SERVER_ERROR })
+                .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
                 .type('json')
                 .code(503); // different code for LS errors and other internal errors.
             } else if (error.isBoom) {
               return error;
             } else {
+              log.error(error);
               return h
-                .response('language server error')
+                .response({ error: { code: error.code || 500, msg: LANG_SERVER_ERROR } })
                 .type('json')
                 .code(500);
             }
@@ -150,18 +151,17 @@ export function lspRoute(
         }
         return { title, files: groupBy(files, 'repo'), uri, position };
       } catch (error) {
-        const log = new Logger(server);
         log.error(error);
         if (error instanceof ResponseError) {
           return h
-            .response({ code: error.code, msg: LANG_SERVER_ERROR })
+            .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
             .type('json')
             .code(503); // different code for LS errors and other internal errors.
         } else if (error.isBoom) {
           return error;
         } else {
           return h
-            .response(LANG_SERVER_ERROR)
+            .response({ error: { code: 500, msg: LANG_SERVER_ERROR } })
             .type('json')
             .code(500);
         }

@@ -8,10 +8,9 @@ import fs from 'fs';
 import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
-import { ServerNotInitialized } from '../../common/lsp_error_codes';
 import { ServerOptions } from '../server_options';
 import { LanguageServerProxy } from './proxy';
-import { RequestExpander } from './request_expander';
+import { InitializingError, RequestExpander } from './request_expander';
 
 // @ts-ignore
 const options: ServerOptions = {
@@ -90,20 +89,8 @@ test('requests should throw error after lsp init timeout', async () => {
   mkdirp.sync(request1.workspacePath);
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
-  await expect(response1Promise).rejects.toEqual({
-    id: -1,
-    error: {
-      code: ServerNotInitialized,
-      message: 'Server is initializing',
-    },
-  });
-  await expect(response2Promise).rejects.toEqual({
-    id: -1,
-    error: {
-      code: ServerNotInitialized,
-      message: 'Server is initializing',
-    },
-  });
+  await expect(response1Promise).rejects.toEqual(InitializingError);
+  await expect(response2Promise).rejects.toEqual(InitializingError);
 });
 
 test('be able to open multiple workspace', async () => {
