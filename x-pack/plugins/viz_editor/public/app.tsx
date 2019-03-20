@@ -8,8 +8,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
-import { Main } from './components/main';
+import { Main } from './frame/main';
 
 // TODO: Convert this to the "new platform" way of doing UI
 function App($scope: any, $element: Element[]) {
@@ -19,7 +18,7 @@ function App($scope: any, $element: Element[]) {
 
   return render(
     <I18nProvider>
-      <Main kfetch={kfetch} />
+      <Main />
     </I18nProvider>,
     el
   );
