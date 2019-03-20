@@ -15,17 +15,17 @@ import { DraggableBadge } from '../../../draggables';
 
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
-import * as i18n from './translations';
-
 const Details = styled.div`
-  margin: 10px 0px 10px 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 `;
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-interface Props {
+export const AuditdExecutedCommandLine = pure<{
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
@@ -36,9 +36,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
-}
-
-export const AuditdExecutedCommandLine = pure<Props>(
+}>(
   ({
     id,
     hostName,
@@ -53,10 +51,10 @@ export const AuditdExecutedCommandLine = pure<Props>(
   }) => (
     <Details>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-        <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
+        <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            id={`auditd-loggedin-${id}`}
             field="auditd.session"
             value={session}
             iconType="number"
@@ -84,7 +82,7 @@ export const AuditdExecutedCommandLine = pure<Props>(
             value={hostName}
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>
+        <TokensFlexItem grow={false}>in</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
             contextId="auditd-executed-element"
@@ -94,7 +92,7 @@ export const AuditdExecutedCommandLine = pure<Props>(
             iconType="folderOpen"
           />
         </TokensFlexItem>
-        {processName != null && <TokensFlexItem grow={false}>{i18n.EXECUTED}</TokensFlexItem>}
+        {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
             contextId="auditd-executed-element"
