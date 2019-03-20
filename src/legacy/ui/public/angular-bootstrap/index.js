@@ -29,7 +29,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.tooltip',
   'ui.bootstrap.progressbar',
   'ui.bootstrap.tabs',
-  'ui.bootstrap.timepicker',
 ]);
 
 angular.module('ui.bootstrap.tpls', [
@@ -42,7 +41,6 @@ angular.module('ui.bootstrap.tpls', [
   'template/progressbar/progressbar.html',
   'template/tabs/tab.html',
   'template/tabs/tabset.html',
-  'template/timepicker/timepicker.html',
 ]);
 
 import './bindHtml/bindHtml';
@@ -50,7 +48,6 @@ import './dropdown/dropdown';
 import './modal/modal';
 import './progressbar/progressbar';
 import './tabs/tabs';
-import './timepicker/timepicker';
 import './tooltip/tooltip';
 import './transition/transition';
 
@@ -106,10 +103,4 @@ import tabset from './tabs/tabset.html';
 
 angular.module('template/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/tabs/tabset.html', tabset);
-}]);
-
-import timepicker from './timepicker/timepicker.html';
-
-angular.module('template/timepicker/timepicker.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/timepicker/timepicker.html', timepicker);
 }]);
