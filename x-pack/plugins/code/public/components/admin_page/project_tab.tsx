@@ -7,12 +7,12 @@
 // @ts-ignore
 import {
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiGlobalToastList,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -30,9 +30,9 @@ import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { Repository } from '../../../model';
-import { importRepo } from '../../actions';
+import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
-import { CallOutType } from '../../reducers/repository';
+import { ToastType } from '../../reducers/repository';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
 
@@ -79,9 +79,10 @@ interface Props {
   isAdmin: boolean;
   importRepo: (repoUrl: string) => void;
   importLoading: boolean;
-  callOutMessage?: string;
-  showCallOut: boolean;
-  callOutType: CallOutType;
+  toastMessage?: string;
+  showToast: boolean;
+  toastType: ToastType;
+  closeToast: () => void;
 }
 interface State {
   showImportProjectModal: boolean;
@@ -178,7 +179,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { projects, isAdmin, status, callOutMessage, showCallOut, callOutType } = this.props;
+    const { projects, isAdmin, status, toastMessage, showToast, toastType } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
@@ -208,10 +209,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 
     return (
       <div className="code-sidebar" data-test-subj="codeRepositoryList">
-        {showCallOut && (
-          <EuiCallOut color={callOutType} title="">
-            {callOutMessage}
-          </EuiCallOut>
+        {showToast && (
+          <EuiGlobalToastList
+            toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
+            dismissToast={this.props.closeToast}
+            toastLifeTimeMs={6000}
+          />
         )}
         <EuiSpacer />
         <EuiFlexGroup>
@@ -256,13 +259,14 @@ const mapStateToProps = (state: RootState) => ({
   status: state.status.status,
   isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
-  callOutMessage: state.repository.callOutMessage,
-  callOutType: state.repository.callOutType,
-  showCallOut: state.repository.showCallOut,
+  toastMessage: state.repository.toastMessage,
+  toastType: state.repository.toastType,
+  showToast: state.repository.showToast,
 });
 
 const mapDispatchToProps = {
   importRepo,
+  closeToast,
 };
 
 export const ProjectTab = connect(

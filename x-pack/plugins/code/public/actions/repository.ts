@@ -31,7 +31,7 @@ export const importRepo = createAction<string>('IMPORT REPO');
 export const importRepoSuccess = createAction<string>('IMPORT REPO SUCCESS');
 export const importRepoFailed = createAction<Error>('IMPORT REPO FAILED');
 
-export const hideCallOut = createAction('HIDE CALL OUT');
+export const closeToast = createAction('CLOSE TOAST');
 
 export const fetchRepoConfigs = createAction('FETCH REPO CONFIGS');
 export const fetchRepoConfigSuccess = createAction<RepoConfigs>('FETCH REPO CONFIGS SUCCESS');

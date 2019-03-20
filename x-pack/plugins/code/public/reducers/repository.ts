@@ -10,19 +10,19 @@ import { Repository, RepositoryConfig } from '../../model';
 
 import { RepoConfigs } from '../../model/workspace';
 import {
+  closeToast,
   deleteRepoFinished,
   fetchRepoConfigSuccess,
   fetchRepos,
   fetchReposFailed,
   fetchReposSuccess,
-  hideCallOut,
   importRepo,
   importRepoFailed,
   importRepoSuccess,
   loadConfigsSuccess,
 } from '../actions';
 
-export enum CallOutType {
+export enum ToastType {
   danger = 'danger',
   success = 'success',
   warning = 'warning',
@@ -34,9 +34,9 @@ export interface RepositoryState {
   loading: boolean;
   importLoading: boolean;
   repoConfigs?: RepoConfigs;
-  showCallOut: boolean;
-  callOutMessage?: string;
-  callOutType?: CallOutType;
+  showToast: boolean;
+  toastMessage?: string;
+  toastType?: ToastType;
   projectConfigs: { [key: string]: RepositoryConfig };
 }
 
@@ -44,7 +44,7 @@ const initialState: RepositoryState = {
   repositories: [],
   loading: false,
   importLoading: false,
-  showCallOut: false,
+  showToast: false,
   projectConfigs: {},
 };
 
@@ -80,30 +80,30 @@ export const repository = handleActions(
     [String(importRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, (draft: RepositoryState) => {
         draft.importLoading = false;
-        draft.showCallOut = true;
-        draft.callOutType = CallOutType.success;
-        draft.callOutMessage = `${action.payload.name} has been successfully imported!`;
+        draft.showToast = true;
+        draft.toastType = ToastType.success;
+        draft.toastMessage = `${action.payload.name} has been successfully imported!`;
         draft.repositories = [...state.repositories, action.payload];
       }),
     [String(importRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         if (action.payload) {
           if (action.payload.res.status === 304) {
-            draft.callOutMessage = 'This Repository has already been imported!';
-            draft.showCallOut = true;
-            draft.callOutType = CallOutType.warning;
+            draft.toastMessage = 'This Repository has already been imported!';
+            draft.showToast = true;
+            draft.toastType = ToastType.warning;
             draft.importLoading = false;
           } else {
-            draft.callOutMessage = action.payload.body.message;
-            draft.showCallOut = true;
-            draft.callOutType = CallOutType.danger;
+            draft.toastMessage = action.payload.body.message;
+            draft.showToast = true;
+            draft.toastType = ToastType.danger;
             draft.importLoading = false;
           }
         }
       }),
-    [String(hideCallOut)]: (state: RepositoryState, action: Action<any>) =>
+    [String(closeToast)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
-        draft.showCallOut = false;
+        draft.showToast = false;
       }),
     [String(fetchRepoConfigSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
