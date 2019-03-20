@@ -22,6 +22,7 @@ describe('setupXPackMain()', () => {
 
     mockElasticsearchPlugin = {
       getCluster: sinon.stub(),
+      waitUntilReady: sinon.stub(),
       status: sinon.stub({
         on() {}
       })
