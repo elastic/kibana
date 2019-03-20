@@ -59,7 +59,8 @@ export class ReindexWorker {
       this.callWithInternalUser,
       this.xpackInfo,
       reindexActionsFactory(this.client, this.callWithInternalUser),
-      apmIndexPatterns
+      apmIndexPatterns,
+      this.log
     );
 
     ReindexWorker.workerSingleton = this;
@@ -167,7 +168,8 @@ export class ReindexWorker {
       callCluster,
       this.xpackInfo,
       actions,
-      this.apmIndexPatterns
+      this.apmIndexPatterns,
+      this.log
     );
     reindexOp = await swallowExceptions(service.processNextStep, this.log)(reindexOp);
 
