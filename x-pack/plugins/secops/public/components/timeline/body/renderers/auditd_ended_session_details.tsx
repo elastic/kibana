@@ -55,7 +55,7 @@ export const AuditdEndedSessionLine = pure<Props>(
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>Session</TokensFlexItem>
+      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-ended-session-${id}`}
