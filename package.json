@@ -408,6 +408,7 @@
     "tslint-config-prettier": "^1.15.0",
     "tslint-microsoft-contrib": "^6.0.0",
     "tslint-plugin-prettier": "^2.0.0",
+    "tslint-rules-bunch": "^0.0.7",
     "typescript": "^3.3.3333",
     "typings-tester": "^0.3.2",
     "vinyl-fs": "^3.0.2",
