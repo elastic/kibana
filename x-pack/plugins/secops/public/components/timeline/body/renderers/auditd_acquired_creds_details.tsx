@@ -55,8 +55,10 @@ export const AuditdAcquiredLine = pure<Props>(
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
+        {i18n.SESSION}
+      </TokensFlexItem>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-acquired-creds-${id}`}
           field="auditd.session"
@@ -64,7 +66,7 @@ export const AuditdAcquiredLine = pure<Props>(
           iconType="number"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
           id={`auditd-acquired-creds-${id}`}
           userName={userName}
@@ -72,12 +74,16 @@ export const AuditdAcquiredLine = pure<Props>(
           secondary={secondary}
         />
       </TokensFlexItem>
-      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {hostName != null && (
+        <TokensFlexItem grow={false} component="span">
+          @
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge id={`auditd-acquired-creds-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-acquired-creds-${id}`}
           field="process.working_directory"
@@ -86,9 +92,11 @@ export const AuditdAcquiredLine = pure<Props>(
         />
       </TokensFlexItem>
       {processExecutable != null && (
-        <TokensFlexItem grow={false}>{i18n.ACQUIRED_CREDENTIALS_TO}</TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.ACQUIRED_CREDENTIALS_TO}
+        </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-acquired-creds-${id}`}
           field="process.executable"
@@ -96,7 +104,7 @@ export const AuditdAcquiredLine = pure<Props>(
           iconType="console"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
             id={`auditd-acquired-creds-${id}`}
