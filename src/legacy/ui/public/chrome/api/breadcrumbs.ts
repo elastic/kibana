@@ -19,11 +19,13 @@
 
 import { IRootScopeService } from 'angular';
 import { fatalError } from 'ui/notify/fatal_error';
-import { Breadcrumb, ChromeStart } from '../../../../../core/public/chrome';
+import { Chrome, CoreStart } from '../../../../../core/public';
+
+type Breadcrumb = Chrome['Breadcrumb'];
 export { Breadcrumb };
 
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];
-
+type ChromeStart = CoreStart['chrome'];
 let newPlatformChrome: ChromeStart;
 export function __newPlatformInit__(instance: ChromeStart) {
   if (newPlatformChrome) {

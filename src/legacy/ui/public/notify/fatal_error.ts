@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import { FatalErrorsStart } from '../../../../core/public/fatal_errors';
+import { CoreStart } from '../../../../core/public';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
+type FatalErrorsStart = CoreStart['fatalErrors'];
 let newPlatformFatalErrors: FatalErrorsStart;
 
 export function __newPlatformInit__(instance: FatalErrorsStart) {

@@ -36,7 +36,7 @@ rules:
             - src/plugins/**/server/**/*
         - target:
             - src/legacy/**/!(*.test).ts
-            - src/x-pack/**/!(*.test).ts
+            - x-pack/**/!(*.test).ts
           from:
             - src/core/public/**/!(utils)*
             - src/core/server/**/*

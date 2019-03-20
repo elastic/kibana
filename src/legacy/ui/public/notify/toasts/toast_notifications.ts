@@ -16,8 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Notifications } from '../../../../../core/public/';
 
-import { Toast, ToastInput, ToastsStart } from '../../../../../core/public/notifications';
+type Toast = Notifications['Toast'];
+type ToastInput = Notifications['ToastInput'];
+type ToastsStart = Notifications['ToastsStart'];
 
 export { Toast, ToastInput };
 

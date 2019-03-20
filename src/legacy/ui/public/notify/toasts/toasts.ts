@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { ToastsStart } from '../../../../../core/public/notifications';
+import { Notifications } from '../../../../../core/public/';
 import { ToastNotifications } from './toast_notifications';
 
+type ToastsStart = Notifications['ToastsStart'];
 export let toastNotifications: ToastNotifications;
 
 export function __newPlatformInit__(toasts: ToastsStart) {

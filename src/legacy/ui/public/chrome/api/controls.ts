@@ -18,8 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeStart } from '../../../../../core/public/chrome';
+import { CoreStart } from '../../../../../core/public/';
 
+type ChromeStart = CoreStart['chrome'];
 let newPlatformChrome: ChromeStart;
 
 export function __newPlatformInit__(instance: ChromeStart) {

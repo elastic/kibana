@@ -17,25 +17,7 @@
  * under the License.
  */
 
-import { BasePathStart } from '../../../../core/public/base_path';
-import { ChromeStart } from '../../../../core/public/chrome';
-import { FatalErrorsStart } from '../../../../core/public/fatal_errors';
-import { HttpStart } from '../../../../core/public/http';
-import { I18nStart } from '../../../../core/public/i18n';
-import { InjectedMetadataStart } from '../../../../core/public/injected_metadata';
-import { NotificationsStart } from '../../../../core/public/notifications';
-import { UiSettingsClient } from '../../../../core/public/ui_settings';
-
-interface CoreStart {
-  i18n: I18nStart;
-  injectedMetadata: InjectedMetadataStart;
-  fatalErrors: FatalErrorsStart;
-  notifications: NotificationsStart;
-  http: HttpStart;
-  basePath: BasePathStart;
-  uiSettings: UiSettingsClient;
-  chrome: ChromeStart;
-}
+import { CoreStart } from '../../../../core/public';
 
 const runtimeContext = {
   start: {

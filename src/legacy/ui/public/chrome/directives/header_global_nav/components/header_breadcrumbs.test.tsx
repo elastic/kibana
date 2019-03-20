@@ -20,8 +20,9 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { Chrome } from '../../../../../../../core/public/';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+type Breadcrumb = Chrome['Breadcrumb'];
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {

@@ -18,6 +18,7 @@
  */
 
 import Hapi from 'hapi';
+// tslint:disable-next-line:no-import-zones
 import { defaultValidationErrorHandler } from '../../../../core/server/http/http_tools';
 
 const defaultConfig = {

@@ -18,8 +18,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { InjectedMetadataStart } from '../../../../../core/public/injected_metadata';
+import { CoreStart } from '../../../../../core/public/';
 
+type InjectedMetadataStart = CoreStart['injectedMetadata'];
 let newPlatformInjectedVars: InjectedMetadataStart;
 
 export function __newPlatformInit__(instance: InjectedMetadataStart) {

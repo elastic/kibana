@@ -18,12 +18,12 @@
  */
 
 import { BasePathStart } from './base_path';
-import { ChromeStart } from './chrome';
+import { Brand, Breadcrumb, ChromeStart, HelpExtension } from './chrome';
 import { FatalErrorsStart } from './fatal_errors';
 import { HttpStart } from './http';
 import { I18nStart } from './i18n';
 import { InjectedMetadataStart } from './injected_metadata';
-import { NotificationsStart } from './notifications';
+import { NotificationsStart, Toast, ToastInput, ToastsStart } from './notifications';
 import { UiSettingsClient } from './ui_settings';
 
 export { CoreSystem } from './core_system';
@@ -37,4 +37,16 @@ export interface CoreStart {
   basePath: BasePathStart;
   uiSettings: UiSettingsClient;
   chrome: ChromeStart;
+}
+
+export interface Chrome {
+  Brand: Brand;
+  Breadcrumb: Breadcrumb;
+  HelpExtension: HelpExtension;
+}
+
+export interface Notifications {
+  Toast: Toast;
+  ToastInput: ToastInput;
+  ToastsStart: ToastsStart;
 }

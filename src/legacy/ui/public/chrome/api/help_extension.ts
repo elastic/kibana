@@ -19,7 +19,10 @@
 
 import { IRootScopeService } from 'angular';
 
-import { ChromeStart, HelpExtension } from '../../../../../core/public/chrome';
+import { Chrome, CoreStart } from '../../../../../core/public/';
+
+type HelpExtension = Chrome['HelpExtension'];
+type ChromeStart = CoreStart['chrome'];
 
 let newPlatformChrome: ChromeStart;
 export function __newPlatformInit__(instance: ChromeStart) {

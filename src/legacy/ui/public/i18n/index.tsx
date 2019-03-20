@@ -22,8 +22,9 @@ import React from 'react';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { I18nStart } from '../../../../core/public/i18n';
+import { CoreStart } from '../../../../core/public';
 
+type I18nStart = CoreStart['i18n'];
 export let I18nContext: I18nStart['Context'] = null!;
 export function __newPlatformInit__(context: typeof I18nContext) {
   if (I18nContext) {
