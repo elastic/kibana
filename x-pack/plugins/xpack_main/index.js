@@ -7,7 +7,6 @@
 import { resolve } from 'path';
 import dedent from 'dedent';
 import {
-  XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
@@ -70,10 +69,6 @@ export const xpackMain = (kibana) => {
           value: false,
           readonly: true,
         },
-        [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
-          name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email'
-          }),
           // TODO: change the description when email address is used for more things?
           description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
             defaultMessage:
