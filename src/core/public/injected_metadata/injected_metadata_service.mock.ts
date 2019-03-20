@@ -24,6 +24,7 @@ const createSetupContractMock = () => {
     getKibanaVersion: jest.fn(),
     getCspConfig: jest.fn(),
     getLegacyMetadata: jest.fn(),
+    getPlugins: jest.fn(),
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
   };
@@ -35,6 +36,7 @@ const createSetupContractMock = () => {
       user: { legacyInjectedUiSettingUserValues: true },
     },
   } as any);
+  setupContract.getPlugins.mockReturnValue([]);
   return setupContract;
 };
 
