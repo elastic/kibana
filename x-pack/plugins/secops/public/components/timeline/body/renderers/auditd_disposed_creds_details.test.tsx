@@ -17,7 +17,7 @@ import { AuditdDisposedDetails, AuditdDisposedLine } from './auditd_disposed_cre
 describe('AuditDisposedCredsDetails', () => {
   describe('rendering', () => {
     test('it renders the default AuditDisposedCredsDetails', () => {
-      // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+      // I cannot and do not want to use the BrowserFields mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallowWithIntl(
         <TestProviders>

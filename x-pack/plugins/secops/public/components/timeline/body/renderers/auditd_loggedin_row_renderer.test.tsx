@@ -26,7 +26,7 @@ describe('auditd_loggedin_row_renderer', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+    // I cannot and do not want to use the BrowserFields mocks for the snapshot tests as they are too heavy
     const browserFields: BrowserFields = {};
     const children = auditdLoggedinRowRenderer.renderRow({
       browserFields,
