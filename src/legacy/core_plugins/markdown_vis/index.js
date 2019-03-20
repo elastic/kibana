@@ -27,6 +27,7 @@ export default function (kibana) {
       visTypes: [
         'plugins/markdown_vis/markdown_vis'
       ],
+      interpreter: ['plugins/markdown_vis/markdown_fn'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     }
 

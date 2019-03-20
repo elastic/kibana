@@ -17,18 +17,20 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { i18n } from '@kbn/i18n';
 
-export const regionmap = () => ({
-  name: 'regionmap',
+export const tilemap = () => ({
+  name: 'tilemap',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.regionmap.help', {
-    defaultMessage: 'Regionmap visualization'
+  help: i18n.translate('interpreter.functions.tilemap.help', {
+    defaultMessage: 'Tilemap visualization'
   }),
   args: {
     visConfig: {
@@ -39,12 +41,19 @@ export const regionmap = () => ({
   fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
 
+    const { geohash, metric, geocentroid } = visConfig.dimensions;
+    const convertedData = convertToGeoJson(context, {
+      geohash,
+      metric,
+      geocentroid,
+    });
+
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'region_map',
+        visData: convertedData,
+        visType: 'tile_map',
         visConfig,
         params: {
           listenOnChange: true,
@@ -53,3 +62,5 @@ export const regionmap = () => ({
     };
   },
 });
+
+functionsRegistry.register(tilemap);

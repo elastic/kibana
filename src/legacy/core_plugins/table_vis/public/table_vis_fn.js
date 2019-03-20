@@ -17,52 +17,46 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';
 
-export const vega = () => ({
-  name: 'vega',
+export const kibanaTable = () => ({
+  name: 'kibana_table',
   type: 'render',
   context: {
     types: [
-      'kibana_context',
-      'null',
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.vega.help', {
-    defaultMessage: 'Vega visualization'
+  help: i18n.translate('interpreter.functions.table.help', {
+    defaultMessage: 'Table visualization'
   }),
   args: {
-    spec: {
-      types: ['string'],
-      default: '',
+    visConfig: {
+      types: ['string', 'null'],
+      default: '"{}"',
     },
   },
   async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
+    const visConfig = JSON.parse(args.visConfig);
 
-    const response = await vegaRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
-      visParams: { spec: args.spec },
-      forceFetch: true
-    });
+    const responseHandler = legacyResponseHandlerProvider().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: response,
-        visType: 'vega',
-        visConfig: {
-          spec: args.spec
-        },
-      }
+        visData: convertedData,
+        visType: 'table',
+        visConfig,
+        params: {
+          listenOnChange: true,
+        }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(kibanaTable);

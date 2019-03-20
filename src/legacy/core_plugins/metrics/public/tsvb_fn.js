@@ -17,15 +17,17 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_request_handler';
-
+import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
+import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
-export const timelionVis = () => ({
-  name: 'timelion_vis',
+
+export const tsvb = () => ({
+  name: 'tsvb',
   type: 'render',
   context: {
     types: [
@@ -33,45 +35,49 @@ export const timelionVis = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.timelion.help', {
-    defaultMessage: 'Timelion visualization'
+  help: i18n.translate('interpreter.functions.tsvb.help', {
+    defaultMessage: 'TSVB visualization'
   }),
   args: {
-    expression: {
+    params: {
       types: ['string'],
-      aliases: ['_'],
-      default: '".es(*)"',
+      default: '"{}"',
     },
-    interval: {
-      types: ['string', 'null'],
-      default: 'auto',
+    uiState: {
+      types: ['string'],
+      default: '"{}"',
     }
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
 
-    const visParams = { expression: args.expression, interval: args.interval };
+    const params = JSON.parse(args.params);
+    const uiStateParams = JSON.parse(args.uiState);
+    const uiState = new PersistedState(uiStateParams);
 
-    const response = await timelionRequestHandler({
+    const response = await metricsRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
-      forceFetch: true,
-      visParams: visParams,
+      visParams: params,
+      uiState: uiState,
     });
 
-    response.visType = 'timelion';
+    response.visType = 'metrics';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visParams,
-        visType: 'timelion',
+        visType: 'metrics',
+        visConfig: params,
+        uiState: uiState,
         visData: response,
       },
     };
   },
 });
+
+functionsRegistry.register(tsvb);

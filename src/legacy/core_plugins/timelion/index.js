@@ -59,6 +59,7 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],

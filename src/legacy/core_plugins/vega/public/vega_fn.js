@@ -17,46 +17,55 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
+import { VegaRequestHandlerProvider } from './vega_request_handler';
 
-export const vislib = () => ({
-  name: 'vislib',
+export const vega = () => ({
+  name: 'vega',
   type: 'render',
   context: {
     types: [
-      'kibana_datatable'
+      'kibana_context',
+      'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.vislib.help', {
-    defaultMessage: 'Vislib visualization'
+  help: i18n.translate('interpreter.functions.vega.help', {
+    defaultMessage: 'Vega visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+    spec: {
+      types: ['string'],
+      default: '',
     },
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-    const visConfigParams = JSON.parse(args.visConfig);
+    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const response = await vegaRequestHandler({
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
+      visParams: { spec: args.spec },
+      forceFetch: true
+    });
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: convertedData,
-        visType: args.type,
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        }
-      },
+        visData: response,
+        visType: 'vega',
+        visConfig: {
+          spec: args.spec
+        },
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(vega);

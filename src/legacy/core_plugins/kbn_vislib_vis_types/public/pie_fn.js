@@ -17,18 +17,20 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
-export const metric = () => ({
-  name: 'kibana_metric',
+export const kibanaPie = () => ({
+  name: 'kibana_pie',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
+  help: i18n.translate('interpreter.functions.pie.help', {
+    defaultMessage: 'Pie visualization'
   }),
   args: {
     visConfig: {
@@ -36,15 +38,18 @@ export const metric = () => ({
       default: '"{}"',
     },
   },
-  fn(context, args) {
+  async fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
+
+    const responseHandler = vislibSlicesResponseHandler().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'metric',
+        visData: convertedData,
+        visType: 'pie',
         visConfig,
         params: {
           listenOnChange: true,
@@ -53,3 +58,5 @@ export const metric = () => ({
     };
   },
 });
+
+functionsRegistry.register(kibanaPie);
