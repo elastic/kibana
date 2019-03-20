@@ -170,7 +170,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await this.waitForLayersToLoad();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // there is no way to wait for canvas been reloaded
+      await PageObjects.common.sleep(5000);
     }
 
     async getView() {
