@@ -6,6 +6,7 @@
 
 import Boom from 'boom';
 
+import { Server } from 'hapi';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CURRENT_MAJOR_VERSION } from 'x-pack/plugins/upgrade_assistant/common/version';
 import { XPackInfo } from 'x-pack/plugins/xpack_main/server/lib/xpack_info';
@@ -102,7 +103,8 @@ export const reindexServiceFactory = (
   callCluster: CallCluster,
   xpackInfo: XPackInfo,
   actions: ReindexActions,
-  apmIndexPatterns: string[] = []
+  apmIndexPatterns: string[] = [],
+  log: Server['log']
 ): ReindexService => {
   // ------ Utility functions
 
@@ -601,10 +603,15 @@ export const reindexServiceFactory = (
               break;
           }
         } catch (e) {
+          log(
+            ['upgrade_assistant', 'error'],
+            `Reindexing step failed: ${e instanceof Error ? e.stack : e.toString()}`
+          );
+
           // Trap the exception and add the message to the object so the UI can display it.
           lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
             status: ReindexStatus.failed,
-            errorMessage: e instanceof Error ? e.stack : e.toString(),
+            errorMessage: e.toString(),
           });
 
           // Cleanup any changes, ignoring any errors.
