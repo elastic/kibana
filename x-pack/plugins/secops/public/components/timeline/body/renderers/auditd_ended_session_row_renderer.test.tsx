@@ -22,7 +22,7 @@ describe('auditdEndedSessionRowRenderer', () => {
 
   beforeEach(() => {
     nonAuditd = cloneDeep(mockEcsData[0]);
-    auditd = cloneDeep(mockEcsData[21]);
+    auditd = cloneDeep(mockEcsData[22]);
   });
 
   test('renders correctly against snapshot', () => {

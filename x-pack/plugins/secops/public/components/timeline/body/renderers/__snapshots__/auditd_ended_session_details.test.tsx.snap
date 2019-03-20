@@ -109,11 +109,11 @@ exports[`AuditdEndedSessionDetails rendering it renders the default AuditdEndedS
     browserFields={Object {}}
     data={
       Object {
-        "_id": "23",
+        "_id": "22",
         "auditd": Object {
           "data": Object {
             "acct": "alice",
-            "op": "PAM:session_close",
+            "op": "PAM:setcred",
             "terminal": "ssh",
           },
           "result": "success",
@@ -135,7 +135,7 @@ exports[`AuditdEndedSessionDetails rendering it renders the default AuditdEndedS
         },
         "destination": null,
         "event": Object {
-          "action": "ended-session",
+          "action": "disposed-credentials",
           "category": "user-login",
           "dataset": null,
           "id": null,

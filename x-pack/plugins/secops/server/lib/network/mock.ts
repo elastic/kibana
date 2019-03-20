@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
+import {
+  Direction,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowType,
+} from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -48,6 +53,7 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     'pageInfo.__typename',
     '__typename',
   ],
+  networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
   networkTopNFlowType: NetworkTopNFlowType.source,
   networkTopNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
 };
@@ -64,10 +70,10 @@ export const mockRequest = {
       pagination: { limit: 10, cursor: null, tiebreaker: null },
       filterQuery: '',
     },
-    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $direction: NetworkTopNFlowDirection!, $type: NetworkTopNFlowType!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
+    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $direction: NetworkTopNFlowDirection!, $sort: NetworkTopNFlowSortField!, $type: NetworkTopNFlowType!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
         source(id: $sourceId) {
           id
-          NetworkTopNFlow(direction: $direction, type: $type, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+          NetworkTopNFlow(direction: $direction, sort: $sort, type: $type, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
             totalCount
             edges {
               node {

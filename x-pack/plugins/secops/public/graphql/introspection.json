@@ -308,6 +308,20 @@
                 "defaultValue": null
               },
               {
+                "name": "sort",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "NetworkTopNFlowSortField",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              },
+              {
                 "name": "type",
                 "description": "",
                 "type": {
@@ -3498,6 +3512,56 @@
             "isDeprecated": false,
             "deprecationReason": null
           }
+        ],
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "NetworkTopNFlowSortField",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "field",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "NetworkTopNFlowFields", "ofType": null }
+            },
+            "defaultValue": null
+          },
+          {
+            "name": "direction",
+            "description": "",
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "ENUM", "name": "Direction", "ofType": null }
+            },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "NetworkTopNFlowFields",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          { "name": "bytes", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "packets",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "ipCount", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

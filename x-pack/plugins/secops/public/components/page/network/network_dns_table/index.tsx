@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { isEqual } from 'lodash/fp';
+import { isEqual, isNil } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -134,7 +134,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
   }
 
   private onChange = (criteria: Criteria) => {
-    if (criteria.sort) {
+    if (!isNil(criteria.sort)) {
       const newDnsSortField: NetworkDnsSortField = {
         field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
         direction: criteria.sort.direction,

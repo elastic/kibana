@@ -7,8 +7,10 @@
 import expect from 'expect.js';
 import { networkTopNFlowQuery } from '../../../../plugins/secops/public/containers/network_top_n_flow/index.gql_query';
 import {
+  Direction,
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
   NetworkTopNFlowType,
 } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
@@ -26,7 +28,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
       const FROM = new Date('2019-02-09T01:57:24.870Z').valueOf();
       const TO = new Date('2019-02-12T01:57:24.870Z').valueOf();
 
-      it('Make sure that we get unidirectional Source NetworkTopNFlow data', () => {
+      it('Make sure that we get unidirectional Source NetworkTopNFlow data with bytes descending sort', () => {
         return client
           .query<GetNetworkTopNFlowQuery.Query>({
             query: networkTopNFlowQuery,
@@ -38,6 +40,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               type: NetworkTopNFlowType.source,
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               direction: NetworkTopNFlowDirection.uniDirectional,
               pagination: {
                 limit: 10,
@@ -49,6 +52,41 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
             const networkTopNFlow = resp.data.source.NetworkTopNFlow;
             expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
             expect(networkTopNFlow.totalCount).to.be(121);
+            expect(networkTopNFlow.edges.map(i => i.node.source!.ip).join(',')).to.be(
+              '8.250.107.245,10.100.7.198,8.248.211.247,8.253.157.240,151.205.0.21,8.254.254.117,54.239.220.40,151.205.0.23,8.248.223.246,151.205.0.17'
+            );
+            expect(networkTopNFlow.edges[0].node.destination).to.be(null);
+            expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
+          });
+      });
+
+      it('Make sure that we get unidirectional Source NetworkTopNFlow data with bytes ascending sort ', () => {
+        return client
+          .query<GetNetworkTopNFlowQuery.Query>({
+            query: networkTopNFlowQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              type: NetworkTopNFlowType.source,
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.asc },
+              direction: NetworkTopNFlowDirection.uniDirectional,
+              pagination: {
+                limit: 10,
+                cursor: null,
+              },
+            },
+          })
+          .then(resp => {
+            const networkTopNFlow = resp.data.source.NetworkTopNFlow;
+            expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
+            expect(networkTopNFlow.totalCount).to.be(121);
+            expect(networkTopNFlow.edges.map(i => i.node.source!.ip).join(',')).to.be(
+              '10.100.4.1,54.239.219.220,54.239.219.228,54.239.220.94,54.239.220.138,54.239.220.184,54.239.220.186,54.239.221.253,35.167.45.163,52.5.171.20'
+            );
             expect(networkTopNFlow.edges[0].node.destination).to.be(null);
             expect(networkTopNFlow.pageInfo.endCursor!.value).to.equal('10');
           });
@@ -65,6 +103,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.source,
               direction: NetworkTopNFlowDirection.biDirectional,
               pagination: {
@@ -93,6 +132,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.destination,
               direction: NetworkTopNFlowDirection.uniDirectional,
               pagination: {
@@ -121,6 +161,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.destination,
               direction: NetworkTopNFlowDirection.biDirectional,
               pagination: {
@@ -149,6 +190,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.source,
               direction: NetworkTopNFlowDirection.uniDirectional,
               pagination: {
@@ -185,6 +227,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.client,
               direction: NetworkTopNFlowDirection.biDirectional,
               pagination: {
@@ -213,6 +256,7 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
+              sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
               type: NetworkTopNFlowType.server,
               direction: NetworkTopNFlowDirection.biDirectional,
               pagination: {
