@@ -62,9 +62,6 @@ export class MBMapContainer extends React.Component {
       featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       location: popupAnchorLocation
     });
-
-    console.log('if readonly, should show filters', this.props.isReadOnly);
-
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
@@ -243,7 +240,13 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
-    ReactDOM.render((<FeatureTooltip properties={content} onCloseClick={this._onTooltipClose}/>), this._tooltipContainer);
+    ReactDOM.render((
+      <FeatureTooltip
+        properties={content}
+        onCloseClick={this._onTooltipClose}
+        isReadOnly={this.props.isReadOnly}
+      />
+    ), this._tooltipContainer);
 
     this._mbPopup.setLngLat(location)
       .setDOMContent(this._tooltipContainer)
@@ -259,7 +262,6 @@ export class MBMapContainer extends React.Component {
 
 
     const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
-    console.log(formattedProperties);
     this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }
 

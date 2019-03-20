@@ -12,20 +12,18 @@ import { i18n } from '@kbn/i18n';
 export class FeatureTooltip extends React.Component {
 
 
-  _renderFilterButton(tooltipProperty) {
-    if (!tooltipProperty.isFilterable()) {
-      return null;
-    }
-    return (<EuiButtonIcon
-      iconType="logstashFilter"
-      title="Filter on property"
-      onClick={tooltipProperty.getFilterAction()}
-      aria-label="Filter on property"
-    />);
+  _renderFilterButton(tooltipProperty) {if (!this.props.isReadOnly || !tooltipProperty.isFilterable())  {
+    return null;
+  }
+  return (<EuiButtonIcon
+    iconType="logstashFilter"
+    title="Filter on property"
+    onClick={tooltipProperty.getFilterAction()}
+    aria-label="Filter on property"
+  />);
   }
 
   _renderProperties() {
-    // return Object.keys(this.props.properties).map(propertyName => {
     return this.props.properties.map((tooltipProperty, index) => {
       /*
        * Justification for dangerouslySetInnerHTML:

@@ -72,8 +72,38 @@ export class ESTooltipProperty extends TooltipProperty {
         this._rawValue,
         this._indexPattern);
       filterBarQueryFilter.addFilters(phraseFilter);
-
-      window._fbqf = filterBarQueryFilter;
     };
   }
+}
+
+
+export class ESMetricJoinTooltipProperty extends ESTooltipProperty {
+
+  constructor(propertyName, rawValue, indexPattern, metricField) {
+    super(propertyName, rawValue, indexPattern);
+    this._metricField = metricField;
+  }
+  isFilterable() {
+    return false;
+  }
+
+  getHtmlDisplayValue() {
+    if (typeof this._rawValue === 'undefined') {
+      return '-';
+    }
+    if (this._metricField.type === 'count') {
+      return this._rawValue;
+    }
+    const indexPatternField = this._indexPattern.fields.byName[this._metricField.field];
+    if (!indexPatternField) {
+      return this._rawValue;
+    }
+    const htmlConverter = indexPatternField.format.getConverterFor('html');
+
+    return (htmlConverter)
+      ? htmlConverter(this._rawValue)
+      : indexPatternField.format.convert(this._rawValue);
+
+  }
+
 }

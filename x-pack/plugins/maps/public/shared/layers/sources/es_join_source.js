@@ -211,8 +211,8 @@ export class ESJoinSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    console.warn('tooltip props not implemented');
-    return [];
-    // return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+    // console.warn('tooltip props not implemented');
+    // return [];
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
