@@ -21,7 +21,7 @@ import 'ngreact';
 
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/timelion', ['react']);
+const module = uiModules.get('apps/sense', ['react']);
 
 import { ConsoleMenu } from '../console_menu';
 

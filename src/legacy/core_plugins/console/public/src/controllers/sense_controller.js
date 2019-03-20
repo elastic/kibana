@@ -54,7 +54,7 @@ module.controller('SenseController', function SenseController(Private, $scope, $
     });
     $scope.getDocumentation();
 
-    // espose method for React Consumption
+    // expose method for React Consumption
     $scope.getRequestsAsCURL = input.getRequestsAsCURL;
   });
   $scope.getDocumentation = () => {
