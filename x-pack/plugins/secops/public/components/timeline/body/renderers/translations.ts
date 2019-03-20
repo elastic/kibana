@@ -94,6 +94,13 @@ export const WAS_AUTHORIZED_TO_USE = i18n.translate(
   }
 );
 
+export const ACQUIRED_CREDENTIALS_TO = i18n.translate(
+  'xpack.secops.auditd.acquired.credentialsDescription',
+  {
+    defaultMessage: 'acquired credentials to',
+  }
+);
+
 export const ENDED_FROM = i18n.translate('xpack.secops.auditd.endedsession.endedFromDescription', {
   defaultMessage: 'ended from',
 });
@@ -115,4 +122,8 @@ export const ATTEMPTED_LOGIN = i18n.translate('xpack.secops.auditd.loggedin.atte
 
 export const WITH_RESULT = i18n.translate('xpack.secops.auditd.loggedin.withResultDescription', {
   defaultMessage: 'with result',
+});
+
+export const AS = i18n.translate('xpack.secops.auditd.primarySecondary.asDescription', {
+  defaultMessage: 'as',
 });
