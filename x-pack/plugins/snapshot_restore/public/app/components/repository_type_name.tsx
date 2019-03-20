@@ -5,16 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  AzureRepositoryType,
-  FSRepositoryType,
-  GCSRepositoryType,
-  HDFSRepositoryType,
-  ReadonlyRepositoryType,
-  RepositoryType,
-  S3RepositoryType,
-  SourceRepositoryType,
-} from '../../../common/repository_types';
+import { RepositoryType, RepositoryTypes } from '../../../common/types/repository_types';
 import { AppStateInterface, useAppState } from '../services/app_context';
 
 interface Props {
@@ -32,43 +23,43 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
   ] = useAppState() as [AppStateInterface];
 
   const typeNameMap: { [key in RepositoryType]: JSX.Element } = {
-    [FSRepositoryType]: (
+    [RepositoryTypes.fs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.fileSystemTypeName"
         defaultMessage="Shared File System"
       />
     ),
-    [ReadonlyRepositoryType]: (
+    [RepositoryTypes.url]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.readonlyTypeName"
         defaultMessage="Read-only URL"
       />
     ),
-    [S3RepositoryType]: (
+    [RepositoryTypes.s3]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.s3TypeName"
         defaultMessage="AWS S3"
       />
     ),
-    [HDFSRepositoryType]: (
+    [RepositoryTypes.hdfs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.hdfsTypeName"
         defaultMessage="HDFS File System"
       />
     ),
-    [AzureRepositoryType]: (
+    [RepositoryTypes.azure]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.azureTypeName"
         defaultMessage="Azure"
       />
     ),
-    [GCSRepositoryType]: (
+    [RepositoryTypes.gcs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.gcsTypeName"
         defaultMessage="Google Cloud Storage"
       />
     ),
-    [SourceRepositoryType]: (
+    [RepositoryTypes.source]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.sourceTypeName"
         defaultMessage="Source"
@@ -80,7 +71,7 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
     return typeNameMap[repositoryType] || <Fragment>{type}</Fragment>;
   };
 
-  if (type === SourceRepositoryType && delegateType) {
+  if (type === RepositoryTypes.source && delegateType) {
     return (
       <Fragment>
         <FormattedMessage

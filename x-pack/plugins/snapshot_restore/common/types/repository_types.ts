@@ -4,35 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const FSRepositoryType = 'fs';
-export const ReadonlyRepositoryType = 'url';
-export const SourceRepositoryType = 'source';
-export const S3RepositoryType = 's3';
-export const HDFSRepositoryType = 'hdfs';
-export const AzureRepositoryType = 'azure';
-export const GCSRepositoryType = 'gcs';
+export type FSRepositoryType = 'fs';
+export type ReadonlyRepositoryType = 'url';
+export type SourceRepositoryType = 'source';
+export type S3RepositoryType = 's3';
+export type HDFSRepositoryType = 'hdfs';
+export type AzureRepositoryType = 'azure';
+export type GCSRepositoryType = 'gcs';
 
-export const RepositoryTypeDocPath = 'modules-snapshots.html';
-export const FSRepositoryTypeDocPath = 'modules-snapshots.html#_shared_file_system_repository';
-export const ReadonlyRepositoryTypeDocPath = 'modules-snapshots.html#_read_only_url_repository';
-export const SourceRepositoryTypeDocPath = 'modules-snapshots.html#_source_only_repository';
-export const S3RepositoryTypeDocPath = 'repository-s3.html';
-export const HDFSRepositoryTypeDocPath = 'repository-hdfs.html';
-export const AzureRepositoryTypeDocPath = 'repository-azure.html';
-export const GCSRepositoryTypeDocPath = 'repository-gcs.html';
+export enum RepositoryTypes {
+  fs = 'fs',
+  url = 'url',
+  source = 'source',
+  s3 = 's3',
+  hdfs = 'hdfs',
+  azure = 'azure',
+  gcs = 'gcs',
+}
 
 export type RepositoryType =
-  | typeof FSRepositoryType
-  | typeof ReadonlyRepositoryType
-  | typeof SourceRepositoryType
-  | typeof S3RepositoryType
-  | typeof HDFSRepositoryType
-  | typeof AzureRepositoryType
-  | typeof GCSRepositoryType;
+  | FSRepositoryType
+  | ReadonlyRepositoryType
+  | SourceRepositoryType
+  | S3RepositoryType
+  | HDFSRepositoryType
+  | AzureRepositoryType
+  | GCSRepositoryType;
+
+export enum RepositoryDocPaths {
+  default = 'modules-snapshots.html',
+  fs = 'modules-snapshots.html#_shared_file_system_repository',
+  url = 'modules-snapshots.html#_read_only_url_repository',
+  source = 'modules-snapshots.html#_source_only_repository',
+  s3 = 'repository-s3.html',
+  hdfs = 'repository-hdfs.html',
+  azure = 'repository-azure.html',
+  gcs = 'repository-gcs.html',
+}
 
 export interface FSRepository {
   name: string;
-  type: typeof FSRepositoryType;
+  type: FSRepositoryType;
   settings: {
     location: string;
     compress?: boolean;
@@ -45,7 +57,7 @@ export interface FSRepository {
 
 export interface ReadonlyRepository {
   name: string;
-  type: typeof ReadonlyRepositoryType;
+  type: ReadonlyRepositoryType;
   settings: {
     url: string;
   };
@@ -53,7 +65,7 @@ export interface ReadonlyRepository {
 
 export interface S3Repository {
   name: string;
-  type: typeof S3RepositoryType;
+  type: S3RepositoryType;
   settings: {
     bucket: string;
     client?: string;
@@ -69,7 +81,7 @@ export interface S3Repository {
 
 export interface HDFSRepository {
   name: string;
-  type: typeof HDFSRepositoryType;
+  type: HDFSRepositoryType;
   settings: {
     uri: string;
     path: string;
@@ -83,7 +95,7 @@ export interface HDFSRepository {
 
 export interface AzureRepository {
   name: string;
-  type: typeof AzureRepositoryType;
+  type: AzureRepositoryType;
   settings: {
     client?: string;
     container?: string;
@@ -97,7 +109,7 @@ export interface AzureRepository {
 
 export interface GCSRepository {
   name: string;
-  type: typeof GCSRepositoryType;
+  type: GCSRepositoryType;
   settings: {
     bucket: string;
     client?: string;
@@ -109,19 +121,19 @@ export interface GCSRepository {
 
 export interface SourceRepository<T> {
   name: string;
-  type: typeof SourceRepositoryType;
+  type: SourceRepositoryType;
   settings: SourceRepositorySettings<T>;
 }
 
-export type SourceRepositorySettings<T> = T extends typeof FSRepositoryType
+export type SourceRepositorySettings<T> = T extends FSRepositoryType
   ? FSRepository['settings']
-  : T extends typeof S3RepositoryType
+  : T extends S3RepositoryType
   ? S3Repository['settings']
-  : T extends typeof HDFSRepositoryType
+  : T extends HDFSRepositoryType
   ? HDFSRepository['settings']
-  : T extends typeof AzureRepositoryType
+  : T extends AzureRepositoryType
   ? AzureRepository['settings']
-  : T extends typeof GCSRepositoryType
+  : T extends GCSRepositoryType
   ? GCSRepository['settings']
   : any & {
       delegate_type: T;

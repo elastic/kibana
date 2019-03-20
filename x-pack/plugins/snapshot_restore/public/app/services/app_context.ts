@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext } from 'react';
 import { AppCore, AppPlugins } from '../../shim';
 
 export interface AppStateInterface {
@@ -12,16 +12,8 @@ export interface AppStateInterface {
   plugins: AppPlugins;
 }
 
-export const AppState = createContext({});
+const AppState = createContext({});
 
-export const StateProvider = ({
-  reducer,
-  initialState,
-  children,
-}: {
-  reducer: (state: object, action: any) => object;
-  initialState: object;
-  children: any;
-}) => <AppState.Provider value={useReducer(reducer, initialState)}>{children}</AppState.Provider>;
+export const AppStateProvider = AppState.Provider;
 
 export const useAppState = () => useContext(AppState);

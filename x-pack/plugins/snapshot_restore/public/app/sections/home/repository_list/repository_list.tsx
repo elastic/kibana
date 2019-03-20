@@ -7,10 +7,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { Repository } from '../../../../../common/repository_types';
+import { Repository } from '../../../../../common/types/repository_types';
 import { BASE_PATH, Section } from '../../../constants';
-import { useRequest } from '../../../services/api';
 import { AppStateInterface, useAppState } from '../../../services/app_context';
+import { useRequest } from '../../../services/use_request';
 
 import { SectionError, SectionLoading } from '../../../components';
 import { RepositoryDetails } from './repository_details';

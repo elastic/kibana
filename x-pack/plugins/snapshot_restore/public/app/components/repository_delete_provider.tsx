@@ -5,16 +5,18 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { Repository } from '../../../common/repository_types';
+import { Repository } from '../../../common/types/repository_types';
 
 interface Props {
-  children: any;
+  children: (deleteRepository: DeleteRepository) => React.ReactNode;
 }
+
+type DeleteRepository = (names: Array<Repository['name']>) => void;
 
 export const RepositoryDeleteProvider = ({ children }: Props) => {
   const [repositoryNames, setRepositoryNames] = useState<Array<Repository['name']>>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const deleteRepository = (names: Array<Repository['name']>): void => {
+  const deleteRepository: DeleteRepository = names => {
     setIsModalOpen(true);
     setRepositoryNames(names);
   };

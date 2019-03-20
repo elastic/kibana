@@ -4,23 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  AzureRepositoryType,
-  AzureRepositoryTypeDocPath,
-  FSRepositoryType,
-  FSRepositoryTypeDocPath,
-  GCSRepositoryType,
-  GCSRepositoryTypeDocPath,
-  HDFSRepositoryType,
-  HDFSRepositoryTypeDocPath,
-  ReadonlyRepositoryType,
-  ReadonlyRepositoryTypeDocPath,
+  RepositoryDocPaths,
   RepositoryType,
-  RepositoryTypeDocPath,
-  S3RepositoryType,
-  S3RepositoryTypeDocPath,
-  SourceRepositoryType,
-  SourceRepositoryTypeDocPath,
-} from '../../../common/repository_types';
+  RepositoryTypes,
+} from '../../../common/types/repository_types';
 
 export const getRepositoryTypeDocUrl = (
   type: RepositoryType,
@@ -28,21 +15,21 @@ export const getRepositoryTypeDocUrl = (
   esPluginDocBasePath: string
 ): string => {
   switch (type) {
-    case FSRepositoryType:
-      return `${esDocBasePath}${FSRepositoryTypeDocPath}`;
-    case ReadonlyRepositoryType:
-      return `${esDocBasePath}${ReadonlyRepositoryTypeDocPath}`;
-    case SourceRepositoryType:
-      return `${esDocBasePath}${SourceRepositoryTypeDocPath}`;
-    case S3RepositoryType:
-      return `${esPluginDocBasePath}${S3RepositoryTypeDocPath}`;
-    case HDFSRepositoryType:
-      return `${esPluginDocBasePath}${HDFSRepositoryTypeDocPath}`;
-    case AzureRepositoryType:
-      return `${esPluginDocBasePath}${AzureRepositoryTypeDocPath}`;
-    case GCSRepositoryType:
-      return `${esPluginDocBasePath}${GCSRepositoryTypeDocPath}`;
+    case RepositoryTypes.fs:
+      return `${esDocBasePath}${RepositoryDocPaths.fs}`;
+    case RepositoryTypes.url:
+      return `${esDocBasePath}${RepositoryDocPaths.url}`;
+    case RepositoryTypes.source:
+      return `${esDocBasePath}${RepositoryDocPaths.source}`;
+    case RepositoryTypes.s3:
+      return `${esPluginDocBasePath}${RepositoryDocPaths.s3}`;
+    case RepositoryTypes.hdfs:
+      return `${esPluginDocBasePath}${RepositoryDocPaths.hdfs}`;
+    case RepositoryTypes.azure:
+      return `${esPluginDocBasePath}${RepositoryDocPaths.azure}`;
+    case RepositoryTypes.gcs:
+      return `${esPluginDocBasePath}${RepositoryDocPaths.gcs}`;
     default:
-      return `${esDocBasePath}${RepositoryTypeDocPath}`;
+      return `${esDocBasePath}${RepositoryDocPaths.default}`;
   }
 };

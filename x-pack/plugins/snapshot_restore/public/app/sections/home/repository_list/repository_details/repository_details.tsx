@@ -5,11 +5,11 @@
  */
 import React, { Fragment } from 'react';
 
-import { useRequest } from '../../../../services/api';
 import { AppStateInterface, useAppState } from '../../../../services/app_context';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
+import { useRequest } from '../../../../services/use_request';
 
-import { Repository, SourceRepositoryType } from '../../../../../../common/repository_types';
+import { Repository, RepositoryTypes } from '../../../../../../common/types/repository_types';
 import {
   RepositoryDeleteProvider,
   RepositoryTypeName,
@@ -117,7 +117,7 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === SourceRepositoryType ? (
+            {type === RepositoryTypes.source ? (
               <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
             ) : (
               <RepositoryTypeName type={type} />

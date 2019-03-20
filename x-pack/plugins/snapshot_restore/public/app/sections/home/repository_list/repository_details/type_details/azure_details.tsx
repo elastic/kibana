@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { AzureRepository } from '../../../../../../../common/repository_types';
+import { AzureRepository } from '../../../../../../../common/types/repository_types';
 import { AppStateInterface, useAppState } from '../../../../../services/app_context';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';

@@ -8,8 +8,8 @@ import React, { useState } from 'react';
 import {
   Repository,
   RepositoryType,
-  SourceRepositoryType,
-} from '../../../../../../common/repository_types';
+  RepositoryTypes,
+} from '../../../../../../common/types/repository_types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
 import { AppStateInterface, useAppState } from '../../../../services/app_context';
 
@@ -48,7 +48,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
       truncateText: true,
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
-        if (type === SourceRepositoryType) {
+        if (type === RepositoryTypes.source) {
           return (
             <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
           );

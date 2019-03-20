@@ -6,20 +6,14 @@
 import React from 'react';
 import {
   AzureRepository,
-  AzureRepositoryType,
   FSRepository,
-  FSRepositoryType,
   GCSRepository,
-  GCSRepositoryType,
   HDFSRepository,
-  HDFSRepositoryType,
   ReadonlyRepository,
-  ReadonlyRepositoryType,
   Repository,
+  RepositoryTypes,
   S3Repository,
-  S3RepositoryType,
-  SourceRepositoryType,
-} from '../../../../../../../common/repository_types';
+} from '../../../../../../../common/types/repository_types';
 
 import { AzureDetails } from './azure_details';
 import { DefaultDetails } from './default_details';
@@ -36,13 +30,13 @@ interface Props {
 export const TypeDetails = ({ repository }: Props) => {
   const { type, settings } = repository;
   switch (type) {
-    case FSRepositoryType:
+    case RepositoryTypes.fs:
       return <FSDetails repository={repository as FSRepository} />;
       break;
-    case ReadonlyRepositoryType:
+    case RepositoryTypes.url:
       return <ReadonlyDetails repository={repository as ReadonlyRepository} />;
       break;
-    case SourceRepositoryType:
+    case RepositoryTypes.source:
       const { delegate_type } = settings;
       const delegatedRepository = {
         ...repository,
@@ -50,16 +44,16 @@ export const TypeDetails = ({ repository }: Props) => {
       };
       return <TypeDetails repository={delegatedRepository} />;
       break;
-    case AzureRepositoryType:
+    case RepositoryTypes.azure:
       return <AzureDetails repository={repository as AzureRepository} />;
       break;
-    case GCSRepositoryType:
+    case RepositoryTypes.gcs:
       return <GCSDetails repository={repository as GCSRepository} />;
       break;
-    case HDFSRepositoryType:
+    case RepositoryTypes.hdfs:
       return <HDFSDetails repository={repository as HDFSRepository} />;
       break;
-    case S3RepositoryType:
+    case RepositoryTypes.s3:
       return <S3Details repository={repository as S3Repository} />;
       break;
     default:
