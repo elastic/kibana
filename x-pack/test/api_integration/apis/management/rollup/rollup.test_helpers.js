@@ -81,21 +81,26 @@ export const registerHelpers = ({ supertest, es }) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
-      .post(`${API_BASE_PATH}/stop`)
+      .post(`${API_BASE_PATH}/stop?wait_for_completion=true`)
       .set('kbn-xsrf', 'xxx')
       .send({ jobIds });
   };
 
   const loadJobs = () => supertest.get(`${API_BASE_PATH}/jobs`);
 
+  const log = (message) => () => {
+    console.log(message);
+    return Promise.resolve();
+  };
+
   const waitForJobsToStop = (attempt = 0) => (
-    loadJobs()
+    log('--------------------- Waiting for jobs to stop --------------------------')()
+      .then(loadJobs)
       .then(async ({ body: { jobs } }) => {
         /**
          * To add some context in case some flakiness appears, we'll log the jobs ids and state.
          * This could be removed if it is confirmed that no more flakyness comes from the rollup api integration tests.
          */
-        console.log('--------------------- Wait for jobs to stop result ------------------------------------');
         console.log('Current Rollup Jobs:');
         console.log(jobs.map((job) => ({ id: job.config.id, state: job.status.job_state })));
         console.log('\n');
@@ -106,7 +111,7 @@ export const registerHelpers = ({ supertest, es }) => {
           return;
         }
 
-        if (attempt < 3 && jobBeingStopped.length) {
+        if (attempt < 3) {
           await wait(500);
           return waitForJobsToStop(++attempt);
         }
