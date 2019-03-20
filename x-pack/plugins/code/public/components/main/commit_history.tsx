@@ -43,9 +43,9 @@ const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) =>
     .join('');
   return (
     <EuiPanel className="code-timeline__commit--root">
-      <div>
+      <div className="eui-textTruncate">
         <EuiText size="s">
-          <p>{message}</p>
+          <p className="eui-textTruncate">{message}</p>
         </EuiText>
         <EuiText size="xs">
           <EuiTextColor color="subdued">
