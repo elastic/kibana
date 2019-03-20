@@ -9,6 +9,7 @@ import {
   Direction,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
   NetworkTopNFlowType,
 } from '../graphql/types';
 import { State } from '../store';
@@ -27,36 +28,20 @@ export const mockGlobalState: State = {
     hosts: {
       page: {
         queries: {
-          authentications: {
-            limit: 10,
-          },
-          hosts: {
-            limit: 10,
-          },
-          events: {
-            limit: 10,
-          },
-          uncommonProcesses: {
-            limit: 10,
-          },
+          authentications: { limit: 10 },
+          hosts: { limit: 10 },
+          events: { limit: 10 },
+          uncommonProcesses: { limit: 10 },
         },
         filterQuery: null,
         filterQueryDraft: null,
       },
       details: {
         queries: {
-          authentications: {
-            limit: 10,
-          },
-          hosts: {
-            limit: 10,
-          },
-          events: {
-            limit: 10,
-          },
-          uncommonProcesses: {
-            limit: 10,
-          },
+          authentications: { limit: 10 },
+          hosts: { limit: 10 },
+          events: { limit: 10 },
+          uncommonProcesses: { limit: 10 },
         },
         filterQuery: null,
         filterQueryDraft: null,
@@ -69,42 +54,27 @@ export const mockGlobalState: State = {
             limit: 10,
             topNFlowType: NetworkTopNFlowType.source,
             topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+            topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
           },
           dns: {
             limit: 10,
-            dnsSortField: {
-              field: NetworkDnsFields.queryCount,
-              direction: Direction.desc,
-            },
+            dnsSortField: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
             isPtrIncluded: false,
           },
         },
         filterQuery: null,
         filterQueryDraft: null,
       },
-      details: {
-        filterQuery: null,
-        filterQueryDraft: null,
-        queries: null,
-      },
+      details: { filterQuery: null, filterQueryDraft: null, queries: null },
     },
     inputs: {
       global: {
-        timerange: {
-          kind: 'absolute',
-          from: 0,
-          to: 1,
-        },
+        timerange: { kind: 'absolute', from: 0, to: 1 },
         query: [],
-        policy: {
-          kind: 'manual',
-          duration: 5000,
-        },
+        policy: { kind: 'manual', duration: 5000 },
       },
     },
-    dragAndDrop: {
-      dataProviders: {},
-    },
+    dragAndDrop: { dataProviders: {} },
     timeline: {
       timelineById: {
         test: {
@@ -119,20 +89,14 @@ export const mockGlobalState: State = {
           isFavorite: false,
           isLive: false,
           kqlMode: 'filter',
-          kqlQuery: {
-            filterQuery: null,
-            filterQueryDraft: null,
-          },
+          kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
           range: '1 Day',
           show: false,
           pinnedEventIds: {},
           itemsPerPageOptions: [5, 10, 20],
-          sort: {
-            columnId: '@timestamp',
-            sortDirection: Direction.desc,
-          },
+          sort: { columnId: '@timestamp', sortDirection: Direction.desc },
           width: defaultWidth,
         },
       },

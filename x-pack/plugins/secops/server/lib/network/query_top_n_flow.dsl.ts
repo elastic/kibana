@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkTopNFlowDirection, NetworkTopNFlowType } from '../../graphql/types';
+import {
+  Direction,
+  NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
+  NetworkTopNFlowSortField,
+  NetworkTopNFlowType,
+} from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
@@ -78,6 +84,7 @@ export const buildTopNFlowQuery = ({
   fields,
   filterQuery,
   networkTopNFlowDirection,
+  networkTopNFlowSort,
   networkTopNFlowType,
   timerange: { from, to },
   pagination: { limit },
@@ -89,14 +96,7 @@ export const buildTopNFlowQuery = ({
 }: NetworkTopNFlowRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    {
-      range: {
-        [timestamp]: {
-          gte: from,
-          lte: to,
-        },
-      },
-    },
+    { range: { [timestamp]: { gte: from, lte: to } } },
   ];
 
   const dslQuery = {
@@ -106,8 +106,18 @@ export const buildTopNFlowQuery = ({
     body: {
       aggregations: {
         ...getCountAgg(networkTopNFlowType),
-        ...getUniDirectionAggs(networkTopNFlowDirection, networkTopNFlowType, limit),
-        ...getBiDirectionAggs(networkTopNFlowDirection, networkTopNFlowType, limit),
+        ...getUniDirectionAggs(
+          networkTopNFlowDirection,
+          networkTopNFlowSort,
+          networkTopNFlowType,
+          limit
+        ),
+        ...getBiDirectionAggs(
+          networkTopNFlowDirection,
+          networkTopNFlowSort,
+          networkTopNFlowType,
+          limit
+        ),
       },
       query: {
         bool: {
@@ -125,6 +135,7 @@ export const buildTopNFlowQuery = ({
 
 const getUniDirectionAggs = (
   networkTopNFlowDirection: NetworkTopNFlowDirection,
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
   networkTopNFlowType: NetworkTopNFlowType,
   limit: number
 ) =>
@@ -135,7 +146,7 @@ const getUniDirectionAggs = (
             field: `${networkTopNFlowType}.ip`,
             size: limit + 1,
             order: {
-              bytes: 'desc',
+              ...getQueryOrder(networkTopNFlowSortField),
             },
           },
           aggs: {
@@ -190,6 +201,7 @@ const getUniDirectionAggs = (
 
 const getBiDirectionAggs = (
   networkTopNFlowDirection: NetworkTopNFlowDirection,
+  networkTopNFlowSortField: NetworkTopNFlowSortField,
   networkTopNFlowType: NetworkTopNFlowType,
   limit: number
 ) =>
@@ -200,7 +212,7 @@ const getBiDirectionAggs = (
             field: `${networkTopNFlowType}.ip`,
             size: limit + 1,
             order: {
-              bytes: 'desc',
+              ...getQueryOrder(networkTopNFlowSortField),
             },
           },
           aggs: {
@@ -249,14 +261,34 @@ const getBiDirectionAggs = (
       }
     : {};
 
-const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType) => {
-  if (networkTopNFlowType === NetworkTopNFlowType.source) {
-    return NetworkTopNFlowType.destination;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.destination) {
-    return NetworkTopNFlowType.source;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.client) {
-    return NetworkTopNFlowType.server;
-  } else if (networkTopNFlowType === NetworkTopNFlowType.server) {
-    return NetworkTopNFlowType.client;
+const getOppositeField = (networkTopNFlowType: NetworkTopNFlowType): NetworkTopNFlowType => {
+  switch (networkTopNFlowType) {
+    case NetworkTopNFlowType.source:
+      return NetworkTopNFlowType.destination;
+    case NetworkTopNFlowType.destination:
+      return NetworkTopNFlowType.source;
+    case NetworkTopNFlowType.server:
+      return NetworkTopNFlowType.client;
+    case NetworkTopNFlowType.client:
+      return NetworkTopNFlowType.server;
   }
+  assertUnreachable(networkTopNFlowType);
+};
+
+const assertUnreachable = (x: never): never => {
+  throw new Error(`Unknown Field in switch statement ${x}`);
+};
+
+type QueryOrder = { bytes: Direction } | { packets: Direction } | { ip_count: Direction };
+
+const getQueryOrder = (networkTopNFlowSortField: NetworkTopNFlowSortField): QueryOrder => {
+  switch (networkTopNFlowSortField.field) {
+    case NetworkTopNFlowFields.bytes:
+      return { bytes: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.packets:
+      return { packets: networkTopNFlowSortField.direction };
+    case NetworkTopNFlowFields.ipCount:
+      return { ip_count: networkTopNFlowSortField.direction };
+  }
+  assertUnreachable(networkTopNFlowSortField.field);
 };

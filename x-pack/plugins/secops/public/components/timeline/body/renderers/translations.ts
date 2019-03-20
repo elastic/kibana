@@ -93,3 +93,10 @@ export const WAS_AUTHORIZED_TO_USE = i18n.translate(
     defaultMessage: 'was authorized to use',
   }
 );
+
+export const DISPOSED_CREDENTIALS_TO = i18n.translate(
+  'xpack.secops.auditd.disposed.credentialsDescription',
+  {
+    defaultMessage: 'disposed credentials to',
+  }
+);

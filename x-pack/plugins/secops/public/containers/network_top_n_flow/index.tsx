@@ -13,6 +13,7 @@ import {
   GetNetworkTopNFlowQuery,
   NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
+  NetworkTopNFlowSortField,
   NetworkTopNFlowType,
   PageInfo,
 } from '../../graphql/types';
@@ -40,6 +41,7 @@ export interface OwnProps extends QueryTemplateProps {
 export interface NetworkTopNFlowComponentReduxProps {
   limit: number;
   topNFlowDirection: NetworkTopNFlowDirection;
+  topNFlowSort: NetworkTopNFlowSortField;
   topNFlowType: NetworkTopNFlowType;
 }
 
@@ -61,6 +63,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       limit,
       poll,
       topNFlowDirection,
+      topNFlowSort,
       topNFlowType,
     } = this.props;
     return (
@@ -77,6 +80,7 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             to: endDate!,
           },
           direction: topNFlowDirection,
+          sort: topNFlowSort,
           type: topNFlowType,
           pagination: {
             limit,

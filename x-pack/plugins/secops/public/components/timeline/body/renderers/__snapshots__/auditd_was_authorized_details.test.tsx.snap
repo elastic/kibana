@@ -109,26 +109,25 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
     browserFields={Object {}}
     data={
       Object {
-        "_id": "25",
-        "_index": "auditbeat-8.0.0-2019.02.19-000001",
+        "_id": "22",
         "auditd": Object {
           "data": Object {
-            "acct": null,
-            "op": null,
-            "terminal": "/dev/pts/0",
+            "acct": "alice",
+            "op": "PAM:setcred",
+            "terminal": "ssh",
           },
           "result": "success",
-          "session": "338",
+          "session": "340",
           "summary": Object {
             "actor": Object {
-              "primary": "root",
+              "primary": "alice",
               "secondary": "alice",
             },
-            "how": "/sbin/pam_tally2",
+            "how": "/usr/sbin/sshd",
             "message_type": null,
             "object": Object {
-              "primary": "/dev/pts/0",
-              "secondary": null,
+              "primary": "ssh",
+              "secondary": "8.42.77.171",
               "type": "user-session",
             },
             "sequence": null,
@@ -136,7 +135,7 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
         },
         "destination": null,
         "event": Object {
-          "action": "was-authorized",
+          "action": "disposed-credentials",
           "category": "user-login",
           "dataset": null,
           "id": null,
@@ -157,19 +156,19 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
         "network": null,
         "process": Object {
           "args": null,
-          "executable": "/sbin/pam_tally2",
+          "executable": "/usr/sbin/sshd",
           "name": null,
-          "pid": 21170,
+          "pid": 21202,
           "ppid": null,
           "title": null,
           "working_directory": null,
         },
         "source": null,
         "suricata": null,
-        "timestamp": "2019-03-13T03:34:08.890Z",
+        "timestamp": "2019-03-13T03:35:21.614Z",
         "url": null,
         "user": Object {
-          "name": "alice",
+          "name": "root",
         },
         "zeek": null,
       }

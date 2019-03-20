@@ -540,7 +540,6 @@ export const mockEcsData: Ecs[] = [
   },
   {
     _id: '16',
-    _index: 'filebeat-8.0.0-2019.02.19-000001',
     timestamp: '2019-03-05T07:00:20.000Z',
     event: {
       action: null,
@@ -786,7 +785,6 @@ export const mockEcsData: Ecs[] = [
   },
   {
     _id: '21',
-    _index: 'auditbeat-8.0.0-2019.02.19-000001',
     timestamp: '2019-03-14T22:30:25.527Z',
     event: {
       action: 'logged-in',
@@ -839,6 +837,66 @@ export const mockEcsData: Ecs[] = [
     },
     process: {
       pid: 17471,
+      name: null,
+      ppid: null,
+      args: null,
+      executable: '/usr/sbin/sshd',
+      title: null,
+      working_directory: null,
+    },
+    zeek: null,
+  },
+  {
+    _id: '22',
+    timestamp: '2019-03-13T03:35:21.614Z',
+    event: {
+      action: 'disposed-credentials',
+      severity: null,
+      module: 'auditd',
+      category: 'user-login',
+      id: null,
+      dataset: null,
+    },
+    auditd: {
+      result: 'success',
+      session: '340',
+      data: {
+        acct: 'alice',
+        terminal: 'ssh',
+        op: 'PAM:setcred',
+      },
+      summary: {
+        actor: {
+          primary: 'alice',
+          secondary: 'alice',
+        },
+        object: {
+          primary: 'ssh',
+          secondary: '8.42.77.171',
+          type: 'user-session',
+        },
+        how: '/usr/sbin/sshd',
+        message_type: null,
+        sequence: null,
+      },
+    },
+    host: {
+      id: '0a63559c1acf4c419d979c4b4d8b83ff',
+      name: 'suricata-bangalore',
+      ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
+    },
+    source: null,
+    destination: null,
+    geo: null,
+    suricata: null,
+    network: null,
+    http: null,
+    url: null,
+    user: {
+      name: 'root',
+    },
+    process: {
+      pid: 21202,
       name: null,
       ppid: null,
       args: null,

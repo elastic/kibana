@@ -1046,7 +1046,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
       },
       Object {
         "_id": "16",
-        "_index": "filebeat-8.0.0-2019.02.19-000001",
         "destination": Object {
           "ip": "192.241.164.26",
           "port": 80,
@@ -1321,7 +1320,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
       },
       Object {
         "_id": "21",
-        "_index": "auditbeat-8.0.0-2019.02.19-000001",
         "auditd": Object {
           "data": Object {
             "acct": null,
@@ -1381,6 +1379,70 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         },
         "suricata": null,
         "timestamp": "2019-03-14T22:30:25.527Z",
+        "url": null,
+        "user": Object {
+          "name": "root",
+        },
+        "zeek": null,
+      },
+      Object {
+        "_id": "22",
+        "auditd": Object {
+          "data": Object {
+            "acct": "alice",
+            "op": "PAM:setcred",
+            "terminal": "ssh",
+          },
+          "result": "success",
+          "session": "340",
+          "summary": Object {
+            "actor": Object {
+              "primary": "alice",
+              "secondary": "alice",
+            },
+            "how": "/usr/sbin/sshd",
+            "message_type": null,
+            "object": Object {
+              "primary": "ssh",
+              "secondary": "8.42.77.171",
+              "type": "user-session",
+            },
+            "sequence": null,
+          },
+        },
+        "destination": null,
+        "event": Object {
+          "action": "disposed-credentials",
+          "category": "user-login",
+          "dataset": null,
+          "id": null,
+          "module": "auditd",
+          "severity": null,
+        },
+        "geo": null,
+        "host": Object {
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
+          "ip": Array [
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
+          ],
+          "name": "suricata-bangalore",
+        },
+        "http": null,
+        "network": null,
+        "process": Object {
+          "args": null,
+          "executable": "/usr/sbin/sshd",
+          "name": null,
+          "pid": 21202,
+          "ppid": null,
+          "title": null,
+          "working_directory": null,
+        },
+        "source": null,
+        "suricata": null,
+        "timestamp": "2019-03-13T03:35:21.614Z",
         "url": null,
         "user": Object {
           "name": "root",
@@ -1470,6 +1532,10 @@ Can be one or multiple IPv4 or IPv6 addresses.",
   range="1 Day"
   rowRenderers={
     Array [
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
       Object {
         "isInstance": [Function],
         "renderRow": [Function],

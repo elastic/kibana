@@ -18,6 +18,7 @@ import {
   Direction,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
   NetworkTopNFlowType,
 } from '../types';
 
@@ -29,6 +30,7 @@ const testNetworkTopNFlowSource = {
   query: `
     query GetNetworkTopNFlowQuery(
       $direction: NetworkTopNFlowDirection!
+      $sort: NetworkTopNFlowSortField!
       $type: NetworkTopNFlowType!
       $timerange: TimerangeInput!
       $pagination: PaginationInput!
@@ -37,6 +39,7 @@ const testNetworkTopNFlowSource = {
       source(id: "default") {
         NetworkTopNFlow(
           direction: $direction
+          sort: $sort
           type: $type
           timerange: $timerange
           pagination: $pagination
@@ -81,6 +84,7 @@ const testNetworkTopNFlowSource = {
       to: new Date('2018-01-01T05:00:00.000Z').valueOf(),
       from: new Date('2019-01-01T04:59:59.999Z').valueOf(),
     },
+    sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
     type: NetworkTopNFlowType.source,
     direction: NetworkTopNFlowDirection.uniDirectional,
     pagination: {

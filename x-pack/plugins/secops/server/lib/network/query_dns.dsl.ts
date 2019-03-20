@@ -4,33 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
+import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkDnsRequestOptions } from './index';
 
-const getQueryOrder = (networkDnsSortField: NetworkDnsSortField) => {
-  if (networkDnsSortField.field === NetworkDnsFields.queryCount) {
-    return {
-      _count: networkDnsSortField.direction,
-    };
-  } else if (networkDnsSortField.field === NetworkDnsFields.dnsName) {
-    return {
-      _key: networkDnsSortField.direction,
-    };
-  } else if (networkDnsSortField.field === NetworkDnsFields.uniqueDomains) {
-    return {
-      unique_domains: networkDnsSortField.direction,
-    };
-  } else if (networkDnsSortField.field === NetworkDnsFields.dnsBytesIn) {
-    return {
-      dns_bytes_in: networkDnsSortField.direction,
-    };
-  } else if (networkDnsSortField.field === NetworkDnsFields.dnsBytesOut) {
-    return {
-      dns_bytes_out: networkDnsSortField.direction,
-    };
+const assertUnreachable = (x: never): never => {
+  throw new Error(`Unknown Field in switch statement ${x}`);
+};
+
+type QueryOrder =
+  | { _count: Direction }
+  | { _key: Direction }
+  | { unique_domains: Direction }
+  | { dns_bytes_in: Direction }
+  | { dns_bytes_out: Direction };
+
+const getQueryOrder = (networkDnsSortField: NetworkDnsSortField): QueryOrder => {
+  switch (networkDnsSortField.field) {
+    case NetworkDnsFields.queryCount:
+      return { _count: networkDnsSortField.direction };
+    case NetworkDnsFields.dnsName:
+      return { _key: networkDnsSortField.direction };
+    case NetworkDnsFields.uniqueDomains:
+      return { unique_domains: networkDnsSortField.direction };
+    case NetworkDnsFields.dnsBytesIn:
+      return { dns_bytes_in: networkDnsSortField.direction };
+    case NetworkDnsFields.dnsBytesOut:
+      return { dns_bytes_out: networkDnsSortField.direction };
   }
+  assertUnreachable(networkDnsSortField.field);
 };
 
 const getCountAgg = () => ({

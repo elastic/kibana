@@ -31,7 +31,7 @@ export const getNetworkDnsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (dnsName: string) => {
+    render: (dnsName: string | null | undefined) => {
       if (!isNil(dnsName)) {
         const id = escapeDataProviderId(`networkDns-table--name-${dnsName}`);
         return (
@@ -44,14 +44,8 @@ export const getNetworkDnsColumns = (
               name: dnsName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: {
-                field: 'dns.question.etld_plus_one',
-                value: escapeQueryValue(dnsName),
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryMatch: { field: 'dns.question.etld_plus_one', value: escapeQueryValue(dnsName) },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -75,7 +69,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: (queryCount: number) => {
+    render: (queryCount: number | null | undefined) => {
       if (!isNil(queryCount)) {
         return numeral(queryCount).format('0');
       } else {
@@ -89,7 +83,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: (uniqueDomains: number) => {
+    render: (uniqueDomains: number | null | undefined) => {
       if (!isNil(uniqueDomains)) {
         return numeral(uniqueDomains).format('0');
       } else {
@@ -103,7 +97,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: (dnsBytesIn: number) => {
+    render: (dnsBytesIn: number | null | undefined) => {
       if (!isNil(dnsBytesIn)) {
         return numeral(dnsBytesIn).format('0.000b');
       } else {
@@ -117,7 +111,7 @@ export const getNetworkDnsColumns = (
     sortable: true,
     truncateText: false,
     hideForMobile: false,
-    render: (dnsBytesOut: number) => {
+    render: (dnsBytesOut: number | null | undefined) => {
       if (!isNil(dnsBytesOut)) {
         return numeral(dnsBytesOut).format('0.000b');
       } else {
