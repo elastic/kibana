@@ -1,7 +1,7 @@
 [[canvas-server-functions]]
 === Canvas server functions
 
-beta[]These functions can only execute on the server. This may be for performance
+These functions can only execute on the server. This may be for performance
 or security reasons, or because the function uses an API only available on the 
 {kib} server. If the expression is executing in the browser, it will transfer to 
 the server when it hits one of these functions.
