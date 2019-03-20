@@ -116,3 +116,7 @@ export const ATTEMPTED_LOGIN = i18n.translate('xpack.secops.auditd.loggedin.atte
 export const WITH_RESULT = i18n.translate('xpack.secops.auditd.loggedin.withResultDescription', {
   defaultMessage: 'with result',
 });
+
+export const AS = i18n.translate('xpack.secops.auditd.primarySecondary.asDescription', {
+  defaultMessage: 'as',
+});

@@ -89,8 +89,12 @@ export const AuditdEndedSessionLine = pure<Props>(
           value={hostName}
         />
       </TokensFlexItem>
-      {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {workingDirectory != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.IN}
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           contextId="auditd-ended-session"
           eventId={id}
@@ -99,7 +103,11 @@ export const AuditdEndedSessionLine = pure<Props>(
           iconType="folderOpen"
         />
       </TokensFlexItem>
-      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.ENDED_FROM}</TokensFlexItem>}
+      {processExecutable != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.ENDED_FROM}
+        </TokensFlexItem>
+      )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           contextId="auditd-ended-session"

@@ -11,6 +11,8 @@ import styled from 'styled-components';
 
 import { DraggableBadge } from '../../../draggables';
 
+import * as i18n from './translations';
+
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
@@ -61,7 +63,7 @@ export const PrimarySecondary = pure<Props>(({ contextId, eventId, primary, seco
   } else {
     return (
       <EuiFlexGroup gutterSize="none">
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
@@ -70,8 +72,10 @@ export const PrimarySecondary = pure<Props>(({ contextId, eventId, primary, seco
             iconType="user"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>as</TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.AS}
+        </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             contextId={contextId}
             eventId={eventId}
