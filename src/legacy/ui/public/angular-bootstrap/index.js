@@ -25,13 +25,11 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.transition',
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
-  'ui.bootstrap.buttons',
   'ui.bootstrap.position',
   'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
   'ui.bootstrap.pagination',
   'ui.bootstrap.tooltip',
-  'ui.bootstrap.popover',
   'ui.bootstrap.progressbar',
   'ui.bootstrap.tabs',
   'ui.bootstrap.timepicker',
@@ -46,7 +44,6 @@ angular.module('ui.bootstrap.tpls', [
   'template/pagination/pagination.html',
   'template/tooltip/tooltip-html-unsafe-popup.html',
   'template/tooltip/tooltip-popup.html',
-  'template/popover/popover.html',
   'template/progressbar/bar.html',
   'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
@@ -59,11 +56,9 @@ angular.module('ui.bootstrap.tpls', [
 
 import './alert/alert';
 import './bindHtml/bindHtml';
-import './buttons/buttons';
 import './dropdown/dropdown';
 import './modal/modal';
 import './pagination/pagination';
-import './popover/popover';
 import './position/position';
 import './progressbar/progressbar';
 import './tabs/tabs';
@@ -112,12 +107,6 @@ import tooltipPopup from './tooltip/tooltip-popup.html';
 
 angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);
-}]);
-
-import popover from './popover/popover.html';
-
-angular.module('template/popover/popover.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/popover/popover.html', popover);
 }]);
 
 import bar from './progressbar/bar.html';

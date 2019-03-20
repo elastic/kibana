@@ -17,5 +17,17 @@
  * under the License.
  */
 
-export { run } from './run';
-export { createFailError, createFlagError, combineErrors, isFailError } from './fail';
+import { SavedObjectsSchema } from './schema';
+
+type Schema = PublicMethodsOf<SavedObjectsSchema>;
+const createSchemaMock = () => {
+  const mocked: jest.Mocked<Schema> = {
+    isHiddenType: jest.fn().mockReturnValue(false),
+    isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+  };
+  return mocked;
+};
+
+export const schemaMock = {
+  create: createSchemaMock,
+};
