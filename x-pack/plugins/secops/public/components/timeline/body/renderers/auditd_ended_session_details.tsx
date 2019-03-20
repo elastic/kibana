@@ -41,7 +41,7 @@ interface Props {
   session: string | null | undefined;
 }
 
-export const AuditdDisposedLine = pure<Props>(
+export const AuditdEndedSessionLine = pure<Props>(
   ({
     id,
     hostName,
@@ -60,7 +60,7 @@ export const AuditdDisposedLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-disposed-creds"
+          contextId="auditd-ended-session"
           eventId={id}
           field="auditd.session"
           value={session}
@@ -69,7 +69,7 @@ export const AuditdDisposedLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
-          contextId="auditd-disposed-creds"
+          contextId="auditd-ended-session"
           eventId={id}
           userName={userName}
           primary={primary}
@@ -83,30 +83,26 @@ export const AuditdDisposedLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-disposed-creds"
+          contextId="auditd-ended-session"
           eventId={id}
           field="host.name"
           value={hostName}
         />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
-      <TokensFlexItem grow={false} component="span">
+      <TokensFlexItem grow={false}>
         <DraggableBadge
-          contextId="auditd-disposed-creds"
+          contextId="auditd-ended-session"
           eventId={id}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
         />
       </TokensFlexItem>
-      {processExecutable != null && (
-        <TokensFlexItem grow={false} component="span">
-          {i18n.DISPOSED_CREDENTIALS_TO}
-        </TokensFlexItem>
-      )}
+      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.ENDED_FROM}</TokensFlexItem>}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-disposed-creds"
+          contextId="auditd-ended-session"
           eventId={id}
           field="process.executable"
           value={processExecutable}
@@ -116,7 +112,7 @@ export const AuditdDisposedLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
-            contextId="auditd-disposed-creds"
+            contextId="auditd-ended-session"
             eventId={id}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
@@ -128,7 +124,7 @@ export const AuditdDisposedLine = pure<Props>(
   )
 );
 
-export const AuditdDisposedDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
+export const AuditdEndedSessionDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
   ({ browserFields, data }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session', data);
@@ -144,7 +140,7 @@ export const AuditdDisposedDetails = pure<{ browserFields: BrowserFields; data: 
     if (data.process != null) {
       return (
         <Details>
-          <AuditdDisposedLine
+          <AuditdEndedSessionLine
             id={id}
             hostName={hostName}
             userName={userName}
