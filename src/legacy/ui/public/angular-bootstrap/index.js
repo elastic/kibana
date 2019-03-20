@@ -23,12 +23,10 @@ uiModules.get('kibana', [
 angular.module('ui.bootstrap', [
   'ui.bootstrap.tpls',
   'ui.bootstrap.transition',
-  'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.position',
   'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
-  'ui.bootstrap.pagination',
   'ui.bootstrap.tooltip',
   'ui.bootstrap.progressbar',
   'ui.bootstrap.tabs',
@@ -37,14 +35,8 @@ angular.module('ui.bootstrap', [
 ]);
 
 angular.module('ui.bootstrap.tpls', [
-  'template/alert/alert.html',
   'template/modal/backdrop.html',
   'template/modal/window.html',
-  'template/pagination/pager.html',
-  'template/pagination/pagination.html',
-  'template/tooltip/tooltip-html-unsafe-popup.html',
-  'template/tooltip/tooltip-popup.html',
-  'template/progressbar/bar.html',
   'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
   'template/tabs/tab.html',
@@ -54,11 +46,9 @@ angular.module('ui.bootstrap.tpls', [
   'template/typeahead/typeahead-popup.html'
 ]);
 
-import './alert/alert';
 import './bindHtml/bindHtml';
 import './dropdown/dropdown';
 import './modal/modal';
-import './pagination/pagination';
 import './position/position';
 import './progressbar/progressbar';
 import './tabs/tabs';
@@ -66,12 +56,6 @@ import './timepicker/timepicker';
 import './tooltip/tooltip';
 import './transition/transition';
 import './typeahead/typeahead';
-
-import alert from './alert/alert.html';
-
-angular.module('template/alert/alert.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/alert/alert.html', alert);
-}]);
 
 import backdrop from './modal/backdrop.html';
 
@@ -83,36 +67,6 @@ import modal from './modal/window.html';
 
 angular.module('template/modal/window.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/modal/window.html', modal);
-}]);
-
-import pager from './pagination/pager.html';
-
-angular.module('template/pagination/pager.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/pagination/pager.html', pager);
-}]);
-
-import pagination from './pagination/pagination.html';
-
-angular.module('template/pagination/pagination.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/pagination/pagination.html', pagination);
-}]);
-
-import tooltipUnsafePopup from './tooltip/tooltip-html-unsafe-popup.html';
-
-angular.module('template/tooltip/tooltip-html-unsafe-popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tooltip/tooltip-html-unsafe-popup.html', tooltipUnsafePopup);
-}]);
-
-import tooltipPopup from './tooltip/tooltip-popup.html';
-
-angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);
-}]);
-
-import bar from './progressbar/bar.html';
-
-angular.module('template/progressbar/bar.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/progressbar/bar.html', bar);
 }]);
 
 import progress from './progressbar/progress.html';
