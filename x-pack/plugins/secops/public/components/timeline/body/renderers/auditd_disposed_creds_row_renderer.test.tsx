@@ -69,7 +69,7 @@ describe('auditDisposedCredsRowRenderer', () => {
     expect(wrapper.text()).toEqual('some children');
   });
 
-  test('should render a auditd row  ', () => {
+  test('should render a auditd row', () => {
     const children = auditDisposedCredsRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
