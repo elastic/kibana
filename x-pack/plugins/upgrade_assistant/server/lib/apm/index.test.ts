@@ -101,6 +101,14 @@ describe('isLegacyApmIndex', () => {
     ).toEqual(false);
   });
 
+  it('is false when using a version qualifier', () => {
+    expect(
+      isLegacyApmIndex('foo-1', ['foo-*'], {
+        _meta: { version: '7.0.0-rc1' },
+      })
+    ).toEqual(false);
+  });
+
   it('handles multiple index patterns', () => {
     expect(
       isLegacyApmIndex('bar-1', ['foo-*', 'bar-*'], {
