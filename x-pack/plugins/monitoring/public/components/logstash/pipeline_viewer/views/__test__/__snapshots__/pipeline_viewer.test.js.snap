@@ -14,7 +14,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
       verticalPosition="center"
     >
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -26,7 +25,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Inputs"
         iconType="logstashInput"
-        onShowVertexDetails={[Function]}
       />
       <EuiSpacer />
       <Queue
@@ -41,7 +39,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -53,11 +50,9 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Filters"
         iconType="logstashFilter"
-        onShowVertexDetails={[Function]}
       />
       <EuiSpacer />
       <StatementSection
-        detailVertex={null}
         elements={
           Array [
             Object {
@@ -69,7 +64,6 @@ exports[`PipelineViewer component passes expected props 1`] = `
         }
         headingText="Outputs"
         iconType="logstashOutput"
-        onShowVertexDetails={[Function]}
       />
     </EuiPageContent>
   </EuiPageBody>
