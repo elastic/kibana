@@ -15,6 +15,8 @@ import { DraggableBadge } from '../../../draggables';
 
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
+import * as i18n from './translations';
+
 const Details = styled.div`
   margin: 10px 0px 10px 10px;
 `;
@@ -23,7 +25,7 @@ const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-export const AuditdExecutedCommandLine = pure<{
+interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
@@ -34,7 +36,9 @@ export const AuditdExecutedCommandLine = pure<{
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
-}>(
+}
+
+export const AuditdExecutedCommandLine = pure<Props>(
   ({
     id,
     hostName,
@@ -49,49 +53,73 @@ export const AuditdExecutedCommandLine = pure<{
   }) => (
     <Details>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-        <TokensFlexItem grow={false}>Session</TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.SESSION}
+        </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="auditd.session"
             value={session}
             iconType="number"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
           <PrimarySecondaryUserInfo
-            id={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             userName={userName}
             primary={primary}
             secondary={secondary}
           />
         </TokensFlexItem>
-        {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
-          <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
-        </TokensFlexItem>
-        {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
+        {hostName != null && (
+          <TokensFlexItem grow={false} component="span">
+            @
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
+            field="host.name"
+            value={hostName}
+          />
+        </TokensFlexItem>
+        {workingDirectory != null && (
+          <TokensFlexItem grow={false} component="span">
+            {i18n.IN}
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
+          <DraggableBadge
+            contextId="auditd-executed-element"
+            eventId={id}
             field="process.working_directory"
             value={workingDirectory}
             iconType="folderOpen"
           />
         </TokensFlexItem>
-        {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
+        {processName != null && (
+          <TokensFlexItem grow={false} component="span">
+            {i18n.EXECUTED}
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="process.name"
             value={processName}
             iconType="console"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
           {args !== '' && (
             <DraggableBadge
-              id={`auditd-executed-element-${id}`}
+              contextId="auditd-executed-element"
+              eventId={id}
               field="process.title"
               queryValue={processTitle != null ? processTitle : ''}
               value={args}

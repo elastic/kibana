@@ -907,6 +907,66 @@ export const mockEcsData: Ecs[] = [
     zeek: null,
   },
   {
+    _id: '23',
+    timestamp: '2019-03-13T03:35:21.614Z',
+    event: {
+      action: 'ended-session',
+      severity: null,
+      module: 'auditd',
+      category: 'user-login',
+      id: null,
+      dataset: null,
+    },
+    auditd: {
+      result: 'success',
+      session: '340',
+      data: {
+        acct: 'alice',
+        terminal: 'ssh',
+        op: 'PAM:session_close',
+      },
+      summary: {
+        actor: {
+          primary: 'alice',
+          secondary: 'alice',
+        },
+        object: {
+          primary: 'ssh',
+          secondary: '8.42.77.171',
+          type: 'user-session',
+        },
+        how: '/usr/sbin/sshd',
+        message_type: null,
+        sequence: null,
+      },
+    },
+    host: {
+      id: '0a63559c1acf4c419d979c4b4d8b83ff',
+      name: 'suricata-bangalore',
+      ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
+    },
+    source: null,
+    destination: null,
+    geo: null,
+    suricata: null,
+    network: null,
+    http: null,
+    url: null,
+    user: {
+      name: 'root',
+    },
+    process: {
+      pid: 21202,
+      name: null,
+      ppid: null,
+      args: null,
+      executable: '/usr/sbin/sshd',
+      title: null,
+      working_directory: null,
+    },
+    zeek: null,
+  },
+  {
     _id: '24',
     timestamp: '2019-03-18T23:17:01.645Z',
     event: {

@@ -376,7 +376,7 @@ describe('AuditDisposedCredsDetails', () => {
         <TestProviders>
           <AuditdDisposedLine
             id="hello-i-am-an-id"
-            args="arg1 arg 2 arg 3"
+            args="arg1 arg2 arg 3"
             userName={undefined}
             secondary={undefined}
             session={undefined}
@@ -388,7 +388,7 @@ describe('AuditDisposedCredsDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
     });
   });
 });

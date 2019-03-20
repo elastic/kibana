@@ -60,7 +60,8 @@ export const AuditdAcquiredLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-acquired-creds-${id}`}
+          contextId="auditd-acquired-creds"
+          eventId={id}
           field="auditd.session"
           value={session}
           iconType="number"
@@ -68,7 +69,8 @@ export const AuditdAcquiredLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
-          id={`auditd-acquired-creds-${id}`}
+          contextId="auditd-acquired-creds"
+          eventId={id}
           userName={userName}
           primary={primary}
           secondary={secondary}
@@ -80,12 +82,18 @@ export const AuditdAcquiredLine = pure<Props>(
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge id={`auditd-acquired-creds-${id}`} field="host.name" value={hostName} />
+        <DraggableBadge
+          contextId="auditd-acquired-creds"
+          eventId={id}
+          field="host.name"
+          value={hostName}
+        />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-acquired-creds-${id}`}
+          contextId="auditd-acquired-creds"
+          eventId={id}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
@@ -98,7 +106,8 @@ export const AuditdAcquiredLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-acquired-creds-${id}`}
+          contextId="auditd-acquired-creds"
+          eventId={id}
           field="process.executable"
           value={processExecutable}
           iconType="console"
@@ -107,7 +116,8 @@ export const AuditdAcquiredLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
-            id={`auditd-acquired-creds-${id}`}
+            contextId="auditd-acquired-creds"
+            eventId={id}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
             value={args}
