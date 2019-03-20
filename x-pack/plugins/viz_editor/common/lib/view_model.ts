@@ -8,6 +8,7 @@ export interface IndexPatternField {
   name: string;
   type: string;
   aggregatable: boolean;
+  searchable: boolean;
 }
 
 export interface IndexPattern {
@@ -15,6 +16,7 @@ export interface IndexPattern {
   title: string;
   timeFieldName?: string;
   fields: IndexPatternField[];
+  fieldFormatMap?: string;
 }
 
 export interface DateHistogramOperation {
@@ -83,11 +85,13 @@ export function initialState(): ViewModel<any, any> {
             name: '@timestamp',
             type: 'date',
             aggregatable: true,
+            searchable: true,
           },
           {
             name: 'bytes',
             type: 'number',
             aggregatable: true,
+            searchable: true,
           },
         ],
       },

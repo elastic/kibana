@@ -19,7 +19,7 @@ type BarChartViewModel = ViewModel<
 >;
 
 function dataPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
-  return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
+  return <IndexPatternPanel />;
 }
 
 function configPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
