@@ -68,8 +68,7 @@ function DefaultEditorAggSelect({
       href={aggHelpLink}
       target="_blank"
       rel="noopener"
-      className="visEditorAggSelect__helpLink pull-right"
-      type="button"
+      className="visEditorAggSelect__helpLink"
     >
       <FormattedMessage
         id="common.ui.vis.defaultEditor.aggSelect.helpLinkLabel"
@@ -80,13 +79,7 @@ function DefaultEditorAggSelect({
   );
 
   return (
-    <EuiFormRow
-      label={label}
-      labelAppend={helpLink}
-      className="form-group"
-      isInvalid={isSelectInvalid}
-      fullWidth={true}
-    >
+    <EuiFormRow label={label} labelAppend={helpLink} isInvalid={isSelectInvalid} fullWidth={true}>
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',

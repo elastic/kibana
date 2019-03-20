@@ -20,3 +20,7 @@
 .visEditorAggSelect__helpLink {
   @include euiFontSizeXS;
 }
+
+vis-agg-select-react-wrapper .euiFormRow {
+  margin-bottom: 7px;
+}
