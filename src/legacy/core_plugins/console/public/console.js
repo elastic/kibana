@@ -21,9 +21,7 @@ import uiRoutes from 'ui/routes';
 import template from './index.html';
 
 require('brace');
-require('ui-bootstrap-custom');
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
 require('ui/tooltip');
 require('ui/autoload/styles');
 

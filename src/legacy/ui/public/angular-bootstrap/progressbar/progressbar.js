@@ -34,18 +34,6 @@ angular.module('ui.bootstrap.progressbar', [])
     };
 }])
 
-.directive('progress', function() {
-    return {
-        restrict: 'EA',
-        replace: true,
-        transclude: true,
-        controller: 'ProgressController',
-        require: 'progress',
-        scope: {},
-        templateUrl: 'template/progressbar/progress.html'
-    };
-})
-
 .directive('progressbar', function() {
     return {
         restrict: 'EA',
