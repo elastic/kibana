@@ -82,7 +82,6 @@ describe('get_pipeline', () => {
   describe('_enrichStateWithStatsAggregation function', () => {
     let stateDocument;
     let statsAggregation;
-    let version;
     let timeseriesInterval;
 
     beforeEach(() => {
@@ -160,14 +159,12 @@ describe('get_pipeline', () => {
                       events_in_total: { value: 1000 },
                       events_out_total: { value: 1000 },
                       duration_in_millis_total: { value: 15 },
-                      queue_push_duration_in_millis_total: { value: 0 }
                     },
                     {
                       key: 'mystdin',
                       events_in_total: { value: 0 },
                       events_out_total: { value: 1000 },
                       duration_in_millis_total: { value: 0 },
-                      queue_push_duration_in_millis_total: { value: 13547 }
                     }
                   ]
                 }
@@ -184,206 +181,63 @@ describe('get_pipeline', () => {
         }
       };
 
-      version = {
-        hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081',
-        firstSeen: 1516131138639,
-        lastSeen: 1516135440463
-      };
-
-
       timeseriesInterval = 30;
     });
 
     it('enriches the state document correctly with stats', () => {
-      const enrichedStateDocument = _enrichStateWithStatsAggregation(stateDocument, statsAggregation, version, timeseriesInterval);
+      const enrichedStateDocument = _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval);
       expect(enrichedStateDocument).to.eql({
-        pipeline: {
-          batch_size: 125,
-          ephemeral_id: '2c53e689-62e8-4ef3-bc57-ea968531a848',
+        batch_size: 125,
+        ephemeral_id: '2c53e689-62e8-4ef3-bc57-ea968531a848',
+        hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081',
+        id: 'main',
+        representation: {
+          type: 'lir',
+          version: '0.0.0',
           hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081',
-          id: 'main',
-          representation: {
-            type: 'lir',
-            version: '0.0.0',
-            hash: 'eada8baceee81726f6be9d0a071beefad3d9a2fd1b5f5d916011dca9fa66d081',
-            graph: {
-              vertices: [
-                {
-                  config_name: 'stdin',
-                  id: 'mystdin',
-                  type: 'plugin',
-                  plugin_type: 'input',
-                  stats: {
-                    duration_in_millis: {
-                      data: [
-                        [ 1516131120000, 0 ],
-                        [ 1516131180000, 0 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_in: {
-                      data: [
-                        [ 1516131120000, 0 ],
-                        [ 1516131180000, 0 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_out: {
-                      data: [
-                        [ 1516131120000, 1000 ],
-                        [ 1516131180000, 2000 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_out_per_millisecond: {
-                      data: [
-                        [ 1516131120000, 0.03333333333333333 ],
-                        [ 1516131180000, 0.06666666666666667 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    millis_per_event: {
-                      data: [
-                        [ 1516131120000, 0 ],
-                        [ 1516131180000, 0 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    queue_push_duration_in_millis: {
-                      data: [
-                        [ 1516131120000, 13547 ],
-                        [ 1516131180000, 25073 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    queue_push_duration_in_millis_per_event: {
-                      data: [
-                        [ 1516131120000, 13.547 ],
-                        [ 1516131180000, 12.5365 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    }
-                  }
-                },
-                {
-                  config_name: 'stdout',
-                  id: 'mystdout',
-                  type: 'plugin',
-                  plugin_type: 'output',
-                  stats: {
-                    duration_in_millis: {
-                      data: [
-                        [ 1516131120000, 15 ],
-                        [ 1516131180000, 20 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_in: {
-                      data: [
-                        [ 1516131120000, 1000 ],
-                        [ 1516131180000, 2000 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_out: {
-                      data: [
-                        [ 1516131120000, 1000 ],
-                        [ 1516131180000, 2000 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_in_per_millisecond: {
-                      data: [
-                        [1516131120000, 0.03333333333333333],
-                        [1516131180000, 0.06666666666666667]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    events_out_per_millisecond: {
-                      data: [
-                        [ 1516131120000, 0.03333333333333333 ],
-                        [ 1516131180000, 0.06666666666666667 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    millis_per_event: {
-                      data: [
-                        [ 1516131120000, 0.015 ],
-                        [ 1516131180000, 0.01 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    },
-                    percent_of_total_processor_duration: {
-                      data: [
-                        [ 1516131120000, 0.0000009431141225932671 ],
-                        [ 1516131180000, 0.0000012536232846986 ]
-                      ],
-                      timeRange: {
-                        min: 1516131138639,
-                        max: 1516135440463
-                      }
-                    }
-                  }
+          graph: {
+            vertices: [
+              {
+                config_name: 'stdin',
+                id: 'mystdin',
+                type: 'plugin',
+                plugin_type: 'input',
+                stats: {
+                  events_out_per_millisecond: 0.03333333333333333,
+                  millis_per_event: 0
                 }
-              ],
-              edges: [
-                {
-                  id: 'c56369ba2e160c8add43e8f105ca17c374b27f4b4627ea4566f066b0ead0bcc7',
-                  from: 'mystdin',
-                  to: '__QUEUE__',
-                  type: 'plain'
-                },
-                {
-                  id: '8a5222282b023399a14195011f2a14aa54a4d97810cd9e0a63c5cd98856bb70f',
-                  from: '__QUEUE__',
-                  to: 'mystdout',
-                  type: 'plain'
+              },
+              {
+                config_name: 'stdout',
+                id: 'mystdout',
+                type: 'plugin',
+                plugin_type: 'output',
+                stats: {
+                  events_in_per_millisecond: 0.03333333333333333,
+                  events_out_per_millisecond: 0.03333333333333333,
+                  millis_per_event: 0.015,
+                  percent_of_total_processor_duration: 0.0000009431141225932671
                 }
-              ]
-            },
-            plugins: []
+              }
+            ],
+            edges: [
+              {
+                id: 'c56369ba2e160c8add43e8f105ca17c374b27f4b4627ea4566f066b0ead0bcc7',
+                from: 'mystdin',
+                to: '__QUEUE__',
+                type: 'plain'
+              },
+              {
+                id: '8a5222282b023399a14195011f2a14aa54a4d97810cd9e0a63c5cd98856bb70f',
+                from: '__QUEUE__',
+                to: 'mystdout',
+                type: 'plain'
+              }
+            ]
           },
-          workers: 1
-        }
+          plugins: []
+        },
+        workers: 1
       });
     });
   });
