@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config as barChartConfig } from './bar_chart_plugin';
-import { ViewModel } from './public/lib';
+import { config as barChartConfig } from '../bar_chart_plugin';
+import { ViewModel } from './common/lib';
 
 export interface PanelComponentProps<S extends ViewModel = ViewModel> {
   viewModel: S;

@@ -16,14 +16,14 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, ViewModel } from '../../lib';
+import { initialState, ViewModel } from '../../common/lib';
 
 import 'brace/ext/language_tools';
 import 'brace/mode/javascript';
 import 'brace/snippets/javascript';
 import 'brace/theme/github';
 
-import { registry } from '../../../editor_plugin_registry';
+import { registry } from '../../editor_plugin_registry';
 
 type Action =
   | { type: 'loaded'; time: Date }

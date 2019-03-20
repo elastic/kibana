@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { EditorPlugin, PanelComponentProps } from '../editor_plugin_registry';
-import { columnSummary } from '../public/components/config_editor';
-import { IndexPatternPanel } from '../public/components/index_pattern_panel';
-import { Axis, selectColumn, ViewModel } from '../public/lib';
+import { columnSummary } from '../public/common/components/config_panel';
+import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
+import { Axis, selectColumn, ViewModel } from '../public/common/lib';
+import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
 interface BarChartVisState extends ViewModel {
   xAxis: Axis;
