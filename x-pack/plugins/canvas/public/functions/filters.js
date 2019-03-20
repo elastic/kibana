@@ -16,6 +16,14 @@ export const filters = () => ({
   context: {
     types: ['null'],
   },
+  args: {
+    group: {
+      aliases: ['_'],
+      types: ['string'],
+      help: 'The name of the filter group to use',
+      multi: true,
+    },
+  },
   help: 'Collect element filters on the workpad, usually to provide them to a data source',
   fn: () => {
     const filterExpression = getGlobalFilterExpression(getState());
