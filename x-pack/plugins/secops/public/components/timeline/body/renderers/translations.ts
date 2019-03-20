@@ -108,3 +108,7 @@ export const WITH_RESULT = i18n.translate('xpack.secops.auditd.loggedin.withResu
 export const EXECUTED = i18n.translate('xpack.secops.auditd.executed.executedDescription', {
   defaultMessage: 'executed',
 });
+
+export const STARTED_AT = i18n.translate('xpack.secops.auditd.endedSession.startedAtDescription', {
+  defaultMessage: 'started at',
+});

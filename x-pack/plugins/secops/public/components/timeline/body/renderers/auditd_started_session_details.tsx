@@ -18,17 +18,17 @@ import { DraggableBadge } from '../../../draggables';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 import { SourceDest } from './source_dest_ip';
 
+import * as i18n from './translations';
+
 const Details = styled.div`
-  margin-left: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0px 10px 10px;
 `;
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-export const AuditdStartedSessionLine = pure<{
+interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
@@ -39,7 +39,9 @@ export const AuditdStartedSessionLine = pure<{
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
-}>(
+}
+
+export const AuditdStartedSessionLine = pure<Props>(
   ({
     id,
     hostName,
@@ -53,7 +55,7 @@ export const AuditdStartedSessionLine = pure<{
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>Session</TokensFlexItem>
+      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-ended-session-${id}`}
@@ -74,7 +76,7 @@ export const AuditdStartedSessionLine = pure<{
       <TokensFlexItem grow={false}>
         <DraggableBadge id={`auditd-ended-session-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
-      {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
+      {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-ended-session-${id}`}
@@ -83,7 +85,7 @@ export const AuditdStartedSessionLine = pure<{
           iconType="folderOpen"
         />
       </TokensFlexItem>
-      {processExecutable != null && <TokensFlexItem grow={false}>started at</TokensFlexItem>}
+      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.STARTED_AT}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-ended-session-${id}`}
