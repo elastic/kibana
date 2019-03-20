@@ -20,7 +20,7 @@ import {
 describe('AuditdStartedSessionDetails', () => {
   describe('rendering', () => {
     test('it renders the default AuditdStartedSessionDetails', () => {
-      // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+      // I cannot and do not want to use the BrowserFields mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallowWithIntl(
         <TestProviders>
