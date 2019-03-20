@@ -6,7 +6,7 @@
 
 const ancestorElement = element => {
   if (!element) {
-    return element;
+    return false;
   }
   // IE11 has no classList on SVG elements, but we're not interested in SVG elements
   do {
@@ -127,7 +127,6 @@ const handleMouseDown = (commit, e, isEditable) => {
 export const eventHandlers = {
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable),
-  onKeyDown: props => () => props.commit('keyboardEvent'), // dummy event
   onWheel: props => e => handleWheel(props.commit, e, props.isEditable),
   resetHandler: () => () => resetHandler(),
 };
