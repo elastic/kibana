@@ -160,76 +160,39 @@ describe('get_pipeline', () => {
       };
 
       statsAggregation = {
-        timeseriesStats: [
-          {
-            key: { time_bucket: 1516131120000 },
-            pipelines: {
-              scoped: {
-                vertices: {
-                  vertex_id: {
-                    buckets: [
-                      {
-                        key: 'mystdout',
-                        events_in_total: { value: 1000 },
-                        events_out_total: { value: 1000 },
-                        duration_in_millis_total: { value: 15 },
-                        queue_push_duration_in_millis_total: { value: 0 }
-                      },
-                      {
-                        key: 'mystdin',
-                        events_in_total: { value: 0 },
-                        events_out_total: { value: 1000 },
-                        duration_in_millis_total: { value: 0 },
-                        queue_push_duration_in_millis_total: { value: 13547 }
-                      }
-                    ]
-                  }
-                },
-                total_processor_duration_stats: {
-                  count: 276,
-                  min: 0,
-                  max: 15904756,
-                  avg: 6591773.384057971,
-                  sum: 1819329454
+        aggregations: {
+          pipelines: {
+            scoped: {
+              vertices: {
+                vertex_id: {
+                  buckets: [
+                    {
+                      key: 'mystdout',
+                      events_in_total: { value: 1000 },
+                      events_out_total: { value: 1000 },
+                      duration_in_millis_total: { value: 15 },
+                      queue_push_duration_in_millis_total: { value: 0 }
+                    },
+                    {
+                      key: 'mystdin',
+                      events_in_total: { value: 0 },
+                      events_out_total: { value: 1000 },
+                      duration_in_millis_total: { value: 0 },
+                      queue_push_duration_in_millis_total: { value: 13547 }
+                    }
+                  ]
                 }
-              }
-            }
-          },
-          {
-            key: { time_bucket: 1516131180000 },
-            pipelines: {
-              scoped: {
-                vertices: {
-                  vertex_id: {
-                    buckets: [
-                      {
-                        key: 'mystdout',
-                        events_in_total: { value: 2000 },
-                        events_out_total: { value: 2000 },
-                        duration_in_millis_total: { value: 20 },
-                        queue_push_duration_in_millis_total: { value: 0 }
-                      },
-                      {
-                        key: 'mystdin',
-                        events_in_total: { value: 0 },
-                        events_out_total: { value: 2000 },
-                        duration_in_millis_total: { value: 0 },
-                        queue_push_duration_in_millis_total: { value: 25073 }
-                      }
-                    ]
-                  }
-                },
-                total_processor_duration_stats: {
-                  count: 276,
-                  min: 0,
-                  max: 15953756,
-                  avg: 6591773.384057971,
-                  sum: 1819329454
-                }
+              },
+              total_processor_duration_stats: {
+                count: 276,
+                min: 0,
+                max: 15904756,
+                avg: 6591773.384057971,
+                sum: 1819329454
               }
             }
           }
-        ]
+        }
       };
 
       version = {
