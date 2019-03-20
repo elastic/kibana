@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] = `
+exports[`auditAcquiredCredsRowRenderer renders correctly against snapshot 1`] = `
 <span>
   <styled.div>
     <span>
@@ -13,18 +13,18 @@ exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] 
         browserFields={Object {}}
         data={
           Object {
-            "_id": "25",
+            "_id": "24",
             "auditd": Object {
               "data": Object {
                 "acct": "root",
-                "op": "PAM:session_open",
+                "op": "PAM:setcred",
                 "terminal": "cron",
               },
               "result": "success",
-              "session": "2908",
+              "session": "unset",
               "summary": Object {
                 "actor": Object {
-                  "primary": "root",
+                  "primary": "unset",
                   "secondary": "root",
                 },
                 "how": "/usr/sbin/cron",
@@ -39,7 +39,7 @@ exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] 
             },
             "destination": null,
             "event": Object {
-              "action": "started-session",
+              "action": "acquired-credentials",
               "category": "user-login",
               "dataset": null,
               "id": null,
@@ -48,9 +48,13 @@ exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] 
             },
             "geo": null,
             "host": Object {
-              "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
-              "ip": null,
-              "name": "siem-kibana",
+              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "ip": Array [
+                "46.101.3.136",
+                "10.16.0.5",
+                "fe80::4066:42ff:fe19:b3b9",
+              ],
+              "name": "zeek-london",
             },
             "http": null,
             "network": null,
@@ -58,14 +62,14 @@ exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] 
               "args": null,
               "executable": "/usr/sbin/cron",
               "name": null,
-              "pid": 725,
+              "pid": 9592,
               "ppid": null,
               "title": null,
               "working_directory": null,
             },
             "source": null,
             "suricata": null,
-            "timestamp": "2019-03-19T01:17:01.336Z",
+            "timestamp": "2019-03-18T23:17:01.645Z",
             "url": null,
             "user": Object {
               "name": "root",

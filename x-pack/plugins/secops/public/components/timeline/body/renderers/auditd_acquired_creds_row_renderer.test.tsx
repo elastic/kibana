@@ -14,21 +14,21 @@ import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
-import { auditdStartedSessionRowRenderer } from '.';
+import { auditAcquiredCredsRowRenderer } from '.';
 
-describe('auditdStartedSessionRowRenderer', () => {
+describe('auditAcquiredCredsRowRenderer', () => {
   let nonAuditd: Ecs;
   let auditd: Ecs;
 
   beforeEach(() => {
     nonAuditd = cloneDeep(mockEcsData[0]);
-    auditd = cloneDeep(mockEcsData[24]);
+    auditd = cloneDeep(mockEcsData[23]);
   });
 
   test('renders correctly against snapshot', () => {
     // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
     const browserFields: BrowserFields = {};
-    const children = auditdStartedSessionRowRenderer.renderRow({
+    const children = auditAcquiredCredsRowRenderer.renderRow({
       browserFields,
       data: auditd,
       width: 100,
@@ -40,22 +40,22 @@ describe('auditdStartedSessionRowRenderer', () => {
   });
 
   test('should return false if not a auditd datum', () => {
-    expect(auditdStartedSessionRowRenderer.isInstance(nonAuditd)).toBe(false);
+    expect(auditAcquiredCredsRowRenderer.isInstance(nonAuditd)).toBe(false);
   });
 
   test('should return true if it is a auditd datum', () => {
-    expect(auditdStartedSessionRowRenderer.isInstance(auditd)).toBe(true);
+    expect(auditAcquiredCredsRowRenderer.isInstance(auditd)).toBe(true);
   });
 
   test('should return false when action is set to some other value', () => {
     auditd.event != null
       ? (auditd.event.action = 'some other value')
       : expect(auditd.event).toBeDefined();
-    expect(auditdStartedSessionRowRenderer.isInstance(auditd)).toBe(false);
+    expect(auditAcquiredCredsRowRenderer.isInstance(auditd)).toBe(false);
   });
 
   test('should render children normally if it does not have a auditd object', () => {
-    const children = auditdStartedSessionRowRenderer.renderRow({
+    const children = auditAcquiredCredsRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: nonAuditd,
       width: 100,
@@ -70,7 +70,7 @@ describe('auditdStartedSessionRowRenderer', () => {
   });
 
   test('should render a auditd row', () => {
-    const children = auditdStartedSessionRowRenderer.renderRow({
+    const children = auditAcquiredCredsRowRenderer.renderRow({
       browserFields: mockBrowserFields,
       data: auditd,
       width: 100,
@@ -82,7 +82,7 @@ describe('auditdStartedSessionRowRenderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children Session2908root@siem-kibanastarted/usr/sbin/cron'
+      'some children Sessionunsetroot@zeek-londonacquired credentials to/usr/sbin/cron'
     );
   });
 });

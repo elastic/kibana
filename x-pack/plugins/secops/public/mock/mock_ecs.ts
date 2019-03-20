@@ -968,6 +968,66 @@ export const mockEcsData: Ecs[] = [
   },
   {
     _id: '24',
+    timestamp: '2019-03-18T23:17:01.645Z',
+    event: {
+      action: 'acquired-credentials',
+      severity: null,
+      module: 'auditd',
+      category: 'user-login',
+      id: null,
+      dataset: null,
+    },
+    auditd: {
+      result: 'success',
+      session: 'unset',
+      data: {
+        acct: 'root',
+        terminal: 'cron',
+        op: 'PAM:setcred',
+      },
+      summary: {
+        actor: {
+          primary: 'unset',
+          secondary: 'root',
+        },
+        object: {
+          primary: 'cron',
+          secondary: null,
+          type: 'user-session',
+        },
+        how: '/usr/sbin/cron',
+        message_type: null,
+        sequence: null,
+      },
+    },
+    host: {
+      id: '7c21f5ed03b04d0299569d221fe18bbc',
+      name: 'zeek-london',
+      ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
+    },
+    source: null,
+    destination: null,
+    geo: null,
+    suricata: null,
+    network: null,
+    http: null,
+    url: null,
+    user: {
+      name: 'root',
+    },
+    process: {
+      pid: 9592,
+      name: null,
+      ppid: null,
+      args: null,
+      executable: '/usr/sbin/cron',
+      title: null,
+      working_directory: null,
+    },
+    zeek: null,
+  },
+  {
+    _id: '25',
     timestamp: '2019-03-19T01:17:01.336Z',
     event: {
       action: 'started-session',

@@ -89,7 +89,11 @@ export const AuditdDisposedLine = pure<Props>(
           value={hostName}
         />
       </TokensFlexItem>
-      {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
+      {workingDirectory != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.IN}
+        </TokensFlexItem>
+      )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           contextId="auditd-disposed-creds"
