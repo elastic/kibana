@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { PanelState } from '../selectors';
-import { GridData, Panel } from '../types';
+import { PanelState, Pre61PanelState } from '../selectors';
+import { GridData } from '../types';
 
 const PANEL_HEIGHT_SCALE_FACTOR = 5;
 const PANEL_HEIGHT_SCALE_FACTOR_WITH_MARGINS = 4;
@@ -35,15 +35,7 @@ export interface SemanticVersion {
 
 export class PanelUtils {
   // 6.1 switched from gridster to react grid. React grid uses different variables for tracking layout
-  public static convertPanelDataPre_6_1(panel: {
-    panelIndex: any; // earlier versions allowed panelIndex to be a number or a string
-    gridData: GridData;
-    col: number;
-    row: number;
-    size_x: number;
-    size_y: number;
-    version: string;
-  }): Partial<PanelState> {
+  public static convertPanelDataPre_6_1(panel: Pre61PanelState): PanelState {
     ['col', 'row'].forEach(key => {
       if (!_.has(panel, key)) {
         throw new Error(
@@ -56,21 +48,20 @@ export class PanelUtils {
       }
     });
 
-    panel.gridData = {
-      x: panel.col - 1,
-      y: panel.row - 1,
-      w: panel.size_x || DEFAULT_PANEL_WIDTH,
-      h: panel.size_y || DEFAULT_PANEL_HEIGHT,
-      i: panel.panelIndex.toString(),
+    return {
+      gridData: {
+        x: panel.col - 1,
+        y: panel.row - 1,
+        w: panel.size_x || DEFAULT_PANEL_WIDTH,
+        h: panel.size_y || DEFAULT_PANEL_HEIGHT,
+        i: panel.panelIndex.toString(),
+      },
+      version: chrome.getKibanaVersion(),
+      panelIndex: panel.panelIndex.toString(),
+      id: panel.id,
+      type: panel.type,
+      embeddableConfig: panel.embeddableConfig,
     };
-    panel.version = chrome.getKibanaVersion();
-    panel.panelIndex = panel.panelIndex.toString();
-    delete panel.size_x;
-    delete panel.size_y;
-    delete panel.row;
-    delete panel.col;
-
-    return panel;
   }
 
   // 6.3 changed the panel dimensions to allow finer control over sizing

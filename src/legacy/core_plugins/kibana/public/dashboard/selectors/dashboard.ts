@@ -41,7 +41,7 @@ import {
 export const getPanels = (dashboard: DashboardState): Readonly<PanelStateMap> => dashboard.panels;
 
 export const getPanel = (dashboard: DashboardState, panelId: PanelId): PanelState =>
-  getPanels(dashboard)[panelId];
+  getPanels(dashboard)[panelId] as PanelState;
 
 export const getPanelType = (dashboard: DashboardState, panelId: PanelId): string =>
   getPanel(dashboard, panelId).type;

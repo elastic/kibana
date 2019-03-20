@@ -22,12 +22,7 @@ import { Dispatch } from 'redux';
 import { updatePanels } from '../actions';
 import { getPanels, getUseMargins, getViewMode } from '../selectors';
 import { DashboardViewMode, PanelStateMap } from '../selectors/types';
-import { Panel } from '../types';
 import { DashboardGrid } from './dashboard_grid';
-
-interface PanelMap {
-  [panelId: string]: Panel;
-}
 
 interface DashboardGridContainerStateProps {
   panels: PanelStateMap;

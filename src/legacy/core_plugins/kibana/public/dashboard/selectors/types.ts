@@ -59,8 +59,21 @@ export interface EmbeddableReduxState {
   readonly lastReloadRequestTime: number;
 }
 
+export interface Pre61PanelState {
+  size_x: number;
+  size_y: number;
+  row: number;
+  col: number;
+  panelIndex: any; // earlier versions allowed this to be number or string
+  id: string;
+  type: string;
+  // Embeddableconfig didn't actually exist on older panel states but `migrate_app_state.js` handles
+  // stuffing it on.
+  embeddableConfig: any;
+}
+
 export interface PanelStateMap {
-  [panelId: string]: PanelState;
+  [panelId: string]: PanelState | Pre61PanelState;
 }
 
 export interface EmbeddablesMap {

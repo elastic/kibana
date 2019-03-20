@@ -37,7 +37,7 @@ import {
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from '../panel';
 import { PanelUtils } from '../panel/panel_utils';
-import { PanelStateMap } from '../selectors/types';
+import { PanelState, PanelStateMap, Pre61PanelState } from '../selectors/types';
 import { GridData } from '../types';
 
 let lastValidGridSize = 0;
@@ -116,8 +116,6 @@ function ResponsiveGrid({
 const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
-import { Panel } from '../types';
-
 interface Props extends ReactIntl.InjectedIntlProps {
   panels: PanelStateMap;
   getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
@@ -131,10 +129,6 @@ interface State {
   focusedPanelIndex?: string;
   isLayoutInvalid: boolean;
   layout?: GridData[];
-}
-
-interface PanelMap {
-  [panelId: string]: Panel;
 }
 
 interface PanelLayout extends Layout {
@@ -182,19 +176,20 @@ class DashboardGridUi extends React.Component<Props, State> {
   public buildLayoutFromPanels(): GridData[] {
     return _.map(this.props.panels, panel => {
       // panel version numbers added in 6.1. Any panel without version number is assumed to be 6.0.0
-      const panelVersion = panel.version
-        ? PanelUtils.parseVersion(panel.version)
-        : PanelUtils.parseVersion('6.0.0');
+      const panelVersion =
+        'version' in panel
+          ? PanelUtils.parseVersion(panel.version)
+          : PanelUtils.parseVersion('6.0.0');
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 1)) {
-        PanelUtils.convertPanelDataPre_6_1(panel);
+        panel = PanelUtils.convertPanelDataPre_6_1(panel as Pre61PanelState);
       }
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel, this.props.useMargins);
+        PanelUtils.convertPanelDataPre_6_3(panel as PanelState, this.props.useMargins);
       }
 
-      return panel.gridData;
+      return (panel as PanelState).gridData;
     });
   }
 
@@ -245,7 +240,7 @@ class DashboardGridUi extends React.Component<Props, State> {
     const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key]);
+    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key] as PanelState);
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
