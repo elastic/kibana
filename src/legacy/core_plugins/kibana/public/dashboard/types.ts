@@ -24,14 +24,3 @@ export interface GridData {
   y: number;
   i: string;
 }
-
-export interface Panel {
-  panelIndex: string; // earlier versions allowed panelIndex to be a number or a string
-  gridData: GridData;
-  col: number;
-  row: number;
-  size_x: number;
-  size_y: number;
-  version: string;
-  type: string;
-}
