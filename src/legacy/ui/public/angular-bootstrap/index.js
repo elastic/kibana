@@ -30,7 +30,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.modal',
   'ui.bootstrap.pagination',
   'ui.bootstrap.tooltip',
-  'ui.bootstrap.tabs',
   'ui.bootstrap.timepicker',
   'ui.bootstrap.typeahead'
 ]);
@@ -43,8 +42,6 @@ angular.module('ui.bootstrap.tpls', [
   'template/pagination/pagination.html',
   'template/tooltip/tooltip-html-unsafe-popup.html',
   'template/tooltip/tooltip-popup.html',
-  'template/tabs/tab.html',
-  'template/tabs/tabset.html',
   'template/timepicker/timepicker.html',
   'template/typeahead/typeahead-match.html',
   'template/typeahead/typeahead-popup.html'
@@ -56,7 +53,6 @@ import './dropdown/dropdown';
 import './modal/modal';
 import './pagination/pagination';
 import './position/position';
-import './tabs/tabs';
 import './timepicker/timepicker';
 import './tooltip/tooltip';
 import './transition/transition';
@@ -102,18 +98,6 @@ import tooltipPopup from './tooltip/tooltip-popup.html';
 
 angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);
-}]);
-
-import tab from './tabs/tab.html';
-
-angular.module('template/tabs/tab.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tab.html', tab);
-}]);
-
-import tabset from './tabs/tabset.html';
-
-angular.module('template/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tabset.html', tabset);
 }]);
 
 import timepicker from './timepicker/timepicker.html';

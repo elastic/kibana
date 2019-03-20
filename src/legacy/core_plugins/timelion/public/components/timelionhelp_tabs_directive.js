@@ -17,8 +17,18 @@
  * under the License.
  */
 
-/**
- * Use * syntax so that these exports do not break when internal
- * types are stripped.
- */
-export * from './core_service';
+import 'ngreact';
+
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/timelion', ['react']);
+
+import { TimelionHelpTabs } from './timelionhelp_tabs';
+
+module.directive('timelionHelpTabs', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(TimelionHelpTabs),
+    undefined,
+    { restrict: 'E' }
+  );
+});
