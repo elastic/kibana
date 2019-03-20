@@ -30,6 +30,7 @@ import advancedToggleHtml from './advanced_toggle.html';
 import './agg_param';
 import aggParamsTemplate from './agg_params.html';
 import aggSelectHtml from './agg_select.html';
+import { groupAggregationsBy } from './default_editor_utils';
 
 uiModules
   .get('app/visualize')
@@ -154,8 +155,9 @@ uiModules
               // if field param exists, compute allowed fields
               if (param.type === 'field') {
                 const availableFields = param.getAvailableFields($scope.agg.getIndexPattern().fields);
-                fields = $scope.indexedFields = $aggParamEditorsScope[`${param.name}Options`] =
+                fields = $aggParamEditorsScope[`${param.name}Options`] =
                   aggTypeFieldFilters.filter(availableFields, param.type, $scope.agg, $scope.vis);
+                $scope.indexedFields = groupAggregationsBy(fields, 'type', 'displayName');
               }
 
               if (fields) {
@@ -206,6 +208,7 @@ uiModules
 
           if (param.editorComponent) {
             attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
+            attrs['indexed-fields'] = 'indexedFields';
             // The form should interact with reactified components as well.
             // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
             // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.

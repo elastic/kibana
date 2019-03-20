@@ -24,7 +24,13 @@ interface AggParamEditorProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
   value: T;
+  indexedFields?: any[];
   setValue(value: T): void;
 }
 
-export { AggParamEditorProps };
+interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
+  isInvalid: boolean;
+  setTouched: () => void;
+}
+
+export { AggParamEditorProps, AggParamRequiredEditorProps };

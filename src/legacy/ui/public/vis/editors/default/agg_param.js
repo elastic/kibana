@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, noop } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -26,10 +26,13 @@ uiModules
   .get('app/visualize')
   .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
     ['agg', { watchDepth: 'collection' }],
+    ['indexedFields', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
+    ['setTouched', { watchDepth: 'reference' }],
     'value',
+    'isInvalid'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -54,6 +57,9 @@ uiModules
             agg-param="aggParam"
             on-change="onChange"
             value="paramValue"
+            is-invalid="isInvalid"
+            set-touched="setTouched"
+            indexed-fields="indexedFields"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -64,6 +70,7 @@ uiModules
           $scope.$bind('aggParam', attr.aggParam);
           $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
+          $scope.$bind('indexedFields', attr.indexedFields);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.config = config;
@@ -81,10 +88,17 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
+
+              if(ngModelCtrl) {
+                ngModelCtrl.$$runValidators(value, null, noop);
+              }
             }, true);
           }
 
           $scope.onChange = (value) => {
+            if ($scope.aggParam.required && !value) {
+              return;
+            }
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
@@ -93,6 +107,19 @@ uiModules
               ngModelCtrl.$setDirty();
             }
           };
+
+          $scope.setTouched = () => {
+            ngModelCtrl.$setTouched();
+            $scope.isInvalid = !$scope.paramValue;
+          };
+
+          if(ngModelCtrl && $scope.aggParam.name === 'field') {
+            ngModelCtrl.$validators.fieldSelect = (modelValue) => {
+              $scope.isInvalid = ngModelCtrl.$touched && !modelValue;
+
+              return !!modelValue;
+            };
+          }
         }
       }
     };
