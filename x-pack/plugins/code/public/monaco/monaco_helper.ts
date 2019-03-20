@@ -62,6 +62,7 @@ export class MonacoHelper {
           folding: true,
           scrollBeyondLastLine: false,
           renderIndentGuides: false,
+          automaticLayout: false,
         },
         {
           textModelService: new TextModelResolverService(monaco),

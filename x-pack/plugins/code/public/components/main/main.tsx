@@ -28,6 +28,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: row;
   flex-grow: 1;
+  height: 100%;
 `;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
