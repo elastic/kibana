@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDetails 1`] = `
+exports[`AuditDisposedCredsDetails rendering it renders the default AuditDisposedCredsDetails 1`] = `
 <Component
   intl={
     Object {
@@ -109,15 +109,15 @@ exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDe
     browserFields={Object {}}
     data={
       Object {
-        "_id": "21",
+        "_id": "22",
         "auditd": Object {
           "data": Object {
-            "acct": null,
-            "op": "login",
-            "terminal": "/dev/pts/0",
+            "acct": "alice",
+            "op": "PAM:setcred",
+            "terminal": "ssh",
           },
           "result": "success",
-          "session": "14",
+          "session": "340",
           "summary": Object {
             "actor": Object {
               "primary": "alice",
@@ -126,7 +126,7 @@ exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDe
             "how": "/usr/sbin/sshd",
             "message_type": null,
             "object": Object {
-              "primary": "/dev/pts/0",
+              "primary": "ssh",
               "secondary": "8.42.77.171",
               "type": "user-session",
             },
@@ -135,7 +135,7 @@ exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDe
         },
         "destination": null,
         "event": Object {
-          "action": "logged-in",
+          "action": "disposed-credentials",
           "category": "user-login",
           "dataset": null,
           "id": null,
@@ -144,13 +144,13 @@ exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDe
         },
         "geo": null,
         "host": Object {
-          "id": "7c21f5ed03b04d0299569d221fe18bbc",
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
           "ip": Array [
-            "46.101.3.136",
-            "10.16.0.5",
-            "fe80::4066:42ff:fe19:b3b9",
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
           ],
-          "name": "zeek-london",
+          "name": "suricata-bangalore",
         },
         "http": null,
         "network": null,
@@ -158,17 +158,14 @@ exports[`AuditdLoggedinDetails rendering it renders the default AuditdLoggedinDe
           "args": null,
           "executable": "/usr/sbin/sshd",
           "name": null,
-          "pid": 17471,
+          "pid": 21202,
           "ppid": null,
           "title": null,
           "working_directory": null,
         },
-        "source": Object {
-          "ip": "8.42.77.171",
-          "port": null,
-        },
+        "source": null,
         "suricata": null,
-        "timestamp": "2019-03-14T22:30:25.527Z",
+        "timestamp": "2019-03-13T03:35:21.614Z",
         "url": null,
         "user": Object {
           "name": "root",

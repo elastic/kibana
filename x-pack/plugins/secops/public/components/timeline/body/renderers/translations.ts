@@ -93,3 +93,10 @@ export const ACQUIRED_CREDENTIALS_TO = i18n.translate(
     defaultMessage: 'acquired credentials to',
   }
 );
+
+export const DISPOSED_CREDENTIALS_TO = i18n.translate(
+  'xpack.secops.auditd.disposed.credentialsDescription',
+  {
+    defaultMessage: 'disposed credentials to',
+  }
+);

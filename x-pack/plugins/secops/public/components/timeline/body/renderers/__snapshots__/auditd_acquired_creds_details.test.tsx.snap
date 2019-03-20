@@ -109,25 +109,25 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
     browserFields={Object {}}
     data={
       Object {
-        "_id": "24",
+        "_id": "22",
         "auditd": Object {
           "data": Object {
-            "acct": "root",
+            "acct": "alice",
             "op": "PAM:setcred",
-            "terminal": "cron",
+            "terminal": "ssh",
           },
           "result": "success",
-          "session": "unset",
+          "session": "340",
           "summary": Object {
             "actor": Object {
-              "primary": "unset",
-              "secondary": "root",
+              "primary": "alice",
+              "secondary": "alice",
             },
-            "how": "/usr/sbin/cron",
+            "how": "/usr/sbin/sshd",
             "message_type": null,
             "object": Object {
-              "primary": "cron",
-              "secondary": null,
+              "primary": "ssh",
+              "secondary": "8.42.77.171",
               "type": "user-session",
             },
             "sequence": null,
@@ -135,7 +135,7 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
         },
         "destination": null,
         "event": Object {
-          "action": "acquired-credentials",
+          "action": "disposed-credentials",
           "category": "user-login",
           "dataset": null,
           "id": null,
@@ -144,28 +144,28 @@ exports[`AuditAcquiredCredsDetails rendering it renders the default AuditAcquire
         },
         "geo": null,
         "host": Object {
-          "id": "7c21f5ed03b04d0299569d221fe18bbc",
+          "id": "0a63559c1acf4c419d979c4b4d8b83ff",
           "ip": Array [
-            "46.101.3.136",
-            "10.16.0.5",
-            "fe80::4066:42ff:fe19:b3b9",
+            "139.59.11.147",
+            "10.47.0.5",
+            "fe80::ec0b:1bff:fe29:80bd",
           ],
-          "name": "zeek-london",
+          "name": "suricata-bangalore",
         },
         "http": null,
         "network": null,
         "process": Object {
           "args": null,
-          "executable": "/usr/sbin/cron",
+          "executable": "/usr/sbin/sshd",
           "name": null,
-          "pid": 9592,
+          "pid": 21202,
           "ppid": null,
           "title": null,
           "working_directory": null,
         },
         "source": null,
         "suricata": null,
-        "timestamp": "2019-03-18T23:17:01.645Z",
+        "timestamp": "2019-03-13T03:35:21.614Z",
         "url": null,
         "user": Object {
           "name": "root",

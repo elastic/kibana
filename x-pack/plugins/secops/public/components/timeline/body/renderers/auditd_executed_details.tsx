@@ -16,9 +16,7 @@ import { DraggableBadge } from '../../../draggables';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
 const Details = styled.div`
-  margin-left: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0px 10px 10px;
 `;
 
 const TokensFlexItem = styled(EuiFlexItem)`
@@ -54,7 +52,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-loggedin-${id}`}
+            id={`auditd-executed-element-${id}`}
             field="auditd.session"
             value={session}
             iconType="number"
@@ -72,7 +70,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>
           <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>in</TokensFlexItem>
+        {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
             id={`auditd-executed-element-${id}`}

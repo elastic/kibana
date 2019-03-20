@@ -7,6 +7,7 @@
 import {
   NetworkDnsSortField,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowSortField,
   NetworkTopNFlowType,
 } from '../../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -22,6 +23,7 @@ export interface BasicQuery {
 
 export interface TopNFlowQuery extends BasicQuery {
   topNFlowType: NetworkTopNFlowType;
+  topNFlowSort: NetworkTopNFlowSortField;
   topNFlowDirection: NetworkTopNFlowDirection;
 }
 

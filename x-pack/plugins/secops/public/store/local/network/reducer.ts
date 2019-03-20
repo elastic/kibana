@@ -10,6 +10,7 @@ import {
   Direction,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
+  NetworkTopNFlowFields,
   NetworkTopNFlowType,
 } from '../../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
@@ -22,6 +23,7 @@ import {
   updateIsPtrIncluded,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
+  updateTopNFlowSort,
   updateTopNFlowType,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
@@ -34,6 +36,10 @@ export const initialNetworkState: NetworkState = {
     queries: {
       topNFlow: {
         limit: DEFAULT_TABLE_LIMIT,
+        topNFlowSort: {
+          field: NetworkTopNFlowFields.bytes,
+          direction: Direction.desc,
+        },
         topNFlowType: NetworkTopNFlowType.source,
         topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
       },
@@ -125,6 +131,19 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
+  .case(updateTopNFlowSort, (state, { topNFlowSort, networkType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        topNFlow: {
+          ...state[networkType].queries!.topNFlow,
+          topNFlowSort,
+        },
+      },
+    },
+  }))
   .case(updateTopNFlowType, (state, { topNFlowType, networkType }) => ({
     ...state,
     [networkType]: {
@@ -134,6 +153,10 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         topNFlow: {
           ...state[networkType].queries!.topNFlow,
           topNFlowType,
+          topNFlowSort: {
+            field: NetworkTopNFlowFields.bytes,
+            direction: Direction.desc,
+          },
         },
       },
     },
