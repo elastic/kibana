@@ -53,7 +53,7 @@ export interface ViewModel {
   queries: {
     [id: string]: QueryViewModel;
   };
-  visualizationType: string;
+  editorPlugin: string;
   title: string;
   [key: string]: any;
 }
@@ -96,7 +96,7 @@ export function initialState(): ViewModel {
         },
       },
     },
-    visualizationType: 'bar_chart',
+    editorPlugin: 'bar_chart',
     title: 'Sum of bytes over time',
     xAxis: {
       title: 'Sum of bytes',

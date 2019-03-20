@@ -22,14 +22,14 @@ function dataPanel({ viewModel }: PanelComponentProps<BarChartVisState>) {
 function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<BarChartVisState>) {
   return (
     <>
-      <div className="configEditor-axis">
-        <span className="configEditor-axis-title">Y-axis</span>
+      <div className="configPanel-axis">
+        <span className="configPanel-axis-title">Y-axis</span>
         {viewModel.yAxis.columns.map(col => (
           <span>{columnSummary(selectColumn(col, viewModel))}</span>
         ))}
       </div>
-      <div className="configEditor-axis">
-        <span className="configEditor-axis-title">X-axis</span>
+      <div className="configPanel-axis">
+        <span className="configPanel-axis-title">X-axis</span>
         {viewModel.xAxis.columns.map(col => (
           <span>{columnSummary(selectColumn(col, viewModel))}</span>
         ))}
@@ -39,7 +39,7 @@ function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<BarCh
 }
 
 function toExpression(viewState: BarChartVisState) {
-  // TODO prob. do this on an ASY object and stringify afterwards
+  // TODO prob. do this on an AST object and stringify afterwards
   return `esqueryast ${JSON.stringify(viewState.queries)} | bar_chart xAxisField=${JSON.stringify({
     xAxis: viewState.xAxis,
     yAxis: viewState.yAxis,

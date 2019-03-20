@@ -14,11 +14,11 @@ export const columnOperations: any = {
   date_histogram: {
     summarize(op: DateHistogramOperation) {
       return (
-        <div className="configEditor-summary">
-          <EuiIcon type="calendar" className="configEditor-summary-icon" />
-          <div className="configEditor-summary-text">
-            <strong className="configEditor-summary-title">Date histogram of</strong>
-            <span className="configEditor-summary-subtitle">{op.arg.field}</span>
+        <div className="configPanel-summary">
+          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Date histogram of</strong>
+            <span className="configPanel-summary-subtitle">{op.arg.field}</span>
           </div>
         </div>
       );
@@ -27,11 +27,11 @@ export const columnOperations: any = {
   sum: {
     summarize(op: SumOperation) {
       return (
-        <div className="configEditor-summary">
-          <EuiIcon type="number" className="configEditor-summary-icon" />
-          <div className="configEditor-summary-text">
-            <strong className="configEditor-summary-title">Sum of</strong>
-            <span className="configEditor-summary-subtitle">{op.arg}</span>
+        <div className="configPanel-summary">
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Sum of</strong>
+            <span className="configPanel-summary-subtitle">{op.arg}</span>
           </div>
         </div>
       );

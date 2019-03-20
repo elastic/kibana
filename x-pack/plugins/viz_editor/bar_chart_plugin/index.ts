@@ -10,4 +10,4 @@ import { registerPipeline } from './bar_chart_vis';
 // registerPipeline();
 
 // TODO register config instead
-export { config } from './bar_chart_config';
+export { config } from './bar_chart_plugin';

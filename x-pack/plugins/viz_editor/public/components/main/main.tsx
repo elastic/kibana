@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
 import { initialState, ViewModel } from '../../lib';
-import { IndexPatternPanel } from '../index_pattern_panel';
 
 import 'brace/ext/language_tools';
 import 'brace/mode/javascript';
@@ -34,6 +33,7 @@ type Action =
 function reducer(state: ViewModel, action: Action): ViewModel {
   switch (action.type) {
     case 'updateViewModel':
+      // TODO this is the place where we can hook in an undo/redo history later
       return action.newState;
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
@@ -43,7 +43,7 @@ function reducer(state: ViewModel, action: Action): ViewModel {
 export function Main() {
   const [state, dispatch] = useReducer(reducer, initialState());
 
-  const { ConfigPanel, DataPanel, toExpression } = registry.getByName(state.visualizationType);
+  const { ConfigPanel, DataPanel, toExpression } = registry.getByName(state.editorPlugin);
 
   const onChangeViewModel = (newState: ViewModel) => {
     dispatch({ type: 'updateViewModel', newState });
@@ -53,9 +53,9 @@ export function Main() {
 
   return (
     <EuiPage>
-      <EuiFlexItem grow={false}>
+      <EuiPageSideBar>
         <DataPanel viewModel={state} onChangeViewModel={onChangeViewModel} />
-      </EuiFlexItem>
+      </EuiPageSideBar>
       <EuiPageBody className="vzBody">
         <EuiPageContent>
           <EuiPageContentBody>
@@ -92,10 +92,10 @@ export function Main() {
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
-      <EuiFlexItem grow={false}>
+      <EuiPageSideBar>
         <ConfigPanel viewModel={state} onChangeViewModel={onChangeViewModel} />
         {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
-      </EuiFlexItem>
+      </EuiPageSideBar>
     </EuiPage>
   );
 }
