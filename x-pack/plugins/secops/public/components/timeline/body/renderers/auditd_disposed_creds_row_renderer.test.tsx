@@ -8,29 +8,29 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
+import { BrowserFields } from 'x-pack/plugins/secops/public/containers/source';
 
-import { BrowserFields } from '../../../../containers/source';
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
-import { auditdLoggedinRowRenderer } from '.';
+import { auditDisposedCredsRowRenderer } from '.';
 
-describe('auditd_loggedin_row_renderer', () => {
-  let nonAuditdExecuted: Ecs;
-  let auditdExecuted: Ecs;
+describe('auditDisposedCredsRowRenderer', () => {
+  let nonAuditd: Ecs;
+  let auditd: Ecs;
 
   beforeEach(() => {
-    nonAuditdExecuted = cloneDeep(mockEcsData[0]);
-    auditdExecuted = cloneDeep(mockEcsData[20]);
+    nonAuditd = cloneDeep(mockEcsData[0]);
+    auditd = cloneDeep(mockEcsData[21]);
   });
 
   test('renders correctly against snapshot', () => {
     // I cannot and do not want to use the BrowserFields mocks for the snapshot tests as they are too heavy
     const browserFields: BrowserFields = {};
-    const children = auditdLoggedinRowRenderer.renderRow({
+    const children = auditDisposedCredsRowRenderer.renderRow({
       browserFields,
-      data: auditdExecuted,
+      data: auditd,
       width: 100,
       children: <span>some children</span>,
     });
@@ -39,23 +39,25 @@ describe('auditd_loggedin_row_renderer', () => {
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
-  test('should return false if not a auditd executed datum', () => {
-    expect(auditdLoggedinRowRenderer.isInstance(nonAuditdExecuted)).toBe(false);
+  test('should return false if not a auditd datum', () => {
+    expect(auditDisposedCredsRowRenderer.isInstance(nonAuditd)).toBe(false);
   });
 
-  test('should return true if it is a auditd executed datum', () => {
-    expect(auditdLoggedinRowRenderer.isInstance(auditdExecuted)).toBe(true);
+  test('should return true if it is a auditd datum', () => {
+    expect(auditDisposedCredsRowRenderer.isInstance(auditd)).toBe(true);
   });
 
   test('should return false when action is set to some other value', () => {
-    auditdExecuted.event!.action = 'some other value';
-    expect(auditdLoggedinRowRenderer.isInstance(auditdExecuted)).toBe(false);
+    auditd.event != null
+      ? (auditd.event.action = 'some other value')
+      : expect(auditd.event).toBeDefined();
+    expect(auditDisposedCredsRowRenderer.isInstance(auditd)).toBe(false);
   });
 
   test('should render children normally if it does not have a auditd object', () => {
-    const children = auditdLoggedinRowRenderer.renderRow({
+    const children = auditDisposedCredsRowRenderer.renderRow({
       browserFields: mockBrowserFields,
-      data: nonAuditdExecuted,
+      data: nonAuditd,
       width: 100,
       children: <span>some children</span>,
     });
@@ -67,10 +69,10 @@ describe('auditd_loggedin_row_renderer', () => {
     expect(wrapper.text()).toEqual('some children');
   });
 
-  test('should render a auditd executed row', () => {
-    const children = auditdLoggedinRowRenderer.renderRow({
+  test('should render a auditd row', () => {
+    const children = auditDisposedCredsRowRenderer.renderRow({
       browserFields: mockBrowserFields,
-      data: auditdExecuted,
+      data: auditd,
       width: 100,
       children: <span>some children </span>,
     });
@@ -80,7 +82,7 @@ describe('auditd_loggedin_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children Session14alice@zeek-londonattempted a login via/usr/sbin/sshdwith resultsuccessSource8.42.77.171:--'
+      'some children Session340alice@suricata-bangaloredisposed credentials to/usr/sbin/sshd'
     );
   });
 });
