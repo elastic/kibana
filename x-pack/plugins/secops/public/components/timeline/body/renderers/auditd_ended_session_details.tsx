@@ -55,8 +55,10 @@ export const AuditdEndedSessionLine = pure<Props>(
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
+        {i18n.SESSION}
+      </TokensFlexItem>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-ended-session-${id}`}
           field="auditd.session"
@@ -64,7 +66,7 @@ export const AuditdEndedSessionLine = pure<Props>(
           iconType="number"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
           eventId={`auditd-ended-session-${id}`}
           userName={userName}
@@ -72,8 +74,12 @@ export const AuditdEndedSessionLine = pure<Props>(
           secondary={secondary}
         />
       </TokensFlexItem>
-      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {hostName != null && (
+        <TokensFlexItem grow={false} component="span">
+          @
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge eventId={`auditd-ended-session-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
@@ -86,7 +92,7 @@ export const AuditdEndedSessionLine = pure<Props>(
         />
       </TokensFlexItem>
       {processExecutable != null && <TokensFlexItem grow={false}>{i18n.ENDED_FROM}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-ended-session-${id}`}
           field="process.executable"
@@ -94,7 +100,7 @@ export const AuditdEndedSessionLine = pure<Props>(
           iconType="console"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
             eventId={`auditd-ended-session-${id}`}

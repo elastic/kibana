@@ -55,8 +55,10 @@ export const AuditdDisposedLine = pure<Props>(
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
+        {i18n.SESSION}
+      </TokensFlexItem>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-disposed-creds-${id}`}
           field="auditd.session"
@@ -64,7 +66,7 @@ export const AuditdDisposedLine = pure<Props>(
           iconType="number"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
           eventId={`auditd-disposed-creds-${id}`}
           userName={userName}
@@ -72,8 +74,12 @@ export const AuditdDisposedLine = pure<Props>(
           secondary={secondary}
         />
       </TokensFlexItem>
-      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {hostName != null && (
+        <TokensFlexItem grow={false} component="span">
+          @
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-disposed-creds-${id}`}
           field="host.name"
@@ -81,7 +87,7 @@ export const AuditdDisposedLine = pure<Props>(
         />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-disposed-creds-${id}`}
           field="process.working_directory"
@@ -90,9 +96,11 @@ export const AuditdDisposedLine = pure<Props>(
         />
       </TokensFlexItem>
       {processExecutable != null && (
-        <TokensFlexItem grow={false}>{i18n.DISPOSED_CREDENTIALS_TO}</TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.DISPOSED_CREDENTIALS_TO}
+        </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-disposed-creds-${id}`}
           field="process.executable"
@@ -100,7 +108,7 @@ export const AuditdDisposedLine = pure<Props>(
           iconType="console"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
             eventId={`auditd-disposed-creds-${id}`}

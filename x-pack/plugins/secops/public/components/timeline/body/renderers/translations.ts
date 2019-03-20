@@ -90,9 +90,22 @@ export const IN = i18n.translate('xpack.secops.auditd.disposed.inDescription', {
 export const ENDED_FROM = i18n.translate('xpack.secops.auditd.endedsession.endedFromDescription', {
   defaultMessage: 'ended from',
 });
+
 export const DISPOSED_CREDENTIALS_TO = i18n.translate(
   'xpack.secops.auditd.disposed.credentialsDescription',
   {
     defaultMessage: 'disposed credentials to',
   }
 );
+
+export const EXECUTED = i18n.translate('xpack.secops.auditd.executed.executedDescription', {
+  defaultMessage: 'executed',
+});
+
+export const ATTEMPTED_LOGIN = i18n.translate('xpack.secops.auditd.loggedin.attemptedDescription', {
+  defaultMessage: 'attempted a login via',
+});
+
+export const WITH_RESULT = i18n.translate('xpack.secops.auditd.loggedin.withResultDescription', {
+  defaultMessage: 'with result',
+});

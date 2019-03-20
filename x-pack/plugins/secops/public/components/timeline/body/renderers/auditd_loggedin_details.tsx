@@ -18,6 +18,8 @@ import { DraggableBadge } from '../../../draggables';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 import { SourceDest } from './source_dest_ip';
 
+import * as i18n from './translations';
+
 const Details = styled.div`
   margin: 10px 0px 10px 10px;
 `;
@@ -40,8 +42,10 @@ interface Props {
 export const AuditdLoggedinLine = pure<Props>(
   ({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>Session</TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
+        {i18n.SESSION}
+      </TokensFlexItem>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-loggedin-${id}`}
           field="auditd.session"
@@ -49,7 +53,7 @@ export const AuditdLoggedinLine = pure<Props>(
           iconType="number"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
           eventId={`auditd-loggedin-${id}`}
           userName={userName}
@@ -57,8 +61,12 @@ export const AuditdLoggedinLine = pure<Props>(
           secondary={secondary}
         />
       </TokensFlexItem>
-      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {hostName != null && (
+        <TokensFlexItem grow={false} component="span">
+          @
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-executed-element-${id}`}
           field="host.name"
@@ -66,9 +74,11 @@ export const AuditdLoggedinLine = pure<Props>(
         />
       </TokensFlexItem>
       {processExecutable != null && (
-        <TokensFlexItem grow={false}>attempted a login via</TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.ATTEMPTED_LOGIN}
+        </TokensFlexItem>
       )}
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-loggedin-${id}`}
           field="process.executable"
@@ -76,8 +86,12 @@ export const AuditdLoggedinLine = pure<Props>(
           iconType="console"
         />
       </TokensFlexItem>
-      {result != null && <TokensFlexItem grow={false}>with result</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {result != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.WITH_RESULT}
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           eventId={`auditd-loggedin-${id}`}
           field="auditd.result"

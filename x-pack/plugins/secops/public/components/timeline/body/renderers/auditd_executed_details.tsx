@@ -15,6 +15,8 @@ import { DraggableBadge } from '../../../draggables';
 
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 
+import * as i18n from './translations';
+
 const Details = styled.div`
   margin: 10px 0px 10px 10px;
 `;
@@ -51,8 +53,10 @@ export const AuditdExecutedCommandLine = pure<Props>(
   }) => (
     <Details>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-        <TokensFlexItem grow={false}>Session</TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
+          {i18n.SESSION}
+        </TokensFlexItem>
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             eventId={`auditd-executed-element-${id}`}
             field="auditd.session"
@@ -60,7 +64,7 @@ export const AuditdExecutedCommandLine = pure<Props>(
             iconType="number"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
           <PrimarySecondaryUserInfo
             eventId={`auditd-executed-element-${id}`}
             userName={userName}
@@ -68,16 +72,24 @@ export const AuditdExecutedCommandLine = pure<Props>(
             secondary={secondary}
           />
         </TokensFlexItem>
-        {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
+        {hostName != null && (
+          <TokensFlexItem grow={false} component="span">
+            @
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             eventId={`auditd-executed-element-${id}`}
             field="host.name"
             value={hostName}
           />
         </TokensFlexItem>
-        {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
+        {workingDirectory != null && (
+          <TokensFlexItem grow={false} component="span">
+            {i18n.IN}
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             eventId={`auditd-executed-element-${id}`}
             field="process.working_directory"
@@ -85,8 +97,12 @@ export const AuditdExecutedCommandLine = pure<Props>(
             iconType="folderOpen"
           />
         </TokensFlexItem>
-        {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
-        <TokensFlexItem grow={false}>
+        {processName != null && (
+          <TokensFlexItem grow={false} component="span">
+            {i18n.EXECUTED}
+          </TokensFlexItem>
+        )}
+        <TokensFlexItem grow={false} component="span">
           <DraggableBadge
             eventId={`auditd-executed-element-${id}`}
             field="process.name"
@@ -94,7 +110,7 @@ export const AuditdExecutedCommandLine = pure<Props>(
             iconType="console"
           />
         </TokensFlexItem>
-        <TokensFlexItem grow={false}>
+        <TokensFlexItem grow={false} component="span">
           {args !== '' && (
             <DraggableBadge
               eventId={`auditd-executed-element-${id}`}
