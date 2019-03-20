@@ -72,17 +72,29 @@ export class EditorComponent extends React.Component<IProps> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (this.props.revealPosition && prevProps.revealPosition !== this.props.revealPosition) {
-      this.revealPosition(this.props.revealPosition);
-    }
     const { file } = this.props;
+    const { uri, path, revision } = file.payload;
+    const {
+      resource,
+      org,
+      repo,
+      revision: routeRevision,
+      path: routePath,
+    } = this.props.match.params;
     if (file.content && prevProps.file.content !== file.content) {
-      const { uri, path, revision } = file.payload;
       this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
       });
+    } else if (
+      file.payload.uri === `${resource}/${org}/${repo}` &&
+      file.payload.revision === routeRevision &&
+      file.payload.path === routePath &&
+      this.props.revealPosition &&
+      prevProps.revealPosition !== this.props.revealPosition
+    ) {
+      this.revealPosition(this.props.revealPosition);
     }
     if (this.monaco && this.monaco.editor) {
       if (prevProps.showBlame !== this.props.showBlame && this.props.showBlame) {

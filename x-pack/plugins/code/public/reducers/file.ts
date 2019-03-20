@@ -12,9 +12,7 @@ import {
   closeTreePath,
   fetchDirectory,
   fetchDirectorySuccess,
-  fetchFile,
   fetchFileFailed,
-  FetchFilePayload,
   FetchFileResponse,
   fetchFileSuccess,
   fetchRepoBranchesSuccess,
@@ -167,10 +165,6 @@ export const file = handleActions(
         const references = action.payload as ReferenceInfo[];
         draft.tags = references.filter(r => r.type === ReferenceType.TAG);
         draft.branches = references.filter(r => r.type !== ReferenceType.TAG);
-      }),
-    [String(fetchFile)]: (state: FileState, action: any) =>
-      produce<FileState>(state, draft => {
-        draft.file = { payload: action.payload as FetchFilePayload };
       }),
     [String(fetchFileSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, draft => {
