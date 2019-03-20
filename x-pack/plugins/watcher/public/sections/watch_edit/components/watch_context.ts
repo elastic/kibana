@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-declare module 'plugins/watcher/models/watch' {
-  export const Watch: any;
-}
-declare module 'plugins/watcher/models/watch/threshold_watch' {
-  export const ThresholdWatch: any;
-}
+
+import React from 'react';
+export const WatchContext = React.createContext({} as any);

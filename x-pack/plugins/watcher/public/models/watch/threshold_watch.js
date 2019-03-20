@@ -18,7 +18,8 @@ const DEFAULT_VALUES = {
   TIME_WINDOW_UNIT: 'm',
   TRIGGER_INTERVAL_SIZE: 1,
   TRIGGER_INTERVAL_UNIT: 'm',
-  THRESHOLD: 1000
+  THRESHOLD: 1000,
+  GROUP_BY: 'all',
 };
 
 /**
@@ -30,7 +31,7 @@ export class ThresholdWatch extends BaseWatch {
     props.type = WATCH_TYPES.THRESHOLD;
     super(props);
 
-    this.index = props.index;
+    this.index = props.index || [];
     this.timeField = props.timeField;
     this.triggerIntervalSize = props.triggerIntervalSize || DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE;
     this.triggerIntervalUnit = props.triggerIntervalUnit || DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT;
@@ -41,6 +42,7 @@ export class ThresholdWatch extends BaseWatch {
     this.thresholdComparator = props.thresholdComparator || DEFAULT_VALUES.THRESHOLD_COMPARATOR;
     this.timeWindowSize = props.timeWindowSize || DEFAULT_VALUES.TIME_WINDOW_SIZE;
     this.timeWindowUnit = props.timeWindowUnit || DEFAULT_VALUES.TIME_WINDOW_UNIT;
+    this.groupBy = props.groupBy || DEFAULT_VALUES.GROUP_BY;
 
     //NOTE: The threshold must be of the appropriate type, i.e.,number/date.
     //Conversion from string must occur by consumer when assigning a
@@ -53,25 +55,33 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get termOrder() {
-    return this.thresholdComparator === COMPARATORS.GREATER_THAN ? SORT_ORDERS.DESCENDING : SORT_ORDERS.ASCENDING;
+    return this.thresholdComparator === COMPARATORS.GREATER_THAN
+      ? SORT_ORDERS.DESCENDING
+      : SORT_ORDERS.ASCENDING;
   }
 
   get titleDescription() {
-    const staticPart = i18n.translate('xpack.watcher.models.thresholdWatch.sendAlertOnSpecificConditionTitleDescription', {
-      defaultMessage: 'Send an alert when a specific condition is met.'
-    });
+    const staticPart = i18n.translate(
+      'xpack.watcher.models.thresholdWatch.sendAlertOnSpecificConditionTitleDescription',
+      {
+        defaultMessage: 'Send an alert when a specific condition is met.',
+      }
+    );
     if (isNaN(this.triggerIntervalSize)) {
       return staticPart;
     }
 
     const timeUnitLabel = getTimeUnitsLabel(this.triggerIntervalUnit, this.triggerIntervalSize);
-    const dynamicPartText = i18n.translate('xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription', {
-      defaultMessage: 'This will run every {triggerIntervalSize} {timeUnitLabel}.',
-      values: {
-        triggerIntervalSize: this.triggerIntervalSize,
-        timeUnitLabel
+    const dynamicPartText = i18n.translate(
+      'xpack.watcher.models.thresholdWatch.thresholdWatchIntervalTitleDescription',
+      {
+        defaultMessage: 'This will run every {triggerIntervalSize} {timeUnitLabel}.',
+        values: {
+          triggerIntervalSize: this.triggerIntervalSize,
+          timeUnitLabel,
+        },
       }
-    });
+    );
     return `${staticPart} ${dynamicPartText}`;
   }
 
@@ -89,7 +99,7 @@ export class ThresholdWatch extends BaseWatch {
       thresholdComparator: this.thresholdComparator,
       timeWindowSize: this.timeWindowSize,
       timeWindowUnit: this.timeWindowUnit,
-      threshold: this.threshold
+      threshold: this.threshold,
     });
 
     return result;
@@ -104,11 +114,11 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   static typeName = i18n.translate('xpack.watcher.models.thresholdWatch.typeName', {
-    defaultMessage: 'Threshold Alert'
+    defaultMessage: 'Threshold Alert',
   });
   static iconClass = '';
   static selectMessage = i18n.translate('xpack.watcher.models.thresholdWatch.selectMessageText', {
-    defaultMessage: 'Send an alert on a specific condition'
+    defaultMessage: 'Send an alert on a specific condition',
   });
   static isCreatable = true;
   static selectSortOrder = 1;
