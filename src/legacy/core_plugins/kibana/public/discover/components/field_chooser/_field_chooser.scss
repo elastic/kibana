@@ -3,6 +3,9 @@
   margin-left: $euiSizeS !important;
 }
 
+/*
+  Fixes EUI bug https://github.com/elastic/eui/issues/1749
+*/
 .stringProgressBarTooltip__anchor {
   display: block;
 }
