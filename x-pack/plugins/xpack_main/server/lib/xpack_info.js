@@ -72,6 +72,7 @@ export class XPackInfo {
   constructor(server, { clusterSource = 'data', pollFrequencyInMillis }) {
     this._log = server.log.bind(server);
     this._cluster = server.plugins.elasticsearch.getCluster(clusterSource);
+    this._elasticsearchReady = server.plugins.elasticsearch.waitUntilReady.bind(server);
     this._clusterSource = clusterSource;
 
     // Create a poller that will be (re)started inside of the `refreshNow` call.
@@ -134,6 +135,7 @@ export class XPackInfo {
 
     // We can reset polling timer since we force refresh here.
     this._poller.stop();
+    await this._elasticsearchReady();
 
     try {
       const response = await this._cluster.callWithInternalUser('transport.request', {
