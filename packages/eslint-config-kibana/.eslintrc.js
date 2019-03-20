@@ -28,16 +28,11 @@ const ELASTIC_LICENSE_HEADER = `
 `;
 
 module.exports = {
-  env: {
-    es6: true,
-    node: true,
-    mocha: true,
-    browser: true,
-  },
-
-  parserOptions: {
-    ecmaVersion: 6,
-  },
+  extends: [
+    './javascript.js',
+    './typescript.js',
+    './jest.js',
+  ],
 
   overrides: [
     /**
