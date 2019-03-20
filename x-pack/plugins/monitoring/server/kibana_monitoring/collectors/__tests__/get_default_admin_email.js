@@ -11,7 +11,7 @@ import { getDefaultAdminEmail } from '../get_settings_collector';
 import { CLUSTER_ALERTS_ADDRESS_CONFIG_KEY } from '../../../../common/constants';
 
 describe('getSettingsCollector / getDefaultAdminEmail', () => {
-  function setup({ enabled = true, adminEmail = null }) {
+  function setup({ enabled = true, adminEmail = null } = {}) {
     const config = { get: sinon.stub() };
 
     config.get
