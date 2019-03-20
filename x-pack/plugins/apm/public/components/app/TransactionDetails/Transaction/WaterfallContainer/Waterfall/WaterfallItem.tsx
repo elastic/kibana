@@ -30,10 +30,6 @@ interface IBarStyleProps {
   color: string;
 }
 
-const DurationStyled = styled(Duration)`
-  display: none;
-`;
-
 const Container = styled<IContainerStyleProps, 'div'>('div')`
   position: relative;
   display: block;
@@ -49,10 +45,6 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
 
   &:hover {
     background-color: ${theme.euiColorLightestShade};
-
-    ${DurationStyled} {
-      display: block;
-    }
   }
 `;
 
@@ -190,7 +182,7 @@ export function WaterfallItem({
             transaction={item.transaction}
           />
         ) : null}
-        <DurationStyled item={item} />
+        <Duration item={item} />
       </ItemText>
     </Container>
   );
