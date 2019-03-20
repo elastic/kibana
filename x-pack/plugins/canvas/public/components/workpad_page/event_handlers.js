@@ -12,7 +12,7 @@ const localMousePosition = (canvasOrigin, clientX, clientY) => {
   };
 };
 
-const resetHandler = () => {
+export const resetHandler = () => {
   window.onmousemove = null;
   window.onmouseup = null;
 };
