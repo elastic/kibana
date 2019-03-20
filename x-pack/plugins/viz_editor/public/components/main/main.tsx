@@ -18,8 +18,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Dispatch, useEffect, useReducer } from 'react';
-// @ts-ignore
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import 'brace/ext/language_tools';
 import 'brace/mode/javascript';
@@ -141,79 +139,61 @@ export function Main({ kfetch }: Props) {
   );
 
   return (
-    <DragDropContext
-      onDragEnd={(args: any) => {
-        console.log(args);
-      }}
-    >
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageHeader>
-            <EuiTitle size="l">
-              <h1>
-                <FormattedMessage
-                  id="vizEditor.helloWorldText"
-                  defaultMessage="{title} Hello World!"
-                  values={{ title: 'New Visualization Editor' }}
+    <EuiPage>
+      <EuiPageBody>
+        <EuiPageHeader>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="vizEditor.helloWorldText"
+                defaultMessage="{title} Hello World!"
+                values={{ title: 'New Visualization Editor' }}
+              />
+            </h1>
+          </EuiTitle>
+          {!!errorMessage ? (
+            <p>
+              <span className="euiTextColor euiTextColor--danger">{errorMessage}</span>
+            </p>
+          ) : null}
+        </EuiPageHeader>
+        <EuiPageContent>
+          <EuiPageContentBody>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={5}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>{leftPanel}</EuiFlexItem>
+                  <EuiFlexItem>
+                    The expression will be rendered here: {expression}
+                    {/* TODO execute the expression and render it to a node inside here */}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {rightPanel}
+                    {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {/* TODO as soon as something changes here, switch to the "expression"-editor */}
+                <EuiCodeEditor
+                  mode="javascript"
+                  theme="github"
+                  width="100%"
+                  height="30px"
+                  value={expression}
+                  setOptions={{
+                    fontSize: '14px',
+                    enableBasicAutocompletion: true,
+                    enableSnippets: true,
+                    enableLiveAutocompletion: true,
+                  }}
+                  aria-label="Code Editor"
                 />
-              </h1>
-            </EuiTitle>
-            {!!errorMessage ? (
-              <p>
-                <span className="euiTextColor euiTextColor--danger">{errorMessage}</span>
-              </p>
-            ) : null}
-          </EuiPageHeader>
-          <EuiPageContent>
-            <EuiPageContentBody>
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={5}>
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>{leftPanel}</EuiFlexItem>
-                    <EuiFlexItem>
-                      <Droppable droppableId="renderedVis">
-                        {(provided: any, snapshot: any) => (
-                          <div
-                            ref={provided.innerRef}
-                            style={{ height: 400, backgroundColor: 'lime' }}
-                            {...provided.droppableProps}
-                          >
-                            The expression will be rendered here: {expression}
-                            <br />
-                            Is dragged over: {snapshot.isDraggingOver}
-                            {/* TODO execute the expression and render it to a node inside here */}
-                          </div>
-                        )}
-                      </Droppable>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {rightPanel}
-                      {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {/* TODO as soon as something changes here, switch to the "expression"-editor */}
-                  <EuiCodeEditor
-                    mode="javascript"
-                    theme="github"
-                    width="100%"
-                    height="30px"
-                    value={expression}
-                    setOptions={{
-                      fontSize: '14px',
-                      enableBasicAutocompletion: true,
-                      enableSnippets: true,
-                      enableLiveAutocompletion: true,
-                    }}
-                    aria-label="Code Editor"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
-    </DragDropContext>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+    </EuiPage>
   );
 }

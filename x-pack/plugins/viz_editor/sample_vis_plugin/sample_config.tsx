@@ -12,8 +12,6 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 import React from 'react';
-// @ts-ignore
-import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { EditorConfig, EditorPanelsBuilder, StandardVisState } from '../editor_config_registry';
 
 interface SampleVisState {
@@ -25,28 +23,13 @@ const Editor: EditorPanelsBuilder<SampleVisState> = ({ customState, onChangeCust
   return {
     leftPanel: (
       <>
-        <Droppable droppableId="fieldList">
-          {(provided: any) => (
-            <div ref={provided.innerRef} {...provided.droppableProps}>
-              TODO: Use Chris' data panel here
-              <EuiListGroup>
-                {fields.map((field, index) => (
-                  <Draggable draggableId={field} index={index} key={field}>
-                    {(provided2: any) => (
-                      <div
-                        ref={provided2.innerRef}
-                        {...provided2.draggableProps}
-                        {...provided2.dragHandleProps}
-                      >
-                        <EuiListGroupItem label={field} />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-              </EuiListGroup>
-            </div>
-          )}
-        </Droppable>
+        TODO: Use Chris' data panel here
+        <EuiListGroup>
+          {fields.map((field, index) => (
+            <EuiListGroupItem label={field} />
+          ))}
+        </EuiListGroup>
+        )}
       </>
     ),
     rightPanel: (
