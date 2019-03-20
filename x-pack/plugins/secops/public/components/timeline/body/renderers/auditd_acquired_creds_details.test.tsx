@@ -271,7 +271,7 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Session');
     });
 
-    test('it returns only hostName if only hostname and an id is given', () => {
+    test('it returns only session and hostName if only hostname and an id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdAcquiredLine
@@ -291,7 +291,7 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Session@some-host-name');
     });
 
-    test('it returns only a user name if only a user name and id is given', () => {
+    test('it returns only a session and user name if only a user name and id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdAcquiredLine
@@ -331,7 +331,7 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Sessionacquired credentials tosome-process-name');
     });
 
-    test('it returns only session if process title with id is given', () => {
+    test('it returns only session and user name if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdAcquiredLine
@@ -371,12 +371,12 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Sessioninsome-working-directory');
     });
 
-    test('it returns only the args with id if that is all that is given (very unlikely situation)', () => {
+    test('it returns only the session and args with id if that is all that is given (very unlikely situation)', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdAcquiredLine
             id="hello-i-am-an-id"
-            args="arg1 arg 2 arg 3"
+            args="arg1 arg2 arg 3"
             userName={undefined}
             secondary={undefined}
             session={undefined}
@@ -388,7 +388,7 @@ describe('AuditAcquiredCredsDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
     });
   });
 });
