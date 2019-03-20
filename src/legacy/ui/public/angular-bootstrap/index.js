@@ -36,7 +36,9 @@ angular.module('ui.bootstrap.tpls', [
   'template/modal/backdrop.html',
   'template/modal/window.html',	
   'template/tooltip/tooltip-html-unsafe-popup.html',	
-  'template/tooltip/tooltip-popup.html',
+  'template/tooltip/tooltip-popup.html',	
+  'template/progressbar/bar.html',	
+  'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
   'template/tabs/tab.html',
   'template/tabs/tabset.html',
@@ -74,6 +76,18 @@ import tooltipPopup from './tooltip/tooltip-popup.html';
 
 angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {	
  $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);	
+}]);
+
+import bar from './progressbar/bar.html';	
+
+ angular.module('template/progressbar/bar.html', []).run(['$templateCache', function($templateCache) {	
+  $templateCache.put('template/progressbar/bar.html', bar);	
+}]);	
+
+import progress from './progressbar/progress.html';
+
+angular.module('template/progressbar/progress.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/progressbar/progress.html', progress);
 }]);
 
 import progressbar from './progressbar/progressbar.html';
