@@ -1,9 +1,11 @@
-button.euiAccordion__button > div:first-child {
+
+
+.diff > button.euiAccordion__button > div:first-child {
   flex-direction: row-reverse;
   padding: $euiSize $euiSizeS;
 }
 
-button.euiAccordion__button {
+.diff > button.euiAccordion__button {
   &:hover {
     text-decoration: none;
   }

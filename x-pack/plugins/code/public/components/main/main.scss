@@ -1,6 +1,6 @@
 .code-editor-container {
-  height: 100%;
-  overflow: auto;
+  overflow: hidden;
+  flex-grow: 1;
 }
 
 .code-auto-overflow {
