@@ -45,13 +45,14 @@ function RawJsonParamEditor({
   );
 
   return (
-    <EuiFormRow label={label} isInvalid={isInvalid}>
+    <EuiFormRow label={label} isInvalid={isInvalid} fullWidth={true}>
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
         isInvalid={isInvalid}
-        value={value}
+        value={value || ''}
         onChange={ev => setValue(ev.target.value)}
         rows={2}
+        fullWidth={true}
       />
     </EuiFormRow>
   );
