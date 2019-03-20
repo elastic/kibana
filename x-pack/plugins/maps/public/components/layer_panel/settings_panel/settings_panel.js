@@ -13,11 +13,17 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
-  EuiRange,
   EuiSpacer,
-  EuiCallOut,
+  EuiCallOut
 } from '@elastic/eui';
+
 import { ValidatedRange } from '../../../shared/components/validated_range';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { ValidatedDualRange } from 'ui/validated_range';
+
+const MIN_ZOOM = 0;
+const MAX_ZOOM = 24;
 
 export function SettingsPanel(props) {
 
@@ -26,14 +32,9 @@ export function SettingsPanel(props) {
     props.updateLabel(props.layerId, label);
   };
 
-  const onMinZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMinZoom(props.layerId, zoom);
-  };
-
-  const onMaxZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMaxZoom(props.layerId, zoom);
+  const onZoomChange = ([min, max]) => {
+    props.updateMinZoom(props.layerId, Math.max(MIN_ZOOM, parseInt(min, 10)));
+    props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
   const onAlphaChange = (alpha) => {
@@ -53,7 +54,11 @@ export function SettingsPanel(props) {
       <Fragment>
         <EuiCallOut
           color="warning"
-          title="Unable to load layer"
+          title={
+            i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
+              defaultMessage: 'Unable to load layer'
+            })
+          }
         >
           <p data-test-subj="layerErrorMessage">
             {props.layer.getErrors()}
@@ -67,34 +72,28 @@ export function SettingsPanel(props) {
   const renderZoomSliders = () => {
     return (
       <EuiFormRow
-        helpText="Display layer when map is in zoom range."
+        helpText={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.zoomFeedbackHelptext', {
+            defaultMessage: 'Display layer when map is in zoom range.'
+          })
+        }
       >
         <EuiFlexGroup>
           <EuiFlexItem>
+
             <EuiFormRow
-              label="Min zoom"
+              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
+                defaultMessage: 'Visible zoom range'
+              })}
             >
-              <EuiRange
-                min={0}
-                max={24}
-                value={props.minZoom.toString()}
-                onChange={onMinZoomChange}
+              <ValidatedDualRange
+                min={MIN_ZOOM}
+                max={MAX_ZOOM}
+                value={[props.minZoom, props.maxZoom]}
                 showInput
                 showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Max zoom"
-            >
-              <EuiRange
-                min={0}
-                max={24}
-                value={props.maxZoom.toString()}
-                onChange={onMaxZoomChange}
-                showInput
-                showRange
+                onChange={onZoomChange}
+                allowEmptyRange={false}
               />
             </EuiFormRow>
           </EuiFlexItem>
@@ -106,7 +105,11 @@ export function SettingsPanel(props) {
   const renderLabel = () => {
     return (
       <EuiFormRow
-        label="Layer name"
+        label={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
+            defaultMessage: 'Layer name'
+          })
+        }
       >
         <EuiFieldText
           value={props.label}
@@ -119,7 +122,11 @@ export function SettingsPanel(props) {
   const renderAlphaSlider = () => {
     return (
       <EuiFormRow
-        label="Layer transparency"
+        label={
+          i18n.translate('xpack.maps.layerPanel.settingsPanel.layerTransparencyLabel', {
+            defaultMessage: 'Layer transparency'
+          })
+        }
       >
         <div className="mapAlphaRange">
           <ValidatedRange
@@ -145,7 +152,14 @@ export function SettingsPanel(props) {
       <EuiPanel>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiTitle size="xs"><h5>Settings</h5></EuiTitle>
+            <EuiTitle size="xs">
+              <h5>
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.settingsPanel.settingsTitle"
+                  defaultMessage="Settings"
+                />
+              </h5>
+            </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
 

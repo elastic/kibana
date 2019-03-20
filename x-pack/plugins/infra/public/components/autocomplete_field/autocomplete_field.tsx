@@ -308,4 +308,5 @@ const SuggestionsPanel = styled(EuiPanel).attrs({
   width: 100%;
   margin-top: 2px;
   overflow: hidden;
+  z-index: ${props => props.theme.eui.euiZLevel1};
 `;

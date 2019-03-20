@@ -107,16 +107,9 @@ exports[`AnnotationsTable Initialization with annotations prop. 1`] = `
 
 exports[`AnnotationsTable Initialization with job config prop. 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
   justifyContent="spaceAround"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiLoadingSpinner
@@ -130,6 +123,7 @@ exports[`AnnotationsTable Minimal initialization without props. 1`] = `
 <EuiCallOut
   color="primary"
   iconType="iInCircle"
+  role="alert"
   size="m"
   title={
     <FormattedMessage

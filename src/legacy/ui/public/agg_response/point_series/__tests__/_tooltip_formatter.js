@@ -44,10 +44,20 @@ describe('tooltipFormatter', function () {
       yAxisFormatter: _.identity,
       zAxisLabel: 'top',
       zAxisFormatter: _.identity,
+      series: [
+        {
+          rawId: '1',
+          label: 'middle',
+          zLabel: 'top',
+          yAxisFormatter: _.identity,
+          zAxisFormatter: _.identity
+        }
+      ]
     },
     datum: {
       x: 3, y: 2, z: 1,
-      extraMetrics: []
+      extraMetrics: [],
+      seriesId: '1'
     }
   };
 
@@ -68,5 +78,13 @@ describe('tooltipFormatter', function () {
     const $row3 = $rows.eq(2).find('td');
     expect(cell($row3, 0)).to.be('top');
     expect(cell($row3, 1)).to.be('1');
+  });
+
+  it('renders correctly on missing extraMetrics in datum', function () {
+    const event = _.cloneDeep(baseEvent);
+    delete event.datum.extraMetrics;
+    const $el = $(tooltipFormatter(event));
+    const $rows = $el.find('tr');
+    expect($rows.length).to.be(3);
   });
 });

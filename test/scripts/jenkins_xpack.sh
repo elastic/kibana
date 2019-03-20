@@ -13,8 +13,6 @@ function report {
 
 trap report EXIT
 
-source src/dev/ci_setup/checkout_sibling_es.sh
-
 export TEST_BROWSER_HEADLESS=1
 
 echo " -> Running mocha tests"
@@ -23,15 +21,14 @@ yarn test
 echo ""
 echo ""
 
-
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
 node scripts/jest --ci --no-cache --verbose
 echo ""
 echo ""
 
-echo " -> Running jest integration tests"
-cd "$XPACK_DIR"
-node scripts/jest_integration --ci --no-cache --verbose
-echo ""
-echo ""
+# echo " -> Running jest integration tests"
+# cd "$XPACK_DIR"
+# node scripts/jest_integration --ci --no-cache --verbose
+# echo ""
+# echo ""

@@ -38,7 +38,7 @@ export class SavedObjectsRepository {
       serializer,
       migrator,
       allowedTypes = [],
-      onBeforeWrite = () => { },
+      onBeforeWrite = () => {},
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -52,13 +52,11 @@ export class SavedObjectsRepository {
     this._index = index;
     this._mappings = mappings;
     this._schema = schema;
-    if(allowedTypes.length === 0) {
+    if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
     }
     this._allowedTypes = allowedTypes;
 
-    // ES7 and up expects the root type to be _doc
-    this._type = '_doc';
     this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
@@ -80,17 +78,11 @@ export class SavedObjectsRepository {
    * @property {string} [options.namespace]
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
-  */
+   */
   async create(type, attributes = {}, options = {}) {
-    const {
-      id,
-      migrationVersion,
-      overwrite = false,
-      namespace,
-      references = [],
-    } = options;
+    const { id, migrationVersion, overwrite = false, namespace, references = [] } = options;
 
-    if(!this._isTypeAllowed(type)) {
+    if (!this._isTypeAllowed(type)) {
       throw errors.createUnsupportedTypeError(type);
     }
 
@@ -112,7 +104,6 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        type: this._type,
         index: this._index,
         refresh: 'wait_for',
         body: raw._source,
@@ -142,22 +133,19 @@ export class SavedObjectsRepository {
    * @returns {promise} -  {saved_objects: [[{ id, type, version, references, attributes, error: { message } }]}
    */
   async bulkCreate(objects, options = {}) {
-    const {
-      namespace,
-      overwrite = false,
-    } = options;
+    const { namespace, overwrite = false } = options;
     const time = this._getCurrentTime();
     const bulkCreateParams = [];
 
     let requestIndexCounter = 0;
-    const expectedResults = objects.map((object) => {
-      if(!this._isTypeAllowed(object.type)) {
+    const expectedResults = objects.map(object => {
+      if (!this._isTypeAllowed(object.type)) {
         return {
           response: {
             id: object.id,
             type: object.type,
             error: errors.createUnsupportedTypeError(object.type).output.payload,
-          }
+          },
         };
       }
 
@@ -182,10 +170,9 @@ export class SavedObjectsRepository {
         {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
-            _type: this._type,
           },
         },
-        expectedResult.rawMigratedDoc._source,
+        expectedResult.rawMigratedDoc._source
       );
 
       return expectedResult;
@@ -199,7 +186,7 @@ export class SavedObjectsRepository {
 
     return {
       saved_objects: expectedResults.map(expectedResult => {
-        if(expectedResult.response) {
+        if (expectedResult.response) {
           return expectedResult.response;
         }
 
@@ -213,11 +200,7 @@ export class SavedObjectsRepository {
         } = Object.values(response)[0];
 
         const {
-          _source: {
-            type,
-            [type]: attributes,
-            references = [],
-          },
+          _source: { type, [type]: attributes, references = [] },
         } = rawMigratedDoc;
 
         const id = requestedId || responseId;
@@ -226,15 +209,15 @@ export class SavedObjectsRepository {
             return {
               id,
               type,
-              error: { statusCode: 409, message: 'version conflict, document already exists' }
+              error: { statusCode: 409, message: 'version conflict, document already exists' },
             };
           }
           return {
             id,
             type,
             error: {
-              message: error.reason || JSON.stringify(error)
-            }
+              message: error.reason || JSON.stringify(error),
+            },
           };
         }
 
@@ -260,17 +243,14 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async delete(type, id, options = {}) {
-    if(!this._isTypeAllowed(type)) {
+    if (!this._isTypeAllowed(type)) {
       throw errors.createGenericNotFoundError();
     }
 
-    const {
-      namespace
-    } = options;
+    const { namespace } = options;
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       ignore: [404],
@@ -289,7 +269,7 @@ export class SavedObjectsRepository {
     }
 
     throw new Error(
-      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response })}`
     );
   }
 
@@ -317,8 +297,8 @@ export class SavedObjectsRepository {
         ...getSearchDsl(this._mappings, this._schema, {
           namespace,
           type: typesToDelete,
-        })
-      }
+        }),
+      },
     };
 
     return await this._writeToCluster('deleteByQuery', esOptions);
@@ -359,23 +339,23 @@ export class SavedObjectsRepository {
       throw new TypeError(`options.type must be a string or an array of strings`);
     }
 
-    if(Array.isArray(type)) {
+    if (Array.isArray(type)) {
       type = type.filter(type => this._isTypeAllowed(type));
-      if(type.length === 0) {
+      if (type.length === 0) {
         return {
           page,
           per_page: perPage,
           total: 0,
-          saved_objects: []
+          saved_objects: [],
         };
       }
-    }else{
-      if(!this._isTypeAllowed(type)) {
+    } else {
+      if (!this._isTypeAllowed(type)) {
         return {
           page,
           per_page: perPage,
           total: 0,
-          saved_objects: []
+          saved_objects: [],
         };
       }
     }
@@ -406,8 +386,8 @@ export class SavedObjectsRepository {
           sortOrder,
           namespace,
           hasReference,
-        })
-      }
+        }),
+      },
     };
 
     const response = await this._callCluster('search', esOptions);
@@ -419,7 +399,7 @@ export class SavedObjectsRepository {
         page,
         per_page: perPage,
         total: 0,
-        saved_objects: []
+        saved_objects: [],
       };
     }
 
@@ -434,7 +414,7 @@ export class SavedObjectsRepository {
   /**
    * Returns an array of objects by id
    *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @param {array} objects - an array of objects containing id, type and optionally fields
    * @param {object} [options={}]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
@@ -446,9 +426,7 @@ export class SavedObjectsRepository {
    * ])
    */
   async bulkGet(objects = [], options = {}) {
-    const {
-      namespace
-    } = options;
+    const { namespace } = options;
 
     if (objects.length === 0) {
       return { saved_objects: [] };
@@ -458,43 +436,49 @@ export class SavedObjectsRepository {
     const response = await this._callCluster('mget', {
       index: this._index,
       body: {
-        docs: objects.reduce((acc, { type, id }) => {
-          if(this._isTypeAllowed(type)) {
+        docs: objects.reduce((acc, { type, id, fields }) => {
+          if (this._isTypeAllowed(type)) {
             acc.push({
               _id: this._serializer.generateRawId(namespace, type, id),
-              _type: this._type,
+              _source: includedFields(type, fields),
             });
-          }else{
-            unsupportedTypes.push({ id, type, error: errors.createUnsupportedTypeError(type).output.payload });
+          } else {
+            unsupportedTypes.push({
+              id,
+              type,
+              error: errors.createUnsupportedTypeError(type).output.payload,
+            });
           }
           return acc;
-        }, [])
-      }
+        }, []),
+      },
     });
 
     return {
-      saved_objects: response.docs.map((doc, i) => {
-        const { id, type } = objects[i];
+      saved_objects: response.docs
+        .map((doc, i) => {
+          const { id, type } = objects[i];
 
-        if (!doc.found) {
+          if (!doc.found) {
+            return {
+              id,
+              type,
+              error: { statusCode: 404, message: 'Not found' },
+            };
+          }
+
+          const time = doc._source.updated_at;
           return {
             id,
             type,
-            error: { statusCode: 404, message: 'Not found' }
+            ...(time && { updated_at: time }),
+            version: encodeHitVersion(doc),
+            attributes: doc._source[type],
+            references: doc._source.references || [],
+            migrationVersion: doc._source.migrationVersion,
           };
-        }
-
-        const time = doc._source.updated_at;
-        return {
-          id,
-          type,
-          ...time && { updated_at: time },
-          version: encodeHitVersion(doc),
-          attributes: doc._source[type],
-          references: doc._source.references || [],
-          migrationVersion: doc._source.migrationVersion,
-        };
-      }).concat(unsupportedTypes)
+        })
+        .concat(unsupportedTypes),
     };
   }
 
@@ -508,19 +492,16 @@ export class SavedObjectsRepository {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id, options = {}) {
-    if(!this._isTypeAllowed(type)) {
+    if (!this._isTypeAllowed(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }
 
-    const {
-      namespace
-    } = options;
+    const { namespace } = options;
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
-      ignore: [404]
+      ignore: [404],
     });
 
     const docNotFound = response.found === false;
@@ -535,7 +516,7 @@ export class SavedObjectsRepository {
     return {
       id,
       type,
-      ...updatedAt && { updated_at: updatedAt },
+      ...(updatedAt && { updated_at: updatedAt }),
       version: encodeHitVersion(response),
       attributes: response._source[type],
       references: response._source.references || [],
@@ -555,20 +536,15 @@ export class SavedObjectsRepository {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
-    if(!this._isTypeAllowed(type)) {
+    if (!this._isTypeAllowed(type)) {
       throw errors.createGenericNotFoundError(type, id);
     }
 
-    const {
-      version,
-      namespace,
-      references = [],
-    } = options;
+    const { version, namespace, references = [] } = options;
 
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
@@ -578,7 +554,7 @@ export class SavedObjectsRepository {
           [type]: attributes,
           updated_at: time,
           references,
-        }
+        },
       },
     });
 
@@ -593,7 +569,7 @@ export class SavedObjectsRepository {
       updated_at: time,
       version: encodeHitVersion(response),
       references,
-      attributes
+      attributes,
     };
   }
 
@@ -614,17 +590,13 @@ export class SavedObjectsRepository {
     if (typeof counterFieldName !== 'string') {
       throw new Error('"counterFieldName" argument must be a string');
     }
-    if(!this._isTypeAllowed(type)) {
+    if (!this._isTypeAllowed(type)) {
       throw errors.createUnsupportedTypeError(type);
     }
 
-    const {
-      migrationVersion,
-      namespace,
-    } = options;
+    const { migrationVersion, namespace } = options;
 
     const time = this._getCurrentTime();
-
 
     const migrated = this._migrator.migrateDocument({
       id,
@@ -638,7 +610,6 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      type: this._type,
       index: this._index,
       refresh: 'wait_for',
       _source: true,
@@ -673,8 +644,6 @@ export class SavedObjectsRepository {
       version: encodeHitVersion(response),
       attributes: response.get._source[type],
     };
-
-
   }
 
   async _writeToCluster(method, params) {
@@ -709,8 +678,8 @@ export class SavedObjectsRepository {
 
   _isTypeAllowed(types) {
     const toCheck = [].concat(types);
-    for(const type of toCheck) {
-      if(!this._allowedTypes.includes(type)) {
+    for (const type of toCheck) {
+      if (!this._allowedTypes.includes(type)) {
         return false;
       }
     }

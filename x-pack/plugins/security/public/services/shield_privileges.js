@@ -46,6 +46,7 @@ module.constant('shieldPrivileges', {
     'read_cross_cluster',
     'manage_follow_index',
     'manage_ilm',
+    'manage_leader_index',
   ],
   applications: []
 });

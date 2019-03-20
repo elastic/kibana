@@ -30,7 +30,7 @@ export class LinkToPage extends React.Component<LinkToPageProps> {
           component={RedirectToNodeDetail}
         />
         <Route path={`${match.url}/logs`} component={RedirectToLogs} />
-        <Redirect to="/home" />
+        <Redirect to="/infrastructure" />
       </Switch>
     );
   }

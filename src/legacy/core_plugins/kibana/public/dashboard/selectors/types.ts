@@ -48,7 +48,7 @@ export interface PanelState {
   readonly id: SavedObjectId;
   readonly version: string;
   readonly type: string;
-  readonly panelIndex: PanelId;
+  panelIndex: PanelId;
   readonly embeddableConfig: any;
   readonly gridData: GridData;
   readonly title?: string;
@@ -65,7 +65,7 @@ export interface EmbeddableReduxState {
   readonly lastReloadRequestTime: number;
 }
 
-export interface PanelsMap {
+export interface PanelStateMap {
   readonly [panelId: string]: PanelState;
 }
 
@@ -80,7 +80,7 @@ export interface DashboardMetadata {
 
 export interface DashboardState {
   readonly view: ViewState;
-  readonly panels: PanelsMap;
+  readonly panels: PanelStateMap;
   readonly embeddables: EmbeddablesMap;
   readonly metadata: DashboardMetadata;
 }
