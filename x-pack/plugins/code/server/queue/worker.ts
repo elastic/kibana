@@ -16,5 +16,5 @@ export interface Worker {
   onJobExecutionError(res: any): void;
   onJobTimeOut(res: any): void;
 
-  updateProgress(uri: string, progress: number): void;
+  updateProgress(job: Job, progress: number): void;
 }

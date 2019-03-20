@@ -86,8 +86,13 @@ export class IndexWorker extends AbstractWorker {
     // Binding the index cancellation logic
     this.cancellationService.cancelIndexJob(uri);
     const indexPromises: Array<Promise<IndexStats>> = this.indexerFactories.map(
-      (indexerFactory: IndexerFactory, index: number) => {
-        const indexer = indexerFactory.create(uri, revision);
+      async (indexerFactory: IndexerFactory, index: number) => {
+        const indexer = await indexerFactory.create(uri, revision);
+        if (!indexer) {
+          this.log.info(`Failed to create indexer for ${uri}`);
+          return new Map(); // return an empty map as stats.
+        }
+
         if (cancellationToken) {
           cancellationToken.on(() => {
             indexer.cancel();
@@ -119,8 +124,20 @@ export class IndexWorker extends AbstractWorker {
     return await this.objectClient.setRepositoryLspIndexStatus(uri, progress);
   }
 
-  public async updateProgress(uri: RepositoryUri, progress: number) {
-    let p: any = {
+  public async onJobCompleted(job: Job, res: IndexWorkerResult) {
+    await super.onJobCompleted(job, res);
+    const { uri, revision } = job.payload;
+    try {
+      return await this.objectClient.updateRepository(uri, { indexedRevision: revision });
+    } catch (error) {
+      this.log.error(`Update indexed revision in repository object error.`);
+      this.log.error(error);
+    }
+  }
+
+  public async updateProgress(job: Job, progress: number) {
+    const { uri } = job.payload;
+    const p: any = {
       uri,
       progress,
       timestamp: new Date(),

@@ -57,7 +57,8 @@ export class CloneWorker extends AbstractGitWorker {
     const repoService = this.repoServiceFactory.newInstance(this.serverOptions.repoPath, this.log);
     const repo = RepositoryUtils.buildRepository(url);
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
-      this.updateProgress(repo.uri, progress, cloneProgress);
+      job.payload.uri = repo.uri;
+      this.updateProgress(job, progress, cloneProgress);
     });
   }
 

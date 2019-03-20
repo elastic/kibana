@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './lsp_incremental_indexer';
 export * from './lsp_indexer';
 export * from './lsp_indexer_factory';
 export * from './indexer';

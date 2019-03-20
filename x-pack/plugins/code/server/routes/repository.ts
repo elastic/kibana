@@ -60,10 +60,10 @@ export function repositoryRoute(
         log.info(`Repository ${repoUrl} does not exist. Go ahead with clone.`);
         try {
           // Create the index for the repository
-          const initializer = repoIndexInitializerFactory.create(
+          const initializer = (await repoIndexInitializerFactory.create(
             repo.uri,
             ''
-          ) as RepositoryIndexInitializer;
+          )) as RepositoryIndexInitializer;
           await initializer.init();
 
           // Persist to elasticsearch

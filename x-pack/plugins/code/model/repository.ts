@@ -21,6 +21,8 @@ export interface Repository {
   nextUpdateTimestamp?: Date;
   // The timestamp of next index for this repository.
   nextIndexTimestamp?: Date;
+  // The current indexed revision in Elasticsearch.
+  indexedRevision?: string;
 }
 
 export interface RepositoryConfig {
