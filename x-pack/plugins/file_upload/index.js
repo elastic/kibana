@@ -16,6 +16,11 @@ export const fileUpload = kibana => {
     uiExports: {
       mappings,
     },
+    savedObjectSchemas: {
+      'file-upload-telemetry': {
+        isNamespaceAgnostic: true
+      }
+    },
 
     init(server) {
       const { xpack_main: xpackMainPlugin } = server.plugins;

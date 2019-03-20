@@ -1,9 +1,17 @@
 {
   "file-upload-telemetry": {
-      "properties": {
-        "index_creation_count": {
-          "type" : "long"
-        }
+    "properties": {
+      "filesUploadedTotalCount": {
+        "type": "long"
+      },
+      "filesUploadedTypesTotalCount": {
+        "dynamic": "true",
+        "properties": {}
+      },
+      "filesUploadedByApp": {
+        "dynamic": "true",
+        "properties": {}
       }
     }
   }
+}

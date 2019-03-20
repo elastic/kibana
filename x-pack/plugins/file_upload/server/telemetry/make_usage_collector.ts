@@ -26,7 +26,7 @@ interface KibanaHapiServer extends Server {
 
 export function makeUsageCollector(server: KibanaHapiServer): void {
   const fileUploadUsageCollector = server.usage.collectorSet.makeUsageCollector({
-    type: 'fileUpload',
+    type: 'fileUploadTelemetry',
     fetch: async (): Promise<Telemetry> => {
       try {
         const savedObjectsClient = getSavedObjectsClient(server);
