@@ -68,14 +68,6 @@ export const xpackMain = (kibana) => {
           description: getConfigTelemetryDesc(),
           value: false,
           readonly: true,
-        },
-          // TODO: change the description when email address is used for more things?
-          description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
-            defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
-          }),
-          type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null
         }
       },
       savedObjectSchemas: {
