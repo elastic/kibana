@@ -26,44 +26,39 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const loadMatrix = (loading: boolean, data: KpiNetworkData, property: string) => {
-  const matrix: number | null | undefined = get(property, data);
-
-  if (typeof matrix !== 'undefined' && matrix !== null) {
-    return numeral(matrix).format('0,0');
-  } else {
-    if (loading) {
-      return <EuiLoadingSpinner size="m" />;
-    } else {
-      getEmptyTagValue();
-    }
-  }
+const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
+  return isLoading ? (
+    <EuiLoadingSpinner size="m" />
+  ) : title != null ? (
+    numeral(title).format('0,0')
+  ) : (
+    getEmptyTagValue()
+  );
 };
 
-const kpiNetworkCards = (loading: boolean, data: KpiNetworkData) => [
-  {
-    title: loadMatrix(loading, data, 'networkEvents'),
-    description: i18n.NETWORK_EVENTS,
-  },
-  {
-    title: loadMatrix(loading, data, 'uniqueFlowId'),
-    description: i18n.UNIQUE_ID,
-  },
-  {
-    title: loadMatrix(loading, data, 'activeAgents'),
-    description: i18n.ACTIVE_AGENTS,
-  },
-  {
-    title: loadMatrix(loading, data, 'uniquePrivateIps'),
-    description: i18n.UNIQUE_PRIVATE_IP,
-  },
+const cardMapping = (
+  isLoading: boolean,
+  i18nKey: string,
+  data: KpiNetworkData,
+  property: string
+): React.ReactNode => {
+  const matrixTitle: number | null | undefined = get(property, data);
+  const matrixDescription: string | undefined = get(i18nKey, i18n);
+
+  return (
+    <EuiFlexItem key={matrixDescription}>
+      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={matrixDescription} />
+    </EuiFlexItem>
+  );
+};
+
+const kpiNetworkCards = (loading: boolean, data: KpiNetworkData): React.ReactNode[] => [
+  cardMapping(loading, 'NETWORK_EVENTS', data, 'networkEvents'),
+  cardMapping(loading, 'UNIQUE_ID', data, 'uniqueFlowId'),
+  cardMapping(loading, 'ACTIVE_AGENTS', data, 'activeAgents'),
+  cardMapping(loading, 'UNIQUE_PRIVATE_IP', data, 'uniquePrivateIps'),
 ];
+
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
-  <EuiFlexGroup>
-    {kpiNetworkCards(loading, data).map(item => (
-      <EuiFlexItem key={item.description}>
-        <EuiCard title={item.title} description={item.description} />
-      </EuiFlexItem>
-    ))}
-  </EuiFlexGroup>
+  <EuiFlexGroup>{kpiNetworkCards(loading, data)}</EuiFlexGroup>
 ));
