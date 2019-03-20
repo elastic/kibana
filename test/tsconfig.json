@@ -8,6 +8,10 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
   ]
 }
