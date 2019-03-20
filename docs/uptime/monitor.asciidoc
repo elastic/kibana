@@ -9,7 +9,9 @@ status over time.
 
 [float]
 === Status bar
-SCREENSHOT
+
+[role="screenshot"]
+image::uptime/images/status-bar.png[Status bar]
 
 The Status bar displays a quick summary of the latest information
 regarding your monitor. You can view its latest status, click a link to
@@ -21,7 +23,9 @@ beyond simply knowing if the monitor is `up` or `down`.
 
 [float]
 === Monitor charts
-SCREENSHOT
+
+[role="screenshot"]
+image::uptime/images/monitor-charts.png[Monitor charts]
 
 The Monitor charts visualize information over the time specified in the
 date range. These charts can help you gain insight into how quickly requests are being resolved
@@ -35,11 +39,14 @@ bucket. The line is the average time.
 Next, is a graphical representation of the check statuses over time. Hover over
 the charts to display crosshairs with more specific numeric data.
 
-SCREENSHOT
+[role="screenshot"]
+image::uptime/images/crosshair-example.png[Chart crosshair]
 
 [float]
 === Check history
-SCREENSHOT
+
+[role="screenshot"]
+image::uptime/images/check-history.png[Check history view]
 
 The Check history displays the total count of this monitor's checks for the selected
 date range. You can additionally filter the checks by `status` to help find recent problems
