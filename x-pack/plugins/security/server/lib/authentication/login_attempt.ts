@@ -5,12 +5,12 @@
  */
 
 /**
- * Object that represents login credentials
- * @typedef {{
- *  username: string,
- *  password: string
- * }} LoginCredentials
+ * Represents login credentials.
  */
+interface LoginCredentials {
+  username: string;
+  password: string;
+}
 
 /**
  * A LoginAttempt represents a single attempt to provide login credentials.
@@ -18,31 +18,25 @@
  */
 export class LoginAttempt {
   /**
-   * Username and password for login
-   * @type {?LoginCredentials}
-   * @protected
+   * Username and password for login.
    */
-  _credentials = null;
+  private credentials: LoginCredentials | null = null;
 
   /**
-   * Gets the username and password for this login
-   * @returns {LoginCredentials}
+   * Gets the username and password for this login.
    */
-  getCredentials() {
-    return this._credentials;
+  public getCredentials() {
+    return this.credentials;
   }
 
   /**
-   * Sets the username and password for this login
-   * @param {string} username
-   * @param {string} password
-   * @returns {LoginCredentials}
+   * Sets the username and password for this login.
    */
-  setCredentials(username, password) {
-    if (this._credentials) {
+  public setCredentials(username: string, password: string) {
+    if (this.credentials) {
       throw new Error('Credentials for login attempt have already been set');
     }
 
-    this._credentials = { username, password };
+    this.credentials = Object.freeze({ username, password });
   }
 }

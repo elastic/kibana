@@ -4,43 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-
-import { DeauthenticationResult } from '../deauthentication_result';
+import { DeauthenticationResult } from './deauthentication_result';
 
 describe('DeauthenticationResult', () => {
   describe('notHandled', () => {
     it('correctly produces `notHandled` deauthentication result.', () => {
       const deauthenticationResult = DeauthenticationResult.notHandled();
 
-      expect(deauthenticationResult.notHandled()).to.be(true);
-      expect(deauthenticationResult.succeeded()).to.be(false);
-      expect(deauthenticationResult.failed()).to.be(false);
-      expect(deauthenticationResult.redirected()).to.be(false);
+      expect(deauthenticationResult.notHandled()).toBe(true);
+      expect(deauthenticationResult.succeeded()).toBe(false);
+      expect(deauthenticationResult.failed()).toBe(false);
+      expect(deauthenticationResult.redirected()).toBe(false);
 
-      expect(deauthenticationResult.user).to.be(undefined);
-      expect(deauthenticationResult.state).to.be(undefined);
-      expect(deauthenticationResult.error).to.be(undefined);
-      expect(deauthenticationResult.redirectURL).to.be(undefined);
+      expect(deauthenticationResult.error).toBeUndefined();
+      expect(deauthenticationResult.redirectURL).toBeUndefined();
     });
   });
 
   describe('failed', () => {
     it('fails if error is not specified.', () => {
-      expect(() => DeauthenticationResult.failed()).to.throwError('Error should be specified.');
+      expect(() => DeauthenticationResult.failed(undefined as any)).toThrowError(
+        'Error should be specified.'
+      );
     });
 
     it('correctly produces `failed` deauthentication result.', () => {
       const failureReason = new Error('Something went wrong.');
       const deauthenticationResult = DeauthenticationResult.failed(failureReason);
 
-      expect(deauthenticationResult.failed()).to.be(true);
-      expect(deauthenticationResult.notHandled()).to.be(false);
-      expect(deauthenticationResult.succeeded()).to.be(false);
-      expect(deauthenticationResult.redirected()).to.be(false);
+      expect(deauthenticationResult.failed()).toBe(true);
+      expect(deauthenticationResult.notHandled()).toBe(false);
+      expect(deauthenticationResult.succeeded()).toBe(false);
+      expect(deauthenticationResult.redirected()).toBe(false);
 
-      expect(deauthenticationResult.error).to.be(failureReason);
-      expect(deauthenticationResult.redirectURL).to.be(undefined);
+      expect(deauthenticationResult.error).toBe(failureReason);
+      expect(deauthenticationResult.redirectURL).toBeUndefined();
     });
   });
 
@@ -48,32 +46,34 @@ describe('DeauthenticationResult', () => {
     it('correctly produces `succeeded` deauthentication result.', () => {
       const deauthenticationResult = DeauthenticationResult.succeeded();
 
-      expect(deauthenticationResult.succeeded()).to.be(true);
-      expect(deauthenticationResult.failed()).to.be(false);
-      expect(deauthenticationResult.notHandled()).to.be(false);
-      expect(deauthenticationResult.redirected()).to.be(false);
+      expect(deauthenticationResult.succeeded()).toBe(true);
+      expect(deauthenticationResult.failed()).toBe(false);
+      expect(deauthenticationResult.notHandled()).toBe(false);
+      expect(deauthenticationResult.redirected()).toBe(false);
 
-      expect(deauthenticationResult.error).to.be(undefined);
-      expect(deauthenticationResult.redirectURL).to.be(undefined);
+      expect(deauthenticationResult.error).toBeUndefined();
+      expect(deauthenticationResult.redirectURL).toBeUndefined();
     });
   });
 
   describe('redirectTo', () => {
     it('fails if redirect URL is not specified.', () => {
-      expect(() => DeauthenticationResult.redirectTo()).to.throwError('Redirect URL must be specified.');
+      expect(() => DeauthenticationResult.redirectTo(undefined as any)).toThrowError(
+        'Redirect URL must be specified.'
+      );
     });
 
     it('correctly produces `redirected` deauthentication result.', () => {
       const redirectURL = '/redirect/url';
       const deauthenticationResult = DeauthenticationResult.redirectTo(redirectURL);
 
-      expect(deauthenticationResult.redirected()).to.be(true);
-      expect(deauthenticationResult.succeeded()).to.be(false);
-      expect(deauthenticationResult.failed()).to.be(false);
-      expect(deauthenticationResult.notHandled()).to.be(false);
+      expect(deauthenticationResult.redirected()).toBe(true);
+      expect(deauthenticationResult.succeeded()).toBe(false);
+      expect(deauthenticationResult.failed()).toBe(false);
+      expect(deauthenticationResult.notHandled()).toBe(false);
 
-      expect(deauthenticationResult.redirectURL).to.be(redirectURL);
-      expect(deauthenticationResult.error).to.be(undefined);
+      expect(deauthenticationResult.redirectURL).toBe(redirectURL);
+      expect(deauthenticationResult.error).toBeUndefined();
     });
   });
 });
