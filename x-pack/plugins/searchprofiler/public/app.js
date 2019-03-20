@@ -45,7 +45,7 @@ uiRoutes.when('/dev_tools/searchprofiler', {
 });
 
 uiModules
-  .get('app/searchprofiler', ['ui.bootstrap.buttons', 'ui.ace'])
+  .get('app/searchprofiler', ['ui.ace'])
   .controller('profileViz', profileVizController)
   .filter('nsToPretty', () => nsToPretty)
   .filter('msToPretty', () => msToPretty)
