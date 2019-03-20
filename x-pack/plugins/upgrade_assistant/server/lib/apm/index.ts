@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { get } from 'lodash';
 import minimatch from 'minimatch';
-import semver from 'semver';
+import { SemVer } from 'semver';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
 import { EnrichedDeprecationInfo } from '../es_migration_apis';
@@ -41,29 +41,14 @@ export async function getDeprecatedApmIndices(
   }, []);
 }
 
-// helper to parse out prerelase tags for use with semver
-// https://www.npmjs.com/package/semver#prerelease-tags
-export const getPureVersion = (version: string): string | undefined => {
-  if (!version) {
-    return;
-  }
-
-  const versions = version.split('-');
-  if (!versions) {
-    return;
-  }
-
-  return versions.shift();
-};
-
 export const isLegacyApmIndex = (
   indexName: string,
   apmIndexPatterns: string[] = [],
   mappings: FlatSettings['mappings']
 ) => {
-  const clientVersion = getPureVersion(get(mappings, '_meta.version'));
+  const clientVersion = new SemVer(get(mappings, '_meta.version', '0.0.0'));
 
-  if (clientVersion && semver.gte(clientVersion, '7.0.0')) {
+  if (clientVersion.compareMain('7.0.0') > -1) {
     return false;
   }
 
