@@ -112,6 +112,26 @@ export const props: { structureTree: SymbolWithMembers[] } = {
                 },
               ],
             },
+            {
+              name: 'Unit',
+              kind: SymbolKind.Variable,
+              location: {
+                uri:
+                  'git://github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts',
+                range: { start: { line: 20, character: 0 }, end: { line: 20, character: 66 } },
+              },
+              path: 'Unit',
+            },
+            {
+              name: 'datemath',
+              kind: SymbolKind.Constant,
+              location: {
+                uri:
+                  'git://github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts',
+                range: { start: { line: 22, character: 14 }, end: { line: 47, character: 1 } },
+              },
+              path: 'datemath',
+            },
           ],
         },
       ],
