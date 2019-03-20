@@ -275,7 +275,7 @@
 .code-commit-id {
   @include euiCodeFont;
   height: calc(20rem / 14);
-  margin: auto 0;
+  margin: auto 0 auto $euiSizeM;
   text-align: center;
   flex-shrink: 0;
 }
