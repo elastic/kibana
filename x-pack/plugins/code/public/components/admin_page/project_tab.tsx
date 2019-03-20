@@ -33,6 +33,7 @@ import { Repository } from '../../../model';
 import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
 import { ToastType } from '../../reducers/repository';
+import { isImportRepositoryURLInvalid } from '../../utils/url';
 import { ProjectItem } from './project_item';
 import { ProjectSettings } from './project_settings';
 
@@ -95,7 +96,7 @@ interface State {
 class CodeProjectTab extends React.PureComponent<Props, State> {
   public static getDerivedStateFromProps(props: Readonly<Props>, state: State) {
     if (state.importLoading && !props.importLoading) {
-      return { showImportProjectModal: false, importLoading: props.importLoading };
+      return { showImportProjectModal: false, importLoading: props.importLoading, repoURL: '' };
     }
     return { importLoading: props.importLoading };
   }
@@ -134,8 +135,9 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   };
 
   public submitImportProject = () => {
-    this.props.importRepo(this.state.repoURL);
-    this.setState({ repoURL: '' });
+    if (!isImportRepositoryURLInvalid(this.state.repoURL)) {
+      this.props.importRepo(this.state.repoURL);
+    }
   };
 
   public renderImportModal = () => {
@@ -150,7 +152,10 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
               <h3>Repository URL</h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow>
+              <EuiFormRow
+                isInvalid={isImportRepositoryURLInvalid(this.state.repoURL)}
+                error="This field shouldn't be empty."
+              >
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
@@ -159,6 +164,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
                   data-test-subj="importRepositoryUrlInputBox"
                   isLoading={this.props.importLoading}
                   fullWidth={true}
+                  isInvalid={isImportRepositoryURLInvalid(this.state.repoURL)}
                 />
               </EuiFormRow>
             </EuiForm>

@@ -17,6 +17,7 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { importRepo } from '../../actions';
 import { RootState } from '../../reducers';
+import { isImportRepositoryURLInvalid } from '../../utils/url';
 
 const ImportButton = styled(EuiButton)`
   margin-top: 1.5rem;
@@ -45,8 +46,9 @@ class CodeImportProject extends React.PureComponent<
   };
 
   public submitImportProject = () => {
-    this.props.importRepo(this.state.value);
-    this.setState({ value: '' });
+    if (!isImportRepositoryURLInvalid(this.state.value)) {
+      this.props.importRepo(this.state.value);
+    }
   };
 
   public render() {
@@ -59,6 +61,8 @@ class CodeImportProject extends React.PureComponent<
               label="Repository URL"
               helpText="e.g. https://github.com/elastic/elasticsearch"
               fullWidth
+              isInvalid={isImportRepositoryURLInvalid(this.state.value)}
+              error="This field shouldn't be empty."
             >
               <EuiFieldText
                 value={this.state.value}
@@ -67,6 +71,7 @@ class CodeImportProject extends React.PureComponent<
                 data-test-subj="importRepositoryUrlInputBox"
                 isLoading={this.props.importLoading}
                 fullWidth={true}
+                isInvalid={isImportRepositoryURLInvalid(this.state.value)}
               />
             </EuiFormRow>
           </EuiFlexItem>
