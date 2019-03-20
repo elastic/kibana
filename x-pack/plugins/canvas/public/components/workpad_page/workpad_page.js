@@ -53,6 +53,8 @@ export class WorkpadPage extends PureComponent {
     bringToFront: PropTypes.func,
     sendBackward: PropTypes.func,
     sendToBack: PropTypes.func,
+    canvasOrigin: PropTypes.func,
+    saveCanvasOrigin: PropTypes.func.isRequired,
   };
 
   componentWillUnmount() {
@@ -87,6 +89,8 @@ export class WorkpadPage extends PureComponent {
       groupElements,
       ungroupElements,
       forceUpdate,
+      canvasOrigin,
+      saveCanvasOrigin,
     } = this.props;
 
     let shortcuts = null;
@@ -112,6 +116,11 @@ export class WorkpadPage extends PureComponent {
       <div
         key={page.id}
         id={page.id}
+        ref={element => {
+          if (!canvasOrigin && element && element.getBoundingClientRect) {
+            saveCanvasOrigin(() => () => element.getBoundingClientRect());
+          }
+        }}
         data-test-subj="canvasWorkpadPage"
         className={`canvasPage ${className} ${isEditable ? 'canvasPage--isEditable' : ''}`}
         data-shared-items-container
