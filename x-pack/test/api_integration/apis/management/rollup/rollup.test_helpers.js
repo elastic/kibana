@@ -91,6 +91,15 @@ export const registerHelpers = ({ supertest, es }) => {
   const waitForJobsToStop = (attempt = 0) => (
     loadJobs()
       .then(async ({ body: { jobs } }) => {
+        /**
+         * To add some context in case some flakiness appears, we'll log the jobs ids and state.
+         * This could be removed if it is confirmed that no more flakyness comes from the rollup api integration tests.
+         */
+        console.log('--------------------- Wait for jobs to stop result ------------------------------------');
+        console.log('Current Rollup Jobs:');
+        console.log(jobs.map((job) => ({ id: job.config.id, state: job.status.job_state })));
+        console.log('\n');
+
         const jobBeingStopped = jobs.filter(job => job.status.job_state !== 'stopped' && job.status.job_state !== 'started');
 
         if (!jobBeingStopped.length) {
