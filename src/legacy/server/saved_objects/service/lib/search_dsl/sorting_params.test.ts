@@ -64,12 +64,6 @@ const MAPPINGS = {
 };
 
 describe('searchDsl/getSortParams', () => {
-  describe('no sortField, type, or order', () => {
-    it('returns no params', () => {
-      expect(getSortingParams(MAPPINGS)).toEqual({});
-    });
-  });
-
   describe('type, no sortField', () => {
     it('returns no params', () => {
       expect(getSortingParams(MAPPINGS, 'pending')).toEqual({});
@@ -78,7 +72,7 @@ describe('searchDsl/getSortParams', () => {
 
   describe('type, order, no sortField', () => {
     it('returns no params', () => {
-      expect(getSortingParams(MAPPINGS, 'saved', null, 'desc')).toEqual({});
+      expect(getSortingParams(MAPPINGS, 'saved', undefined, 'desc')).toEqual({});
     });
   });
 

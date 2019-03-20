@@ -17,42 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import * as Public from './public';
+import * as Server from './server';
 
-import { getQueryParams } from './query_params';
-import { getSortingParams } from './sorting_params';
-
-export function getSearchDsl(mappings, schema, options = {}) {
-  const {
-    type,
-    search,
-    defaultSearchOperator,
-    searchFields,
-    sortField,
-    sortOrder,
-    namespace,
-    hasReference,
-  } = options;
-
-  if (!type) {
-    throw Boom.notAcceptable('type must be specified');
-  }
-
-  if (sortOrder && !sortField) {
-    throw Boom.notAcceptable('sortOrder requires a sortField');
-  }
-
-  return {
-    ...getQueryParams(
-      mappings,
-      schema,
-      namespace,
-      type,
-      search,
-      searchFields,
-      defaultSearchOperator,
-      hasReference
-    ),
-    ...getSortingParams(mappings, type, sortField, sortOrder),
-  };
-}
+export { Public, Server };

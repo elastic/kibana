@@ -17,15 +17,19 @@
  * under the License.
  */
 
-export const EXTENDED_STATS_TYPES = [
-  'std_deviation',
-  'variance',
-  'sum_of_squares'
-];
-
 export const METRIC_TYPES = {
   PERCENTILE: 'percentile',
   PERCENTILE_RANK: 'percentile_rank',
   TOP_HIT: 'top_hit',
-  COUNT: 'count'
+  COUNT: 'count',
+  DERIVATIVE: 'derivative',
+  STD_DEVIATION: 'std_deviation',
+  VARIANCE: 'variance',
+  SUM_OF_SQUARES: 'sum_of_squares',
 };
+
+export const EXTENDED_STATS_TYPES = [
+  METRIC_TYPES.STD_DEVIATION,
+  METRIC_TYPES.VARIANCE,
+  METRIC_TYPES.SUM_OF_SQUARES
+];

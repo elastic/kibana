@@ -30,4 +30,4 @@ jest.doMock('../config/config_service', () => ({
 }));
 
 export const mockServer = { start: jest.fn(), stop: jest.fn() };
-jest.mock('../', () => ({ Server: jest.fn(() => mockServer) }));
+jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));

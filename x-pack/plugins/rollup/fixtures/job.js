@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from '../__jest__/utils';
+import { getRandomString } from '../../../test_utils';
 
 const initialValues = {
   dateHistogramField: 'timestamp',

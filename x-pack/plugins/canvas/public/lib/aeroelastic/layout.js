@@ -140,7 +140,7 @@ const nextShapes = select(getNextShapes)(shapes, restateShapesEvent);
 
 const transformedShapes = select(applyLocalTransforms)(nextShapes, transformIntents);
 
-const draggedPrimaryShape = select(getDraggedPrimaryShape)(shapes, draggedShape);
+const draggedPrimaryShape = select(getDraggedPrimaryShape)(nextShapes, draggedShape);
 
 const alignmentGuideAnnotations = select(getAlignmentGuideAnnotations)(
   configuration,

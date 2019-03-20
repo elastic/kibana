@@ -20,47 +20,44 @@
 jest.mock('./query_params');
 jest.mock('./sorting_params');
 
-import { getSearchDsl } from './search_dsl';
+import { schemaMock } from '../../../schema/schema.mock';
 import * as queryParamsNS from './query_params';
+import { getSearchDsl } from './search_dsl';
 import * as sortParamsNS from './sorting_params';
+
+const getQueryParams = queryParamsNS.getQueryParams as jest.Mock;
+const getSortingParams = sortParamsNS.getSortingParams as jest.Mock;
+
+const SCHEMA = schemaMock.create();
+const MAPPINGS = { properties: {} };
 
 describe('getSearchDsl', () => {
   afterEach(() => {
-    queryParamsNS.getQueryParams.mockReset();
-    sortParamsNS.getSortingParams.mockReset();
+    getQueryParams.mockReset();
+    getSortingParams.mockReset();
   });
 
   describe('validation', () => {
     it('throws when type is not specified', () => {
       expect(() => {
-        getSearchDsl(
-          {},
-          {},
-          {
-            type: undefined,
-            sortField: 'title',
-          }
-        );
+        getSearchDsl(MAPPINGS, SCHEMA, {
+          type: undefined as any,
+          sortField: 'title',
+        });
       }).toThrowError(/type must be specified/);
     });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
-        getSearchDsl(
-          {},
-          {},
-          {
-            type: 'foo',
-            sortOrder: 'desc',
-          }
-        );
+        getSearchDsl(MAPPINGS, SCHEMA, {
+          type: 'foo',
+          sortOrder: 'desc',
+        });
       }).toThrowError(/sortOrder requires a sortField/);
     });
   });
 
   describe('passes control', () => {
     it('passes (mappings, schema, namespace, type, search, searchFields, hasReference) to getQueryParams', () => {
-      const mappings = { type: { properties: {} } };
-      const schema = { isNamespaceAgnostic: () => {} };
       const opts = {
         namespace: 'foo-namespace',
         type: 'foo',
@@ -73,11 +70,11 @@ describe('getSearchDsl', () => {
         },
       };
 
-      getSearchDsl(mappings, schema, opts);
-      expect(queryParamsNS.getQueryParams).toHaveBeenCalledTimes(1);
-      expect(queryParamsNS.getQueryParams).toHaveBeenCalledWith(
-        mappings,
-        schema,
+      getSearchDsl(MAPPINGS, SCHEMA, opts);
+      expect(getQueryParams).toHaveBeenCalledTimes(1);
+      expect(getQueryParams).toHaveBeenCalledWith(
+        MAPPINGS,
+        SCHEMA,
         opts.namespace,
         opts.type,
         opts.search,
@@ -88,19 +85,17 @@ describe('getSearchDsl', () => {
     });
 
     it('passes (mappings, type, sortField, sortOrder) to getSortingParams', () => {
-      sortParamsNS.getSortingParams.mockReturnValue({});
-      const mappings = { type: { properties: {} } };
-      const schema = { isNamespaceAgnostic: () => {} };
+      getSortingParams.mockReturnValue({});
       const opts = {
         type: 'foo',
         sortField: 'bar',
         sortOrder: 'baz',
       };
 
-      getSearchDsl(mappings, schema, opts);
-      expect(sortParamsNS.getSortingParams).toHaveBeenCalledTimes(1);
-      expect(sortParamsNS.getSortingParams).toHaveBeenCalledWith(
-        mappings,
+      getSearchDsl(MAPPINGS, SCHEMA, opts);
+      expect(getSortingParams).toHaveBeenCalledTimes(1);
+      expect(getSortingParams).toHaveBeenCalledWith(
+        MAPPINGS,
         opts.type,
         opts.sortField,
         opts.sortOrder
@@ -108,9 +103,9 @@ describe('getSearchDsl', () => {
     });
 
     it('returns combination of getQueryParams and getSortingParams', () => {
-      queryParamsNS.getQueryParams.mockReturnValue({ a: 'a' });
-      sortParamsNS.getSortingParams.mockReturnValue({ b: 'b' });
-      expect(getSearchDsl(null, null, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
+      getQueryParams.mockReturnValue({ a: 'a' });
+      getSortingParams.mockReturnValue({ b: 'b' });
+      expect(getSearchDsl(MAPPINGS, SCHEMA, { type: 'foo' })).toEqual({ a: 'a', b: 'b' });
     });
   });
 });

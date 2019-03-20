@@ -25,12 +25,12 @@ import {
 } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Server } from '.';
 import { Env } from './config';
-import { getEnvOptions } from './config/__mocks__/env';
-import { loggingServiceMock } from './logging/logging_service.mock';
+import { Server } from './server';
 
+import { getEnvOptions } from './config/__mocks__/env';
 import { configServiceMock } from './config/config_service.mock';
+import { loggingServiceMock } from './logging/logging_service.mock';
 
 const configService = configServiceMock.create();
 const env = new Env('.', getEnvOptions());

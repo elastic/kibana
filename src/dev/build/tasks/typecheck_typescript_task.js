@@ -20,28 +20,13 @@
 import { exec, write } from '../lib';
 import { Project } from '../../typescript';
 
-export const TranspileTypescriptTypesTask = {
-  description: 'Transpiling types with typescript compiler',
+export const TypecheckTypescriptTask = {
+  description: 'Typechecking sources with typescript compiler',
 
   async run(config, log, build) {
-    // This task is only used to build types needed for the x-pack typescript build
-
-    // the types project is built inside the repo so x-pack can use it for it's in-repo build.
-    const typesProjectRepo = new Project(config.resolveFromRepo('tsconfig.types.json'));
-    const typesProjectBuild = new Project(build.resolvePath('tsconfig.types.json'));
-
-    // these projects are located in the build folder
-    const defaultProject = new Project(build.resolvePath('tsconfig.json'));
+    // these projects are built in the build folder
     const browserProject = new Project(build.resolvePath('tsconfig.browser.json'));
-
-    // update the default config to exclude **/public/**/* files
-    await write(defaultProject.tsConfigPath, JSON.stringify({
-      ...defaultProject.config,
-      exclude: [
-        ...defaultProject.config.exclude,
-        'src/**/public/**/*'
-      ]
-    }));
+    const defaultProject = new Project(build.resolvePath('tsconfig.json'));
 
     // update the browser config file to include **/public/**/* files
     await write(browserProject.tsConfigPath, JSON.stringify({
@@ -53,18 +38,28 @@ export const TranspileTypescriptTypesTask = {
       ]
     }));
 
+    // update the default config to exclude **/public/**/* files
+    await write(defaultProject.tsConfigPath, JSON.stringify({
+      ...defaultProject.config,
+      exclude: [
+        ...defaultProject.config.exclude,
+        'src/**/public/**/*'
+      ]
+    }));
+
     const projects = [
-      typesProjectRepo.tsConfigPath,
-      typesProjectBuild.tsConfigPath,
+      browserProject.tsConfigPath,
+      defaultProject.tsConfigPath,
     ];
 
-    // compile each typescript type config file
+    // compile each typescript config file
     for (const tsConfigPath of projects) {
-      log.info(`Compiling`, tsConfigPath, 'project');
+      log.info(`Typechecking`, tsConfigPath, 'project');
       await exec(
         log,
         require.resolve('typescript/bin/tsc'),
         [
+          '--noEmit',
           '--pretty', 'true',
           '--project', tsConfigPath,
         ],
