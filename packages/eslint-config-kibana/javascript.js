@@ -1,10 +1,15 @@
 const semver = require('semver');
-
+const { resolve } = require('path');
+const { readdirSync } = require('fs');
 const PKG = require('../../package.json');
 const RESTRICTED_GLOBALS = require('./restricted_globals');
+const RESTRICTED_MODULES = { paths: ['gulp-util'] };
 
 module.exports = {
   overrides: [
+    /**
+     * Main JS configuration
+     */
     {
       files: ['**/*.js'],
       parser: 'babel-eslint',
@@ -22,6 +27,11 @@ module.exports = {
       settings: {
         react: {
           version: semver.valid(semver.coerce(PKG.dependencies.react)),
+        },
+        'import/resolver': {
+          '@kbn/eslint-import-resolver-kibana': {
+            forceNode: true,
+          },
         },
       },
 
@@ -76,6 +86,8 @@ module.exports = {
         'no-proto': 'error',
         'no-redeclare': 'error',
         'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
+        'no-restricted-imports': [2, RESTRICTED_MODULES],
+        'no-restricted-modules': [2, RESTRICTED_MODULES],
         'no-return-assign': 'off',
         'no-script-url': 'error',
         'no-sequences': 'error',
@@ -180,6 +192,362 @@ module.exports = {
 
         'prefer-object-spread/prefer-object-spread': 'error',
       }
+    },
+
+    /**
+     * Allow default exports
+     */
+    {
+      files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
+      rules: {
+        'kibana-custom/no-default-export': 'off',
+        'import/no-named-as-default': 'off',
+      },
+    },
+
+    /**
+     * Files that are allowed to import webpack-specific stuff
+     */
+    {
+      files: [
+        '**/public/**/*.js',
+        '**/webpackShims/**/*.js',
+        'packages/kbn-ui-framework/doc_site/src/**/*.js',
+        'src/fixtures/**/*.js', // TODO: this directory needs to be more obviously "public" (or go away)
+      ],
+      settings: {
+        // instructs import/no-extraneous-dependencies to treat modules
+        // in plugins/ or ui/ namespace as "core modules" so they don't
+        // trigger failures for not being listed in package.json
+        'import/core-modules': ['plugins', 'legacy/ui', 'uiExports'],
+
+        'import/resolver': {
+          '@kbn/eslint-import-resolver-kibana': {
+            forceNode: false,
+            rootPackageName: 'kibana',
+            kibanaPath: '.',
+            pluginMap: readdirSync(resolve(__dirname, '../../x-pack/plugins')).reduce((acc, name) => {
+              console.log(name);
+              if (!name.startsWith('_')) {
+                acc[name] = `x-pack/plugins/${name}`;
+              }
+              return acc;
+            }, {}),
+          },
+        },
+      },
+    },
+
+    /**
+     * Files that ARE NOT allowed to use devDependencies
+     */
+    {
+      files: ['packages/kbn-ui-framework/**/*.js', 'x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: false,
+            peerDependencies: true,
+          },
+        ],
+      },
+    },
+
+    /**
+     * Files that ARE allowed to use devDependencies
+     */
+    {
+      files: [
+        'packages/kbn-ui-framework/**/*.test.js',
+        'packages/kbn-ui-framework/doc_site/**/*.js',
+        'packages/kbn-ui-framework/generator-kui/**/*.js',
+        'packages/kbn-ui-framework/Gruntfile.js',
+        'packages/kbn-es/src/**/*.js',
+        'packages/kbn-interpreter/tasks/**/*.js',
+        'packages/kbn-interpreter/src/plugin/**/*.js',
+        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
+        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+        'x-pack/**/*.test.js',
+        'x-pack/gulpfile.js',
+        'x-pack/plugins/apm/public/utils/testHelpers.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: true,
+            peerDependencies: true,
+          },
+        ],
+      },
+    },
+
+    /**
+     * Files that run BEFORE node version check
+     */
+    {
+      files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
+      rules: {
+        'import/no-commonjs': 'off',
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-var': 'off',
+        'prefer-const': 'off',
+        'prefer-destructuring': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ImportDeclaration',
+          'ExportNamedDeclaration',
+          'ExportDefaultDeclaration',
+          'ExportAllDeclaration',
+          'ArrowFunctionExpression',
+          'AwaitExpression',
+          'ClassDeclaration',
+          'RestElement',
+          'SpreadElement',
+          'YieldExpression',
+          'VariableDeclaration[kind="const"]',
+          'VariableDeclaration[kind="let"]',
+          'VariableDeclarator[id.type="ArrayPattern"]',
+          'VariableDeclarator[id.type="ObjectPattern"]',
+        ],
+      },
+    },
+
+    /**
+     * Files that run in the browser with only node-level transpilation
+     */
+    {
+      files: [
+        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        '**/browser_exec_scripts/**/*.js',
+      ],
+      rules: {
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-var': 'off',
+        'prefer-const': 'off',
+        'prefer-destructuring': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ArrowFunctionExpression',
+          'AwaitExpression',
+          'ClassDeclaration',
+          'ImportDeclaration',
+          'RestElement',
+          'SpreadElement',
+          'YieldExpression',
+          'VariableDeclaration[kind="const"]',
+          'VariableDeclaration[kind="let"]',
+          'VariableDeclarator[id.type="ArrayPattern"]',
+          'VariableDeclarator[id.type="ObjectPattern"]',
+        ],
+      },
+    },
+
+    /**
+     * Files that run AFTER node version check
+     * and are not also transpiled with babel
+     */
+    {
+      files: [
+        '.eslintrc.js',
+        '**/webpackShims/**/*.js',
+        'packages/kbn-plugin-generator/**/*.js',
+        'packages/kbn-plugin-helpers/**/*.js',
+        'packages/kbn-eslint-import-resolver-kibana/**/*.js',
+        'packages/kbn-eslint-plugin-license-header/**/*.js',
+        'x-pack/gulpfile.js',
+        'x-pack/dev-tools/mocha/setup_mocha.js',
+        'x-pack/scripts/*.js',
+      ],
+      rules: {
+        'import/no-commonjs': 'off',
+        'prefer-object-spread/prefer-object-spread': 'off',
+        'no-restricted-syntax': [
+          'error',
+          'ImportDeclaration',
+          'ExportNamedDeclaration',
+          'ExportDefaultDeclaration',
+          'ExportAllDeclaration',
+        ],
+      },
+    },
+
+    /**
+     * APM overrides
+     */
+    {
+      files: ['x-pack/plugins/apm/**/*.js'],
+      rules: {
+        'no-unused-vars': ['error', { ignoreRestSiblings: true }],
+        'no-console': ['warn', { allow: ['error'] }],
+      },
+    },
+
+    /**
+     * GIS overrides
+     */
+    {
+      files: ['x-pack/plugins/maps/**/*.js'],
+      rules: {
+        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
+      },
+    },
+
+    /**
+     * Graph overrides
+     */
+    {
+      files: ['x-pack/plugins/graph/**/*.js'],
+      globals: {
+        angular: true,
+        $: true,
+      },
+      rules: {
+        'block-scoped-var': 'off',
+        camelcase: 'off',
+        eqeqeq: 'off',
+        'guard-for-in': 'off',
+        'new-cap': 'off',
+        'no-loop-func': 'off',
+        'no-redeclare': 'off',
+        'no-shadow': 'off',
+        'no-unused-vars': 'off',
+        'one-var': 'off',
+      },
+    },
+
+    /**
+     * ML overrides
+     */
+    {
+      files: ['x-pack/plugins/ml/**/*.js'],
+      rules: {
+        'no-shadow': 'error',
+      },
+    },
+
+    /**
+     * disable jsx-a11y for kbn-ui-framework
+     */
+    {
+      files: ['packages/kbn-ui-framework/**/*.js'],
+      rules: {
+        'jsx-a11y/click-events-have-key-events': 'off',
+        'jsx-a11y/anchor-has-content': 'off',
+        'jsx-a11y/tabindex-no-positive': 'off',
+        'jsx-a11y/label-has-associated-control': 'off',
+        'jsx-a11y/aria-role': 'off',
+      },
+    },
+
+    /**
+     * Monitoring overrides
+     */
+    {
+      files: ['x-pack/plugins/monitoring/**/*.js'],
+      rules: {
+        'block-spacing': ['error', 'always'],
+        curly: ['error', 'all'],
+        'no-unused-vars': ['error', { args: 'all', argsIgnorePattern: '^_' }],
+        'no-else-return': 'error',
+      },
+    },
+    {
+      files: ['x-pack/plugins/monitoring/public/**/*.js'],
+      env: { browser: true },
+    },
+
+    /**
+     * Canvas overrides
+     */
+    {
+      files: ['x-pack/plugins/canvas/**/*.js'],
+      rules: {
+        radix: 'error',
+        curly: ['error', 'all'],
+
+        // module importing
+        'import/order': [
+          'error',
+          {
+            groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          },
+        ],
+        'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
+
+        // react
+        'react/no-did-mount-set-state': 'error',
+        'react/no-did-update-set-state': 'error',
+        'react/no-multi-comp': ['error', { ignoreStateless: true }],
+        'react/self-closing-comp': 'error',
+        'react/sort-comp': 'error',
+        'react/jsx-boolean-value': 'error',
+        'react/jsx-wrap-multilines': 'error',
+        'react/no-unescaped-entities': ['error', { forbid: ['>', '}'] }],
+        'react/forbid-elements': [
+          'error',
+          {
+            forbid: [
+              {
+                element: 'EuiConfirmModal',
+                message: 'Use <ConfirmModal> instead',
+              },
+              {
+                element: 'EuiPopover',
+                message: 'Use <Popover> instead',
+              },
+              {
+                element: 'EuiIconTip',
+                message: 'Use <TooltipIcon> instead',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: [
+        'x-pack/plugins/canvas/gulpfile.js',
+        'x-pack/plugins/canvas/scripts/*.js',
+        'x-pack/plugins/canvas/tasks/*.js',
+        'x-pack/plugins/canvas/tasks/**/*.js',
+        'x-pack/plugins/canvas/__tests__/**/*.js',
+        'x-pack/plugins/canvas/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
+      ],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: true,
+            peerDependencies: true,
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/**/*.js'],
+      globals: { canvas: true, $: true },
+      rules: {
+        'import/no-unresolved': [
+          'error',
+          {
+            ignore: ['!!raw-loader.+.svg$'],
+          },
+        ],
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/public/**/*.js'],
+      env: {
+        browser: true,
+      },
+    },
+    {
+      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
+      env: {
+        jquery: true,
+      },
     },
   ]
 };

@@ -12,7 +12,7 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
-const typescriptEslintRecommendedRules = require('@typescript-eslint/eslint-plugin').configs.recommended.rules;
+// const typescriptEslintRecommendedRules = require('@typescript-eslint/eslint-plugin').configs.recommended.rules;
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
 module.exports = {
@@ -23,8 +23,6 @@ module.exports = {
 
       plugins: [
         '@typescript-eslint',
-        'mocha',
-        'no-unsanitized',
         'prefer-object-spread',
         'jsx-a11y',
       ],
