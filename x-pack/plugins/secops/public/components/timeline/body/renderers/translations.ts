@@ -78,3 +78,11 @@ export const SHR = i18n.translate('xpack.secops.zeek.shrDescription', {
 export const OTH = i18n.translate('xpack.secops.zeek.othDescription', {
   defaultMessage: 'No SYN seen, just midstream traffic',
 });
+
+export const IN = i18n.translate('xpack.secops.auditd.disposed.inDescription', {
+  defaultMessage: 'in',
+});
+
+export const ENDED_FROM = i18n.translate('xpack.secops.auditd.endedsession.endedFromDescription', {
+  defaultMessage: 'ended from',
+});
