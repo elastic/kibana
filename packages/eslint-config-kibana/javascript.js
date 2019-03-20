@@ -227,7 +227,6 @@ module.exports = {
             rootPackageName: 'kibana',
             kibanaPath: '.',
             pluginMap: readdirSync(resolve(__dirname, '../../x-pack/plugins')).reduce((acc, name) => {
-              console.log(name);
               if (!name.startsWith('_')) {
                 acc[name] = `x-pack/plugins/${name}`;
               }
