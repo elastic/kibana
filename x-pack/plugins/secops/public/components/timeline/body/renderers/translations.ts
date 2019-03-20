@@ -78,3 +78,18 @@ export const SHR = i18n.translate('xpack.secops.zeek.shrDescription', {
 export const OTH = i18n.translate('xpack.secops.zeek.othDescription', {
   defaultMessage: 'No SYN seen, just midstream traffic',
 });
+
+export const SESSION = i18n.translate('xpack.secops.auditd.sessionDescription', {
+  defaultMessage: 'Session',
+});
+
+export const IN = i18n.translate('xpack.secops.auditd.disposed.inDescription', {
+  defaultMessage: 'in',
+});
+
+export const WAS_AUTHORIZED_TO_USE = i18n.translate(
+  'xpack.secops.auditd.wasauthorized.wasAuthorizedToUseDescription',
+  {
+    defaultMessage: 'was authorized to use',
+  }
+);

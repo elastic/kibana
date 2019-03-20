@@ -18,17 +18,17 @@ import { DraggableBadge } from '../../../draggables';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
 import { SourceDest } from './source_dest_ip';
 
+import * as i18n from './translations';
+
 const Details = styled.div`
-  margin-left: 10px;
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin: 10px 0px 10px 10px;
 `;
 
 const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-export const AuditdWasAuthorizedLine = pure<{
+interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
@@ -39,7 +39,9 @@ export const AuditdWasAuthorizedLine = pure<{
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
-}>(
+}
+
+export const AuditdWasAuthorizedLine = pure<Props>(
   ({
     id,
     hostName,
@@ -53,7 +55,7 @@ export const AuditdWasAuthorizedLine = pure<{
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>Session</TokensFlexItem>
+      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-acquired-creds-${id}`}
@@ -74,7 +76,7 @@ export const AuditdWasAuthorizedLine = pure<{
       <TokensFlexItem grow={false}>
         <DraggableBadge id={`auditd-was-authorized-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
-      {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
+      {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-was-authorized-${id}`}
@@ -84,7 +86,7 @@ export const AuditdWasAuthorizedLine = pure<{
         />
       </TokensFlexItem>
       {processExecutable != null && (
-        <TokensFlexItem grow={false}>was authorized to use</TokensFlexItem>
+        <TokensFlexItem grow={false}>{i18n.WAS_AUTHORIZED_TO_USE}</TokensFlexItem>
       )}
       <TokensFlexItem grow={false}>
         <DraggableBadge
