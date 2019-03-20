@@ -25,30 +25,10 @@ describe('PluginVertex', () => {
     vertexJson = {
       config_name: 'some-name',
       stats: {
-        millis_per_event: {
-          data: [
-            [ 1516667383000, 10 ],
-            [ 1516667386000, 50 ]
-          ]
-        },
-        percent_of_total_processor_duration: {
-          data: [
-            [ 1516667383000, 0.25 ],
-            [ 1516667386000, 0.3 ]
-          ]
-        },
-        events_in_per_millisecond: {
-          data: [
-            [ 1516667383000, 0.01 ],
-            [ 1516667386000, 0.02 ]
-          ]
-        },
-        events_out_per_millisecond: {
-          data: [
-            [ 1516667383000, 0.01 ],
-            [ 1516667386000, 0.03 ]
-          ]
-        }
+        millis_per_event: 50,
+        percent_of_total_processor_duration: 0.3,
+        events_in_per_millisecond: 0.01,
+        events_out_per_millisecond: 0.01
       }
     };
   });
