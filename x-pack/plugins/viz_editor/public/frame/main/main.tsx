@@ -16,7 +16,7 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, ViewModel } from '../../common/lib';
+import { initialState, ViewModel } from '../../../common/lib';
 
 import 'brace/ext/language_tools';
 import 'brace/mode/javascript';
@@ -49,7 +49,7 @@ export function Main() {
     dispatch({ type: 'updateViewModel', newState });
   };
 
-  const expression = toExpression(state);
+  const expression = toExpression(state, 'edit');
 
   return (
     <EuiPage>

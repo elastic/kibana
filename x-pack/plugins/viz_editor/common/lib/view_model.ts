@@ -48,14 +48,19 @@ export interface IndexPatterns {
   [id: string]: IndexPattern;
 }
 
-export interface ViewModel {
+/**
+ * The complete state of the editor.
+ * The basic properties which are shared over all editor plugins
+ * are defined here, anything else is in the private property and scoped by plugin
+ */
+export interface ViewModel<K extends string = any, T = any> {
   indexPatterns: IndexPatterns;
   queries: {
     [id: string]: QueryViewModel;
   };
   editorPlugin: string;
   title: string;
-  [key: string]: any;
+  private: { [key in K]: T };
 }
 
 export function selectColumn(id: string, model: ViewModel) {
@@ -66,7 +71,7 @@ export function selectColumn(id: string, model: ViewModel) {
 }
 
 // Generate our dummy-data
-export function initialState(): ViewModel {
+export function initialState(): ViewModel<any, any> {
   return {
     indexPatterns: {
       'index-pattern:aaa': {
@@ -98,13 +103,17 @@ export function initialState(): ViewModel {
     },
     editorPlugin: 'bar_chart',
     title: 'Sum of bytes over time',
-    xAxis: {
-      title: 'Sum of bytes',
-      columns: ['q1_0'],
-    },
-    yAxis: {
-      title: 'Timestamp per 30 seconds',
-      columns: ['q1_1'],
+    private: {
+      barChart: {
+        xAxis: {
+          title: 'Sum of bytes',
+          columns: ['q1_0'],
+        },
+        yAxis: {
+          title: 'Timestamp per 30 seconds',
+          columns: ['q1_1'],
+        },
+      },
     },
   };
 }

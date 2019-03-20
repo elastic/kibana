@@ -5,32 +5,40 @@
  */
 
 import React from 'react';
-import { columnSummary } from '../public/common/components/config_panel';
-import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
-import { Axis, selectColumn, ViewModel } from '../public/common/lib';
+import { columnSummary } from '../common/components/config_panel';
+import { IndexPatternPanel } from '../common/components/index_pattern_panel';
+import { Axis, selectColumn, ViewModel } from '../common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
-interface BarChartVisState extends ViewModel {
-  xAxis: Axis;
-  yAxis: Axis;
-}
+type BarChartViewModel = ViewModel<
+  'barChart',
+  {
+    xAxis: Axis;
+    yAxis: Axis;
+  }
+>;
 
-function dataPanel({ viewModel }: PanelComponentProps<BarChartVisState>) {
+function dataPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
   return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
 }
 
-function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<BarChartVisState>) {
+function configPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
+  const {
+    private: {
+      barChart: { xAxis, yAxis },
+    },
+  } = viewModel;
   return (
     <>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
-        {viewModel.yAxis.columns.map(col => (
+        {yAxis.columns.map(col => (
           <span>{columnSummary(selectColumn(col, viewModel))}</span>
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
-        {viewModel.xAxis.columns.map(col => (
+        {xAxis.columns.map(col => (
           <span>{columnSummary(selectColumn(col, viewModel))}</span>
         ))}
       </div>
@@ -38,15 +46,15 @@ function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<BarCh
   );
 }
 
-function toExpression(viewState: BarChartVisState) {
+function toExpression(viewState: BarChartViewModel) {
   // TODO prob. do this on an AST object and stringify afterwards
-  return `esqueryast ${JSON.stringify(viewState.queries)} | bar_chart xAxisField=${JSON.stringify({
-    xAxis: viewState.xAxis,
-    yAxis: viewState.yAxis,
-  })} | bar_chart_renderer`;
+  return `esqueryast ${JSON.stringify(viewState.queries)} | bar_chart xAxisField=${JSON.stringify(
+    viewState.private.barChart
+  )} | bar_chart_renderer`;
 }
 
-export const config: EditorPlugin<BarChartVisState> = {
+export const config: EditorPlugin<BarChartViewModel> = {
+  name: 'bar_chart',
   toExpression,
   DataPanel: dataPanel,
   ConfigPanel: configPanel,

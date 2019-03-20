@@ -5,7 +5,7 @@
  */
 
 import { config as barChartConfig } from '../bar_chart_plugin';
-import { ViewModel } from './common/lib';
+import { ViewModel } from '../common/lib';
 
 export interface PanelComponentProps<S extends ViewModel = ViewModel> {
   viewModel: S;
@@ -29,10 +29,15 @@ export interface Suggestion<S extends ViewModel = ViewModel> {
  */
 
 export interface EditorPlugin<S extends ViewModel = ViewModel> {
-  DataPanel: React.FunctionComponent<PanelComponentProps<S>>;
-  ConfigPanel: React.FunctionComponent<PanelComponentProps<S>>;
-  // TODO add the other panels
-  toExpression: (viewModel: S) => string;
+  name: string;
+  DataPanel: React.ComponentType<PanelComponentProps<S>>;
+  ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
+  HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
+  TopAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
+  BottomAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
+  LeftAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
+  RightAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
+  toExpression: (viewModel: S, mode: 'view' | 'edit') => string;
   getSuggestions: (viewModel: S) => Array<Suggestion<S>>;
   getInitialState: (viewModel: S) => S;
 }
@@ -53,6 +58,6 @@ export const registry = {
     configMap[name] = config;
   },
   getAll() {
-    return Object.entries(configMap);
+    return Object.values(configMap);
   },
 };
