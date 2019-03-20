@@ -318,8 +318,6 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
-    console.warn('filterAndFormatPropertiesToHtml needs to be implemented');
-    return [];
-    // return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
