@@ -20,7 +20,7 @@
 export const MockClient = jest.fn();
 jest.mock('elasticsearch', () => ({
   // Jest types don't include `requireActual` right now.
-  ...(jest as any).requireActual('elasticsearch'),
+  ...jest.requireActual('elasticsearch'),
   Client: MockClient,
 }));
 
