@@ -60,7 +60,8 @@ export const AuditdStartedSessionLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-started-session-${id}`}
+          contextId="auditd-started-session"
+          eventId={id}
           field="auditd.session"
           value={session}
           iconType="number"
@@ -68,7 +69,8 @@ export const AuditdStartedSessionLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
-          id={`auditd-started-session-${id}`}
+          contextId="auditd-started-session"
+          eventId={id}
           userName={userName}
           primary={primary}
           secondary={secondary}
@@ -80,7 +82,12 @@ export const AuditdStartedSessionLine = pure<Props>(
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge id={`auditd-started-session-${id}`} field="host.name" value={hostName} />
+        <DraggableBadge
+          contextId="auditd-started-session"
+          eventId={id}
+          field="host.name"
+          value={hostName}
+        />
       </TokensFlexItem>
       {workingDirectory != null && (
         <TokensFlexItem grow={false} component="span">
@@ -89,7 +96,8 @@ export const AuditdStartedSessionLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-started-session-${id}`}
+          contextId="auditd-started-session"
+          eventId={id}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
@@ -102,7 +110,8 @@ export const AuditdStartedSessionLine = pure<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          id={`auditd-started-session-${id}`}
+          contextId="auditd-started-session"
+          eventId={id}
           field="process.executable"
           value={processExecutable}
           iconType="console"
@@ -111,7 +120,8 @@ export const AuditdStartedSessionLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
-            id={`auditd-started-session-${id}`}
+            contextId="auditd-started-session"
+            eventId={id}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
             value={args}
