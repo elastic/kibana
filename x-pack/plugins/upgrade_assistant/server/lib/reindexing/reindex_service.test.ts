@@ -27,6 +27,7 @@ import {
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
   let callCluster: jest.Mock<CallCluster>;
+  let log: jest.Mock;
   let xpackInfo: { feature: jest.Mocked<any> };
   let service: ReindexService;
 
@@ -55,6 +56,7 @@ describe('reindexService', () => {
       runWhileIndexGroupLocked: jest.fn(async (group: string, f: any) => f({ attributes: {} })),
     };
     callCluster = jest.fn();
+    log = jest.fn();
     xpackInfo = {
       feature: jest.fn(() => ({
         isAvailable() {
@@ -65,7 +67,7 @@ describe('reindexService', () => {
         },
       })),
     };
-    service = reindexServiceFactory(callCluster, xpackInfo as any, actions);
+    service = reindexServiceFactory(callCluster, xpackInfo as any, actions, log);
   });
 
   describe('hasRequiredPrivileges', () => {
@@ -586,6 +588,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=true',
             method: 'POST',
@@ -600,6 +603,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=true',
             method: 'POST',
@@ -623,6 +627,7 @@ describe('reindexService', () => {
           expect(
             updatedOp.attributes.errorMessage!.includes('Could not stop ML jobs')
           ).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=true',
             method: 'POST',
@@ -644,6 +649,7 @@ describe('reindexService', () => {
           expect(
             updatedOp.attributes.errorMessage!.includes('Some nodes are not on minimum version')
           ).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           // Should not have called ML endpoint at all
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=true',
@@ -696,6 +702,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_stop',
             method: 'POST',
@@ -710,6 +717,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.created);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_stop',
             method: 'POST',
@@ -731,6 +739,7 @@ describe('reindexService', () => {
           expect(
             updatedOp.attributes.errorMessage!.includes('Could not stop Watcher')
           ).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_stop',
             method: 'POST',
@@ -766,6 +775,7 @@ describe('reindexService', () => {
         );
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
 
       it('fails if setting updates fail', async () => {
@@ -776,6 +786,7 @@ describe('reindexService', () => {
         );
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
     });
 
@@ -810,6 +821,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
 
       it('fails if create index fails', async () => {
@@ -821,6 +833,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.readonly);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
 
         // Original index should have been set back to allow reads.
         expect(callCluster).toHaveBeenCalledWith('indices.putSettings', {
@@ -873,6 +886,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.newIndexCreated);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
     });
 
@@ -930,6 +944,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexStarted);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage).not.toBeNull();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
         });
       });
 
@@ -1013,6 +1028,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
 
       it('fails if switching aliases fails', async () => {
@@ -1021,6 +1037,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.reindexCompleted);
         expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
+        expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
       });
     });
 
@@ -1089,6 +1106,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=false',
             method: 'POST',
@@ -1104,6 +1122,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=false',
             method: 'POST',
@@ -1124,6 +1143,7 @@ describe('reindexService', () => {
           expect(
             updatedOp.attributes.errorMessage!.includes('Could not resume ML jobs')
           ).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/ml/set_upgrade_mode?enabled=false',
             method: 'POST',
@@ -1190,6 +1210,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_start',
             method: 'POST',
@@ -1205,6 +1226,7 @@ describe('reindexService', () => {
           expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
           expect(updatedOp.attributes.status).toEqual(ReindexStatus.failed);
           expect(updatedOp.attributes.errorMessage!.includes(`Can't lock!`)).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).not.toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_start',
             method: 'POST',
@@ -1225,6 +1247,7 @@ describe('reindexService', () => {
           expect(
             updatedOp.attributes.errorMessage!.includes('Could not start Watcher')
           ).toBeTruthy();
+          expect(log).toHaveBeenCalledWith(['upgrade_assistant', 'error'], expect.any(String));
           expect(callCluster).toHaveBeenCalledWith('transport.request', {
             path: '/_xpack/watcher/_start',
             method: 'POST',
