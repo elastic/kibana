@@ -19,7 +19,7 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { delay } from 'bluebird';
-import sharp from 'sharp';
+import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -454,11 +454,13 @@ export class WebElementWrapper {
     const screenshot = await this._driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const position = await this.getPosition();
-    return sharp(buffer).extract({
-      left: position.x * 2,
-      top: position.y * 2,
-      width: position.width * 2,
-      height: position.height * 2,
-    }).toBuffer();
+    const width = position.width * 2;
+    const height = position.height * 2;
+    const x = position.x * 2;
+    const y = position.y * 2;
+    const src = PNG.sync.read(buffer);
+    const dst = new PNG({ width, height });
+    PNG.bitblt(src, dst, x, y, width, height, 0, 0);
+    return PNG.sync.write(dst);
   }
 }
