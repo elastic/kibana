@@ -18,6 +18,7 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       parserOptions: {
         ecmaFeatures: { jsx: true },
+        project: './tsconfig.json'
       },
       files: ['**/*.{ts,tsx}'],
       plugins: ['@typescript-eslint'],
@@ -29,17 +30,50 @@ module.exports = {
       // For now we are using an workaround to create
       // those extended rules arrays
       rules: Object.assign(
-        typescriptEslintRecommendedRules,
         {
-          "@typescript-eslint/camelcase": [ 'error', { properties: 'never' } ],
-          "@typescript-eslint/indent": [ 'error', 2, { SwitchCase: 1 } ],
-          "@typescript-eslint/no-unused-vars": [ 'error' ],
-          "@typescript-eslint/no-use-before-define": [ 'error', 'nofunc' ],
-          "@typescript-eslint/explicit-function-return-type": false,
-          "@typescript-eslint/no-explicit-any": false,
+          typescriptEslintRecommendedRules,
+          "camelcase": "off",
+          '@typescript-eslint/camelcase': [ 'error', { properties: 'never' } ],
+          "indent": "off",
+          '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
+          "no-unused-vars": "off",
+          '@typescript-eslint/no-unused-vars': [ 'error' ],
+          'no-use-before-define': 'off',
+          '@typescript-eslint/no-use-before-define': 'off',
+
+          "@typescript-eslint/adjacent-overload-signatures": 'off',
+          "@typescript-eslint/array-type": 'off',
+          "@typescript-eslint/ban-types": "error",
+          "@typescript-eslint/class-name-casing": "error",
+          "@typescript-eslint/explicit-function-return-type": 'off',
+          "@typescript-eslint/explicit-member-accessibility": 'off',
+          "@typescript-eslint/interface-name-prefix": "off",
+          "@typescript-eslint/member-delimiter-style": "error",
+          "@typescript-eslint/no-angle-bracket-type-assertion": "error",
+          "no-array-constructor": "off",
+          "@typescript-eslint/no-array-constructor": "error",
+          "@typescript-eslint/no-empty-interface": "error",
+          "@typescript-eslint/no-explicit-any": 'off',
+          "@typescript-eslint/no-inferrable-types": "error",
+          "@typescript-eslint/no-misused-new": "error",
+          "@typescript-eslint/no-namespace": "error",
+          "@typescript-eslint/no-non-null-assertion": 'off',
+          "@typescript-eslint/no-object-literal-type-assertion": "error",
+          "@typescript-eslint/no-parameter-properties": "off",
+          "@typescript-eslint/no-triple-slash-reference": "error",
+          "@typescript-eslint/no-var-requires": "offr",
+          "@typescript-eslint/prefer-interface": "error",
+          "@typescript-eslint/prefer-namespace-keyword": "error",
+          "@typescript-eslint/type-annotation-spacing": "error"
         },
         eslintConfigPrettierTypescriptEslintRules,
       )
+    },
+    {
+      parserOptions: {
+        project: 'x-pack/tsconfig.json'
+      },
+      files: ['x-pack/**/*.{ts,tsx}'],
     },
   ]
 };
