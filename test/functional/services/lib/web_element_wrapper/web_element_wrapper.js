@@ -453,11 +453,7 @@ export class WebElementWrapper {
   async takeScreenshot() {
     const screenshot = await this._driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
-    const position = await this.getPosition();
-    const width = position.width * 2;
-    const height = position.height * 2;
-    const x = position.x * 2;
-    const y = position.y * 2;
+    const { width, height, x, y } = await this.getPosition();
     const src = PNG.sync.read(buffer);
     const dst = new PNG({ width, height });
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);
