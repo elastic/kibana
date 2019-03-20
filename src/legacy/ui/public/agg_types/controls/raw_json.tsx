@@ -45,7 +45,7 @@ function RawJsonParamEditor({
   );
 
   return (
-    <EuiFormRow label={label} isInvalid={isInvalid} className="form-group">
+    <EuiFormRow label={label} isInvalid={isInvalid}>
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
         isInvalid={isInvalid}

@@ -21,7 +21,6 @@ import _ from 'lodash';
 import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'sinon';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from '../../../../vis';
 import { intervalOptions } from '../../../buckets/_interval_options';
@@ -59,10 +58,6 @@ describe('editor', function () {
         ]
       });
 
-      const formCtrl = {
-        $addControl: sinon.fake()
-      };
-
       const $el = $('<vis-editor-agg-params agg="agg" ' +
         'index-pattern="agg.getIndexPattern()" ' +
         'group-name="groupName">' +
@@ -73,7 +68,6 @@ describe('editor', function () {
       $parentScope.groupName = 'buckets';
       $parentScope.vis = vis;
 
-      $el.data('$formController', formCtrl);
       $compile($el)($parentScope);
       $scope = $el.scope();
       $scope.$digest();

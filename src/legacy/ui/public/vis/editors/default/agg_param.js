@@ -21,7 +21,7 @@ import { isFunction, noop } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
-import { isValidJson } from '../../../agg_types/utils';
+import { isValidJson } from './utils';
 
 uiModules
   .get('app/visualize')

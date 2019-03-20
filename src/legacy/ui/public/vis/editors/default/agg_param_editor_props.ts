@@ -22,7 +22,7 @@ import { AggConfig } from '../../agg_config';
 
 interface AggParamEditorProps<T> {
   agg: AggConfig;
-  aggParam?: AggParam;
+  aggParam: AggParam;
   value: T;
   setValue(value: T): void;
 }
