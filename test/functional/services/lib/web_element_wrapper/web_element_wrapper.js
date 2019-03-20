@@ -19,6 +19,7 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { delay } from 'bluebird';
+import sharp from 'sharp';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -442,5 +443,22 @@ export class WebElementWrapper {
     };
 
     return $;
+  }
+
+  /**
+   * Creates the screenshot of the element
+   *
+   * @returns {Promise<void>}
+   */
+  async takeScreenshot() {
+    const screenshot = await this._driver.takeScreenshot();
+    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const position = await this.getPosition();
+    return sharp(buffer).extract({
+      left: position.x * 2,
+      top: position.y * 2,
+      width: position.width * 2,
+      height: position.height * 2,
+    }).toBuffer();
   }
 }

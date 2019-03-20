@@ -23,53 +23,9 @@ import { fromNode as fcb, promisify } from 'bluebird';
 import mkdirp from 'mkdirp';
 import del from 'del';
 import { comparePngs } from './lib/compare_pngs';
-import { createCanvas, Image } from 'canvas';
 
 const mkdirAsync = promisify(mkdirp);
 const writeFileAsync = promisify(writeFile);
-
-const BASE64_IMAGE_PREFIX = 'data:image/png;base64,';
-
-
-function takeScreenshotOfArea({ x, y, width, height }, browser) {
-
-  x = x || 0;
-  y = y || 0;
-
-  let currentScrollTop;
-  let currentScrollLeft;
-
-  return Promise
-    .all([
-      browser.setScrollTop(y),
-      browser.setScrollLeft(x)
-    ])
-    .then(dataList => {
-
-      currentScrollTop = dataList[0];
-      currentScrollLeft = dataList[1];
-
-      return browser.takeScreenshot();
-
-    })
-    .then(image => {
-      const deltaScrollTop = 2 * y - currentScrollTop;
-      const deltaScrollLeft = 2 * x - currentScrollLeft;
-      const canvas = createCanvas(width * 2, height * 2);
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-
-      img.src = BASE64_IMAGE_PREFIX + image;
-
-      console.log('scroll top', deltaScrollLeft, deltaScrollTop);
-
-      ctx.drawImage(img, -deltaScrollLeft, -deltaScrollTop, img.width, img.height);
-
-      return canvas.toBuffer();
-
-    });
-
-}
 
 export async function ScreenshotsProvider({ getService }) {
   const log = getService('log');
@@ -118,14 +74,7 @@ export async function ScreenshotsProvider({ getService }) {
     async _take(path, el) {
       try {
         log.info(`Taking screenshot "${path}"`);
-        let screenshot;
-        if (el) {
-          const position = await el.getPosition();
-          log.debug('element position:', position);
-          screenshot = await takeScreenshotOfArea(position, browser);
-        } else {
-          screenshot = await browser.takeScreenshot();
-        }
+        const screenshot = await (el ? el.takeScreenshot() : browser.takeScreenshot());
         await fcb(cb => mkdirp(dirname(path), cb));
         await fcb(cb => writeFile(path, screenshot, 'base64', cb));
       } catch (err) {
