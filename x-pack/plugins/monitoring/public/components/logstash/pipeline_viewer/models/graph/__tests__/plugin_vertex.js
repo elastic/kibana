@@ -60,7 +60,7 @@ describe('PluginVertex', () => {
 
   it('should have the correct events-per-second stat', () => {
     const pluginVertex = new PluginVertex(graph, vertexJson);
-    expect(pluginVertex.latestEventsPerSecond).to.be(20);
+    expect(pluginVertex.latestEventsPerSecond).to.be(10);
   });
 
   describe('isTimeConsuming', () => {
@@ -71,13 +71,13 @@ describe('PluginVertex', () => {
     });
 
     it('should have a false isTimeConsuming result when the plugin consumes an average amount of execution time', () => {
-      vertexJson.stats.percent_of_total_processor_duration.data[1][1] = percentExecution;
+      vertexJson.stats.percent_of_total_processor_duration = percentExecution;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isTimeConsuming()).to.be(false);
     });
 
     it('should have a true isTimeConsuming result when the plugin consumes a large amount of execution time', () => {
-      vertexJson.stats.percent_of_total_processor_duration.data[1][1] = 0.1 +
+      vertexJson.stats.percent_of_total_processor_duration = 0.1 +
         (percentExecution * (TIME_CONSUMING_PROCESSOR_THRESHOLD_COEFFICIENT));
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isTimeConsuming()).to.be(true);
@@ -91,13 +91,13 @@ describe('PluginVertex', () => {
     });
 
     it('should have a true isSlow result when the plugin\'s seconds per event is 2 standard deviations above the mean', () => {
-      vertexJson.stats.millis_per_event.data[1][1] = 999999999999999999;
+      vertexJson.stats.millis_per_event = 999999999999999999;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isSlow()).to.be(true);
     });
 
     it('should have a false isSlow result when the plugin\'s seconds per event is 2 standard deviations above the mean', () => {
-      vertexJson.stats.millis_per_event.data[1][1] = 1;
+      vertexJson.stats.millis_per_event = 1;
       const pluginVertex = new PluginVertex(graph, vertexJson);
       expect(pluginVertex.isSlow()).to.be(false);
     });
