@@ -15,6 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { ESTooltipProperty } from '../../util/tooltip_property';
 
 const DEFAULT_LIMIT = 2048;
 
@@ -168,6 +169,7 @@ export class ESSearchSource extends AbstractESSource {
   }
 
   async filterAndFormatPropertiesToHtml(properties) {
+    const tooltipProps = [];
     const filteredProperties = {};
     this._descriptor.tooltipProperties.forEach(propertyName => {
       filteredProperties[propertyName] = _.get(properties, propertyName, '-');
@@ -182,16 +184,20 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     this._descriptor.tooltipProperties.forEach(propertyName => {
-      const field = indexPattern.fields.byName[propertyName];
-      if (!field) {
-        return;
-      }
-      const htmlConverter = field.format.getConverterFor('html');
-      filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
-        field.format.convert(filteredProperties[propertyName]);
+      // const field = indexPattern.fields.byName[propertyName];
+      // if (!field) {
+      //   return;
+      // }
+      // const htmlConverter = field.format.getConverterFor('html');
+      // filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
+      //   field.format.convert(filteredProperties[propertyName]);
+      //
+      tooltipProps.push(new ESTooltipProperty(propertyName, filteredProperties[propertyName], indexPattern));
+
     });
 
-    return filteredProperties;
+    return tooltipProps;
+    // return filteredProperties;
   }
 
   isFilterByMapBounds() {

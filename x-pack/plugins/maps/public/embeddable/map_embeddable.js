@@ -29,7 +29,6 @@ export class MapEmbeddable extends Embeddable {
 
   constructor({ savedMap, editUrl, indexPatterns = [] }) {
     super({ title: savedMap.title, editUrl, indexPatterns });
-
     this._savedMap = savedMap;
     this._store = createMapStore();
   }
@@ -39,6 +38,7 @@ export class MapEmbeddable extends Embeddable {
   }
 
   onContainerStateChanged(containerState) {
+    console.log('container state changed', containerState);
     if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
         !_.isEqual(containerState.query, this._prevQuery) ||
         !_.isEqual(containerState.filters, this._prevFilters)) {
@@ -72,6 +72,7 @@ export class MapEmbeddable extends Embeddable {
    * @param {ContainerState} containerState
    */
   render(domNode, containerState) {
+    console.log('emb render', containerState);
     this._store.dispatch(setReadOnly(true));
     // todo get center and zoom from embeddable UI state
     if (this._savedMap.mapStateJSON) {
@@ -105,6 +106,7 @@ export class MapEmbeddable extends Embeddable {
   }
 
   reload() {
+    console.log('reload....');
     this._dispatchSetQuery({
       query: this._prevQuery,
       timeRange: this._prevTimeRange,

@@ -63,6 +63,8 @@ export class MBMapContainer extends React.Component {
       location: popupAnchorLocation
     });
 
+    console.log('if readonly, should show filters', this.props.isReadOnly);
+
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
@@ -254,7 +256,10 @@ export class MBMapContainer extends React.Component {
       return layer.getId() === this.props.tooltipState.layerId;
     });
     const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
+
+
     const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
+    console.log(formattedProperties);
     this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }
 
