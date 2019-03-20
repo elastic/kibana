@@ -6,7 +6,6 @@
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
 
-import { SearchEmbeddable } from 'plugins/kibana/discover/embeddable/search_embeddable';
 import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embeddable';
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
@@ -46,7 +45,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
     const { embeddable } = panelActionAPI;
 
-    if (embeddable && embeddable instanceof SearchEmbeddable) {
+    if (embeddable && embeddable.hasOwnProperty('savedSearch')) {
       return true;
     }
 
@@ -63,7 +62,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       return;
     }
 
-    const searchEmbeddable = embeddable as SearchEmbeddable;
+    const searchEmbeddable = embeddable;
     const state = await this.generateJobParams({ searchEmbeddable });
 
     const id = `search:${embeddable.savedSearch.id}`;
