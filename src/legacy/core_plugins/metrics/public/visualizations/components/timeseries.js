@@ -19,14 +19,22 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import classNames from 'classnames';
 import _ from 'lodash';
 import getLastValue from '../../../common/get_last_value';
-import { isBackgroundInverted } from '../../../common/set_is_reversed';
-import TimeseriesChart from './timeseries_chart';
-import Legend from './legend';
+import {
+  Axis,
+  Chart,
+  getSpecId,
+  LineSeries,
+  ScaleType,
+  Position,
+  Settings,
+  getAxisId,
+  timeFormatter
+} from '@elastic/charts';
+
+import '@elastic/charts/dist/style.css';
 import eventBus from '../lib/events';
-import reactcss from 'reactcss';
 
 class Timeseries extends Component {
 
@@ -127,55 +135,37 @@ class Timeseries extends Component {
   }
 
   render() {
-    const classes = classNames('tvbVisTimeSeries', {
-      'tvbVisTimeSeries--reversed': isBackgroundInverted(this.props.backgroundColor),
-    });
-
-    const styles = reactcss({
-      bottomLegend: {
-        content: {
-          flexDirection: 'column'
-        }
-      }
-    }, { bottomLegend: this.props.legendPosition === 'bottom' });
     return (
-      <div className={classes} data-test-subj="timeseriesChart">
-        <div style={styles.content} className="tvbVisTimeSeries__content">
-          <div className="tvbVisTimeSeries__visualization">
-            <TimeseriesChart
-              dateFormat={this.props.dateFormat}
-              crosshair={this.props.crosshair}
-              onBrush={this.props.onBrush}
-              plothover={this.plothover}
-              backgroundColor={this.props.backgroundColor}
-              series={this.props.series}
-              annotations={this.props.annotations}
-              show={this.state.show}
-              showGrid={this.props.showGrid}
-              tickFormatter={this.props.tickFormatter}
-              options={this.props.options}
-              xaxisLabel={this.props.xaxisLabel}
-              yaxes={this.props.yaxes}
-              xAxisFormatter={this.props.xAxisFormatter}
-            />
-          </div>
-          <Legend
-            legendPosition={this.props.legendPosition}
-            onClick={this.handleHideClick}
-            onToggle={this.toggleFilter}
-            series={this.props.series}
-            showLegend={this.state.showLegend}
-            seriesValues={this.state.values}
-            seriesFilter={this.state.show}
-            tickFormatter={this.props.tickFormatter}
-          />
-        </div>
-      </div>
+      <Chart renderer="canvas" className={'story-chart'}>
+        <Settings showLegend={this.state.showLegend} legendPosition={this.props.legendPosition} />
+        {
+          this.props.series.map(series =>
+            (<LineSeries
+              key={series.id}
+              id={getSpecId(series.label)}
+              xScaleType={ScaleType.Time}
+              yScaleType={ScaleType.Linear}
+              xAccessor={0}
+              yAccessors={[1]}
+              data={series.data}
+              yScaleToDataExtent={false}
+            />))
+        }
+        <Axis
+          id={getAxisId('bottom')}
+          position={Position.Bottom}
+          title={'Bottom axis'}
+          tickFormat={timeFormatter('MMM-DD HH:mm')}
+        />
+        <Axis
+          id={getAxisId('left2')}
+          title={'Left axis'}
+          position={Position.Left}
+        />
+
+      </Chart>
     );
   }
-
-
-
 }
 
 Timeseries.defaultProps = {
