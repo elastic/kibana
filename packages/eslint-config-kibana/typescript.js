@@ -9,19 +9,49 @@
 // To read bore about it please visit
 // https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000225170-ESLint-and-ts-Typescript-files
 
+const semver = require('semver');
+const PKG = require('../../package.json');
+
 const typescriptEslintRecommendedRules = require('@typescript-eslint/eslint-plugin').configs.recommended.rules;
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
 module.exports = {
   overrides: [
     {
+      files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
+
+      plugins: [
+        '@typescript-eslint',
+        'mocha',
+        'no-unsanitized',
+        'prefer-object-spread',
+        'jsx-a11y',
+      ],
+
+      settings: {
+        react: {
+          version: semver.valid(semver.coerce(PKG.dependencies.react)),
+        },
+      },
+
+      env: {
+        es6: true,
+        node: true,
+        mocha: true,
+        browser: true,
+      },
+
       parserOptions: {
-        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+        ecmaVersion: 6,
+        ecmaFeatures: {
+          experimentalObjectRestSpread: true,
+          jsx: true
+        },
         project: './tsconfig.json'
       },
-      files: ['**/*.{ts,tsx}'],
-      plugins: ['@typescript-eslint'],
+
       // NOTE: we can't override the extends option here to apply
       // all the recommend rules as it is not allowed yet
       // more info on: https://github.com/eslint/rfcs/pull/13 and
@@ -30,42 +60,7 @@ module.exports = {
       // For now we are using an workaround to create
       // those extended rules arrays
       rules: Object.assign(
-        {
-          typescriptEslintRecommendedRules,
-          "camelcase": "off",
-          '@typescript-eslint/camelcase': [ 'error', { properties: 'never' } ],
-          "indent": "off",
-          '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
-          "no-unused-vars": "off",
-          '@typescript-eslint/no-unused-vars': [ 'error' ],
-          'no-use-before-define': 'off',
-          '@typescript-eslint/no-use-before-define': 'off',
-
-          "@typescript-eslint/adjacent-overload-signatures": 'off',
-          "@typescript-eslint/array-type": 'off',
-          "@typescript-eslint/ban-types": "error",
-          "@typescript-eslint/class-name-casing": "error",
-          "@typescript-eslint/explicit-function-return-type": 'off',
-          "@typescript-eslint/explicit-member-accessibility": 'off',
-          "@typescript-eslint/interface-name-prefix": "off",
-          "@typescript-eslint/member-delimiter-style": "error",
-          "@typescript-eslint/no-angle-bracket-type-assertion": "error",
-          "no-array-constructor": "off",
-          "@typescript-eslint/no-array-constructor": "error",
-          "@typescript-eslint/no-empty-interface": "error",
-          "@typescript-eslint/no-explicit-any": 'off',
-          "@typescript-eslint/no-inferrable-types": "error",
-          "@typescript-eslint/no-misused-new": "error",
-          "@typescript-eslint/no-namespace": "error",
-          "@typescript-eslint/no-non-null-assertion": 'off',
-          "@typescript-eslint/no-object-literal-type-assertion": "error",
-          "@typescript-eslint/no-parameter-properties": "off",
-          "@typescript-eslint/no-triple-slash-reference": "error",
-          "@typescript-eslint/no-var-requires": "offr",
-          "@typescript-eslint/prefer-interface": "error",
-          "@typescript-eslint/prefer-namespace-keyword": "error",
-          "@typescript-eslint/type-annotation-spacing": "error"
-        },
+        {},
         eslintConfigPrettierTypescriptEslintRules,
       )
     },

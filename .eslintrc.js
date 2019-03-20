@@ -35,8 +35,9 @@ const ELASTIC_LICENSE_HEADER = `
 module.exports = {
   extends: [
     '@elastic/eslint-config-kibana',
-    '@elastic/eslint-config-kibana/jest',
+    '@elastic/eslint-config-kibana/javascript',
     '@elastic/eslint-config-kibana/typescript',
+    '@elastic/eslint-config-kibana/jest',
   ],
 
   settings: {
