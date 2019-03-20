@@ -58,7 +58,7 @@ export const AuditdStartedSessionLine = pure<Props>(
       <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-ended-session-${id}`}
+          id={`auditd-started-session-${id}`}
           field="auditd.session"
           value={session}
           iconType="number"
@@ -66,7 +66,7 @@ export const AuditdStartedSessionLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false}>
         <PrimarySecondaryUserInfo
-          id={`auditd-ended-session-${id}`}
+          id={`auditd-started-session-${id}`}
           userName={userName}
           primary={primary}
           secondary={secondary}
@@ -74,12 +74,12 @@ export const AuditdStartedSessionLine = pure<Props>(
       </TokensFlexItem>
       {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
       <TokensFlexItem grow={false}>
-        <DraggableBadge id={`auditd-ended-session-${id}`} field="host.name" value={hostName} />
+        <DraggableBadge id={`auditd-started-session-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-ended-session-${id}`}
+          id={`auditd-started-session-${id}`}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
@@ -88,7 +88,7 @@ export const AuditdStartedSessionLine = pure<Props>(
       {processExecutable != null && <TokensFlexItem grow={false}>{i18n.STARTED_AT}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-ended-session-${id}`}
+          id={`auditd-started-session-${id}`}
           field="process.executable"
           value={processExecutable}
           iconType="console"
@@ -97,7 +97,7 @@ export const AuditdStartedSessionLine = pure<Props>(
       <TokensFlexItem grow={false}>
         {args !== '' && (
           <DraggableBadge
-            id={`auditd-ended-session-${id}`}
+            id={`auditd-started-session-${id}`}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
             value={args}
