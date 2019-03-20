@@ -55,8 +55,10 @@ export const AuditdStartedSessionLine = pure<Props>(
     session,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
+        {i18n.SESSION}
+      </TokensFlexItem>
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-started-session-${id}`}
           field="auditd.session"
@@ -64,7 +66,7 @@ export const AuditdStartedSessionLine = pure<Props>(
           iconType="number"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
           id={`auditd-started-session-${id}`}
           userName={userName}
@@ -72,12 +74,20 @@ export const AuditdStartedSessionLine = pure<Props>(
           secondary={secondary}
         />
       </TokensFlexItem>
-      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {hostName != null && (
+        <TokensFlexItem grow={false} component="span">
+          @
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge id={`auditd-started-session-${id}`} field="host.name" value={hostName} />
       </TokensFlexItem>
-      {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {workingDirectory != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.IN}
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-started-session-${id}`}
           field="process.working_directory"
@@ -85,8 +95,12 @@ export const AuditdStartedSessionLine = pure<Props>(
           iconType="folderOpen"
         />
       </TokensFlexItem>
-      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.STARTED}</TokensFlexItem>}
-      <TokensFlexItem grow={false}>
+      {processExecutable != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.STARTED}
+        </TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false} component="span">
         <DraggableBadge
           id={`auditd-started-session-${id}`}
           field="process.executable"
@@ -94,7 +108,7 @@ export const AuditdStartedSessionLine = pure<Props>(
           iconType="console"
         />
       </TokensFlexItem>
-      <TokensFlexItem grow={false}>
+      <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
             id={`auditd-started-session-${id}`}
