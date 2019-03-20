@@ -1,0 +1,13 @@
+{
+  "author": "Elastic",
+  "name": "viz_editor",
+  "version": "7.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "devDependencies": {
+    "@types/lodash": "^4.14.110"
+  },
+  "dependencies": {
+    "lodash": "^4.17.10"
+  }
+}
