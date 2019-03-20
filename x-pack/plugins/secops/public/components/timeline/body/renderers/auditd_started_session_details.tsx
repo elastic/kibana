@@ -85,7 +85,7 @@ export const AuditdStartedSessionLine = pure<Props>(
           iconType="folderOpen"
         />
       </TokensFlexItem>
-      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.STARTED_AT}</TokensFlexItem>}
+      {processExecutable != null && <TokensFlexItem grow={false}>{i18n.STARTED}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
           id={`auditd-started-session-${id}`}

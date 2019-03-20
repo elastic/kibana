@@ -91,6 +91,10 @@ export const ENDED_FROM = i18n.translate('xpack.secops.auditd.endedsession.ended
   defaultMessage: 'ended from',
 });
 
+export const STARTED = i18n.translate('xpack.secops.auditd.endedSession.startedAtDescription', {
+  defaultMessage: 'started',
+});
+
 export const DISPOSED_CREDENTIALS_TO = i18n.translate(
   'xpack.secops.auditd.disposed.credentialsDescription',
   {

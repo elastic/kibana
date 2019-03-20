@@ -82,7 +82,7 @@ describe('auditdStartedSessionRowRenderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children Session2908root@siem-kibanastarted at/usr/sbin/cron'
+      'some children Session2908root@siem-kibanastarted/usr/sbin/cron'
     );
   });
 });

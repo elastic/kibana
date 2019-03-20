@@ -37,7 +37,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/started at/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/started/usr/bin/gpgconf--list-dirs agent-socket'
       );
     });
 
@@ -74,7 +74,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -96,7 +96,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -118,7 +118,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -140,7 +140,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -162,7 +162,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -184,7 +184,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -206,7 +206,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -228,7 +228,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -250,7 +250,7 @@ describe('AuditdStartedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1started atprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
@@ -331,7 +331,7 @@ describe('AuditdStartedSessionDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionstarted atsome-process-name');
+      expect(wrapper.text()).toEqual('Sessionstartedsome-process-name');
     });
 
     test('it returns only session if process title with id is given', () => {
