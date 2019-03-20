@@ -195,6 +195,14 @@ export class QueryBarUI extends Component<Props, State> {
   private componentIsUnmounting = false;
   private persistedLog: PersistedLog | null = null;
 
+  public shouldComponentUpdate(
+    nextProps: Readonly<Props>,
+    nextState: Readonly<State>,
+    nextContext: any
+  ): boolean {
+    return !isEqual(this.state, nextState);
+  }
+
   public isDirty = () => {
     if (!this.props.showDatePicker) {
       return this.state.query.query !== this.props.query.query;
