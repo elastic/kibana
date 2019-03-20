@@ -22,8 +22,8 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 describe('Create Rollup Job, step 5: Metrics', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
+  let find;
+  let exists;
   let userActions;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
@@ -36,8 +36,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      findTestSubject,
-      testSubjectExists,
+      find,
+      exists,
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
@@ -60,13 +60,13 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should have the title set to "Review"', () => {
-      expect(testSubjectExists('rollupJobCreateReviewTitle')).toBe(true);
+      expect(exists('rollupJobCreateReviewTitle')).toBe(true);
     });
 
     it('should have the "next" and "save" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(false);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(true);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(false);
+      expect(exists('rollupJobSaveButton')).toBe(true);
     });
 
     it('should go to the "Metrics" step when clicking the back button', async () => {
@@ -76,9 +76,9 @@ describe('Create Rollup Job, step 5: Metrics', () => {
   });
 
   describe('tabs', () => {
-    const getTabsText = () => findTestSubject('stepReviewTab').map(tab => tab.text());
+    const getTabsText = () => find('stepReviewTab').map(tab => tab.text());
     const selectFirstField = (step) => {
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
       // Select the first term field
       getMetadataFromEuiTable(`rollupJob${step}FieldChooser-table`)
