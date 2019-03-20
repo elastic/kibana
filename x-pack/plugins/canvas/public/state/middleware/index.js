@@ -36,7 +36,7 @@ const middlewares = [
   ),
 ];
 
-// intitialize redux devtools if extension is installed
+// initialize redux devtools if extension is installed
 if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) {
   middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 }
