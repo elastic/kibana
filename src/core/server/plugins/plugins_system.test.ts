@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 
 const mockCreatePluginStartContext = jest.fn();
 jest.mock('./plugin_context', () => ({
@@ -27,11 +27,12 @@ jest.mock('./plugin_context', () => ({
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { logger } from '../logging/__mocks__';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { Plugin, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
 
+const logger = loggingServiceMock.create();
 function createPlugin(
   id: string,
   {
@@ -60,10 +61,9 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-let startDeps: { elasticsearch: ElasticsearchServiceStart };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
-  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
@@ -231,4 +231,43 @@ Array [
   expect(firstPluginToRun.start).toHaveBeenCalledTimes(1);
   expect(secondPluginNotToRun.start).not.toHaveBeenCalled();
   expect(thirdPluginToRun.start).toHaveBeenCalledTimes(1);
+});
+
+test('`uiPlugins` returns empty Maps before plugins are added', async () => {
+  expect(pluginsSystem.uiPlugins()).toMatchInlineSnapshot(`
+Object {
+  "internal": Map {},
+  "public": Map {},
+}
+`);
+});
+
+test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
+  const plugins = new Map([
+    [createPlugin('order-4', { required: ['order-2'] }), { 'order-2': 'added-as-2' }],
+    [createPlugin('order-0'), {}],
+    [
+      createPlugin('order-2', { required: ['order-1'], optional: ['order-0'] }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [createPlugin('order-1', { required: ['order-0'] }), { 'order-0': 'added-as-1' }],
+    [
+      createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[Plugin, Record<PluginName, unknown>]>);
+
+  [...plugins.keys()].forEach(plugin => {
+    pluginsSystem.addPlugin(plugin);
+  });
+
+  expect([...pluginsSystem.uiPlugins().internal.keys()]).toMatchInlineSnapshot(`
+Array [
+  "order-0",
+  "order-1",
+  "order-2",
+  "order-3",
+  "order-4",
+]
+`);
 });

@@ -19,6 +19,7 @@ export const sourceFieldsFragment = gql`
       fields {
         container
         host
+        message
         pod
         tiebreaker
         timestamp

@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { ElasticsearchServiceStart } from '../elasticsearch';
-
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
 jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
@@ -32,7 +30,8 @@ import { BehaviorSubject, from } from 'rxjs';
 
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { logger } from '../logging/__mocks__';
+import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { Plugin } from './plugin';
 import { PluginsService } from './plugins_service';
@@ -44,7 +43,8 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-let startDeps: { elasticsearch: ElasticsearchServiceStart };
+const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
+const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockPackage.raw = {
     branch: 'feature-v1',
@@ -57,7 +57,6 @@ beforeEach(() => {
   };
 
   env = Env.createDefault(getEnvOptions());
-  startDeps = { elasticsearch: { legacy: {} } as any };
 
   configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({ plugins: { initialize: true } })),
@@ -83,7 +82,7 @@ test('`start` throws if plugin has an invalid manifest', async () => {
 [Error: Failed to initialize plugins:
 	Invalid JSON (invalid-manifest, path-1)]
 `);
-  expect(logger.mockCollect().error).toMatchInlineSnapshot(`
+  expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: Invalid JSON (invalid-manifest, path-1)],
@@ -104,7 +103,7 @@ test('`start` throws if plugin required Kibana version is incompatible with the 
 [Error: Failed to initialize plugins:
 	Incompatible version (incompatible-version, path-3)]
 `);
-  expect(logger.mockCollect().error).toMatchInlineSnapshot(`
+  expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
 Array [
   Array [
     [Error: Incompatible version (incompatible-version, path-3)],
@@ -162,6 +161,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
 
   mockPluginSystem.startPlugins.mockResolvedValue(new Map());
+  mockPluginSystem.uiPlugins.mockReturnValue({ public: new Map(), internal: new Map() });
 
   mockDiscover.mockReturnValue({
     error$: from([]),
@@ -225,12 +225,16 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     ]),
   });
 
-  expect(await pluginsService.start(startDeps)).toBeInstanceOf(Map);
+  const start = await pluginsService.start(startDeps);
+
+  expect(start.contracts).toBeInstanceOf(Map);
+  expect(start.uiPlugins.public).toBeInstanceOf(Map);
+  expect(start.uiPlugins.internal).toBeInstanceOf(Map);
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
   expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
 
-  expect(logger.mockCollect().info).toMatchInlineSnapshot(`
+  expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
 Array [
   Array [
     "Plugin \\"explicitly-disabled-plugin\\" is disabled.",
@@ -288,12 +292,15 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     plugin$: from([firstPlugin, secondPlugin]),
   });
 
-  const pluginsStart = new Map();
-  mockPluginSystem.startPlugins.mockResolvedValue(pluginsStart);
+  const contracts = new Map();
+  const discoveredPlugins = { public: new Map(), internal: new Map() };
+  mockPluginSystem.startPlugins.mockResolvedValue(contracts);
+  mockPluginSystem.uiPlugins.mockReturnValue(discoveredPlugins);
 
   const start = await pluginsService.start(startDeps);
 
-  expect(start).toBe(pluginsStart);
+  expect(start.contracts).toBe(contracts);
+  expect(start.uiPlugins).toBe(discoveredPlugins);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
@@ -311,7 +318,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     { env, logger, configService }
   );
 
-  const logs = logger.mockCollect();
+  const logs = loggingServiceMock.collect(logger);
   expect(logs.info).toHaveLength(0);
   expect(logs.error).toHaveLength(0);
 });

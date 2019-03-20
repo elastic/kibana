@@ -6,19 +6,8 @@ exports[`apmUiEnabled 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="m"
         textTransform="none"
@@ -45,21 +34,15 @@ exports[`apmUiEnabled 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiFlexGroup
-    alignItems="stretch"
     className="homeAddData__flexGroup"
-    component="div"
-    direction="row"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -84,7 +67,6 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="apmApp"
           />
         }
@@ -95,7 +77,6 @@ exports[`apmUiEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -120,7 +101,6 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="loggingApp"
           />
         }
@@ -131,7 +111,6 @@ exports[`apmUiEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -156,7 +135,6 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="monitoringApp"
           />
         }
@@ -167,7 +145,6 @@ exports[`apmUiEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -192,7 +169,6 @@ exports[`apmUiEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="securityApp"
           />
         }
@@ -203,19 +179,12 @@ exports[`apmUiEnabled 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGrid
     columns={2}
-    gutterSize="l"
-    responsive={true}
   >
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -255,8 +224,6 @@ exports[`apmUiEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -304,19 +271,8 @@ exports[`isNewKibanaInstance 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="m"
         textTransform="none"
@@ -343,21 +299,15 @@ exports[`isNewKibanaInstance 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiFlexGroup
-    alignItems="stretch"
     className="homeAddData__flexGroup"
-    component="div"
-    direction="row"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
     wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -382,7 +332,6 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="loggingApp"
           />
         }
@@ -393,7 +342,6 @@ exports[`isNewKibanaInstance 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -418,7 +366,6 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="monitoringApp"
           />
         }
@@ -429,7 +376,6 @@ exports[`isNewKibanaInstance 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -454,7 +400,6 @@ exports[`isNewKibanaInstance 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="securityApp"
           />
         }
@@ -465,19 +410,12 @@ exports[`isNewKibanaInstance 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGrid
     columns={2}
-    gutterSize="l"
-    responsive={true}
   >
     <EuiFlexItem
       className="homAddData__footerItem homAddData__footerItem--highlight"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -517,8 +455,6 @@ exports[`isNewKibanaInstance 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="homAddData__footerItem homAddData__footerItem--highlight"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -566,19 +502,8 @@ exports[`mlEnabled 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="m"
         textTransform="none"
@@ -605,21 +530,15 @@ exports[`mlEnabled 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiFlexGroup
-    alignItems="stretch"
     className="homeAddData__flexGroup"
-    component="div"
-    direction="row"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
     wrap={true}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -644,7 +563,6 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="apmApp"
           />
         }
@@ -655,7 +573,6 @@ exports[`mlEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -680,7 +597,6 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="loggingApp"
           />
         }
@@ -691,7 +607,6 @@ exports[`mlEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -716,7 +631,6 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="monitoringApp"
           />
         }
@@ -727,7 +641,6 @@ exports[`mlEnabled 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -752,7 +665,6 @@ exports[`mlEnabled 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="securityApp"
           />
         }
@@ -763,19 +675,12 @@ exports[`mlEnabled 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGrid
     columns={3}
-    gutterSize="l"
-    responsive={true}
   >
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -815,8 +720,6 @@ exports[`mlEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -856,8 +759,6 @@ exports[`mlEnabled 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -905,19 +806,8 @@ exports[`render 1`] = `
   hasShadow={false}
   paddingSize="l"
 >
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+  <EuiFlexGroup>
+    <EuiFlexItem>
       <EuiTitle
         size="m"
         textTransform="none"
@@ -944,21 +834,15 @@ exports[`render 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiFlexGroup
-    alignItems="stretch"
     className="homeAddData__flexGroup"
-    component="div"
-    direction="row"
     gutterSize="l"
     justifyContent="spaceAround"
     responsive={false}
     wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -983,7 +867,6 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="loggingApp"
           />
         }
@@ -994,7 +877,6 @@ exports[`render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -1019,7 +901,6 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="monitoringApp"
           />
         }
@@ -1030,7 +911,6 @@ exports[`render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiCard
@@ -1055,7 +935,6 @@ exports[`render 1`] = `
         icon={
           <EuiIcon
             className="homAddData__icon"
-            size="m"
             type="securityApp"
           />
         }
@@ -1066,19 +945,12 @@ exports[`render 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGrid
     columns={2}
-    gutterSize="l"
-    responsive={true}
   >
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}
@@ -1118,8 +990,6 @@ exports[`render 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       className="homAddData__footerItem"
-      component="div"
-      grow={true}
     >
       <EuiText
         grow={true}

@@ -5,7 +5,7 @@
  */
 
 import { getInterpreter } from 'plugins/interpreter/interpreter';
-import { registries } from '@kbn/interpreter/public';
+import { registries } from 'plugins/interpreter/registries';
 import { register, addRegistries } from '@kbn/interpreter/common';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -15,17 +15,13 @@ import { elementsRegistry } from '../../lib/elements_registry';
 import { templatesRegistry } from '../../lib/templates_registry';
 import { tagsRegistry } from '../../lib/tags_registry';
 import { elementSpecs } from '../../../canvas_plugin_src/elements';
-import { renderFunctions } from '../../../canvas_plugin_src/renderers';
 import { transformSpecs } from '../../../canvas_plugin_src/uis/transforms';
 import { modelSpecs } from '../../../canvas_plugin_src/uis/models';
 import { viewSpecs } from '../../../canvas_plugin_src/uis/views';
 import { datasourceSpecs } from '../../../canvas_plugin_src/uis/datasources';
 import { args as argSpecs } from '../../../canvas_plugin_src/uis/arguments';
 import { tagSpecs } from '../../../canvas_plugin_src/uis/tags';
-import { functions as browserFunctions } from '../../../canvas_plugin_src/functions/browser';
-import { functions as commonPluginFunctions } from '../../../canvas_plugin_src/functions/common';
 import { templateSpecs } from '../../../canvas_plugin_src/templates';
-import { commonFunctions } from '../../../common/functions';
 import { clientFunctions } from '../../functions';
 
 import {
@@ -61,16 +57,12 @@ addRegistries(registries, {
 
 register(registries, {
   elements: elementSpecs,
-  renderers: renderFunctions,
   transformUIs: transformSpecs,
   modelUIs: modelSpecs,
   viewUIs: viewSpecs,
   datasourceUIs: datasourceSpecs,
   argumentUIs: argSpecs,
-  browserFunctions: browserFunctions
-    .concat(commonFunctions)
-    .concat(clientFunctions)
-    .concat(commonPluginFunctions),
+  browserFunctions: clientFunctions,
   templates: templateSpecs,
   tagUIs: tagSpecs,
 });

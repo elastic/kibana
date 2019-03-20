@@ -5,16 +5,18 @@
  */
 
 import { get } from 'lodash';
-import { APMError } from '../typings/es_schemas/Error';
-import { Span } from '../typings/es_schemas/Span';
-import { Transaction } from '../typings/es_schemas/Transaction';
+import { APMError } from '../typings/es_schemas/ui/APMError';
+import { Span } from '../typings/es_schemas/ui/Span';
+import { Transaction } from '../typings/es_schemas/ui/Transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
   const transaction: Transaction = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     http: {
@@ -58,8 +60,10 @@ describe('Transaction', () => {
 describe('Span', () => {
   const span: Span = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     processor: {
@@ -100,8 +104,10 @@ describe('Span', () => {
 
 describe('Error', () => {
   const errorDoc: APMError = {
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     error: {
@@ -142,7 +148,8 @@ describe('Error', () => {
       id: 'parentId'
     },
     transaction: {
-      id: 'transaction id'
+      id: 'transaction id',
+      type: 'request'
     }
   };
 
