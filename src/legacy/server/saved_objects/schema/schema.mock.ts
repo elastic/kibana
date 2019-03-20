@@ -17,19 +17,17 @@
  * under the License.
  */
 
-export const METRIC_TYPES = {
-  PERCENTILE: 'percentile',
-  PERCENTILE_RANK: 'percentile_rank',
-  TOP_HIT: 'top_hit',
-  COUNT: 'count',
-  DERIVATIVE: 'derivative',
-  STD_DEVIATION: 'std_deviation',
-  VARIANCE: 'variance',
-  SUM_OF_SQUARES: 'sum_of_squares',
+import { SavedObjectsSchema } from './schema';
+
+type Schema = PublicMethodsOf<SavedObjectsSchema>;
+const createSchemaMock = () => {
+  const mocked: jest.Mocked<Schema> = {
+    isHiddenType: jest.fn().mockReturnValue(false),
+    isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+  };
+  return mocked;
 };
 
-export const EXTENDED_STATS_TYPES = [
-  METRIC_TYPES.STD_DEVIATION,
-  METRIC_TYPES.VARIANCE,
-  METRIC_TYPES.SUM_OF_SQUARES
-];
+export const schemaMock = {
+  create: createSchemaMock,
+};

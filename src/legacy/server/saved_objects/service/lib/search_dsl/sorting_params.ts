@@ -18,16 +18,21 @@
  */
 
 import Boom from 'boom';
-import { getProperty } from '../../../../mappings';
+import { getProperty, IndexMapping } from '../../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id'];
 
-export function getSortingParams(mappings, type, sortField, sortOrder) {
+export function getSortingParams(
+  mappings: IndexMapping,
+  type: string | string[],
+  sortField?: string,
+  sortOrder?: string
+) {
   if (!sortField) {
     return {};
   }
 
-  const types = [].concat(type);
+  const types = Array.isArray(type) ? type : [type];
 
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {

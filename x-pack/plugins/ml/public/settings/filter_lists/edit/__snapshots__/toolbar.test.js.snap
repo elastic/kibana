@@ -3,42 +3,36 @@
 exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = `
 <Fragment>
   <EuiFlexGroup
-    justifyContent="flexEnd"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <AddItemPopover
-        addItems={[MockFunction]}
-        canCreateFilter={true}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
     alignItems="center"
     gutterSize="xl"
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        color="danger"
-        disabled={true}
-        fill={false}
-        iconSide="left"
-        onClick={[MockFunction]}
-        type="button"
-      >
-        <FormattedMessage
-          defaultMessage="Delete item"
-          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-          values={Object {}}
-        />
-      </EuiButton>
-    </EuiFlexItem>
     <EuiFlexItem>
       <EuiSearchBar
+        filters={Array []}
         onChange={[MockFunction]}
+        toolsRight={
+          Array [
+            <AddItemPopover
+              addItems={[MockFunction]}
+              canCreateFilter={true}
+            />,
+            <EuiButton
+              color="danger"
+              disabled={true}
+              fill={false}
+              iconSide="left"
+              onClick={[MockFunction]}
+              size="s"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Delete item"
+                id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>,
+          ]
+        }
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -48,42 +42,36 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
 exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = `
 <Fragment>
   <EuiFlexGroup
-    justifyContent="flexEnd"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <AddItemPopover
-        addItems={[MockFunction]}
-        canCreateFilter={true}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiFlexGroup
     alignItems="center"
     gutterSize="xl"
   >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiButton
-        color="danger"
-        disabled={false}
-        fill={false}
-        iconSide="left"
-        onClick={[MockFunction]}
-        type="button"
-      >
-        <FormattedMessage
-          defaultMessage="Delete item"
-          id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
-          values={Object {}}
-        />
-      </EuiButton>
-    </EuiFlexItem>
     <EuiFlexItem>
       <EuiSearchBar
+        filters={Array []}
         onChange={[MockFunction]}
+        toolsRight={
+          Array [
+            <AddItemPopover
+              addItems={[MockFunction]}
+              canCreateFilter={true}
+            />,
+            <EuiButton
+              color="danger"
+              disabled={false}
+              fill={false}
+              iconSide="left"
+              onClick={[MockFunction]}
+              size="s"
+              type="button"
+            >
+              <FormattedMessage
+                defaultMessage="Delete item"
+                id="xpack.ml.settings.filterLists.toolbar.deleteItemButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>,
+          ]
+        }
       />
     </EuiFlexItem>
   </EuiFlexGroup>
