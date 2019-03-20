@@ -31,7 +31,7 @@ describe('draggables', () => {
     test('it renders the default Badge', () => {
       const wrapper = shallowWithIntl(
         <DraggableBadge
-          id="draggable-id"
+          eventId="draggable-id"
           field="some-field"
           value="some-value"
           queryValue="some-query-value"
@@ -78,7 +78,7 @@ describe('draggables', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DraggableBadge
-            id="draggable-id"
+            eventId="draggable-id"
             field="some-field"
             value="some value"
             iconType="number"
@@ -92,7 +92,7 @@ describe('draggables', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DraggableBadge
-            id="draggable-id"
+            eventId="draggable-id"
             field="some-field"
             iconType="number"
             value={undefined}
@@ -105,7 +105,12 @@ describe('draggables', () => {
     test('it returns null if value is null', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <DraggableBadge id="draggable-id" field="some-field" value={null} iconType="number" />
+          <DraggableBadge
+            eventId="draggable-id"
+            field="some-field"
+            value={null}
+            iconType="number"
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toBeNull();

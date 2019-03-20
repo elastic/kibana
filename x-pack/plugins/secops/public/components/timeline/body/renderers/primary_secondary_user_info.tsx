@@ -18,17 +18,19 @@ const TokensFlexItem = styled(EuiFlexItem)`
 export const nilOrUnSet = (value?: string | null) =>
   value == null || value.toLowerCase() === 'unset';
 
-export const PrimarySecondary = pure<{
-  id: string;
+interface Props {
+  eventId: string;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-}>(({ id, primary, secondary }) => {
+}
+
+export const PrimarySecondary = pure<Props>(({ eventId, primary, secondary }) => {
   if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return null;
   } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
     return (
       <DraggableBadge
-        id={id}
+        eventId={eventId}
         field="auditd.summary.actor.primary"
         value={primary}
         iconType="user"
@@ -37,7 +39,7 @@ export const PrimarySecondary = pure<{
   } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
     return (
       <DraggableBadge
-        id={id}
+        eventId={eventId}
         field="auditd.summary.actor.secondary"
         value={secondary}
         iconType="user"
@@ -46,7 +48,7 @@ export const PrimarySecondary = pure<{
   } else if (primary === secondary) {
     return (
       <DraggableBadge
-        id={id}
+        eventId={eventId}
         field="auditd.summary.actor.secondary"
         value={secondary}
         iconType="user"
@@ -57,7 +59,7 @@ export const PrimarySecondary = pure<{
       <EuiFlexGroup gutterSize="none">
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={id}
+            eventId={eventId}
             field="auditd.summary.actor.primary"
             value={primary}
             iconType="user"
@@ -66,7 +68,7 @@ export const PrimarySecondary = pure<{
         <TokensFlexItem grow={false}>as</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={id}
+            eventId={eventId}
             field="auditd.summary.actor.secondary"
             value={secondary}
             iconType="user"
@@ -77,25 +79,33 @@ export const PrimarySecondary = pure<{
   }
 });
 
-export const PrimarySecondaryUserInfo = pure<{
-  id: string;
+interface PrimarySecondaryUserInfoProps {
+  eventId: string;
   userName: string | null | undefined;
   primary: string | null | undefined;
   secondary: string | null | undefined;
-}>(({ id, userName, primary, secondary }) => {
-  if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-    return null;
-  } else if (
-    !nilOrUnSet(userName) &&
-    !nilOrUnSet(primary) &&
-    !nilOrUnSet(secondary) &&
-    userName === primary &&
-    userName === secondary
-  ) {
-    return <DraggableBadge id={id} field="user.name" value={userName} iconType="user" />;
-  } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-    return <DraggableBadge id={id} field="user.name" value={userName} iconType="user" />;
-  } else {
-    return <PrimarySecondary id={id} primary={primary} secondary={secondary} />;
+}
+
+export const PrimarySecondaryUserInfo = pure<PrimarySecondaryUserInfoProps>(
+  ({ eventId, userName, primary, secondary }) => {
+    if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+      return null;
+    } else if (
+      !nilOrUnSet(userName) &&
+      !nilOrUnSet(primary) &&
+      !nilOrUnSet(secondary) &&
+      userName === primary &&
+      userName === secondary
+    ) {
+      return (
+        <DraggableBadge eventId={eventId} field="user.name" value={userName} iconType="user" />
+      );
+    } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+      return (
+        <DraggableBadge eventId={eventId} field="user.name" value={userName} iconType="user" />
+      );
+    } else {
+      return <PrimarySecondary eventId={eventId} primary={primary} secondary={secondary} />;
+    }
   }
-});
+);

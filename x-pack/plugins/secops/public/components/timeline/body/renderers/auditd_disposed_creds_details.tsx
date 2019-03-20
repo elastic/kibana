@@ -58,7 +58,7 @@ export const AuditdDisposedLine = pure<Props>(
       <TokensFlexItem grow={false}>{i18n.SESSION}</TokensFlexItem>
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-disposed-creds-${id}`}
+          eventId={`auditd-disposed-creds-${id}`}
           field="auditd.session"
           value={session}
           iconType="number"
@@ -66,7 +66,7 @@ export const AuditdDisposedLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false}>
         <PrimarySecondaryUserInfo
-          id={`auditd-disposed-creds-${id}`}
+          eventId={`auditd-disposed-creds-${id}`}
           userName={userName}
           primary={primary}
           secondary={secondary}
@@ -74,12 +74,16 @@ export const AuditdDisposedLine = pure<Props>(
       </TokensFlexItem>
       {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
       <TokensFlexItem grow={false}>
-        <DraggableBadge id={`auditd-disposed-creds-${id}`} field="host.name" value={hostName} />
+        <DraggableBadge
+          eventId={`auditd-disposed-creds-${id}`}
+          field="host.name"
+          value={hostName}
+        />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-disposed-creds-${id}`}
+          eventId={`auditd-disposed-creds-${id}`}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
@@ -90,7 +94,7 @@ export const AuditdDisposedLine = pure<Props>(
       )}
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          id={`auditd-disposed-creds-${id}`}
+          eventId={`auditd-disposed-creds-${id}`}
           field="process.executable"
           value={processExecutable}
           iconType="console"
@@ -99,7 +103,7 @@ export const AuditdDisposedLine = pure<Props>(
       <TokensFlexItem grow={false}>
         {args !== '' && (
           <DraggableBadge
-            id={`auditd-disposed-creds-${id}`}
+            eventId={`auditd-disposed-creds-${id}`}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
             value={args}

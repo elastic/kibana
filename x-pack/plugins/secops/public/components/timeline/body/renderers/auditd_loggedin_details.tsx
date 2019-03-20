@@ -26,7 +26,7 @@ const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-export const AuditdLoggedinLine = pure<{
+interface Props {
   id: string;
   hostName: string | null | undefined;
   result: string | null | undefined;
@@ -35,51 +35,59 @@ export const AuditdLoggedinLine = pure<{
   primary: string | null | undefined;
   secondary: string | null | undefined;
   processExecutable: string | null | undefined;
-}>(({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
-  <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-    <TokensFlexItem grow={false}>Session</TokensFlexItem>
-    <TokensFlexItem grow={false}>
-      <DraggableBadge
-        id={`auditd-loggedin-${id}`}
-        field="auditd.session"
-        value={session}
-        iconType="number"
-      />
-    </TokensFlexItem>
-    <TokensFlexItem grow={false}>
-      <PrimarySecondaryUserInfo
-        id={`auditd-loggedin-${id}`}
-        userName={userName}
-        primary={primary}
-        secondary={secondary}
-      />
-    </TokensFlexItem>
-    {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
-    <TokensFlexItem grow={false}>
-      <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
-    </TokensFlexItem>
-    {processExecutable != null && (
-      <TokensFlexItem grow={false}>attempted a login via</TokensFlexItem>
-    )}
-    <TokensFlexItem grow={false}>
-      <DraggableBadge
-        id={`auditd-loggedin-${id}`}
-        field="process.executable"
-        value={processExecutable}
-        iconType="console"
-      />
-    </TokensFlexItem>
-    {result != null && <TokensFlexItem grow={false}>with result</TokensFlexItem>}
-    <TokensFlexItem grow={false}>
-      <DraggableBadge
-        id={`auditd-loggedin-${id}`}
-        field="auditd.result"
-        queryValue={result}
-        value={result}
-      />
-    </TokensFlexItem>
-  </EuiFlexGroup>
-));
+}
+
+export const AuditdLoggedinLine = pure<Props>(
+  ({ id, hostName, result, session, processExecutable, userName, primary, secondary }) => (
+    <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
+      <TokensFlexItem grow={false}>Session</TokensFlexItem>
+      <TokensFlexItem grow={false}>
+        <DraggableBadge
+          eventId={`auditd-loggedin-${id}`}
+          field="auditd.session"
+          value={session}
+          iconType="number"
+        />
+      </TokensFlexItem>
+      <TokensFlexItem grow={false}>
+        <PrimarySecondaryUserInfo
+          eventId={`auditd-loggedin-${id}`}
+          userName={userName}
+          primary={primary}
+          secondary={secondary}
+        />
+      </TokensFlexItem>
+      {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
+      <TokensFlexItem grow={false}>
+        <DraggableBadge
+          eventId={`auditd-executed-element-${id}`}
+          field="host.name"
+          value={hostName}
+        />
+      </TokensFlexItem>
+      {processExecutable != null && (
+        <TokensFlexItem grow={false}>attempted a login via</TokensFlexItem>
+      )}
+      <TokensFlexItem grow={false}>
+        <DraggableBadge
+          eventId={`auditd-loggedin-${id}`}
+          field="process.executable"
+          value={processExecutable}
+          iconType="console"
+        />
+      </TokensFlexItem>
+      {result != null && <TokensFlexItem grow={false}>with result</TokensFlexItem>}
+      <TokensFlexItem grow={false}>
+        <DraggableBadge
+          eventId={`auditd-loggedin-${id}`}
+          field="auditd.result"
+          queryValue={result}
+          value={result}
+        />
+      </TokensFlexItem>
+    </EuiFlexGroup>
+  )
+);
 
 export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
   ({ browserFields, data }) => {

@@ -2,9 +2,9 @@
 
 exports[`draggables rendering it renders the default Badge 1`] = `
 <Component
+  eventId="draggable-id"
   field="some-field"
   iconType="number"
-  id="draggable-id"
   intl={
     Object {
       "defaultFormats": Object {},

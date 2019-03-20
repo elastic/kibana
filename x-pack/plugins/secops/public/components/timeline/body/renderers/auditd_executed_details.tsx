@@ -23,7 +23,7 @@ const TokensFlexItem = styled(EuiFlexItem)`
   margin-left: 3px;
 `;
 
-export const AuditdExecutedCommandLine = pure<{
+interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
@@ -34,7 +34,9 @@ export const AuditdExecutedCommandLine = pure<{
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
-}>(
+}
+
+export const AuditdExecutedCommandLine = pure<Props>(
   ({
     id,
     hostName,
@@ -52,7 +54,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>Session</TokensFlexItem>
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            eventId={`auditd-executed-element-${id}`}
             field="auditd.session"
             value={session}
             iconType="number"
@@ -60,7 +62,7 @@ export const AuditdExecutedCommandLine = pure<{
         </TokensFlexItem>
         <TokensFlexItem grow={false}>
           <PrimarySecondaryUserInfo
-            id={`auditd-executed-element-${id}`}
+            eventId={`auditd-executed-element-${id}`}
             userName={userName}
             primary={primary}
             secondary={secondary}
@@ -68,12 +70,16 @@ export const AuditdExecutedCommandLine = pure<{
         </TokensFlexItem>
         {hostName != null && <TokensFlexItem grow={false}>@</TokensFlexItem>}
         <TokensFlexItem grow={false}>
-          <DraggableBadge id={`auditd-executed-element-${id}`} field="host.name" value={hostName} />
+          <DraggableBadge
+            eventId={`auditd-executed-element-${id}`}
+            field="host.name"
+            value={hostName}
+          />
         </TokensFlexItem>
         {workingDirectory != null && <TokensFlexItem grow={false}>in</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            eventId={`auditd-executed-element-${id}`}
             field="process.working_directory"
             value={workingDirectory}
             iconType="folderOpen"
@@ -82,7 +88,7 @@ export const AuditdExecutedCommandLine = pure<{
         {processName != null && <TokensFlexItem grow={false}>executed</TokensFlexItem>}
         <TokensFlexItem grow={false}>
           <DraggableBadge
-            id={`auditd-executed-element-${id}`}
+            eventId={`auditd-executed-element-${id}`}
             field="process.name"
             value={processName}
             iconType="console"
@@ -91,7 +97,7 @@ export const AuditdExecutedCommandLine = pure<{
         <TokensFlexItem grow={false}>
           {args !== '' && (
             <DraggableBadge
-              id={`auditd-executed-element-${id}`}
+              eventId={`auditd-executed-element-${id}`}
               field="process.title"
               queryValue={processTitle != null ? processTitle : ''}
               value={args}

@@ -56,16 +56,27 @@ const Badge = styled(EuiBadge)`
   vertical-align: top;
 `;
 
-export type BadgeDraggableType = DefaultDraggableType & { iconType?: IconType; color?: string };
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
+  eventId: string;
+  iconType?: IconType;
+  color?: string;
+};
 
 export const DraggableBadge = pure<BadgeDraggableType>(
-  ({ id, field, value, name, color = 'hollow', children, queryValue, iconType }) => {
-    return (
-      <DefaultDraggable id={id} field={field} name={name} value={value} queryValue={queryValue}>
+  ({ eventId, field, value, name, color = 'hollow', children, queryValue, iconType }) =>
+    value != null ? (
+      <DefaultDraggable
+        id={`${eventId}-${field}-${value}`}
+        field={field}
+        name={name}
+        value={value}
+        queryValue={queryValue}
+      >
         <Badge iconType={iconType} color={color}>
           {children ? children : value}
         </Badge>
       </DefaultDraggable>
-    );
-  }
+    ) : null
 );

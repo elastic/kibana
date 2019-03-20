@@ -331,7 +331,7 @@ describe('AuditdEndedSessionDetails', () => {
       expect(wrapper.text()).toEqual('Sessionended fromsome-process-name');
     });
 
-    test('it returns only session if process title with id is given', () => {
+    test('it returns only session and userName if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <AuditdEndedSessionLine
@@ -376,7 +376,7 @@ describe('AuditdEndedSessionDetails', () => {
         <TestProviders>
           <AuditdEndedSessionLine
             id="hello-i-am-an-id"
-            args="arg1 arg 2 arg 3"
+            args="arg1 arg2 arg 3"
             userName={undefined}
             secondary={undefined}
             session={undefined}
@@ -388,7 +388,7 @@ describe('AuditdEndedSessionDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg 2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
     });
   });
 });
