@@ -5,6 +5,9 @@
  */
 
 import _ from 'lodash';
+import { buildPhraseFilter } from '@kbn/es-query';
+
+import { filterBarQueryFilter } from '../../../kibana_services';
 
 export class TooltipProperty {
 
@@ -27,17 +30,13 @@ export class TooltipProperty {
     return _.escape(this._rawValue);
   }
 
-  renderTooltipRow() {
-
+  isFilterable() {
+    return false;
   }
 
-  // isFilterable() {
-  //   return false;
-  // }
-
-  // getFilterAction() {
-  //
-  // }
+  getFilterAction() {
+    throw new Error('This property is not filterable');
+  }
 }
 
 
@@ -54,8 +53,27 @@ export class ESTooltipProperty extends TooltipProperty {
       return '-';
     }
     const htmlConverter = field.format.getConverterFor('html');
-    console.log('htmlconver', htmlConverter);
     return  (htmlConverter) ? htmlConverter(this._rawValue) :
       field.format.convert(this._rawValue);
+  }
+
+  isFilterable() {
+    const field = this._indexPattern.fields.byName[this._propertyName];
+    if (!field) {
+      return false;
+    }
+    return field.type === 'string';
+  }
+
+  getFilterAction() {
+    return () => {
+      const phraseFilter = buildPhraseFilter(
+        this._indexPattern.fields.byName[this._propertyName],
+        this._rawValue,
+        this._indexPattern);
+      filterBarQueryFilter.addFilters(phraseFilter);
+
+      window._fbqf = filterBarQueryFilter;
+    };
   }
 }

@@ -11,7 +11,7 @@ import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/
 
 export let indexPatternService;
 export let SearchSource;
-export let FilterBarQueryFilter;
+export let filterBarQueryFilter;
 
 export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
   const inspectorRequest = inspectorAdapters.requests.start(
@@ -40,6 +40,6 @@ uiModules.get('app/maps').run(($injector) => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
   console.log('fb', FilterBarQueryFilterProvider);
-  FilterBarQueryFilter = Private(FilterBarQueryFilterProvider);
+  filterBarQueryFilter = Private(FilterBarQueryFilterProvider);
   console.log('the filter bar query filter provider', FilterBarQueryFilterProvider);
 });
