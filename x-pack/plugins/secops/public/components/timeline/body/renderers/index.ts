@@ -5,6 +5,7 @@
  */
 
 import { auditDisposedCredsRowRenderer } from './auditd_disposed_creds_row_renderer';
+import { auditdEndedSessionRowRenderer } from './auditd_ended_session_row_renderer';
 import { auditdExecutedRowRenderer } from './auditd_executed_row_renderer';
 import { auditdLoggedinRowRenderer } from './auditd_loggedin_row_renderer';
 import { ColumnRenderer } from './column_renderer';
@@ -16,6 +17,7 @@ import { suricataRowRenderer } from './suricata_row_renderer';
 import { unknownColumnRenderer } from './unknown_column_renderer';
 import { zeekRowRenderer } from './zeek_row_renderer';
 
+export * from './auditd_ended_session_row_renderer';
 export * from './auditd_disposed_creds_row_renderer';
 export * from './auditd_executed_row_renderer';
 export * from './auditd_loggedin_row_renderer';
@@ -35,6 +37,7 @@ export const rowRenderers: RowRenderer[] = [
   suricataRowRenderer,
   auditdExecutedRowRenderer,
   auditdLoggedinRowRenderer,
+  auditdEndedSessionRowRenderer,
   auditDisposedCredsRowRenderer,
   plainRowRenderer,
 ];
