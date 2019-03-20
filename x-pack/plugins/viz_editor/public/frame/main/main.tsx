@@ -15,7 +15,13 @@ import {
   EuiPageContentBody,
   EuiPageSideBar,
 } from '@elastic/eui';
-import React, { useReducer } from 'react';
+// @ts-ignore
+import { fromExpression } from '@kbn/interpreter/common';
+// @ts-ignore
+import { getInterpreter } from 'plugins/interpreter/interpreter';
+// @ts-ignore
+import { renderersRegistry } from 'plugins/interpreter/registries';
+import React, { useEffect, useReducer, useRef } from 'react';
 import { initialState, ViewModel } from '../../../common/lib';
 
 import 'brace/ext/language_tools';
@@ -61,15 +67,7 @@ export function Main() {
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
-                The expression will be rendered here: {expression}
-                {/* TODO execute the expression and render it to a node inside here 
-                  This will be something along these lines:
-                    ```const response = await runInterpreter(expression, { some: 1 });
-                        // response.type === 'render'
-                        if (resposne.type === 'render') {
-                          rendersRegistry.get(rensponse.as).render(domElement, response);
-                        }```
-                */}
+                <ExpressionRenderer expression={expression} />
               </EuiFlexItem>
               <EuiFlexItem>
                 {/* TODO as soon as something changes here, switch to the "expression"-editor */}
@@ -97,5 +95,36 @@ export function Main() {
         {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
       </EuiPageSideBar>
     </EuiPage>
+  );
+}
+export const runPipeline = async (expression: string, context: object, handlers: any) => {
+  const ast = fromExpression(expression);
+  const { interpreter } = await getInterpreter();
+  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
+  return pipelineResponse;
+};
+
+async function runAndRender(expression: any, domElement: any) {
+  const response = await runPipeline(expression, {}, { getInitialContext: () => ({}) });
+  if (response.type === 'render') {
+    renderersRegistry.get(response.as).render(domElement, response.value);
+  }
+}
+
+export function ExpressionRenderer(props: any) {
+  const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
+
+  useEffect(() => {
+    if (mountpoint.current) {
+      runAndRender(props.expression, mountpoint.current);
+    }
+  });
+
+  return (
+    <div
+      ref={el => {
+        mountpoint.current = el;
+      }}
+    />
   );
 }

@@ -7,7 +7,7 @@
 import { registerPipeline } from './bar_chart_vis';
 
 // TODO somehow get the registries and register everything
-// registerPipeline();
+registerPipeline();
 
 // TODO register config instead
 export { config } from './bar_chart_plugin';

@@ -48,9 +48,8 @@ function configPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
 
 function toExpression(viewState: BarChartViewModel) {
   // TODO prob. do this on an AST object and stringify afterwards
-  return `esqueryast ${JSON.stringify(viewState.queries)} | bar_chart xAxisField=${JSON.stringify(
-    viewState.private.barChart
-  )} | bar_chart_renderer`;
+  // TODO actually use the stuff from the viewState
+  return `sample_data | bar_chart`;
 }
 
 export const config: EditorPlugin<BarChartViewModel> = {
