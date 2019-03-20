@@ -39,7 +39,7 @@ uiModules
     return {
       restrict: 'E',
       scope: true,
-      require: '?^ngModel',
+      require: '^ngModel',
       template: function () {
         return `<vis-agg-select-react-wrapper
             agg="agg"
@@ -68,8 +68,9 @@ uiModules
             $scope.paramValue = value;
             setValidity(!!value);
 
+            // We skip the first time the listener is called
             if (value !== oldValue) {
-              // we should set isSelectInvalid here in case the foem is reseted
+              // We should set isSelectInvalid here in case the form is reseted
               $scope.isSelectInvalid = !value;
             }
 
@@ -90,7 +91,7 @@ uiModules
             ngModelCtrl.$setDirty();
           };
 
-          // Since it's required field we set validity to prevent submiting the form when agg isn't selected initially.
+          // Since it's required field we set validity to prevent submitting the form when agg isn't selected initially.
           setValidity(!!($scope.agg && $scope.agg.type));
         }
       }
