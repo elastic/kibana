@@ -34,6 +34,7 @@ interface DefaultEditorAggSelectProps {
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
   isSelectInvalid: boolean;
+  setTouched: () => void;
 }
 
 function DefaultEditorAggSelect({
@@ -46,6 +47,7 @@ function DefaultEditorAggSelect({
   aggHelpLink,
   isSelectInvalid,
   isSubAggregation,
+  setTouched,
 }: DefaultEditorAggSelectProps) {
   const isAggTypeDefined = value && Boolean(value.title);
   const selectedOptions: ComboBoxGroupedOption[] = isAggTypeDefined
@@ -93,6 +95,7 @@ function DefaultEditorAggSelect({
         isClearable={false}
         isInvalid={isSelectInvalid}
         fullWidth={true}
+        onBlur={() => setTouched()}
       />
     </EuiFormRow>
   );
