@@ -215,7 +215,7 @@ function getDetailsItems(anomaly, examples, filter) {
 
   return items;
 }
-// [ {action: "register"}, {method: "GET"}, ... ]
+// anomalyInfluencers: [ {fieldName: fieldValue}, {fieldName: fieldValue}, ... ]
 function getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay) {
   const items = [];
 

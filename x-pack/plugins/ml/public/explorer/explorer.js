@@ -78,6 +78,7 @@ import {
   DRAG_SELECT_ACTION,
   APP_STATE_ACTION,
   EXPLORER_ACTION,
+  FILTER_ACTION,
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
@@ -270,7 +271,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                 filteredFields: [],
                 influencersFilterQuery: undefined,
                 maskAll: false,
-                queryString: undefined
+                queryString: '',
+                tableQueryString: ''
               };
 
               Object.assign(stateUpdate, noFilterState);
@@ -929,14 +931,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const { queryString } = this.state;
       const operator = 'and ';
 
-      if (action === '+') {
+      if (action === FILTER_ACTION.ADD) {
         // Don't re-add if already exists in the query
         const queryPattern = getQueryPattern(fieldName, fieldValue);
         if (queryString.match(queryPattern) !== null) {
           return;
         }
         newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${fieldName}:"${fieldValue}"`;
-      } else if (action === '-') {
+      } else if (action === FILTER_ACTION.REMOVE) {
         if (this.state.filterActive === false) {
           return;
         } else {
