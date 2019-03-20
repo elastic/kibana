@@ -17,39 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { mapValues } from 'lodash';
 
-export const metric = () => ({
-  name: 'kibana_metric',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'metric',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
-});
+// Takes a function spec and passes in default args,
+// overriding with any provided args.
+export const functionWrapper = fnSpec => {
+  const spec = fnSpec();
+  const defaultArgs = mapValues(spec.args, argSpec => argSpec.default);
+  return (context, args, handlers) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
+};
