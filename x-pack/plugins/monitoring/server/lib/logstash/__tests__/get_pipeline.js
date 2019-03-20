@@ -37,13 +37,8 @@ describe('get_pipeline', () => {
     it('returns correct stats', () => {
       const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
       expect(result).to.eql({
-        events_in: 10000,
-        events_out: 9000,
-        duration_in_millis: 18000,
         events_out_per_millisecond: 0.01,
         millis_per_event: 2,
-        queue_push_duration_in_millis: 100000,
-        queue_push_duration_in_millis_per_event: 11.11111111111111
       });
     });
 
@@ -57,9 +52,6 @@ describe('get_pipeline', () => {
       it('returns correct stats', () => {
         const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
-          events_in: 10000,
-          events_out: 9000,
-          duration_in_millis: 18000,
           events_in_per_millisecond: 0.011111111111111112,
           events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
@@ -78,9 +70,6 @@ describe('get_pipeline', () => {
       it('returns correct stats', () => {
         const result = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
         expect(result).to.eql({
-          events_in: 10000,
-          events_out: 9000,
-          duration_in_millis: 18000,
           events_in_per_millisecond: 0.011111111111111112,
           events_out_per_millisecond: 0.01,
           millis_per_event: 1.8,
