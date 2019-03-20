@@ -7,8 +7,41 @@ rulesDirectory:
   - tslint-plugin-prettier
   - src/dev/tslint/rules
   - node_modules/tslint-microsoft-contrib
+  - node_modules/tslint-rules-bunch/rules
 
 rules:
+  no-import-zones:
+    - true
+    - zones:
+      - patterns:
+        - target: src/core/server/**/*
+          from:
+            - src/core/public/**/*
+            - src/plugins/**/server/**/*
+            - src/plugins/**/public/**/*
+        - target: src/core/public/**/*
+          from:
+            - src/core/server/**/*
+            - src/plugins/**/server/**/*
+            - src/plugins/**/public/**/*
+        - target: src/plugins/**/server/**/*
+          from:
+            - src/core/public/**/*
+            - src/core/server/**/*
+            - src/plugins/**/public/**/*
+        - target: src/plugins/**/public/**/*
+          from:
+            - src/core/public/**/*
+            - src/core/server/**/*
+            - src/plugins/**/server/**/*
+        - target:
+            - src/legacy/**/!(*.test).ts
+            - src/x-pack/**/!(*.test).ts
+          from:
+            - src/core/public/**/!(utils)*
+            - src/core/server/**/*
+            - src/plugins/**/server/**/*
+            - src/plugins/**/public/**/*
   prettier: true
   object-literal-sort-keys: false
   interface-name: false
