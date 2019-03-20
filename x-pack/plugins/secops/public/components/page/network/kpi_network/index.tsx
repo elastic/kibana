@@ -26,6 +26,13 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
+interface CardItemProps {
+  isLoading: boolean;
+  i18nKey: string;
+  data: KpiNetworkData;
+  property: string;
+}
+
 const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
   return isLoading ? (
     <EuiLoadingSpinner size="m" />
@@ -36,29 +43,27 @@ const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined)
   );
 };
 
-const cardMapping = (
-  isLoading: boolean,
-  i18nKey: string,
-  data: KpiNetworkData,
-  property: string
-): React.ReactNode => {
+const CardItem = pure<CardItemProps>(({ isLoading, i18nKey, data, property }) => {
   const matrixTitle: number | null | undefined = get(property, data);
-  const matrixDescription: string | undefined = get(i18nKey, i18n);
+  const matrixDescription: string = get(i18nKey, i18n);
 
   return (
     <EuiFlexItem key={matrixDescription}>
       <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={matrixDescription} />
     </EuiFlexItem>
   );
-};
-
-const kpiNetworkCards = (loading: boolean, data: KpiNetworkData): React.ReactNode[] => [
-  cardMapping(loading, 'NETWORK_EVENTS', data, 'networkEvents'),
-  cardMapping(loading, 'UNIQUE_ID', data, 'uniqueFlowId'),
-  cardMapping(loading, 'ACTIVE_AGENTS', data, 'activeAgents'),
-  cardMapping(loading, 'UNIQUE_PRIVATE_IP', data, 'uniquePrivateIps'),
-];
+});
 
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
-  <EuiFlexGroup>{kpiNetworkCards(loading, data)}</EuiFlexGroup>
+  <EuiFlexGroup>
+    <CardItem isLoading={loading} i18nKey="NETWORK_EVENTS" data={data} property="networkEvents" />
+    <CardItem isLoading={loading} i18nKey="UNIQUE_ID" data={data} property="uniqueFlowId" />
+    <CardItem isLoading={loading} i18nKey="ACTIVE_AGENTS" data={data} property="activeAgents" />
+    <CardItem
+      isLoading={loading}
+      i18nKey="UNIQUE_PRIVATE_IP"
+      data={data}
+      property="uniquePrivateIps"
+    />
+  </EuiFlexGroup>
 ));
