@@ -18,7 +18,7 @@ export async function getDefaultAdminEmail(config) {
   const emailAddressConfigKey = `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`;
   const configuredEmailAddress = config.get(emailAddressConfigKey);
 
-  return configuredEmailAddress;
+  return configuredEmailAddress || null;
 }
 
 // we use shouldUseNull to determine if we need to send nulls; we only send nulls if the last email wasn't null
