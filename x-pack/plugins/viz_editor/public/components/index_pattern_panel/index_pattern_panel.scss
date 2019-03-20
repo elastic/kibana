@@ -1,0 +1,22 @@
+.indexPatternPanel-field {
+  text-align: left;
+  display: block;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: 100%;
+  background: #FFF;
+  padding: 8px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  transition: box-shadow 0.25s;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.indexPatternPanel-field:hover {
+  box-shadow: 0 8px 16px -8px rgba(0,0,0,0.25);
+}
+
+.indexPatternPanel-field-icon {
+  opacity: 0.75;
+}

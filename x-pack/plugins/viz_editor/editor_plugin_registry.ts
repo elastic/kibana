@@ -4,36 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config as sampleConfig } from './sample_vis_plugin';
+import { config as barChartConfig } from './bar_chart_plugin';
+import { ViewModel } from './public/lib';
 
-export interface StandardVisState {
-  title: string;
-  colorPalette?: [string];
-  columns: Array<{ ref: number; label: string; generator?: string }>;
-  query: object; // TODO introduce complete "Query" type. We definitewly want to type this very well
+export interface PanelComponentProps<S extends ViewModel = ViewModel> {
+  viewModel: S;
+  onChangeViewModel: (newState: S) => void;
 }
 
-export interface EditorComponentProps<S> {
-  standardState: StandardVisState;
-  customState: S;
-  onChangeStandardState: (newState: StandardVisState) => void;
-  onChangeCustomState: (newState: S) => void;
-}
-
-export type EditorPanelsBuilder<S = any> = (
-  props: EditorComponentProps<S>
-) => { leftPanel: JSX.Element; rightPanel: JSX.Element };
-
-export interface Suggestion<S = any> {
+export interface Suggestion<S extends ViewModel = ViewModel> {
   expression: string;
   score: number;
-  standardVisState: StandardVisState;
-  customVisState: S;
+  viewModel: S;
   title: string;
 }
 
 /**
- * each editorconfig has to register itself and has to provide these four things:
+ * each editorplugin has to register itself and has to provide these four things:
  * >> an editor panels builder, which gets passed the current state and updater functions
  *    for the current state and returns two rendered react elements for the left and the right panel (might be extended later)
  * >> a toExpression function which takes the current state and turns it into an expression. should be completely pure
@@ -41,16 +28,17 @@ export interface Suggestion<S = any> {
  *    Also contains a score which is used to sort the suggestions from all plugins
  */
 
-export interface EditorConfig<S = any> {
-  editorPanels: EditorPanelsBuilder<S>;
-  toExpression: (standardVisState: StandardVisState, customVisState: S) => string;
-  getSuggestions: (standardVisState: StandardVisState, customVisState: S) => Array<Suggestion<S>>;
-  defaultStandardState: StandardVisState;
-  defaultCustomState: S;
+export interface EditorPlugin<S extends ViewModel = ViewModel> {
+  DataPanel: React.FunctionComponent<PanelComponentProps<S>>;
+  ConfigPanel: React.FunctionComponent<PanelComponentProps<S>>;
+  // TODO add the other panels
+  toExpression: (viewModel: S) => string;
+  getSuggestions: (viewModel: S) => Array<Suggestion<S>>;
+  getInitialState: (viewModel: S) => S;
 }
 
-const configMap: { [key: string]: EditorConfig } = {
-  sample: sampleConfig,
+const configMap: { [key: string]: EditorPlugin<any> } = {
+  bar_chart: barChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected

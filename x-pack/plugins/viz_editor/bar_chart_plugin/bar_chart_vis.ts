@@ -17,15 +17,15 @@ import { registries } from '@kbn/interpreter/public';
 
 function sampleVisFunction() {
   return {
-    name: 'sampleChart',
+    name: 'bar_chart',
     type: 'render',
   };
 }
 
 function sampleVisRenderer() {
   return {
-    name: 'visualization',
-    displayName: 'visualization',
+    name: 'bar_chart_renderer',
+    displayName: 'Bar Chart',
     reuseDomNode: true,
     render: async (domNode: any, config: any, handlers: any) => {
       // TODO mount something to the dom node here
