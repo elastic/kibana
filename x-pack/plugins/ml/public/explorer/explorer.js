@@ -1107,7 +1107,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   defaultMessage="Top Influencers"
                 />
               </span>
-              <InfluencersList influencers={influencers} />
+              <InfluencersList
+                influencers={influencers}
+                influencerFilter={this.applyFilterFromTable}
+              />
             </div>
           )}
 

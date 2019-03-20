@@ -4,6 +4,23 @@
   .field-label {
     font-size: $euiFontSizeXS;
     text-align: left;
+    max-height: $euiFontSizeS;
+
+      .filter-button {
+        opacity: 0.3;
+        min-width: 14px;
+        -webkit-transform: translateY(-1px);
+        transform: translateY(-1px);
+
+        .euiIcon {
+          width: $euiFontSizeS;
+          height: $euiFontSizeS;
+        }
+      }
+
+      .filter-button:hover {
+        opacity: 1;
+      }
 
     .field-value {
       @include euiTextTruncate;
@@ -29,7 +46,7 @@
 
     .progress-bar {
       height: $euiSizeXS / 2;
-      margin-top: $euiSizeS;
+      margin-top: $euiSizeM;
       text-align: right;
       line-height: 18px; // SASSTODO: Calc porper value
       display: inline-block;
