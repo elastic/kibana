@@ -11,19 +11,33 @@ import { i18n } from '@kbn/i18n';
 
 export class FeatureTooltip extends React.Component {
 
+  _renderFilterButton(tooltipProperty, hasFilters) {
+    if (!this.props.isReadOnly || !hasFilters)  {
+      return null;
+    }
 
-  _renderFilterButton(tooltipProperty) {if (!this.props.isReadOnly || !tooltipProperty.isFilterable())  {
-    return null;
-  }
-  return (<EuiButtonIcon
-    iconType="logstashFilter"
-    title="Filter on property"
-    onClick={tooltipProperty.getFilterAction()}
-    aria-label="Filter on property"
-  />);
+
+    let icon;
+    if (tooltipProperty.isFilterable()) {
+      icon = (<EuiButtonIcon
+        iconType="logstashFilter"
+        title="Filter on property"
+        onClick={tooltipProperty.getFilterAction()}
+        aria-label="Filter on property"
+      />);
+    } else {
+      icon = null;
+    }
+
+
+    return (
+      <EuiFlexItem className="mapFeatureTooltipFilterButton" style={{ 'width': '32px' }}>
+        {icon}
+      </EuiFlexItem>
+    );
   }
 
-  _renderProperties() {
+  _renderProperties(hasFilters) {
     return this.props.properties.map((tooltipProperty, index) => {
       /*
        * Justification for dangerouslySetInnerHTML:
@@ -39,25 +53,24 @@ export class FeatureTooltip extends React.Component {
       />);
 
       return (
-        <EuiFlexItem key={index}>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <span><strong>{tooltipProperty.getPropertyName()}</strong></span>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span>{' '}</span>
-              {htmlValue}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {this._renderFilterButton(tooltipProperty)}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexGroup key={index}>
+          <EuiFlexItem style={{ 'width': '64px' }}>
+            <strong>{tooltipProperty.getPropertyName()}</strong>
+          </EuiFlexItem>
+          <EuiFlexItem style={{ 'width': '128px' }}>
+            {htmlValue}
+          </EuiFlexItem>
+          {this._renderFilterButton(tooltipProperty, hasFilters)}
+        </EuiFlexGroup>
       );
     });
   }
 
   render() {
+
+    const hasFilterableProperties = this.props.properties.some(prop => {
+      return prop.isFilterable();
+    });
     return (
       <Fragment>
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -76,8 +89,8 @@ export class FeatureTooltip extends React.Component {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              {this._renderProperties()}
+            <EuiFlexGroup direction="column" gutterSize="none">
+              {this._renderProperties(hasFilterableProperties)}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
