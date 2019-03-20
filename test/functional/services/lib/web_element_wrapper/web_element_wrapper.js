@@ -398,6 +398,14 @@ export class WebElementWrapper {
     `The element with ${className} className was still present when it should have disappeared.`);
   }
 
+  async clearWithKeyboard() {
+    const platformKey = process.platform === 'darwin' ? this._Keys.COMMAND : this._Keys.CONTROL;
+    await this.pressKeys([platformKey, 'a']);
+    const actions = this._driver.executor_.w3c === true ? this._driver.actions() : this._driver.actions({ bridge: true });
+    await actions.sendKeys(this._Keys.DELETE).perform();
+
+  }
+
   /**
    * Scroll the element into view, avoiding the fixed header if necessary
    *

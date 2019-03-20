@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('data-shared-item title is cleared with an empty panel title string', async () => {
-      await dashboardPanelActions.setCustomPanelTitle('h\b');
+      await dashboardPanelActions.setCustomPanelTitle('');
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         const foundSharedItemTitle = !!sharedData.find(item => {

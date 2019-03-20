@@ -211,7 +211,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressKeys(...args) {
-      const actions = driver.actions({ bridge: true });
+      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
