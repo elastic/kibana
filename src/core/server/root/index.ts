@@ -20,9 +20,9 @@
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Server } from '..';
 import { Config, ConfigService, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
+import { Server } from '../server';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.

@@ -10,20 +10,21 @@ import { EmptyStateError } from './empty_state_error';
 import { EmptyStateLoading } from './empty_state_loading';
 
 interface EmptyStateProps {
+  basePath: string;
   children: JSX.Element[] | JSX.Element;
   count: number | undefined;
   error?: string;
   loading?: boolean;
 }
 
-export const EmptyState = ({ children, count, error, loading }: EmptyStateProps) => {
+export const EmptyState = ({ basePath, children, count, error, loading }: EmptyStateProps) => {
   if (error) {
     return <EmptyStateError errorMessage={error} />;
   }
   if (loading) {
     return <EmptyStateLoading />;
   } else if (!count) {
-    return <EmptyIndex />;
+    return <EmptyIndex basePath={basePath} />;
   }
   return <Fragment>{children}</Fragment>;
 };

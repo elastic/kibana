@@ -36,38 +36,43 @@ const lookup = {
   metric,
   timeseries,
   gauge,
-  markdown
+  markdown,
 };
 
 class Series extends Component {
-
   constructor(props) {
     super(props);
+
     this.state = {
       visible: true,
-      selectedTab: 'metrics'
+      selectedTab: 'metrics',
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.switchTab = this.switchTab.bind(this);
-    this.toggleVisible = this.toggleVisible.bind(this);
   }
 
-  switchTab(selectedTab) {
+  switchTab = (selectedTab) => {
     this.setState({ selectedTab });
-  }
+  };
 
-  handleChange(part) {
+  handleChange = (part) => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = _.assign({}, model, part);
       this.props.onChange(doc);
     }
-  }
+  };
 
-  toggleVisible(e) {
+  togglePanelActivation = () => {
+    const { model } = this.props;
+
+    this.handleChange({
+      hidden: !model.hidden,
+    });
+  };
+
+  toggleVisible = (e) => {
     e.preventDefault();
     this.setState({ visible: !this.state.visible });
-  }
+  };
 
   render() {
     const { panel } = this.props;
@@ -95,7 +100,8 @@ class Series extends Component {
         style: this.props.style,
         switchTab: this.switchTab,
         toggleVisible: this.toggleVisible,
-        visible: this.state.visible
+        togglePanelActivation: this.togglePanelActivation,
+        visible: this.state.visible,
       };
       return (<Component {...params}/>);
     }
@@ -113,7 +119,7 @@ class Series extends Component {
 }
 
 Series.defaultProps = {
-  name: 'metrics'
+  name: 'metrics',
 };
 
 Series.propTypes = {

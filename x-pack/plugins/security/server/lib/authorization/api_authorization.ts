@@ -13,7 +13,7 @@ export function initAPIAuthorization(server: Server, authorization: Authorizatio
 
   server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
     // if the api doesn't start with "/api/" or we aren't using RBAC for this request, just continue
-    if (!request.path.startsWith('/api/') || !mode.useRbac()) {
+    if (!request.path.startsWith('/api/') || !mode.useRbacForRequest(request)) {
       return h.continue;
     }
 

@@ -590,6 +590,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.missingOrFail('dashboardSaveMenuItem');
     }
 
+    async getNotLoadedVisualizations(vizList) {
+      const checkList = [];
+      for (const name of vizList) {
+        const isPresent = await testSubjects.exists(
+          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          { timeout: 10000 }
+        );
+        checkList.push({ name, isPresent });
+      }
+
+      return checkList.filter(viz => viz.isPresent === false).map(viz => viz.name);
+    }
   }
 
   return new DashboardPage();

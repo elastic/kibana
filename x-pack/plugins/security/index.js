@@ -106,7 +106,7 @@ export const security = (kibana) => new kibana.Plugin({
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbac()) {
+      if (!authorization.mode.useRbacForRequest(request)) {
         return originalInjectedVars;
       }
 
@@ -173,7 +173,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      if (authorization.mode.useRbac()) {
+      if (authorization.mode.useRbacForRequest(request)) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         return new savedObjects.SavedObjectsClient(internalRepository);
       }
@@ -183,7 +183,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.mode.useRbac()) {
+      if (authorization.mode.useRbacForRequest(request)) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
@@ -232,7 +232,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
 
       // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbac()) {
+      if (!mode.useRbacForRequest(req)) {
         return h.continue;
       }
 

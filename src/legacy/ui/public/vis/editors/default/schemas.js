@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import '../directives/buttons';
 import { IndexedArray } from '../../../indexed_array';
 import { AggParams } from '../../../agg_types/agg_params';
 

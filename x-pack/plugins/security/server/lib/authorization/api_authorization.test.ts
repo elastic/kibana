@@ -41,11 +41,11 @@ describe('initAPIAuthorization', () => {
     expect(statusCode).toBe(200);
   });
 
-  test(`protected route that starts with "/api/", but "mode.useRbac()" returns false continues`, async () => {
+  test(`protected route that starts with "/api/", but "mode.useRbacForRequest()" returns false continues`, async () => {
     const server = new Server();
     const mockAuthorizationService: AuthorizationService = {
       mode: {
-        useRbac: jest.fn().mockReturnValue(false),
+        useRbacForRequest: jest.fn().mockReturnValue(false),
       },
     } as any;
     initAPIAuthorization(server, mockAuthorizationService);
@@ -61,19 +61,20 @@ describe('initAPIAuthorization', () => {
         },
       },
     ]);
-    const { result, statusCode } = await server.inject({
+    const { request, result, statusCode } = await server.inject({
       method: 'GET',
       url: '/api/foo',
     });
     expect(result).toBe('foo api response');
     expect(statusCode).toBe(200);
+    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 
-  test(`unprotected route that starts with "/api/", but "mode.useRbac()" returns true continues`, async () => {
+  test(`unprotected route that starts with "/api/", but "mode.useRbacForRequest()" returns true continues`, async () => {
     const server = new Server();
     const mockAuthorizationService: AuthorizationService = {
       mode: {
-        useRbac: jest.fn().mockReturnValue(true),
+        useRbacForRequest: jest.fn().mockReturnValue(true),
       },
     } as any;
     initAPIAuthorization(server, mockAuthorizationService);
@@ -89,15 +90,16 @@ describe('initAPIAuthorization', () => {
         },
       },
     ]);
-    const { result, statusCode } = await server.inject({
+    const { request, result, statusCode } = await server.inject({
       method: 'GET',
       url: '/api/foo',
     });
     expect(result).toBe('foo api response');
     expect(statusCode).toBe(200);
+    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 
-  test(`protected route that starts with "/api/", "mode.useRbac()" returns true and user is authorized continues`, async () => {
+  test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
     const headers = {
       authorization: 'foo',
     };
@@ -105,15 +107,15 @@ describe('initAPIAuthorization', () => {
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: true });
     const mockAuthorizationService: AuthorizationService = {
       actions,
-      checkPrivilegesDynamicallyWithRequest: (request: any) => {
+      checkPrivilegesDynamicallyWithRequest: (req: any) => {
         // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
         // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
-        expect(request.headers).toMatchObject(headers);
+        expect(req.headers).toMatchObject(headers);
 
         return mockCheckPrivileges;
       },
       mode: {
-        useRbac: jest.fn().mockReturnValue(true),
+        useRbacForRequest: jest.fn().mockReturnValue(true),
       },
     } as any;
     initAPIAuthorization(server, mockAuthorizationService);
@@ -129,7 +131,7 @@ describe('initAPIAuthorization', () => {
         },
       },
     ]);
-    const { result, statusCode } = await server.inject({
+    const { request, result, statusCode } = await server.inject({
       method: 'GET',
       url: '/api/foo',
       headers,
@@ -137,9 +139,10 @@ describe('initAPIAuthorization', () => {
     expect(result).toBe('foo api response');
     expect(statusCode).toBe(200);
     expect(mockCheckPrivileges).toHaveBeenCalledWith([actions.api.get('foo')]);
+    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 
-  test(`protected route that starts with "/api/", "mode.useRbac()" returns true and user isn't authorized responds with a 404`, async () => {
+  test(`protected route that starts with "/api/", "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
     const headers = {
       authorization: 'foo',
     };
@@ -147,15 +150,15 @@ describe('initAPIAuthorization', () => {
     const mockCheckPrivileges = jest.fn().mockReturnValue({ hasAllRequested: false });
     const mockAuthorizationService: AuthorizationService = {
       actions,
-      checkPrivilegesDynamicallyWithRequest: (request: any) => {
+      checkPrivilegesDynamicallyWithRequest: (req: any) => {
         // hapi conceals the actual "request" from us, so we make sure that the headers are passed to
         // "checkPrivilegesDynamicallyWithRequest" because this is what we're really concerned with
-        expect(request.headers).toMatchObject(headers);
+        expect(req.headers).toMatchObject(headers);
 
         return mockCheckPrivileges;
       },
       mode: {
-        useRbac: jest.fn().mockReturnValue(true),
+        useRbacForRequest: jest.fn().mockReturnValue(true),
       },
     } as any;
     initAPIAuthorization(server, mockAuthorizationService);
@@ -171,7 +174,7 @@ describe('initAPIAuthorization', () => {
         },
       },
     ]);
-    const { result, statusCode } = await server.inject({
+    const { request, result, statusCode } = await server.inject({
       method: 'GET',
       url: '/api/foo',
       headers,
@@ -185,5 +188,6 @@ Object {
 `);
     expect(statusCode).toBe(404);
     expect(mockCheckPrivileges).toHaveBeenCalledWith([actions.api.get('foo')]);
+    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 });
