@@ -17,15 +17,21 @@
  * under the License.
  */
 
+jest.mock('uiExports/interpreter');
+
 jest.mock('@kbn/interpreter/common', () => ({
   register: jest.fn(),
+  registryFactory: jest.fn(),
 }));
 
 const mockInterpreter = {
   interpretAst: jest.fn(),
 };
-jest.mock('@kbn/interpreter/public', () => ({
+jest.mock('./lib/interpreter', () => ({
   initializeInterpreter: jest.fn().mockReturnValue(Promise.resolve(mockInterpreter)),
+}));
+
+jest.mock('./registries', () => ({
   registries: {
     browserFunctions: jest.fn(),
     renderers: jest.fn(),
@@ -52,9 +58,9 @@ describe('interpreter/interpreter', () => {
     ajaxStream = require('ui/ajax_stream').ajaxStream;
     getInterpreter = require('./interpreter').getInterpreter;
     interpretAst = require('./interpreter').interpretAst;
-    initializeInterpreter = require('@kbn/interpreter/public').initializeInterpreter;
+    initializeInterpreter = require('./lib/interpreter').initializeInterpreter;
     kfetch = require('ui/kfetch').kfetch;
-    registries = require('@kbn/interpreter/public').registries;
+    registries = require('./registries').registries;
   });
 
   describe('getInterpreter', () => {
