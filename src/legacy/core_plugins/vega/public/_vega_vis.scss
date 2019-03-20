@@ -107,8 +107,7 @@
 
 .vgaVis__tooltip {
 
-  $vegaTooltipMaxWidth: $euiSize * 25;
-  max-width: $vegaTooltipMaxWidth + $euiSizeL;
+  max-width: 100%;
 
   h2 {
     margin-bottom: $euiSizeS;
@@ -122,12 +121,23 @@
 
   td.key {
     color: $euiColorMediumShade;
-    max-width: $vegaTooltipMaxWidth * 0.4;
+    max-width: $euiSize * 10;
     text-align: right;
     padding-right: $euiSizeXS;
   }
   td.value {
-    max-width: $vegaTooltipMaxWidth * 0.6;
+    max-width: $euiSizeL * 10;
     text-align: left;
   }
+
+  @media only screen and (max-width: map-get($euiBreakpoints, 'm')){
+    td.key {
+      max-width: $euiSize * 6;
+    }
+    td.value {
+      max-width: $euiSize * 10;
+    }
+  }
+
+
 }
