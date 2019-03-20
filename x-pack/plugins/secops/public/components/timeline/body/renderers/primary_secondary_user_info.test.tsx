@@ -18,7 +18,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = shallowWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName="user-name-1"
             primary="primary-1"
             secondary="secondary-1"
@@ -32,7 +33,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName="user-name-1"
             primary={undefined}
             secondary={undefined}
@@ -46,7 +48,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName="user-name-1"
             primary="unset"
             secondary="unset"
@@ -60,7 +63,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             primary="primary-1"
             userName={undefined}
             secondary={undefined}
@@ -74,7 +78,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             primary="primary-1"
             userName="unset"
             secondary="unset"
@@ -88,7 +93,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName={undefined}
             primary={undefined}
             secondary="secondary-1"
@@ -102,7 +108,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             secondary="secondary-1"
             primary="unset"
             userName="unset"
@@ -116,7 +123,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName="username-1"
             primary="username-1"
             secondary="username-1"
@@ -130,7 +138,8 @@ describe('UserPrimarySecondary', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <PrimarySecondaryUserInfo
-            eventId="id-123"
+            contextId="context-123"
+            eventId="event-123"
             userName="[username]"
             primary="[primary]"
             secondary="[secondary]"

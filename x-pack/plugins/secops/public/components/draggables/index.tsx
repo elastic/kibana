@@ -59,16 +59,17 @@ const Badge = styled(EuiBadge)`
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type BadgeDraggableType = Omit<DefaultDraggableType, 'id'> & {
+  contextId: string;
   eventId: string;
   iconType?: IconType;
   color?: string;
 };
 
 export const DraggableBadge = pure<BadgeDraggableType>(
-  ({ eventId, field, value, name, color = 'hollow', children, queryValue, iconType }) =>
+  ({ contextId, eventId, field, value, name, color = 'hollow', children, queryValue, iconType }) =>
     value != null ? (
       <DefaultDraggable
-        id={`${eventId}-${field}-${value}`}
+        id={`${contextId}-${eventId}-${field}-${value}`}
         field={field}
         name={name}
         value={value}

@@ -60,7 +60,8 @@ export const AuditdEndedSessionLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          eventId={`auditd-ended-session-${id}`}
+          contextId="auditd-ended-session"
+          eventId={id}
           field="auditd.session"
           value={session}
           iconType="number"
@@ -68,7 +69,8 @@ export const AuditdEndedSessionLine = pure<Props>(
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">
         <PrimarySecondaryUserInfo
-          eventId={`auditd-ended-session-${id}`}
+          contextId="auditd-ended-session"
+          eventId={id}
           userName={userName}
           primary={primary}
           secondary={secondary}
@@ -80,12 +82,18 @@ export const AuditdEndedSessionLine = pure<Props>(
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
-        <DraggableBadge eventId={`auditd-ended-session-${id}`} field="host.name" value={hostName} />
+        <DraggableBadge
+          contextId="auditd-ended-session"
+          eventId={id}
+          field="host.name"
+          value={hostName}
+        />
       </TokensFlexItem>
       {workingDirectory != null && <TokensFlexItem grow={false}>{i18n.IN}</TokensFlexItem>}
       <TokensFlexItem grow={false}>
         <DraggableBadge
-          eventId={`auditd-ended-session-${id}`}
+          contextId="auditd-ended-session"
+          eventId={id}
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
@@ -94,7 +102,8 @@ export const AuditdEndedSessionLine = pure<Props>(
       {processExecutable != null && <TokensFlexItem grow={false}>{i18n.ENDED_FROM}</TokensFlexItem>}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          eventId={`auditd-ended-session-${id}`}
+          contextId="auditd-ended-session"
+          eventId={id}
           field="process.executable"
           value={processExecutable}
           iconType="console"
@@ -103,7 +112,8 @@ export const AuditdEndedSessionLine = pure<Props>(
       <TokensFlexItem grow={false} component="span">
         {args !== '' && (
           <DraggableBadge
-            eventId={`auditd-ended-session-${id}`}
+            contextId="auditd-ended-session"
+            eventId={id}
             field="process.title"
             queryValue={processTitle != null ? processTitle : ''}
             value={args}

@@ -58,7 +58,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         </TokensFlexItem>
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            eventId={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="auditd.session"
             value={session}
             iconType="number"
@@ -66,7 +67,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         </TokensFlexItem>
         <TokensFlexItem grow={false} component="span">
           <PrimarySecondaryUserInfo
-            eventId={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             userName={userName}
             primary={primary}
             secondary={secondary}
@@ -79,7 +81,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            eventId={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="host.name"
             value={hostName}
           />
@@ -91,7 +94,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            eventId={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="process.working_directory"
             value={workingDirectory}
             iconType="folderOpen"
@@ -104,7 +108,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
-            eventId={`auditd-executed-element-${id}`}
+            contextId="auditd-executed-element"
+            eventId={id}
             field="process.name"
             value={processName}
             iconType="console"
@@ -113,7 +118,8 @@ export const AuditdExecutedCommandLine = pure<Props>(
         <TokensFlexItem grow={false} component="span">
           {args !== '' && (
             <DraggableBadge
-              eventId={`auditd-executed-element-${id}`}
+              contextId="auditd-executed-element"
+              eventId={id}
               field="process.title"
               queryValue={processTitle != null ? processTitle : ''}
               value={args}

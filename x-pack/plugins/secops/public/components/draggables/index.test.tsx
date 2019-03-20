@@ -31,7 +31,8 @@ describe('draggables', () => {
     test('it renders the default Badge', () => {
       const wrapper = shallowWithIntl(
         <DraggableBadge
-          eventId="draggable-id"
+          contextId="context-id"
+          eventId="event-id"
           field="some-field"
           value="some-value"
           queryValue="some-query-value"
@@ -78,7 +79,8 @@ describe('draggables', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DraggableBadge
-            eventId="draggable-id"
+            contextId="context-id"
+            eventId="event-id"
             field="some-field"
             value="some value"
             iconType="number"
@@ -92,7 +94,8 @@ describe('draggables', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DraggableBadge
-            eventId="draggable-id"
+            contextId="context-id"
+            eventId="event-id"
             field="some-field"
             iconType="number"
             value={undefined}
@@ -106,7 +109,8 @@ describe('draggables', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
           <DraggableBadge
-            eventId="draggable-id"
+            contextId="context-id"
+            eventId="event-id"
             field="some-field"
             value={null}
             iconType="number"

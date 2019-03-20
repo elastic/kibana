@@ -106,7 +106,8 @@ exports[`UserPrimarySecondary rendering it renders the default PrimarySecondaryU
   }
 >
   <pure(Component)
-    eventId="id-123"
+    contextId="context-123"
+    eventId="event-123"
     primary="primary-1"
     secondary="secondary-1"
     userName="user-name-1"
