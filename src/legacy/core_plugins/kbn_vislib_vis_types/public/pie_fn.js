@@ -29,7 +29,7 @@ export const kibanaPie = () => ({
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.pie.help', {
+  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
     defaultMessage: 'Pie visualization'
   }),
   args: {

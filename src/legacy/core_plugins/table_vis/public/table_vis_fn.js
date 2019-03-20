@@ -29,7 +29,7 @@ export const kibanaTable = () => ({
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.table.help', {
+  help: i18n.translate('tableVis.function.help', {
     defaultMessage: 'Table visualization'
   }),
   args: {

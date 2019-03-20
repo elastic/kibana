@@ -29,7 +29,7 @@ export const tilemap = () => ({
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.tilemap.help', {
+  help: i18n.translate('tileMap.function.help', {
     defaultMessage: 'Tilemap visualization'
   }),
   args: {

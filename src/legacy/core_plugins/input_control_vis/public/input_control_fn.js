@@ -26,7 +26,7 @@ export const inputControlVis = () => ({
   context: {
     types: [],
   },
-  help: i18n.translate('interpreter.functions.input_control.help', {
+  help: i18n.translate('inputControl.function.help', {
     defaultMessage: 'Input control visualization'
   }),
   args: {

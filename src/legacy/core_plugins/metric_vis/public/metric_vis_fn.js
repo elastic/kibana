@@ -28,7 +28,7 @@ export const metric = () => ({
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.metric.help', {
+  help: i18n.translate('metricVis.function.help', {
     defaultMessage: 'Metric visualization'
   }),
   args: {

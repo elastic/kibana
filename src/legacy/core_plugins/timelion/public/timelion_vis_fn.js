@@ -34,7 +34,7 @@ export const timelionVis = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.timelion.help', {
+  help: i18n.translate('timelion.function.help', {
     defaultMessage: 'Timelion visualization'
   }),
   args: {

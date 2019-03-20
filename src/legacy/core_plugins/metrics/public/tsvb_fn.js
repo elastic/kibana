@@ -35,7 +35,7 @@ export const tsvb = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.tsvb.help', {
+  help: i18n.translate('tsvb.function.help', {
     defaultMessage: 'TSVB visualization'
   }),
   args: {

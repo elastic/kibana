@@ -26,7 +26,7 @@ export const kibanaMarkdown = () => ({
   context: {
     types: [],
   },
-  help: i18n.translate('interpreter.functions.markdown.help', {
+  help: i18n.translate('markdownVis.function.help', {
     defaultMessage: 'Markdown visualization'
   }),
   args: {
