@@ -11,7 +11,7 @@ import { groupBy, last } from 'lodash';
 import { ResponseError } from 'vscode-jsonrpc';
 import { ResponseMessage } from 'vscode-jsonrpc/lib/messages';
 import { Location } from 'vscode-languageserver-types';
-import { UnknownFileLanguage } from '../../common/lsp_error_codes';
+import { ServerNotInitialized, UnknownFileLanguage } from '../../common/lsp_error_codes';
 import { parseLspUrl } from '../../common/uri_util';
 import { GitOperations } from '../git_operations';
 import { Logger } from '../log';
@@ -51,13 +51,13 @@ export function lspRoute(
           } catch (error) {
             if (error instanceof ResponseError) {
               // hide some errors;
-              if (error.code !== UnknownFileLanguage) {
-                log.info(error);
+              if (error.code !== UnknownFileLanguage || error.code !== ServerNotInitialized) {
+                log.debug(error);
               }
               return h
                 .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
                 .type('json')
-                .code(503); // different code for LS errors and other internal errors.
+                .code(500); // different code for LS errors and other internal errors.
             } else if (error.isBoom) {
               return error;
             } else {
@@ -156,7 +156,7 @@ export function lspRoute(
           return h
             .response({ error: { code: error.code, msg: LANG_SERVER_ERROR } })
             .type('json')
-            .code(503); // different code for LS errors and other internal errors.
+            .code(500); // different code for LS errors and other internal errors.
         } else if (error.isBoom) {
           return error;
         } else {
