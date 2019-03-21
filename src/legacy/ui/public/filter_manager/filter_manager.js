@@ -91,7 +91,6 @@ export function FilterManagerProvider(Private) {
   };
 
   filterManager.add = function (field, values, operation, index) {
-    console.log('filter manager add filter', arguments);
     const newFilters = this.generate(field, values, operation, index);
     return queryFilter.addFilters(newFilters);
   };

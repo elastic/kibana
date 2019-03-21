@@ -46,6 +46,11 @@ export class ESTooltipProperty extends TooltipProperty {
   }
 
   getHtmlDisplayValue() {
+
+    if (typeof this._rawValue === 'undefined') {
+      return '-';
+    }
+
     const field = this._indexPattern.fields.byName[this._propertyName];
     if (!field) {
       return '-';

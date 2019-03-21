@@ -35,7 +35,6 @@ export class PhraseFilterManager extends FilterManager {
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
   createFilter(phrases) {
-    console.log('createfilter', phrases, this.indexPattern);
     let newFilter;
     if (phrases.length === 1) {
       newFilter = buildPhraseFilter(

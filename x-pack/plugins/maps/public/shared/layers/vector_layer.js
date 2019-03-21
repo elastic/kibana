@@ -515,8 +515,6 @@ export class VectorLayer extends AbstractLayer {
 
 
   _addJoinsToSourceTooltips(tooltipsFromSource) {
-
-    //get all the index-patterns
     for (let i = 0; i < tooltipsFromSource.length; i++) {
       const tooltipProperty = tooltipsFromSource[i];
       const matchingJoins = [];
@@ -529,7 +527,6 @@ export class VectorLayer extends AbstractLayer {
         tooltipsFromSource[i] = new JoinTooltipProperty(tooltipProperty, matchingJoins);
       }
     }
-
   }
 
 

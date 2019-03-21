@@ -179,7 +179,7 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     this._descriptor.tooltipProperties.forEach(propertyName => {
-      tooltipProps.push(new ESTooltipProperty(propertyName, _.get(properties, propertyName, '-'), indexPattern));
+      tooltipProps.push(new ESTooltipProperty(propertyName, properties[propertyName], indexPattern));
     });
     return tooltipProps;
   }

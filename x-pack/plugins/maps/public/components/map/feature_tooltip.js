@@ -24,6 +24,7 @@ export class FeatureTooltip extends React.Component {
         title="Filter on property"
         onClick={tooltipProperty.getFilterAction()}
         aria-label="Filter on property"
+        className="mapFeatureTooltipFilterButton"
       />);
     } else {
       icon = null;
