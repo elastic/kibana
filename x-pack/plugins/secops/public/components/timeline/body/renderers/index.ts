@@ -9,6 +9,7 @@ import { auditDisposedCredsRowRenderer } from './auditd_disposed_creds_row_rende
 import { auditdEndedSessionRowRenderer } from './auditd_ended_session_row_renderer';
 import { auditdExecutedRowRenderer } from './auditd_executed_row_renderer';
 import { auditdLoggedinRowRenderer } from './auditd_loggedin_row_renderer';
+import { auditdStartedSessionRowRenderer } from './auditd_started_session_row_renderer';
 import { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
@@ -22,6 +23,7 @@ export * from './auditd_acquired_creds_row_renderer';
 export * from './auditd_ended_session_row_renderer';
 export * from './auditd_disposed_creds_row_renderer';
 export * from './auditd_executed_row_renderer';
+export * from './auditd_started_session_row_renderer';
 export * from './auditd_loggedin_row_renderer';
 export * from './column_renderer';
 export * from './row_renderer';
@@ -42,6 +44,7 @@ export const rowRenderers: RowRenderer[] = [
   auditAcquiredCredsRowRenderer,
   auditdEndedSessionRowRenderer,
   auditDisposedCredsRowRenderer,
+  auditdStartedSessionRowRenderer,
   plainRowRenderer,
 ];
 

@@ -12,36 +12,39 @@ import { BrowserFields } from 'x-pack/plugins/secops/public/containers/source';
 import { mockBrowserFields } from '../../../../containers/source/mock';
 import { mockEcsData, TestProviders } from '../../../../mock';
 
-import { AuditdAcquiredDetails, AuditdAcquiredLine } from './auditd_acquired_creds_details';
+import {
+  AuditdStartedSessionDetails,
+  AuditdStartedSessionLine,
+} from './auditd_started_session_details';
 
-describe('AuditAcquiredCredsDetails', () => {
+describe('AuditdStartedSessionDetails', () => {
   describe('rendering', () => {
-    test('it renders the default AuditAcquiredCredsDetails', () => {
-      // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
+    test('it renders the default AuditdStartedSessionDetails', () => {
+      // I cannot and do not want to use the BrowserFields mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallowWithIntl(
         <TestProviders>
-          <AuditdAcquiredDetails browserFields={browserFields} data={mockEcsData[21]} />
+          <AuditdStartedSessionDetails browserFields={browserFields} data={mockEcsData[21]} />
         </TestProviders>
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
-    test('it returns auditd if the data does contain auditd data', () => {
+    test('it returns auditd data if the data does contain auditd data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredDetails browserFields={mockBrowserFields} data={mockEcsData[19]} />
+          <AuditdStartedSessionDetails browserFields={mockBrowserFields} data={mockEcsData[19]} />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/acquired credentials to/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/started/usr/bin/gpgconf--list-dirs agent-socket'
       );
     });
 
     test('it returns null for text if the data contains no auditd data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredDetails browserFields={mockBrowserFields} data={mockEcsData[0]} />
+          <AuditdStartedSessionDetails browserFields={mockBrowserFields} data={mockEcsData[0]} />
         </TestProviders>
       );
       expect(wrapper.text()).toBeNull();
@@ -52,11 +55,11 @@ describe('AuditAcquiredCredsDetails', () => {
   // you have something wrong with your beats. These tests are to ensure the function does not
   // crash. If you need to format things prettier because not all the data is there, then update
   // these tests with those changes
-  describe('#AuditdAcquiredLine', () => {
+  describe('#AuditdStartedSessionLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="username-1"
@@ -71,14 +74,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -93,14 +96,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -115,14 +118,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with username if primary and secondary equal unset with different casing', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="username-1"
@@ -137,14 +140,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with username if primary and secondary are undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -159,14 +162,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1username-1@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1username-1@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with "as" wording if username, primary, and secondary are all different', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -181,14 +184,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with "as" wording if username and primary are the same but secondary is different', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -203,14 +206,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with primary if username and secondary are unset with different casing', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             userName="unseT"
@@ -225,14 +228,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns a session with primary if username and secondary are undefined', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="host-1"
             session="session-1"
@@ -247,14 +250,14 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionsession-1[username-primary]@host-1inworking-directory-1acquired credentials toprocess-1arg1 arg2 arg3'
+        'Sessionsession-1[username-primary]@host-1inworking-directory-1startedprocess-1arg1 arg2 arg3'
       );
     });
 
     test('it returns just a session if only given an id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             userName={undefined}
             secondary={undefined}
@@ -271,10 +274,10 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Session');
     });
 
-    test('it returns only session and hostName if only hostname and an id is given', () => {
+    test('it returns only hostName if only hostname and an id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             hostName="some-host-name"
             userName={undefined}
@@ -291,10 +294,10 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Session@some-host-name');
     });
 
-    test('it returns only a session and user name if only a user name and id is given', () => {
+    test('it returns only a user name if only a user name and id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             userName="some-user-name"
             secondary={undefined}
@@ -314,7 +317,7 @@ describe('AuditAcquiredCredsDetails', () => {
     test('it returns only a process name if only given a process name and id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             userName={undefined}
             processExecutable="some-process-name"
@@ -328,13 +331,13 @@ describe('AuditAcquiredCredsDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionacquired credentials tosome-process-name');
+      expect(wrapper.text()).toEqual('Sessionstartedsome-process-name');
     });
 
-    test('it returns only session and user name if process title with id is given', () => {
+    test('it returns only session if process title with id is given', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
             processTitle="some-process-title"
             userName="some-user-name"
@@ -354,7 +357,7 @@ describe('AuditAcquiredCredsDetails', () => {
     test('it returns only a working directory if that is all that is given with a id', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id={'hello-i-am-an-id'}
             workingDirectory="some-working-directory"
             userName={undefined}
@@ -371,12 +374,12 @@ describe('AuditAcquiredCredsDetails', () => {
       expect(wrapper.text()).toEqual('Sessioninsome-working-directory');
     });
 
-    test('it returns only the session and args with id if that is all that is given (very unlikely situation)', () => {
+    test('it returns only the args with id if that is all that is given (very unlikely situation)', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <AuditdAcquiredLine
+          <AuditdStartedSessionLine
             id="hello-i-am-an-id"
-            args="arg1 arg2 arg 3"
+            args="arg1 arg 2 arg 3"
             userName={undefined}
             secondary={undefined}
             session={undefined}
@@ -388,7 +391,7 @@ describe('AuditAcquiredCredsDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('Sessionarg1 arg2 arg 3');
+      expect(wrapper.text()).toEqual('Sessionarg1 arg 2 arg 3');
     });
   });
 });
