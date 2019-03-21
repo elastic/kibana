@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerPipeline } from './bar_chart_vis';
+import { registerPipeline } from './xy_chart_vis';
 
 registerPipeline();
 
 // TODO register config instead
-export { config } from './bar_chart_plugin';
+export { config } from './xy_chart_plugin';

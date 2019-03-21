@@ -17,13 +17,13 @@ import { registries } from 'plugins/interpreter/registries';
 
 function sampleVisFunction() {
   return {
-    name: 'bar_chart',
+    name: 'xy_chart',
     type: 'render',
     context: { types: ['datatable'] },
     fn(context: any) {
       return {
         type: 'render',
-        as: 'bar_chart_renderer',
+        as: 'xy_chart_renderer',
         value: context,
       };
     },
@@ -32,8 +32,8 @@ function sampleVisFunction() {
 
 function sampleVisRenderer() {
   return {
-    name: 'bar_chart_renderer',
-    displayName: 'Bar Chart',
+    name: 'xy_chart_renderer',
+    displayName: 'XY Chart',
     reuseDomNode: true,
     render: async (domNode: any, config: any, handlers: any) => {
       domNode.innerText = JSON.stringify(config);

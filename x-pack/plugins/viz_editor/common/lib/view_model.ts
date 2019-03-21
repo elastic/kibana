@@ -101,10 +101,10 @@ export function initialState(): ViewModel<any, any> {
         },
       },
     },
-    editorPlugin: 'bar_chart',
+    editorPlugin: 'xy_chart',
     title: 'Sum of bytes over time',
     private: {
-      barChart: {
+      xyChart: {
         xAxis: {
           title: 'Sum of bytes',
           columns: ['q1_0'],

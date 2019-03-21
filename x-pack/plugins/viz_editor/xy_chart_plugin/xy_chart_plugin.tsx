@@ -10,22 +10,22 @@ import { IndexPatternPanel } from '../common/components/index_pattern_panel';
 import { Axis, selectColumn, ViewModel } from '../common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
-type BarChartViewModel = ViewModel<
-  'barChart',
+type XyChartViewModel = ViewModel<
+  'xyChart',
   {
     xAxis: Axis;
     yAxis: Axis;
   }
 >;
 
-function dataPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
+function dataPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
   return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
 }
 
-function configPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
+function configPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
   const {
     private: {
-      barChart: { xAxis, yAxis },
+      xyChart: { xAxis, yAxis },
     },
   } = viewModel;
   return (
@@ -46,14 +46,14 @@ function configPanel({ viewModel }: PanelComponentProps<BarChartViewModel>) {
   );
 }
 
-function toExpression(viewState: BarChartViewModel) {
+function toExpression(viewState: XyChartViewModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `sample_data | bar_chart`;
+  return `sample_data | xy_chart`;
 }
 
-export const config: EditorPlugin<BarChartViewModel> = {
-  name: 'bar_chart',
+export const config: EditorPlugin<XyChartViewModel> = {
+  name: 'xy_chart',
   toExpression,
   DataPanel: dataPanel,
   ConfigPanel: configPanel,
@@ -63,6 +63,18 @@ export const config: EditorPlugin<BarChartViewModel> = {
       score: 0.5,
       viewModel,
       title: 'Standard Bar Chart',
+    },
+    {
+      expression: toExpression(viewModel),
+      score: 0.5,
+      viewModel,
+      title: 'Standard Line Chart',
+    },
+    {
+      expression: toExpression(viewModel),
+      score: 0.5,
+      viewModel,
+      title: 'Standard Area Chart',
     },
   ],
   // this part should check whether the x and y axes have to be initialized in some way

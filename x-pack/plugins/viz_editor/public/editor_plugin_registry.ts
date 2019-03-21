@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config as barChartConfig } from '../bar_chart_plugin';
 import { ViewModel } from '../common/lib';
+import { config as xyChartConfig } from '../xy_chart_plugin';
 
 export interface PanelComponentProps<S extends ViewModel = ViewModel> {
   viewModel: S;
@@ -40,7 +40,7 @@ export interface EditorPlugin<S extends ViewModel = ViewModel> {
 }
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {
-  bar_chart: barChartConfig,
+  xy_chart: xyChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
