@@ -28,7 +28,7 @@ interface KpiNetworkProps {
 
 interface CardItemProps {
   isLoading: boolean;
-  i18nKey: string;
+  description: string;
   data: KpiNetworkData;
   property: string;
 }
@@ -43,27 +43,44 @@ const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined)
   );
 };
 
-const CardItem = pure<CardItemProps>(({ isLoading, i18nKey, data, property }) => {
+const CardItem = pure<CardItemProps>(({ isLoading, description, data, property }) => {
   const matrixTitle: number | null | undefined = get(property, data);
-  const matrixDescription: string = get(i18nKey, i18n);
 
   return (
-    <EuiFlexItem key={matrixDescription}>
-      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={matrixDescription} />
+    <EuiFlexItem key={description}>
+      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={description} />
     </EuiFlexItem>
   );
 });
 
+const kpiNetworkCards = [
+  {
+    property: 'networkEvents',
+    description: get('NETWORK_EVENTS', i18n),
+  },
+  {
+    property: 'uniqueFlowId',
+    description: get('UNIQUE_ID', i18n),
+  },
+  {
+    property: 'activeAgents',
+    description: get('ACTIVE_AGENTS', i18n),
+  },
+  {
+    property: 'uniquePrivateIps',
+    description: get('UNIQUE_PRIVATE_IP', i18n),
+  },
+];
+
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
   <EuiFlexGroup>
-    <CardItem isLoading={loading} i18nKey="NETWORK_EVENTS" data={data} property="networkEvents" />
-    <CardItem isLoading={loading} i18nKey="UNIQUE_ID" data={data} property="uniqueFlowId" />
-    <CardItem isLoading={loading} i18nKey="ACTIVE_AGENTS" data={data} property="activeAgents" />
-    <CardItem
-      isLoading={loading}
-      i18nKey="UNIQUE_PRIVATE_IP"
-      data={data}
-      property="uniquePrivateIps"
-    />
+    {kpiNetworkCards.map(card => (
+      <CardItem
+        isLoading={loading}
+        description={card.description}
+        data={data}
+        property={card.property}
+      />
+    ))}
   </EuiFlexGroup>
 ));
