@@ -26,8 +26,14 @@ import { InjectedMetadataStart } from './injected_metadata';
 import { NotificationsStart } from './notifications';
 import { UiSettingsClient } from './ui_settings';
 
+/** @interal */
 export { CoreSystem } from './core_system';
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
 export interface CoreStart {
   i18n: I18nStart;
   injectedMetadata: InjectedMetadataStart;

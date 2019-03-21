@@ -48,9 +48,9 @@ interface BootstrapArgs {
 }
 
 /**
- * @interal
  *
- * @param options
+ * @internal
+ * @param param0 - options
  */
 export async function bootstrap({
   configs,

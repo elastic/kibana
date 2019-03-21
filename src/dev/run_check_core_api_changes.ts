@@ -24,46 +24,53 @@ import dedent from 'dedent';
 import execa from 'execa';
 import getopts from 'getopts';
 
-const apiExtractorConfig: IExtractorConfig = {
-  compiler: {
-    configType: 'tsconfig',
-    rootFolder: '.',
-  },
-  project: {
-    entryPointSourceFile: 'target/types/server/index.d.ts',
-  },
-  apiReviewFile: {
-    enabled: true,
-    apiReviewFolder: './common/core_api_review/',
-    tempFolder: './build',
-  },
-  apiJsonFile: {
-    enabled: true,
-    outputFolder: './build',
-  },
-  dtsRollup: {
-    enabled: false,
-    trimming: true,
-    publishFolderForInternal: '',
-    publishFolderForBeta: '',
-    publishFolderForPublic: '',
-    mainDtsRollupPath: '',
-  },
+const apiExtractorConfig = (folder: string): IExtractorConfig => {
+  return {
+    compiler: {
+      configType: 'tsconfig',
+      rootFolder: '.',
+    },
+    project: {
+      entryPointSourceFile: `target/types/${folder}/index.d.ts`,
+    },
+    apiReviewFile: {
+      enabled: true,
+      apiReviewFolder: `./src/core/${folder}/`,
+      tempFolder: `./build/${folder}/`,
+    },
+    apiJsonFile: {
+      enabled: true,
+      outputFolder: `./build/${folder}`,
+    },
+    dtsRollup: {
+      enabled: false,
+      trimming: true,
+      publishFolderForInternal: '',
+      publishFolderForBeta: '',
+      publishFolderForPublic: '',
+      mainDtsRollupPath: '',
+    },
+    policies: {
+      namespaceSupport: 'permissive',
+    },
+  };
 };
 
 const runBuildTypes = async () => {
   await execa.shell('yarn run build:types');
 };
 
-const runApiDocumenter = async () => {
-  await execa.shell('api-documenter markdown -i ./build -o ./docs/development/core/api');
+const runApiDocumenter = async (folder: string) => {
+  await execa.shell(
+    `api-documenter markdown -i ./build/${folder} -o ./docs/development/core/${folder}`
+  );
 };
 
 const isApiChangedWarning = (warning: string) => {
   return warning.startsWith('You have changed the public API signature for this project.');
 };
 
-const runApiExtractor = (acceptChanges: boolean = false) => {
+const runApiExtractor = (folder: string, acceptChanges: boolean = false) => {
   // Because of the internals of api-extractor ILogger can't be implemented as a typescript Class
   const warnings = [] as string[];
   const errors = [] as string[];
@@ -95,7 +102,7 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
     customLogger: memoryLogger,
   };
 
-  const extractor = new Extractor(apiExtractorConfig, options);
+  const extractor = new Extractor(apiExtractorConfig(folder), options);
   extractor.processProject();
 
   const printableWarnings = warnings.filter(msg => !isApiChangedWarning(msg));
@@ -104,7 +111,7 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
   return { apiChanged, warnings: printableWarnings, errors };
 };
 
-(async function run() {
+async function run(folder: string): Promise<boolean> {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
@@ -122,12 +129,11 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
     },
   });
 
-  if (extraFlags.length) {
+  if (extraFlags.length > 0) {
     for (const flag of extraFlags) {
       log.error(`Unknown flag: ${flag}`);
     }
 
-    process.exitCode = 1;
     opts.help = true;
   }
 
@@ -156,24 +162,24 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
       `)
     );
     process.stdout.write('\n');
-    process.exit();
+    return !(extraFlags.length > 0);
   }
 
-  log.info('Kibana Core API: checking for changes in API signature...');
+  log.info(`Core ${folder} API: checking for changes in API signature...`);
 
   await runBuildTypes().catch(e => {
     if (e) {
       log.error(e);
-      process.exit(1);
+      return false;
     }
   });
 
-  const { apiChanged, warnings, errors } = runApiExtractor(opts.accept);
+  const { apiChanged, warnings, errors } = runApiExtractor(folder, opts.accept);
 
   if (apiChanged && opts.accept) {
-    log.warning('You have changed the public signature of the Kibana Core API');
+    log.warning(`You have changed the public signature of the ${folder} Core API`);
     log.warning(
-      'Please commit the updated API documentation and the review file in `common/core_api_review/kibana.api.ts` \n'
+      `Please commit the updated API documentation and the review file in \`common/core_api_review/kibana.api.ts\` \n`
     );
   }
 
@@ -187,28 +193,41 @@ const runApiExtractor = (acceptChanges: boolean = false) => {
   }
 
   if (!apiChanged) {
-    log.info('Kibana Core API: no changes detected ✔');
+    log.info(`Core ${folder} API: no changes detected ✔`);
   }
 
   if (opts.accept || opts.docs) {
-    await runApiDocumenter().catch(e => {
-      log.error(e);
-      process.exit(1);
-    });
-
-    log.info('Kibana Core API: updated documentation ✔');
+    await runApiDocumenter(folder)
+      .then(() => {
+        log.info(`Core ${folder} API: updated documentation ✔`);
+      })
+      .catch(e => {
+        log.error(e);
+        return false;
+      });
   }
 
   // If the API changed and we're not accepting the changes, exit process with error
   if (apiChanged && !opts.accept) {
-    process.exit(1);
+    return false;
   }
 
   // If any errors or warnings occured, exit with an error
   if (errors.length > 0 || warnings.length > 0) {
-    log.error('Kibana Core API: api-extractor failed with the following errors or warnings:');
+    log.error(`Core ${folder} API: api-extractor failed with the following errors or warnings:`);
     errors.forEach(msg => log.error(msg));
     warnings.forEach(msg => log.warning(msg));
-    process.exit(1);
+    return false;
+  }
+
+  return true;
+}
+
+(async () => {
+  const publicSucceeded = await run('public');
+  const serverSucceeded = await run('server');
+
+  if (!publicSucceeded || !serverSucceeded) {
+    process.exitCode = 1;
   }
 })();
