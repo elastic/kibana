@@ -18302,7 +18302,7 @@ react-vis@^1.8.1:
     prop-types "^15.5.8"
     react-motion "^0.4.8"
 
-react@>=0.13.3:
+react@>=0.13.3, react@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
   integrity sha512-ZmIomM7EE1DvPEnSFAHZn9Vs9zJl5A9H7el0EGTE6ZbW9FKe/14IYAlPbC8iH25YarEQxZL+E8VW7Mi7kfQrDQ==
@@ -18312,15 +18312,15 @@ react@>=0.13.3:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react@^16.2.0, react@^16.6.0:
-  version "16.8.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.8.2.tgz#83064596feaa98d9c2857c4deae1848b542c9c0c"
-  integrity sha512-aB2ctx9uQ9vo09HVknqv3DGRpI7OIGJhCx3Bt0QqoRluEjHSaObJl+nG12GDdYH6sTgE7YiPJ6ZUyMx9kICdXw==
+react@^16.6.0:
+  version "16.6.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.6.0.tgz#b34761cfaf3e30f5508bc732fb4736730b7da246"
+  integrity sha512-zJPnx/jKtuOEXCbQ9BKaxDMxR0001/hzxXwYxG8septeyYGfsgAei6NgfbVgOhbY1WOP2o3VPs/E9HaN+9hV3Q==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.13.2"
+    scheduler "^0.10.0"
 
 reactcss@1.2.3, reactcss@^1.2.0:
   version "1.2.3"
