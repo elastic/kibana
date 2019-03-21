@@ -84,7 +84,7 @@ export async function runCheckTsProjectsCli() {
       process.exit(1);
     },
     {
-      helpDescription:
+      description:
         'Check that all .ts and .tsx files in the repository are assigned to a tsconfig.json file',
     }
   );

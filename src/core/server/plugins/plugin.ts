@@ -80,6 +80,48 @@ export interface PluginManifest {
   readonly server: boolean;
 }
 
+/**
+ * Small container object used to expose information about discovered plugins that may
+ * or may not have been started.
+ * @internal
+ */
+export interface DiscoveredPlugin {
+  /**
+   * Identifier of the plugin.
+   */
+  readonly id: PluginName;
+
+  /**
+   * Root configuration path used by the plugin, defaults to "id".
+   */
+  readonly configPath: ConfigPath;
+
+  /**
+   * An optional list of the other plugins that **must be** installed and enabled
+   * for this plugin to function properly.
+   */
+  readonly requiredPlugins: ReadonlyArray<PluginName>;
+
+  /**
+   * An optional list of the other plugins that if installed and enabled **may be**
+   * leveraged by this plugin for some additional functionality but otherwise are
+   * not required for this plugin to work properly.
+   */
+  readonly optionalPlugins: ReadonlyArray<PluginName>;
+}
+
+/**
+ * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
+ * be exposed to client-side code.
+ * @internal
+ */
+export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+  /**
+   * Path on the filesystem where plugin was loaded from.
+   */
+  readonly path: string;
+}
+
 type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (
   coreContext: PluginInitializerContext
 ) => {
@@ -109,7 +151,7 @@ export class Plugin<
 
   constructor(
     public readonly path: string,
-    private readonly manifest: PluginManifest,
+    public readonly manifest: PluginManifest,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.log = initializerContext.logger.get();
