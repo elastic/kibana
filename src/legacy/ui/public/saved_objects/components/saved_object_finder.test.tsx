@@ -37,6 +37,7 @@ import {
   EuiPagination,
   EuiTablePagination,
 } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as sinon from 'sinon';
@@ -63,7 +64,7 @@ describe('SavedObjectsFinder', () => {
     {
       type: 'search',
       name: 'Search',
-      getIconForSavedObject: () => 'search',
+      getIconForSavedObject: () => 'search' as IconType,
       showSavedObject: () => true,
     },
   ];
@@ -224,7 +225,7 @@ describe('SavedObjectsFinder', () => {
           {
             type: 'vis',
             name: 'Vis',
-            getIconForSavedObject: () => 'visualization',
+            getIconForSavedObject: () => 'visLine',
           },
         ]}
       />
@@ -249,12 +250,12 @@ describe('SavedObjectsFinder', () => {
       {
         type: 'search',
         name: 'Search',
-        getIconForSavedObject: () => 'search',
+        getIconForSavedObject: () => 'search' as IconType,
       },
       {
         type: 'vis',
         name: 'Vis',
-        getIconForSavedObject: () => 'document',
+        getIconForSavedObject: () => 'document' as IconType,
       },
     ];
 

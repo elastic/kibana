@@ -31,6 +31,7 @@ exports[`render 1`] = `
         fill={true}
         href="/app/myapp"
         iconSide="left"
+        size="m"
         type="button"
       >
         launch myapp
