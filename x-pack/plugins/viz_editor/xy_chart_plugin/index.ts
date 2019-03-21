@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerPipeline } from './xy_chart_vis';
-
-registerPipeline();
-
-// TODO register config instead
+export { registerPipeline } from './xy_chart_vis';
 export { config } from './xy_chart_plugin';

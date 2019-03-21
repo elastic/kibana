@@ -17,6 +17,7 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { registries, renderersRegistry } from 'plugins/interpreter/registries';
+import { registerPipeline as registerXYPipeline } from '../xy_chart_plugin';
 
 // TODO: Convert this to the "new platform" way of doing UI
 function App($scope: any, $element: Element[]) {
@@ -35,3 +36,7 @@ function App($scope: any, $element: Element[]) {
 chrome.setRootController('vizEditor', App);
 
 registerFunctions(registries);
+
+// TODO this is just a workaround for now because the xychart doesn't have it's own plugin yet.
+// As soon as it has, the entrypoint of this plugin should take care of this
+registerXYPipeline(registries);
