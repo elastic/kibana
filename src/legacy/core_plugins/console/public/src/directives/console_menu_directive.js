@@ -17,25 +17,18 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
+import 'ngreact';
 
-require('brace');
-require('ui-bootstrap-custom');
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/sense', ['react']);
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
+import { ConsoleMenu } from '../console_menu';
 
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-require('./src/directives/console_menu_directive');
-
-
-uiRoutes.when('/dev_tools/console', {
-  controller: 'SenseController',
-  template,
+module.directive('consoleMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(ConsoleMenu),
+    undefined,
+    { restrict: 'E' }
+  );
 });
