@@ -83,6 +83,25 @@ export class VisualizeLoader {
     return this.renderVis(el, savedObj, params);
   }
 
+  public async loadById(savedVisualizationId: string, params: VisualizeLoaderParams) {
+    return new Promise((resolve, reject) => {
+      this.savedVisualizations.get(savedVisualizationId).then((savedObj: VisSavedObject) => {
+        const handlerParams = {
+          ...params,
+          // lets add query filter angular service to the params
+          queryFilter: this.Private(FilterBarQueryFilterProvider),
+          // lets add Private to the params, we'll need to pass it to visualize later
+          Private: this.Private,
+          autoRender: false,
+        };
+
+        const element = document.createElement('div');
+        const handler = new EmbeddedVisualizeHandler(element, savedObj, handlerParams);
+        resolve(handler);
+      }, reject);
+    });
+  }
+
   /**
    * Returns a promise, that resolves to a list of all saved visualizations.
    *

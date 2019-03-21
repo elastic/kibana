@@ -53,6 +53,7 @@ interface EmbeddedVisualizeHandlerParams extends VisualizeLoaderParams {
   Private: IPrivate;
   queryFilter: any;
   autoFetch?: boolean;
+  autoRender?: boolean;
 }
 
 const RENDER_COMPLETE_EVENT = 'render_complete';
@@ -201,7 +202,9 @@ export class EmbeddedVisualizeHandler {
     this.dataSubject = new Rx.Subject();
     this.data$ = this.dataSubject.asObservable().pipe(share());
 
-    this.render();
+    if (params.autoRender !== false) {
+      this.render();
+    }
   }
 
   /**
@@ -425,9 +428,10 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
-  private fetch = (forceFetch: boolean = false) => {
+  private fetch = (forceFetch: boolean = false, tableOnly: boolean = false) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
+    this.dataLoaderParams.tableOnly = tableOnly;
     this.dataLoaderParams.inspectorAdapters = this.inspectorAdapters;
 
     this.vis.filters = { timeRange: this.dataLoaderParams.timeRange };

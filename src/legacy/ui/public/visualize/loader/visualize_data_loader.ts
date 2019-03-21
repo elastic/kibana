@@ -88,6 +88,10 @@ export class VisualizeDataLoader {
       filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
     });
 
+    if (params.tableOnly) {
+      return requestHandlerResponse;
+    }
+
     // No need to call the response handler when there have been no data nor has there been changes
     // in the vis-state (response handler does not depend on uiState)
     const canSkipResponseHandler =

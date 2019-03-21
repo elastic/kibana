@@ -34,8 +34,9 @@ import { kibanaTable } from './table';
 import { tagcloud } from './tagcloud';
 import { vislib } from './vislib';
 import { visualization } from './visualization';
+import { visdata } from './vis_data';
 
 export const functions = [
   clog, esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
-  metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
+  metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization, visdata
 ];

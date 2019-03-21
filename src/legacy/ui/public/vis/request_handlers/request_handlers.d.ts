@@ -26,6 +26,7 @@ import { AggConfigs } from '../agg_configs';
 import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
+  tableOnly?: boolean;
   searchSource: SearchSource;
   aggs: AggConfigs;
   timeRange?: TimeRange;
