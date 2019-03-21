@@ -118,7 +118,7 @@ export class EditorComponent extends React.Component<IProps> {
   }
   public render() {
     return (
-      <EuiFlexItem data-test-subj="codeSourceViewer" className="code-no-overflow" grow={1}>
+      <EuiFlexItem data-test-subj="codeSourceViewer" className="codeOverflowHidden" grow={1}>
         <Shortcut
           keyCode="f"
           help="With editor ‘active’ Find in file"
@@ -126,7 +126,12 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <div tabIndex={0} className="code-editor-container" id="mainEditor" />
+        <div
+          tabIndex={0}
+          className="codeContainer__editor"
+          id="mainEditor"
+          style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
+        />
         {this.renderReferences()}
       </EuiFlexItem>
     );

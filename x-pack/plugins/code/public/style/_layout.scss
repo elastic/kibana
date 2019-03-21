@@ -19,6 +19,11 @@
   }
 }
 
+.codeContainer__editor {
+  overflow: hidden;
+  flex-grow: 1;
+}
+
 .codeFooter--error {
   color: $euiColorDanger;
 }

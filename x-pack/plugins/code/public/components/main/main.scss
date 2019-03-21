@@ -1,8 +1,3 @@
-.code-editor-container {
-  overflow: hidden;
-  flex-grow: 1;
-}
-
 .code-auto-overflow {
   overflow: auto;
 }
@@ -12,7 +7,7 @@
   overflow-y: auto;
 }
 
-.code-no-overflow {
+.codeOverflowHidden {
   overflow: hidden;
 }
 
