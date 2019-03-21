@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { DiscoveredPlugin } from '../../server';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('#getKibanaVersion', () => {
@@ -72,6 +73,43 @@ describe('start.getCspConfig()', () => {
     expect(() => {
       // @ts-ignore TS knows this shouldn't be possible
       csp.warnLegacyBrowsers = false;
+    }).toThrowError();
+  });
+});
+
+describe('start.getPlugins()', () => {
+  it('returns injectedMetadata.uiPlugins', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+      },
+    } as any);
+
+    const plugins = injectedMetadata.start().getPlugins();
+    expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
+  });
+
+  it('returns frozen version of uiPlugins', () => {
+    const injectedMetadata = new InjectedMetadataService({
+      injectedMetadata: {
+        uiPlugins: [{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }],
+      },
+    } as any);
+
+    const plugins = injectedMetadata.start().getPlugins();
+    expect(() => {
+      plugins.pop();
+    }).toThrowError();
+    expect(() => {
+      plugins.push({ id: 'new-plugin', plugin: {} as DiscoveredPlugin });
+    }).toThrowError();
+    expect(() => {
+      // @ts-ignore TS knows this shouldn't be possible
+      plugins[0].name = 'changed';
+    }).toThrowError();
+    expect(() => {
+      // @ts-ignore TS knows this shouldn't be possible
+      plugins[0].newProp = 'changed';
     }).toThrowError();
   });
 });
