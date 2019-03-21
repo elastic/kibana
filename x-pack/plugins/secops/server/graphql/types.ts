@@ -744,11 +744,13 @@ export interface SayMyName {
 }
 
 export interface KpiNetworkData {
-  networkEvents: number;
+  networkEvents?: number | null;
 
-  uniqueFlowId: number;
+  uniqueFlowId?: number | null;
 
   activeAgents?: number | null;
+
+  uniquePrivateIps?: number | null;
 }
 
 // ====================================================
@@ -3311,24 +3313,31 @@ export namespace SayMyNameResolvers {
 
 export namespace KpiNetworkDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = KpiNetworkData> {
-    networkEvents?: NetworkEventsResolver<number, TypeParent, Context>;
+    networkEvents?: NetworkEventsResolver<number | null, TypeParent, Context>;
 
-    uniqueFlowId?: UniqueFlowIdResolver<number, TypeParent, Context>;
+    uniqueFlowId?: UniqueFlowIdResolver<number | null, TypeParent, Context>;
 
     activeAgents?: ActiveAgentsResolver<number | null, TypeParent, Context>;
+
+    uniquePrivateIps?: UniquePrivateIpsResolver<number | null, TypeParent, Context>;
   }
 
   export type NetworkEventsResolver<
-    R = number,
+    R = number | null,
     Parent = KpiNetworkData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type UniqueFlowIdResolver<
-    R = number,
+    R = number | null,
     Parent = KpiNetworkData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type ActiveAgentsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniquePrivateIpsResolver<
     R = number | null,
     Parent = KpiNetworkData,
     Context = SecOpsContext

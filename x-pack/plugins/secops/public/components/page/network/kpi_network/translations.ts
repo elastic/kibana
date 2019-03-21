@@ -17,3 +17,14 @@ export const UNIQUE_ID = i18n.translate('xpack.secops.kpiNetwork.source.uniquiId
 export const ACTIVE_AGENTS = i18n.translate('xpack.secops.kpiNetwork.source.activeAgentsTitle', {
   defaultMessage: 'Active Agents',
 });
+
+export const UNIQUE_PRIVATE_IP = i18n.translate(
+  'xpack.secops.kpiNetwork.source.uniquePrivateIpsTitle',
+  {
+    defaultMessage: 'Unique Private IP',
+  }
+);
+
+export const LOADING = i18n.translate('xpack.secops.kpiNetwork.source.loadingDescription', {
+  defaultMessage: 'Loading',
+});

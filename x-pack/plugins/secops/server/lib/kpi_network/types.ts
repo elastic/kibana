@@ -21,3 +21,20 @@ export interface KpiNetworkHit extends SearchHit {
     };
   };
 }
+
+export interface KpiNetworkHeader {
+  index: string[] | string;
+  allowNoIndices?: boolean;
+  ignoreUnavailable?: boolean;
+}
+
+export interface KpiNetworkBody {
+  query?: object;
+  aggregations?: object;
+  size?: number;
+  track_total_hits?: boolean;
+}
+
+export type KpiNetworkESMSearchBody = KpiNetworkBody | KpiNetworkHeader;
+
+export type UniquePrivateAttributeQuery = 'source' | 'destination';

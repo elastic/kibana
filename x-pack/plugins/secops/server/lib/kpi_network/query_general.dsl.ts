@@ -6,7 +6,9 @@
 import { createQueryFilterClauses } from '../../utils/build_query';
 import { RequestBasicOptions } from '../framework';
 
-const getKpiNetworkFilter = () => [
+import { KpiNetworkESMSearchBody } from './types';
+
+const getGeneralQueryFilter = () => [
   {
     bool: {
       filter: [
@@ -39,7 +41,7 @@ const getKpiNetworkFilter = () => [
   },
 ];
 
-export const buildQuery = ({
+export const buildGeneralQuery = ({
   filterQuery,
   timerange: { from, to },
   sourceConfiguration: {
@@ -47,10 +49,10 @@ export const buildQuery = ({
     logAlias,
     packetbeatAlias,
   },
-}: RequestBasicOptions) => {
+}: RequestBasicOptions): KpiNetworkESMSearchBody[] => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
-    ...getKpiNetworkFilter(),
+    ...getGeneralQueryFilter(),
     {
       range: {
         [timestamp]: {
@@ -61,11 +63,13 @@ export const buildQuery = ({
     },
   ];
 
-  const dslQuery = {
-    allowNoIndices: true,
-    index: [logAlias, packetbeatAlias],
-    ignoreUnavailable: true,
-    body: {
+  const dslQuery = [
+    {
+      index: [logAlias, packetbeatAlias],
+      allowNoIndices: true,
+      ignoreUnavailable: true,
+    },
+    {
       aggregations: {
         unique_flow_id: {
           cardinality: {
@@ -86,7 +90,7 @@ export const buildQuery = ({
       size: 0,
       track_total_hits: true,
     },
-  };
+  ];
 
   return dslQuery;
 };

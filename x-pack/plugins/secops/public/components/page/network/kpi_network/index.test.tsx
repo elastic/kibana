@@ -25,10 +25,20 @@ describe('NetworkTopNFlow Table Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders the default Authentication table', () => {
+    test('it renders loading icons', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent data={mockData.KpiNetwork} />
+          <KpiNetworkComponent data={mockData.KpiNetwork} loading={true} />
+        </ReduxStoreProvider>
+      );
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('it renders the default widget', () => {
+      const wrapper = shallow(
+        <ReduxStoreProvider store={store}>
+          <KpiNetworkComponent data={mockData.KpiNetwork} loading={false} />
         </ReduxStoreProvider>
       );
 

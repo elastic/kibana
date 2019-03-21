@@ -4,67 +4,104 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep } from 'lodash/fp';
-
 import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 
 import { ElasticsearchKpiNetworkAdapter } from './elasticsearch_adapter';
-import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
+import { mockMsearchOptions, mockOptions, mockRequest, mockResponse, mockResult } from './mock';
+import * as generalQueryDsl from './query_general.dsl';
+import * as uniquePrvateIpQueryDsl from './query_unique_private_ips.dsl';
 
 describe('Network Kpi elasticsearch_adapter', () => {
-  describe('Happy Path - get Data', () => {
-    const mockCallWithRequest = jest.fn();
-    mockCallWithRequest.mockResolvedValue(mockResponse);
-    const mockFramework: FrameworkAdapter = {
-      version: 'mock',
-      callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
-      registerGraphQLEndpoint: jest.fn(),
-      getIndexPatternsService: jest.fn(),
-    };
-    jest.mock('../framework', () => ({
-      callWithRequest: mockCallWithRequest,
-    }));
+  const mockCallWithRequest = jest.fn();
+  const mockFramework: FrameworkAdapter = {
+    version: 'mock',
+    callWithRequest: mockCallWithRequest,
+    exposeStaticDir: jest.fn(),
+    registerGraphQLEndpoint: jest.fn(),
+    getIndexPatternsService: jest.fn(),
+  };
+  let mockBuildQuery: jest.SpyInstance;
+  let mockBuildUniquePrvateIpsQuery: jest.SpyInstance;
+  let EsKpiNetwork: ElasticsearchKpiNetworkAdapter;
+  let data: KpiNetworkData;
 
-    test('getKpiNetwork', async () => {
-      const EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
-      const data: KpiNetworkData = await EsKpiNetwork.getKpiNetwork(
-        mockRequest as FrameworkRequest,
-        mockOptions
-      );
+  describe('getKpiNetwork - call stack', () => {
+    beforeAll(async () => {
+      mockCallWithRequest.mockResolvedValue(mockResponse);
+      jest.mock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      mockBuildQuery = jest.spyOn(generalQueryDsl, 'buildGeneralQuery').mockReturnValue([]);
+      mockBuildUniquePrvateIpsQuery = jest
+        .spyOn(uniquePrvateIpQueryDsl, 'buildUniquePrvateIpQuery')
+        .mockReturnValue([]);
+      EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
+      data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
+    });
+
+    afterAll(() => {
+      mockCallWithRequest.mockReset();
+      mockBuildQuery.mockRestore();
+      mockBuildUniquePrvateIpsQuery.mockRestore();
+    });
+
+    test('should build general query with correct option', () => {
+      expect(mockBuildQuery).toHaveBeenCalledWith(mockOptions);
+    });
+
+    test('should build query for unique private ip (source) with correct option', () => {
+      expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith('source', mockOptions);
+    });
+
+    test('should build query for unique private ip (destination) with correct option', () => {
+      expect(mockBuildUniquePrvateIpsQuery).toHaveBeenCalledWith('destination', mockOptions);
+    });
+
+    test('should send msearch request', () => {
+      expect(mockCallWithRequest).toHaveBeenCalledWith(mockRequest, 'msearch', mockMsearchOptions);
+    });
+  });
+
+  describe('Happy Path - get Data', () => {
+    beforeAll(async () => {
+      mockCallWithRequest.mockResolvedValue(mockResponse);
+      jest.mock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
+      data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
+    });
+
+    afterAll(() => {
+      mockCallWithRequest.mockReset();
+    });
+
+    test('getKpiNetwork - response with data', () => {
       expect(data).toEqual(mockResult);
     });
   });
 
   describe('Unhappy Path - No data', () => {
-    const mockNoDataResponse = cloneDeep(mockResponse);
-    mockNoDataResponse.hits.total.value = 0;
-    mockNoDataResponse.aggregations.unique_flow_id.value = 0;
-    mockNoDataResponse.aggregations.active_agents.value = 0;
-    const mockCallWithRequest = jest.fn();
-    mockCallWithRequest.mockResolvedValue(mockNoDataResponse);
-    const mockFramework: FrameworkAdapter = {
-      version: 'mock',
-      callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
-      registerGraphQLEndpoint: jest.fn(),
-      getIndexPatternsService: jest.fn(),
-    };
-    jest.mock('../framework', () => ({
-      callWithRequest: mockCallWithRequest,
-    }));
+    beforeAll(async () => {
+      mockCallWithRequest.mockResolvedValue(null);
+      jest.mock('../framework', () => ({
+        callWithRequest: mockCallWithRequest,
+      }));
+      EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
+      data = await EsKpiNetwork.getKpiNetwork(mockRequest as FrameworkRequest, mockOptions);
+    });
 
-    test('getKpiNetwork', async () => {
-      const EsKpiNetwork = new ElasticsearchKpiNetworkAdapter(mockFramework);
-      const data: KpiNetworkData = await EsKpiNetwork.getKpiNetwork(
-        mockRequest as FrameworkRequest,
-        mockOptions
-      );
+    afterAll(() => {
+      mockCallWithRequest.mockReset();
+    });
+
+    test('getKpiNetwork - response without data', async () => {
       expect(data).toEqual({
-        networkEvents: 0,
-        uniqueFlowId: 0,
-        activeAgents: 0,
+        networkEvents: null,
+        uniqueFlowId: null,
+        activeAgents: null,
+        uniquePrivateIps: null,
       });
     });
   });

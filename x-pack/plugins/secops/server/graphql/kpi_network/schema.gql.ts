@@ -8,9 +8,10 @@ import gql from 'graphql-tag';
 
 export const kpiNetworkSchema = gql`
   type KpiNetworkData {
-    networkEvents: Float!
-    uniqueFlowId: Float!
+    networkEvents: Float
+    uniqueFlowId: Float
     activeAgents: Float
+    uniquePrivateIps: Float
   }
 
   extend type Source {

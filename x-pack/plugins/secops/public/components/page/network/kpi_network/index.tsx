@@ -10,8 +10,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { has } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
@@ -22,37 +23,47 @@ import * as i18n from './translations';
 
 interface KpiNetworkProps {
   data: KpiNetworkData;
+  loading: boolean;
 }
 
-const kpiNetworkCards = (data: KpiNetworkData) => [
-  {
-    title:
-      has('networkEvents', data) && data.networkEvents !== null
-        ? numeral(data.networkEvents).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.NETWORK_EVENTS,
-  },
-  {
-    title:
-      has('uniqueFlowId', data) && data.uniqueFlowId !== null
-        ? numeral(data.uniqueFlowId).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.UNIQUE_ID,
-  },
-  {
-    title:
-      has('activeAgents', data) && data.activeAgents !== null
-        ? numeral(data.activeAgents).format('0,0')
-        : getEmptyTagValue(),
-    description: i18n.ACTIVE_AGENTS,
-  },
-];
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data }) => (
+interface CardItemProps {
+  isLoading: boolean;
+  i18nKey: string;
+  data: KpiNetworkData;
+  property: string;
+}
+
+const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
+  return isLoading ? (
+    <EuiLoadingSpinner size="m" />
+  ) : title != null ? (
+    numeral(title).format('0,0')
+  ) : (
+    getEmptyTagValue()
+  );
+};
+
+const CardItem = pure<CardItemProps>(({ isLoading, i18nKey, data, property }) => {
+  const matrixTitle: number | null | undefined = get(property, data);
+  const matrixDescription: string = get(i18nKey, i18n);
+
+  return (
+    <EuiFlexItem key={matrixDescription}>
+      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={matrixDescription} />
+    </EuiFlexItem>
+  );
+});
+
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
   <EuiFlexGroup>
-    {kpiNetworkCards(data).map(item => (
-      <EuiFlexItem key={item.description}>
-        <EuiCard title={item.title} description={item.description} />
-      </EuiFlexItem>
-    ))}
+    <CardItem isLoading={loading} i18nKey="NETWORK_EVENTS" data={data} property="networkEvents" />
+    <CardItem isLoading={loading} i18nKey="UNIQUE_ID" data={data} property="uniqueFlowId" />
+    <CardItem isLoading={loading} i18nKey="ACTIVE_AGENTS" data={data} property="activeAgents" />
+    <CardItem
+      isLoading={loading}
+      i18nKey="UNIQUE_PRIVATE_IP"
+      data={data}
+      property="uniquePrivateIps"
+    />
   </EuiFlexGroup>
 ));

@@ -31,13 +31,12 @@ const basePath = chrome.getBasePath();
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
-
+const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
 }
 
 type NetworkComponentProps = NetworkComponentReduxProps;
-
 const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
   <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
     {({ filebeatIndicesExist, indexPattern }) =>
@@ -56,7 +55,15 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       sourceId="default"
                       startDate={from}
                     >
-                      {({ kpiNetwork }) => <KpiNetworkComponent data={kpiNetwork} />}
+                      {({ kpiNetwork, loading, id, refetch }) => (
+                        <KpiNetworkComponentManage
+                          id={id}
+                          setQuery={setQuery}
+                          refetch={refetch}
+                          data={kpiNetwork}
+                          loading={loading}
+                        />
+                      )}
                     </KpiNetworkQuery>
                     <EuiSpacer size="m" />
                     <NetworkTopNFlowQuery

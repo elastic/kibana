@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { GetKpiNetworkQuery, KpiNetworkData } from '../../graphql/types';
+import { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
@@ -18,6 +19,8 @@ import { kpiNetworkQuery } from './index.gql_query';
 export interface KpiNetworkArgs {
   id: string;
   kpiNetwork: KpiNetworkData;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
 }
 
 export interface KpiNetworkProps extends QueryTemplateProps {
@@ -40,11 +43,13 @@ export const KpiNetworkQuery = pure<KpiNetworkProps>(
         filterQuery: createFilter(filterQuery),
       }}
     >
-      {({ data }) => {
+      {({ data, loading, refetch }) => {
         const kpiNetwork = getOr({}, `source.KpiNetwork`, data);
         return children({
           id,
           kpiNetwork,
+          loading,
+          refetch,
         });
       }}
     </Query>
