@@ -11,7 +11,8 @@ export const kpiNetworkSchema = gql`
     networkEvents: Float
     uniqueFlowId: Float
     activeAgents: Float
-    uniquePrivateIps: Float
+    uniqueSourcePrivateIp: Float
+    uniqueDestinationPrivateIp: Float
   }
 
   extend type Source {

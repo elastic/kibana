@@ -15,7 +15,8 @@ export const mockKpiNetworkData: { KpiNetwork: KpiNetworkData } = {
     networkEvents: 0,
     uniqueFlowId: 0,
     activeAgents: 0,
-    uniquePrivateIps: 0,
+    uniqueSourcePrivateIp: 0,
+    uniqueDestinationPrivateIp: 0,
   },
 };
 

@@ -101,7 +101,8 @@ describe('Network Kpi elasticsearch_adapter', () => {
         networkEvents: null,
         uniqueFlowId: null,
         activeAgents: null,
-        uniquePrivateIps: null,
+        uniqueSourcePrivateIp: null,
+        uniqueDestinationPrivateIp: null,
       });
     });
   });

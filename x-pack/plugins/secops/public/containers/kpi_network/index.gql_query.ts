@@ -14,7 +14,8 @@ export const kpiNetworkQuery = gql`
         networkEvents
         uniqueFlowId
         activeAgents
-        uniquePrivateIps
+        uniqueSourcePrivateIp
+        uniqueDestinationPrivateIp
       }
     }
   }

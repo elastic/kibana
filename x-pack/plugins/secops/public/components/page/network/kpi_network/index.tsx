@@ -28,9 +28,8 @@ interface KpiNetworkProps {
 
 interface CardItemProps {
   isLoading: boolean;
+  title: JSX.Element;
   description: string;
-  data: KpiNetworkData;
-  property: string;
 }
 
 const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
@@ -43,44 +42,60 @@ const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined)
   );
 };
 
-const CardItem = pure<CardItemProps>(({ isLoading, description, data, property }) => {
-  const matrixTitle: number | null | undefined = get(property, data);
-
+const CardItem = pure<CardItemProps>(({ title, description }) => {
   return (
     <EuiFlexItem key={description}>
-      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={description} />
+      <EuiCard title={title} description={description} />
     </EuiFlexItem>
   );
 });
 
-const kpiNetworkCards = [
-  {
-    property: 'networkEvents',
-    description: get('NETWORK_EVENTS', i18n),
-  },
-  {
-    property: 'uniqueFlowId',
-    description: get('UNIQUE_ID', i18n),
-  },
-  {
-    property: 'activeAgents',
-    description: get('ACTIVE_AGENTS', i18n),
-  },
-  {
-    property: 'uniquePrivateIps',
-    description: get('UNIQUE_PRIVATE_IP', i18n),
-  },
-];
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
+  const kpiNetworkCards = [
+    {
+      description: get('NETWORK_EVENTS', i18n),
+      title: <>{fieldTitleMapping(loading, get('networkEvents', data))}</>,
+    },
+    {
+      property: 'uniqueFlowId',
+      description: get('UNIQUE_ID', i18n),
+      title: <>{fieldTitleMapping(loading, get('uniqueFlowId', data))}</>,
+    },
+    {
+      property: 'activeAgents',
+      description: get('ACTIVE_AGENTS', i18n),
+      title: <>{fieldTitleMapping(loading, get('activeAgents', data))}</>,
+    },
+    {
+      property: 'uniquePrivateIps',
+      description: get('UNIQUE_PRIVATE_IP', i18n),
+      title: (
+        <div>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <span>{fieldTitleMapping(loading, get('uniqueSourcePrivateIp', data))}</span>
+              <span>{fieldTitleMapping(loading, get('uniqueDestinationPrivateIp', data))}</span>
+            </EuiFlexItem>
+            <EuiFlexItem className="eui-textRight">
+              <span>Source</span>
+              <span>Destination</span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ),
+    },
+  ];
 
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
-  <EuiFlexGroup>
-    {kpiNetworkCards.map(card => (
-      <CardItem
-        isLoading={loading}
-        description={card.description}
-        data={data}
-        property={card.property}
-      />
-    ))}
-  </EuiFlexGroup>
-));
+  return (
+    <EuiFlexGroup>
+      {kpiNetworkCards.map(card => (
+        <CardItem
+          key={card.description}
+          isLoading={loading}
+          description={card.description}
+          title={card.title}
+        />
+      ))}
+    </EuiFlexGroup>
+  );
+});

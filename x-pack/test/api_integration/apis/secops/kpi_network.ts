@@ -38,7 +38,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.networkEvents).to.be(6157);
             expect(kpiNetwork!.uniqueFlowId).to.be(712);
             expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniquePrivateIps).to.equal(17);
+            expect(kpiNetwork!.uniqueSourcePrivateIp).to.equal(17);
+            expect(kpiNetwork!.uniqueDestinationPrivateIp).to.equal(18);
           });
       });
     });
@@ -68,7 +69,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.networkEvents).to.be(6157);
             expect(kpiNetwork!.uniqueFlowId).to.be(712);
             expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniquePrivateIps).to.equal(17);
+            expect(kpiNetwork!.uniqueSourcePrivateIp).to.equal(17);
+            expect(kpiNetwork!.uniqueDestinationPrivateIp).to.equal(18);
           });
       });
     });
