@@ -22,12 +22,12 @@ detailed information and instructions.
 [float]
 == Configure data sources 
 
-By default the Logs UI uses the `filebeat-*` index pattern to query the data.
-If your logs are located in a different set of indices or use a different
+The `filebeat-*` index pattern is used to query data by default.
+If your logs are located in a different set of indices, or use a different
 timestamp field, you can adjust the source configuration via the user interface
 or the {kib} configuration file.
 
-NOTE: The Logs and Infrastructure UI share a common data source definition in
+NOTE: Logs and Infrastructure share a common data source definition in
 each space. Changes in one of them can influence the data displayed in the
 other.
 

@@ -22,12 +22,12 @@ detailed information and instructions.
 [float]
 == Configure data sources 
 
-By default the Infrastructure UI uses the `metricbeat-*` index pattern to query
-the data.  If your metrics are located in a different set of indices or use a
+The `metricbeat-*` index pattern is used to query the data by default.
+If your metrics are located in a different set of indices, or use a
 different timestamp field, you can adjust the source configuration via the user
 interface or the {kib} configuration file.
 
-NOTE: The Logs and Infrastructure UI share a common data source definition in
+NOTE: Logs and Infrastructure share a common data source definition in
 each space. Changes in one of them can influence the data displayed in the
 other.
 
@@ -35,7 +35,7 @@ other.
 === Configure data sources in the user interface
 
 The source configuration UI can be accessed via the corresponding button in the
-toolbar.
+toolbar:
 
 [role="screenshot"]
 image::infrastructure/images/infrastructure-configure-source.png[Configure Infrastructure UI source button in Kibana]
