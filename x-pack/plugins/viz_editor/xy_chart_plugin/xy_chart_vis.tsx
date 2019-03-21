@@ -29,8 +29,13 @@ function sampleVisFunction() {
   return {
     name: 'xy_chart',
     type: 'render',
+    args: {
+      displayType: {
+        types: ['string'],
+      },
+    },
     context: { types: ['datatable'] },
-    fn(context: any) {
+    fn(context: any, args: any) {
       const xColumn = context.columns[0].id;
       const yColumn = context.columns[1].id;
 
@@ -40,8 +45,7 @@ function sampleVisFunction() {
         value: {
           // TODO this should come via the expression
           title: 'A title',
-          // TODO this should also come via the expression
-          seriesType: 'line',
+          seriesType: args.displayType,
           data: context.rows.map((row: any) => [row[xColumn], row[yColumn]]),
         },
       };

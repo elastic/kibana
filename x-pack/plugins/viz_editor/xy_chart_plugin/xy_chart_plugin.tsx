@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
+import { EuiSuperSelect } from '@elastic/eui';
+import { set } from 'lodash/fp';
 import React from 'react';
 import { columnSummary } from '../common/components/config_panel';
 import { IndexPatternPanel } from '../common/components/index_pattern_panel';
@@ -15,6 +18,7 @@ type XyChartViewModel = ViewModel<
   {
     xAxis: Axis;
     yAxis: Axis;
+    displayType?: 'line' | 'area';
   }
 >;
 
@@ -22,14 +26,33 @@ function dataPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
   return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
 }
 
-function configPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
+function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyChartViewModel>) {
   const {
     private: {
-      xyChart: { xAxis, yAxis },
+      xyChart: { xAxis, yAxis, displayType },
     },
   } = viewModel;
   return (
     <>
+      <div className="configPanel-axis">
+        <span className="configPanel-axis-title">Display type</span>
+        <EuiSuperSelect
+          options={[
+            {
+              value: 'line',
+              inputDisplay: 'Line',
+            },
+            {
+              value: 'area',
+              inputDisplay: 'area',
+            },
+          ]}
+          valueOfSelected={displayType || 'line'}
+          onChange={(value: string) => {
+            onChangeViewModel(set(['private', 'xyChart', 'displayType'], value, viewModel));
+          }}
+        />
+      </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
@@ -49,7 +72,7 @@ function configPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
 function toExpression(viewState: XyChartViewModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `sample_data | xy_chart`;
+  return `sample_data | xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
 export const config: EditorPlugin<XyChartViewModel> = {
