@@ -111,7 +111,7 @@ const kibanaFeatures: Feature[] = [
     catalogue: ['console', 'searchprofiler', 'grokdebugger'],
     privileges: {
       all: {
-        api: ['console/execute'],
+        api: ['console'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -119,7 +119,7 @@ const kibanaFeatures: Feature[] = [
         ui: ['show'],
       },
       read: {
-        api: ['console/execute'],
+        api: ['console'],
         savedObject: {
           all: [],
           read: ['config'],
@@ -169,7 +169,7 @@ const kibanaFeatures: Feature[] = [
     app: ['kibana'],
     catalogue: ['index_patterns'],
     management: {
-      kibana: ['indices'],
+      kibana: ['index_patterns'],
     },
     privileges: {
       all: {
@@ -177,7 +177,7 @@ const kibanaFeatures: Feature[] = [
           all: ['index-pattern'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['createNew'],
       },
       read: {
         savedObject: {

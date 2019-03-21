@@ -50,6 +50,7 @@ export class SavedObjectsManagementBuilder {
       'kql-telemetry',
       'timelion-sheet',
       'user-action',
+      'sample-data-telemetry',
     ];
   }
 

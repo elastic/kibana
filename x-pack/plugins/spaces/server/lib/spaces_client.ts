@@ -196,7 +196,7 @@ export class SpacesClient {
   }
 
   private useRbac(): boolean {
-    return this.authorization && this.authorization.mode.useRbac();
+    return this.authorization && this.authorization.mode.useRbacForRequest(this.request);
   }
 
   private async ensureAuthorizedGlobally(action: string, method: string, forbiddenMessage: string) {

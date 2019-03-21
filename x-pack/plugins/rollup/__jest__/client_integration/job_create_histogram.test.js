@@ -22,8 +22,8 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 describe('Create Rollup Job, step 4: Histogram', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
+  let find;
+  let exists;
   let userActions;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
@@ -37,8 +37,8 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      findTestSubject,
-      testSubjectExists,
+      find,
+      exists,
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
@@ -56,7 +56,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
   const goToStepAndOpenFieldChooser = async () => {
     await goToStep(4);
-    findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+    find('rollupJobShowFieldChooserButton').simulate('click');
   };
 
   describe('layout', () => {
@@ -69,17 +69,17 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     });
 
     it('should have the title set to "Terms"', () => {
-      expect(testSubjectExists('rollupJobCreateHistogramTitle')).toBe(true);
+      expect(exists('rollupJobCreateHistogramTitle')).toBe(true);
     });
 
     it('should have a link to the documentation', () => {
-      expect(testSubjectExists('rollupJobCreateHistogramDocsButton')).toBe(true);
+      expect(exists('rollupJobCreateHistogramDocsButton')).toBe(true);
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(true);
+      expect(exists('rollupJobSaveButton')).toBe(false);
     });
 
     it('should go to the "Terms" step when clicking the back button', async () => {
@@ -93,11 +93,11 @@ describe('Create Rollup Job, step 4: Histogram', () => {
     });
 
     it('should have a button to display the list of histogram fields to chose from', () => {
-      expect(testSubjectExists('rollupJobHistogramFieldChooser')).toBe(false);
+      expect(exists('rollupJobHistogramFieldChooser')).toBe(false);
 
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
-      expect(testSubjectExists('rollupJobHistogramFieldChooser')).toBe(true);
+      expect(exists('rollupJobHistogramFieldChooser')).toBe(true);
     });
   });
 
@@ -108,15 +108,15 @@ describe('Create Rollup Job, step 4: Histogram', () => {
       });
 
       it('should have the title set to "Add histogram fields"', async () => {
-        expect(findTestSubject('rollupJobCreateFlyoutTitle').text()).toEqual('Add histogram fields');
+        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add histogram fields');
       });
 
       it('should have a button to close the flyout', () => {
-        expect(testSubjectExists('rollupJobHistogramFieldChooser')).toBe(true);
+        expect(exists('rollupJobHistogramFieldChooser')).toBe(true);
 
-        findTestSubject('euiFlyoutCloseButton').simulate('click');
+        find('euiFlyoutCloseButton').simulate('click');
 
-        expect(testSubjectExists('rollupJobHistogramFieldChooser')).toBe(false);
+        expect(exists('rollupJobHistogramFieldChooser')).toBe(false);
       });
     });
 
@@ -191,7 +191,7 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
   describe('interval', () => {
     const addHistogramFieldToList = () => {
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
       const { rows } = getMetadataFromEuiTable('rollupJobHistogramFieldChooser-table');
       rows[0].reactWrapper.simulate('click');
     };
@@ -204,15 +204,15 @@ describe('Create Rollup Job, step 4: Histogram', () => {
 
     describe('input validation', () => {
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should display errors when clicking "next" without filling the interval', () => {
-        expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+        expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
         userActions.clickNextStep();
 
-        expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
+        expect(exists('rollupJobCreateStepError')).toBeTruthy();
         expect(getFormErrorsMessages()).toEqual(['Interval must be a whole number.']);
       });
 

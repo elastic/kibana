@@ -132,6 +132,9 @@ export default function (kibana) {
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
+        'sample-data-telemetry': {
+          isNamespaceAgnostic: true,
+        },
       },
 
       injectDefaultVars(server, options) {
@@ -167,6 +170,9 @@ export default function (kibana) {
             advancedSettings: {
               save: true
             },
+            indexPatterns: {
+              createNew: true,
+            },
             savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
               ...acc,
               [type]: {
@@ -182,7 +188,7 @@ export default function (kibana) {
                */
               kibana: {
                 settings: true,
-                indices: true,
+                index_patterns: true,
               },
             }
           }
