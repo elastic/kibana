@@ -17,46 +17,58 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { kibanaTable } from './table';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { kibanaPie } from './pie_fn';
 
 const mockResponseHandler = jest.fn().mockReturnValue(Promise.resolve({
-  tables: [{ columns: [], rows: [] }],
+  hits: 1,
+  names: ['Count'],
+  raw: {
+    columns: [],
+    rows: [],
+  },
+  slices: {
+    children: [],
+  },
+  tooltipFormatter: {
+    id: 'number',
+  },
 }));
-jest.mock('ui/vis/response_handlers/legacy', () => ({
-  LegacyResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
+jest.mock('ui/vis/response_handlers/vislib', () => ({
+  VislibSlicesResponseHandlerProvider: () => ({ handler: mockResponseHandler }),
 }));
 
-describe('interpreter/functions#table', () => {
-  const fn = functionWrapper(kibanaTable);
+describe('interpreter/functions#pie', () => {
+  const fn = functionWrapper(kibanaPie);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
-    perPage: 10,
-    showPartialRows: false,
-    showMetricsAtAllLevels: false,
-    sort: {
-      columnIndex: null,
-      direction: null
+    addTooltip: true,
+    addLegend: false,
+    type: 'pie',
+    addTooltip: true,
+    addLegend: true,
+    legendPosition: 'right',
+    isDonut: true,
+    labels: {
+      show: false,
+      values: true,
+      last_level: true,
+      truncate: 100,
     },
-    showTotal: false,
-    totalFunc: 'sum',
     dimensions: {
-      metrics: [
-        {
-          accessor: 0,
-          format: {
-            id: 'number'
-          },
-          params: {},
-          aggType: 'count'
-        }
-      ],
-      buckets: []
-    }
+      metric: {
+        accessor: 0,
+        format: {
+          id: 'number',
+        },
+        params: {},
+        aggType: 'count',
+      },
+    },
   };
 
   beforeEach(() => {

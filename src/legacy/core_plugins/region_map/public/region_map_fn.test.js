@@ -17,53 +17,42 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { metric } from './metric';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { regionmap } from './region_map_fn';
 
-describe('interpreter/functions#metric', () => {
-  const fn = functionWrapper(metric);
+describe('interpreter/functions#regionmap', () => {
+  const fn = functionWrapper(regionmap);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
+    legendPosition: 'bottomright',
     addTooltip: true,
-    addLegend: false,
-    type: 'metric',
-    metric: {
-      percentageMode: false,
-      useRanges: false,
-      colorSchema: 'Green to Red',
-      metricColorMode: 'None',
-      colorsRange: [
-        {
-          from: 0,
-          to: 10000,
-        }
-      ],
-      labels: {
-        show: true,
-      },
-      invertColors: false,
-      style: {
-        bgFill: '#000',
-        bgColor: false,
-        labelColor: false,
-        subText: '',
-        fontSize: 60,
-      },
-      metrics: [
-        {
-          accessor: 0,
-          format: {
-            id: 'number'
-          },
-          params: {},
-          aggType: 'count',
-        }
-      ]
+    colorSchema: 'Yellow to Red',
+    emsHotLink: '',
+    selectedJoinField: null,
+    isDisplayWarning: true,
+    wms: {
+      enabled: false,
+      options: {
+        format: 'image/png',
+        transparent: true
+      }
     },
+    mapZoom: 2,
+    mapCenter: [0, 0],
+    outlineWeight: 1,
+    showAllShapes: true,
+    metric: {
+      accessor: 0,
+      format: {
+        id: 'number'
+      },
+      params: {},
+      aggType: 'count'
+    }
   };
 
   it('returns an object with the correct structure', () => {

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { tilemap } from './tilemap';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { tilemap } from './tilemap_fn';
 
 jest.mock('ui/vis/map/convert_to_geojson', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({

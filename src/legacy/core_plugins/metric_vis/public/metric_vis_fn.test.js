@@ -17,29 +17,52 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { tagcloud } from './tagcloud';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { metric } from './metric_vis_fn';
 
-describe('interpreter/functions#tagcloud', () => {
-  const fn = functionWrapper(tagcloud);
+describe('interpreter/functions#metric', () => {
+  const fn = functionWrapper(metric);
   const context = {
     type: 'kibana_datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
   const visConfig = {
-    scale: 'linear',
-    orientation: 'single',
-    minFontSize: 18,
-    maxFontSize: 72,
-    showLabel: true,
+    addTooltip: true,
+    addLegend: false,
+    type: 'metric',
     metric: {
-      accessor: 0,
-      format: {
-        id: 'number',
+      percentageMode: false,
+      useRanges: false,
+      colorSchema: 'Green to Red',
+      metricColorMode: 'None',
+      colorsRange: [
+        {
+          from: 0,
+          to: 10000,
+        }
+      ],
+      labels: {
+        show: true,
       },
-      params: {},
-      aggType: 'count',
+      invertColors: false,
+      style: {
+        bgFill: '#000',
+        bgColor: false,
+        labelColor: false,
+        subText: '',
+        fontSize: 60,
+      },
+      metrics: [
+        {
+          accessor: 0,
+          format: {
+            id: 'number'
+          },
+          params: {},
+          aggType: 'count',
+        }
+      ]
     },
   };
 

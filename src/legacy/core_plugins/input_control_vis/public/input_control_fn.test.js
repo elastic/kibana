@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { inputControlVis } from './input_control';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { inputControlVis } from './input_control_fn';
 
 describe('interpreter/functions#input_control_vis', () => {
   const fn = functionWrapper(inputControlVis);

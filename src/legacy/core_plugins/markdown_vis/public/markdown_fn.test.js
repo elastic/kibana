@@ -17,46 +17,19 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { regionmap } from './regionmap';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { kibanaMarkdown } from './markdown_fn';
 
-describe('interpreter/functions#regionmap', () => {
-  const fn = functionWrapper(regionmap);
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+describe('interpreter/functions#markdown', () => {
+  const fn = functionWrapper(kibanaMarkdown);
   const visConfig = {
-    legendPosition: 'bottomright',
-    addTooltip: true,
-    colorSchema: 'Yellow to Red',
-    emsHotLink: '',
-    selectedJoinField: null,
-    isDisplayWarning: true,
-    wms: {
-      enabled: false,
-      options: {
-        format: 'image/png',
-        transparent: true
-      }
-    },
-    mapZoom: 2,
-    mapCenter: [0, 0],
-    outlineWeight: 1,
-    showAllShapes: true,
-    metric: {
-      accessor: 0,
-      format: {
-        id: 'number'
-      },
-      params: {},
-      aggType: 'count'
-    }
+    fontSize: 12,
+    openLinksInNewTab: true,
+    markdown: '## hello _markdown_',
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });
