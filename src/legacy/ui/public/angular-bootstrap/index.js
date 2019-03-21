@@ -28,7 +28,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.modal',
   'ui.bootstrap.tooltip',
   'ui.bootstrap.progressbar',
-  'ui.bootstrap.tabs',
 ]);
 
 angular.module('ui.bootstrap.tpls', [
@@ -39,15 +38,12 @@ angular.module('ui.bootstrap.tpls', [
   'template/progressbar/bar.html',	
   'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
-  'template/tabs/tab.html',
-  'template/tabs/tabset.html',
 ]);
 
 import './bindHtml/bindHtml';
 import './dropdown/dropdown';
 import './modal/modal';
 import './progressbar/progressbar';
-import './tabs/tabs';
 import './tooltip/tooltip';
 import './transition/transition';
 
@@ -91,16 +87,4 @@ import progressbar from './progressbar/progressbar.html';
 
 angular.module('template/progressbar/progressbar.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/progressbar/progressbar.html', progressbar);
-}]);
-
-import tab from './tabs/tab.html';
-
-angular.module('template/tabs/tab.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tab.html', tab);
-}]);
-
-import tabset from './tabs/tabset.html';
-
-angular.module('template/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tabset.html', tabset);
 }]);
