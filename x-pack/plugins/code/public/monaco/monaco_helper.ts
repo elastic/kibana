@@ -5,6 +5,7 @@
  */
 
 import { editor } from 'monaco-editor';
+import chrome from 'ui/chrome';
 import { ResizeChecker } from 'ui/resize_checker';
 import { EditorActions } from '../components/editor/editor';
 import { provideDefinition } from './definition/definition_provider';
@@ -43,6 +44,9 @@ export class MonacoHelper {
       this.monaco.languages.registerDefinitionProvider('java', definitionProvider);
       this.monaco.languages.registerDefinitionProvider('typescript', definitionProvider);
       this.monaco.languages.registerDefinitionProvider('javascript', definitionProvider);
+      if (chrome.getInjected('enableLangserversDeveloping', false) === true) {
+        this.monaco.languages.registerDefinitionProvider('go', definitionProvider);
+      }
       const codeEditorService = new EditorService();
       codeEditorService.setMonacoHelper(this);
       this.editor = monaco.editor.create(
