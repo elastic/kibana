@@ -17,25 +17,28 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
 
-require('brace');
-require('ui-bootstrap-custom');
+import 'ngreact';
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('kibana/vega', ['react']);
 
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-require('./src/directives/console_menu_directive');
+import { VegaHelpMenu } from './vega_help_menu';
+import { VegaActionsMenu } from './vega_action_menu';
 
+module.directive('vegaActionsMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(VegaActionsMenu),
+    undefined,
+    { restrict: 'E' }
+  );
+});
 
-uiRoutes.when('/dev_tools/console', {
-  controller: 'SenseController',
-  template,
+module.directive('vegaHelpMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(VegaHelpMenu),
+    undefined,
+    { restrict: 'E' }
+  );
 });
