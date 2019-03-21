@@ -141,7 +141,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('redirects to the default location if state is not presented.', async () => {
       const request = requestFixture({ payload: { SAMLResponse: 'saml-response-xml' } });
 
-      callWithInternalUser.withArgs('shield.samlAuthenticate').returns({
+      callWithInternalUser.withArgs('shield.samlAuthenticate').resolves({
         access_token: 'idp-initiated-login-token',
         refresh_token: 'idp-initiated-login-refresh-token',
       });

@@ -24,35 +24,30 @@ interface ProviderOptions {
 }
 
 /**
- * Represents state created at the beginning of the SAML handshake.
+ * The state supported by the provider (for the SAML handshake or established session).
  */
-interface HandshakeState {
+interface ProviderState {
   /**
-   * Unique identifier of the SAML request.
+   * Unique identifier of the SAML request initiated the handshake.
    */
-  requestId: string;
+  requestId?: string;
 
   /**
    * URL to redirect user to after successful SAML handshake.
    */
-  nextURL: string;
-}
+  nextURL?: string;
 
-/**
- * Represents state that contains access and refresh tokens for the established SAML session.
- */
-interface SessionState {
   /**
    * Access token issued as the result of successful SAML handshake and that should be provided with
    * every request to Elasticsearch on behalf of the authenticated user. This token will eventually expire.
    */
-  accessToken: string;
+  accessToken?: string;
 
   /**
    * Once access token expires the refresh token is used to get a new pair of access/refresh tokens
    * without any user involvement. If not used this token will eventually expire as well.
    */
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 /**
@@ -134,7 +129,7 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: Request, state?: HandshakeState | SessionState | null) {
+  public async authenticate(request: Request, state?: ProviderState | null) {
     this.options.log(
       ['debug', 'security', 'saml'],
       `Trying to authenticate user request to ${request.url.path}.`
@@ -150,18 +145,15 @@ export class SAMLAuthenticationProvider {
     }
 
     if (state && authenticationResult.notHandled()) {
-      authenticationResult = await this.authenticateViaState(request, state as SessionState);
+      authenticationResult = await this.authenticateViaState(request, state);
       if (authenticationResult.failed() && isAccessTokenExpiredError(authenticationResult.error)) {
-        authenticationResult = await this.authenticateViaRefreshToken(
-          request,
-          state as SessionState
-        );
+        authenticationResult = await this.authenticateViaRefreshToken(request, state);
       }
     }
 
     if (authenticationResult.notHandled()) {
       // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
-      authenticationResult = await this.authenticateViaPayload(request, state as HandshakeState);
+      authenticationResult = await this.authenticateViaPayload(request, state);
     }
 
     // If we couldn't authenticate by means of all methods above, let's try to
@@ -176,7 +168,7 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Request, state?: SessionState) {
+  public async deauthenticate(request: Request, state?: ProviderState) {
     this.options.log(
       ['debug', 'security', 'saml'],
       `Trying to deauthenticate user via ${request.url.path}.`
@@ -192,7 +184,7 @@ export class SAMLAuthenticationProvider {
 
     let logoutArgs: [
       'shield.samlInvalidate' | 'shield.samlLogout',
-      { body: Record<string, string> }
+      { body: Record<string, unknown> }
     ];
     if (isSAMLRequestQuery(request.query)) {
       this.options.log(
@@ -304,7 +296,7 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  private async authenticateViaPayload(request: Request, state?: HandshakeState) {
+  private async authenticateViaPayload(request: Request, state?: ProviderState | null) {
     this.options.log(
       ['debug', 'security', 'saml'],
       'Trying to authenticate via SAML response payload.'
@@ -378,7 +370,7 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Request, { accessToken }: SessionState) {
+  private async authenticateViaState(request: Request, { accessToken }: ProviderState) {
     this.options.log(['debug', 'security', 'saml'], 'Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -418,7 +410,7 @@ export class SAMLAuthenticationProvider {
    * @param request HapiJS request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(request: Request, { refreshToken }: SessionState) {
+  private async authenticateViaRefreshToken(request: Request, { refreshToken }: ProviderState) {
     this.options.log(['debug', 'security', 'saml'], 'Trying to refresh access token.');
 
     if (!refreshToken) {
