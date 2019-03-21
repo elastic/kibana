@@ -32,7 +32,7 @@ each space. Changes in one of them can influence the data displayed in the
 other.
 
 [float]
-=== Configure data sources in the user interface
+=== Configure source
 
 The source configuration UI can be accessed via the corresponding
 image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
@@ -55,12 +55,12 @@ configuration items can be inspected and adjusted:
 image::logs/images/logs-configure-source-dialog.png[Configure logs UI source dialog in Kibana]
 
 TIP: If <<xpack-spaces>> are enabled in your Kibana instance, any configuration
-changes performed via the user interface are specific to that space. You can
+changes performed via Configure source are specific to that space. You can
 therefore easily make different subsets of the data available by creating
 multiple spaces with different data source configurations.
 
 [float]
-=== Configure data sources in the configuration file
+=== Configuration file
 
 The settings in the configuration file are used as a fallback when no other
 configuration for that space has been defined. They are located in the
