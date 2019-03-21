@@ -26,7 +26,7 @@ describe('auditAcquiredCredsRowRenderer', () => {
   });
 
   test('renders correctly against snapshot', () => {
-    // I cannot and do not want to use the mocks for the snapshot tests as they are too heavy
+    // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
     const browserFields: BrowserFields = {};
     const children = auditAcquiredCredsRowRenderer.renderRow({
       browserFields,

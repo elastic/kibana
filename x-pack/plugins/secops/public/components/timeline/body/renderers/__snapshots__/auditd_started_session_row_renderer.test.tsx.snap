@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`auditWasAuthorizedRowRenderer renders correctly against snapshot 1`] = `
+exports[`auditdStartedSessionRowRenderer renders correctly against snapshot 1`] = `
 <span>
   <styled.div>
     <span>
@@ -13,24 +13,24 @@ exports[`auditWasAuthorizedRowRenderer renders correctly against snapshot 1`] = 
         browserFields={Object {}}
         data={
           Object {
-            "_id": "26",
+            "_id": "25",
             "auditd": Object {
               "data": Object {
-                "acct": null,
-                "op": null,
-                "terminal": "/dev/pts/0",
+                "acct": "root",
+                "op": "PAM:session_open",
+                "terminal": "cron",
               },
               "result": "success",
-              "session": "338",
+              "session": "2908",
               "summary": Object {
                 "actor": Object {
                   "primary": "root",
-                  "secondary": "alice",
+                  "secondary": "root",
                 },
-                "how": "/sbin/pam_tally2",
+                "how": "/usr/sbin/cron",
                 "message_type": null,
                 "object": Object {
-                  "primary": "/dev/pts/0",
+                  "primary": "cron",
                   "secondary": null,
                   "type": "user-session",
                 },
@@ -39,7 +39,7 @@ exports[`auditWasAuthorizedRowRenderer renders correctly against snapshot 1`] = 
             },
             "destination": null,
             "event": Object {
-              "action": "was-authorized",
+              "action": "started-session",
               "category": "user-login",
               "dataset": null,
               "id": null,
@@ -48,31 +48,27 @@ exports[`auditWasAuthorizedRowRenderer renders correctly against snapshot 1`] = 
             },
             "geo": null,
             "host": Object {
-              "id": "0a63559c1acf4c419d979c4b4d8b83ff",
-              "ip": Array [
-                "139.59.11.147",
-                "10.47.0.5",
-                "fe80::ec0b:1bff:fe29:80bd",
-              ],
-              "name": "suricata-bangalore",
+              "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
+              "ip": null,
+              "name": "siem-kibana",
             },
             "http": null,
             "network": null,
             "process": Object {
               "args": null,
-              "executable": "/sbin/pam_tally2",
+              "executable": "/usr/sbin/cron",
               "name": null,
-              "pid": 21170,
+              "pid": 725,
               "ppid": null,
               "title": null,
               "working_directory": null,
             },
             "source": null,
             "suricata": null,
-            "timestamp": "2019-03-13T03:34:08.890Z",
+            "timestamp": "2019-03-19T01:17:01.336Z",
             "url": null,
             "user": Object {
-              "name": "alice",
+              "name": "root",
             },
             "zeek": null,
           }
