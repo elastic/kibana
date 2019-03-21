@@ -38,9 +38,9 @@ export const tilemap = () => ({
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-    const { geohash, metric, geocentroid } = visConfigParams.dimensions;
+    const visConfig = JSON.parse(args.visConfig);
 
+    const { geohash, metric, geocentroid } = visConfig.dimensions;
     const convertedData = convertToGeoJson(context, {
       geohash,
       metric,
@@ -53,7 +53,7 @@ export const tilemap = () => ({
       value: {
         visData: convertedData,
         visType: 'tile_map',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

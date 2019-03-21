@@ -220,6 +220,13 @@ export const schema = Joi.object()
       })
       .default(),
 
+    // settings for the snapshots module
+    snapshots: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('snapshots')),
+      })
+      .default(),
+
     // settings for the failureDebugging module
     failureDebugging: Joi.object()
       .keys({
