@@ -25,7 +25,7 @@ export { isNewPlatformPlugin } from './discovery';
 /** @internal */
 export { DiscoveredPlugin, DiscoveredPluginInternal } from './plugin';
 export { PluginName } from './plugin';
-export { PluginInitializerContext, PluginStartContext } from './plugin_context';
+export { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 
 /** @internal */
 export class PluginsModule {

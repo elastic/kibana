@@ -32,7 +32,7 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
   return toastOrTitle;
 };
 
-export class ToastsStart {
+export class ToastsSetup {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
 

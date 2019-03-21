@@ -21,7 +21,7 @@ import { LegacyPlatformService } from './legacy_service';
 type LegacyPlatformServiceContract = PublicMethodsOf<LegacyPlatformService>;
 const createMock = () => {
   const mocked: jest.Mocked<LegacyPlatformServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
   return mocked;

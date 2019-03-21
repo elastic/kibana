@@ -56,7 +56,7 @@ i18n.load(injectedMetadata.i18n.translationsUrl)
       }
     });
 
-    const coreStart = coreSystem.start();
+    const coreStart = coreSystem.setup();
 
     if (i18nError) {
       coreStart.fatalErrors.add(i18nError);

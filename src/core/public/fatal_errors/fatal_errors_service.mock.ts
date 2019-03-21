@@ -16,29 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FatalErrorsService, FatalErrorsStart } from './fatal_errors_service';
+import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<FatalErrorsStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<FatalErrorsSetup> = {
     add: jest.fn<never, any>(() => undefined as never),
     get$: jest.fn(),
   };
 
-  return startContract;
+  return setupContract;
 };
 
 type FatalErrorsServiceContract = PublicMethodsOf<FatalErrorsService>;
 const createMock = () => {
   const mocked: jest.Mocked<FatalErrorsServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     add: jest.fn<never, any>(() => undefined as never),
   };
 
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const fatalErrorsServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };
