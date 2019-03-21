@@ -17,3 +17,5 @@ export const PLUGIN = {
     });
   },
 };
+
+export const API_BASE_PATH = '/api/snapshot_restore/';

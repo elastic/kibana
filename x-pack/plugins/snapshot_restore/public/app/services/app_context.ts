@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { createContext, useContext } from 'react';
 import { AppCore, AppPlugins } from '../../shim';
 
-export interface AppContextInterface {
+export interface AppStateInterface {
   core: AppCore;
   plugins: AppPlugins;
 }
 
-export const AppContext = React.createContext<AppContextInterface | null>(null);
+const AppState = createContext({});
+
+export const AppStateProvider = AppState.Provider;
+
+export const useAppState = () => useContext(AppState);

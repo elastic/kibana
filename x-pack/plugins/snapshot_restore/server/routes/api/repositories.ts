@@ -10,24 +10,27 @@ export function registerRepositoriesRoutes(router: Router) {
   router.get('repositories/{name}', getOneHandler);
 }
 
-const getAllHandler: RouterRouteHandler = async (req, callWithRequest) => {
+export const getAllHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
   const repositories = Object.keys(repositoriesByName).map(name => {
     return {
       name,
-      test: repositoriesByName[name],
+      ...repositoriesByName[name],
     };
   });
   return repositories;
 };
 
-const getOneHandler: RouterRouteHandler = async (req, callWithRequest) => {
+export const getOneHandler: RouterRouteHandler = async (req, callWithRequest) => {
   const { name } = req.params;
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
   if (repositoryByName[name]) {
-    return repositoryByName[name];
+    return {
+      name,
+      ...repositoryByName[name],
+    };
   } else {
     return {};
   }

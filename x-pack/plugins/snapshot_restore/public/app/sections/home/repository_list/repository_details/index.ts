@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-
-export const SnapshotList = () => {
-  return <div>List of snapshots</div>;
-};
+export { RepositoryDetails } from './repository_details';

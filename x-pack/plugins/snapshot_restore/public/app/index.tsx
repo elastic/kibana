@@ -3,38 +3,51 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useReducer } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
 import { AppCore, AppPlugins } from '../shim';
 import { App } from './app';
-import { AppContext, AppContextInterface } from './services/app_context';
+import { AppStateInterface, AppStateProvider } from './services/app_context';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
+
+// Placeholder reducer in case we need it for any app state data
+const appStateReducer = (state: any, action: any) => {
+  switch (action.type) {
+    default:
+      return state;
+  }
+};
+
+const ReactApp = ({ appState }: { appState: AppStateInterface }) => {
+  const {
+    i18n: { Context: I18nContext },
+  } = appState.core;
+  return (
+    <I18nContext>
+      <HashRouter>
+        <AppStateProvider value={useReducer(appStateReducer, appState)}>
+          <App />
+        </AppStateProvider>
+      </HashRouter>
+    </I18nContext>
+  );
+};
 
 export const renderReact = async (
   elem: Element,
   core: AppCore,
   plugins: AppPlugins
 ): Promise<void> => {
-  const {
-    i18n: { Context: I18nContext },
-  } = core;
-
-  const appContext: AppContextInterface = {
-    core,
-    plugins,
-  };
-
   render(
-    <I18nContext>
-      <HashRouter>
-        <AppContext.Provider value={appContext}>
-          <App />
-        </AppContext.Provider>
-      </HashRouter>
-    </I18nContext>,
+    <ReactApp
+      appState={{
+        core,
+        plugins,
+      }}
+    />,
     elem
   );
 };

@@ -8,6 +8,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
+import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import routes from 'ui/routes';
@@ -23,6 +24,14 @@ export interface AppCore {
   chrome: typeof chrome;
   notification: {
     fatalError: typeof fatalError;
+  };
+  http: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
+  documentation: {
+    esDocBasePath: string;
+    esPluginDocBasePath: string;
   };
 }
 
@@ -40,10 +49,6 @@ export interface Core extends AppCore {
     registerAngularRoute(path: string, config: object): void;
     registerRouter(router: HashRouter): void;
     getRouter(): HashRouter | undefined;
-  };
-  http: {
-    setClient(client: any): void;
-    getClient(): any;
   };
 }
 
@@ -83,6 +88,10 @@ export function createShim(): { core: Core; plugins: Plugins } {
       chrome,
       notification: {
         fatalError,
+      },
+      documentation: {
+        esDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`,
+        esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
       },
     },
     plugins: {
