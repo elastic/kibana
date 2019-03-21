@@ -19,6 +19,7 @@
 
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { delay } from 'bluebird';
+import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
@@ -442,5 +443,20 @@ export class WebElementWrapper {
     };
 
     return $;
+  }
+
+  /**
+   * Creates the screenshot of the element
+   *
+   * @returns {Promise<void>}
+   */
+  async takeScreenshot() {
+    const screenshot = await this._driver.takeScreenshot();
+    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const { width, height, x, y } = await this.getPosition();
+    const src = PNG.sync.read(buffer);
+    const dst = new PNG({ width, height });
+    PNG.bitblt(src, dst, x, y, width, height, 0, 0);
+    return PNG.sync.write(dst);
   }
 }
