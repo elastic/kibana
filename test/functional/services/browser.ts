@@ -18,12 +18,15 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
 // @ts-ignore no support ts yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-import { FtrProviderContext } from '../ftr_provider_context.d';
+import { FtrProviderContext } from '../ftr_provider_context';
+import Type = logging.Type;
+import Entry = logging.Entry;
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
@@ -32,7 +35,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Keyboard events
      */
-    public readonly keys = Key;
+    public readonly keys: IKey = Key;
 
     /**
      * Is WebDriver instance W3C compatible
@@ -45,7 +48,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
-    public async getWindowSize() {
+    public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
       return await (driver.manage().window() as any).getRect();
     }
 
@@ -57,7 +60,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} height
      * @return {Promise<void>}
      */
-    public async setWindowSize(...args: number[]) {
+    public async setWindowSize(width: number, height: number): Promise<void>;
+    public async setWindowSize(...args: number[]): Promise<void>;
+    public async setWindowSize(...args: Array<unknown>): Promise<void> {
       await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
     }
 
@@ -67,7 +72,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getCurrentUrl() {
+    public async getCurrentUrl(): Promise<string> {
       // strip _t=Date query param when url is read
       const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
@@ -85,7 +90,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    public async get(url: string, insertTimestamp = true) {
+    public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           (parsed.query as any)._t = Date.now();
@@ -107,7 +112,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async moveMouseTo(element: WebElementWrapper, xOffset: number, yOffset: number) {
+    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
+    public async moveMouseTo(
+      element: WebElementWrapper,
+      xOffset?: number,
+      yOffset?: number
+    ): Promise<void> {
       const mouse = (driver.actions() as any).mouse();
       const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
@@ -115,7 +126,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           .pause(mouse)
           .move({ origin: element._webElement })
           .perform();
-      } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
+      } else if (isNaN(xOffset!) || isNaN(yOffset!) === false) {
         await actions
           .pause(mouse)
           .move({ origin: { x: xOffset, y: yOffset } })
@@ -184,7 +195,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async refresh() {
+    public async refresh(): Promise<void> {
       await driver.navigate().refresh();
     }
 
@@ -194,7 +205,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async goBack() {
+    public async goBack(): Promise<void> {
       await driver.navigate().back();
     }
 
@@ -205,7 +216,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param  {string|string[]} keys
      * @return {Promise<void>}
      */
-    public async pressKeys(...args: string[]) {
+    public async pressKeys(keys: string | string[]): Promise<void>;
+    public async pressKeys(...args: string[]): Promise<void>;
+    public async pressKeys(...args: string[]): Promise<void> {
       const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
@@ -222,16 +235,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async clickMouseButton(...args: any[]) {
+    public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async clickMouseButton(element: WebElementWrapper): Promise<void>;
+    public async clickMouseButton(...args: Array<unknown>): Promise<void> {
       const mouse = (driver.actions() as any).mouse();
       const actions = (driver as any).actions({ bridge: true });
       if (args[0] instanceof WebElementWrapper) {
         await actions
           .pause(mouse)
-          .move({ origin: args[0]._webElement })
+          .move({ origin: (args[0] as any)._webElement })
           .click()
           .perform();
-      } else if (isNaN(args[1]) || isNaN(args[2]) === false) {
+      } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await actions
           .pause(mouse)
           .move({ origin: { x: args[1], y: args[2] } })
@@ -249,7 +264,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string>}
      */
-    public async getPageSource() {
+    public async getPageSource(): Promise<string> {
       return await driver.getPageSource();
     }
 
@@ -261,7 +276,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
-    async getLogsFor(...args) {
+    public async getLogsFor(type: typeof Type | string): Promise<Entry[]>;
+    public async getLogsFor(...args: any[]): Promise<Entry[]> {
       // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       // See: https://github.com/w3c/webdriver/issues/406
       // See: https://w3c.github.io/webdriver/#endpoints
@@ -281,7 +297,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Buffer>}
      */
-    public async takeScreenshot() {
+    public async takeScreenshot(): Promise<string | Buffer> {
       return await driver.takeScreenshot();
     }
 
@@ -291,7 +307,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element: { _webElement: any }) {
+    public async doubleClick(element: WebElementWrapper): Promise<void> {
       const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions.doubleClick(element._webElement).perform();
@@ -308,7 +324,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {string} handle
      * @return {Promise<void>}
      */
-    public async switchToWindow(...args: string[]) {
+    public async switchToWindow(handle: string): Promise<void>;
+    public async switchToWindow(...args: string[]): Promise<void>;
+    public async switchToWindow(...args: string[]): Promise<void> {
       await (driver.switchTo() as any).window(...args);
     }
 
@@ -318,7 +336,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<string[]>}
      */
-    public async getAllWindowHandles() {
+    public async getAllWindowHandles(): Promise<string[]> {
       return await driver.getAllWindowHandles();
     }
 
@@ -329,7 +347,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {string} value
      * @return {Promise<void>}
      */
-    public async setLocalStorageItem(key: string, value: string) {
+    public async setLocalStorageItem(key: string, value: string): Promise<void> {
       await driver.executeScript(
         'return window.localStorage.setItem(arguments[0], arguments[1]);',
         key,
@@ -344,7 +362,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<void>}
      */
-    public async closeCurrentWindow() {
+    public async closeCurrentWindow(): Promise<void> {
       await driver.close();
     }
 
@@ -366,7 +384,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync(fn, ...args) {
+    public async executeAsync<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
       return await driver.executeAsyncScript(
         fn,
         ...cloneDeep(args, arg => {
@@ -380,26 +398,26 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public getScrollTop() {
       return driver
         .executeScript('return document.body.scrollTop')
-        .then(scrollSize => parseInt(scrollSize, 10));
+        .then((scrollSize: any) => parseInt(scrollSize, 10));
     }
 
     public getScrollLeft() {
       return driver
         .executeScript('return document.body.scrollLeft')
-        .then(scrollSize => parseInt(scrollSize, 10));
+        .then((scrollSize: any) => parseInt(scrollSize, 10));
     }
 
     // return promise with REAL scroll position
-    public setScrollTop(scrollSize) {
+    public setScrollTop(scrollSize: number | string) {
       return driver
         .executeScript('document.body.scrollTop = ' + scrollSize)
-        .then(() => this.getScrollTop(driver));
+        .then(this.getScrollTop);
     }
 
-    public setScrollLeft(scrollSize) {
+    public setScrollLeft(scrollSize: number | string) {
       return driver
         .executeScript('document.body.scrollLeft = ' + scrollSize)
-        .then(() => this.getScrollLeft(driver));
+        .then(this.getScrollLeft);
     }
   }
 
