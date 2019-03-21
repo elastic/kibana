@@ -6,12 +6,10 @@
 
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
-// @ts-ignore
-import { registries } from 'plugins/interpreter/registries';
 
 import { sampleDataFunction } from './sample_data';
 
-export function registerFunctions() {
+export function registerFunctions(registries: any) {
   register(registries, {
     browserFunctions: [sampleDataFunction],
   });

@@ -31,6 +31,11 @@ type Action =
   | { type: 'loadError'; message: string }
   | { type: 'updateViewModel'; newState: ViewModel };
 
+export interface MainProps {
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: any;
+}
+
 function reducer(state: ViewModel, action: Action): ViewModel {
   switch (action.type) {
     case 'updateViewModel':
@@ -41,7 +46,7 @@ function reducer(state: ViewModel, action: Action): ViewModel {
   }
 }
 
-export function Main() {
+export function Main(props: MainProps) {
   const [state, dispatch] = useReducer(reducer, initialState());
 
   const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
@@ -71,10 +76,10 @@ export function Main() {
               <EuiFlexItem grow={5}>
                 {WorkspacePanel ? (
                   <WorkspacePanel {...panelProps}>
-                    <ExpressionRenderer expression={expression} />
+                    <ExpressionRenderer {...props} expression={expression} />
                   </WorkspacePanel>
                 ) : (
-                  <ExpressionRenderer expression={expression} />
+                  <ExpressionRenderer {...props} expression={expression} />
                 )}
               </EuiFlexItem>
               <EuiFlexItem>

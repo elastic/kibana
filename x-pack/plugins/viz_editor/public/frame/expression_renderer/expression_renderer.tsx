@@ -6,21 +6,17 @@
 
 // @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
-// @ts-ignore
-import { getInterpreter } from 'plugins/interpreter/interpreter';
-// @ts-ignore
-import { renderersRegistry } from 'plugins/interpreter/registries';
 import React, { useEffect, useRef } from 'react';
 
-export const runPipeline = async (expression: string, context: object, handlers: any) => {
+async function runAndRender(
+  expression: any,
+  domElement: any,
+  getInterpreter: any,
+  renderersRegistry: any
+) {
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
-  const pipelineResponse = await interpreter.interpretAst(ast, context, handlers);
-  return pipelineResponse;
-};
-
-async function runAndRender(expression: any, domElement: any) {
-  const response = await runPipeline(expression, {}, { getInitialContext: () => ({}) });
+  const response = await interpreter.interpretAst(ast, {}, { getInitialContext: () => ({}) });
   if (response.type === 'render') {
     renderersRegistry.get(response.as).render(domElement, response.value);
   }
@@ -31,7 +27,12 @@ export function ExpressionRenderer(props: any) {
 
   useEffect(() => {
     if (mountpoint.current) {
-      runAndRender(props.expression, mountpoint.current);
+      runAndRender(
+        props.expression,
+        mountpoint.current,
+        props.getInterpreter,
+        props.renderersRegistry
+      );
     }
   });
 

@@ -11,6 +11,13 @@ import chrome from 'ui/chrome';
 import { registerFunctions } from './frame/interpreter_functions';
 import { Main } from './frame/main';
 
+// @ts-ignore
+import { fromExpression } from '@kbn/interpreter/common';
+// @ts-ignore
+import { getInterpreter } from 'plugins/interpreter/interpreter';
+// @ts-ignore
+import { registries, renderersRegistry } from 'plugins/interpreter/registries';
+
 // TODO: Convert this to the "new platform" way of doing UI
 function App($scope: any, $element: Element[]) {
   const el = $element[0];
@@ -19,7 +26,7 @@ function App($scope: any, $element: Element[]) {
 
   return render(
     <I18nProvider>
-      <Main />
+      <Main getInterpreter={getInterpreter} renderersRegistry={renderersRegistry} />
     </I18nProvider>,
     el
   );
@@ -27,4 +34,4 @@ function App($scope: any, $element: Element[]) {
 
 chrome.setRootController('vizEditor', App);
 
-registerFunctions();
+registerFunctions(registries);
