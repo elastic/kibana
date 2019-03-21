@@ -37,7 +37,7 @@ export const metric = () => ({
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
     return {
       type: 'render',
@@ -45,7 +45,7 @@ export const metric = () => ({
       value: {
         visData: context,
         visType: 'metric',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

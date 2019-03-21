@@ -21,3 +21,9 @@ declare module '*.html' {
   const template: string;
   export default template;
 }
+
+type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
+}[keyof T];
+
+type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;

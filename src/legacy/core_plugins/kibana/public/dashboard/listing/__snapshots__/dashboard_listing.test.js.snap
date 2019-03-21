@@ -1,54 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`after fetch hideWriteControls with dashboards 1`] = `
-<InjectIntl(TableListViewUi)
-  createItem={[Function]}
-  deleteItems={[Function]}
-  editItem={[Function]}
-  entityName="dashboard"
-  entityNamePlural="dashboards"
-  findItems={[Function]}
-  hideWriteControls={true}
-  initialFilter=""
-  listingLimit={1}
-  noItemsFragment={
-    <div>
-      <EuiEmptyPrompt
-        iconColor="subdued"
-        iconType="visualizeApp"
-        title={
-          <h2>
-            <FormattedMessage
-              defaultMessage="Looks like you don't have any dashboards."
-              id="kbn.dashboard.listing.noItemsMessage"
-              values={Object {}}
-            />
-          </h2>
-        }
-      />
-    </div>
-  }
-  tableColumns={
-    Array [
-      Object {
-        "field": "title",
-        "name": "Title",
-        "render": [Function],
-        "sortable": true,
-      },
-      Object {
-        "dataType": "string",
-        "field": "description",
-        "name": "Description",
-        "sortable": true,
-      },
-    ]
-  }
-  tableListTitle="Dashboards"
-/>
-`;
-
-exports[`after fetch hideWriteControls with no dashboards 1`] = `
+exports[`after fetch hideWriteControls 1`] = `
 <InjectIntl(TableListViewUi)
   createItem={[Function]}
   deleteItems={[Function]}

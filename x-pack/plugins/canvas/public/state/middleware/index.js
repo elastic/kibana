@@ -17,11 +17,13 @@ import { workpadUpdate } from './workpad_update';
 import { workpadRefresh } from './workpad_refresh';
 import { appReady } from './app_ready';
 import { elementStats } from './element_stats';
+import { resolvedArgs } from './resolved_args';
 
 const middlewares = [
   applyMiddleware(
     thunkMiddleware,
     elementStats,
+    resolvedArgs,
     esPersistMiddleware,
     historyMiddleware,
     aeroelastic,
@@ -34,7 +36,7 @@ const middlewares = [
   ),
 ];
 
-// intitialize redux devtools if extension is installed
+// initialize redux devtools if extension is installed
 if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) {
   middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 }

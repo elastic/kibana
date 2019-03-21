@@ -104,6 +104,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
       resolve(__dirname, './apps/apm'),
+      resolve(__dirname, './apps/index_patterns')
     ],
 
     // define the name and providers for services that should be

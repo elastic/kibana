@@ -5,10 +5,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiText
       grow={true}
       size="m"
@@ -27,7 +24,6 @@ exports[`ImportedEvents Renders imported events 1`] = `
     </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <InjectIntl(EventsTable)
@@ -49,7 +45,6 @@ exports[`ImportedEvents Renders imported events 1`] = `
     size="m"
   />
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiCheckbox

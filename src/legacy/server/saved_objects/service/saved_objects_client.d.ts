@@ -68,6 +68,7 @@ export interface UpdateOptions extends BaseOptions {
 export interface BulkGetObject {
   id: string;
   type: string;
+  fields?: string[];
 }
 export type BulkGetObjects = BulkGetObject[];
 
@@ -81,6 +82,10 @@ export interface MigrationVersion {
 
 export interface SavedObjectAttributes {
   [key: string]: SavedObjectAttributes | string | number | boolean | null;
+}
+
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
 }
 
 export interface SavedObject<T extends SavedObjectAttributes = any> {

@@ -6,6 +6,7 @@
 
 import { Feature } from './server/lib/feature_registry';
 import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
+export { XPackFeature } from './server/lib/xpack_info';
 
 export interface XPackMainPlugin {
   info: XPackInfo;

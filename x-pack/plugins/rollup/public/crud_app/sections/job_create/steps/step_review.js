@@ -80,7 +80,7 @@ export class StepReviewUi extends Component {
         <EuiTab
           onClick={() => this.selectTab(tab)}
           isSelected={isSelected}
-          data-test-subj={`stepReviewTab${isSelected ? 'Selected' : ''}`}
+          data-test-subj="stepReviewTab"
           key={index}
         >
           {tabToHumanizedMap[tab]}
@@ -109,7 +109,7 @@ export class StepReviewUi extends Component {
 
     return (
       <Fragment>
-        <EuiTitle>
+        <EuiTitle data-test-subj="rollupJobCreateReviewTitle">
           <h3>
             <FormattedMessage
               id="xpack.rollupJobs.create.stepReviewTitle"

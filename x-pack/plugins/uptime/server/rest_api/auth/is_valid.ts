@@ -10,4 +10,7 @@ export const createIsValidRoute = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/is_valid',
   handler: async (request: any): Promise<boolean> => await libs.auth.requestIsValid(request),
+  options: {
+    tags: ['access:uptime'],
+  },
 });

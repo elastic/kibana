@@ -14,9 +14,9 @@ import { checkLicense } from './check_license';
 import { migrations } from './migrations';
 import { watchStatusAndLicenseToInitialize } from
   '../../server/lib/watch_status_and_license_to_initialize';
-import { i18n } from '@kbn/i18n';
 import { initTelemetryCollection } from './server/maps_telemetry';
-import {  APP_ID, APP_ICON } from './common/constants';
+import { i18n } from '@kbn/i18n';
+import {  APP_ID, APP_ICON, createMapPath } from './common/constants';
 import { getAppTitle } from './common/i18n_getters';
 
 export function maps(kibana) {
@@ -84,9 +84,9 @@ export function maps(kibana) {
         name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
           defaultMessage: 'Maps',
         }),
-        icon: 'gisApp',
+        icon: APP_ICON,
         navLinkId: 'maps',
-        app: ['maps', 'kibana'],
+        app: [APP_ID, 'kibana'],
         catalogue: ['maps'],
         privileges: {
           all: {
@@ -118,9 +118,33 @@ export function maps(kibana) {
         .feature(this.id)
         .registerLicenseCheckResultsGenerator(checkLicense);
 
+      const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
+        defaultMessage: 'Map'
+      });
       server.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+      server.addAppLinksToSampleDataset('ecommerce', [
+        {
+          path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
       server.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
+      server.addAppLinksToSampleDataset('flights', [
+        {
+          path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
       server.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
+      server.addAppLinksToSampleDataset('logs', [
+        {
+          path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+          label: sampleDataLinkLabel,
+          icon: 'gisApp'
+        }
+      ]);
       server.injectUiAppVars('maps', async () => {
         return await server.getInjectedUiAppVars('kibana');
       });
