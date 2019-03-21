@@ -1,4 +1,4 @@
 @import '@elastic/eui/src/global_styling/variables/index';
-@import './components/index_pattern_panel/index_pattern_panel.scss';
-@import './components/config_panel_components/config_panel.scss';
-@import './components/main/main.scss';
+@import '../common/components/index_pattern_panel/index_pattern_panel.scss';
+@import '../common/components/config_panel/config_panel.scss';
+@import './frame/main/main.scss';

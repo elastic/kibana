@@ -26,7 +26,7 @@ import 'brace/theme/github';
 import { registry } from '../../editor_plugin_registry';
 
 type Action =
-  | { type: 'loaded'; time: Date }
+  | { type: 'loaded' }
   | { type: 'loadError'; message: string }
   | { type: 'updateViewModel'; newState: ViewModel };
 
