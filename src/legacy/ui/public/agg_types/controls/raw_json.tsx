@@ -18,7 +18,7 @@
  */
 import React from 'react';
 
-import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamRequiredEditorProps } from '../../vis/editors/default';
@@ -32,20 +32,24 @@ function RawJsonParamEditor({
   const label = (
     <>
       <FormattedMessage id="common.ui.aggTypes.jsonInputLabel" defaultMessage="JSON input" />{' '}
-      <EuiToolTip
+      <EuiIconTip
         position="right"
         content={i18n.translate('common.ui.aggTypes.jsonInputTooltip', {
           defaultMessage:
             "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
         })}
-      >
-        <EuiIcon type="questionInCircle" />
-      </EuiToolTip>
+        type="questionInCircle"
+      />
     </>
   );
 
   return (
-    <EuiFormRow label={label} isInvalid={isInvalid} fullWidth={true}>
+    <EuiFormRow
+      label={label}
+      isInvalid={isInvalid}
+      fullWidth={true}
+      className="visEditorSidebar__aggParamFormRow"
+    >
       <EuiTextArea
         id={`visEditorRawJson${agg.id}`}
         isInvalid={isInvalid}

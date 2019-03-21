@@ -35,7 +35,7 @@ describe('AggType utils', () => {
       expect(isValidJson(undefined as any)).to.be(true);
     });
 
-    it('should return fasle when invalid string', () => {
+    it('should return false when invalid string', () => {
       expect(isValidJson(input.invalid)).to.be(false);
     });
 
@@ -43,7 +43,7 @@ describe('AggType utils', () => {
       expect(isValidJson(input.valid)).to.be(true);
     });
 
-    it('should return fasle if a number', () => {
+    it('should return false if a number', () => {
       expect(isValidJson('0')).to.be(false);
     });
   });
