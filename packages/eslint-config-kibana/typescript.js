@@ -12,6 +12,7 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
+// TODO: Apply old typescript rules
 // const typescriptEslintRecommendedRules = require('@typescript-eslint/eslint-plugin').configs.recommended.rules;
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
