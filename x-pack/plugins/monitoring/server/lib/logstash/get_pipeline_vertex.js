@@ -8,7 +8,7 @@ import boom from 'boom';
 import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
-import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
+import { getPipelineVertexStatsAggregation } from './get_pipeline_vertex_stats_aggregation';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
 export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds) {
@@ -23,6 +23,7 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   const durationInMillis = vertexStatsBucket.duration_in_millis_total.value;
 
+  const inputStats = {};
   const processorStats = {};
   const eventsProcessedStats = {
     events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis
@@ -32,6 +33,8 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
   if (isInput) {
     eventsTotal = eventsOutTotal;
+    inputStats.queue_push_duration_in_millis = vertexStatsBucket.queue_push_duration_in_millis_total.value;
+    inputStats.queue_push_duration_in_millis_per_event = inputStats.queue_push_duration_in_millis / eventsTotal;
   }
 
   if (isProcessor) {
@@ -41,7 +44,11 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
   }
 
   return {
+    events_in: eventsInTotal,
+    events_out: eventsOutTotal,
+    duration_in_millis: durationInMillis,
     millis_per_event: durationInMillis / eventsTotal,
+    ...inputStats,
     ...processorStats,
     ...eventsProcessedStats
   };
@@ -49,49 +56,52 @@ export function _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationI
 
 /**
  * The UI needs a list of all vertices for the requested pipeline version, with each vertex in the list having its timeseries metrics associated with it. The
- * stateDocument object provides the list of vertices while the statsAggregation object provides the latest metrics for each of these vertices.
+ * stateDocument object provides the list of vertices while the statsAggregation object provides the timeseries metrics for each of these vertices.
  * This function stitches the two together and returns the modified stateDocument object.
  *
  * @param {Object} stateDocument
- * @param {Object} statsAggregation
+ * @param {Object} vertexStatsAggregation
  * @param {Object} First and last seen timestamps for pipeline version we're getting data for
  * @param {Integer} timeseriesIntervalInSeconds The size of each timeseries bucket, in seconds
  */
-export function _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesIntervalInSeconds) {
+export function _enrichVertexStateWithStatsAggregation(stateDocument, vertexStatsAggregation, vertexId, timeseriesIntervalInSeconds) {
   const logstashState = stateDocument.logstash_state;
   const vertices = logstashState.pipeline.representation.graph.vertices;
 
-  const verticesById = {};
-  vertices.forEach(vertex => {
-    verticesById[vertex.id] = vertex;
-    vertex.stats = {};
+  // First, filter out the vertex we care about
+  const vertex = vertices.find(v => v.id === vertexId);
+  vertex.stats = {};
+
+  // Next, iterate over timeseries metrics and attach them to vertex
+  const timeSeriesBuckets = vertexStatsAggregation.aggregations.timeseries.buckets;
+  timeSeriesBuckets.forEach(timeSeriesBucket => {
+    // each bucket calculates stats for total pipeline CPU time for the associated timeseries
+    const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
+    const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
+
+    const timestamp = timeSeriesBucket.key;
+
+    const vertexStatsBucket = timeSeriesBucket.pipelines.scoped.vertices.vertex_id;
+    const vertexStats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
+    Object.keys(vertexStats).forEach(stat => {
+      if (!vertex.stats.hasOwnProperty(stat)) {
+        vertex.stats[stat] = { data: [] };
+      }
+      vertex.stats[stat].data.push([ timestamp, vertexStats[stat] ]);
+    });
   });
 
-  const totalDurationStats = statsAggregation.aggregations.pipelines.scoped.total_processor_duration_stats;
-  const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
-
-  const verticesWithStatsBuckets = statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
-  verticesWithStatsBuckets.forEach(vertexStatsBucket => {
-    // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
-    const vertexId = vertexStatsBucket.key;
-    const vertex = verticesById[vertexId];
-
-    if (vertex !== undefined) {
-      // We extract this vertex's stats from vertexStatsBucket
-      vertex.stats = _vertexStats(vertex, vertexStatsBucket, totalProcessorsDurationInMillis, timeseriesIntervalInSeconds);
-    }
-  });
-
-  return stateDocument.logstash_state.pipeline;
+  return vertex;
 }
 
-export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version) {
+export async function getPipelineVertex(req, config, lsIndexPattern, clusterUuid, pipelineId, version, vertexId) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
   const options = {
     clusterUuid,
     pipelineId,
-    version
+    version,
+    vertexId
   };
 
   // Determine metrics' timeseries interval based on version's timespan
@@ -100,12 +110,12 @@ export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipe
 
   const [ stateDocument, statsAggregation ] = await Promise.all([
     getPipelineStateDocument(req, lsIndexPattern, options),
-    getPipelineStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
+    getPipelineVertexStatsAggregation(req, lsIndexPattern, timeseriesInterval, options),
   ]);
 
   if (stateDocument === null) {
     return boom.notFound(`Pipeline [${pipelineId} @ ${version.hash}] not found in the selected time range for cluster [${clusterUuid}].`);
   }
 
-  return _enrichStateWithStatsAggregation(stateDocument, statsAggregation, timeseriesInterval);
+  return _enrichVertexStateWithStatsAggregation(stateDocument, statsAggregation, vertexId, timeseriesInterval);
 }
