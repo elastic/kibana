@@ -97,5 +97,6 @@ export const EntityCell = injectI18n(function EntityCell({
 EntityCell.WrappedComponent.propTypes = {
   entityName: PropTypes.string,
   entityValue: PropTypes.any,
-  filter: PropTypes.func
+  filter: PropTypes.func,
+  wrapText: PropTypes.bool
 };
