@@ -89,12 +89,17 @@ export const ml = (kibana) => {
         app: ['ml', 'kibana'],
         catalogue: ['ml'],
         privileges: {},
-        reservedPrivilege: {
-          savedObject: {
-            all: [],
-            read: ['config']
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: [],
           },
-          ui: [],
+          description: i18n.translate('xpack.ml.feature.reserved.description', {
+            defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
+          })
         }
       });
 

@@ -55,18 +55,21 @@ describe('FeatureRegistry', () => {
         },
       },
       privilegesTooltip: 'some fancy tooltip',
-      reservedPrivilege: {
-        catalogue: ['foo'],
-        management: {
-          foo: ['bar'],
+      reserved: {
+        privilege: {
+          catalogue: ['foo'],
+          management: {
+            foo: ['bar'],
+          },
+          app: ['app1'],
+          savedObject: {
+            all: ['config', 'space', 'etc'],
+            read: ['canvas'],
+          },
+          api: ['someApiEndpointTag', 'anotherEndpointTag'],
+          ui: ['allowsFoo', 'showBar', 'showBaz'],
         },
-        app: ['app1'],
-        savedObject: {
-          all: ['config', 'space', 'etc'],
-          read: ['canvas'],
-        },
-        api: ['someApiEndpointTag', 'anotherEndpointTag'],
-        ui: ['allowsFoo', 'showBar', 'showBaz'],
+        description: 'some completely adequate description',
       },
     };
 

@@ -93,12 +93,12 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           read: [actions.login, actions.version, ...readActions],
         },
         reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
-          if (feature.reservedPrivilege) {
+          if (feature.reserved) {
             acc[feature.id] = [
               actions.version,
               ...flatten(
                 featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
-                  featurePrivilegeBuilder.getActions(feature.reservedPrivilege!, feature)
+                  featurePrivilegeBuilder.getActions(feature.reserved!.privilege, feature)
                 )
               ),
             ];

@@ -44,7 +44,10 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
   catalogue?: string[];
   privileges: TPrivileges;
   privilegesTooltip?: string;
-  reservedPrivilege?: FeatureKibanaPrivileges;
+  reserved?: {
+    privilege: FeatureKibanaPrivileges;
+    description: string;
+  };
 }
 
 // Each feature gets its own property on the UICapabilities object,
@@ -100,7 +103,10 @@ const schema = Joi.object({
     read: privilegeSchema,
   }).required(),
   privilegesTooltip: Joi.string(),
-  reservedPrivilege: privilegeSchema,
+  reserved: Joi.object({
+    privilege: privilegeSchema.required(),
+    description: Joi.string().required(),
+  }),
 });
 
 export class FeatureRegistry {

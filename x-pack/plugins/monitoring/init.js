@@ -65,12 +65,17 @@ export const init = (monitoringPlugin, server) => {
     app: ['monitoring', 'kibana'],
     catalogue: ['monitoring'],
     privileges: {},
-    reservedPrivilege: {
-      savedObject: {
-        all: [],
-        read: ['config']
+    reserved: {
+      privilege: {
+        savedObject: {
+          all: [],
+          read: ['config']
+        },
+        ui: [],
       },
-      ui: [],
+      description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+        defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
+      })
     }
   });
 

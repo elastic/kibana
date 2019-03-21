@@ -717,12 +717,15 @@ describe('features', () => {
             foo: ['ignore-me-1', 'ignore-me-2'],
           },
           privileges: {},
-          reservedPrivilege: {
-            savedObject: {
-              all: ['ignore-me-1', 'ignore-me-2'],
-              read: ['ignore-me-1', 'ignore-me-2'],
+          reserved: {
+            privilege: {
+              savedObject: {
+                all: ['ignore-me-1', 'ignore-me-2'],
+                read: ['ignore-me-1', 'ignore-me-2'],
+              },
+              ui: ['ignore-me-1'],
             },
-            ui: ['ignore-me-1'],
+            description: '',
           },
         },
       ];
@@ -758,12 +761,15 @@ describe('reserved', () => {
           foo: ['management-1', 'management-2'],
         },
         privileges: {},
-        reservedPrivilege: {
-          savedObject: {
-            all: [],
-            read: [],
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
           },
-          ui: [],
+          description: '',
         },
       },
     ];
@@ -799,17 +805,20 @@ describe('reserved', () => {
           foo: ['ignore-me-1', 'ignore-me-2'],
         },
         privileges: {},
-        reservedPrivilege: {
-          app: ['app-1', 'app-2'],
-          catalogue: ['catalogue-1', 'catalogue-2'],
-          management: {
-            bar: ['management-1', 'management-2'],
+        reserved: {
+          privilege: {
+            app: ['app-1', 'app-2'],
+            catalogue: ['catalogue-1', 'catalogue-2'],
+            management: {
+              bar: ['management-1', 'management-2'],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
           },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
+          description: '',
         },
       },
     ];
@@ -840,12 +849,15 @@ describe('reserved', () => {
         icon: 'arrowDown',
         app: [],
         privileges: {},
-        reservedPrivilege: {
-          savedObject: {
-            all: ['savedObject-all-1', 'savedObject-all-2'],
-            read: ['savedObject-read-1', 'savedObject-read-2'],
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: ['savedObject-all-1', 'savedObject-all-2'],
+              read: ['savedObject-read-1', 'savedObject-read-2'],
+            },
+            ui: ['ui-1', 'ui-2'],
           },
-          ui: ['ui-1', 'ui-2'],
+          description: '',
         },
       },
     ];
