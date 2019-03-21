@@ -108,9 +108,9 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   return <EuiIcon type="merge" />;
 }
 
-function Duration({ item, ...props }: { item: IWaterfallItem }) {
+function Duration({ item }: { item: IWaterfallItem }) {
   return (
-    <EuiText color="subdued" size="xs" {...props}>
+    <EuiText color="subdued" size="xs">
       {asTime(item.duration)}
     </EuiText>
   );
