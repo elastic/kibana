@@ -106,6 +106,8 @@
 // Adapted from https://github.com/vega/vega-tooltip
 
 .vgaVis__tooltip {
+  max-width: 100%;
+
   h2 {
     margin-bottom: $euiSizeS;
   }
@@ -125,5 +127,14 @@
   td.value {
     max-width: $euiSizeL * 10;
     text-align: left;
+  }
+
+  @media only screen and (max-width: map-get($euiBreakpoints, 'm')){
+    td.key {
+      max-width: $euiSize * 6;
+    }
+    td.value {
+      max-width: $euiSize * 10;
+    }
   }
 }
