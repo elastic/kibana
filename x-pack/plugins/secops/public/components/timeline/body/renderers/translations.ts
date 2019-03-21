@@ -87,6 +87,13 @@ export const IN = i18n.translate('xpack.secops.auditd.disposed.inDescription', {
   defaultMessage: 'in',
 });
 
+export const WAS_AUTHORIZED_TO_USE = i18n.translate(
+  'xpack.secops.auditd.wasauthorized.wasAuthorizedToUseDescription',
+  {
+    defaultMessage: 'was authorized to use',
+  }
+);
+
 export const ACQUIRED_CREDENTIALS_TO = i18n.translate(
   'xpack.secops.auditd.acquired.credentialsDescription',
   {
