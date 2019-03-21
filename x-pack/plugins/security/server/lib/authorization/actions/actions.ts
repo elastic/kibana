@@ -11,22 +11,23 @@ import { SpaceActions } from './space';
 import { UIActions } from './ui';
 
 export class Actions {
-  public allHack = 'allHack:';
+  public readonly allHack = 'allHack:';
 
-  public api = new ApiActions();
+  public readonly api = new ApiActions();
 
-  public app = new AppActions();
+  public readonly app = new AppActions();
 
-  public login = 'login:';
+  public readonly login = 'login:';
 
-  public savedObject = new SavedObjectActions();
+  public readonly savedObject = new SavedObjectActions();
 
-  public space = new SpaceActions();
+  public readonly space = new SpaceActions();
 
-  public ui = new UIActions();
+  public readonly ui = new UIActions();
 
-  public version = `version:${this.versionNumber}`;
-  constructor(private versionNumber: string) {}
+  public readonly version = `version:${this.versionNumber}`;
+
+  constructor(private readonly versionNumber: string) {}
 }
 
 export function actionsFactory(config: any) {
