@@ -102,15 +102,9 @@ export async function BrowserProvider({ getService }) {
       const mouse = driver.actions().mouse();
       const actions = driver.actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
-        await actions
-          .pause(mouse)
-          .move({ origin: element._webElement })
-          .perform();
+        await actions.pause(mouse).move({ origin: element._webElement }).perform();
       } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
-        await actions
-          .pause(mouse)
-          .move({ origin: { x: xOffset, y: yOffset } })
-          .perform();
+        await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
       } else {
         throw new Error('Element or coordinates should be provided');
       }
