@@ -107,6 +107,7 @@ class AnomaliesTable extends Component {
           definition={definition}
           isAggregatedData={this.isShowingAggregatedData()}
           filter={this.props.filter}
+          influencerFilter={this.props.influencerFilter}
           influencersLimit={INFLUENCERS_LIMIT}
         />
       );
@@ -152,7 +153,7 @@ class AnomaliesTable extends Component {
   }
 
   render() {
-    const { timefilter, tableData, filter } = this.props;
+    const { timefilter, tableData, filter, influencerFilter } = this.props;
 
     if (tableData === undefined ||
       tableData.anomalies === undefined || tableData.anomalies.length === 0) {
@@ -183,7 +184,8 @@ class AnomaliesTable extends Component {
       this.state.showRuleEditorFlyout,
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
-      filter);
+      filter,
+      influencerFilter);
 
     const sorting = {
       sort: {
@@ -226,7 +228,8 @@ class AnomaliesTable extends Component {
 AnomaliesTable.propTypes = {
   timefilter: PropTypes.object.isRequired,
   tableData: PropTypes.object,
-  filter: PropTypes.func
+  filter: PropTypes.func,
+  influencerFilter: PropTypes.func
 };
 
 export { AnomaliesTable };

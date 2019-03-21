@@ -32,6 +32,7 @@ require('./src/directives/sense_history');
 require('./src/directives/sense_settings');
 require('./src/directives/sense_help');
 require('./src/directives/sense_welcome');
+require('./src/directives/console_menu_directive');
 
 
 uiRoutes.when('/dev_tools/console', {
