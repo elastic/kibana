@@ -18,7 +18,11 @@ async function runAndRender(
   const { interpreter } = await getInterpreter();
   const response = await interpreter.interpretAst(ast, {}, { getInitialContext: () => ({}) });
   if (response.type === 'render') {
-    renderersRegistry.get(response.as).render(domElement, response.value);
+    renderersRegistry.get(response.as).render(domElement, response.value, {
+      onDestroy: (fn: () => never) => {
+        /* this is just here for compatibility with legacy kibana renderers */
+      },
+    });
   }
 }
 

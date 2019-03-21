@@ -5,6 +5,7 @@
  */
 
 import { ViewModel } from '../common/lib';
+import { config as pieChartConfig } from '../pie_chart_plugin';
 import { config as xyChartConfig } from '../xy_chart_plugin';
 
 export interface PanelComponentProps<S extends ViewModel = ViewModel> {
@@ -13,10 +14,12 @@ export interface PanelComponentProps<S extends ViewModel = ViewModel> {
 }
 
 export interface Suggestion<S extends ViewModel = ViewModel> {
-  expression: string;
+  pluginName: string;
+  previewExpression: string;
   score: number;
   viewModel: S;
   title: string;
+  iconType: string;
 }
 
 /**
@@ -36,11 +39,12 @@ export interface EditorPlugin<S extends ViewModel = ViewModel> {
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
   toExpression: (viewModel: S, mode: 'view' | 'edit') => string;
   getSuggestions: (viewModel: S) => Array<Suggestion<S>>;
-  getInitialState: (viewModel: S) => S;
+  getInitialState: (viewModel: ViewModel<string, unknown>) => ViewModel<string, unknown>;
 }
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {
   xy_chart: xyChartConfig,
+  pie_chart: pieChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected

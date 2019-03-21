@@ -9,6 +9,9 @@ import {
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroup,
+  // @ts-ignore
+  EuiListGroupItem,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -64,6 +67,8 @@ export function Main(props: MainProps) {
 
   const expression = toExpression(state, 'edit');
 
+  const suggestions = registry.getAll().flatMap(plugin => plugin.getSuggestions(state));
+
   return (
     <EuiPage>
       <EuiPageSideBar>
@@ -105,7 +110,22 @@ export function Main(props: MainProps) {
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />
-        {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
+        <h4>Suggestions</h4>
+        <EuiListGroup>
+          {suggestions.map((suggestion, i) => (
+            <EuiListGroupItem
+              key={i}
+              label={suggestion.title}
+              iconType={suggestion.iconType}
+              onClick={() => {
+                onChangeViewModel({
+                  ...suggestion.viewModel,
+                  editorPlugin: suggestion.pluginName,
+                });
+              }}
+            />
+          ))}
+        </EuiListGroup>
       </EuiPageSideBar>
     </EuiPage>
   );

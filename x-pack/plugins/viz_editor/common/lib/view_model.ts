@@ -106,11 +106,11 @@ export function initialState(): ViewModel<any, any> {
     private: {
       xyChart: {
         xAxis: {
-          title: 'Sum of bytes',
+          title: 'Timestamp per 30 seconds',
           columns: ['q1_0'],
         },
         yAxis: {
-          title: 'Timestamp per 30 seconds',
+          title: 'Sum of bytes',
           columns: ['q1_1'],
         },
       },

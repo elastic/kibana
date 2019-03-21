@@ -35,6 +35,11 @@ export function vizEditor(kibana: any) {
     },
 
     init(server: Legacy.Server) {
+      // TODO these injections are only here to support the legacy chart renderers (kibana_pie, kibana_gauge, ...)
+      // When we switch to elastic-charts completely, they can be removed
+      server.injectUiAppVars(PLUGIN_ID, async () => {
+        return await (server as any).getInjectedUiAppVars('kibana');
+      });
       server.route({
         path: `${API_PREFIX}/example`,
         method: 'GET',
