@@ -56,7 +56,7 @@ export interface IndexPatterns {
  * are defined here, anything else is in the private property and scoped by plugin
  */
 export interface ViewModel<K extends string = any, T = any> {
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatterns | null;
   queries: {
     [id: string]: QueryViewModel;
   };
@@ -75,27 +75,7 @@ export function selectColumn(id: string, model: ViewModel) {
 // Generate our dummy-data
 export function initialState(): ViewModel<any, any> {
   return {
-    indexPatterns: {
-      'index-pattern:aaa': {
-        id: 'index-pattern:aaa',
-        title: 'kibana_sample_data_ecommerce',
-        timeFieldName: '@timestamp',
-        fields: [
-          {
-            name: '@timestamp',
-            type: 'date',
-            aggregatable: true,
-            searchable: true,
-          },
-          {
-            name: 'bytes',
-            type: 'number',
-            aggregatable: true,
-            searchable: true,
-          },
-        ],
-      },
-    },
+    indexPatterns: null,
     queries: {
       q1: {
         indexPattern: 'index-pattern:aaa',

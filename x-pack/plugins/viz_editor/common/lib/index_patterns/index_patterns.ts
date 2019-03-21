@@ -12,7 +12,7 @@ export const getIndexPatterns = () => {
   return savedObjectsClient
     .find({
       type: 'index-pattern',
-      perPage: 1000,
+      perPage: 1000, // TODO: Paginate index patterns
     })
     .then(resp => {
       return resp.savedObjects.map(({ id, attributes }) => {
@@ -24,6 +24,6 @@ export const getIndexPatterns = () => {
       });
     })
     .catch(err => {
-      // Log fetch error
+      // TODO: Show errors to users
     });
 };

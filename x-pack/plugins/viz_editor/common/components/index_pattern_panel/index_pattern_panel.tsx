@@ -18,56 +18,65 @@ import chrome from 'ui/chrome';
 import { IndexPatterns } from '../../lib';
 import { getIndexPatterns } from '../../lib/index_patterns';
 
+interface Props {
+  indexPatterns: IndexPatterns | null;
+  onChangeIndexPatterns: (indexPatterns: IndexPatterns) => void;
+}
+
 interface State {
   selectedIndexName: string;
-  indexPatterns: IndexPatterns | null;
 }
 
 function initialState(): State {
   const settingsClient = chrome.getUiSettingsClient();
   return {
     selectedIndexName: settingsClient.get('defaultIndex') || '',
-    indexPatterns: null,
   };
 }
 
-function getIndexPatternFromName(state: State, title: string) {
-  if (!state.indexPatterns) {
-    return null;
-  }
-
-  return Object.values(state.indexPatterns).find(indexPattern => {
+function getIndexPatternFromName(indexPatterns: IndexPatterns, title: string) {
+  return Object.values(indexPatterns).find(indexPattern => {
     return indexPattern.title === title;
   });
 }
 
-export function IndexPatternPanel() {
+export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
   const [state, setState] = useState(() => initialState());
 
-  useEffect(() => {
-    if (state.indexPatterns) {
-      return;
-    }
-
-    getIndexPatterns().then(indexPatterns => {
-      if (!indexPatterns) {
+  useEffect(
+    () => {
+      if (indexPatterns) {
         return;
       }
 
-      setState({
-        selectedIndexName: state.selectedIndexName || indexPatterns[0].title,
-        indexPatterns: zipObject(indexPatterns.map(({ id }) => id), indexPatterns),
+      getIndexPatterns().then(loadedIndexPatterns => {
+        if (!loadedIndexPatterns) {
+          return;
+        }
+
+        onChangeIndexPatterns(
+          zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns)
+        );
+
+        setState({
+          selectedIndexName: state.selectedIndexName || loadedIndexPatterns[0].title,
+        });
       });
-    });
-  });
+    },
+    [indexPatterns]
+  );
 
-  const indexPattern = getIndexPatternFromName(state, state.selectedIndexName);
-
-  if (!indexPattern || !state.indexPatterns) {
+  if (!indexPatterns) {
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(state.indexPatterns).map(({ title }) => ({
+  const indexPattern = getIndexPatternFromName(indexPatterns, state.selectedIndexName);
+
+  if (!indexPattern) {
+    return <div>TODO... index pattern chooser...</div>;
+  }
+
+  const indexPatternNames = Object.values(indexPatterns).map(({ title }) => ({
     text: title,
     value: title,
     inputDisplay: title,

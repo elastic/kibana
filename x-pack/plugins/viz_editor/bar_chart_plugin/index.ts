@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerPipeline } from './bar_chart_vis';
-
 // TODO somehow get the registries and register everything
 // registerPipeline();
 
