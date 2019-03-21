@@ -2,6 +2,7 @@ node_modules
 bower_components
 /data
 /build
+/target
 /.es
 /plugins
 /optimize
