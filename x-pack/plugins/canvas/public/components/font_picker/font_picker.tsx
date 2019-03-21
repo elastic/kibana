@@ -44,6 +44,7 @@ export const FontPicker: SFC<Props> = props => {
 FontPicker.propTypes = {
   /** Initial value of the Font Picker. */
   // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/28015
+  // TODO: revert to string
   value: PropTypes.any,
   /** Function to execute when a Font is selected. */
   onSelect: PropTypes.func,

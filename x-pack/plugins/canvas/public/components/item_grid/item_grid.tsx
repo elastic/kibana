@@ -59,7 +59,10 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
 };
 
 ItemGrid.propTypes = {
-  items: PropTypes.array,
-  itemsPerRow: PropTypes.number,
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/28015
+  // TODO: revert to array
+  items: PropTypes.any,
+  // TODO: revert to number
+  itemsPerRow: PropTypes.any,
   children: PropTypes.func.isRequired,
 };

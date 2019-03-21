@@ -32,6 +32,8 @@ export const ColorDot: SFC<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
-  value: PropTypes.string,
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/28015
+  // TODO: revert to string
+  value: PropTypes.any,
   children: PropTypes.node,
 };
