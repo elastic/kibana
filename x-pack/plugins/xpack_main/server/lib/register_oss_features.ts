@@ -169,7 +169,7 @@ const kibanaFeatures: Feature[] = [
     app: ['kibana'],
     catalogue: ['index_patterns'],
     management: {
-      kibana: ['indices'],
+      kibana: ['index_patterns'],
     },
     privileges: {
       all: {
@@ -177,7 +177,7 @@ const kibanaFeatures: Feature[] = [
           all: ['index-pattern'],
           read: ['config'],
         },
-        ui: [],
+        ui: ['createNew'],
       },
       read: {
         savedObject: {
