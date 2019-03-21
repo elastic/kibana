@@ -17,72 +17,56 @@ interface MonitorChartsProps {
   monitorId: string;
 }
 
-interface MonitorChartsState {
-  crosshairLocation: number;
-}
-
 type Props = MonitorChartsProps & UptimeCommonProps;
 
-export class MonitorChartsQuery extends React.Component<Props, MonitorChartsState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { crosshairLocation: 0 };
-  }
+export const MonitorChartsQuery = ({
+  colors: { primary, secondary, danger },
+  dateRangeStart,
+  dateRangeEnd,
+  monitorId,
+  autorefreshIsPaused,
+  autorefreshInterval,
+}: Props) => {
+  return (
+    <Query
+      pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
+      query={createGetMonitorChartsQuery}
+      variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+    >
+      {({ loading, error, data }) => {
+        if (loading) {
+          return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+            defaultMessage: 'Loading…',
+          });
+        }
+        if (error) {
+          return i18n.translate('xpack.uptime.monitorCharts.errorMessage', {
+            values: { message: error.message },
+            defaultMessage: 'Error {message}',
+          });
+        }
 
-  public render() {
-    const {
-      colors: { primary, secondary, danger },
-      dateRangeStart,
-      dateRangeEnd,
-      monitorId,
-      autorefreshIsPaused,
-      autorefreshInterval,
-    } = this.props;
-    return (
-      <Query
-        pollInterval={autorefreshIsPaused ? undefined : autorefreshInterval}
-        query={createGetMonitorChartsQuery}
-        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
-      >
-        {({ loading, error, data }) => {
-          if (loading) {
-            return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
-              defaultMessage: 'Loading…',
-            });
-          }
-          if (error) {
-            return i18n.translate('xpack.uptime.monitorCharts.errorMessage', {
-              values: { message: error.message },
-              defaultMessage: 'Error {message}',
-            });
-          }
+        const {
+          monitorChartsData,
+          monitorChartsData: { durationMaxValue, statusMaxCount },
+        }: { monitorChartsData: MonitorChart } = data;
 
-          const {
-            monitorChartsData,
-            monitorChartsData: { durationMaxValue, statusMaxCount },
-          }: { monitorChartsData: MonitorChart } = data;
+        const durationMax = microsToMillis(durationMaxValue);
+        // These limits provide domain sizes for the charts
+        const checkDomainLimits = [0, statusMaxCount];
+        const durationDomainLimits = [0, durationMax ? durationMax : 0];
 
-          const durationMax = microsToMillis(durationMaxValue);
-          // These limits provide domain sizes for the charts
-          const checkDomainLimits = [0, statusMaxCount];
-          const durationDomainLimits = [0, durationMax ? durationMax : 0];
-
-          return (
-            <MonitorCharts
-              checkDomainLimits={checkDomainLimits}
-              crosshairLocation={this.state.crosshairLocation}
-              danger={danger}
-              durationDomainLimits={durationDomainLimits}
-              monitorChartData={monitorChartsData}
-              primary={primary}
-              secondary={secondary}
-              updateCrosshairLocation={this.updateCrosshairLocation}
-            />
-          );
-        }}
-      </Query>
-    );
-  }
-  private updateCrosshairLocation = (crosshairLocation: number) =>
-    this.setState({ crosshairLocation });
-}
+        return (
+          <MonitorCharts
+            checkDomainLimits={checkDomainLimits}
+            danger={danger}
+            durationDomainLimits={durationDomainLimits}
+            monitorChartData={monitorChartsData}
+            primary={primary}
+            secondary={secondary}
+          />
+        );
+      }}
+    </Query>
+  );
+};
