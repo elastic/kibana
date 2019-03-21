@@ -3,9 +3,11 @@
 
 .prfDevTool {
   height: calc(100vh - #{$euiHeaderChildSize});
+  overflow: hidden;
 
   .devApp__container {
-    flex-shrink: 1;
+  overflow: hidden;
+  flex-shrink: 1;
   }
 }
 
@@ -13,6 +15,7 @@
   display: flex;
   flex: 1 1 auto;
   padding: $euiSize;
+  overflow: hidden;
 
   // SASSTODO/EUITODO/HACK: Reset font styles of headers
   h1, h2, h3, h4, h5, h6 {
@@ -28,21 +31,16 @@
   margin-left: $euiSize;
   display: flex;
   overflow: hidden;
-
-  .nav-tabs {
-    margin: -1px 0 0 -1px;
-  }
+  flex-direction: column;
 
   // Make only the tab content scroll
-
-  > * {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+  search-profiler-tabs {
+    flex-shrink: 0;
   }
 
-  .tab-content {
+  profiletree {
     overflow-y: auto;
+    flex-grow: 1;
   }
 }
 
