@@ -19,13 +19,13 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import '../validate_cidr_mask';
+import '../../directives/validate_date_math';
 
 
-describe('Validate CIDR mask directive', function () {
+describe('Validate date math directive', function () {
   let $compile;
   let $rootScope;
-  const html = '<input type="text" ng-model="value" validate-cidr-mask />';
+  const html = '<input type="text" ng-model="value" validate-date-math />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -34,71 +34,55 @@ describe('Validate CIDR mask directive', function () {
     $rootScope = _$rootScope_;
   }));
 
-  it('should allow empty input', function () {
+  it('should allow valid date math', function () {
     const element = $compile(html)($rootScope);
 
-    $rootScope.value = '';
+    $rootScope.value = 'now';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = null;
+    $rootScope.value = '2012-02-28';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = undefined;
+    $rootScope.value = 'now-3d';
+    $rootScope.$digest();
+    expect(element.hasClass('ng-valid')).to.be.ok();
+
+    $rootScope.value = 'now-3M/M';
+    $rootScope.$digest();
+    expect(element.hasClass('ng-valid')).to.be.ok();
+
+    $rootScope.value = '2012-05-31||-3M/M';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
   });
 
-  it('should allow valid CIDR masks', function () {
-    const element = $compile(html)($rootScope);
-
-    $rootScope.value = '0.0.0.0/1';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-valid')).to.be.ok();
-
-    $rootScope.value = '128.0.0.1/31';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-valid')).to.be.ok();
-
-    $rootScope.value = '1.2.3.4/2';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-valid')).to.be.ok();
-
-    $rootScope.value = '67.129.65.201/27';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-valid')).to.be.ok();
-  });
-
-  it('should disallow invalid CIDR masks', function () {
+  it('should disallow invalid date math', function () {
     const element = $compile(html)($rootScope);
 
     $rootScope.value = 'hello, world';
     $rootScope.$digest();
     expect(element.hasClass('ng-invalid')).to.be.ok();
 
-    $rootScope.value = '0.0.0.0';
+    $rootScope.value = 'now+-5w';
     $rootScope.$digest();
     expect(element.hasClass('ng-invalid')).to.be.ok();
 
-    $rootScope.value = '0.0.0.0/0';
+    $rootScope.value = '2012-02-31';
     $rootScope.$digest();
     expect(element.hasClass('ng-invalid')).to.be.ok();
 
-    $rootScope.value = '0.0.0.0/33';
+    $rootScope.value = '5/5/2005+3d';
     $rootScope.$digest();
     expect(element.hasClass('ng-invalid')).to.be.ok();
+  });
 
-    $rootScope.value = '256.0.0.0/32';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
+  it('should allow empty values', function () {
+    const element = $compile(html)($rootScope);
 
-    $rootScope.value = '0.0.0.0/32/32';
+    $rootScope.value = '';
     $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
-
-    $rootScope.value = '1.2.3/1';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
+    expect(element.hasClass('ng-valid')).to.be.ok();
   });
 });
