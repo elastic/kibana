@@ -24,6 +24,20 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function({ getPageObjects }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
 
+  async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
+    await visualBuilder.markdownSwitchSubTab('data');
+    await visualBuilder.setMarkdownDataVariable('', variableName);
+
+    await visualBuilder.markdownSwitchSubTab('markdown');
+    const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
+    rerenderedTable.forEach(row => {
+      // eslint-disable-next-line no-unused-expressions
+      variableName === 'label'
+        ? expect(row.key).to.include.string(checkedValue)
+        : expect(row.key).to.not.include.string(checkedValue);
+    });
+  }
+
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
       before(async () => {
@@ -80,16 +94,7 @@ export default function({ getPageObjects }: FtrProviderContext) {
         table.forEach(row => {
           expect(row.key).to.contain(LABEL);
         });
-
-        // cleanup label
-        await visualBuilder.markdownSwitchSubTab('data');
-        await visualBuilder.setMarkdownDataVariable('', LABEL);
-
-        await visualBuilder.markdownSwitchSubTab('markdown');
-        const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
-        rerenderedTable.forEach(row => {
-          expect(row.key).to.include.string(BASE_LABEL);
-        });
+        await cleanupMarkdownData(LABEL, BASE_LABEL);
       });
 
       it('should change variable name', async () => {
@@ -101,21 +106,13 @@ export default function({ getPageObjects }: FtrProviderContext) {
 
         table.forEach((row, index) => {
           // exception: last index for variable is always: {{count.label}}
+          // eslint-disable-next-line no-unused-expressions
           index === table.length - 1
             ? expect(row.key).to.not.include.string(VARIABLE)
             : expect(row.key).to.include.string(VARIABLE);
         });
 
-        // cleanup variable name
-        await visualBuilder.markdownSwitchSubTab('data');
-        await visualBuilder.setMarkdownDataVariable('', VARIABLE);
-
-        // table should not be containing variable sault
-        await visualBuilder.markdownSwitchSubTab('markdown');
-        const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
-        rerenderedTable.forEach(row => {
-          expect(row.key).to.not.include.string(VARIABLE);
-        });
+        await cleanupMarkdownData(VARIABLE, VARIABLE);
       });
 
       it('should render markdown table', async () => {

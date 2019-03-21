@@ -21,7 +21,7 @@ import { cloneDeep } from 'lodash';
 import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
-// @ts-ignore no support ts yet
+
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
