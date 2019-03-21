@@ -17,36 +17,26 @@
  * under the License.
  */
 
-import { BasePathStart } from './base_path';
-import { Brand, Breadcrumb, ChromeStart, HelpExtension } from './chrome';
-import { FatalErrorsStart } from './fatal_errors';
-import { HttpStart } from './http';
-import { I18nStart } from './i18n';
-import { InjectedMetadataStart } from './injected_metadata';
-import { NotificationsStart, Toast, ToastInput, ToastsStart } from './notifications';
-import { UiSettingsClient } from './ui_settings';
+import * as BasePath from './base_path';
+import * as Chrome from './chrome';
+import * as FatalErrors from './fatal_errors';
+import * as Http from './http';
+import * as I18n from './i18n';
+import * as InjectedMetadata from './injected_metadata';
+import * as Notifications from './notifications';
+import * as UiSettings from './ui_settings';
 
 export { CoreSystem } from './core_system';
 
 export interface CoreStart {
-  i18n: I18nStart;
-  injectedMetadata: InjectedMetadataStart;
-  fatalErrors: FatalErrorsStart;
-  notifications: NotificationsStart;
-  http: HttpStart;
-  basePath: BasePathStart;
-  uiSettings: UiSettingsClient;
-  chrome: ChromeStart;
+  i18n: I18n.I18nStart;
+  injectedMetadata: InjectedMetadata.InjectedMetadataStart;
+  fatalErrors: FatalErrors.FatalErrorsStart;
+  notifications: Notifications.NotificationsStart;
+  http: Http.HttpStart;
+  basePath: BasePath.BasePathStart;
+  uiSettings: UiSettings.UiSettingsStart;
+  chrome: Chrome.ChromeStart;
 }
 
-export interface Chrome {
-  Brand: Brand;
-  Breadcrumb: Breadcrumb;
-  HelpExtension: HelpExtension;
-}
-
-export interface Notifications {
-  Toast: Toast;
-  ToastInput: ToastInput;
-  ToastsStart: ToastsStart;
-}
+export { BasePath, Chrome, FatalErrors, Http, I18n, InjectedMetadata, Notifications, UiSettings };

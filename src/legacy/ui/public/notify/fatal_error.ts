@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { CoreStart } from '../../../../core/public';
+import { FatalErrors } from '../../../../core/public';
 import {
   AngularHttpError,
   formatAngularHttpError,
   isAngularHttpError,
 } from './lib/format_angular_http_error';
 
-type FatalErrorsStart = CoreStart['fatalErrors'];
-let newPlatformFatalErrors: FatalErrorsStart;
+let newPlatformFatalErrors: FatalErrors.FatalErrorsStart;
 
-export function __newPlatformInit__(instance: FatalErrorsStart) {
+export function __newPlatformInit__(instance: FatalErrors.FatalErrorsStart) {
   if (newPlatformFatalErrors) {
     throw new Error('ui/notify/fatal_error already initialized with new platform apis');
   }

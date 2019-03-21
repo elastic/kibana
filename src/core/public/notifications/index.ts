@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { Toast, ToastInput, ToastsStart } from './toasts';
-export { NotificationsService, NotificationsStart } from './notifications_service';
+export * from './toasts';
+export * from './notifications_service';

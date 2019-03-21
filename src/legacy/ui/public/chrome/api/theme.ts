@@ -19,13 +19,11 @@
 
 import * as Rx from 'rxjs';
 
-import { Chrome, CoreStart } from '../../../../../core/public/';
+import { Chrome } from '../../../../../core/public/';
 
-type Brand = Chrome['Brand'];
-type ChromeStart = CoreStart['chrome'];
-let newPlatformChrome: ChromeStart;
+let newPlatformChrome: Chrome.ChromeStart;
 
-export function __newPlatformInit__(instance: ChromeStart) {
+export function __newPlatformInit__(instance: Chrome.ChromeStart) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/theme is already initialized');
   }
@@ -34,18 +32,18 @@ export function __newPlatformInit__(instance: ChromeStart) {
 }
 
 export function initChromeThemeApi(chrome: { [key: string]: any }) {
-  const brandCache$ = new Rx.BehaviorSubject<Brand>({});
+  const brandCache$ = new Rx.BehaviorSubject<Chrome.Brand>({});
   newPlatformChrome.getBrand$().subscribe(brandCache$);
 
   const applicationClassesCache$ = new Rx.BehaviorSubject<string[]>([]);
   newPlatformChrome.getApplicationClasses$().subscribe(applicationClassesCache$);
 
-  chrome.setBrand = (brand: Brand) => {
+  chrome.setBrand = (brand: Chrome.Brand) => {
     newPlatformChrome.setBrand(brand);
     return chrome;
   };
 
-  chrome.getBrand = (key: keyof Brand) => {
+  chrome.getBrand = (key: keyof Chrome.Brand) => {
     return brandCache$.getValue()[key];
   };
 

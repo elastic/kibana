@@ -22,10 +22,9 @@ import React from 'react';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { CoreStart } from '../../../../core/public';
+import { I18n } from '../../../../core/public';
 
-type I18nStart = CoreStart['i18n'];
-export let I18nContext: I18nStart['Context'] = null!;
+export let I18nContext: I18n.I18nStart['Context'] = null!;
 export function __newPlatformInit__(context: typeof I18nContext) {
   if (I18nContext) {
     throw new Error('ui/i18n already initialized with new platform apis');

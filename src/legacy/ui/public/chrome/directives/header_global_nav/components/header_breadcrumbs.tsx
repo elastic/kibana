@@ -27,15 +27,14 @@ import {
 } from '@elastic/eui';
 
 import { Chrome } from '../../../../../../../core/public/';
-type Breadcrumb = Chrome['Breadcrumb'];
 
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<Chrome.Breadcrumb[]>;
 }
 
 interface State {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: Chrome.Breadcrumb[];
 }
 
 export class HeaderBreadcrumbs extends Component<Props, State> {

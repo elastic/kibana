@@ -18,9 +18,8 @@
  */
 import { Notifications } from '../../../../../core/public/';
 
-type Toast = Notifications['Toast'];
-type ToastInput = Notifications['ToastInput'];
-type ToastsStart = Notifications['ToastsStart'];
+type Toast = Notifications.Toast;
+type ToastInput = Notifications.ToastInput;
 
 export { Toast, ToastInput };
 
@@ -29,7 +28,7 @@ export class ToastNotifications {
 
   private onChangeCallback?: () => void;
 
-  constructor(private readonly toasts: ToastsStart) {
+  constructor(private readonly toasts: Notifications.ToastsStart) {
     toasts.get$().subscribe(list => {
       this.list = list;
 

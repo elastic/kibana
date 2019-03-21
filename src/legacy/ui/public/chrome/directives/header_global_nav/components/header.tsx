@@ -63,10 +63,9 @@ import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { NavControlSide } from '../';
 import { Chrome } from '../../../../../../../core/public/';
 
-type Breadcrumb = Chrome['Breadcrumb'];
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<Chrome.Breadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;

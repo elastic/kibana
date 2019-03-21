@@ -18,12 +18,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { CoreStart } from '../../../../../core/public/';
+import { InjectedMetadata } from '../../../../../core/public/';
 
-type InjectedMetadataStart = CoreStart['injectedMetadata'];
-let newPlatformInjectedVars: InjectedMetadataStart;
+let newPlatformInjectedVars: InjectedMetadata.InjectedMetadataStart;
 
-export function __newPlatformInit__(instance: InjectedMetadataStart) {
+export function __newPlatformInit__(instance: InjectedMetadata.InjectedMetadataStart) {
   if (newPlatformInjectedVars) {
     throw new Error('ui/chrome/api/injected_vars is already initialized');
   }

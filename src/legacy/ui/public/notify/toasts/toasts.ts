@@ -20,10 +20,9 @@
 import { Notifications } from '../../../../../core/public/';
 import { ToastNotifications } from './toast_notifications';
 
-type ToastsStart = Notifications['ToastsStart'];
 export let toastNotifications: ToastNotifications;
 
-export function __newPlatformInit__(toasts: ToastsStart) {
+export function __newPlatformInit__(toasts: Notifications.ToastsStart) {
   if (toastNotifications) {
     throw new Error('ui/notify/toasts already initialized with new platform apis');
   }

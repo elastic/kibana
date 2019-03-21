@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { CoreStart } from '../../../../../core/public/';
-let newPlatformBasePath: CoreStart['basePath'];
+import { BasePath } from '../../../../../core/public/';
+let newPlatformBasePath: BasePath.BasePathStart;
 
-export function __newPlatformInit__(instance: CoreStart['basePath']) {
+export function __newPlatformInit__(instance: BasePath.BasePathStart) {
   if (newPlatformBasePath) {
     throw new Error('ui/chrome/api/base_path is already initialized');
   }
