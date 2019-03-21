@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { flatten } from 'lodash';
+import { Feature, FeatureKibanaPrivileges } from 'x-pack/plugins/xpack_main/types';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
 import { FeaturePrivilegeCatalogueBuilder } from './catalogue';
+import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
 import { FeaturePrivilegeSavedObjectsManagementBuilder } from './saved_objects_management';
 import { FeaturePrivilegeUIBuilder } from './ui';
-export { FeaturePrivilegeBuilder } from './feature_privilege_builder';
+export { FeaturePrivilegeBuilder };
 
-export const featurePrivilegeBuildersFactory = (actions: Actions): FeaturePrivilegeApiBuilder[] => {
-  return [
+export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivilegeBuilder => {
+  const builders = [
     new FeaturePrivilegeApiBuilder(actions),
     new FeaturePrivilegeAppBuilder(actions),
     new FeaturePrivilegeCatalogueBuilder(actions),
@@ -26,4 +29,10 @@ export const featurePrivilegeBuildersFactory = (actions: Actions): FeaturePrivil
     new FeaturePrivilegeSavedObjectsManagementBuilder(actions),
     new FeaturePrivilegeUIBuilder(actions),
   ];
+
+  return {
+    getActions(privilege: FeatureKibanaPrivileges, feature: Feature) {
+      return flatten(builders.map(builder => builder.getActions(privilege, feature)));
+    },
+  };
 };

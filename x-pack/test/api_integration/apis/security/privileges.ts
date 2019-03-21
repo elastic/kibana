@@ -66,6 +66,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:discover/show',
                   'ui:discover/createShortUrl',
                   'ui:discover/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -134,6 +135,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:visualize/show',
                   'ui:visualize/createShortUrl',
                   'ui:visualize/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -214,6 +216,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:dashboard/createNew',
                   'ui:dashboard/show',
                   'ui:dashboard/showWriteControls',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -267,6 +270,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                   'ui:dev_tools/show',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -302,6 +306,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/edit',
                   'ui:savedObjectsManagement/config/read',
                   'ui:advancedSettings/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -337,6 +342,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:savedObjectsManagement/config/read',
                   'ui:indexPatterns/createNew',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -381,6 +387,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:timelion/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -431,6 +438,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:graph/save',
                   'ui:graph/delete',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -465,6 +473,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
               },
               ml: {
@@ -479,6 +488,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
               },
               apm: {
@@ -494,6 +504,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                   'ui:apm/show',
+                  'allHack:',
                 ],
               },
               maps: {
@@ -523,6 +534,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:maps/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -572,6 +584,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:savedObjectsManagement/index-pattern/read',
                   'ui:canvas/save',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -619,6 +632,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:infrastructure/show',
                   'ui:infrastructure/configureSource',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -664,6 +678,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'ui:savedObjectsManagement/config/read',
                   'ui:logs/show',
                   'ui:logs/configureSource',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -697,6 +712,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/get',
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -898,6 +914,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
+                'allHack:',
               ],
               read: [
                 'login:',
@@ -1185,6 +1202,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 'app:uptime',
                 'ui:catalogue/uptime',
                 'ui:navLinks/uptime',
+                'allHack:',
               ],
               read: [
                 'login:',

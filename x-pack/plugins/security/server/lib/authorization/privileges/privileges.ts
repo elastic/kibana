@@ -12,14 +12,14 @@ import {
 import { Feature } from '../../../../../xpack_main/types';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { Actions } from '../actions';
-import { featurePrivilegeBuildersFactory } from './feature_privilege_builder';
+import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 
 export interface PrivilegesService {
   get(): RawKibanaPrivileges;
 }
 
 export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPlugin) {
-  const featurePrivilegeBuilders = featurePrivilegeBuildersFactory(actions);
+  const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
     get() {
@@ -29,14 +29,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
         flatten(
           features.map(feature =>
             Object.values(feature.privileges).reduce<string[]>((acc, privilege) => {
-              return [
-                ...acc,
-                ...flatten(
-                  featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
-                    featurePrivilegeBuilder.getActions(privilege, feature)
-                  )
-                ),
-              ];
+              return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
             }, [])
           )
         )
@@ -50,14 +43,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
                 return acc;
               }
 
-              return [
-                ...acc,
-                ...flatten(
-                  featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
-                    featurePrivilegeBuilder.getActions(privilege, feature)
-                  )
-                ),
-              ];
+              return [...acc, ...featurePrivilegeBuilder.getActions(privilege, feature)];
             }, [])
           )
         )
@@ -65,14 +51,11 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
 
       return {
         features: features.reduce((acc: RawKibanaFeaturePrivileges, feature: Feature) => {
-          acc[feature.id] = mapValues(feature.privileges, privilege => [
+          acc[feature.id] = mapValues(feature.privileges, (privilege, privilegeId) => [
             actions.login,
             actions.version,
-            ...flatten(
-              featurePrivilegeBuilders.map(featurePrivilegeBuilder =>
-                featurePrivilegeBuilder.getActions(privilege, feature)
-              )
-            ),
+            ...featurePrivilegeBuilder.getActions(privilege, feature),
+            ...(privilegeId === 'all' ? [actions.allHack] : []),
           ]);
           return acc;
         }, {}),
@@ -83,11 +66,12 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             ...allActions,
+            actions.allHack,
           ],
           read: [actions.login, actions.version, ...readActions],
         },
         space: {
-          all: [actions.login, actions.version, ...allActions],
+          all: [actions.login, actions.version, ...allActions, actions.allHack],
           read: [actions.login, actions.version, ...readActions],
         },
       };

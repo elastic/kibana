@@ -25,7 +25,8 @@ import {
   createAuthorizationService,
   disableUICapabilitesFactory,
   initAPIAuthorization,
-  registerPrivilegesWithCluster
+  registerPrivilegesWithCluster,
+  validateFeaturePrivileges
 } from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
@@ -160,6 +161,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
+        await validateFeaturePrivileges(authorization.actions, xpackMainPlugin.getFeatures());
         await registerPrivilegesWithCluster(server);
       }
     });
