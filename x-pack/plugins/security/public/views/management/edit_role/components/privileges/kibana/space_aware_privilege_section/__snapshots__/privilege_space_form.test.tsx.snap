@@ -314,6 +314,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           }
           calculatedPrivileges={
             Object {
+              "_reserved": undefined,
               "base": Object {
                 "actualPrivilege": "none",
                 "actualPrivilegeSource": 40,
