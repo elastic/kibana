@@ -159,6 +159,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
+
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();

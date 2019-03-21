@@ -22,7 +22,11 @@ export class FeatureTooltip extends React.Component {
       icon = (<EuiButtonIcon
         iconType="logstashFilter"
         title="Filter on property"
-        onClick={tooltipProperty.getFilterAction()}
+        onClick={() => {
+          this.props.closeTooltip();
+          const filterAction = tooltipProperty.getFilterAction();
+          filterAction();
+        }}
         aria-label="Filter on property"
         className="mapFeatureTooltipFilterButton"
       />);
@@ -80,7 +84,7 @@ export class FeatureTooltip extends React.Component {
               <EuiFlexItem>&nbsp;</EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
-                  onClick={this.props.onCloseClick}
+                  onClick={this.props.closeTooltip}
                   iconType="cross"
                   aria-label={i18n.translate('xpack.maps.tooltip.closeAreaLabel', {
                     defaultMessage: 'Close tooltip'

@@ -243,7 +243,7 @@ export class MBMapContainer extends React.Component {
     ReactDOM.render((
       <FeatureTooltip
         properties={content}
-        onCloseClick={this._onTooltipClose}
+        closeTooltip={this._onTooltipClose}
         isReadOnly={this.props.isReadOnly}
       />
     ), this._tooltipContainer);

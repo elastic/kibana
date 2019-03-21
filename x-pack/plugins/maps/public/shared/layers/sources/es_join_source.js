@@ -94,7 +94,7 @@ export class ESJoinSource extends AbstractESSource {
     return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
   }
 
-  async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
+  async getPropertiesMap({  query, timeFilters, filters }, leftSourceName, leftFieldName) {
 
     if (!this.hasCompleteConfig()) {
       return [];
@@ -112,13 +112,13 @@ export class ESJoinSource extends AbstractESSource {
       searchSource.setField('index', indexPattern);
       searchSource.setField('size', 0);
       searchSource.setField('filter', () => {
-        const filters = [];
+        const allFilters = [...filters];
         if (timeAware) {
-          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+          allFilters.push(timefilter.createFilter(indexPattern, timeFilters));
         }
-        return filters;
+        return allFilters;
       });
-      searchSource.setField('query', searchFilters.query);
+      searchSource.setField('query', query);
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
