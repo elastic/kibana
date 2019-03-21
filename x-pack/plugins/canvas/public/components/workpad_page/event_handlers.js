@@ -17,7 +17,7 @@ const resetHandler = () => {
   window.onmouseup = null;
 };
 
-const setupHandler = (commit, canvasOrigin, initialCallback, initialClientX, initialClientY) => {
+const setupHandler = (commit, canvasOrigin) => {
   // Ancestor has to be identified on setup, rather than 1st interaction, otherwise events may be triggered on
   // DOM elements that had been removed: kibana-canvas github issue #1093
 
@@ -39,10 +39,6 @@ const setupHandler = (commit, canvasOrigin, initialCallback, initialClientX, ini
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
   };
-  if (typeof initialCallback === 'function' && !isNaN(initialClientX) && !isNaN(initialClientY)) {
-    const { x, y } = localMousePosition(canvasOrigin, initialClientX, initialClientY);
-    initialCallback(x, y);
-  }
 };
 
 const handleMouseMove = (
@@ -51,33 +47,15 @@ const handleMouseMove = (
   isEditable,
   canvasOrigin
 ) => {
-  // mouse move must be handled even before an initial click
-  if (!window.onmousemove && isEditable) {
-    setupHandler(
-      commit,
-      canvasOrigin,
-      (x, y) => commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey }),
-      clientX,
-      clientY
-    );
+  if (isEditable) {
+    const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
+    commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey });
   }
 };
 
-const handleWheel = (
-  commit,
-  { clientX, clientY, altKey, metaKey, shiftKey, ctrlKey },
-  isEditable,
-  canvasOrigin
-) => {
-  // new mouse position must be registered when page scrolls
-  if (isEditable) {
-    setupHandler(
-      commit,
-      canvasOrigin,
-      (x, y) => commit('cursorPosition', { x, y, altKey, metaKey, shiftKey, ctrlKey }),
-      clientX,
-      clientY
-    );
+const handleMouseLeave = (commit, { buttons }) => {
+  if (buttons !== 1) {
+    commit('cursorPosition', {}); // reset hover only if we're not holding down left key (ie. drag in progress)
   }
 };
 
@@ -88,19 +66,15 @@ const handleMouseDown = (commit, e, isEditable, canvasOrigin) => {
     resetHandler();
     return; // left-click and edit mode only
   }
-  setupHandler(
-    commit,
-    canvasOrigin,
-    (x, y) =>
-      commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey }),
-    clientX,
-    clientY
-  );
+  setupHandler(commit, canvasOrigin);
+  const { x, y } = localMousePosition(canvasOrigin, clientX, clientY);
+  commit('mouseEvent', { event: 'mouseDown', x, y, altKey, metaKey, shiftKey, ctrlKey });
 };
 
 export const eventHandlers = {
   onMouseDown: props => e => handleMouseDown(props.commit, e, props.isEditable, props.canvasOrigin),
   onMouseMove: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
-  onWheel: props => e => handleWheel(props.commit, e, props.isEditable, props.canvasOrigin),
+  onMouseLeave: props => e => handleMouseLeave(props.commit, e),
+  onWheel: props => e => handleMouseMove(props.commit, e, props.isEditable, props.canvasOrigin),
   resetHandler: () => () => resetHandler(),
 };
