@@ -21,7 +21,7 @@ import { Observable } from 'rxjs';
 import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { ElasticsearchServiceStart } from '../elasticsearch';
+import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
@@ -29,7 +29,7 @@ import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface PluginsServiceSetup {
   contracts: Map<PluginName, unknown>;
   uiPlugins: {
     public: Map<PluginName, DiscoveredPlugin>;
@@ -38,12 +38,12 @@ export interface PluginsServiceStart {
 }
 
 /** @internal */
-export interface PluginsServiceStartDeps {
-  elasticsearch: ElasticsearchServiceStart;
+export interface PluginsServiceSetupDeps {
+  elasticsearch: ElasticsearchServiceSetup;
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceStart> {
+export class PluginsService implements CoreService<PluginsServiceSetup> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -52,8 +52,8 @@ export class PluginsService implements CoreService<PluginsServiceStart> {
     this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
-  public async start(deps: PluginsServiceStartDeps) {
-    this.log.debug('Starting plugins service');
+  public async setup(deps: PluginsServiceSetupDeps) {
+    this.log.debug('Setting up plugins service');
 
     const config = await this.coreContext.configService
       .atPath('plugins', PluginsConfig)
@@ -73,7 +73,7 @@ export class PluginsService implements CoreService<PluginsServiceStart> {
     }
 
     return {
-      contracts: await this.pluginsSystem.startPlugins(deps),
+      contracts: await this.pluginsSystem.setupPlugins(deps),
       uiPlugins: this.pluginsSystem.uiPlugins(),
     };
   }
@@ -117,10 +117,7 @@ export class PluginsService implements CoreService<PluginsServiceStart> {
             throw new Error(`Plugin with id "${plugin.name}" is already registered!`);
           }
 
-          pluginEnableStatuses.set(plugin.name, {
-            plugin,
-            isEnabled,
-          });
+          pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
         })
       )
       .toPromise();
