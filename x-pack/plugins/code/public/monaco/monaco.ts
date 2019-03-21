@@ -63,7 +63,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 // import 'monaco-editor/esm/vs/basic-languages/css/css.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/dockerfile/dockerfile.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/fsharp/fsharp.contribution.js';
-// import 'monaco-editor/esm/vs/basic-languages/go/go.contribution.js';
+import 'monaco-editor/esm/vs/basic-languages/go/go.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/handlebars/handlebars.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/html/html.contribution.js';
 // import 'monaco-editor/esm/vs/basic-languages/ini/ini.contribution.js';
