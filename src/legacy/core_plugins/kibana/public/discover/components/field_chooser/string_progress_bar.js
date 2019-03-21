@@ -36,7 +36,7 @@ const module = uiModules.get('discover/field_chooser');
 function StringFieldProgressBar(props) {
   return (
     <EuiToolTip
-      anchorClassName="stringProgressBarTooltip__anchor"
+      anchorClassName="dscProgressBarTooltip__anchor"
       content={props.count}
       delay="regular"
       position="right"

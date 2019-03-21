@@ -4,8 +4,8 @@
 }
 
 /*
-  Fixes EUI bug https://github.com/elastic/eui/issues/1749
+  Fixes EUI known issue https://github.com/elastic/eui/issues/1749
 */
-.stringProgressBarTooltip__anchor {
+.dscProgressBarTooltip__anchor {
   display: block;
 }
