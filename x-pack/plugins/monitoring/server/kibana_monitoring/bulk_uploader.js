@@ -42,6 +42,8 @@ export class BulkUploader {
 
     this._timer = null;
     this._interval = interval;
+    this._lastFetchUsageTime = null;
+    this._usageInterval = server.plugins.xpack_main.telemetryCollectionInterval;
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),
       info: message => server.log(['info', ...LOGGING_TAGS], message),
@@ -64,17 +66,33 @@ export class BulkUploader {
   start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
 
-    // this is internal bulk upload, so filter out API-only collectors
-    const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.ignoreForInternalUploader !== true);
+    const filterCollectorSet = _collectorSet => {
+      const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+      if (!filterUsage) {
+        this._lastFetchUsageTime = Date.now();
+      }
+
+      return _collectorSet.getFilteredCollectorSet(c => {
+        // this is internal bulk upload, so filter out API-only collectors
+        if (c.ignoreForInternalUploader) {
+          return false;
+        }
+        // Only collect usage data at the same interval as telemetry would (default to once a day)
+        if (filterUsage && c.isUsageCollector) {
+          return false;
+        }
+        return true;
+      });
+    };
 
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+      this._fetchAndUpload(filterCollectorSet(collectorSet)); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(filterThem(collectorSet));
+      this._fetchAndUpload(filterCollectorSet(collectorSet));
     }, this._interval);
   }
 

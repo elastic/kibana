@@ -210,7 +210,10 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
         start,
         end,
         type: `${product}_stats`,
-        filters: [ { terms: { cluster_uuid: clusterUuids } } ]
+        filters: [
+          { terms: { cluster_uuid: clusterUuids } },
+          { exists: { field: 'kibana_stats.usage.index' } }
+        ]
       }),
       collapse: {
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)

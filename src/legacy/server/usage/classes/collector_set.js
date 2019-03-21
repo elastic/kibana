@@ -43,7 +43,7 @@ export class CollectorSet {
      * Define as instance properties to allow enclosing the server object
      */
     this.makeStatsCollector = options => new Collector(server, options);
-    this.makeUsageCollector = options => new UsageCollector(server, options);
+    this.makeUsageCollector = options => new UsageCollector(server, { ...options, isUsageCollector: true });
     this._makeCollectorSetFromArray = collectorsArray => new CollectorSet(server, collectorsArray);
   }
 

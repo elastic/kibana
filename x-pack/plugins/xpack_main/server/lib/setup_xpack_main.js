@@ -7,6 +7,7 @@
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
 import { FeatureRegistry } from './feature_registry';
+import { REPORT_INTERVAL_MS } from '../../common/constants';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.
@@ -22,6 +23,7 @@ export function setupXPackMain(server) {
   });
 
   server.expose('info', info);
+  server.expose('telemetryCollectionInterval', REPORT_INTERVAL_MS);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
