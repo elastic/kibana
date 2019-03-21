@@ -2,20 +2,17 @@
   <div class="prfDevTool__container kuiViewContent kuiViewContentItem" ng-controller="profileViz">
     <div class="prfDevTool__wrapper">
       <div class="prfDevTool__main">
-        <tabset ng-show="profileResponse.length > 0">
-          <tab
-            heading="{{ 'xpack.searchProfiler.queryProfileTabTitle' | i18n: { defaultMessage: 'Query Profile' } }}"
-            active="activeTab.search"
-            ng-click="activateTab('search')"
-            disabled="!hasSearch">
-              <profileTree data="profileResponse" target="searches"></profileTree>
-          </tab>
-          <tab heading="{{ 'xpack.searchProfiler.aggregationProfileTabTitle' | i18n: { defaultMessage: 'Aggregation Profile' } }}"
-            ng-click="activateTab('aggregations')"
-            disabled="!hasAggregations">
-              <profileTree data="profileResponse" target="aggregations"></profileTree>
-          </tab>
-        </tabset>
+
+        <search-profiler-tabs
+          ng-if="profileResponse.length > 0"
+          profile-response="profileResponse"
+          activate-tab="activateTab"
+          active-tab="activeTab"
+        >
+        </search-profiler-tabs>
+
+        <profileTree ng-show="activeTab.search" data="profileResponse" target="searches"></profileTree>
+        <profileTree ng-show="activeTab.aggregations" data="profileResponse" target="aggregations"></profileTree>
 
         <!-- License error notice -->
         <div class="euiCallout euiCallOut--warning" ng-hide="licenseEnabled">

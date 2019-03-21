@@ -14,14 +14,14 @@ import {
   toBoolean,
   toNumber,
   updateTimePicker
-} from 'x-pack/plugins/apm/public/store/urlParams';
+} from '../../../store/urlParams';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
-interface Props extends RouteComponentProps {
+export interface DatePickerProps extends RouteComponentProps {
   dispatchUpdateTimePicker: typeof updateTimePicker;
 }
 
-class DatePickerComponent extends React.Component<Props> {
+export class DatePickerComponent extends React.Component<DatePickerProps> {
   public refreshTimeoutId = 0;
 
   public getParamsFromSearch = (search: string) => {
@@ -39,25 +39,10 @@ class DatePickerComponent extends React.Component<Props> {
 
   public componentDidMount() {
     this.dispatchTimeRangeUpdate();
-    this.restartRefreshCycle();
   }
 
-  public componentWillUnmount() {
-    this.clearRefreshTimeout();
-  }
-
-  public componentDidUpdate(prevProps: Props) {
-    const currentParams = this.getParamsFromSearch(this.props.location.search);
-    const previousParams = this.getParamsFromSearch(prevProps.location.search);
-
+  public componentDidUpdate() {
     this.dispatchTimeRangeUpdate();
-
-    if (
-      currentParams.refreshPaused !== previousParams.refreshPaused ||
-      currentParams.refreshInterval !== previousParams.refreshInterval
-    ) {
-      this.restartRefreshCycle();
-    }
   }
 
   public dispatchTimeRangeUpdate() {
@@ -77,53 +62,22 @@ class DatePickerComponent extends React.Component<Props> {
     this.props.dispatchUpdateTimePicker({ min, max });
   }
 
-  public clearRefreshTimeout() {
-    if (this.refreshTimeoutId) {
-      window.clearTimeout(this.refreshTimeoutId);
-    }
-  }
-
-  public refresh = () => {
-    const { refreshPaused, refreshInterval } = this.getParamsFromSearch(
-      this.props.location.search
-    );
-
-    this.clearRefreshTimeout();
-
-    if (refreshPaused) {
-      return;
-    }
-
-    this.dispatchTimeRangeUpdate();
-    this.refreshTimeoutId = window.setTimeout(this.refresh, refreshInterval);
-  };
-
-  public restartRefreshCycle = () => {
-    this.clearRefreshTimeout();
-    const { refreshInterval, refreshPaused } = this.getParamsFromSearch(
-      this.props.location.search
-    );
-    if (refreshPaused) {
-      return;
-    }
-    this.refreshTimeoutId = window.setTimeout(this.refresh, refreshInterval);
-  };
-
-  public updateUrl(nextSearch: {
+  public updateUrl(nextQuery: {
     rangeFrom?: string;
     rangeTo?: string;
     refreshPaused?: boolean;
     refreshInterval?: number;
   }) {
-    const currentSearch = toQuery(this.props.location.search);
+    const currentQuery = toQuery(this.props.location.search);
+    const nextSearch = fromQuery({ ...currentQuery, ...nextQuery });
 
-    this.props.history.push({
-      ...this.props.location,
-      search: fromQuery({
-        ...currentSearch,
-        ...nextSearch
-      })
-    });
+    // Compare the encoded versions of current and next search string, and if they're the same,
+    // use replace instead of push to prevent an unnecessary stack entry which breaks the back button.
+    const currentSearch = fromQuery(currentQuery);
+    const { push, replace } = this.props.history;
+    const update = currentSearch === nextSearch ? replace : push;
+
+    update({ ...this.props.location, search: nextSearch });
   }
 
   public handleRefreshChange: EuiSuperDatePickerProps['onRefreshChange'] = ({
@@ -136,7 +90,7 @@ class DatePickerComponent extends React.Component<Props> {
     });
   };
 
-  public handleTimeChange: EuiSuperDatePickerProps['onTimeChange'] = options => {
+  public handleTimeChange = (options: { start: string; end: string }) => {
     this.updateUrl({ rangeFrom: options.start, rangeTo: options.end });
   };
 
@@ -154,6 +108,7 @@ class DatePickerComponent extends React.Component<Props> {
         isPaused={refreshPaused}
         refreshInterval={refreshInterval}
         onTimeChange={this.handleTimeChange}
+        onRefresh={this.handleTimeChange}
         onRefreshChange={this.handleRefreshChange}
         showUpdateButton={true}
       />

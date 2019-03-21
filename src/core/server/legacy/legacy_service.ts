@@ -24,10 +24,10 @@ import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig } from '../dev';
-import { ElasticsearchServiceStart } from '../elasticsearch';
-import { BasePathProxyServer, HttpConfig, HttpServiceStart } from '../http';
+import { ElasticsearchServiceSetup } from '../elasticsearch';
+import { BasePathProxyServer, HttpConfig, HttpServiceSetup } from '../http';
 import { Logger } from '../logging';
-import { PluginsServiceStart } from '../plugins/plugins_service';
+import { PluginsServiceSetup } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -37,10 +37,10 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-interface Deps {
-  elasticsearch: ElasticsearchServiceStart;
-  http?: HttpServiceStart;
-  plugins: PluginsServiceStart;
+interface SetupDeps {
+  elasticsearch: ElasticsearchServiceSetup;
+  http?: HttpServiceSetup;
+  plugins: PluginsServiceSetup;
 }
 
 function getLegacyRawConfig(config: Config) {
@@ -65,8 +65,8 @@ export class LegacyService implements CoreService {
     this.log = coreContext.logger.get('legacy-service');
   }
 
-  public async start(deps: Deps) {
-    this.log.debug('starting legacy service');
+  public async setup(deps: SetupDeps) {
+    this.log.debug('setting up legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
@@ -131,7 +131,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: Deps) {
+  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: SetupDeps) {
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
