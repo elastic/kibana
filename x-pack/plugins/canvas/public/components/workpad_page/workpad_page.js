@@ -40,6 +40,7 @@ export class WorkpadPage extends PureComponent {
     onDoubleClick: PropTypes.func,
     onKeyDown: PropTypes.func,
     onMouseDown: PropTypes.func,
+    onMouseLeave: PropTypes.func,
     onMouseMove: PropTypes.func,
     onMouseUp: PropTypes.func,
     onAnimationEnd: PropTypes.func,
@@ -75,6 +76,7 @@ export class WorkpadPage extends PureComponent {
       onDoubleClick,
       onKeyDown,
       onMouseDown,
+      onMouseLeave,
       onMouseMove,
       onMouseUp,
       onAnimationEnd,
@@ -135,6 +137,7 @@ export class WorkpadPage extends PureComponent {
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
         onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
         onDoubleClick={onDoubleClick}
         onAnimationEnd={onAnimationEnd}
         onWheel={onWheel}
