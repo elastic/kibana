@@ -95,7 +95,7 @@ load your workpad with all of the images (SVGs, GIFs, etc.) you want and then
 easily access them from the asset picker when you add image elements.
 
 [role="screenshot"]
-image::images/highlights-6.7.0-canvas.gif[Canvas in 6.7]
+image::images/highlights-6.7.0-canvas.png[Canvas in 6.7]
 
 Also in 6.7, you can download the workpad directly from the *Edit* view. 
 Click the link in the workpad header to download a JSON file.  
@@ -139,7 +139,7 @@ Uptime documentation for details.
 
 
 [role="screenshot"]
-image::images/highlights-6.7.0-uptime.gif[Uptime]
+image::images/highlights-6.7.0-uptime.png[Uptime]
 
 
 [float]
