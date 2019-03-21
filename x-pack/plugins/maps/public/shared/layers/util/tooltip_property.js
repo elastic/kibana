@@ -16,18 +16,16 @@ export class TooltipProperty {
     this._rawValue = rawValue;
   }
 
-
-  getRawValue() {
-    return this._rawValue;
-  }
-
   getPropertyName() {
     return this._propertyName;
   }
 
-
   getHtmlDisplayValue() {
     return _.escape(this._rawValue);
+  }
+
+  getRawValue() {
+    return this._rawValue;
   }
 
   isFilterable() {
@@ -65,19 +63,23 @@ export class ESTooltipProperty extends TooltipProperty {
     return field.type === 'string';
   }
 
+  getESFilter() {
+    return buildPhraseFilter(
+      this._indexPattern.fields.byName[this._propertyName],
+      this._rawValue,
+      this._indexPattern);
+  }
+
   getFilterAction() {
     return () => {
-      const phraseFilter = buildPhraseFilter(
-        this._indexPattern.fields.byName[this._propertyName],
-        this._rawValue,
-        this._indexPattern);
-      filterBarQueryFilter.addFilters(phraseFilter);
+      const phraseFilter = this.getESFilter();
+      filterBarQueryFilter.addFilters([phraseFilter]);
     };
   }
 }
 
 
-export class ESMetricJoinTooltipProperty extends ESTooltipProperty {
+export class ESAggMetricTooltipProperty extends ESTooltipProperty {
 
   constructor(propertyName, rawValue, indexPattern, metricField) {
     super(propertyName, rawValue, indexPattern);
@@ -105,5 +107,53 @@ export class ESMetricJoinTooltipProperty extends ESTooltipProperty {
       : indexPatternField.format.convert(this._rawValue);
 
   }
+
+}
+
+
+export class JoinTooltipProperty extends TooltipProperty {
+
+  constructor(tooltipProperty, leftInnerJoins) {
+    super();
+    this._tooltipProperty = tooltipProperty;
+    this._leftInnerJoins = leftInnerJoins;
+  }
+
+  isFilterable() {
+    return true;
+  }
+
+  getPropertyName() {
+    return this._tooltipProperty.getPropertyName();
+  }
+
+  getHtmlDisplayValue() {
+    return this._tooltipProperty.getHtmlDisplayValue();
+  }
+
+  getFilterAction() {
+    //dispatch all the filter actions to the query bar
+    //this relies on the de-duping of filterBarQueryFilter
+    return async () => {
+      const esFilters = [];
+      if (this._tooltipProperty.isFilterable()) {
+        esFilters.push(this._tooltipProperty.getESFilter());
+      }
+
+      for (let i = 0; i < this._leftInnerJoins.length; i++) {
+        const rightSource =  this._leftInnerJoins[i].getRightJoinSource();
+        const esTooltipProperty = await rightSource.createESTooltipProperty(
+          rightSource.getTerm(),
+          this._tooltipProperty.getRawValue()
+        );
+        if (esTooltipProperty) {
+          const filter = esTooltipProperty.getESFilter();
+          esFilters.push(filter);
+        }
+      }
+      filterBarQueryFilter.addFilters(esFilters);
+    };
+  }
+
 
 }

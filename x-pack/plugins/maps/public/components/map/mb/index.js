@@ -54,9 +54,6 @@ function mapDispatchToProps(dispatch) {
     },
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
-    },
-    addGlobalFilter() {
-      console.log('should dispatch global filter', arguments);
     }
   };
 }

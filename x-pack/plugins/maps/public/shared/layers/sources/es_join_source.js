@@ -15,6 +15,7 @@ import {
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { timefilter } from 'ui/timefilter/timefilter';
 import { i18n } from '@kbn/i18n';
+import { ESTooltipProperty } from '../util/tooltip_property';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -77,6 +78,10 @@ export class ESJoinSource extends AbstractESSource {
 
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
+  }
+
+  getTerm() {
+    return this._descriptor.term;
   }
 
   _formatMetricKey(metric) {
@@ -214,5 +219,13 @@ export class ESJoinSource extends AbstractESSource {
     // console.warn('tooltip props not implemented');
     // return [];
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
+
+  async createESTooltipProperty(propertyName, rawValue) {
+    const indexPattern = await this._getIndexPattern();
+    if (!indexPattern) {
+      return null;
+    }
+    return new ESTooltipProperty(propertyName, rawValue, indexPattern);
   }
 }

@@ -15,7 +15,7 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
-import { ESMetricJoinTooltipProperty } from '../util/tooltip_property';
+import { ESAggMetricTooltipProperty } from '../util/tooltip_property';
 
 
 export class AbstractESSource extends AbstractVectorSource {
@@ -100,7 +100,7 @@ export class AbstractESSource extends AbstractVectorSource {
         }
       }
 
-      const tooltipProperty  = new ESMetricJoinTooltipProperty(metricField.propertyLabel, value, indexPattern, metricField);
+      const tooltipProperty  = new ESAggMetricTooltipProperty(metricField.propertyLabel, value, indexPattern, metricField);
       tooltipProperties.push(tooltipProperty);
     });
 

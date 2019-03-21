@@ -69,8 +69,6 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
    */
   queryFilter.addFilters = function (filters, global) {
 
-    console.log('add filtes', arguments)
-
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 
