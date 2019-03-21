@@ -34,8 +34,9 @@ other.
 [float]
 === Configure data sources in the user interface
 
-The source configuration UI can be accessed via the corresponding button in the
-toolbar:
+The source configuration UI can be accessed via the corresponding
+image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
+button in the toolbar:
 
 [role="screenshot"]
 image::infrastructure/images/infrastructure-configure-source.png[Configure Infrastructure UI source button in Kibana]
