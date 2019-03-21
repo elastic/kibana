@@ -8,12 +8,11 @@ import { merge } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from 'plugins/watcher/../common/constants';
 import { ActionDefaultsRegistryProvider } from '../registry';
 
-const DEFAULT_ADMIN_EMAIL_CONFIG_KEY = 'xPack:defaultAdminEmail';
 const actionType = ACTION_TYPES.EMAIL;
 
-function getActionDefaults(config) {
+function getActionDefaults() {
   return {
-    to: config.get(DEFAULT_ADMIN_EMAIL_CONFIG_KEY)
+    to: ''
   };
 }
 
