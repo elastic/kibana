@@ -1,0 +1,25 @@
+.overwrittenSession {
+  @include kibanaFullScreenGraphics;
+}
+
+.overwrittenSession__header {
+  position: relative;
+  padding: $euiSizeXL;
+  z-index: 10;
+}
+
+.overwrittenSession__logo {
+  @include kibanaCircleLogo;
+  @include euiBottomShadowMedium;
+
+  margin-bottom: $euiSizeXL;
+}
+
+.overwrittenSession__content {
+  position: relative;
+  margin: auto;
+  max-width: 560px;
+  padding-left: $euiSizeXL;
+  padding-right: $euiSizeXL;
+  z-index: 10;
+}
