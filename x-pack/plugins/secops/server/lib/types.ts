@@ -132,3 +132,9 @@ interface SortRequestField {
 }
 
 export type SortRequest = SortRequestField[];
+
+export interface MSearchHeader {
+  index: string[] | string;
+  allowNoIndices?: boolean;
+  ignoreUnavailable?: boolean;
+}
