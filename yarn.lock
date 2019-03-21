@@ -16025,7 +16025,7 @@ micromatch@^2.1.5, micromatch@^2.3.11:
     parse-glob "^3.0.4"
     regex-cache "^0.4.2"
 
-micromatch@^3.0.4, micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.5, micromatch@^3.1.8, micromatch@^3.1.9:
+micromatch@^3.0.4, micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.8, micromatch@^3.1.9:
   version "3.1.10"
   resolved "https://registry.yarnpkg.com/micromatch/-/micromatch-3.1.10.tgz#70859bc95c9840952f359a068a3fc49f9ecfac23"
   integrity sha512-MWikgl9n9M3w+bpsY3He8L+w9eF9338xRl8IAO5viDizwSzziFEyUzo2xrrloB64ADbTf8uA8vRqqttDTOmccg==
@@ -22995,15 +22995,6 @@ tslint-plugin-prettier@^2.0.0:
     eslint-plugin-prettier "^2.2.0"
     tslib "^1.7.1"
 
-tslint-rules-bunch@^0.0.7:
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/tslint-rules-bunch/-/tslint-rules-bunch-0.0.7.tgz#da832e237b3626ce04dc3e726463829e4b37004f"
-  integrity sha512-bqHQfB0jZw6V0sgfo6LJMcI/tuCNpyFqY0kFSE92mF8sjdTjQGuloqTwHlveoZzMJ4CiuiYjLh+YXSS5nceSXQ==
-  dependencies:
-    micromatch "^3.1.5"
-    tslib "^1.9.0"
-    tsutils "^3.5.2"
-
 tslint@^5.11.0:
   version "5.11.0"
   resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.11.0.tgz#98f30c02eae3cde7006201e4c33cb08b48581eed"
@@ -23036,7 +23027,7 @@ tsutils@^2.27.2:
   dependencies:
     tslib "^1.8.1"
 
-tsutils@^3.5.2:
+tsutils@^3.9.1:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.9.1.tgz#2a40dc742943c71eca6d5c1994fcf999956be387"
   integrity sha512-hrxVtLtPqQr//p8/msPT1X1UYXUjizqSit5d9AQ5k38TcV38NyecL5xODNxa73cLe/5sdiJ+w1FqzDhRBA/anA==
