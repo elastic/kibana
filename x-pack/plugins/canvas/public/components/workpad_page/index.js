@@ -41,6 +41,7 @@ const mapDispatchToProps = dispatch => {
   };
 };
 
+// eslint-disable-next-line
 const getRootElementId = (lookup, id) => {
   if (!lookup.has(id)) {
     return null;
