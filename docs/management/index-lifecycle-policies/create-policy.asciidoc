@@ -21,6 +21,8 @@ disable *Index Management*, then *Index Lifecycle Policies* is also disabled.
 [role="screenshot"]
 image::images/index-lifecycle-policies-create.png[][UI for creating an index lifecycle policy]
 
+==== Defining the phases of the index lifecycle
+
 You can define up to four phases in the index lifecycle. For each phase, you 
 can enable actions to optimize performance for that phase.
 
