@@ -34,12 +34,6 @@ const URL_LIMIT_WARN_WITHIN = 1000;
 export function initAngularApi(chrome, internals) {
   chrome.getFirstPathSegment = _.noop;
 
-  internals.disableAutoAngularUrlEncodingFix = false;
-  chrome.disableAutoAngularUrlEncodingFix = () => {
-    internals.disableAutoAngularUrlEncodingFix = true;
-    return chrome;
-  };
-
   chrome.setupAngular = function () {
     const kibana = uiModules.get('kibana');
 
@@ -57,9 +51,11 @@ export function initAngularApi(chrome, internals) {
       .value('esUrl', (function () {
         const a = document.createElement('a');
         a.href = chrome.addBasePath('/elasticsearch');
+        const protocolPort = /https/.test(a.protocol) ? 443 : 80;
+        const port = a.port || protocolPort;
         return {
           host: a.hostname,
-          port: a.port,
+          port,
           protocol: a.protocol,
           pathname: a.pathname
         };
