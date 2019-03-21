@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { get } from 'lodash';
+import React from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get } from 'lodash';
-import React from 'react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
 import { ComboBoxGroupedOption } from '../default_editor_utils';
@@ -38,8 +38,6 @@ interface DefaultEditorAggSelectProps {
 }
 
 function DefaultEditorAggSelect({
-  // since it happens that during 'agg_params' test run, this component is invoked with undefined props,
-  // we added default value for agg, value and aggTypeOptions. It can be removed after 'agg_params' is converted to React
   agg = {},
   value = { title: '' },
   setValue,
@@ -81,7 +79,13 @@ function DefaultEditorAggSelect({
   );
 
   return (
-    <EuiFormRow label={label} labelAppend={helpLink} isInvalid={isSelectInvalid} fullWidth={true}>
+    <EuiFormRow
+      label={label}
+      labelAppend={helpLink}
+      isInvalid={isSelectInvalid}
+      fullWidth={true}
+      className="visEditorAggSelect__formRow"
+    >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
           defaultMessage: 'Select an aggregation',
