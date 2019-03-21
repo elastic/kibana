@@ -5,27 +5,10 @@
     font-size: $euiFontSizeXS;
     text-align: left;
     max-height: $euiFontSizeS;
-
-      .filter-button {
-        opacity: 0.3;
-        min-width: 14px;
-        -webkit-transform: translateY(-1px);
-        transform: translateY(-1px);
-
-        .euiIcon {
-          width: $euiFontSizeS;
-          height: $euiFontSizeS;
-        }
-      }
-
-      .filter-button:hover {
-        opacity: 1;
-      }
+    max-width: calc(100% - 102px); // SASSTODO: Calc proper value
 
     .field-value {
       @include euiTextTruncate;
-
-      max-width: calc(100% - 34px); // SASSTODO: Calc proper value
       display: inline-block;
       vertical-align: bottom;
     }
@@ -110,7 +93,7 @@
     line-height: 14px;
     border-radius: $euiBorderRadius;
     padding: $euiSizeXS / 2;
-    margin-top: 1px;
+    margin-top: 3px;
     display: inline-block;
     border: $euiBorderThin;
   }

@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
 import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
-import { EntityCell } from '../anomalies_table/entity_cell';
+import { EntityCell } from '../entity_cell';
 
 
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {

@@ -51,20 +51,6 @@
       font-size: inherit;
     }
 
-    .filter-button {
-      opacity: 0.3;
-      min-width: 14px;
-
-      .euiIcon {
-        width: 14px;
-        height: 14px;
-      }
-    }
-
-    .filter-button:hover {
-      opacity: 1;
-    }
-
     .detector-rules-icon {
       margin-left: $euiSizeXS;
       opacity: 0.5;
@@ -124,11 +110,6 @@
         flex-basis: 85%;
         font-size: inherit;
         line-height: 1.5rem;
-      }
-
-      .filter-button {
-        -webkit-transform: translateY(-1px);
-        transform: translateY(-1px);
       }
 
     }
