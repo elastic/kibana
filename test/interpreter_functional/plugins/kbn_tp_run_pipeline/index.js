@@ -17,10 +17,23 @@
  * under the License.
  */
 
-require('../src/setup_node_env');
-require('@kbn/test').runTestsCli([
-  require.resolve('../test/functional/config.js'),
-  require.resolve('../test/api_integration/config.js'),
-  require.resolve('../test/plugin_functional/config.js'),
-  require.resolve('../test/interpreter_functional/config.js'),
-]);
+export default function (kibana) {
+  return new kibana.Plugin({
+    uiExports: {
+      app: {
+        title: 'Run Pipeline',
+        description: 'This is a sample plugin to test running pipeline expressions',
+        main: 'plugins/kbn_tp_run_pipeline/app',
+      }
+    },
+
+    init(server) {
+      // The following lines copy over some configuration variables from Kibana
+      // to this plugin. This will be needed when embedding visualizations, so that e.g.
+      // region map is able to get its configuration.
+      server.injectUiAppVars('kbn_tp_run_pipeline', async () => {
+        return await server.getInjectedUiAppVars('kibana');
+      });
+    }
+  });
+}
