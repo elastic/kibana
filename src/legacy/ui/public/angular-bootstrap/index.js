@@ -24,7 +24,6 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.tpls',
   'ui.bootstrap.transition',
   'ui.bootstrap.bindHtml',
-  'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
   'ui.bootstrap.tooltip',
   'ui.bootstrap.progressbar',
@@ -41,7 +40,6 @@ angular.module('ui.bootstrap.tpls', [
 ]);
 
 import './bindHtml/bindHtml';
-import './dropdown/dropdown';
 import './modal/modal';
 import './progressbar/progressbar';
 import './tooltip/tooltip';
