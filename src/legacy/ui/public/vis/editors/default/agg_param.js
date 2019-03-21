@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction, noop } from 'lodash';
+import { isFunction } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -86,7 +86,7 @@ uiModules
               $scope.paramValue = value;
 
               if(ngModelCtrl) {
-                ngModelCtrl.$$runValidators(value, null, noop);
+                ngModelCtrl.$setViewValue(value);
               }
             }, true);
           }
@@ -102,8 +102,8 @@ uiModules
           };
 
           if(ngModelCtrl && $scope.aggParam.name === 'json') {
-            ngModelCtrl.$validators.jsonInput = (modelValue) => {
-              const isJsonValid = isValidJson(modelValue);
+            ngModelCtrl.$validators.jsonInput = (value) => {
+              const isJsonValid = isValidJson(value);
               $scope.isInvalid = !isJsonValid;
 
               return isJsonValid;
