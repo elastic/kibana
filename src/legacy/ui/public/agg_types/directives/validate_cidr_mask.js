@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { CidrMask } from '../utils/cidr_mask';
-import { uiModules } from '../modules';
+import { CidrMask } from '../../utils/cidr_mask';
+import { uiModules } from '../../modules';
 
 uiModules.get('kibana').directive('validateCidrMask', function () {
   return {

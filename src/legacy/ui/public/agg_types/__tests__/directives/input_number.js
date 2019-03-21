@@ -19,13 +19,12 @@
 
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import '../validate_ip';
+import '../../directives/input_number';
 
-
-describe('Validate IP directive', function () {
+describe('Number input directive', function () {
   let $compile;
   let $rootScope;
-  const html = '<input type="text" ng-model="value" validate-ip />';
+  const html = '<input type="text" ng-model="value" input-number />';
 
   beforeEach(ngMock.module('kibana'));
 
@@ -34,63 +33,35 @@ describe('Validate IP directive', function () {
     $rootScope = _$rootScope_;
   }));
 
-  it('should allow empty input', function () {
+  it('should allow whole numbers', function () {
     const element = $compile(html)($rootScope);
 
-    $rootScope.value = '';
+    $rootScope.value = '123';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = null;
+    $rootScope.value = '1';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = undefined;
+    $rootScope.value = '-5';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
   });
 
-  it('should allow valid IP addresses', function () {
+  it('should allow numbers with decimals', function () {
     const element = $compile(html)($rootScope);
 
-    $rootScope.value = '0.0.0.0';
+    $rootScope.value = '123.0';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = '0.0.0.1';
+    $rootScope.value = '1.2';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
 
-    $rootScope.value = '126.45.211.34';
+    $rootScope.value = '-5.5';
     $rootScope.$digest();
     expect(element.hasClass('ng-valid')).to.be.ok();
-
-    $rootScope.value = '255.255.255.255';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-valid')).to.be.ok();
-  });
-
-  it('should disallow invalid IP addresses', function () {
-    const element = $compile(html)($rootScope);
-
-    $rootScope.value = 'hello, world';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
-
-    $rootScope.value = '0.0.0';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
-
-    $rootScope.value = '256.0.0.0';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
-
-    $rootScope.value = '-1.0.0.0';
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
-
-    $rootScope.value = Number.MAX_VALUE;
-    $rootScope.$digest();
-    expect(element.hasClass('ng-invalid')).to.be.ok();
   });
 });

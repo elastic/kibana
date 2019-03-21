@@ -17,21 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { getDocLink } from '../../documentation_links';
+import { uiModules } from '../../modules';
+
 const module = uiModules.get('kibana');
 
-module.directive('inputNumber', function () {
+module.directive('documentationHref', function () {
   return {
     restrict: 'A',
-    require: 'ngModel',
-    link: function ($scope, $elem, attrs, ngModel) {
-      ngModel.$parsers.push(checkNumber);
-      ngModel.$formatters.push(checkNumber);
-
-      function checkNumber(value) {
-        ngModel.$setValidity('number', !isNaN(parseFloat(value)));
-        return value;
-      }
+    link: function (scope, element, attributes) {
+      element.attr('href', getDocLink(attributes.documentationHref));
     }
   };
 });

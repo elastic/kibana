@@ -17,25 +17,20 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
+import { uiModules } from '../../modules';
+const module = uiModules.get('kibana');
 
-require('brace');
-require('ui-bootstrap-custom');
-
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
-
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-require('./src/directives/console_menu_directive');
-
-
-uiRoutes.when('/dev_tools/console', {
-  controller: 'SenseController',
-  template,
+module.directive('autoSelectIfOnlyOne', function () {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    link: function (scope, element, attributes, ngModelCtrl) {
+      scope.$watchCollection(attributes.autoSelectIfOnlyOne, (options) => {
+        if (options && options.length === 1) {
+          ngModelCtrl.$setViewValue(options[0]);
+          ngModelCtrl.$render();
+        }
+      });
+    }
+  };
 });

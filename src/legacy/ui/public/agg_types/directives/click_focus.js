@@ -17,25 +17,25 @@
  * under the License.
  */
 
-import uiRoutes from 'ui/routes';
-import template from './index.html';
+import _ from 'lodash';
+import $ from 'jquery';
+import { uiModules } from '../../modules';
+const module = uiModules.get('kibana');
 
-require('brace');
-require('ui-bootstrap-custom');
+module.directive('clickFocus', function () {
+  return {
+    scope: {
+      clickFocus: '='
+    },
+    restrict: 'A',
+    link: function ($scope, $elem) {
+      function handler() {
+        const focusElem = $.find('input[name=' + $scope.clickFocus + ']');
+        if (focusElem[0]) focusElem[0].focus();
+      }
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
-require('ui/autoload/styles');
-
-require('./src/controllers/sense_controller');
-require('./src/directives/sense_history');
-require('./src/directives/sense_settings');
-require('./src/directives/sense_help');
-require('./src/directives/sense_welcome');
-require('./src/directives/console_menu_directive');
-
-
-uiRoutes.when('/dev_tools/console', {
-  controller: 'SenseController',
-  template,
+      $elem.bind('click', handler);
+      $scope.$on('$destroy', _.bindKey($elem, 'unbind', 'click', handler));
+    }
+  };
 });

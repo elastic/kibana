@@ -17,20 +17,18 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-const module = uiModules.get('kibana');
+import 'ngreact';
 
-module.directive('autoSelectIfOnlyOne', function () {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    link: function (scope, element, attributes, ngModelCtrl) {
-      scope.$watchCollection(attributes.autoSelectIfOnlyOne, (options) => {
-        if (options && options.length === 1) {
-          ngModelCtrl.$setViewValue(options[0]);
-          ngModelCtrl.$render();
-        }
-      });
-    }
-  };
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/sense', ['react']);
+
+import { ConsoleMenu } from '../console_menu';
+
+module.directive('consoleMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(ConsoleMenu),
+    undefined,
+    { restrict: 'E' }
+  );
 });

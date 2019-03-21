@@ -17,16 +17,28 @@
  * under the License.
  */
 
-import { getDocLink } from '../documentation_links';
-import { uiModules } from '../modules';
 
-const module = uiModules.get('kibana');
+import 'ngreact';
 
-module.directive('documentationHref', function () {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attributes) {
-      element.attr('href', getDocLink(attributes.documentationHref));
-    }
-  };
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('kibana/vega', ['react']);
+
+import { VegaHelpMenu } from './vega_help_menu';
+import { VegaActionsMenu } from './vega_action_menu';
+
+module.directive('vegaActionsMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(VegaActionsMenu),
+    undefined,
+    { restrict: 'E' }
+  );
+});
+
+module.directive('vegaHelpMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(VegaHelpMenu),
+    undefined,
+    { restrict: 'E' }
+  );
 });
