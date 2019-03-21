@@ -50,6 +50,20 @@ const Lint = require('tslint');
 const mm = require('micromatch');
 const { findImports, ImportKind } = require('tsutils');
 
+function traverseToTopFolder(src, pattern) {
+  while(src && mm([src], pattern).length) {
+    const srcIdx = src.lastIndexOf(path.delimiter);
+    src = src.slice(0, srcIdx);
+  }
+  return src;
+}
+
+function isSameFolderOrDescendent(src, imported, pattern) {
+  const srcFileFolderRoot = traverseToTopFolder(src, pattern);
+  const importedFileFolderRoot = traverseToTopFolder(imported, pattern);
+  return srcFileFolderRoot === importedFileFolderRoot;
+}
+
 const metadata = {
   ruleName: 'no-import-zones',
   description: `Forbids specific imports for the specified targets using 'micromatch' patterns matching`,
@@ -158,7 +172,11 @@ function walk(ctx) {
         const relativeSrcFile = path.relative(basePath, srcFile);
         const relativeImportFile = path.relative(basePath, importFile);
         for (const { target, from } of patterns) {
-          if (mm([relativeSrcFile], target).length && mm([relativeImportFile], from).length) {
+          if (
+            mm([relativeSrcFile], target).length &&
+            mm([relativeImportFile], from).length &&
+            !isSameFolderOrDescendent(relativeSrcFile, relativeImportFile, target)
+          ) {
             const zone = { basePath, target, from };
             const messages = [
               `(${Rule.metadata.ruleName}): '${importUnit.text}' import is forbidden`,
