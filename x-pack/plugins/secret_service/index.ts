@@ -5,9 +5,8 @@
  */
 
 import crypto from 'crypto';
+import { Root } from 'joi';
 import { resolve } from 'path';
-// @ts-ignore
-import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
 import { CONFIG_KEY_NAME, SecretService } from './server';
 
@@ -25,7 +24,7 @@ export const secretService = (kibana: any) => {
       },
     },
 
-    config(Joi: any) {
+    config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         secret: Joi.string().default(undefined),
@@ -38,15 +37,11 @@ export const secretService = (kibana: any) => {
     async init(server: any) {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
-      const { keystore } = server;
+      let encryptionKey = server.config().get(CONFIG_KEY_NAME);
 
-      if (!keystore.has(CONFIG_KEY_NAME)) {
-        keystore.add(CONFIG_KEY_NAME, crypto.randomBytes(128).toString('hex'));
-        if (!keystore.exists()) {
-          warn(`Keystore missing, new keystore created ${keystore.path}`);
-        }
-        warn('Missing key - one has been auto-generated for use.');
-        keystore.save();
+      if (!encryptionKey) {
+        encryptionKey = crypto.randomBytes(128).toString('hex');
+        warn('Encryption key is missing - one has been auto-generated for use!');
       }
 
       const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
@@ -54,13 +49,7 @@ export const secretService = (kibana: any) => {
         'secret',
       ]);
 
-      const auditEnabled = server.config().get('xpack.secret_service.audit.enabled');
-      let auditor;
-      if (auditEnabled) {
-        auditor = new AuditLogger(server, this.id);
-      }
-      const encryptionKey = keystore.get(CONFIG_KEY_NAME);
-      const service = new SecretService(repository, 'secret', encryptionKey, auditor);
+      const service = new SecretService(repository, 'secret', encryptionKey);
 
       // validate key used
       const valid = await service.validateKey();

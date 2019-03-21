@@ -8,10 +8,7 @@
 import nodeCrypto from '@elastic/node-crypto';
 import { SavedObjectsRepository } from 'src/legacy/server/saved_objects';
 import uuid from 'uuid';
-// @ts-ignore
-import { AuditLogger } from '../../../server/lib/audit_logger';
 
-type SSEvents = 'secret_object_created' | 'secret_object_accessed' | 'secret_object_decrypt_failed';
 type SecretId = Promise<string>;
 
 export const CONFIG_KEY_NAME = 'xpack.secret_service.secret';
@@ -25,15 +22,9 @@ export class SecretService {
   constructor(
     private readonly savedObjectsRepository: SavedObjectsRepository,
     private readonly type: string,
-    private readonly encryptionKey: string,
-    private readonly auditor?: AuditLogger
+    private readonly encryptionKey: string
   ) {
     const crypt = nodeCrypto({ encryptionKey: this.encryptionKey });
-    const logEvent = (event: SSEvents, message?: string) => {
-      if (this.auditor) {
-        this.auditor.log(event, message);
-      }
-    };
 
     this.hideAttribute = async (toEncrypt: any) => {
       return this.hideAttributeWithId(uuid.v4(), toEncrypt);
@@ -45,8 +36,6 @@ export class SecretService {
 
       // lastly put the encrypted details into the saved object
       const saved = await this.savedObjectsRepository.create(this.type, { secret }, { id });
-
-      logEvent('secret_object_created', `Secret object id:${saved.id} was created`);
 
       return saved.id;
     };
@@ -62,8 +51,6 @@ export class SecretService {
       try {
         const unhidden = await crypt.decrypt(toDecrypt);
 
-        logEvent('secret_object_accessed', `Saved object id:${savedObject.id} accessed`);
-
         return {
           ...savedObject,
           attributes: {
@@ -71,10 +58,6 @@ export class SecretService {
           },
         };
       } catch (e) {
-        logEvent(
-          'secret_object_decrypt_failed',
-          `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
-        );
         const err = new Error(`SecretService Decrypt Failed: ${e.message}`);
         err.stack = e.stack;
         throw err;
