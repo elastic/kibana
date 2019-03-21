@@ -90,5 +90,5 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).start()
+}).setup()
 `;

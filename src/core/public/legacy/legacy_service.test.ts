@@ -151,14 +151,14 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { LegacyPlatformService } from './legacy_service';
 
-const basePathStart = basePathServiceMock.createStartContract();
-const chromeStart = chromeServiceMock.createStartContract();
-const fatalErrorsStart = fatalErrorsServiceMock.createStartContract();
-const httpStart = httpServiceMock.createStartContract();
-const i18nStart = i18nServiceMock.createStartContract();
-const injectedMetadataStart = injectedMetadataServiceMock.createStartContract();
-const notificationsStart = notificationServiceMock.createStartContract();
-const uiSettingsStart = uiSettingsServiceMock.createStartContract();
+const basePathSetup = basePathServiceMock.createSetupContract();
+const chromeSetup = chromeServiceMock.createSetupContract();
+const fatalErrorsSetup = fatalErrorsServiceMock.createSetupContract();
+const httpSetup = httpServiceMock.createSetupContract();
+const i18nSetup = i18nServiceMock.createSetupContract();
+const injectedMetadataSetup = injectedMetadataServiceMock.createSetupContract();
+const notificationsSetup = notificationServiceMock.createSetupContract();
+const uiSettingsSetup = uiSettingsServiceMock.createSetupContract();
 
 const defaultParams = {
   targetDomElement: document.createElement('div'),
@@ -167,35 +167,35 @@ const defaultParams = {
   }),
 };
 
-const defaultStartDeps = {
-  i18n: i18nStart,
-  fatalErrors: fatalErrorsStart,
-  injectedMetadata: injectedMetadataStart,
-  notifications: notificationsStart,
-  http: httpStart,
-  basePath: basePathStart,
-  uiSettings: uiSettingsStart,
-  chrome: chromeStart,
+const defaultSetupDeps = {
+  i18n: i18nSetup,
+  fatalErrors: fatalErrorsSetup,
+  injectedMetadata: injectedMetadataSetup,
+  notifications: notificationsSetup,
+  http: httpSetup,
+  basePath: basePathSetup,
+  uiSettings: uiSettingsSetup,
+  chrome: chromeSetup,
 };
 
 afterEach(() => {
   jest.clearAllMocks();
-  injectedMetadataStart.getLegacyMetadata.mockReset();
+  injectedMetadataSetup.getLegacyMetadata.mockReset();
   jest.resetModules();
   mockLoadOrder.length = 0;
 });
 
-describe('#start()', () => {
+describe('#setup()', () => {
   describe('default', () => {
     it('passes legacy metadata from injectedVars to ui/metadata', () => {
       const legacyMetadata = { isLegacyMetadata: true };
-      injectedMetadataStart.getLegacyMetadata.mockReturnValue(legacyMetadata as any);
+      injectedMetadataSetup.getLegacyMetadata.mockReturnValue(legacyMetadata as any);
 
       const legacyPlatform = new LegacyPlatformService({
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockUiMetadataInit).toHaveBeenCalledTimes(1);
       expect(mockUiMetadataInit).toHaveBeenCalledWith(legacyMetadata);
@@ -206,10 +206,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockI18nContextInit).toHaveBeenCalledTimes(1);
-      expect(mockI18nContextInit).toHaveBeenCalledWith(i18nStart.Context);
+      expect(mockI18nContextInit).toHaveBeenCalledWith(i18nSetup.Context);
     });
 
     it('passes fatalErrors service to ui/notify/fatal_errors', () => {
@@ -217,10 +217,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockFatalErrorInit).toHaveBeenCalledTimes(1);
-      expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsStart);
+      expect(mockFatalErrorInit).toHaveBeenCalledWith(fatalErrorsSetup);
     });
 
     it('passes toasts service to ui/notify/toasts', () => {
@@ -228,10 +228,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockNotifyToastsInit).toHaveBeenCalledTimes(1);
-      expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsStart.toasts);
+      expect(mockNotifyToastsInit).toHaveBeenCalledWith(notificationsSetup.toasts);
     });
 
     it('passes http service to ui/chrome/api/loading_count', () => {
@@ -239,10 +239,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockHttpInit).toHaveBeenCalledTimes(1);
-      expect(mockHttpInit).toHaveBeenCalledWith(httpStart);
+      expect(mockHttpInit).toHaveBeenCalledWith(httpSetup);
     });
 
     it('passes basePath service to ui/chrome/api/base_path', () => {
@@ -250,10 +250,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockBasePathInit).toHaveBeenCalledTimes(1);
-      expect(mockBasePathInit).toHaveBeenCalledWith(basePathStart);
+      expect(mockBasePathInit).toHaveBeenCalledWith(basePathSetup);
     });
 
     it('passes basePath service to ui/chrome/api/ui_settings', () => {
@@ -261,10 +261,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockUiSettingsInit).toHaveBeenCalledTimes(1);
-      expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsStart);
+      expect(mockUiSettingsInit).toHaveBeenCalledWith(uiSettingsSetup);
     });
 
     it('passes injectedMetadata service to ui/chrome/api/injected_vars', () => {
@@ -272,10 +272,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockInjectedVarsInit).toHaveBeenCalledTimes(1);
-      expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataStart);
+      expect(mockInjectedVarsInit).toHaveBeenCalledWith(injectedMetadataSetup);
     });
 
     it('passes chrome service to ui/chrome/api/controls', () => {
@@ -283,10 +283,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockChromeControlsInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeStart);
+      expect(mockChromeControlsInit).toHaveBeenCalledWith(chromeSetup);
     });
 
     it('passes chrome service to ui/chrome/api/help_extension', () => {
@@ -294,10 +294,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockChromeHelpExtensionInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeHelpExtensionInit).toHaveBeenCalledWith(chromeStart);
+      expect(mockChromeHelpExtensionInit).toHaveBeenCalledWith(chromeSetup);
     });
 
     it('passes chrome service to ui/chrome/api/theme', () => {
@@ -305,10 +305,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockChromeThemeInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeStart);
+      expect(mockChromeThemeInit).toHaveBeenCalledWith(chromeSetup);
     });
 
     it('passes chrome service to ui/chrome/api/breadcrumbs', () => {
@@ -316,10 +316,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockChromeBreadcrumbsInit).toHaveBeenCalledTimes(1);
-      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledWith(chromeStart);
+      expect(mockChromeBreadcrumbsInit).toHaveBeenCalledWith(chromeSetup);
     });
 
     it('passes chrome service to ui/chrome/api/global_nav_state', () => {
@@ -327,10 +327,10 @@ describe('#start()', () => {
         ...defaultParams,
       });
 
-      legacyPlatform.start(defaultStartDeps);
+      legacyPlatform.setup(defaultSetupDeps);
 
       expect(mockGlobalNavStateInit).toHaveBeenCalledTimes(1);
-      expect(mockGlobalNavStateInit).toHaveBeenCalledWith(chromeStart);
+      expect(mockGlobalNavStateInit).toHaveBeenCalledWith(chromeSetup);
     });
 
     describe('useLegacyTestHarness = false', () => {
@@ -339,7 +339,7 @@ describe('#start()', () => {
           ...defaultParams,
         });
 
-        legacyPlatform.start(defaultStartDeps);
+        legacyPlatform.setup(defaultSetupDeps);
 
         expect(mockUiTestHarnessBootstrap).not.toHaveBeenCalled();
         expect(mockUiChromeBootstrap).toHaveBeenCalledTimes(1);
@@ -354,7 +354,7 @@ describe('#start()', () => {
           useLegacyTestHarness: true,
         });
 
-        legacyPlatform.start(defaultStartDeps);
+        legacyPlatform.setup(defaultSetupDeps);
 
         expect(mockUiChromeBootstrap).not.toHaveBeenCalled();
         expect(mockUiTestHarnessBootstrap).toHaveBeenCalledTimes(1);
@@ -372,7 +372,7 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
-        legacyPlatform.start(defaultStartDeps);
+        legacyPlatform.setup(defaultSetupDeps);
 
         expect(mockLoadOrder).toMatchSnapshot();
       });
@@ -387,7 +387,7 @@ describe('#start()', () => {
 
         expect(mockLoadOrder).toEqual([]);
 
-        legacyPlatform.start(defaultStartDeps);
+        legacyPlatform.setup(defaultSetupDeps);
 
         expect(mockLoadOrder).toMatchSnapshot();
       });

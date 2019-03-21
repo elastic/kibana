@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
-
-// eslint-disable-next-line new-cap
-const responseHandler = LegacyResponseHandlerProvider().handler;
 
 export const kibanaTable = () => ({
   name: 'kibana_table',
@@ -41,9 +38,10 @@ export const kibanaTable = () => ({
     },
   },
   async fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const responseHandler = legacyResponseHandlerProvider().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
@@ -51,7 +49,7 @@ export const kibanaTable = () => ({
       value: {
         visData: convertedData,
         visType: 'table',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`#start() returns \`Context\` component 1`] = `
+exports[`#setup() returns \`Context\` component 1`] = `
 <MockI18nProvider>
   <MockEuiContext
     i18n={

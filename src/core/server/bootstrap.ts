@@ -47,6 +47,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ * @interal
+ *
+ * @param options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -78,7 +83,7 @@ export async function bootstrap({
   }
 
   try {
-    await root.start();
+    await root.setup();
   } catch (err) {
     await shutdown(err);
   }

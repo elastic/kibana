@@ -15,9 +15,9 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 /*
- * Component for rendering an entity cell in the anomalies table, displaying the value
- * of the 'partition', 'by' or 'over' field, and optionally links for adding or removing
- * a filter on this entity.
+ * Component for rendering an entity in the anomalies table, displaying the value
+ * of the entity, such as a partitioning or influencer field value, and optionally links for
+ * adding or removing a filter on this entity.
  */
 export const EntityCell = injectI18n(function EntityCell({ entityName, entityValue, filter, intl }) {
   const valueText = (entityName !== 'mlcategory') ? entityValue : `mlcategory ${entityValue}`;

@@ -21,7 +21,7 @@ exports[`#add() deletes all children of rootDomElement and renders <FatalErrorSc
 </div>
 `;
 
-exports[`start.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `
+exports[`setup.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen component 1`] = `
 Array [
   Array [
     <I18nContext>
@@ -36,7 +36,7 @@ Array [
 ]
 `;
 
-exports[`start.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen container 1`] = `
+exports[`setup.add() deletes all children of rootDomElement and renders <FatalErrorScreen /> into it: fatal error screen container 1`] = `
 <div>
   <div />
 </div>
