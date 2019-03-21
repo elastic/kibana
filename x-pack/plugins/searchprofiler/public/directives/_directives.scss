@@ -122,6 +122,11 @@
   width:100%;
 }
 
+.prfDevTool__flyoutSubtitle {
+  margin-bottom: $euiSizeS;
+  display: inline-block;
+}
+
 @include euiBreakpoint('xs', 's') {
   .prfDevTool__shardDetailsWrapper {
     flex-direction: column;
