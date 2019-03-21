@@ -30,10 +30,20 @@ export const visdata = () => ({
     id: {
       types: ['string'],
     },
+    from: {
+      types: ['string'],
+    },
+    to: {
+      types: ['string'],
+    }
   },
   async fn(context, args) {
     const loader = await getVisualizeLoader();
     const handler = await loader.loadById(args.id);
+    handler.dataLoaderParams.timeRange = {
+      from: args.from,
+      to: args.to,
+    };
     const data = await handler.fetch(true, true);
 
     if (!data.rows || !data.columns) throw('visualization datasource does not return table');
