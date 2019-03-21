@@ -16,15 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isArray } from 'lodash';
 import getAggValue from '../../helpers/get_agg_value';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-import { toPercentileNumber } from '../../helpers/to_percentile_number';
+import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
-
-const getValues = metric => isArray(metric.value) ? metric.value : [metric.value];
 
 export default function percentile(resp, panel, series, meta) {
   return next => results => {
@@ -35,7 +32,7 @@ export default function percentile(resp, panel, series, meta) {
     }
 
     getSplits(resp, panel, series, meta).forEach(split => {
-      getValues(metric).forEach(percentileRank => {
+      (metric.values || []).forEach(percentileRank => {
         const data = split.timeseries.buckets.map(bucket => (
           [bucket.key, getAggValue(bucket, {
             ...metric,

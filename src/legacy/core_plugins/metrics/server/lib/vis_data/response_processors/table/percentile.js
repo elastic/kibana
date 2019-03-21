@@ -19,7 +19,7 @@
 import { last } from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-import { toPercentileNumber } from '../../helpers/to_percentile_number';
+import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export default function percentile(bucket, panel, series) {

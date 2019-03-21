@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { get, isArray, assign, last  } from 'lodash';
+import { get, assign, last } from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
@@ -38,25 +38,23 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import AddDeleteButtons from '../add_delete_buttons';
 
-const getRankValues = model => isArray(model.value) && model.value.length ? model.value : [model.value || ''];
-
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
-  const defaults = { value: [''] };
+  const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   const isTablePanel = panel.type === 'table';
-  const percentileRankValueRows = getRankValues(model);
+  const percentileRankValueRows = model.values;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValueChange = (value) => {
+  const handlePercentileRankValueChange = (values) => {
     handleChange(assign({}, model, {
-      value,
+      values,
     }));
   };
 
@@ -78,7 +76,7 @@ export const PercentileRankAgg = props => {
     <div className="tvbAggRow__percentileRankValue" key={key}>
       <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFormLabel htmlFor={htmlId('value')} >
+          <EuiFormLabel htmlFor={htmlId('value')}>
             <FormattedMessage
               id="tsvb.percentileRank.valueLabel"
               defaultMessage="Value:"

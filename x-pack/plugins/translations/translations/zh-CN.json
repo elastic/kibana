@@ -2809,7 +2809,6 @@
     "tsvb.calculateLabel.lookupMetricTypeOfTargetLabel": "{targetLabel} 的 {lookupMetricType}",
     "tsvb.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel": "{targetLabel} ({additionalLabel}) 的 {lookupMetricType}",
     "tsvb.calculateLabel.mathLabel": "数学",
-    "tsvb.calculateLabel.percentileRankLabel": "{metricField} 的 {lookupMetricType} ({metricValue})",
     "tsvb.calculateLabel.seriesAggLabel": "序列聚合 ({metricFunction})",
     "tsvb.calculateLabel.staticValueLabel": "{metricValue} 的静态值",
     "tsvb.calculateLabel.unknownLabel": "未知",

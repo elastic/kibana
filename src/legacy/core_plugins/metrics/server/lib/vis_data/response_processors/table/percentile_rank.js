@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { last, isArray } from 'lodash';
+import { last } from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
-import { toPercentileNumber } from '../../helpers/to_percentile_number';
+import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import getAggValue from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
-
-const getLastRankValue = metric => isArray(metric.value) ? last(metric.value) : metric.value;
 
 export default function percentile(bucket, panel, series) {
   return next => results => {
@@ -40,7 +38,7 @@ export default function percentile(bucket, panel, series) {
     getSplits(fakeResp, panel, series).forEach(split => {
 
       // table allows only one percentile in a series (the last one will be chosen in case of several)
-      const lastRankValue = getLastRankValue(metric);
+      const lastRankValue = last(metric.values);
       const percentileRank = toPercentileNumber(lastRankValue);
 
       const data = split.timeseries.buckets.map(bucket => (

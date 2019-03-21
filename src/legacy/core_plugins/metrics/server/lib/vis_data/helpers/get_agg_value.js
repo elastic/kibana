@@ -18,7 +18,7 @@
  */
 
 import { get, includes, max, min, sum } from 'lodash';
-import { toPercentileNumber } from './to_percentile_number';
+import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
 
 const aggFns = {

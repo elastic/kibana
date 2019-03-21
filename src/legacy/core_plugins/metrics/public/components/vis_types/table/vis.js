@@ -109,9 +109,7 @@ class TableVis extends Component {
         case METRIC_TYPES.PERCENTILE:
           return `${defaultLabel} (${last(metric.percentiles).value})`;
         case METRIC_TYPES.PERCENTILE_RANK:
-          const getLastRankValue = metric => isArray(metric.value) ? last(metric.value) : metric.value;
-
-          return `${defaultLabel} (${getLastRankValue(metric)})`;
+          return `${defaultLabel} (${last(metric.values)})`;
         default:
           return defaultLabel;
       }

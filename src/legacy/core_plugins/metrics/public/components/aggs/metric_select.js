@@ -19,21 +19,23 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import { includes } from 'lodash';
+import { injectI18n } from '@kbn/i18n/react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
 import calculateSiblings from '../lib/calculate_siblings';
 import calculateLabel from '../../../common/calculate_label';
 import basicAggs from '../../../common/basic_aggs';
-import { injectI18n } from '@kbn/i18n/react';
+import { toPercentileNumber } from '../../../common/to_percentile_number';
+import { METRIC_TYPES } from '../../../common/metric_types';
 
 function createTypeFilter(restrict, exclude) {
   return metric => {
-    if (_.includes(exclude, metric.type)) return false;
+    if (includes(exclude, metric.type)) return false;
     switch (restrict) {
       case 'basic':
-        return _.includes(basicAggs, metric.type);
+        return includes(basicAggs, metric.type);
       default:
         return true;
     }
@@ -73,15 +75,31 @@ function MetricSelectUi(props) {
     .filter(row => /^percentile/.test(row.type))
     .reduce((acc, row) => {
       const label = calculateLabel(row, calculatedMetrics);
-      row.percentiles.forEach(p => {
-        if (p.value) {
-          const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
-          acc.push({
-            value: `${row.id}[${value}]`,
-            label: `${label} (${value})`,
+
+      switch (row.type) {
+        case METRIC_TYPES.PERCENTILE_RANK:
+          (row.values || []).forEach(p => {
+            const value = toPercentileNumber(p);
+
+            acc.push({
+              value: `${row.id}[${value}]`,
+              label: `${label} (${value})`,
+            });
           });
-        }
-      });
+
+        case METRIC_TYPES.PERCENTILE:
+          (row.percentiles || []).forEach(p => {
+            if (p.value) {
+              const value = toPercentileNumber(p.value);
+
+              acc.push({
+                value: `${row.id}[${value}]`,
+                label: `${label} (${value})`,
+              });
+            }
+          });
+      }
+
       return acc;
     }, []);
 
