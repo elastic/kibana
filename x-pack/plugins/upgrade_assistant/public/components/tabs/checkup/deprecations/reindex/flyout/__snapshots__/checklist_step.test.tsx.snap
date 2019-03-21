@@ -94,6 +94,7 @@ exports[`ChecklistFlyout renders 1`] = `
           iconSide="left"
           isLoading={false}
           onClick={[MockFunction]}
+          size="m"
           type="button"
         >
           <FormattedMessage
