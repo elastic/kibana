@@ -17921,7 +17921,7 @@ react-datetime@^2.14.0:
     prop-types "^15.5.7"
     react-onclickoutside "^6.5.0"
 
-react-dom@^16.0.0:
+react-dom@^16.0.0, react-dom@^16.2.0:
   version "16.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.2.0.tgz#69003178601c0ca19b709b33a83369fe6124c044"
   integrity sha512-zpGAdwHVn9K0091d+hr+R0qrjoJ84cIBFL2uU60KvWBPfZ7LPSrfqviTxGHWN0sjPZb2hxWzMexwrvJdKePvjg==
@@ -17930,16 +17930,6 @@ react-dom@^16.0.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
-
-react-dom@^16.2.0:
-  version "16.8.2"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.2.tgz#7c8a69545dd554d45d66442230ba04a6a0a3c3d3"
-  integrity sha512-cPGfgFfwi+VCZjk73buu14pYkYBR1b/SRMSYqkLDdhSEHnSwcuYTPu6/Bh6ZphJFIk80XLvbSe2azfcRzNF+Xg==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.2"
-    scheduler "^0.13.2"
 
 react-dom@^16.6.0:
   version "16.6.0"
@@ -19514,14 +19504,6 @@ scheduler@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.10.0.tgz#7988de90fe7edccc774ea175a783e69c40c521e1"
   integrity sha512-+TSTVTCBAA3h8Anei3haDc1IRwMeDmtI/y/o3iBe3Mjl2vwYF9DtPDt929HyRmV/e7au7CLu8sc4C4W0VOs29w==
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-
-scheduler@^0.13.2:
-  version "0.13.4"
-  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.4.tgz#8fef05e7a3580c76c0364d2df5e550e4c9140298"
-  integrity sha512-cvSOlRPxOHs5dAhP9yiS/6IDmVAVxmk33f0CtTJRkmUWcb1Us+t7b1wqdzoC0REw2muC9V5f1L/w5R5uKGaepA==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
