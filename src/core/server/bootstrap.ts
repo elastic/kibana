@@ -111,7 +111,7 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // tslint:disable no-console
+    // eslint-disable no-console
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
   }
 

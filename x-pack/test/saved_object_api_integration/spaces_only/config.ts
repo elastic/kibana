@@ -6,5 +6,5 @@
 
 import { createTestConfig } from '../common/config';
 
-// tslint:disable:no-default-export
+// eslint-disable no-default-export
 export default createTestConfig('spaces_only', { license: 'basic' });

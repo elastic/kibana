@@ -8,7 +8,7 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 import { TestInvoker } from '../../common/lib/types';
 import { importTestSuiteFactory } from '../../common/suites/import';
 
-// tslint:disable:no-default-export
+// eslint-disable no-default-export
 export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');

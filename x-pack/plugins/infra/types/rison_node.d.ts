@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// tslint:disable:variable-name
+// eslint-disable variable-name
 
 declare module 'rison-node' {
   export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;

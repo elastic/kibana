@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// tslint:disable:no-default-export
+// eslint-disable no-default-export
 export default function upgradeAssistantFunctionalTests({
   getService,
   getPageObjects,

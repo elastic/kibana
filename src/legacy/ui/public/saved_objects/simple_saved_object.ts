@@ -34,7 +34,7 @@ import { SavedObjectsClient } from './saved_objects_client';
  */
 export class SimpleSavedObject<T extends SavedObjectAttributes> {
   public attributes: T;
-  // tslint:disable-next-line variable-name We want to use the same interface this class had in JS
+  // eslint-disable-next-line variable-name We want to use the same interface this class had in JS
   public _version?: SavedObjectType<T>['version'];
   public id: SavedObjectType<T>['id'];
   public type: SavedObjectType<T>['type'];

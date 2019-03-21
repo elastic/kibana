@@ -49,7 +49,7 @@ export class FatalErrorsService {
       )
       .subscribe({
         error: error => {
-          // tslint:disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.error('Uncaught error in fatal error screen internals', error);
         },
       });
@@ -62,7 +62,7 @@ export class FatalErrorsService {
 
     if (error instanceof Error) {
       // make stack traces clickable by putting whole error in the console
-      // tslint:disable-next-line no-console
+      // eslint-disable-next-line no-console
       console.error(error);
     }
 

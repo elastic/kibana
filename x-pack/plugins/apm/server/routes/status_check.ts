@@ -13,7 +13,7 @@ import { getServerStatus } from '../lib/status_check/server_check';
 
 const ROOT = '/api/apm/status';
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };

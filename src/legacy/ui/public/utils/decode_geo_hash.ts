@@ -58,7 +58,7 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
 }
 
 function refine_interval(interval: number[], cd: number, mask: number) {
-  if (cd & mask) { /* tslint:disable-line */
+  if (cd & mask) { /* eslint-disable-line */
     interval[0] = (interval[0] + interval[1]) / 2;
   } else {
     interval[1] = (interval[0] + interval[1]) / 2;

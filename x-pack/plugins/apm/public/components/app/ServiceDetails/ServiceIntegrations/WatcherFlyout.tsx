@@ -205,7 +205,7 @@ export class WatcherFlyout extends Component<
         this.addSuccessToast(id);
       })
       .catch(e => {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.error(e);
         this.addErrorToast();
       });

@@ -72,7 +72,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
       )
     ).subscribe({
       error(error) {
-        // tslint:disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.error('Uncaught error in fatal error screen internals', error);
       },
     });

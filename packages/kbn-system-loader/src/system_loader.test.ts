@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* tslint:disable max-classes-per-file */
+/* eslint-disable max-classes-per-file */
 
 import { System } from './system';
 import { KibanaSystemApiFactory, SystemLoader } from './system_loader';
