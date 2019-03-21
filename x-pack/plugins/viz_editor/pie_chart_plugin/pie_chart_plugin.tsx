@@ -6,7 +6,8 @@
 
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
-import { get, set } from 'lodash/fp';
+import clone from 'lodash-es/clone';
+import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../common/components/config_panel';
 import { IndexPatternPanel } from '../common/components/index_pattern_panel';
@@ -20,8 +21,15 @@ interface PieChartPrivateState {
 
 type PieChartViewModel = ViewModel<'pieChart', PieChartPrivateState>;
 
-function dataPanel({ viewModel }: PanelComponentProps<PieChartViewModel>) {
-  return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
+function dataPanel({ viewModel, onChangeViewModel }: PanelComponentProps<PieChartViewModel>) {
+  return (
+    <IndexPatternPanel
+      indexPatterns={viewModel.indexPatterns}
+      onChangeIndexPatterns={indexPatterns => {
+        onChangeViewModel({ ...viewModel, indexPatterns });
+      }}
+    />
+  );
 }
 
 function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<PieChartViewModel>) {
@@ -101,26 +109,25 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>) {
   const xAxisRef = 'q1_0';
   const yAxisRef = 'q1_1';
 
-  if (
-    get(['queries', 'q1', 'select', 'q1_0'], viewModel) &&
-    get(['queries', 'q1', 'select', 'q1_1'], viewModel)
-  ) {
-    return set(
-      ['private', 'pieChart'],
+  if (viewModel.queries.q1!.select.q1_0 && viewModel.queries.q1!.select.q1_1) {
+    return setWith(
+      clone(viewModel),
+      'private.pieChart',
       {
         sliceAxis: { columns: [xAxisRef] },
         angleAxis: { columns: [yAxisRef] },
       } as PieChartPrivateState,
-      viewModel
+      clone
     );
   } else {
-    return set(
-      ['private', 'xyChart'],
+    return setWith(
+      clone(viewModel),
+      'private.pieChart',
       {
-        sliceAxis: { columns: [xAxisRef] },
-        angleAxis: { columns: [yAxisRef] },
+        sliceAxis: { columns: [] as string[] },
+        angleAxis: { columns: [] as string[] },
       } as PieChartPrivateState,
-      viewModel
+      clone
     );
   }
 }

@@ -5,10 +5,10 @@
   "private": true,
   "license": "Elastic-License",
   "devDependencies": {
-    "@types/lodash": "^4.14.110"
+    "@types/lodash-es": "^4.17.0"
   },
   "dependencies": {
     "@elastic/charts": "^3.2.0",
-    "lodash": "^4.17.10"
+    "lodash-es": "^4.17.0"
   }
 }

@@ -6,7 +6,8 @@
 
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
-import { get, set } from 'lodash/fp';
+import clone from 'lodash-es/clone';
+import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../common/components/config_panel';
 import { IndexPatternPanel } from '../common/components/index_pattern_panel';
@@ -21,8 +22,15 @@ interface XyChartPrivateState {
 
 type XyChartViewModel = ViewModel<'xyChart', XyChartPrivateState>;
 
-function dataPanel({ viewModel }: PanelComponentProps<XyChartViewModel>) {
-  return <IndexPatternPanel indexPatterns={viewModel.indexPatterns} />;
+function dataPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyChartViewModel>) {
+  return (
+    <IndexPatternPanel
+      indexPatterns={viewModel.indexPatterns}
+      onChangeIndexPatterns={indexPatterns => {
+        onChangeViewModel({ ...viewModel, indexPatterns });
+      }}
+    />
+  );
 }
 
 function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyChartViewModel>) {
@@ -48,7 +56,13 @@ function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyCha
           ]}
           valueOfSelected={displayType || 'line'}
           onChange={(value: string) => {
-            onChangeViewModel(set(['private', 'xyChart', 'displayType'], value, viewModel));
+            const updatedViewModel = setWith(
+              clone(viewModel),
+              'private.xyChart.displayType',
+              value,
+              clone
+            );
+            onChangeViewModel(updatedViewModel);
           }}
         />
       </div>
@@ -77,7 +91,7 @@ function toExpression(viewState: XyChartViewModel) {
 function prefillPrivateState(viewModel: ViewModel<string, unknown>, displayType?: string) {
   if (viewModel.private.xyChart) {
     if (displayType) {
-      return set(['private', 'xyChart', 'displayType'], displayType, viewModel);
+      return setWith(clone(viewModel), 'private.xyChart.displayType', displayType, clone);
     } else {
       return viewModel;
     }
@@ -87,28 +101,25 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>, displayType?
   const xAxisRef = 'q1_0';
   const yAxisRef = 'q1_1';
 
-  if (
-    get(['queries', 'q1', 'select', 'q1_0'], viewModel) &&
-    get(['queries', 'q1', 'select', 'q1_1'], viewModel)
-  ) {
-    return set(
-      ['private', 'xyChart'],
+  if (viewModel.queries.q1!.select.q1_0 && viewModel.queries.q1!.select.q1_1) {
+    return setWith(
+      clone(viewModel),
+      'private.xyChart',
       {
         xAxis: { columns: [xAxisRef] },
         yAxis: { columns: [yAxisRef] },
-        displayType,
       } as XyChartPrivateState,
-      viewModel
+      clone
     );
   } else {
-    return set(
-      ['private', 'xyChart'],
+    return setWith(
+      clone(viewModel),
+      'private.xyChart',
       {
         xAxis: { columns: [] as string[] },
         yAxis: { columns: [] as string[] },
-        displayType,
       } as XyChartPrivateState,
-      viewModel
+      clone
     );
   }
 }

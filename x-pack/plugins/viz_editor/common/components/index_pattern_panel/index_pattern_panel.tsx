@@ -4,39 +4,97 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiIcon, ICON_TYPES } from '@elastic/eui';
+import {
+  EuiIcon,
+  // @ts-ignore
+  EuiSuperSelect,
+  ICON_TYPES,
+} from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
-import React, { useState } from 'react';
+import zipObject from 'lodash-es/zipObject';
+import React, { useEffect, useState } from 'react';
+import chrome from 'ui/chrome';
 import { IndexPatterns } from '../../lib';
+import { getIndexPatterns } from '../../lib/index_patterns';
 
 interface Props {
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatterns | null;
+  onChangeIndexPatterns: (indexPatterns: IndexPatterns) => void;
 }
 
 interface State {
-  indexPattern?: string;
+  selectedIndexName: string;
 }
 
-function initialState(indexPatterns: IndexPatterns): State {
+function initialState(): State {
+  const settingsClient = chrome.getUiSettingsClient();
   return {
-    indexPattern: Object.keys(indexPatterns)[0],
+    selectedIndexName: settingsClient.get('defaultIndex') || '',
   };
 }
 
-export function IndexPatternPanel({ indexPatterns }: Props) {
-  const [state] = useState(() => initialState(indexPatterns));
-  const indexPattern = state.indexPattern ? indexPatterns[state.indexPattern] : undefined;
+function getIndexPatternFromName(indexPatterns: IndexPatterns, title: string) {
+  return Object.values(indexPatterns).find(indexPattern => {
+    return indexPattern.title === title;
+  });
+}
+
+export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
+  const [state, setState] = useState(() => initialState());
+
+  useEffect(
+    () => {
+      if (indexPatterns) {
+        return;
+      }
+
+      getIndexPatterns().then(loadedIndexPatterns => {
+        if (!loadedIndexPatterns) {
+          return;
+        }
+
+        onChangeIndexPatterns(
+          zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns)
+        );
+
+        setState({
+          selectedIndexName: state.selectedIndexName || loadedIndexPatterns[0].title,
+        });
+      });
+    },
+    [indexPatterns]
+  );
+
+  if (!indexPatterns) {
+    return <div>TODO... index pattern chooser...</div>;
+  }
+
+  const indexPattern = getIndexPatternFromName(indexPatterns, state.selectedIndexName);
 
   if (!indexPattern) {
     return <div>TODO... index pattern chooser...</div>;
   }
 
+  const indexPatternNames = Object.values(indexPatterns).map(({ title }) => ({
+    text: title,
+    value: title,
+    inputDisplay: title,
+  }));
+
   return (
     <>
-      <EuiButtonEmpty className="vzDataSource-link" size="l">
-        {indexPattern.title}
-      </EuiButtonEmpty>
+      <EuiSuperSelect
+        options={indexPatternNames}
+        valueOfSelected={state.selectedIndexName}
+        onChange={(value: string) => {
+          setState({
+            ...state,
+            selectedIndexName: value,
+          });
+        }}
+      />
+
       <div className="indexPatternPanel">
         {indexPattern.fields.map(field => (
           <button
