@@ -65,7 +65,6 @@ export async function BrowserProvider({ getService }) {
       const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete parsed.query._t;
-        return undefined;
       });
       return currentWithoutTime;
     }
@@ -82,7 +81,6 @@ export async function BrowserProvider({ getService }) {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
           parsed.query._t = Date.now();
-          return undefined;
         });
 
         return await driver.get(urlWithTime);
@@ -126,15 +124,10 @@ export async function BrowserProvider({ getService }) {
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
-    async dragAndDrop(
-      from,
-      to
-    ) {
+    async dragAndDrop(from, to) {
       let _from;
       let _to;
-      const _fromOffset = from.offset
-        ? { x: from.offset.x || 0, y: from.offset.y || 0 }
-        : { x: 0, y: 0 };
+      const _fromOffset = from.offset ? { x: from.offset.x || 0, y: from.offset.y || 0 } : { x: 0, y: 0 };
       const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
 
       if (from.location instanceof WebElementWrapper) {
@@ -215,17 +208,9 @@ export async function BrowserProvider({ getService }) {
       const mouse = driver.actions().mouse();
       const actions = driver.actions({ bridge: true });
       if (args[0] instanceof WebElementWrapper) {
-        await actions
-          .pause(mouse)
-          .move({ origin: args[0]._webElement })
-          .click()
-          .perform();
+        await actions.pause(mouse).move({ origin: args[0]._webElement }).click().perform();
       } else if (isNaN(args[1]) || isNaN(args[2]) === false) {
-        await actions
-          .pause(mouse)
-          .move({ origin: { x: args[1], y: args[2] } })
-          .click()
-          .perform();
+        await actions.pause(mouse).move({ origin: { x: args[1], y: args[2] } }).click().perform();
       } else {
         throw new Error('Element or coordinates should be provided');
       }
@@ -250,17 +235,14 @@ export async function BrowserProvider({ getService }) {
      * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
-    async getLogsFor(type) {
+    async getLogsFor(...args) {
       // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       // See: https://github.com/w3c/webdriver/issues/406
       // See: https://w3c.github.io/webdriver/#endpoints
       if (driver.executor_.w3c === true) {
         return [];
       } else {
-        return await driver
-          .manage()
-          .logs()
-          .get(type);
+        return await driver.manage().logs().get(...args);
       }
     }
 
@@ -297,8 +279,8 @@ export async function BrowserProvider({ getService }) {
      * @param {string} handle
      * @return {Promise<void>}
      */
-    async switchToWindow(handle) {
-      await driver.switchTo().window(handle);
+    async switchToWindow(...args) {
+      await driver.switchTo().window(...args);
     }
 
     /**
@@ -319,11 +301,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async setLocalStorageItem(key, value) {
-      await driver.executeScript(
-        'return window.localStorage.setItem(arguments[0], arguments[1]);',
-        key,
-        value
-      );
+      await driver.executeScript('return window.localStorage.setItem(arguments[0], arguments[1]);', key, value);
     }
 
     /**
@@ -345,14 +323,11 @@ export async function BrowserProvider({ getService }) {
      * @param  {...any[]} args
      */
     async execute(fn, ...args) {
-      return await driver.executeScript(
-        fn,
-        ...cloneDeep(args, arg => {
-          if (arg instanceof WebElementWrapper) {
-            return arg._webElement;
-          }
-        })
-      );
+      return await driver.executeScript(fn, ...cloneDeep(args, arg => {
+        if (arg instanceof WebElementWrapper) {
+          return arg._webElement;
+        }
+      }));
     }
 
     async executeAsync(fn, ...args) {
