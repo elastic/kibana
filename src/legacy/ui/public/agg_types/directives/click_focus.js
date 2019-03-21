@@ -17,30 +17,25 @@
  * under the License.
  */
 
-import dateMath from '@elastic/datemath';
-import { uiModules } from '../modules';
+import _ from 'lodash';
+import $ from 'jquery';
+import { uiModules } from '../../modules';
+const module = uiModules.get('kibana');
 
-uiModules.get('kibana').directive('validateDateMath', function () {
+module.directive('clickFocus', function () {
   return {
-    restrict: 'A',
-    require: 'ngModel',
     scope: {
-      'ngModel': '='
+      clickFocus: '='
     },
-    link: function ($scope, elem, attr, ngModel) {
-      ngModel.$parsers.unshift(validateDateMath);
-      ngModel.$formatters.unshift(validateDateMath);
-
-      function validateDateMath(input) {
-        if (input == null || input === '') {
-          ngModel.$setValidity('validDateMath', true);
-          return null;
-        }
-
-        const moment = dateMath.parse(input);
-        ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
-        return input;
+    restrict: 'A',
+    link: function ($scope, $elem) {
+      function handler() {
+        const focusElem = $.find('input[name=' + $scope.clickFocus + ']');
+        if (focusElem[0]) focusElem[0].focus();
       }
+
+      $elem.bind('click', handler);
+      $scope.$on('$destroy', _.bindKey($elem, 'unbind', 'click', handler));
     }
   };
 });

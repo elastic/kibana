@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { CidrMask } from '../utils/cidr_mask';
-import { uiModules } from '../modules';
+import dateMath from '@elastic/datemath';
+import { uiModules } from '../../modules';
 
-uiModules.get('kibana').directive('validateCidrMask', function () {
+uiModules.get('kibana').directive('validateDateMath', function () {
   return {
     restrict: 'A',
     require: 'ngModel',
@@ -28,22 +28,18 @@ uiModules.get('kibana').directive('validateCidrMask', function () {
       'ngModel': '='
     },
     link: function ($scope, elem, attr, ngModel) {
-      ngModel.$parsers.unshift(validateCidrMask);
-      ngModel.$formatters.unshift(validateCidrMask);
+      ngModel.$parsers.unshift(validateDateMath);
+      ngModel.$formatters.unshift(validateDateMath);
 
-      function validateCidrMask(mask) {
-        if (mask == null || mask === '') {
-          ngModel.$setValidity('cidrMaskInput', true);
+      function validateDateMath(input) {
+        if (input == null || input === '') {
+          ngModel.$setValidity('validDateMath', true);
           return null;
         }
 
-        try {
-          mask = new CidrMask(mask);
-          ngModel.$setValidity('cidrMaskInput', true);
-          return mask.toString();
-        } catch (e) {
-          ngModel.$setValidity('cidrMaskInput', false);
-        }
+        const moment = dateMath.parse(input);
+        ngModel.$setValidity('validDateMath', moment != null && moment.isValid());
+        return input;
       }
     }
   };

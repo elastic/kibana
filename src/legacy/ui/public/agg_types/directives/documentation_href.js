@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { getDocLink } from '../../documentation_links';
+import { uiModules } from '../../modules';
+
 const module = uiModules.get('kibana');
 
-module.directive('autoSelectIfOnlyOne', function () {
+module.directive('documentationHref', function () {
   return {
     restrict: 'A',
-    require: 'ngModel',
-    link: function (scope, element, attributes, ngModelCtrl) {
-      scope.$watchCollection(attributes.autoSelectIfOnlyOne, (options) => {
-        if (options && options.length === 1) {
-          ngModelCtrl.$setViewValue(options[0]);
-          ngModelCtrl.$render();
-        }
-      });
+    link: function (scope, element, attributes) {
+      element.attr('href', getDocLink(attributes.documentationHref));
     }
   };
 });

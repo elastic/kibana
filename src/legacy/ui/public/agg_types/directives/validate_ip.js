@@ -17,42 +17,39 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import Ipv4Address from '../../utils/ipv4_address';
+import { uiModules } from '../../modules';
 
 uiModules
   .get('kibana')
-  .directive('validateAgg', function () {
+  .directive('validateIp', function () {
     return {
       restrict: 'A',
       require: 'ngModel',
       scope: {
         'ngModel': '=',
-        'agg': '='
       },
       link: function ($scope, elem, attr, ngModel) {
-        function validateAgg(aggValue) {
-          if (aggValue == null || aggValue === 'custom') {
-            ngModel.$setValidity('aggInput', true);
-            return aggValue;
+        function validateIp(ipAddress) {
+          if (ipAddress == null || ipAddress === '') {
+            ngModel.$setValidity('ipInput', true);
+            return null;
           }
 
           try {
-            $scope.agg.params.customMetric = null;
-            $scope.agg.params.metricAgg = aggValue;
-            $scope.agg.makeLabel();
-            ngModel.$setValidity('aggInput', true);
+            ipAddress = new Ipv4Address(ipAddress);
+            ngModel.$setValidity('ipInput', true);
+            return ipAddress.toString();
           } catch (e) {
-            ngModel.$setValidity('aggInput', false);
+            ngModel.$setValidity('ipInput', false);
           }
-
-          return aggValue;
         }
 
         // From User
-        ngModel.$parsers.unshift(validateAgg);
+        ngModel.$parsers.unshift(validateIp);
 
         // To user
-        ngModel.$formatters.unshift(validateAgg);
+        ngModel.$formatters.unshift(validateIp);
       }
     };
   });

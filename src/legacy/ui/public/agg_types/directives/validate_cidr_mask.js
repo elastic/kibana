@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
-const module = uiModules.get('kibana');
+import { CidrMask } from '../../utils/cidr_mask';
+import { uiModules } from '../../modules';
 
-module.directive('inputNumber', function () {
+uiModules.get('kibana').directive('validateCidrMask', function () {
   return {
     restrict: 'A',
     require: 'ngModel',
-    link: function ($scope, $elem, attrs, ngModel) {
-      ngModel.$parsers.push(checkNumber);
-      ngModel.$formatters.push(checkNumber);
+    scope: {
+      'ngModel': '='
+    },
+    link: function ($scope, elem, attr, ngModel) {
+      ngModel.$parsers.unshift(validateCidrMask);
+      ngModel.$formatters.unshift(validateCidrMask);
 
-      function checkNumber(value) {
-        ngModel.$setValidity('number', !isNaN(parseFloat(value)));
-        return value;
+      function validateCidrMask(mask) {
+        if (mask == null || mask === '') {
+          ngModel.$setValidity('cidrMaskInput', true);
+          return null;
+        }
+
+        try {
+          mask = new CidrMask(mask);
+          ngModel.$setValidity('cidrMaskInput', true);
+          return mask.toString();
+        } catch (e) {
+          ngModel.$setValidity('cidrMaskInput', false);
+        }
       }
     }
   };
