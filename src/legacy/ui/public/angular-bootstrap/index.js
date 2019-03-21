@@ -21,9 +21,6 @@ uiModules.get('kibana', [
  * License: MIT
  */
 angular.module('ui.bootstrap', [
-  'ui.bootstrap.tpls',
-  'ui.bootstrap.transition',
-  'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.position',
   'ui.bootstrap.modal',
@@ -31,26 +28,8 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.tooltip',
   'ui.bootstrap.progressbar',
   'ui.bootstrap.timepicker',
-  'ui.bootstrap.typeahead'
 ]);
 
-angular.module('ui.bootstrap.tpls', [
-  'template/alert/alert.html',
-  'template/modal/backdrop.html',
-  'template/modal/window.html',
-  'template/pagination/pager.html',
-  'template/pagination/pagination.html',
-  'template/tooltip/tooltip-html-unsafe-popup.html',
-  'template/tooltip/tooltip-popup.html',
-  'template/progressbar/bar.html',
-  'template/progressbar/progress.html',
-  'template/progressbar/progressbar.html',
-  'template/timepicker/timepicker.html',
-  'template/typeahead/typeahead-match.html',
-  'template/typeahead/typeahead-popup.html'
-]);
-
-import './alert/alert';
 import './bindHtml/bindHtml';
 import './modal/modal';
 import './pagination/pagination';
@@ -58,14 +37,6 @@ import './position/position';
 import './progressbar/progressbar';
 import './timepicker/timepicker';
 import './tooltip/tooltip';
-import './transition/transition';
-import './typeahead/typeahead';
-
-import alert from './alert/alert.html';
-
-angular.module('template/alert/alert.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/alert/alert.html', alert);
-}]);
 
 import backdrop from './modal/backdrop.html';
 
@@ -127,14 +98,3 @@ angular.module('template/timepicker/timepicker.html', []).run(['$templateCache',
   $templateCache.put('template/timepicker/timepicker.html', timepicker);
 }]);
 
-import typeaheadMatch from './typeahead/typeahead-match.html';
-
-angular.module('template/typeahead/typeahead-match.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/typeahead/typeahead-match.html', typeaheadMatch);
-}]);
-
-import typeaheadPopup from './typeahead/typeahead-popup.html';
-
-angular.module('template/typeahead/typeahead-popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/typeahead/typeahead-popup.html', typeaheadPopup);
-}]);

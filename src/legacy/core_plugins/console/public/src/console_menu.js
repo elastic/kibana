@@ -19,15 +19,21 @@
 
 import PropTypes from 'prop-types';
 
+import 'ngreact';
 import React, {
   Component,
 } from 'react';
+
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+const module = uiModules.get('apps/sense', ['react']);
 
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -131,20 +137,37 @@ export class ConsoleMenu extends Component {
     ];
 
     return (
-      <span onMouseEnter={this.mouseEnter}>
-        <EuiPopover
-          id="contextMenu"
-          button={button}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
+      <div className="conApp__editorActions" id="ConAppEditorActions">
+        <EuiToolTip
+          content={<FormattedMessage
+            id="console.sendRequestButtonTooltip"
+            defaultMessage="Click to send request"
+          />}
         >
-          <EuiContextMenuPanel
-            items={items}
+          <EuiButtonIcon
+            iconType="play"
+            aria-label=""
+            color="success"
+            onClick={() => {this.props.sendSelected();}}
+            data-test-subj="send-request-button"
           />
-        </EuiPopover>
-      </span>
+        </EuiToolTip>
+
+        <span onMouseEnter={this.mouseEnter}>
+          <EuiPopover
+            id="contextMenu"
+            button={button}
+            isOpen={this.state.isPopoverOpen}
+            closePopover={this.closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenuPanel
+              items={items}
+            />
+          </EuiPopover>
+        </span>
+      </div>
     );
   }
 }
@@ -154,4 +177,14 @@ ConsoleMenu.propTypes = {
   openDocumentation: PropTypes.func.isRequired,
   getDocumentation: PropTypes.func.isRequired,
   autoIndent: PropTypes.func.isRequired,
+  sendSelected: PropTypes.func.isRequired,
 };
+
+/* Wrapping directive for use in Angular code. */
+module.directive('consoleMenu', function (reactDirective) {
+  return reactDirective(
+    wrapInI18nContext(ConsoleMenu),
+    undefined,
+    { restrict: 'E' }
+  );
+});

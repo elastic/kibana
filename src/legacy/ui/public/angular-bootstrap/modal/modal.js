@@ -1,3 +1,5 @@
+import './transition';
+
 angular.module('ui.bootstrap.modal', ['ui.bootstrap.transition'])
 
 /**

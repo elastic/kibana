@@ -2,23 +2,15 @@
   <div class="conApp">
     <div class="conApp__editor">
       <ul class="conApp__autoComplete" id="autocomplete"></ul>
-      <div class="conApp__editorActions" id="ConAppEditorActions">
-        <kbn-tooltip text="{{:: 'console.sendRequestButtonTooltip' | i18n: { defaultMessage: 'click to send request' } }}">
-          <button
-            class="conApp__editorActionButton conApp__editorActionButton--success"
-            ng-click="sendSelected()"
-            data-test-subj="send-request-button">
-            <i class="fa fa-play"></i>
-          </button>
-        </kbn-tooltip>
-        <console-menu
-          auto-indent="autoIndent"
-          get-documentation="getDocumentation"
-          open-documentation="openDocumentation"
-          get-curl="getRequestsAsCURL"
-        >
-        </console-menu>
-      </div>
+      
+      <console-menu
+        auto-indent="autoIndent"
+        get-documentation="getDocumentation"
+        open-documentation="openDocumentation"
+        get-curl="getRequestsAsCURL"
+        send-selected="sendSelected"
+      >
+      </console-menu>
 
       <div class="conApp__editorContent" id="ConAppEditor" data-test-subj="request-editor">GET _search
   {
