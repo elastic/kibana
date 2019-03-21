@@ -10,7 +10,6 @@ import { Shortcuts } from 'react-shortcuts';
 import Style from 'style-it';
 import { WorkpadPage } from '../workpad_page';
 import { Fullscreen } from '../fullscreen';
-import { resetHandler } from '../workpad_page/event_handlers';
 
 const WORKPAD_CANVAS_BUFFER = 32; // 32px padding around the workpad
 
@@ -65,11 +64,9 @@ export class Workpad extends React.PureComponent {
 
     // presentation events
     if (action === 'PREV') {
-      resetHandler();
       return previousPage();
     }
     if (action === 'NEXT') {
-      resetHandler();
       return nextPage();
     }
   };
