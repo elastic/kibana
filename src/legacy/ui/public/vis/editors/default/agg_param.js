@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction, noop } from 'lodash';
+import { isFunction } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -90,7 +90,7 @@ uiModules
               $scope.paramValue = value;
 
               if(ngModelCtrl) {
-                ngModelCtrl.$$runValidators(value, null, noop);
+                ngModelCtrl.$setViewValue(value);
               }
             }, true);
           }
@@ -114,10 +114,10 @@ uiModules
           };
 
           if(ngModelCtrl && $scope.aggParam.name === 'field') {
-            ngModelCtrl.$validators.fieldSelect = (modelValue) => {
-              $scope.isInvalid = ngModelCtrl.$touched && !modelValue;
+            ngModelCtrl.$validators.fieldSelect = (value) => {
+              $scope.isInvalid = ngModelCtrl.$touched && !value;
 
-              return !!modelValue;
+              return !!value;
             };
           }
         }

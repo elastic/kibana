@@ -17,12 +17,14 @@
  * under the License.
  */
 
+import { isFunction } from 'lodash';
 import React from 'react';
 
 import { EuiCallOut, EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
+import { AggConfig } from 'ui/vis';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
 import { AggParamRequiredEditorProps } from '../../vis/editors/default';
 import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
@@ -31,6 +33,7 @@ import { FieldParamType } from '../param_types';
 function FieldParamEditor({
   agg = {},
   indexedFields = [],
+  aggParam,
   value,
   setValue,
   isInvalid,
@@ -41,19 +44,32 @@ function FieldParamEditor({
     ? [{ label: value.displayName, value }]
     : [];
 
+  const onChange = (options: EuiComboBoxOptionProps[]) => {
+    setValue(get(options, '0.value'));
+
+    if (isFunction(aggParam.onChange)) {
+      aggParam.onChange(agg);
+    }
+  };
+
   return (
-    <EuiFormRow label={label} isInvalid={isInvalid} fullWidth={true}>
+    <EuiFormRow
+      label={label}
+      isInvalid={isInvalid}
+      fullWidth={true}
+      className="visEditorSidebar__aggParamFormRow"
+    >
       {indexedFields.length ? (
         <EuiComboBox
           placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
-            defaultMessage: 'Select a field',
+            defaultMessage: 'Select a field…',
           })}
           options={indexedFields}
           selectedOptions={selectedOptions}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
           isInvalid={isInvalid}
-          onChange={options => setValue(get(options, '0.value'))}
+          onChange={onChange}
           data-test-subj="field-select"
           fullWidth={true}
           onBlur={setTouched}
@@ -72,7 +88,7 @@ function FieldParamEditor({
               defaultMessage="The {indexPatternTitle} index pattern does not contain any of the following field types:"
               values={{ indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title }}
             />{' '}
-            {getFieldTypesString(get(agg, 'type.params.byName.field.filterFieldTypes'))}
+            {getFieldTypesString(agg)}
           </p>
         </EuiCallOut>
       )}
@@ -80,8 +96,11 @@ function FieldParamEditor({
   );
 }
 
-function getFieldTypesString(filterFieldTypes: string | string[]) {
-  return formatListAsProse(parseCommaSeparatedList(filterFieldTypes), { inclusive: false });
+function getFieldTypesString(agg: AggConfig) {
+  return formatListAsProse(
+    parseCommaSeparatedList(get(agg, 'type.params.byName.field.filterFieldTypes')),
+    { inclusive: false }
+  );
 }
 
 export { FieldParamEditor };

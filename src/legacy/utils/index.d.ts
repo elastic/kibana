@@ -17,13 +17,6 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
+export function parseCommaSeparatedList(input: string | string[]): string[];
 
-interface AggParam {
-  type: string;
-  name: string;
-  displayName?: string;
-  onChange?: (agg: AggConfig) => void;
-}
-
-export { AggParam };
+export function formatListAsProse(list: string[], options?: { inclusive?: boolean }): string;
