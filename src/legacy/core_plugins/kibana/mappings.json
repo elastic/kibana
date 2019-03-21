@@ -1,4 +1,12 @@
 {
+  "config": {
+    "dynamic": "true",
+    "properties": {
+      "buildNum": {
+        "type": "keyword"
+      }
+    }
+  },
   "index-pattern": {
     "properties": {
       "fieldFormatMap": {
