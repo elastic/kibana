@@ -18,9 +18,9 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { DashboardGrid } from '../grid';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { ExitFullScreenButton } from 'ui/exit_full_screen';
+import { DashboardGrid } from '../grid';
 
 export function DashboardViewport({
   maximizedPanelId,
@@ -31,6 +31,15 @@ export function DashboardViewport({
   useMargins,
   isFullScreenMode,
   onExitFullScreenMode,
+}: {
+  maximizedPanelId: string;
+  getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
+  panelCount: number;
+  title: string;
+  description: string;
+  useMargins: boolean;
+  isFullScreenMode: boolean;
+  onExitFullScreenMode: () => void;
 }) {
   return (
     <div
@@ -40,7 +49,7 @@ export function DashboardViewport({
       data-description={description}
       className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
     >
-      { isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} /> }
+      {isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} />}
       <DashboardGrid
         getEmbeddableFactory={getEmbeddableFactory}
         maximizedPanelId={maximizedPanelId}
@@ -48,12 +57,3 @@ export function DashboardViewport({
     </div>
   );
 }
-
-DashboardViewport.propTypes = {
-  getEmbeddableFactory: PropTypes.func,
-  maximizedPanelId: PropTypes.string,
-  panelCount: PropTypes.number,
-  title: PropTypes.string,
-  description: PropTypes.string,
-  useMargins: PropTypes.bool.isRequired,
-};
