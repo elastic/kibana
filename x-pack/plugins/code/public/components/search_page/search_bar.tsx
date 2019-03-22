@@ -45,6 +45,12 @@ export class SearchBar extends React.PureComponent<Props> {
     );
   };
 
+  public toggleOptionsFlyout() {
+    if (this.queryBar) {
+      this.queryBar.toggleOptionsFlyout();
+    }
+  }
+
   public render() {
     const onSubmit = (q: string) => {
       this.onSearchChanged(q);

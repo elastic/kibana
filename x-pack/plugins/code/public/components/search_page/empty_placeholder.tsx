@@ -28,7 +28,16 @@ export const EmptyPlaceholder = (props: any) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill={true}>Modify your search settings</EuiButton>
+        <EuiButton
+          fill={true}
+          onClick={() => {
+            if (props.toggleOptionsFlyout) {
+              props.toggleOptionsFlyout();
+            }
+          }}
+        >
+          Modify your search settings
+        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
