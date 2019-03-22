@@ -22,7 +22,14 @@ export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
     it('handles simple_query_string and must_not ES queries', async () => {
       await pageObjects.uptime.applyCustomFilterQuery(
         DATE_RANGE_START,
-        '-auto-http-0X131221E73F825974 http monitor.status:up monitor.duration.us<300000'
+        '-auto-http-0X131221E73F825974 http monitor.status:up monitor.duration.us<300000',
+        [
+          'monitor-page-link-auto-http-0X970CBD2F2102BFA8',
+          'monitor-page-link-auto-http-0X9CB71300ABD5A2A8',
+          'monitor-page-link-auto-http-0XC9CDA429418EDC2B',
+          'monitor-page-link-auto-http-0XD9AE729FC1C1E04A',
+          'monitor-page-link-auto-http-0XDD2D4E60FD4A61C3',
+        ]
       );
     });
   });
