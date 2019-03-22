@@ -120,7 +120,7 @@ describe('FeatureRegistry', () => {
     });
   });
 
-  it('prevents features from being registered with invalid privileges', () => {
+  it('prevents features from being registered with invalid privilege names', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',

@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { pick } from 'lodash';
+
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { Plugin, PluginName } from './plugin';
+import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
 import { createPluginStartContext } from './plugin_context';
 import { PluginsServiceStartDeps } from './plugins_service';
 
@@ -93,6 +95,41 @@ export class PluginsSystem {
       this.log.debug(`Stopping plugin "${pluginName}"...`);
       await this.plugins.get(pluginName)!.stop();
     }
+  }
+
+  /**
+   * Get a Map of all discovered UI plugins in topological order.
+   */
+  public uiPlugins() {
+    const internal = new Map<PluginName, DiscoveredPluginInternal>(
+      [...this.getTopologicallySortedPluginNames().keys()]
+        .filter(pluginName => this.plugins.get(pluginName)!.includesUiPlugin)
+        .map(pluginName => {
+          const plugin = this.plugins.get(pluginName)!;
+          return [
+            pluginName,
+            {
+              id: pluginName,
+              path: plugin.path,
+              configPath: plugin.manifest.configPath,
+              requiredPlugins: plugin.manifest.requiredPlugins,
+              optionalPlugins: plugin.manifest.optionalPlugins,
+            },
+          ] as [PluginName, DiscoveredPluginInternal];
+        })
+    );
+
+    const publicPlugins = new Map<PluginName, DiscoveredPlugin>(
+      [...internal.entries()].map(
+        ([pluginName, plugin]) =>
+          [
+            pluginName,
+            pick(plugin, ['id', 'configPath', 'requiredPlugins', 'optionalPlugins']),
+          ] as [PluginName, DiscoveredPlugin]
+      )
+    );
+
+    return { public: publicPlugins, internal };
   }
 
   /**

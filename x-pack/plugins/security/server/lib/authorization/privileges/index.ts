@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { privilegesFactory } from './privileges';
+export { privilegesFactory, PrivilegesService } from './privileges';

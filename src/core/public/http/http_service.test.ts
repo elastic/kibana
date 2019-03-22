@@ -20,13 +20,12 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
+import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { HttpService } from './http_service';
 
 function setup() {
   const service = new HttpService();
-  const fatalErrors: any = {
-    add: jest.fn(),
-  };
+  const fatalErrors = fatalErrorsServiceMock.createStartContract();
   const start = service.start({ fatalErrors });
 
   return { service, fatalErrors, start };

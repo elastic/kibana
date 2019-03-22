@@ -52,33 +52,33 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       log.debug('addEveryEmbeddableOnCurrentPage');
       const itemList = await testSubjects.find('savedObjectFinderItemList');
       const embeddableRows = await itemList.findAllByCssSelector('li');
+      const embeddableList = [];
       for (let i = 0; i < embeddableRows.length; i++) {
+        embeddableList.push(await embeddableRows[i].getVisibleText());
         await embeddableRows[i].click();
         await PageObjects.common.closeToast();
       }
       log.debug(`Added ${embeddableRows.length} embeddables`);
+      return embeddableList;
     }
 
     async clickPagerNextButton() {
       // Clear all toasts that could hide pagination controls
       await PageObjects.common.clearAllToasts();
 
-      const addPanel = await testSubjects.find('dashboardAddPanel');
-      const pagination = await addPanel.findAllByClassName('euiPagination');
-      if (pagination.length === 0) {
+      const isNext = await testSubjects.exists('pagination-button-next');
+      if (!isNext) {
         return false;
       }
 
-      const pagerNextButton = await pagination[0].findByCssSelector('button[aria-label="Next page"]');
-      if (!pagerNextButton) {
-        return false;
-      }
+      const pagerNextButton = await testSubjects.find('pagination-button-next');
 
       const isDisabled = await pagerNextButton.getAttribute('disabled');
       if (isDisabled != null) {
         return false;
       }
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await pagerNextButton.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       return true;
@@ -121,26 +121,30 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
       let morePages = true;
+      const vizList = [];
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        vizList.push(await this.addEveryEmbeddableOnCurrentPage());
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
+      return vizList.reduce((acc, vizList) => [...acc, ...vizList], []);
     }
 
     async addEverySavedSearch(filter) {
       log.debug('DashboardAddPanel.addEverySavedSearch');
       await this.ensureAddPanelIsShowing();
       await this.toggleFilter('search');
+      const searchList = [];
       if (filter) {
         await this.filterEmbeddableNames(filter.replace('-', ' '));
       }
       let morePages = true;
       while (morePages) {
-        await this.addEveryEmbeddableOnCurrentPage();
+        searchList.push(await this.addEveryEmbeddableOnCurrentPage());
         morePages = await this.clickPagerNextButton();
       }
       await this.closeAddPanel();
+      return searchList.reduce((acc, searchList) => [...acc, ...searchList], []);
     }
 
     async addSavedSearch(searchName) {
@@ -163,9 +167,12 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
 
     async addVisualizations(visualizations) {
       log.debug('DashboardAddPanel.addVisualizations');
+      const vizList = [];
       for (const vizName of visualizations) {
         await this.addVisualization(vizName);
+        vizList.push(vizName);
       }
+      return vizList;
     }
 
     async addVisualization(vizName) {
@@ -176,6 +183,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
       await testSubjects.click(`savedObjectTitle${vizName.split(' ').join('-')}`);
       await testSubjects.exists('addObjectToDashboardSuccess');
       await this.closeAddPanel();
+      return vizName;
     }
 
     async filterEmbeddableNames(name) {

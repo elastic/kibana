@@ -23,8 +23,8 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 describe('Create Rollup Job, step 2: Date histogram', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
+  let find;
+  let exists;
   let userActions;
   let getFormErrorsMessages;
   let form;
@@ -37,8 +37,8 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      findTestSubject,
-      testSubjectExists,
+      find,
+      exists,
       userActions,
       getFormErrorsMessages,
       form,
@@ -61,17 +61,17 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     });
 
     it('should have the title set to "Date histogram"', () => {
-      expect(testSubjectExists('rollupJobCreateDateHistogramTitle')).toBe(true);
+      expect(exists('rollupJobCreateDateHistogramTitle')).toBe(true);
     });
 
     it('should have a link to the documentation', () => {
-      expect(testSubjectExists('rollupJobCreateDateHistogramDocsButton')).toBe(true);
+      expect(exists('rollupJobCreateDateHistogramDocsButton')).toBe(true);
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(true);
+      expect(exists('rollupJobSaveButton')).toBe(false);
     });
 
     it('should go to the "Logistics" step when clicking the back button', async () => {
@@ -87,7 +87,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       await goToStep(2);
 
-      const dateFieldSelectOptionsValues = findTestSubject('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
+      const dateFieldSelectOptionsValues = find('rollupJobCreateDateFieldSelect').find('option').map(option => option.text());
       expect(dateFieldSelectOptionsValues).toEqual(dateFields);
     });
   });
@@ -96,7 +96,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     it('should have a select with all the timezones', async () => {
       await goToStep(2);
 
-      const timeZoneSelect = findTestSubject('rollupJobCreateTimeZoneSelect');
+      const timeZoneSelect = find('rollupJobCreateTimeZoneSelect');
       const options = timeZoneSelect.find('option').map(option => option.text());
       expect(options).toEqual(moment.tz.names());
     });
@@ -108,18 +108,18 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     });
 
     it('should display errors when clicking "next" without filling the form', () => {
-      expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+      expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
       userActions.clickNextStep();
 
-      expect(testSubjectExists('rollupJobCreateStepError')).toBeTruthy();
+      expect(exists('rollupJobCreateStepError')).toBeTruthy();
       expect(getFormErrorsMessages()).toEqual(['Interval is required.']);
-      expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+      expect(find('rollupJobNextButton').props().disabled).toBe(true);
     });
 
     describe('interval', () => {
       afterEach(() => {
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should validate the interval format', () => {

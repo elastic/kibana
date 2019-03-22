@@ -248,7 +248,7 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all', 'reserved_apm', 'reserved_monitoring'],
+                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {
@@ -298,7 +298,6 @@ export default function ({ getService }) {
             },
             kibana: [
               {
-                _reserved: ['apm', 'monitoring'],
                 base: ['read'],
                 feature: {
                   dashboard: ['read'],

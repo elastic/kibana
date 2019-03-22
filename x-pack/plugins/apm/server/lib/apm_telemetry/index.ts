@@ -5,7 +5,6 @@
  */
 
 export {
-  AgentName,
   storeApmTelemetry,
   createApmTelementry,
   APM_TELEMETRY_DOC_ID

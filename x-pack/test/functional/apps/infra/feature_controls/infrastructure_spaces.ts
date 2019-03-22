@@ -104,10 +104,38 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).not.to.contain('Infrastructure');
       });
 
-      it(`infrastructure landing page renders not found page`, async () => {
+      it(`infrastructure root renders not found page`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', '', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('infraNotFoundPage');
+      });
+
+      it(`infrastructure home page renders not found page`, async () => {
         await PageObjects.common.navigateToActualUrl('infraOps', 'home', {
           basePath: '/s/custom_space',
-          ensureCurrentUrl: true,
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('infraNotFoundPage');
+      });
+
+      it(`infrastructure landing page renders not found page`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        await testSubjects.existOrFail('infraNotFoundPage');
+      });
+
+      it(`infrastructure snapshot page renders not found page`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraOps', 'infrastructure/snapshot', {
+          basePath: '/s/custom_space',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
         });
         await testSubjects.existOrFail('infraNotFoundPage');
       });

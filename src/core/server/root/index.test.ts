@@ -30,7 +30,7 @@ jest.mock('../config/config_service', () => ({
 }));
 
 const mockServer = { start: jest.fn(), stop: jest.fn() };
-jest.mock('../', () => ({ Server: jest.fn(() => mockServer) }));
+jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';

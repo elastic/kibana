@@ -130,28 +130,9 @@ describe('after fetch', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('hideWriteControls with no dashboards', async () => {
+  test('hideWriteControls', async () => {
     const component = shallowWithIntl(<DashboardListing.WrappedComponent
       findItems={find.bind(null, 0)}
-      deleteItems={() => {}}
-      createItem={() => {}}
-      editItem={() => {}}
-      getViewUrl={() => {}}
-      listingLimit={1}
-      hideWriteControls={true}
-    />);
-
-    // Ensure all promises resolve
-    await new Promise(resolve => process.nextTick(resolve));
-    // Ensure the state changes are reflected
-    component.update();
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('hideWriteControls with dashboards', async () => {
-    const component = shallowWithIntl(<DashboardListing.WrappedComponent
-      findItems={find.bind(null, 1)}
       deleteItems={() => {}}
       createItem={() => {}}
       editItem={() => {}}

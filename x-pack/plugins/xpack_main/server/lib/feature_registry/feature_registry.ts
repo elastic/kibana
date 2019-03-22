@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import _ from 'lodash';
+import { cloneDeep, difference } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
@@ -129,7 +129,7 @@ export class FeatureRegistry {
 
   public getAll(): Feature[] {
     this.locked = true;
-    return _.cloneDeep(Object.values(this.features));
+    return cloneDeep(Object.values(this.features));
   }
 }
 
@@ -146,7 +146,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       throw new Error('Privilege definition may not be null or undefined');
     }
 
-    const unknownAppEntries = _.difference(privilegeDefinition.app || [], app);
+    const unknownAppEntries = difference(privilegeDefinition.app || [], app);
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -155,7 +155,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
       );
     }
 
-    const unknownCatalogueEntries = _.difference(privilegeDefinition.catalogue || [], catalogue);
+    const unknownCatalogueEntries = difference(privilegeDefinition.catalogue || [], catalogue);
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
@@ -174,10 +174,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
           );
         }
 
-        const unknownSectionEntries = _.difference(
-          managementEntry,
-          management[managementSectionId]
-        );
+        const unknownSectionEntries = difference(managementEntry, management[managementSectionId]);
 
         if (unknownSectionEntries.length > 0) {
           throw new Error(

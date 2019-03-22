@@ -9,9 +9,9 @@ import {
   Feature,
   FeatureKibanaPrivileges,
 } from 'x-pack/plugins/xpack_main/server/lib/feature_registry/feature_registry';
-import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
+import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-export class FeaturePrivilegeSavedObjectsManagementBuilder extends FeaturePrivilegeBuilder {
+export class FeaturePrivilegeSavedObjectsManagementBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
     return uniq([
       ...flatten(

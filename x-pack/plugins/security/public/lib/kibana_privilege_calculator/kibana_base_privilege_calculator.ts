@@ -6,10 +6,10 @@
 
 import _ from 'lodash';
 import { KibanaPrivileges, RoleKibanaPrivilege } from '../../../common/model';
+import { compareActions } from '../../../common/privilege_calculator_utils';
 import { NO_PRIVILEGE_VALUE } from '../../views/management/edit_role/lib/constants';
 import { isGlobalPrivilegeDefinition } from '../privilege_utils';
 import { PRIVILEGE_SOURCE, PrivilegeExplanation } from './kibana_privilege_calculator_types';
-import { compareActions } from './privilege_calculator_utils';
 
 export class KibanaBasePrivilegeCalculator {
   constructor(

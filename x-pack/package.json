@@ -137,7 +137,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.4.0",
+    "@elastic/eui": "9.4.2",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
@@ -238,7 +238,7 @@
     "polished": "^1.9.2",
     "prop-types": "^15.6.0",
     "puid": "1.0.5",
-    "puppeteer-core": "^1.7.0",
+    "puppeteer-core": "^1.13.0",
     "raw-loader": "0.5.1",
     "react": "^16.8.0",
     "react-apollo": "^2.1.4",

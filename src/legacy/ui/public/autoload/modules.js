@@ -26,7 +26,6 @@ import '../config';
 import '../courier';
 import '../debounce';
 import '../doc_title';
-import '../elastic_textarea';
 import '../es';
 import '../events';
 import '../fancy_forms';

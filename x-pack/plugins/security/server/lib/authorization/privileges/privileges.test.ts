@@ -60,6 +60,7 @@ describe('features', () => {
         actions.ui.get('management', 'foo', 'management-1'),
         actions.ui.get('management', 'foo', 'management-2'),
         actions.ui.get('navLinks', 'kibana:foo'),
+        actions.allHack,
       ],
       read: [
         actions.login,
@@ -132,6 +133,7 @@ describe('features', () => {
         actions.ui.get('catalogue', 'catalogue-all-2'),
         actions.ui.get('management', 'all', 'all-management-1'),
         actions.ui.get('management', 'all', 'all-management-2'),
+        actions.allHack,
       ],
       read: [
         actions.login,
@@ -213,6 +215,7 @@ describe('features', () => {
         actions.ui.get('savedObjectsManagement', 'all-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'all-ui-1'),
         actions.ui.get('foo', 'all-ui-2'),
+        actions.allHack,
       ],
       read: [
         actions.login,
@@ -336,6 +339,7 @@ describe('features', () => {
           actions.ui.get('management', 'foo', 'management-1'),
           actions.ui.get('management', 'foo', 'management-2'),
           actions.ui.get('navLinks', 'kibana:foo'),
+          actions.allHack,
         ],
         read: [
           actions.login,
@@ -515,6 +519,7 @@ describe('features', () => {
         actions.ui.get('savedObjectsManagement', 'read-savedObject-read-2', 'read'),
         actions.ui.get('foo', 'read-ui-1'),
         actions.ui.get('foo', 'read-ui-2'),
+        actions.allHack,
       ]);
     });
 

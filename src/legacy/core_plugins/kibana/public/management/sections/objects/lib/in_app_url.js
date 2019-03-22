@@ -48,7 +48,7 @@ export function canViewInApp(uiCapabilities, type) {
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
-      return uiCapabilities.management.kibana.indices;
+      return uiCapabilities.management.kibana.index_patterns;
     case 'dashboard':
     case 'dashboards':
       return uiCapabilities.dashboard.show;

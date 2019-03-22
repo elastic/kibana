@@ -21,7 +21,13 @@ import { checkLicense } from './server/lib/check_license';
 import { initAuthenticator } from './server/lib/authentication/authenticator';
 import { SecurityAuditLogger } from './server/lib/audit_logger';
 import { AuditLogger } from '../../server/lib/audit_logger';
-import { createAuthorizationService, disableUICapabilitesFactory, registerPrivilegesWithCluster } from './server/lib/authorization';
+import {
+  createAuthorizationService,
+  disableUICapabilitesFactory,
+  initAPIAuthorization,
+  registerPrivilegesWithCluster,
+  validateFeaturePrivileges
+} from './server/lib/authorization';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { SecureSavedObjectsClientWrapper } from './server/lib/saved_objects_client/secure_saved_objects_client_wrapper';
 import { deepFreeze } from './server/lib/deep_freeze';
@@ -101,7 +107,7 @@ export const security = (kibana) => new kibana.Plugin({
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbac()) {
+      if (!authorization.mode.useRbacForRequest(request)) {
         return originalInjectedVars;
       }
 
@@ -155,6 +161,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugin, async (license) => {
       if (license.allowRbac) {
+        await validateFeaturePrivileges(authorization.actions, xpackMainPlugin.getFeatures());
         await registerPrivilegesWithCluster(server);
       }
     });
@@ -168,7 +175,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { callWithRequest, callWithInternalUser } = adminCluster;
       const callCluster = (...args) => callWithRequest(request, ...args);
 
-      if (authorization.mode.useRbac()) {
+      if (authorization.mode.useRbacForRequest(request)) {
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
         return new savedObjects.SavedObjectsClient(internalRepository);
       }
@@ -178,7 +185,7 @@ export const security = (kibana) => new kibana.Plugin({
     });
 
     savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
-      if (authorization.mode.useRbac()) {
+      if (authorization.mode.useRbacForRequest(request)) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,
           auditLogger,
@@ -197,6 +204,7 @@ export const security = (kibana) => new kibana.Plugin({
 
     await initAuthenticator(server);
     initAuthenticateApi(server);
+    initAPIAuthorization(server, authorization);
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
@@ -226,7 +234,7 @@ export const security = (kibana) => new kibana.Plugin({
       const { actions, checkPrivilegesDynamicallyWithRequest, mode } = server.plugins.security.authorization;
 
       // if we don't have a license enabling security, or we're a legacy user, don't validate this request
-      if (!mode.useRbac()) {
+      if (!mode.useRbacForRequest(req)) {
         return h.continue;
       }
 
@@ -243,22 +251,6 @@ export const security = (kibana) => new kibana.Plugin({
         }
       }
 
-      // Enforce API restrictions for associated applications
-      if (path.startsWith('/api/')) {
-        const { tags = [] } = req.route.settings;
-
-        const actionTags = tags.filter(tag => tag.startsWith('access:'));
-
-        if (actionTags.length > 0) {
-          const feature = path.split('/', 3)[2];
-          const apiActions = actionTags.map(tag => actions.api.get(`${feature}/${tag.split(':', 2)[1]}`));
-
-          const checkPrivilegesResponse = await checkPrivileges(apiActions);
-          if (!checkPrivilegesResponse.hasAllRequested) {
-            return Boom.notFound();
-          }
-        }
-      }
 
       return h.continue;
     });

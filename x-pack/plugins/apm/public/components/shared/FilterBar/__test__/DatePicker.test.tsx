@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+import { History, Location } from 'history';
 import React from 'react';
 import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, RouteComponentProps } from 'react-router-dom';
 // @ts-ignore
 import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
 import { mockNow } from 'x-pack/plugins/apm/public/utils/testHelpers';
-import { DatePicker } from '../DatePicker';
+import { DatePicker, DatePickerComponent } from '../DatePicker';
 
 function mountPicker(search?: string) {
   const store = configureStore();
@@ -76,6 +77,42 @@ describe('DatePicker', () => {
     });
   });
 
+  describe('url updates', () => {
+    function setupTest() {
+      const location = { search: '?rangeFrom=now-15m&rangeTo=now' } as Location;
+      const history = {
+        push: jest.fn() as History['push'],
+        replace: jest.fn() as History['replace']
+      } as History;
+      const routerProps = { location, history } as RouteComponentProps;
+      const actionMock = jest.fn();
+      const props = { ...routerProps, dispatchUpdateTimePicker: actionMock };
+      const wrapper = shallow<DatePickerComponent>(
+        <DatePickerComponent {...props} />
+      );
+
+      return { history, wrapper };
+    }
+
+    it('should push an entry to the stack for each change', () => {
+      const { history, wrapper } = setupTest();
+
+      wrapper.instance().updateUrl({ rangeFrom: 'now-20m', rangeTo: 'now' });
+
+      expect(history.push).toHaveBeenCalledTimes(1);
+      expect(history.replace).not.toHaveBeenCalled();
+    });
+
+    it('should replace the last entry in the stack if the URL is the same', () => {
+      const { history, wrapper } = setupTest();
+
+      wrapper.instance().updateUrl({ rangeFrom: 'now-15m', rangeTo: 'now' });
+
+      expect(history.replace).toHaveBeenCalledTimes(1);
+      expect(history.push).not.toHaveBeenCalled();
+    });
+  });
+
   describe('refresh cycle', () => {
     beforeEach(() => {
       jest.useFakeTimers();
@@ -91,12 +128,18 @@ describe('DatePicker', () => {
       );
       const listener = jest.fn();
       store.subscribe(listener);
-      jest.advanceTimersByTime(1100);
 
-      expect(listener).toHaveBeenCalledTimes(5);
+      jest.advanceTimersByTime(200);
+      await new Promise(resolve => setImmediate(resolve, 0));
+      jest.advanceTimersByTime(200);
+      await new Promise(resolve => setImmediate(resolve, 0));
+      jest.advanceTimersByTime(200);
+      await new Promise(resolve => setImmediate(resolve, 0));
+
+      expect(listener).toHaveBeenCalledTimes(3);
     });
 
-    it('should not refresh when paused', async () => {
+    it('should not refresh when paused', () => {
       const { store } = mountPicker(
         'rangeFrom=now-15m&rangeTo=now&refreshPaused=true&refreshInterval=200'
       );
@@ -107,7 +150,7 @@ describe('DatePicker', () => {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('should be paused by default', async () => {
+    it('should be paused by default', () => {
       const { store } = mountPicker(
         'rangeFrom=now-15m&rangeTo=now&refreshInterval=200'
       );
@@ -118,7 +161,7 @@ describe('DatePicker', () => {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('should not attempt refreshes after unmounting', async () => {
+    it('should not attempt refreshes after unmounting', () => {
       const { store, mounted } = mountPicker(
         'rangeFrom=now-15m&rangeTo=now&refreshPaused=false&refreshInterval=200'
       );

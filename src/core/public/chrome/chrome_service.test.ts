@@ -20,6 +20,9 @@
 import * as Rx from 'rxjs';
 import { toArray } from 'rxjs/operators';
 
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
+
 const store = new Map();
 (window as any).localStorage = {
   setItem: (key: string, value: string) => store.set(String(key), String(value)),
@@ -31,22 +34,8 @@ import { ChromeService } from './chrome_service';
 
 function defaultStartDeps(): any {
   return {
-    notifications: {
-      toasts: {
-        addWarning: jest.fn(),
-      },
-    },
-    injectedMetadata: {
-      injectedMetadataStart: true,
-      getCspConfig: jest.fn().mockReturnValue({ warnLegacyBrowsers: true }),
-      getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-      getLegacyMetadata: jest.fn().mockReturnValue({
-        uiSettings: {
-          defaults: { legacyInjectedUiSettingDefaults: true },
-          user: { legacyInjectedUiSettingUserValues: true },
-        },
-      }),
-    },
+    notifications: notificationServiceMock.createStartContract(),
+    injectedMetadata: injectedMetadataServiceMock.createStartContract(),
   };
 }
 

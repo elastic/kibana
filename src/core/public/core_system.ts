@@ -42,6 +42,8 @@ interface Params {
  * of Kibana in the UI, including the LegacyPlatform which is managed
  * by the LegacyPlatformService. As we migrate more things to the new
  * platform the CoreSystem will get many more Services.
+ *
+ * @internal
  */
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;

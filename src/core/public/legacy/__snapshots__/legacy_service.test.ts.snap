@@ -40,7 +40,7 @@ Array [
 ]
 `;
 
-exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstraped to targetDomElement 1`] = `
+exports[`#stop() destroys the angular scope and empties the targetDomElement if angular is bootstrapped to targetDomElement 1`] = `
 <div
   class="ng-scope"
 />

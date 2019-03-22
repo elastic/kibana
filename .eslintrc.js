@@ -155,6 +155,7 @@ module.exports = {
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*',
         'x-pack/**/*.test.js',
+        'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],

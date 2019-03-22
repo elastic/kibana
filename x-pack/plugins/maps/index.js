@@ -84,9 +84,9 @@ export function maps(kibana) {
         name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
           defaultMessage: 'Maps',
         }),
-        icon: 'gisApp',
+        icon: APP_ICON,
         navLinkId: 'maps',
-        app: ['maps', 'kibana'],
+        app: [APP_ID, 'kibana'],
         catalogue: ['maps'],
         privileges: {
           all: {
