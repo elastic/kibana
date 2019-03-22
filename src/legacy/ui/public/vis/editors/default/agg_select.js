@@ -18,7 +18,7 @@
  */
 
 import 'ngreact';
-import { has, get, noop } from 'lodash';
+import { has, get } from 'lodash';
 import { uiModules } from '../../../modules';
 import { DefaultEditorAggSelect } from './components/default_editor_agg_select';
 import { wrapInI18nContext } from 'ui/i18n';
@@ -64,7 +64,9 @@ uiModules
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
-            ngModelCtrl.$$runValidators(value, null, noop);
+
+            // Set value to trigger $validators calling
+            ngModelCtrl.$setViewValue(value);
 
             // We skip the first time the listener is called
             if (value !== oldValue) {

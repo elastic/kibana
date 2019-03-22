@@ -88,7 +88,7 @@ function DefaultEditorAggSelect({
     >
       <EuiComboBox
         placeholder={i18n.translate('common.ui.vis.defaultEditor.aggSelect.selectAggPlaceholder', {
-          defaultMessage: 'Select an aggregation',
+          defaultMessage: 'Select an aggregation…',
         })}
         id={`visDefaultEditorAggSelect${agg.id}`}
         options={aggTypeOptions}
