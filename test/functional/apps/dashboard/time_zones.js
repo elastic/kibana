@@ -22,13 +22,14 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
+  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common', 'header']);
 
   describe('dashboard time zones', () => {
     before(async () => {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', 'timezonetest_6_2_4.json'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
     });
