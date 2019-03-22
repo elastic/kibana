@@ -75,6 +75,18 @@ export function selectColumn(id: string, model: VisModel) {
   return query ? query.select[id] : undefined;
 }
 
+export function setPrivateState<K extends string, T>(name: K) {
+  return (visModel: VisModel, newPrivateState: T) => {
+    return {
+      ...visModel,
+      private: {
+        ...visModel.private,
+        [name]: newPrivateState,
+      },
+    };
+  };
+}
+
 export function getColumnIdByIndex(
   queries: {
     [id: string]: VisModelQuery;

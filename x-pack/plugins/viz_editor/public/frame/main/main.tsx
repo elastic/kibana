@@ -71,9 +71,14 @@ export function Main(props: MainProps) {
     onChangeVisModel,
   };
 
-  const expression = toExpression(state.visModel, 'edit');
+  // TODO add a meaningful default expression builder implementation here
+  const expression = toExpression
+    ? toExpression(state.visModel, 'edit')
+    : `esquery { query } | ${state.visModel.editorPlugin}_chart { config }`;
 
-  const suggestions = registry.getAll().flatMap(plugin => plugin.getSuggestions(state.visModel));
+  const suggestions = registry
+    .getAll()
+    .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
 
   return (
     <EuiPage>

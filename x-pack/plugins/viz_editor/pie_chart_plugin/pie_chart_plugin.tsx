@@ -6,8 +6,6 @@
 
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
-import clone from 'lodash-es/clone';
-import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
 import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
@@ -15,6 +13,7 @@ import {
   Axis,
   getColumnIdByIndex,
   selectColumn,
+  setPrivateState,
   UnknownVisModel,
   VisModel,
 } from '../public/common/lib';
@@ -26,6 +25,8 @@ interface PieChartPrivateState {
 }
 
 type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
+
+const setPieState = setPrivateState<'pieChart', PieChartPrivateState>('pieChart');
 
 function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   return (
@@ -116,25 +117,15 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
 
   if (xAxisRef && yAxisRef) {
-    return setWith(
-      clone(visModel),
-      'private.pieChart',
-      {
-        sliceAxis: { columns: [xAxisRef] },
-        angleAxis: { columns: [yAxisRef] },
-      } as PieChartPrivateState,
-      clone
-    );
+    return setPieState(visModel, {
+      sliceAxis: { title: 'Slice By', columns: [xAxisRef] },
+      angleAxis: { title: 'Size By', columns: [yAxisRef] },
+    });
   } else {
-    return setWith(
-      clone(visModel),
-      'private.pieChart',
-      {
-        sliceAxis: { columns: [] as string[] },
-        angleAxis: { columns: [] as string[] },
-      } as PieChartPrivateState,
-      clone
-    );
+    return setPieState(visModel, {
+      sliceAxis: { title: 'Slice By', columns: [] },
+      angleAxis: { title: 'Size By', columns: [] },
+    });
   }
 }
 

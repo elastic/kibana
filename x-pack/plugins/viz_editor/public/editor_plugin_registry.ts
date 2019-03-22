@@ -38,8 +38,8 @@ export interface EditorPlugin<S extends VisModel = VisModel> {
   ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
   HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
-  toExpression: (visModel: S, mode: 'view' | 'edit') => string;
-  getSuggestions: (visModel: S) => Array<Suggestion<S>>;
+  toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
+  getSuggestions?: (visModel: S) => Array<Suggestion<S>>;
   getInitialState: (visModel: UnknownVisModel) => UnknownVisModel;
 }
 

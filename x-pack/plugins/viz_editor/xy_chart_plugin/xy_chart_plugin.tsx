@@ -15,6 +15,7 @@ import {
   Axis,
   getColumnIdByIndex,
   selectColumn,
+  setPrivateState,
   UnknownVisModel,
   VisModel,
 } from '../public/common/lib';
@@ -27,6 +28,8 @@ interface XyChartPrivateState {
 }
 
 type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
+
+const setXyState = setPrivateState<'xyChart', XyChartPrivateState>('xyChart');
 
 function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   return (
@@ -108,25 +111,15 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: string) {
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
 
   if (xAxisRef && yAxisRef) {
-    return setWith(
-      clone(visModel),
-      'private.xyChart',
-      {
-        xAxis: { columns: [xAxisRef] },
-        yAxis: { columns: [yAxisRef] },
-      } as XyChartPrivateState,
-      clone
-    );
+    return setXyState(visModel, {
+      xAxis: { title: 'X Axis', columns: [xAxisRef] },
+      yAxis: { title: 'Y Axis', columns: [yAxisRef] },
+    });
   } else {
-    return setWith(
-      clone(visModel),
-      'private.xyChart',
-      {
-        xAxis: { columns: [] as string[] },
-        yAxis: { columns: [] as string[] },
-      } as XyChartPrivateState,
-      clone
-    );
+    return setXyState(visModel, {
+      xAxis: { title: 'X Axis', columns: [] },
+      yAxis: { title: 'Y Axis', columns: [] },
+    });
   }
 }
 

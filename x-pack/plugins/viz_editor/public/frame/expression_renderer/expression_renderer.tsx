@@ -29,16 +29,19 @@ async function runAndRender(
 export function ExpressionRenderer(props: any) {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
 
-  useEffect(() => {
-    if (mountpoint.current) {
-      runAndRender(
-        props.expression,
-        mountpoint.current,
-        props.getInterpreter,
-        props.renderersRegistry
-      );
-    }
-  });
+  useEffect(
+    () => {
+      if (mountpoint.current) {
+        runAndRender(
+          props.expression,
+          mountpoint.current,
+          props.getInterpreter,
+          props.renderersRegistry
+        );
+      }
+    },
+    [props.expression, mountpoint.current, props.getInterpreter, props.renderersRegistry]
+  );
 
   return (
     <div
