@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import moment from 'moment';
-export default (timefilter) => ranges => {
+const TIME_MODE = 'absolute';
+
+export const createBrushHandler = timefilter => (from, to) => {
   timefilter.setTime({
-    from: moment(ranges.xaxis.from).toISOString(),
-    to: moment(ranges.xaxis.to).toISOString(),
-    mode: 'absolute',
+    from,
+    to,
+    mode: TIME_MODE,
   });
 };

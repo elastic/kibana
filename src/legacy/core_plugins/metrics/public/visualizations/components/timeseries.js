@@ -19,8 +19,6 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
-import getLastValue from '../../../common/get_last_value';
 import {
   Axis,
   Chart,
@@ -30,161 +28,78 @@ import {
   Position,
   Settings,
   getAxisId,
-  timeFormatter
 } from '@elastic/charts';
+import { GRID_LINE_CONFIG } from '../lib/config';
 
 import '@elastic/charts/dist/style.css';
-import eventBus from '../lib/events';
 
-class Timeseries extends Component {
-
+export class TimeSeries extends Component {
   constructor(props) {
     super(props);
-    const values = this.getLastValues(props);
-    this.state = {
-      showLegend: props.legend != null ? props.legend : true,
-      values: values || {},
-      show: _.keys(values) || [],
-      ignoreLegendUpdates: false,
-      ignoreVisibilityUpdates: false
-    };
-    this.toggleFilter = this.toggleFilter.bind(this);
-    this.handleHideClick = this.handleHideClick.bind(this);
-    this.plothover = this.plothover.bind(this);
+    this.state = {};
   }
 
-  filterLegend(id) {
-    if (!_.has(this.state.values, id)) return [];
-    const notAllShown = _.keys(this.state.values).length !== this.state.show.length;
-    const isCurrentlyShown = _.includes(this.state.show, id);
-    const show = [];
-    if (notAllShown && isCurrentlyShown) {
-      this.setState({ ignoreVisibilityUpdates: false, show: Object.keys(this.state.values) });
-    } else {
-      show.push(id);
-      this.setState({ ignoreVisibilityUpdates: true, show: [id] });
-    }
-    return show;
-  }
-
-  toggleFilter(event, id) {
-    const show = this.filterLegend(id);
-    if (_.isFunction(this.props.onFilter)) {
-      this.props.onFilter(show);
-    }
-    eventBus.trigger('toggleFilter', id, this);
-  }
-
-  getLastValues(props) {
-    const values = {};
-    props.series.forEach((row) => {
-      // we need a valid identifier
-      if (!row.id) row.id = row.label;
-      values[row.id] = getLastValue(row.data);
-    });
-    return values;
-  }
-
-  updateLegend(pos, item) {
-    const values = {};
-    if (pos) {
-      this.props.series.forEach((row) => {
-        if (row.data && Array.isArray(row.data)) {
-          if (item && row.data[item.dataIndex] && row.data[item.dataIndex][0] === item.datapoint[0]) {
-            values[row.id] = row.data[item.dataIndex][1];
-          } else {
-            let closest;
-            for (let i = 0; i < row.data.length; i++) {
-              closest = i;
-              if (row.data[i] && pos.x < row.data[i][0]) break;
-            }
-            if (!row.data[closest]) return values[row.id] = null;
-            const [ , value ] = row.data[closest];
-            values[row.id] = value != null && value || null;
-          }
-        }
-      });
-    } else {
-      _.assign(values, this.getLastValues(this.props));
-    }
-
-    this.setState({ values });
-  }
-
-  componentWillReceiveProps(props) {
-    if (props.legend !== this.props.legend) this.setState({ showLegend: props.legend });
-    if (!this.state.ignoreLegendUpdates) {
-      const values = this.getLastValues(props);
-      const currentKeys = _.keys(this.state.values);
-      const keys = _.keys(values);
-      const diff = _.difference(keys, currentKeys);
-      const nextState = { values: values };
-      if (diff.length && !this.state.ignoreVisibilityUpdates) {
-        nextState.show = keys;
-      }
-      this.setState(nextState);
-    }
-  }
-
-  plothover(event, pos, item) {
-    this.updateLegend(pos, item);
-  }
-
-  handleHideClick() {
-    this.setState({ showLegend: !this.state.showLegend });
-  }
 
   render() {
+    const { min, max, mode } = this.props.yaxes[0];
+    let leftDomain;
+    if (min && max) leftDomain = { min, max };
+
     return (
-      <Chart renderer="canvas" className={'story-chart'}>
-        <Settings showLegend={this.state.showLegend} legendPosition={this.props.legendPosition} />
+      <Chart renderer="canvas" className="tvbVisTimeSeries" >
+        <Settings
+          showLegend={this.props.legend}
+          legendPosition={this.props.legendPosition}
+          onBrushEnd={this.props.onBrush}
+        />
         {
-          this.props.series.map(series =>
-            (<LineSeries
-              key={series.id}
-              id={getSpecId(series.label)}
+          this.props.series.map(({ id, label, data, bars }) => (
+            <LineSeries
+              key={id}
+              id={getSpecId(label)}
+              seriesType={bars.show ? 'bar' : 'line'}
               xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
+              yScaleType={mode || ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}
-              data={series.data}
+              data={data}
               yScaleToDataExtent={false}
-            />))
+            />
+          ))
         }
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
-          title={'Bottom axis'}
-          tickFormat={timeFormatter('MMM-DD HH:mm')}
+          title={this.props.xaxisLabel}
+          tickFormat={this.props.xAxisFormatter}
+          showGridLines={this.props.showGrid}
+          gridLineStyle={GRID_LINE_CONFIG}
         />
         <Axis
-          id={getAxisId('left2')}
-          title={'Left axis'}
-          position={Position.Left}
+          id={getAxisId('yaxis')}
+          position={this.props.axisPosition}
+          domain={leftDomain}
+          showGridLines={this.props.showGrid}
+          gridLineStyle={GRID_LINE_CONFIG}
         />
-
       </Chart>
     );
   }
 }
 
-Timeseries.defaultProps = {
+TimeSeries.defaultProps = {
   legend: true,
   showGrid: true
 };
 
-Timeseries.propTypes = {
+TimeSeries.propTypes = {
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
+  axisPosition: PropTypes.string,
   onFilter: PropTypes.func,
   series: PropTypes.array,
-  annotations: PropTypes.array,
-  backgroundColor: PropTypes.string,
-  options: PropTypes.object,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
   xaxisLabel: PropTypes.string,
   dateFormat: PropTypes.string
 };
-
-export default Timeseries;

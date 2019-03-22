@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Metric from '../../../visualizations/components/metric';
 import getLastValue from '../../../../common/get_last_value';
@@ -55,7 +55,7 @@ function MetricVisualization(props) {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
+        newProps.formatter = createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
       return _.assign({}, _.pick(row, ['label', 'data']), newProps);

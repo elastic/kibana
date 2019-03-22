@@ -22,9 +22,9 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
 
-import tickFormatter from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Timeseries from '../../../visualizations/components/timeseries';
+import { TimeSeries } from '../../../visualizations/components/timeseries';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
@@ -70,7 +70,7 @@ class TimeseriesVisualization extends Component {
   }
 
   render() {
-    const { backgroundColor, model, visData } = this.props;
+    const { model, visData, dateFormat, onBrush } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
 
@@ -102,11 +102,11 @@ class TimeseriesVisualization extends Component {
     }
     const seriesModel = model.series.map(s => _.cloneDeep(s));
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const formatter = tickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
+    const tickFormatter = createTickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
 
     const mainAxis = {
       position: model.axis_position,
-      tickFormatter: formatter,
+      tickFormatter,
       axisFormatter: _.get(firstSeries, 'formatter', 'number'),
       axisFormatterTemplate: _.get(firstSeries, 'value_template')
     };
@@ -126,7 +126,7 @@ class TimeseriesVisualization extends Component {
     seriesModel.forEach(s => {
       series
         .filter(r => _.startsWith(r.id, s.id))
-        .forEach(r => r.tickFormatter = tickFormatter(s.formatter, s.value_template, this.props.getConfig));
+        .forEach(r => r.tickFormatter = createTickFormatter(s.formatter, s.value_template, this.props.getConfig));
 
       if (s.hide_in_legend) {
         series
@@ -172,12 +172,12 @@ class TimeseriesVisualization extends Component {
         if (row.separate_axis) {
           axisCount++;
 
-          const formatter = tickFormatter(row.formatter, row.value_template, this.props.getConfig);
+          const tickFormatter = createTickFormatter(row.formatter, row.value_template, this.props.getConfig);
 
           const yaxis = {
             alignTicksWithAxis: 1,
             position: row.axis_position,
-            tickFormatter: formatter,
+            tickFormatter,
             axisFormatter: row.axis_formatter,
             axisFormatterTemplate: row.value_template
           };
@@ -199,24 +199,21 @@ class TimeseriesVisualization extends Component {
       });
     }
 
-    const panelBackgroundColor = model.background_color || backgroundColor;
+    const panelBackgroundColor = model.background_color;
     const style = { backgroundColor: panelBackgroundColor };
 
     const params = {
-      dateFormat: this.props.dateFormat,
-      crosshair: true,
-      tickFormatter: formatter,
-      legendPosition: model.legend_position || 'right',
-      backgroundColor: panelBackgroundColor,
+      dateFormat,
+      onBrush,
       series,
       annotations,
       yaxes,
-      showGrid: Boolean(model.show_grid),
-      legend: Boolean(model.show_legend),
+      tickFormatter,
       xAxisFormatter: this.xaxisFormatter,
-      onBrush: (ranges) => {
-        if (this.props.onBrush) this.props.onBrush(ranges);
-      }
+      axisPosition: model.axis_position,
+      legendPosition: model.legend_position || 'right',
+      legend: Boolean(model.show_legend),
+      showGrid: Boolean(model.show_grid),
     };
 
     if (interval) {
@@ -225,7 +222,7 @@ class TimeseriesVisualization extends Component {
 
     return (
       <div className="tvbVis" style={style}>
-        <Timeseries {...params}/>
+        <TimeSeries {...params}/>
       </div>
     );
 

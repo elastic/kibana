@@ -25,7 +25,7 @@ import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
 import PanelConfig from './panel_config';
-import brushHandler from '../lib/create_brush_handler';
+import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchIndexPatternFields } from '../lib/fetch_fields';
 
 class VisEditor extends Component {
@@ -39,7 +39,7 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields
     };
-    this.onBrush = brushHandler(props.vis.API.timeFilter);
+    this.onBrush = createBrushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.Subject();
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }

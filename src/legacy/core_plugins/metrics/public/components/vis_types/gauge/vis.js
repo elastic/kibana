@@ -20,7 +20,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Gauge from '../../../visualizations/components/gauge';
 import getLastValue from '../../../../common/get_last_value';
@@ -55,7 +55,7 @@ function GaugeVisualization(props) {
       const seriesDef = model.series.find(s => _.includes(row.id, s.id));
       const newProps = {};
       if (seriesDef) {
-        newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
+        newProps.formatter = createTickFormatter(seriesDef.formatter, seriesDef.value_template, props.getConfig);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
       return _.assign({}, row, newProps);

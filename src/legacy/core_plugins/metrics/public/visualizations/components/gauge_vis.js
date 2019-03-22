@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 import calculateCoordinates from '../lib/calculate_coordinates';
-import colors from '../lib/colors';
+import { COLORS } from '../lib/config';
 
 class GaugeVis extends Component {
 
@@ -125,7 +125,7 @@ class GaugeVis extends Component {
         cx: 60,
         cy: 60,
         fill: 'rgba(0,0,0,0)',
-        stroke: colors.lineColor,
+        stroke: COLORS.LINE_COLOR,
         strokeDasharray: `${sliceSize * size} ${size}`,
         strokeWidth: this.props.innerLine
       }

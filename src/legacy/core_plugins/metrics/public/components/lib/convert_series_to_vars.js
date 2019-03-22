@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import getLastValue from '../../../common/get_last_value';
-import tickFormatter from './tick_formatter';
+import { createTickFormatter } from './tick_formatter';
 import moment from 'moment';
 export default (series, model, dateFormat = 'lll', getConfig = null) => {
   const variables = {};
@@ -32,7 +32,7 @@ export default (series, model, dateFormat = 'lll', getConfig = null) => {
           _.snakeCase(seriesModel.var_name)
         ].filter(v => v).join('.');
 
-        const formatter = tickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
+        const formatter = createTickFormatter(seriesModel.formatter, seriesModel.value_template, getConfig);
         const lastValue = getLastValue(row.data);
 
         const data = {

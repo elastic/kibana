@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import tickFormatter from '../../lib/tick_formatter';
+import { createTickFormatter } from '../../lib/tick_formatter';
 import TopN from '../../../visualizations/components/top_n';
 import getLastValue from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
@@ -55,7 +55,7 @@ function TopNVisualization(props) {
       const id = first(item.id.split(/:/));
       const seriesConfig = model.series.find(s => s.id === id);
       if (seriesConfig) {
-        const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig);
+        const tickFormatter = createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, props.getConfig);
         const value = getLastValue(item.data);
         let color = item.color || seriesConfig.color;
         if (model.bar_color_rules) {
@@ -70,7 +70,7 @@ function TopNVisualization(props) {
         return {
           ...item,
           color,
-          tickFormatter: formatter
+          tickFormatter
         };
       }
       return item;
