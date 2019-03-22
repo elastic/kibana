@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from './query_types';
-import { toTable } from './to_es_query';
+import { Query } from '../../common';
+import { toTable } from './to_table';
 
 describe('viz-editor/query/to_table', () => {
   test('tabularizes raw docs', () => {
@@ -87,8 +87,8 @@ describe('viz-editor/query/to_table', () => {
           buckets: [
             {
               key: {
-                air_port: 'gvl',
-                dest: 'atl',
+                airport: 'gvl',
+                destination: 'atl',
               },
               num_recs: {
                 value: 2,
@@ -99,8 +99,8 @@ describe('viz-editor/query/to_table', () => {
             },
             {
               key: {
-                air_port: 'sea',
-                dest: 'por',
+                airport: 'sea',
+                destination: 'por',
               },
               num_recs: {
                 value: 77,

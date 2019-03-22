@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SelectOperation } from './query_types';
+
 export interface IndexPatternField {
   name: string;
   type: string;
@@ -19,25 +21,10 @@ export interface IndexPattern {
   fieldFormatMap?: string;
 }
 
-export interface DateHistogramOperation {
-  op: 'date_histogram';
-  arg: {
-    field: string;
-    interval: string;
-  };
-}
-
-export interface SumOperation {
-  op: 'sum';
-  arg: string;
-}
-
-export type QueryColumn = DateHistogramOperation | SumOperation;
-
 export interface QueryViewModel {
   indexPattern: string;
   select: {
-    [id: string]: QueryColumn;
+    [id: string]: SelectOperation;
   };
 }
 

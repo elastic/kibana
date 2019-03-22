@@ -5,3 +5,4 @@
  */
 
 export * from './view_model';
+export * from './query_types';

@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { toEsQuery } from './to_es_query';
 export { route } from './route';

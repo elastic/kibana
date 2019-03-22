@@ -4,11 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { API_PREFIX } from '../../common';
-import { Query } from './query_types';
-import { toEsQuery, toTable } from './to_es_query';
+// ------------------------------------------------------------------------------------------
+// This file contains all restful endpoints pertaining to query execution for viz-editor
+// ------------------------------------------------------------------------------------------
 
+import { Legacy } from 'kibana';
+import { API_PREFIX, Query } from '../../common';
+import { toEsQuery } from './to_es_query';
+import { toTable } from './to_table';
+
+/**
+ * Expose a RESTful endpoint that runs an Elasticsearch query based on our
+ * query model, and returns a tabular result.
+ */
 export function route(server: Legacy.Server) {
   const { callWithRequest } = server.plugins.elasticsearch.createCluster('data', {});
 
@@ -18,7 +26,10 @@ export function route(server: Legacy.Server) {
     async handler(req) {
       const query = req.payload as Query;
       const esQuery = toEsQuery(query);
-      const result = await callWithRequest(req, 'search', esQuery);
+      const result = await callWithRequest(req, 'search', {
+        index: query.index,
+        body: esQuery,
+      });
 
       return {
         rows: toTable(query, result),
