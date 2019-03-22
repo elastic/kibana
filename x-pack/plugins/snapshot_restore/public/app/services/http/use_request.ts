@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState } from 'react';
-import { API_BASE_PATH } from '../../../common/constants';
-import { AppStateInterface, useAppState } from './app_context';
+import { API_BASE_PATH } from '../../../../common/constants';
+import { useAppDependencies } from '../../index';
 
 export const useRequest = ({
   path,
@@ -18,11 +18,9 @@ export const useRequest = ({
   body?: any;
   interval?: number;
 }) => {
-  const [
-    {
-      core: { http, chrome },
-    },
-  ] = useAppState() as [AppStateInterface];
+  const {
+    core: { http, chrome },
+  } = useAppDependencies();
 
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);

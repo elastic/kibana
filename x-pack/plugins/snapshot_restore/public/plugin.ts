@@ -7,7 +7,8 @@ import { unmountComponentAtNode } from 'react-dom';
 
 import { PLUGIN } from '../common/constants';
 import { CLIENT_BASE_PATH, renderReact } from './app';
-import { AppCore, AppPlugins, Core, Plugins } from './shim';
+import { AppCore, AppPlugins } from './app/types';
+import { Core, Plugins } from './shim';
 
 import template from './index.html';
 

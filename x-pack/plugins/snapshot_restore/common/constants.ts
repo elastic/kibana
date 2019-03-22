@@ -19,3 +19,13 @@ export const PLUGIN = {
 };
 
 export const API_BASE_PATH = '/api/snapshot_restore/';
+
+export enum REPOSITORY_TYPES {
+  fs = 'fs',
+  url = 'url',
+  source = 'source',
+  s3 = 's3',
+  hdfs = 'hdfs',
+  azure = 'azure',
+  gcs = 'gcs',
+}

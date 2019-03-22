@@ -6,8 +6,8 @@
 
 import React, { Fragment } from 'react';
 
-import { HDFSRepository } from '../../../../../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../../../../../services/app_context';
+import { HDFSRepository } from '../../../../../../../common/types';
+import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -15,14 +15,13 @@ interface Props {
   repository: HDFSRepository;
 }
 
-export const HDFSDetails = ({ repository }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
+
   const { settings } = repository;
   const {
     uri,

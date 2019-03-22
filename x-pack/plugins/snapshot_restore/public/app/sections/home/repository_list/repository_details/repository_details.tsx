@@ -5,11 +5,12 @@
  */
 import React, { Fragment } from 'react';
 
-import { AppStateInterface, useAppState } from '../../../../services/app_context';
-import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
-import { useRequest } from '../../../../services/use_request';
+import { useAppDependencies } from '../../../../index';
+import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
+import { useRequest } from '../../../../services/http';
 
-import { Repository, RepositoryTypes } from '../../../../../../common/types/repository_types';
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   RepositoryTypeName,
@@ -36,15 +37,14 @@ interface Props {
   onClose: () => void;
 }
 
-export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
-  const [
-    {
-      core: {
-        i18n,
-        documentation: { esDocBasePath, esPluginDocBasePath },
-      },
+export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryName, onClose }) => {
+  const {
+    core: {
+      i18n,
+      documentation: { esDocBasePath, esPluginDocBasePath },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
+
   const { FormattedMessage } = i18n;
   const { error, loading, data: repository } = useRequest({
     path: `repositories/${repositoryName}`,
@@ -117,7 +117,7 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === RepositoryTypes.source ? (
+            {type === REPOSITORY_TYPES.source ? (
               <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
             ) : (
               <RepositoryTypeName type={type} />

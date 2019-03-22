@@ -7,10 +7,10 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { Repository } from '../../../../../common/types/repository_types';
+import { Repository } from '../../../../../common/types';
 import { BASE_PATH, Section } from '../../../constants';
-import { AppStateInterface, useAppState } from '../../../services/app_context';
-import { useRequest } from '../../../services/use_request';
+import { useAppDependencies } from '../../../index';
+import { useRequest } from '../../../services/http';
 
 import { SectionError, SectionLoading } from '../../../components';
 import { RepositoryDetails } from './repository_details';
@@ -23,20 +23,18 @@ interface MatchParams {
 }
 interface Props extends RouteComponentProps<MatchParams> {}
 
-export const RepositoryList = ({
+export const RepositoryList: React.FunctionComponent<Props> = ({
   match: {
     params: { name },
   },
   history,
-}: Props) => {
+}) => {
   const section = 'repositories' as Section;
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
   const { error, loading, data: repositories, request: reload } = useRequest({
     path: 'repositories',
     method: 'get',

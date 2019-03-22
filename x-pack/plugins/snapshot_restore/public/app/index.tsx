@@ -3,34 +3,43 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useReducer } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
-import { AppCore, AppPlugins } from '../shim';
 import { App } from './app';
-import { AppStateInterface, AppStateProvider } from './services/app_context';
+import { AppStateProvider, initialState, reducer } from './services/state';
+import { AppCore, AppDependencies, AppPlugins } from './types';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
 
-// Placeholder reducer in case we need it for any app state data
-const appStateReducer = (state: any, action: any) => {
-  switch (action.type) {
-    default:
-      return state;
-  }
-};
+/**
+ * App dependencies
+ */
+let DependenciesContext: React.Context<AppDependencies>;
 
-const ReactApp = ({ appState }: { appState: AppStateInterface }) => {
+export const useAppDependencies = () => useContext<AppDependencies>(DependenciesContext);
+
+const ReactApp: React.FunctionComponent<AppDependencies> = ({ core, plugins }) => {
   const {
     i18n: { Context: I18nContext },
-  } = appState.core;
+  } = core;
+
+  const appDependencies: AppDependencies = {
+    core,
+    plugins,
+  };
+
+  DependenciesContext = createContext<AppDependencies>(appDependencies);
+
   return (
     <I18nContext>
       <HashRouter>
-        <AppStateProvider value={useReducer(appStateReducer, appState)}>
-          <App />
-        </AppStateProvider>
+        <DependenciesContext.Provider value={appDependencies}>
+          <AppStateProvider value={useReducer(reducer, initialState)}>
+            <App />
+          </AppStateProvider>
+        </DependenciesContext.Provider>
       </HashRouter>
     </I18nContext>
   );
@@ -41,13 +50,5 @@ export const renderReact = async (
   core: AppCore,
   plugins: AppPlugins
 ): Promise<void> => {
-  render(
-    <ReactApp
-      appState={{
-        core,
-        plugins,
-      }}
-    />,
-    elem
-  );
+  render(<ReactApp core={core} plugins={plugins} />, elem);
 };

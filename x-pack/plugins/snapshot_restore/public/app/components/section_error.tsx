@@ -18,7 +18,7 @@ interface Props {
   };
 }
 
-export function SectionError({ title, error }: Props) {
+export const SectionError: React.FunctionComponent<Props> = ({ title, error }) => {
   const {
     error: errorString,
     cause, // wrapEsError() on the server adds a "cause" array
@@ -40,4 +40,4 @@ export function SectionError({ title, error }: Props) {
       )}
     </EuiCallOut>
   );
-}
+};

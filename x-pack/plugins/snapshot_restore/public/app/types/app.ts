@@ -3,17 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { createContext, useContext } from 'react';
 import { AppCore, AppPlugins } from '../../shim';
+export { AppCore, AppPlugins } from '../../shim';
 
-export interface AppStateInterface {
+export interface AppDependencies {
   core: AppCore;
   plugins: AppPlugins;
 }
 
-const AppState = createContext({});
-
-export const AppStateProvider = AppState.Provider;
-
-export const useAppState = () => useContext(AppState);
+export interface AppState {
+  [key: string]: any;
+}

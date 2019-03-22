@@ -5,13 +5,11 @@
  */
 import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useState } from 'react';
-import {
-  Repository,
-  RepositoryType,
-  RepositoryTypes,
-} from '../../../../../../common/types/repository_types';
+
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
-import { AppStateInterface, useAppState } from '../../../../services/app_context';
+import { useAppDependencies } from '../../../../index';
 
 interface Props {
   repositories: Repository[];
@@ -19,12 +17,14 @@ interface Props {
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
-export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }: Props) => {
-  const [
-    {
-      core: { i18n },
-    },
-  ] = useAppState() as [AppStateInterface];
+export const RepositoryTable: React.FunctionComponent<Props> = ({
+  repositories,
+  reload,
+  openRepositoryDetails,
+}) => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
@@ -48,7 +48,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
       truncateText: true,
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
-        if (type === RepositoryTypes.source) {
+        if (type === REPOSITORY_TYPES.source) {
           return (
             <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
           );

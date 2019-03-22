@@ -6,8 +6,8 @@
 
 import React, { Fragment } from 'react';
 
-import { GCSRepository } from '../../../../../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../../../../../services/app_context';
+import { GCSRepository } from '../../../../../../../common/types';
+import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -15,14 +15,13 @@ interface Props {
   repository: GCSRepository;
 }
 
-export const GCSDetails = ({ repository }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
+
   const {
     settings: { bucket, client, base_path, compress, chunk_size },
   } = repository;

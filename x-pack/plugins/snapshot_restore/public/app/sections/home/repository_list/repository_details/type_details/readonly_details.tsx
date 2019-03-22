@@ -6,8 +6,8 @@
 
 import React, { Fragment } from 'react';
 
-import { ReadonlyRepository } from '../../../../../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../../../../../services/app_context';
+import { ReadonlyRepository } from '../../../../../../../common/types';
+import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -15,14 +15,12 @@ interface Props {
   repository: ReadonlyRepository;
 }
 
-export const ReadonlyDetails = ({ repository }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+export const ReadonlyDetails: React.FunctionComponent<Props> = ({ repository }) => {
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
   const {
     settings: { url },
   } = repository;

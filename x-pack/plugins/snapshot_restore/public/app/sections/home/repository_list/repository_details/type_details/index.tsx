@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
+
+import { REPOSITORY_TYPES } from '../../../../../../../common/constants';
 import {
   AzureRepository,
   FSRepository,
@@ -11,9 +13,8 @@ import {
   HDFSRepository,
   ReadonlyRepository,
   Repository,
-  RepositoryTypes,
   S3Repository,
-} from '../../../../../../../common/types/repository_types';
+} from '../../../../../../../common/types';
 
 import { AzureDetails } from './azure_details';
 import { DefaultDetails } from './default_details';
@@ -27,16 +28,16 @@ interface Props {
   repository: Repository;
 }
 
-export const TypeDetails = ({ repository }: Props) => {
+export const TypeDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const { type, settings } = repository;
   switch (type) {
-    case RepositoryTypes.fs:
+    case REPOSITORY_TYPES.fs:
       return <FSDetails repository={repository as FSRepository} />;
       break;
-    case RepositoryTypes.url:
+    case REPOSITORY_TYPES.url:
       return <ReadonlyDetails repository={repository as ReadonlyRepository} />;
       break;
-    case RepositoryTypes.source:
+    case REPOSITORY_TYPES.source:
       const { delegate_type } = settings;
       const delegatedRepository = {
         ...repository,
@@ -44,16 +45,16 @@ export const TypeDetails = ({ repository }: Props) => {
       };
       return <TypeDetails repository={delegatedRepository} />;
       break;
-    case RepositoryTypes.azure:
+    case REPOSITORY_TYPES.azure:
       return <AzureDetails repository={repository as AzureRepository} />;
       break;
-    case RepositoryTypes.gcs:
+    case REPOSITORY_TYPES.gcs:
       return <GCSDetails repository={repository as GCSRepository} />;
       break;
-    case RepositoryTypes.hdfs:
+    case REPOSITORY_TYPES.hdfs:
       return <HDFSDetails repository={repository as HDFSRepository} />;
       break;
-    case RepositoryTypes.s3:
+    case REPOSITORY_TYPES.s3:
       return <S3Details repository={repository as S3Repository} />;
       break;
     default:

@@ -6,8 +6,8 @@
 
 import React, { Fragment } from 'react';
 
-import { S3Repository } from '../../../../../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../../../../../services/app_context';
+import { S3Repository } from '../../../../../../../common/types';
+import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -15,14 +15,13 @@ interface Props {
   repository: S3Repository;
 }
 
-export const S3Details = ({ repository }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
+
   const {
     settings: {
       bucket,

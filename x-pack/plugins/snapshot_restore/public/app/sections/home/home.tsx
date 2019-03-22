@@ -10,7 +10,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
-import { AppStateInterface, useAppState } from '../../services/app_context';
+import { useAppDependencies } from '../../index';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -21,20 +21,19 @@ interface MatchParams {
 
 interface Props extends RouteComponentProps<MatchParams> {}
 
-export const SnapshotRestoreHome = ({
+export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
   match: {
     params: { section },
   },
   history,
-}: Props) => {
+}) => {
   const [activeSection, setActiveSection] = useState<Section>(section);
 
-  const [
-    {
-      core: { i18n, chrome },
-      plugins: { management },
-    },
-  ] = useAppState() as [AppStateInterface];
+  const {
+    core: { i18n, chrome },
+    plugins: { management },
+  } = useAppDependencies();
+
   const { FormattedMessage } = i18n;
 
   const tabs = [
