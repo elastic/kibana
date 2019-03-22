@@ -36,8 +36,6 @@ export async function getSeriesData(req, panel) {
   const body = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 
-  console.log(100600, JSON.stringify(body));
-
   return searchRequest.search({ body })
     .then(data => {
       const series = data.map(handleResponseBody(panel));
