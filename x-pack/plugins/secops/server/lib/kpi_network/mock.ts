@@ -38,7 +38,7 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n      networkEvents\n      uniqueFlowId\n      activeAgents\n      uniqueSourcePrivateIp\n      uniqueDestinationPrivateIp\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetKpiNetworkQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiNetwork(timerange: $timerange, filterQuery: $filterQuery) {\n      networkEvents\n      uniqueFlowId\n      activeAgents\n      uniqueSourcePrivateIps\n      uniqueDestinationPrivateIps\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -76,6 +76,6 @@ export const mockResult = {
   networkEvents: 950867,
   uniqueFlowId: 50243,
   activeAgents: 15,
-  uniqueSourcePrivateIp: 383,
-  uniqueDestinationPrivateIp: 18,
+  uniqueSourcePrivateIps: 383,
+  uniqueDestinationPrivateIps: 18,
 };

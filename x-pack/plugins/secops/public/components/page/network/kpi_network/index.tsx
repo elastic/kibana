@@ -9,6 +9,7 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTextAlign,
 } from '@elastic/eui';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -68,18 +69,20 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
     },
     {
       property: 'uniquePrivateIps',
-      description: get('UNIQUE_PRIVATE_IP', i18n),
+      description: get('UNIQUE_PRIVATE_IPS', i18n),
       title: (
         <div>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem>
-              <span>{fieldTitleMapping(loading, get('uniqueSourcePrivateIp', data))}</span>
-              <span>{fieldTitleMapping(loading, get('uniqueDestinationPrivateIp', data))}</span>
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {fieldTitleMapping(loading, get('uniqueSourcePrivateIps', data))}
             </EuiFlexItem>
-            <EuiFlexItem className="eui-textRight">
-              <span>Source</span>
-              <span>Destination</span>
+            <EuiFlexItem grow={false}>{get('UNIQUE_SOURCE_PRIVATE_IPS', i18n)}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              {fieldTitleMapping(loading, get('uniqueDestinationPrivateIps', data))}
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>{get('UNIQUE_DESTINATION_PRIVATE_IPS', i18n)}</EuiFlexItem>
           </EuiFlexGroup>
         </div>
       ),
