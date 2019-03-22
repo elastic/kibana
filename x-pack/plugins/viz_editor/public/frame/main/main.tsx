@@ -19,7 +19,7 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, ViewModel } from '../../../common/lib';
+import { initialState, ViewModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
 import 'brace/ext/language_tools';

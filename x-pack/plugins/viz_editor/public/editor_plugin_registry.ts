@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ViewModel } from '../common/lib';
+import { ViewModel } from '../public/common/lib';
+
 import { config as pieChartConfig } from '../pie_chart_plugin';
 import { config as xyChartConfig } from '../xy_chart_plugin';
 

@@ -9,9 +9,9 @@ import { EuiSuperSelect } from '@elastic/eui';
 import clone from 'lodash-es/clone';
 import setWith from 'lodash-es/setWith';
 import React from 'react';
-import { columnSummary } from '../common/components/config_panel';
-import { IndexPatternPanel } from '../common/components/index_pattern_panel';
-import { Axis, selectColumn, ViewModel } from '../common/lib';
+import { columnSummary } from '../public/common/components/config_panel';
+import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
+import { Axis, selectColumn, ViewModel } from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
 interface PieChartPrivateState {
