@@ -134,7 +134,6 @@
     "common.ui.aggTypes.extendedBounds.minLabel.optionalText": "（可选）",
     "common.ui.aggTypes.extendedBoundsLabel": "扩展的边界",
     "common.ui.aggTypes.extendedBoundsTooltip": "“最小值”和“最大值”不会筛选结果，而会扩展结果集的边界",
-    "common.ui.aggTypes.field.aggregationFieldTitle": "聚合字段",
     "common.ui.aggTypes.field.fieldLabel": "字段",
     "common.ui.aggTypes.field.selectFieldPlaceholder": "选择字段",
     "common.ui.aggTypes.filters.addFilterButtonLabel": "添加筛选",
