@@ -103,6 +103,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/saved_objects_management'),
       resolve(__dirname, './apps/dev_tools'),
+      resolve(__dirname, './apps/apm'),
       resolve(__dirname, './apps/index_patterns')
     ],
 
@@ -237,6 +238,9 @@ export default async function ({ readConfigFile }) {
       rollupJob: {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/rollup_jobs/'
+      },
+      apm: {
+        pathname: '/app/apm',
       }
     },
 

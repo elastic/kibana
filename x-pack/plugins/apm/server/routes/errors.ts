@@ -31,7 +31,8 @@ export function initErrorsApi(server: Server) {
           sortField: Joi.string(),
           sortDirection: Joi.string()
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -56,7 +57,8 @@ export function initErrorsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -82,7 +84,8 @@ export function initErrorsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: distributionHandler
   });
@@ -93,7 +96,8 @@ export function initErrorsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: distributionHandler
   });

@@ -86,7 +86,16 @@ export function apm(kibana: any) {
         catalogue: ['apm'],
         privileges: {
           all: {
-            grantWithBaseRead: true,
+            api: ['apm'],
+            catalogue: ['apm'],
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: ['show']
+          },
+          read: {
+            api: ['apm'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
@@ -94,11 +103,7 @@ export function apm(kibana: any) {
             },
             ui: ['show']
           }
-        },
-        privilegesTooltip: i18n.translate('xpack.apm.privileges.tooltip', {
-          defaultMessage:
-            'A role with access to the apm-* indicies should be assigned to users to grant access'
-        })
+        }
       });
       initTransactionGroupsApi(server);
       initTracesApi(server);
