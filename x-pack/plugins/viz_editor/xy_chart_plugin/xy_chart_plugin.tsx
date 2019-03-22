@@ -11,7 +11,7 @@ import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
 import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
-import { Axis, selectColumn, ViewModel } from '../public/common/lib';
+import { Axis, selectColumn, UnknownVisModel, VisModel } from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
 interface XyChartPrivateState {
@@ -20,25 +20,25 @@ interface XyChartPrivateState {
   displayType?: 'line' | 'area';
 }
 
-type XyChartViewModel = ViewModel<'xyChart', XyChartPrivateState>;
+type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
 
-function dataPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyChartViewModel>) {
+function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   return (
     <IndexPatternPanel
-      indexPatterns={viewModel.indexPatterns}
+      indexPatterns={visModel.indexPatterns}
       onChangeIndexPatterns={indexPatterns => {
-        onChangeViewModel({ ...viewModel, indexPatterns });
+        onChangeVisModel({ ...visModel, indexPatterns });
       }}
     />
   );
 }
 
-function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyChartViewModel>) {
+function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   const {
     private: {
       xyChart: { xAxis, yAxis, displayType },
     },
-  } = viewModel;
+  } = visModel;
   return (
     <>
       <div className="configPanel-axis">
@@ -56,44 +56,44 @@ function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<XyCha
           ]}
           valueOfSelected={displayType || 'line'}
           onChange={(value: string) => {
-            const updatedViewModel = setWith(
-              clone(viewModel),
+            const updatedVisModel = setWith(
+              clone(visModel),
               'private.xyChart.displayType',
               value,
               clone
             );
-            onChangeViewModel(updatedViewModel);
+            onChangeVisModel(updatedVisModel);
           }}
         />
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Y-axis</span>
         {yAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, viewModel))}</span>
+          <span>{columnSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">X-axis</span>
         {xAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, viewModel))}</span>
+          <span>{columnSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
     </>
   );
 }
 
-function toExpression(viewState: XyChartViewModel) {
+function toExpression(viewState: XyChartVisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
   return `sample_data | xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
-function prefillPrivateState(viewModel: ViewModel<string, unknown>, displayType?: string) {
-  if (viewModel.private.xyChart) {
+function prefillPrivateState(visModel: UnknownVisModel, displayType?: string) {
+  if (visModel.private.xyChart) {
     if (displayType) {
-      return setWith(clone(viewModel), 'private.xyChart.displayType', displayType, clone);
+      return setWith(clone(visModel), 'private.xyChart.displayType', displayType, clone);
     } else {
-      return viewModel;
+      return visModel;
     }
   }
 
@@ -101,9 +101,9 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>, displayType?
   const xAxisRef = 'q1_0';
   const yAxisRef = 'q1_1';
 
-  if (viewModel.queries.q1!.select.q1_0 && viewModel.queries.q1!.select.q1_1) {
+  if (visModel.queries.q1!.select.q1_0 && visModel.queries.q1!.select.q1_1) {
     return setWith(
-      clone(viewModel),
+      clone(visModel),
       'private.xyChart',
       {
         xAxis: { columns: [xAxisRef] },
@@ -113,7 +113,7 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>, displayType?
     );
   } else {
     return setWith(
-      clone(viewModel),
+      clone(visModel),
       'private.xyChart',
       {
         xAxis: { columns: [] as string[] },
@@ -129,29 +129,29 @@ const displayTypeIcon = {
   area: 'visArea',
 };
 
-function getSuggestion(viewModel: XyChartViewModel, displayType: 'line' | 'area', title: string) {
-  const prefilledViewModel = prefillPrivateState(
-    viewModel as ViewModel<string, unknown>,
+function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', title: string) {
+  const prefilledVisModel = prefillPrivateState(
+    visModel as UnknownVisModel,
     displayType
-  ) as XyChartViewModel;
+  ) as XyChartVisModel;
   return {
-    previewExpression: toExpression(prefilledViewModel),
+    previewExpression: toExpression(prefilledVisModel),
     score: 0.5,
-    viewModel: prefilledViewModel,
+    visModel: prefilledVisModel,
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: 'xy_chart',
   };
 }
 
-export const config: EditorPlugin<XyChartViewModel> = {
+export const config: EditorPlugin<XyChartVisModel> = {
   name: 'xy_chart',
   toExpression,
   DataPanel: dataPanel,
   ConfigPanel: configPanel,
-  getSuggestions: viewModel => [
-    getSuggestion(viewModel, 'line', 'Standard line chart'),
-    getSuggestion(viewModel, 'area', 'Standard area chart'),
+  getSuggestions: visModel => [
+    getSuggestion(visModel, 'line', 'Standard line chart'),
+    getSuggestion(visModel, 'area', 'Standard area chart'),
   ],
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),

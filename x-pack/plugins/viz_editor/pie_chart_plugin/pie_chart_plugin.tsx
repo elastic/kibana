@@ -11,7 +11,7 @@ import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
 import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
-import { Axis, selectColumn, ViewModel } from '../public/common/lib';
+import { Axis, selectColumn, UnknownVisModel, VisModel } from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
 interface PieChartPrivateState {
@@ -19,44 +19,44 @@ interface PieChartPrivateState {
   angleAxis: Axis;
 }
 
-type PieChartViewModel = ViewModel<'pieChart', PieChartPrivateState>;
+type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
 
-function dataPanel({ viewModel, onChangeViewModel }: PanelComponentProps<PieChartViewModel>) {
+function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   return (
     <IndexPatternPanel
-      indexPatterns={viewModel.indexPatterns}
+      indexPatterns={visModel.indexPatterns}
       onChangeIndexPatterns={indexPatterns => {
-        onChangeViewModel({ ...viewModel, indexPatterns });
+        onChangeVisModel({ ...visModel, indexPatterns });
       }}
     />
   );
 }
 
-function configPanel({ viewModel, onChangeViewModel }: PanelComponentProps<PieChartViewModel>) {
+function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   const {
     private: {
       pieChart: { sliceAxis, angleAxis },
     },
-  } = viewModel;
+  } = visModel;
   return (
     <>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Slice pie by</span>
         {sliceAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, viewModel))}</span>
+          <span>{columnSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Size slices by</span>
         {angleAxis.columns.map(col => (
-          <span>{columnSummary(selectColumn(col, viewModel))}</span>
+          <span>{columnSummary(selectColumn(col, visModel))}</span>
         ))}
       </div>
     </>
   );
 }
 
-function toExpression(viewState: PieChartViewModel) {
+function toExpression(viewState: PieChartVisModel) {
   const legacyConfig = {
     type: 'pie',
     addTooltip: true,
@@ -100,18 +100,18 @@ function toExpression(viewState: PieChartViewModel) {
   return `sample_data | pie_chart | kibana_pie visConfig='${JSON.stringify(legacyConfig)}'`;
 }
 
-function prefillPrivateState(viewModel: ViewModel<string, unknown>) {
-  if (viewModel.private.pieChart) {
-    return viewModel;
+function prefillPrivateState(visModel: UnknownVisModel) {
+  if (visModel.private.pieChart) {
+    return visModel;
   }
 
   // TODO we maybe need a more stable way to get these
   const xAxisRef = 'q1_0';
   const yAxisRef = 'q1_1';
 
-  if (viewModel.queries.q1!.select.q1_0 && viewModel.queries.q1!.select.q1_1) {
+  if (visModel.queries.q1!.select.q1_0 && visModel.queries.q1!.select.q1_1) {
     return setWith(
-      clone(viewModel),
+      clone(visModel),
       'private.pieChart',
       {
         sliceAxis: { columns: [xAxisRef] },
@@ -121,7 +121,7 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>) {
     );
   } else {
     return setWith(
-      clone(viewModel),
+      clone(visModel),
       'private.pieChart',
       {
         sliceAxis: { columns: [] as string[] },
@@ -132,27 +132,24 @@ function prefillPrivateState(viewModel: ViewModel<string, unknown>) {
   }
 }
 
-function getSuggestion(viewModel: PieChartViewModel) {
-  const prefilledViewModel = prefillPrivateState(viewModel as ViewModel<
-    string,
-    unknown
-  >) as PieChartViewModel;
+function getSuggestion(visModel: PieChartVisModel) {
+  const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as PieChartVisModel;
   return {
     pluginName: 'pie_chart',
-    previewExpression: toExpression(prefilledViewModel),
+    previewExpression: toExpression(prefilledVisModel),
     score: 0.5,
-    viewModel: prefilledViewModel,
+    visModel: prefilledVisModel,
     title: 'Standard Pie Chart',
     iconType: 'visPie',
   };
 }
 
-export const config: EditorPlugin<PieChartViewModel> = {
+export const config: EditorPlugin<PieChartVisModel> = {
   name: 'pie_chart',
   toExpression,
   DataPanel: dataPanel,
   ConfigPanel: configPanel,
-  getSuggestions: viewModel => [getSuggestion(viewModel)],
+  getSuggestions: visModel => [getSuggestion(visModel)],
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
 };

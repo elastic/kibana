@@ -19,7 +19,7 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, ViewModel } from '../../common/lib';
+import { initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
 import 'brace/ext/language_tools';
@@ -32,42 +32,48 @@ import { registry } from '../../editor_plugin_registry';
 type Action =
   | { type: 'loaded' }
   | { type: 'loadError'; message: string }
-  | { type: 'updateViewModel'; newState: ViewModel };
+  | { type: 'updateVisModel'; newState: VisModel };
 
 export interface MainProps {
   getInterpreter: () => Promise<{ interpreter: any }>;
   renderersRegistry: any;
 }
 
-function reducer(state: ViewModel, action: Action): ViewModel {
+export interface RootState {
+  visModel: VisModel;
+  // TODO stuff like dirt and valid will go in here
+  metadata: {};
+}
+
+function reducer(state: RootState, action: Action): RootState {
   switch (action.type) {
-    case 'updateViewModel':
+    case 'updateVisModel':
       // TODO this is the place where we can hook in an undo/redo history later
-      return action.newState;
+      return { ...state, visModel: action.newState };
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
   }
 }
 
 export function Main(props: MainProps) {
-  const [state, dispatch] = useReducer(reducer, initialState());
+  const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
 
   const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
-    state.editorPlugin
+    state.visModel.editorPlugin
   );
 
-  const onChangeViewModel = (newState: ViewModel) => {
-    dispatch({ type: 'updateViewModel', newState });
+  const onChangeVisModel = (newState: VisModel) => {
+    dispatch({ type: 'updateVisModel', newState });
   };
 
   const panelProps = {
-    viewModel: state,
-    onChangeViewModel,
+    visModel: state.visModel,
+    onChangeVisModel,
   };
 
-  const expression = toExpression(state, 'edit');
+  const expression = toExpression(state.visModel, 'edit');
 
-  const suggestions = registry.getAll().flatMap(plugin => plugin.getSuggestions(state));
+  const suggestions = registry.getAll().flatMap(plugin => plugin.getSuggestions(state.visModel));
 
   return (
     <EuiPage>
@@ -118,8 +124,8 @@ export function Main(props: MainProps) {
               label={suggestion.title}
               iconType={suggestion.iconType}
               onClick={() => {
-                onChangeViewModel({
-                  ...suggestion.viewModel,
+                onChangeVisModel({
+                  ...suggestion.visModel,
                   editorPlugin: suggestion.pluginName,
                 });
               }}

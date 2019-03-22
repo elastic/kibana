@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ViewModel } from '../public/common/lib';
+import { UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from '../pie_chart_plugin';
 import { config as xyChartConfig } from '../xy_chart_plugin';
 
-export interface PanelComponentProps<S extends ViewModel = ViewModel> {
-  viewModel: S;
-  onChangeViewModel: (newState: S) => void;
+export interface PanelComponentProps<S extends VisModel = VisModel> {
+  visModel: S;
+  onChangeVisModel: (newState: S) => void;
 }
 
-export interface Suggestion<S extends ViewModel = ViewModel> {
+export interface Suggestion<S extends VisModel = VisModel> {
   pluginName: string;
   previewExpression: string;
   score: number;
-  viewModel: S;
+  visModel: S;
   title: string;
   iconType: string;
 }
@@ -32,15 +32,15 @@ export interface Suggestion<S extends ViewModel = ViewModel> {
  *    Also contains a score which is used to sort the suggestions from all plugins
  */
 
-export interface EditorPlugin<S extends ViewModel = ViewModel> {
+export interface EditorPlugin<S extends VisModel = VisModel> {
   name: string;
   DataPanel: React.ComponentType<PanelComponentProps<S>>;
   ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
   HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
-  toExpression: (viewModel: S, mode: 'view' | 'edit') => string;
-  getSuggestions: (viewModel: S) => Array<Suggestion<S>>;
-  getInitialState: (viewModel: ViewModel<string, unknown>) => ViewModel<string, unknown>;
+  toExpression: (visModel: S, mode: 'view' | 'edit') => string;
+  getSuggestions: (visModel: S) => Array<Suggestion<S>>;
+  getInitialState: (visModel: UnknownVisModel) => UnknownVisModel;
 }
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {

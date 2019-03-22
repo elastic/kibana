@@ -34,7 +34,7 @@ export interface SumOperation {
 
 export type QueryColumn = DateHistogramOperation | SumOperation;
 
-export interface QueryViewModel {
+export interface VisModelQuery {
   indexPattern: string;
   select: {
     [id: string]: QueryColumn;
@@ -55,17 +55,20 @@ export interface IndexPatterns {
  * The basic properties which are shared over all editor plugins
  * are defined here, anything else is in the private property and scoped by plugin
  */
-export interface ViewModel<K extends string = any, T = any> {
+export interface VisModel<K extends string = any, T = any> {
   indexPatterns: IndexPatterns | null;
   queries: {
-    [id: string]: QueryViewModel;
+    [id: string]: VisModelQuery;
   };
   editorPlugin: string;
   title: string;
   private: { [key in K]: T };
 }
 
-export function selectColumn(id: string, model: ViewModel) {
+// This type should be used if it is not known which private states exist on a VisModel
+export type UnknownVisModel = VisModel<string, unknown>;
+
+export function selectColumn(id: string, model: VisModel) {
   const [queryId] = id.split('_');
   const query = model.queries[queryId];
 
@@ -73,7 +76,7 @@ export function selectColumn(id: string, model: ViewModel) {
 }
 
 // Generate our dummy-data
-export function initialState(): ViewModel<any, any> {
+export function initialState(): VisModel<any, any> {
   return {
     indexPatterns: null,
     queries: {
