@@ -39,4 +39,28 @@ describe('getFilteredQueryAndStatusFilter', () => {
     const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     expect(result).toMatchSnapshot();
   });
+
+  it('handles term query ', () => {
+    filters = `{"bool":{"must":[{"term":{"down":true}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('handles simple_query_string', () => {
+    filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('handles must_not queries', () => {
+    filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}},{"range":{"monitor.duration.ms":{"lt":100}}}],"must_not":[{"simple_query_string":{"query":"production"}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
+
+  it('handles must and must_not queries with a status filter', () => {
+    filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}},{"match":{"monitor.status":{"query":"up","operator":"and"}}},{"range":{"monitor.duration.us":{"lt":2000}}}],"must_not":[{"simple_query_string":{"query":"production"}},{"term":{"down":true}}]}}`;
+    const result = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    expect(result).toMatchSnapshot();
+  });
 });

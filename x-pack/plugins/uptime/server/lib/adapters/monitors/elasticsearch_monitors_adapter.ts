@@ -16,7 +16,7 @@ import {
   MonitorSeriesPoint,
   Ping,
 } from '../../../../common/graphql/types';
-import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
+import { dropLatestBucket, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 
@@ -425,7 +425,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
-    const query = getFilteredQuery(dateRangeStart, dateRangeEnd, filters);
+    const { query } = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     if (get(query, 'bool.filter', undefined)) {
       query.bool.filter.push(statusDown);
     } else {

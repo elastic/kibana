@@ -1,5 +1,200 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFilteredQueryAndStatusFilter handles must and must_not queries with a status filter 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "error.type",
+              "monitor.id",
+              "monitor.name",
+              "monitor.status",
+              "monitor.type",
+              "monitor.url",
+              "url.domain",
+              "url.full",
+              "url.path",
+              "url.scheme",
+            ],
+            "query": "http",
+          },
+        },
+        Object {
+          "range": Object {
+            "monitor.duration.us": Object {
+              "lt": 2000,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+      "must_not": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "error.type",
+              "monitor.id",
+              "monitor.name",
+              "monitor.status",
+              "monitor.type",
+              "monitor.url",
+              "url.domain",
+              "url.full",
+              "url.path",
+              "url.scheme",
+            ],
+            "query": "production",
+          },
+        },
+        Object {
+          "term": Object {
+            "down": true,
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": "up",
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles must_not queries 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "error.type",
+              "monitor.id",
+              "monitor.name",
+              "monitor.status",
+              "monitor.type",
+              "monitor.url",
+              "url.domain",
+              "url.full",
+              "url.path",
+              "url.scheme",
+            ],
+            "query": "http",
+          },
+        },
+        Object {
+          "range": Object {
+            "monitor.duration.ms": Object {
+              "lt": 100,
+            },
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+      "must_not": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "error.type",
+              "monitor.id",
+              "monitor.name",
+              "monitor.status",
+              "monitor.type",
+              "monitor.url",
+              "url.domain",
+              "url.full",
+              "url.path",
+              "url.scheme",
+            ],
+            "query": "production",
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles simple_query_string 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "error.type",
+              "monitor.id",
+              "monitor.name",
+              "monitor.status",
+              "monitor.type",
+              "monitor.url",
+              "url.domain",
+              "url.full",
+              "url.path",
+              "url.scheme",
+            ],
+            "query": "http",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+      "must_not": Array [],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
+exports[`getFilteredQueryAndStatusFilter handles term query  1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "down": true,
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+      "must_not": Array [],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
 exports[`getFilteredQueryAndStatusFilter returns a range + id filter when status filter is absent 1`] = `
 Object {
   "query": Object {
@@ -22,6 +217,7 @@ Object {
           },
         },
       ],
+      "must_not": Array [],
     },
   },
   "statusFilter": undefined,
@@ -50,6 +246,7 @@ Object {
           },
         },
       ],
+      "must_not": Array [],
     },
   },
   "statusFilter": "down",
@@ -70,6 +267,8 @@ Object {
           },
         },
       ],
+      "must": Array [],
+      "must_not": Array [],
     },
   },
   "statusFilter": "down",
@@ -92,6 +291,5 @@ Object {
       ],
     },
   },
-  "statusFilter": undefined,
 }
 `;
