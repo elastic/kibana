@@ -27,7 +27,12 @@ export const kibanaDatatable = () => ({
       return {
         type: 'kibana_datatable',
         rows: context.rows,
-        columns: context.columns,
+        columns: context.columns.map(column => {
+          return {
+            id: column.name,
+            name: column.name,
+          };
+        }),
       };
     },
     pointseries: context => {
