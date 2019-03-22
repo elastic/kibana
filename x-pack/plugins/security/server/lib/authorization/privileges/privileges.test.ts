@@ -746,6 +746,7 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
+        actions.allHack,
       ]);
       expect(actual).toHaveProperty(`${group}.read`, [actions.login, actions.version]);
     });
