@@ -2,13 +2,6 @@
 @import '@elastic/eui/src/components/tool_tip/mixins';
 
 .tvbVisTimeSeries {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1 0 auto;
-}
-
-.tvbVisTimeSeries__content {
   position: absolute;
   top: 0;
   right: 0;
@@ -18,28 +11,6 @@
   flex: 1 0 auto;
   // TODO: Remove once tooltips are portaled
   overflow: visible; // Ensures the tooltip doesn't cause scrollbars
-}
-
-.tvbVisTimeSeries__visualization {
-  cursor: crosshair;
-  display: flex;
-  flex-direction: column;
-  flex: 1 0 auto;
-  position: relative;
-
-  > .tvbVisTimeSeries__container {
-    min-width: 1px;
-    width: 100%;
-    height: 100%;
-  }
-}
-
-.tvbVisTimeSeries__container {
-  @include euiFontSizeXS;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex: 1 0 auto;
 }
 
 .tvbVisTimeSeries__axisLabel {
