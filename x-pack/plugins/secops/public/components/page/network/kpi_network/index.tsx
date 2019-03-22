@@ -9,7 +9,6 @@ import {
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTextAlign,
 } from '@elastic/eui';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -28,12 +27,24 @@ interface KpiNetworkProps {
 }
 
 interface CardItemProps {
-  isLoading: boolean;
-  title: JSX.Element;
+  field: NestedCardItemProps[] | string;
   description: string;
+  data?: KpiNetworkData;
 }
 
-const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
+interface NestedCardItemProps {
+  field: string;
+  description: string;
+  data?: KpiNetworkData;
+}
+
+interface CardItemListProps extends CardItemProps {
+  isLoading: boolean;
+  key: string;
+}
+
+const createTitle = (isLoading: boolean, field: string, data: KpiNetworkData) => {
+  const title: number = get(field, data);
   return isLoading ? (
     <EuiLoadingSpinner size="m" />
   ) : title != null ? (
@@ -43,60 +54,81 @@ const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined)
   );
 };
 
-const CardItem = pure<CardItemProps>(({ title, description }) => {
+const createMultipleTitles = (
+  isLoading: boolean,
+  field: NestedCardItemProps[],
+  data: KpiNetworkData
+) => {
+  return (
+    <div>
+      {field.map(content => {
+        const secondaryField: string = get('field', content);
+        return (
+          <EuiFlexGroup key={content.description} gutterSize="s" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>{createTitle(isLoading, secondaryField, data)}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{content.description}</EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      })}
+    </div>
+  );
+};
+
+const CardItem = pure<CardItemListProps>(({ field, description, isLoading, data }) => {
   return (
     <EuiFlexItem key={description}>
-      <EuiCard title={title} description={description} />
+      {
+        <EuiCard
+          title={
+            !Array.isArray(field)
+              ? createTitle(isLoading, field, data!)
+              : createMultipleTitles(isLoading, field, data!)
+          }
+          description={description}
+        />
+      }
     </EuiFlexItem>
   );
 });
 
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
-  const kpiNetworkCards = [
-    {
-      description: get('NETWORK_EVENTS', i18n),
-      title: <>{fieldTitleMapping(loading, get('networkEvents', data))}</>,
-    },
-    {
-      property: 'uniqueFlowId',
-      description: get('UNIQUE_ID', i18n),
-      title: <>{fieldTitleMapping(loading, get('uniqueFlowId', data))}</>,
-    },
-    {
-      property: 'activeAgents',
-      description: get('ACTIVE_AGENTS', i18n),
-      title: <>{fieldTitleMapping(loading, get('activeAgents', data))}</>,
-    },
-    {
-      property: 'uniquePrivateIps',
-      description: get('UNIQUE_PRIVATE_IPS', i18n),
-      title: (
-        <div>
-          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {fieldTitleMapping(loading, get('uniqueSourcePrivateIps', data))}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{get('UNIQUE_SOURCE_PRIVATE_IPS', i18n)}</EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              {fieldTitleMapping(loading, get('uniqueDestinationPrivateIps', data))}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{get('UNIQUE_DESTINATION_PRIVATE_IPS', i18n)}</EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-      ),
-    },
-  ];
+const fieldTitleMapping: CardItemProps[] = [
+  {
+    field: 'networkEvents',
+    description: i18n.NETWORK_EVENTS,
+  },
+  {
+    field: 'uniqueFlowId',
+    description: i18n.UNIQUE_ID,
+  },
+  {
+    field: 'activeAgents',
+    description: i18n.ACTIVE_AGENTS,
+  },
+  {
+    field: [
+      {
+        field: 'uniqueSourcePrivateIps',
+        description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
+      },
+      {
+        field: 'uniqueDestinationPrivateIps',
+        description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
+      },
+    ],
+    description: i18n.UNIQUE_PRIVATE_IPS,
+  },
+];
 
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
   return (
     <EuiFlexGroup>
-      {kpiNetworkCards.map(card => (
+      {fieldTitleMapping.map(card => (
         <CardItem
-          key={card.description}
+          key={`kpi-summary-${card.description}`}
           isLoading={loading}
           description={card.description}
-          title={card.title}
+          field={card.field}
+          data={data}
         />
       ))}
     </EuiFlexGroup>
