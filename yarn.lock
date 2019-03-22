@@ -822,10 +822,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.4.2":
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.4.2.tgz#530ec18f9b1cb3972824a707cc0cb3005c6c5028"
-  integrity sha512-2fH+WiYYq1tPn5mEvg5NR5b9TjVYY0cM26HPERMRMZyAenGFQtjhansO8qFlTl/MAYz5GsQ7ejgdtzu095opdw==
+"@elastic/eui@9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.5.0.tgz#233b4722b0cd2506793472ec1c6b97640a365229"
+  integrity sha512-LXtCNJxdbH6+ajb1x0/AvEAnpdNMQzlDubj+yqP8XShNiNBPMa3M7Hzdb5iSPJ4TL/EPuGrUQbMPx4aZNKLc1g==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -18120,6 +18120,11 @@ pngjs@3.3.1, pngjs@^3.0.0:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.3.1.tgz#8e14e6679ee7424b544334c3b2d21cea6d8c209a"
   integrity sha512-ggXCTsqHRIsGMkHlCEhbHhUmNTA2r1lpkE0NL4Q9S8spkXbm4vE9TVmPso2AGYn90Gltdz8W5CyzhcIGg2Gejg==
+
+pngjs@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/pngjs/-/pngjs-3.4.0.tgz#99ca7d725965fb655814eaf65f38f12bbdbf555f"
+  integrity sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==
 
 podium@3.x.x:
   version "3.1.2"

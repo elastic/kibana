@@ -29,12 +29,6 @@ export const kibanaMarkdown = () => ({
     defaultMessage: 'Markdown visualization'
   }),
   args: {
-    expression: {
-      types: ['string'],
-      aliases: [ '_' ],
-      default: '',
-      help: 'markdown',
-    },
     visConfig: {
       types: ['string'],
       default: '"{}"',
@@ -48,7 +42,6 @@ export const kibanaMarkdown = () => ({
       value: {
         visType: 'markdown',
         visConfig: {
-          markdown: args.spec,
           ...params,
         },
       }

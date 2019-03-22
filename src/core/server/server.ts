@@ -20,7 +20,7 @@
 import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { ElasticsearchModule } from './elasticsearch';
-import { HttpConfig, HttpModule, HttpServerInfo } from './http';
+import { HttpConfig, HttpModule, HttpServiceSetup } from './http';
 import { LegacyCompatModule } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsModule } from './plugins';
@@ -43,29 +43,29 @@ export class Server {
     this.elasticsearch = new ElasticsearchModule(core);
   }
 
-  public async start() {
-    this.log.debug('starting server');
+  public async setup() {
+    this.log.debug('setting up server');
 
-    // We shouldn't start http service in two cases:
+    // We shouldn't set up http service in two cases:
     // 1. If `server.autoListen` is explicitly set to `false`.
     // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be started instead.
-    let httpStart: HttpServerInfo | undefined;
+    // will fork a dedicated process where http service will be set up instead.
+    let httpSetup: HttpServiceSetup | undefined;
     const httpConfig = await this.http.config$.pipe(first()).toPromise();
     if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpStart = await this.http.service.start();
+      httpSetup = await this.http.service.setup();
     }
 
-    const elasticsearchServiceStart = await this.elasticsearch.service.start();
+    const elasticsearchServiceSetup = await this.elasticsearch.service.setup();
 
-    const pluginsStart = await this.plugins.service.start({
-      elasticsearch: elasticsearchServiceStart,
+    const pluginsSetup = await this.plugins.service.setup({
+      elasticsearch: elasticsearchServiceSetup,
     });
 
-    await this.legacy.service.start({
-      elasticsearch: elasticsearchServiceStart,
-      http: httpStart,
-      plugins: pluginsStart,
+    await this.legacy.service.setup({
+      elasticsearch: elasticsearchServiceSetup,
+      http: httpSetup,
+      plugins: pluginsSetup,
     });
   }
 
