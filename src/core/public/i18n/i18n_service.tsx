@@ -27,7 +27,7 @@ import { I18nProvider } from '@kbn/i18n/react';
  * Service that is responsible for i18n capabilities.
  */
 export class I18nService {
-  public start() {
+  public setup() {
     const mapping = {
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
@@ -54,4 +54,4 @@ export class I18nService {
   }
 }
 
-export type I18nStart = ReturnType<I18nService['start']>;
+export type I18nSetup = ReturnType<I18nService['setup']>;

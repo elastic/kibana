@@ -24,5 +24,5 @@ export {
   DiscoveredPlugin,
   PluginInitializerContext,
   PluginName,
-  PluginStartContext,
+  PluginSetupContext,
 } from './plugins';
