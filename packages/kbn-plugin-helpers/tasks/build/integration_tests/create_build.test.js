@@ -27,6 +27,9 @@ const PLUGIN = require('../../../lib/plugin_config')(PLUGIN_FIXTURE);
 const PLUGIN_BUILD_DIR = resolve(PLUGIN_FIXTURE, 'build');
 const PLUGIN_BUILD_TARGET = resolve(PLUGIN_BUILD_DIR, 'kibana', PLUGIN.id);
 
+const SECOND = 1000;
+jest.setTimeout(30 * SECOND);
+
 beforeEach(() => del(PLUGIN_BUILD_DIR));
 afterEach(() => del(PLUGIN_BUILD_DIR));
 
