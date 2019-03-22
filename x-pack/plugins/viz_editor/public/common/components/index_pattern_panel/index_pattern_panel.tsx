@@ -24,13 +24,13 @@ interface Props {
 }
 
 interface State {
-  selectedIndexId: string;
+  selectedIndexPatternId: string;
 }
 
 function initialState(): State {
   const settingsClient = chrome.getUiSettingsClient();
   return {
-    selectedIndexId: settingsClient.get('defaultIndex') || '',
+    selectedIndexPatternId: settingsClient.get('defaultIndex') || '',
   };
 }
 
@@ -53,7 +53,7 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
         );
 
         setState({
-          selectedIndexId: state.selectedIndexId || loadedIndexPatterns[0].id,
+          selectedIndexPatternId: state.selectedIndexPatternId || loadedIndexPatterns[0].id,
         });
       });
     },
@@ -64,7 +64,7 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPattern = indexPatterns[state.selectedIndexId];
+  const indexPattern = indexPatterns[state.selectedIndexPatternId];
 
   if (!indexPattern) {
     return <div>TODO... index pattern chooser...</div>;
@@ -80,11 +80,11 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     <>
       <EuiSuperSelect
         options={indexPatternNames}
-        valueOfSelected={state.selectedIndexId}
+        valueOfSelected={state.selectedIndexPatternId}
         onChange={(value: string) => {
           setState({
             ...state,
-            selectedIndexId: value,
+            selectedIndexPatternId: value,
           });
         }}
       />

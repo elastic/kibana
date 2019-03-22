@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './constants';
-export * from './query_types';
+export const PLUGIN_ID = 'viz_editor';
+export const API_PREFIX = `/api/${PLUGIN_ID}`;

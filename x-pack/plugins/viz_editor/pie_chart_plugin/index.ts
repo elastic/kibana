@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './constants';
-export * from './query_types';
+export { registerPipeline } from './pie_chart_vis';
+export { config } from './pie_chart_plugin';

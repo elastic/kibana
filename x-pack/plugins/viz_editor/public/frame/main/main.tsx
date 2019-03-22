@@ -9,6 +9,9 @@ import {
   EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiListGroup,
+  // @ts-ignore
+  EuiListGroupItem,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -16,7 +19,8 @@ import {
   EuiPageSideBar,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
-import { initialState, ViewModel } from '../../../common/lib';
+import { initialState, VisModel } from '../../common/lib';
+import { ExpressionRenderer } from '../expression_renderer';
 
 import 'brace/ext/language_tools';
 import 'brace/mode/javascript';
@@ -28,48 +32,71 @@ import { registry } from '../../editor_plugin_registry';
 type Action =
   | { type: 'loaded' }
   | { type: 'loadError'; message: string }
-  | { type: 'updateViewModel'; newState: ViewModel };
+  | { type: 'updateVisModel'; newState: VisModel };
 
-function reducer(state: ViewModel, action: Action): ViewModel {
+export interface MainProps {
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: any;
+}
+
+export interface RootState {
+  visModel: VisModel;
+  // TODO stuff like dirt and valid will go in here
+  metadata: {};
+}
+
+function reducer(state: RootState, action: Action): RootState {
   switch (action.type) {
-    case 'updateViewModel':
+    case 'updateVisModel':
       // TODO this is the place where we can hook in an undo/redo history later
-      return action.newState;
+      return { ...state, visModel: action.newState };
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
   }
 }
 
-export function Main() {
-  const [state, dispatch] = useReducer(reducer, initialState());
+export function Main(props: MainProps) {
+  const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
 
-  const { ConfigPanel, DataPanel, toExpression } = registry.getByName(state.editorPlugin);
+  const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
+    state.visModel.editorPlugin
+  );
 
-  const onChangeViewModel = (newState: ViewModel) => {
-    dispatch({ type: 'updateViewModel', newState });
+  const onChangeVisModel = (newState: VisModel) => {
+    dispatch({ type: 'updateVisModel', newState });
   };
 
-  const expression = toExpression(state, 'edit');
+  const panelProps = {
+    visModel: state.visModel,
+    onChangeVisModel,
+  };
+
+  // TODO add a meaningful default expression builder implementation here
+  const expression = toExpression
+    ? toExpression(state.visModel, 'edit')
+    : `esquery { query } | ${state.visModel.editorPlugin}_chart { config }`;
+
+  const suggestions = registry
+    .getAll()
+    .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
 
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <DataPanel viewModel={state} onChangeViewModel={onChangeViewModel} />
+        <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
         <EuiPageContent>
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
-                The expression will be rendered here: {expression}
-                {/* TODO execute the expression and render it to a node inside here 
-                  This will be something along these lines:
-                    ```const response = await runInterpreter(expression, { some: 1 });
-                        // response.type === 'render'
-                        if (resposne.type === 'render') {
-                          rendersRegistry.get(rensponse.as).render(domElement, response);
-                        }```
-                */}
+                {WorkspacePanel ? (
+                  <WorkspacePanel {...panelProps}>
+                    <ExpressionRenderer {...props} expression={expression} />
+                  </WorkspacePanel>
+                ) : (
+                  <ExpressionRenderer {...props} expression={expression} />
+                )}
               </EuiFlexItem>
               <EuiFlexItem>
                 {/* TODO as soon as something changes here, switch to the "expression"-editor */}
@@ -93,8 +120,23 @@ export function Main() {
         </EuiPageContent>
       </EuiPageBody>
       <EuiPageSideBar>
-        <ConfigPanel viewModel={state} onChangeViewModel={onChangeViewModel} />
-        {/* TODO get suggestion scores from all of the plugins and display top 3 or something here */}
+        <ConfigPanel {...panelProps} />
+        <h4>Suggestions</h4>
+        <EuiListGroup>
+          {suggestions.map((suggestion, i) => (
+            <EuiListGroupItem
+              key={i}
+              label={suggestion.title}
+              iconType={suggestion.iconType}
+              onClick={() => {
+                onChangeVisModel({
+                  ...suggestion.visModel,
+                  editorPlugin: suggestion.pluginName,
+                });
+              }}
+            />
+          ))}
+        </EuiListGroup>
       </EuiPageSideBar>
     </EuiPage>
   );
