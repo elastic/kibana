@@ -44,7 +44,7 @@ describe('#getKibanaBuildNumber', () => {
   });
 });
 
-describe('start.getCspConfig()', () => {
+describe('setup.getCspConfig()', () => {
   it('returns injectedMetadata.csp', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
@@ -54,7 +54,7 @@ describe('start.getCspConfig()', () => {
       },
     } as any);
 
-    const contract = injectedMetadata.start();
+    const contract = injectedMetadata.setup();
     expect(contract.getCspConfig()).toEqual({
       warnLegacyBrowsers: true,
     });
@@ -69,7 +69,7 @@ describe('start.getCspConfig()', () => {
       },
     } as any);
 
-    const csp = injectedMetadata.start().getCspConfig();
+    const csp = injectedMetadata.setup().getCspConfig();
     expect(() => {
       // @ts-ignore TS knows this shouldn't be possible
       csp.warnLegacyBrowsers = false;
@@ -77,7 +77,7 @@ describe('start.getCspConfig()', () => {
   });
 });
 
-describe('start.getPlugins()', () => {
+describe('setup.getPlugins()', () => {
   it('returns injectedMetadata.uiPlugins', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
@@ -85,7 +85,7 @@ describe('start.getPlugins()', () => {
       },
     } as any);
 
-    const plugins = injectedMetadata.start().getPlugins();
+    const plugins = injectedMetadata.setup().getPlugins();
     expect(plugins).toEqual([{ id: 'plugin-1', plugin: {} }, { id: 'plugin-2', plugin: {} }]);
   });
 
@@ -96,7 +96,7 @@ describe('start.getPlugins()', () => {
       },
     } as any);
 
-    const plugins = injectedMetadata.start().getPlugins();
+    const plugins = injectedMetadata.setup().getPlugins();
     expect(() => {
       plugins.pop();
     }).toThrowError();
@@ -114,7 +114,7 @@ describe('start.getPlugins()', () => {
   });
 });
 
-describe('start.getLegacyMetadata()', () => {
+describe('setup.getLegacyMetadata()', () => {
   it('returns injectedMetadata.legacyMetadata', () => {
     const injectedMetadata = new InjectedMetadataService({
       injectedMetadata: {
@@ -122,7 +122,7 @@ describe('start.getLegacyMetadata()', () => {
       },
     } as any);
 
-    const contract = injectedMetadata.start();
+    const contract = injectedMetadata.setup();
     expect(contract.getLegacyMetadata()).toBe('foo');
   });
 
@@ -135,7 +135,7 @@ describe('start.getLegacyMetadata()', () => {
       },
     } as any);
 
-    const legacyMetadata = injectedMetadata.start().getLegacyMetadata();
+    const legacyMetadata = injectedMetadata.setup().getLegacyMetadata();
     expect(legacyMetadata).toEqual({
       foo: true,
     });
@@ -146,9 +146,9 @@ describe('start.getLegacyMetadata()', () => {
   });
 });
 
-describe('start.getInjectedVar()', () => {
+describe('setup.getInjectedVar()', () => {
   it('returns values from injectedMetadata.vars', () => {
-    const start = new InjectedMetadataService({
+    const setup = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -159,20 +159,20 @@ describe('start.getInjectedVar()', () => {
           },
         },
       },
-    } as any).start();
+    } as any).setup();
 
-    expect(start.getInjectedVar('foo')).toEqual({
+    expect(setup.getInjectedVar('foo')).toEqual({
       bar: '1',
     });
-    expect(start.getInjectedVar('foo.bar')).toBe('1');
-    expect(start.getInjectedVar('baz:box')).toEqual({
+    expect(setup.getInjectedVar('foo.bar')).toBe('1');
+    expect(setup.getInjectedVar('baz:box')).toEqual({
       foo: 2,
     });
-    expect(start.getInjectedVar('')).toBe(undefined);
+    expect(setup.getInjectedVar('')).toBe(undefined);
   });
 
   it('returns read-only values', () => {
-    const start = new InjectedMetadataService({
+    const setup = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -180,9 +180,9 @@ describe('start.getInjectedVar()', () => {
           },
         },
       },
-    } as any).start();
+    } as any).setup();
 
-    const foo: any = start.getInjectedVar('foo');
+    const foo: any = setup.getInjectedVar('foo');
     expect(() => {
       foo.bar = 2;
     }).toThrowErrorMatchingInlineSnapshot(
@@ -196,9 +196,9 @@ describe('start.getInjectedVar()', () => {
   });
 });
 
-describe('start.getInjectedVars()', () => {
+describe('setup.getInjectedVars()', () => {
   it('returns all injected vars, readonly', () => {
-    const start = new InjectedMetadataService({
+    const setup = new InjectedMetadataService({
       injectedMetadata: {
         vars: {
           foo: {
@@ -206,9 +206,9 @@ describe('start.getInjectedVars()', () => {
           },
         },
       },
-    } as any).start();
+    } as any).setup();
 
-    const vars: any = start.getInjectedVars();
+    const vars: any = setup.getInjectedVars();
     expect(() => {
       vars.foo = 2;
     }).toThrowErrorMatchingInlineSnapshot(
