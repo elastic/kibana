@@ -8,12 +8,12 @@
 @import '@elastic/eui/src/global_styling/variables/index';
 @import '@elastic/eui/src/global_styling/mixins/index';
 
-@import './mixins';
-
 // TEMP HACK FOR 7.0, will be fixed in EUI in 7.1+
 // Resets non EuiText headers font styles
 h1, h2, h3, h4, h5, h6, p {
-  font-family: $euiFontFamily;
+  font-family: inherit;
   font-weight: $euiFontWeightRegular;
   font-size: $euiFontSize;
 }
+
+@import './mixins';
