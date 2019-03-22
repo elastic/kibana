@@ -32,6 +32,10 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
+const corePublicPattern = './src/core/public/(?!utils|index).*';
+const coreServerPattern = './src/core/server/(?!index).*';
+const pluginsPublicPattern = './src/plugins/.*/public/(?!index).*';
+const pluginsServerPattern = './src/plugins/.*/server/(?!index).*';
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
   plugins: ['@kbn/eslint-plugin-eslint'],
@@ -47,6 +51,51 @@ module.exports = {
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
+    'import/no-restricted-paths': [
+      2,
+      {
+        zones: [
+          {
+            target: './src/legacy/.*js$',
+            from: [
+              corePublicPattern,
+              coreServerPattern,
+              pluginsPublicPattern,
+              pluginsServerPattern,
+            ],
+          },
+          {
+            target: './x-pack/(?!.*test).*js$',
+            from: [
+              corePublicPattern,
+              coreServerPattern,
+              pluginsPublicPattern,
+              pluginsServerPattern,
+            ],
+          },
+          {
+            target: './src/core/public/.*js$',
+            from: [coreServerPattern, pluginsPublicPattern, pluginsServerPattern],
+          },
+          {
+            target: './src/core/server/.*js$',
+            from: [corePublicPattern, pluginsPublicPattern, pluginsServerPattern],
+          },
+          {
+            target: './src/plugins/.*/public/.*js$',
+            from: [corePublicPattern, coreServerPattern, pluginsServerPattern],
+          },
+          {
+            target: './src/plugins/.*/server/.*js$',
+            from: [corePublicPattern, coreServerPattern, pluginsPublicPattern],
+          },
+          // the rule doesn't support 'from' as an array, so we flatten it
+        ].reduce(
+          (acc, zone) => acc.concat(zone.from.map(from => ({ target: zone.target, from }))),
+          []
+        ),
+      },
+    ],
   },
 
   overrides: [
