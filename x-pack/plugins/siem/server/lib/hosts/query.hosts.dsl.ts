@@ -9,15 +9,11 @@ import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap } from '../ecs_fields';
 import { RequestOptions } from '../framework';
 
-export const hostsFieldsMap: Readonly<Record<string, string>> = {
-  lastBeat: '@timestamp',
-  ...{ ...hostFieldsMap },
-};
+import { buildFieldsTermAggregation } from './helpers';
 
-export const buildQuery = ({
+export const buildHostsQuery = ({
   fields,
   filterQuery,
-  timerange: { from, to },
   pagination: { limit, cursor },
   sourceConfiguration: {
     fields: { timestamp },
@@ -26,8 +22,9 @@ export const buildQuery = ({
     packetbeatAlias,
     winlogbeatAlias,
   },
+  timerange: { from, to },
 }: RequestOptions) => {
-  const esFields = reduceFields(fields, hostsFieldsMap);
+  const esFields = reduceFields(fields, hostFieldsMap);
 
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -41,13 +38,7 @@ export const buildQuery = ({
     },
   ];
 
-  const agg = {
-    host_count: {
-      cardinality: {
-        field: 'host.id',
-      },
-    },
-  };
+  const agg = { host_count: { cardinality: { field: 'host.name' } } };
 
   const dslQuery = {
     allowNoIndices: true,
@@ -56,41 +47,20 @@ export const buildQuery = ({
     body: {
       aggregations: {
         ...agg,
-        group_by_host: {
-          terms: {
-            size: limit + 1,
-            field: 'host.id',
-            order: {
-              firstSeen: 'asc',
-            },
-          },
+        host_data: {
+          terms: { size: limit + 1, field: 'host.name', order: { lastSeen: 'desc' } },
           aggs: {
-            firstSeen: {
-              min: {
-                field: '@timestamp',
-              },
-            },
-            host: {
-              top_hits: {
-                size: 1,
-                _source: esFields,
-                sort: [
-                  {
-                    '@timestamp': 'desc',
-                  },
-                ],
-              },
-            },
+            lastSeen: { max: { field: '@timestamp' } },
+            firstSeen: { min: { field: '@timestamp' } },
+            ...buildFieldsTermAggregation(
+              esFields.filter(field => !['@timestamp', '_id'].includes(field))
+            ),
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-        },
-      },
+      query: { bool: { filter } },
       size: 0,
-      track_total_hits: false,
+      track_total_hits: true,
     },
   };
 

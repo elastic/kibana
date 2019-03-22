@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddToKql Component Rendering 1`] = `
+<Component
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(Symbol.observable): [Function],
+    }
+  }
+>
+  <pure(Component)
+    componentFilterType="hosts"
+    expression="host.name: siem-kibana"
+    type="page"
+  >
+    siem-kibana
+  </pure(Component)>
+</Component>
+`;

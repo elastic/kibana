@@ -48,6 +48,10 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
+  HostDetails: HostItem;
+
+  HostFirstLastSeen: FirstLastSeenHost;
+
   IpOverview?: IpOverviewData | null;
 
   KpiNetwork?: KpiNetworkData | null;
@@ -804,11 +808,13 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
+  host?: HostEcsFields | null;
+}
+
+export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
-  host?: HostEcsFields | null;
-
-  lastBeat?: Date | null;
+  lastSeen?: Date | null;
 }
 
 export interface IpOverviewData {
@@ -1082,6 +1088,18 @@ export interface HostsSourceArgs {
   pagination: PaginationInput;
 
   filterQuery?: string | null;
+}
+export interface HostDetailsSourceArgs {
+  id?: string | null;
+
+  hostName: string;
+
+  timerange: TimerangeInput;
+}
+export interface HostFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  hostName: string;
 }
 export interface IpOverviewSourceArgs {
   id?: string | null;
@@ -1506,12 +1524,11 @@ export namespace GetEventsQuery {
   };
 }
 
-export namespace GetHostSummaryQuery {
+export namespace GetHostDetailsQuery {
   export type Variables = {
     sourceId: string;
+    hostName: string;
     timerange: TimerangeInput;
-    pagination: PaginationInput;
-    filterQuery?: string | null;
   };
 
   export type Query = {
@@ -1525,35 +1542,13 @@ export namespace GetHostSummaryQuery {
 
     id: string;
 
-    Hosts: Hosts;
+    HostDetails: HostDetails;
   };
 
-  export type Hosts = {
-    __typename?: 'HostsData';
-
-    totalCount: number;
-
-    edges: Edges[];
-
-    pageInfo: PageInfo;
-  };
-
-  export type Edges = {
-    __typename?: 'HostsEdges';
-
-    node: Node;
-
-    cursor: Cursor;
-  };
-
-  export type Node = {
+  export type HostDetails = {
     __typename?: 'HostItem';
 
     _id?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastBeat?: Date | null;
 
     host?: Host | null;
   };
@@ -1587,25 +1582,34 @@ export namespace GetHostSummaryQuery {
 
     version?: string | null;
   };
+}
 
-  export type Cursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+export namespace GetHostFirstLastSeenQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
   };
 
-  export type PageInfo = {
-    __typename?: 'PageInfo';
+  export type Query = {
+    __typename?: 'Query';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
+    source: Source;
   };
 
-  export type EndCursor = {
-    __typename?: 'CursorType';
+  export type Source = {
+    __typename?: 'Source';
 
-    value: string;
+    id: string;
+
+    HostFirstLastSeen: HostFirstLastSeen;
+  };
+
+  export type HostFirstLastSeen = {
+    __typename?: 'FirstLastSeenHost';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
   };
 }
 
@@ -1653,10 +1657,6 @@ export namespace GetHostsTableQuery {
     __typename?: 'HostItem';
 
     _id?: string | null;
-
-    firstSeen?: Date | null;
-
-    lastBeat?: Date | null;
 
     host?: Host | null;
   };

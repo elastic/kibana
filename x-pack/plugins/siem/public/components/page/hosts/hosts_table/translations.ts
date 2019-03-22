@@ -18,12 +18,20 @@ export const FIRST_SEEN = i18n.translate('xpack.siem.hostsTable.firstSeen', {
   defaultMessage: 'First Seen',
 });
 
+export const LAST_SEEN = i18n.translate('xpack.siem.hostsTable.lastSeen', {
+  defaultMessage: 'Last Seen',
+});
+
 export const OS = i18n.translate('xpack.siem.hostsTable.os', {
   defaultMessage: 'OS',
 });
 
 export const VERSION = i18n.translate('xpack.siem.hostsTable.version', {
   defaultMessage: 'Version',
+});
+
+export const TOOLTIP = i18n.translate('xpack.siem.hostsTable.helperTooltip', {
+  defaultMessage: 'Hosts table is sorted by last seen',
 });
 
 export const ROWS_2 = i18n.translate('xpack.siem.hostsTable.rows', {

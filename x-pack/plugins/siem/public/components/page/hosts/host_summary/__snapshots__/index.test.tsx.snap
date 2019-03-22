@@ -1,38 +1,887 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Host Summary Component #getEuiDescriptionList All item in description list are loading 1`] = `
+<div>
+  <dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
+  >
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Name
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      First Seen
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Last Seen
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Id
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      IP Address
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      MAC Addr
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Type
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Platform
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      OS Name
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Family
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Version
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Architecture
+    </dt>
+    <div>
+      <div
+        class="euiLoadingSpinner euiLoadingSpinner--medium"
+      />
+    </div>
+  </dl>
+</div>
+`;
+
+exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in description list 1`] = `
+<div>
+  <dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
+  >
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Name
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              siem-kibana
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      First Seen
+    </dt>
+    <div>
+      Network error: No more mocked responses for the query: query GetHostFirstLastSeenQuery($sourceId: ID!, $hostName: String!) {
+  source(id: $sourceId) {
+    id
+    HostFirstLastSeen(hostName: $hostName) {
+      firstSeen
+      lastSeen
+    }
+  }
+}
+, variables: {"sourceId":"default","hostName":"siem-kibana"}
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Last Seen
+    </dt>
+    <div>
+      Network error: No more mocked responses for the query: query GetHostFirstLastSeenQuery($sourceId: ID!, $hostName: String!) {
+  source(id: $sourceId) {
+    id
+    HostFirstLastSeen(hostName: $hostName) {
+      firstSeen
+      lastSeen
+    }
+  }
+}
+, variables: {"sourceId":"default","hostName":"siem-kibana"}
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Id
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              aa7ca589f1b8220002f2fc61c64cfbf1
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      IP Address
+    </dt>
+    <div>
+      --
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      MAC Addr
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              42:01:0a:8e:00:07
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Type
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              projects/189716325846/machineTypes/n1-standard-1
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Platform
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              debian
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      OS Name
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              Debian GNU/Linux
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Family
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              debian
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Version
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              9 (stretch)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Architecture
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="7"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="7"
+            data-react-beautiful-dnd-draggable="7"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              x86_64
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dl>
+</div>
+`;
+
+exports[`Host Summary Component #getEuiDescriptionList if it creates a description list 1`] = `
+<div>
+  <dl
+    class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
+  >
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Name
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              kibana-siem
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      First Seen
+    </dt>
+    <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        Apr 8, 2019 @ 16:09:40.692
+      </span>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Last Seen
+    </dt>
+    <div>
+      <span
+        class="euiToolTipAnchor"
+      >
+        Apr 8, 2019 @ 18:35:45.064
+      </span>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Id
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              aa7ca589f1b8220002f2fc61c64cfbf1
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      IP Address
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              <a
+                class="euiLink euiLink--primary"
+                href="#/link-to/network/ip/10.142.0.7"
+              >
+                10.142.0.7
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              <a
+                class="euiLink euiLink--primary"
+                href="#/link-to/network/ip/fe80--4001-aff-fe8e-7"
+              >
+                fe80::4001:aff:fe8e:7
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      MAC Addr
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              42:01:0a:8e:00:07
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Type
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              projects/189716325846/machineTypes/n1-standard-1
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Platform
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              debian
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      OS Name
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              Debian GNU/Linux
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Family
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              debian
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Version
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              9 (stretch)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <dt
+      class="euiDescriptionList__title"
+    >
+      Architecture
+    </dt>
+    <div>
+      <div
+        data-test-subj="draggableWrapperDiv"
+      >
+        <div
+          data-react-beautiful-dnd-droppable="6"
+        >
+          <div
+            aria-roledescription="Draggable item. Press space bar to lift"
+            class="sc-kEYyzF eIecMG"
+            data-react-beautiful-dnd-drag-handle="6"
+            data-react-beautiful-dnd-draggable="6"
+            data-test-subj="providerContainer"
+            draggable="false"
+            style="z-index: 9000;"
+            tabindex="0"
+          >
+            <div
+              class="euiText euiText--small"
+              data-test-subj="draggable-content"
+            >
+              x86_64
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dl>
+</div>
+`;
+
 exports[`Host Summary Component rendering it renders the default Host Summary 1`] = `
 <Component>
   <pure(Component)
     data={
-      Array [
-        Object {
-          "cursor": Object {
-            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+      Object {
+        "_id": "yneHlmgBjVl2VqDlAjPR",
+        "host": Object {
+          "architecture": "x86_64",
+          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          "ip": Array [
+            "10.142.0.7",
+            "fe80::4001:aff:fe8e:7",
+          ],
+          "mac": Array [
+            "42:01:0a:8e:00:07",
+          ],
+          "name": "siem-kibana",
+          "os": Object {
+            "family": "debian",
+            "name": "Debian GNU/Linux",
+            "platform": "debian",
+            "version": "9 (stretch)",
           },
-          "node": Object {
-            "_id": "yneHlmgBjVl2VqDlAjPR",
-            "host": Object {
-              "architecture": "x86_64",
-              "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
-              "ip": Array [
-                "10.142.0.7",
-                "fe80::4001:aff:fe8e:7",
-              ],
-              "mac": Array [
-                "42:01:0a:8e:00:07",
-              ],
-              "name": "siem-kibana",
-              "os": Object {
-                "family": "debian",
-                "name": "Debian GNU/Linux",
-                "platform": "debian",
-                "version": "9 (stretch)",
-              },
-              "type": "projects/189716325846/machineTypes/n1-standard-1",
-            },
-          },
+          "type": "projects/189716325846/machineTypes/n1-standard-1",
         },
-      ]
+      }
     }
     endDate={618472800000}
     loading={false}

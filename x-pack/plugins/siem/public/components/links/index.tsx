@@ -11,10 +11,10 @@ import { pure } from 'recompose';
 import { encodeIpv6 } from '../../lib/helpers';
 
 // Internal Links
-export const HostDetailsLink = pure<{ children?: React.ReactNode; hostId: string }>(
-  ({ children, hostId }) => (
-    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostId)}`}>
-      {children ? children : hostId}
+export const HostDetailsLink = pure<{ children?: React.ReactNode; hostName: string }>(
+  ({ children, hostName }) => (
+    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostName)}`}>
+      {children ? children : hostName}
     </EuiLink>
   )
 );

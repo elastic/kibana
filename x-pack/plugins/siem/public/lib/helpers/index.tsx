@@ -18,3 +18,9 @@ export type WrapArrayIfExitts = <T>(value: Many<T>) => T[] | undefined;
  */
 export const asArrayIfExists: WrapArrayIfExitts = value =>
   !isUndefined(value) ? castArray(value) : undefined;
+
+export const wait = (): Promise<void> => {
+  return new Promise(resolve => {
+    return setTimeout(resolve, 10);
+  });
+};

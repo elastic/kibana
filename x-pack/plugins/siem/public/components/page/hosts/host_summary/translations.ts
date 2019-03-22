@@ -14,8 +14,12 @@ export const NAME = i18n.translate('xpack.siem.hostDetails.name', {
   defaultMessage: 'Name',
 });
 
-export const LAST_BEAT = i18n.translate('xpack.siem.hostDetails.lastBeat', {
-  defaultMessage: 'Last Beat',
+export const FIRST_SEEN = i18n.translate('xpack.siem.hostDetails.firstSeen', {
+  defaultMessage: 'First Seen',
+});
+
+export const LAST_SEEN = i18n.translate('xpack.siem.hostDetails.lastSeen', {
+  defaultMessage: 'Last Seen',
 });
 
 export const ID = i18n.translate('xpack.siem.hostDetails.id', {

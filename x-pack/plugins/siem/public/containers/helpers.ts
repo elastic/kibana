@@ -12,4 +12,4 @@ import { ESQuery } from '../../common/typed_json';
 export const createFilter = (filterQuery: ESQuery | string | undefined) =>
   isString(filterQuery) ? filterQuery : JSON.stringify(filterQuery);
 
-export const getDefaultFetchPolicy = (): FetchPolicy => 'network-only';
+export const getDefaultFetchPolicy = (): FetchPolicy => 'cache-and-network';

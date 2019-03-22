@@ -20,8 +20,6 @@ export const HostsTableQuery = gql`
         edges {
           node {
             _id
-            firstSeen
-            lastBeat
             host {
               id
               name

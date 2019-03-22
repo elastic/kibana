@@ -4,12 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostEcsFields, HostsData } from '../../graphql/types';
+import {
+  FirstLastSeenHost,
+  HostEcsFields,
+  HostItem,
+  HostsData,
+  SourceConfiguration,
+  TimerangeInput,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData>;
+  getHostDetails(req: FrameworkRequest, options: HostDetailsRequestOptions): Promise<HostItem>;
+  getHostFirstLastSeen(
+    req: FrameworkRequest,
+    options: HostLastFirstSeenRequestOptions
+  ): Promise<FirstLastSeenHost>;
 }
 
 type StringOrNumber = string | number;
@@ -26,24 +38,60 @@ export interface HostHit extends Hit {
 
 export type HostHits = Hits<number, HostHit>;
 
-export interface HostBucket {
-  key?: { host_name: string };
-  host: HostHits;
-  firstSeen: {
-    value: number;
-    value_as_string: string;
-  };
+export interface HostLastFirstSeenRequestOptions {
+  hostName: string;
+  sourceConfiguration: SourceConfiguration;
 }
 
-export interface HostData extends SearchHit {
+export interface HostDetailsRequestOptions extends HostLastFirstSeenRequestOptions {
+  fields: string[];
+  timerange: TimerangeInput;
+}
+
+export interface HostValue {
+  value: number;
+  value_as_string: string;
+}
+
+export interface HostBucketItem {
+  key: string;
+  doc_count: number;
+  timestamp: HostValue;
+}
+
+export interface HostBuckets {
+  buckets: HostBucketItem[];
+}
+
+export interface HostAggEsItem {
+  key?: string;
+  cloud_machine_type?: HostBuckets;
+  firstSeen?: HostValue;
+  lastSeen?: HostValue;
+  host_architecture?: HostBuckets;
+  host_id?: HostBuckets;
+  host_ip?: HostBuckets;
+  host_mac?: HostBuckets;
+  host_name?: HostBuckets;
+  host_os?: HostBuckets;
+  host_os_name?: HostBuckets;
+  host_os_version?: HostBuckets;
+  host_type?: HostBuckets;
+}
+
+export interface HostEsData extends SearchHit {
   sort: string[];
   aggregations: {
     host_count: {
       value: number;
     };
-    group_by_host: {
-      after_key: string;
-      buckets: HostBucket[];
+    host_data: {
+      buckets: HostAggEsItem[];
     };
   };
+}
+
+export interface HostAggEsData extends SearchHit {
+  sort: string[];
+  aggregations: HostAggEsItem;
 }

@@ -4,67 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr, head } from 'lodash/fp';
+import { get, getOr, has, head, set } from 'lodash/fp';
 
-import { HostsData, HostsEdges } from '../../graphql/types';
-import { mergeFieldsWithHit } from '../../utils/build_query';
+import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
 import { TermAggregation } from '../types';
 
-import { buildQuery, hostsFieldsMap } from './query.dsl';
-import { HostBucket, HostData, HostHit, HostsAdapter } from './types';
+import { buildHostDetailsQuery } from './query.detail_host.dsl';
+import { buildHostsQuery } from './query.hosts.dsl';
+import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
+import {
+  HostAggEsData,
+  HostAggEsItem,
+  HostBuckets,
+  HostDetailsRequestOptions,
+  HostEsData,
+  HostLastFirstSeenRequestOptions,
+  HostsAdapter,
+  HostValue,
+} from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
   public async getHosts(request: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
-    const response = await this.framework.callWithRequest<HostData, TermAggregation>(
+    const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',
-      buildQuery(options)
+      buildHostsQuery(options)
     );
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
-    const hits: HostHit[] = getOr([], 'aggregations.group_by_host.buckets', response).map(
-      (bucket: HostBucket) => ({
-        ...head(bucket.host.hits.hits),
-        cursor: bucket.key!.host_name,
-        firstSeen: bucket.firstSeen.value_as_string,
-      })
-    );
-    const hostsEdges = hits.map(hit => formatHostsData(options.fields, hit, hostsFieldsMap));
+    const buckets: HostAggEsItem[] = getOr([], 'aggregations.host_data.buckets', response);
+    const hostsEdges = buckets.map(bucket => formatHostEdgesData(options.fields, bucket));
     const hasNextPage = hostsEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = hostsEdges.splice(beginning, limit - beginning);
 
+    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
+  }
+
+  public async getHostDetails(
+    request: FrameworkRequest,
+    options: HostDetailsRequestOptions
+  ): Promise<HostItem> {
+    const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
+      request,
+      'search',
+      buildHostDetailsQuery(options)
+    );
+    const aggregations: HostAggEsItem = get('aggregations', response) || {};
+    return { _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+  }
+
+  public async getHostFirstLastSeen(
+    request: FrameworkRequest,
+    options: HostLastFirstSeenRequestOptions
+  ): Promise<FirstLastSeenHost> {
+    const response = await this.framework.callWithRequest<HostAggEsData, TermAggregation>(
+      request,
+      'search',
+      buildLastFirstSeenHostQuery(options)
+    );
+
+    const aggregations: HostAggEsItem = get('aggregations', response) || {};
     return {
-      edges,
-      totalCount,
-      pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-        },
-      },
+      firstSeen: get('firstSeen.value_as_string', aggregations),
+      lastSeen: get('lastSeen.value_as_string', aggregations),
     };
   }
 }
 
-export const formatHostsData = (
+export const formatHostEdgesData = (
   fields: ReadonlyArray<string>,
-  hit: HostHit,
-  fieldMap: Readonly<Record<string, string>>
+  bucket: HostAggEsItem
 ): HostsEdges =>
   fields.reduce<HostsEdges>(
     (flattenedFields, fieldName) => {
-      flattenedFields.node._id = hit._id;
-      if (hit.cursor) {
-        flattenedFields.cursor.value = hit.cursor;
+      const hostId = get('key', bucket);
+      flattenedFields.node._id = hostId || null;
+      flattenedFields.cursor.value = hostId || '';
+
+      const fieldValue = getHostFieldValue(fieldName, bucket);
+      if (fieldValue) {
+        return set(`node.${fieldName}`, fieldValue, flattenedFields);
       }
-      if (hit.firstSeen) {
-        flattenedFields.node.firstSeen = hit.firstSeen;
-      }
-      return mergeFieldsWithHit(fieldName, flattenedFields, fieldMap, hit);
+      return flattenedFields;
     },
     {
       node: {},
@@ -74,3 +100,36 @@ export const formatHostsData = (
       },
     }
   );
+
+const formatHostItem = (fields: ReadonlyArray<string>, bucket: HostAggEsItem): HostItem =>
+  fields.reduce<HostItem>((flattenedFields, fieldName) => {
+    const fieldValue = getHostFieldValue(fieldName, bucket);
+    if (fieldValue) {
+      return set(fieldName, fieldValue, flattenedFields);
+    }
+    return flattenedFields;
+  }, {});
+
+const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | string[] | null => {
+  const aggField = hostFieldsMap[fieldName]
+    ? hostFieldsMap[fieldName].replace(/\./g, '_')
+    : fieldName.replace(/\./g, '_');
+  if (['host.ip', 'host.mac'].includes(fieldName) && has(aggField, bucket)) {
+    const data: HostBuckets = get(aggField, bucket);
+    return data.buckets.map(obj => obj.key);
+  } else if (has(`${aggField}.buckets`, bucket)) {
+    return getFirstItem(get(`${aggField}`, bucket));
+  } else if (has(aggField, bucket)) {
+    const valueObj: HostValue = get(aggField, bucket);
+    return valueObj.value_as_string;
+  }
+  return null;
+};
+
+const getFirstItem = (data: HostBuckets): string | null => {
+  const firstItem = head(data.buckets);
+  if (firstItem == null) {
+    return null;
+  }
+  return firstItem.key;
+};

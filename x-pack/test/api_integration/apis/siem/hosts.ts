@@ -7,10 +7,12 @@
 import expect from '@kbn/expect';
 
 import {
+  GetHostDetailsQuery,
+  GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
-  GetHostSummaryQuery,
 } from '../../../../plugins/siem/public/graphql/types';
-import { HostSummaryQuery } from './../../../../plugins/siem/public/containers/hosts/host_summary.gql_query';
+import { HostDetailsQuery } from './../../../../plugins/siem/public/containers/hosts/details/host_details.gql_query';
+import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
 import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
 
@@ -82,12 +84,12 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
         });
     });
 
-    it('Make sure that we get Host Summary data', () => {
-      const expectedHost: GetHostSummaryQuery.Host = {
+    it('Make sure that we get Host Details data', () => {
+      const expectedHost: GetHostDetailsQuery.Host = {
         architecture: 'x86_64',
         id: CURSOR_ID,
-        ip: null,
-        mac: null,
+        ip: [],
+        mac: [],
         name: 'zeek-sensor-san-francisco',
         os: {
           family: 'debian',
@@ -101,31 +103,40 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
       };
 
       return client
-        .query<GetHostSummaryQuery.Query>({
-          query: HostSummaryQuery,
+        .query<GetHostDetailsQuery.Query>({
+          query: HostDetailsQuery,
           variables: {
             sourceId: 'default',
+            hostName: 'zeek-sensor-san-francisco',
             timerange: {
               interval: '12h',
               to: TO,
               from: FROM,
             },
-            pagination: {
-              limit: 1,
-              cursor: null,
-            },
-            filterQuery: JSON.stringify({
-              term: {
-                'host.id': CURSOR_ID,
-              },
-            }),
           },
         })
         .then(resp => {
-          const hosts = resp.data.source.Hosts;
-          expect(hosts.edges.length).to.be(EDGE_LENGTH);
-          expect(hosts.totalCount).to.be(EDGE_LENGTH);
-          expect(hosts.edges[0]!.node!.host!).to.eql(expectedHost);
+          const hosts = resp.data.source.HostDetails;
+          expect(hosts.host).to.eql(expectedHost);
+        });
+    });
+
+    it('Make sure that we get Last First Seen for a Host', () => {
+      return client
+        .query<GetHostFirstLastSeenQuery.Query>({
+          query: HostFirstLastSeenGqlQuery,
+          variables: {
+            sourceId: 'default',
+            hostName: 'zeek-sensor-san-francisco',
+          },
+        })
+        .then(resp => {
+          const firstLastSeenHost = resp.data.source.HostFirstLastSeen;
+          expect(firstLastSeenHost).to.eql({
+            __typename: 'FirstLastSeenHost',
+            firstSeen: '2019-02-19T19:36:23.561Z',
+            lastSeen: '2019-02-19T20:42:33.561Z',
+          });
         });
     });
   });
