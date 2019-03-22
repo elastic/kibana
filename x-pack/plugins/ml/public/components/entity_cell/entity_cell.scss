@@ -6,8 +6,7 @@
 
 .field-value-long {
   overflow-wrap: break-word;
-  // IE11 fix for overflow within a flex container
-  max-width: calc(100% - 1px);
+  // Known issue: IE11 text overflow within a flex container
 }
 
 .filter-button {
