@@ -17,27 +17,29 @@
  * under the License.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
 import { injectI18n } from '@kbn/i18n/react';
-import _ from 'lodash';
-import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
+import _ from 'lodash';
+import React from 'react';
+import ReactGridLayout, { Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import { PanelUtils } from '../panel/panel_utils';
-import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel } from '../panel';
+// @ts-ignore
+import sizeMe from 'react-sizeme';
+import { EmbeddableFactory } from 'ui/embeddable';
 import { toastNotifications } from 'ui/notify';
 import {
-  DashboardConstants,
   DASHBOARD_GRID_COLUMN_COUNT,
   DASHBOARD_GRID_HEIGHT,
+  DashboardConstants,
 } from '../dashboard_constants';
-import sizeMe from 'react-sizeme';
+import { DashboardViewMode } from '../dashboard_view_mode';
+import { DashboardPanel } from '../panel';
+import { PanelUtils } from '../panel/panel_utils';
+import { PanelState, PanelStateMap, Pre61PanelState } from '../selectors/types';
+import { GridData } from '../types';
 
-const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
 /**
@@ -45,7 +47,7 @@ let lastValidGridSize = 0;
  * taller than the current grid.
  * see https://github.com/elastic/kibana/issues/14710.
  */
-function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
+function ensureWindowScrollsToBottom(event: { clientY: number; pageY: number }) {
   // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
   // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
   const WINDOW_BUFFER = 10;
@@ -62,6 +64,14 @@ function ResponsiveGrid({
   children,
   maximizedPanelId,
   useMargins,
+}: {
+  size: { width: number };
+  isViewMode: boolean;
+  layout: Layout[];
+  onLayoutChange: () => void;
+  children: JSX.Element[];
+  maximizedPanelId: string;
+  useMargins: boolean;
 }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
@@ -94,8 +104,7 @@ function ResponsiveGrid({
       draggableHandle={isViewMode ? '.doesnt-exist' : '.dshPanel__dragger'}
       layout={layout}
       onLayoutChange={onLayoutChange}
-      measureBeforeMount={false}
-      onResize={ensureWindowScrollsToBottom}
+      onResize={({}, {}, {}, {}, event) => ensureWindowScrollsToBottom(event)}
     >
       {children}
     </ReactGridLayout>
@@ -104,15 +113,43 @@ function ResponsiveGrid({
 
 // Using sizeMe sets up the grid to be re-rendered automatically not only when the window size changes, but also
 // when the container size changes, so it works for Full Screen mode switches.
+const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
+interface Props extends ReactIntl.InjectedIntlProps {
+  panels: PanelStateMap;
+  getEmbeddableFactory: (panelType: string) => EmbeddableFactory;
+  dashboardViewMode: DashboardViewMode.EDIT | DashboardViewMode.VIEW;
+  onPanelsUpdated: (updatedPanels: PanelStateMap) => void;
+  maximizedPanelId?: string;
+  useMargins: boolean;
+}
 
-class DashboardGridUi extends React.Component {
-  constructor(props) {
+interface State {
+  focusedPanelIndex?: string;
+  isLayoutInvalid: boolean;
+  layout?: GridData[];
+}
+
+interface PanelLayout extends Layout {
+  i: string;
+}
+
+class DashboardGridUi extends React.Component<Props, State> {
+  // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
+  // item.
+  private gridItems = {} as { [key: string]: HTMLDivElement | null };
+
+  // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
+  // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
+  // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
+  // https://github.com/elastic/kibana/issues/14802 for more info.
+  // This is probably a better implementation anyway so the handlers are cached.
+  // @type {Object.<string, EmbeddableFactory>}
+  private embeddableFactoryMap: { [s: string]: EmbeddableFactory } = {};
+
+  constructor(props: Props) {
     super(props);
-    // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
-    // item.
-    this.gridItems = {};
 
     let isLayoutInvalid = false;
     let layout;
@@ -127,41 +164,36 @@ class DashboardGridUi extends React.Component {
         }),
         text: error.message,
       });
-      window.location = `#${DashboardConstants.LANDING_PAGE_PATH}`;
+      window.location.hash = DashboardConstants.LANDING_PAGE_PATH;
     }
     this.state = {
       focusedPanelIndex: undefined,
       layout,
       isLayoutInvalid,
     };
-
-    // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
-    // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
-    // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
-    // https://github.com/elastic/kibana/issues/14802 for more info.
-    // This is probably a better implementation anyway so the handlers are cached.
-    // @type {Object.<string, EmbeddableFactory>}
-    this.embeddableFactoryMap = {};
   }
 
-  buildLayoutFromPanels() {
+  public buildLayoutFromPanels(): GridData[] {
     return _.map(this.props.panels, panel => {
       // panel version numbers added in 6.1. Any panel without version number is assumed to be 6.0.0
-      const panelVersion = panel.version ? PanelUtils.parseVersion(panel.version) : PanelUtils.parseVersion('6.0.0');
+      const panelVersion =
+        'version' in panel
+          ? PanelUtils.parseVersion(panel.version)
+          : PanelUtils.parseVersion('6.0.0');
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 1)) {
-        PanelUtils.convertPanelDataPre_6_1(panel);
+        panel = PanelUtils.convertPanelDataPre_6_1(panel as Pre61PanelState);
       }
 
       if (panelVersion.major < 6 || (panelVersion.major === 6 && panelVersion.minor < 3)) {
-        PanelUtils.convertPanelDataPre_6_3(panel, this.props.useMargins);
+        PanelUtils.convertPanelDataPre_6_3(panel as PanelState, this.props.useMargins);
       }
 
-      return panel.gridData;
+      return (panel as PanelState).gridData;
     });
   }
 
-  createEmbeddableFactoriesMap(panels) {
+  public createEmbeddableFactoriesMap(panels: PanelStateMap) {
     Object.values(panels).map(panel => {
       if (!this.embeddableFactoryMap[panel.type]) {
         this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
@@ -169,46 +201,46 @@ class DashboardGridUi extends React.Component {
     });
   }
 
-  componentWillMount() {
+  public componentWillMount() {
     this.createEmbeddableFactoriesMap(this.props.panels);
   }
 
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps: Props) {
     this.createEmbeddableFactoriesMap(nextProps.panels);
   }
 
-  onLayoutChange = (layout) => {
+  public onLayoutChange = (layout: PanelLayout[]) => {
     const { onPanelsUpdated, panels } = this.props;
-    const updatedPanels = layout.reduce((updatedPanelsAcc, panelLayout) => {
-      updatedPanelsAcc[panelLayout.i] = {
-        ...panels[panelLayout.i],
-        panelIndex: panelLayout.i,
-        gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i'])
-      };
-      return updatedPanelsAcc;
-    }, []);
+    const updatedPanels = layout.reduce(
+      (updatedPanelsAcc, panelLayout) => {
+        updatedPanelsAcc[panelLayout.i] = {
+          ...panels[panelLayout.i],
+          panelIndex: panelLayout.i,
+          gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+        };
+        return updatedPanelsAcc;
+      },
+      {} as PanelStateMap
+    );
     onPanelsUpdated(updatedPanels);
   };
 
-  onPanelFocused = focusedPanelIndex => {
+  public onPanelFocused = (focusedPanelIndex: string): void => {
     this.setState({ focusedPanelIndex });
   };
 
-  onPanelBlurred = blurredPanelIndex => {
+  public onPanelBlurred = (blurredPanelIndex: string): void => {
     if (this.state.focusedPanelIndex === blurredPanelIndex) {
       this.setState({ focusedPanelIndex: undefined });
     }
   };
 
-  renderDOM() {
-    const {
-      panels,
-      maximizedPanelId
-    } = this.props;
+  public renderDOM() {
+    const { panels, maximizedPanelId } = this.props;
     const { focusedPanelIndex } = this.state;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map(key => panels[key]);
+    const panelsInOrder = Object.keys(panels).map((key: string) => panels[key] as PanelState);
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
@@ -226,10 +258,12 @@ class DashboardGridUi extends React.Component {
       });
       return (
         <div
-          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? '2' : 'auto' }}
+          style={{ zIndex: focusedPanelIndex === panel.panelIndex ? 2 : 'auto' }}
           className={classes}
           key={panel.panelIndex}
-          ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
+          ref={reactGridItem => {
+            this.gridItems[panel.panelIndex] = reactGridItem;
+          }}
         >
           <DashboardPanel
             panelId={panel.panelIndex}
@@ -242,7 +276,7 @@ class DashboardGridUi extends React.Component {
     });
   }
 
-  render() {
+  public render() {
     if (this.state.isLayoutInvalid) {
       return null;
     }
@@ -262,14 +296,5 @@ class DashboardGridUi extends React.Component {
     );
   }
 }
-
-DashboardGridUi.propTypes = {
-  panels: PropTypes.object.isRequired,
-  getEmbeddableFactory: PropTypes.func.isRequired,
-  dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
-  onPanelsUpdated: PropTypes.func.isRequired,
-  maximizedPanelId: PropTypes.string,
-  useMargins: PropTypes.bool.isRequired,
-};
 
 export const DashboardGrid = injectI18n(DashboardGridUi);
