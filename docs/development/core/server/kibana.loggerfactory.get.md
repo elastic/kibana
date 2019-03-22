@@ -14,7 +14,7 @@ get(...contextParts: string[]): Logger;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  contextParts | `string[]` |  |
+|  contextParts | `string[]` | Parts of the context to return logger for. For example get('plugins', 'pid') will return a logger for the `plugins.pid` context. |
 
 <b>Returns:</b>
 

@@ -2,7 +2,7 @@
 
 ## ClusterClient.callAsInternalUser property
 
-Calls specified  with provided  on behalf of the Kibana internal user.
+Calls specified endpoint with provided clientParams on behalf of the Kibana internal user.
 
 <b>Signature:</b>
 

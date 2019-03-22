@@ -40,45 +40,45 @@ export interface Logger {
   /**
    * Log messages at the most detailed log level
    *
-   * @param message The log message
-   * @param meta
+   * @param message - The log message
+   * @param meta -
    */
   trace(message: string, meta?: LogMeta): void;
 
   /**
    * Log messages useful for debugging and interactive investigation
-   * @param message The log message
-   * @param meta
+   * @param message - The log message
+   * @param meta -
    */
   debug(message: string, meta?: LogMeta): void;
 
   /**
    * Logs messages related to general application flow
-   * @param message The log message
-   * @param meta
+   * @param message - The log message
+   * @param meta -
    */
   info(message: string, meta?: LogMeta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages
-   * @param errorOrMessage An Error object or message string to log
-   * @param meta
+   * @param errorOrMessage - An Error object or message string to log
+   * @param meta -
    */
   warn(errorOrMessage: string | Error, meta?: LogMeta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages that caused a failure in the application flow
    *
-   * @param errorOrMessage An Error object or message string to log
-   * @param meta
+   * @param errorOrMessage - An Error object or message string to log
+   * @param meta -
    */
   error(errorOrMessage: string | Error, meta?: LogMeta): void;
 
   /**
    * Logs abnormal or unexpected errors or messages that caused an unrecoverable failure
    *
-   * @param errorOrMessage An Error object or message string to log
-   * @param meta
+   * @param errorOrMessage - An Error object or message string to log
+   * @param meta -
    */
   fatal(errorOrMessage: string | Error, meta?: LogMeta): void;
 

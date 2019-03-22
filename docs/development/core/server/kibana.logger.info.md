@@ -14,7 +14,7 @@ info(message: string, meta?: LogMeta): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | `string` |  |
+|  message | `string` | The log message |
 |  meta | `LogMeta` |  |
 
 <b>Returns:</b>

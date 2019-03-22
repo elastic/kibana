@@ -14,7 +14,7 @@ error(errorOrMessage: string | Error, meta?: LogMeta): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  errorOrMessage | `string | Error` |  |
+|  errorOrMessage | `string | Error` | An Error object or message string to log |
 |  meta | `LogMeta` |  |
 
 <b>Returns:</b>
