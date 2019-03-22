@@ -26,7 +26,7 @@ interface PieChartPrivateState {
 
 type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
 
-const setPieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
+const updatePieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
 
 function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   return (
@@ -117,12 +117,12 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
 
   if (xAxisRef && yAxisRef) {
-    return setPieState(visModel, {
+    return updatePieState(visModel, {
       sliceAxis: { title: 'Slice By', columns: [xAxisRef] },
       angleAxis: { title: 'Size By', columns: [yAxisRef] },
     });
   } else {
-    return setPieState(visModel, {
+    return updatePieState(visModel, {
       sliceAxis: { title: 'Slice By', columns: [] },
       angleAxis: { title: 'Size By', columns: [] },
     });
