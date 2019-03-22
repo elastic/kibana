@@ -553,7 +553,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
               >
                 a0ce2
               </a>
@@ -582,7 +582,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/a0ce2c8978ef92cdf2ff163ae28576ee?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -660,7 +660,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
               >
                 f3ac9
               </a>
@@ -689,7 +689,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/f3ac95493913cc7a3cfec30a19d2120a?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -767,7 +767,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
               >
                 e9086
               </a>
@@ -796,7 +796,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/e90863d04b7a692435305f09bbe8c840?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
@@ -874,7 +874,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
             >
               <a
                 className="euiLink euiLink--primary c0"
-                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))"
+                href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
               >
                 8673d
               </a>
@@ -903,7 +903,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
                   <a
                     aria-describedby="error-message-tooltip"
                     className="euiLink euiLink--primary c2"
-                    href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?_g=(time:(from:now-24h,mode:quick,to:now))"
+                    href="#/opbeans-python/errors/8673d8bf7a032e387c101bafbab0d2bc?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >

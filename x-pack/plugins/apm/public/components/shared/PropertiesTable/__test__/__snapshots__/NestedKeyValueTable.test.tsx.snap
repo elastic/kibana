@@ -187,7 +187,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="a"
           value={1}
         />
@@ -205,7 +204,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="b"
           value={2}
         />
@@ -229,7 +227,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="c"
           value={
             Array [
@@ -258,7 +255,6 @@ exports[`NestedKeyValueTable component should render with data 1`] = `
       <styled.td>
         <NestedValue
           depth={0}
-          keySorter={[Function]}
           parentKey="d"
           value={
             Object {

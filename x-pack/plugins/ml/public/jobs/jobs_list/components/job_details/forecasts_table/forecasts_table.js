@@ -159,6 +159,7 @@ class ForecastsTableUI extends Component {
             defaultMessage="No forecasts have been run for this job"
           />)}
           iconType="iInCircle"
+          role="alert"
         >
           {isTimeSeriesViewJob(this.props.job) &&
             <p>

@@ -27,7 +27,7 @@ jest.mock('fs', () => ({
 }));
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../../../package.json', () => mockPackage);
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';

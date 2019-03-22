@@ -31,7 +31,7 @@ const getDefaultElasticsearchConfig = () => {
   return {
     hosts: ['http://localhost:9200', 'http://192.168.1.1:1234'],
     requestTimeout: moment.duration(30000),
-    ssl: { certificateAuthorities: [], verificationMode: 'full' },
+    ssl: { verificationMode: 'full' },
   };
 };
 

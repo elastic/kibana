@@ -34,11 +34,11 @@ import {
   EmbeddableReduxState,
   EmbeddablesMap,
   PanelId,
-  PanelsMap,
   PanelState,
+  PanelStateMap,
 } from './types';
 
-export const getPanels = (dashboard: DashboardState): PanelsMap => dashboard.panels;
+export const getPanels = (dashboard: DashboardState): PanelStateMap => dashboard.panels;
 
 export const getPanel = (dashboard: DashboardState, panelId: PanelId): PanelState =>
   getPanels(dashboard)[panelId];

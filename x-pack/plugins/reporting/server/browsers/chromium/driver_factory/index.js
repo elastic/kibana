@@ -28,7 +28,7 @@ export class HeadlessChromiumDriverFactory {
 
   type = 'chromium';
 
-  test({ viewport, browserTimezone }, log) {
+  test({ viewport, browserTimezone }, logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -49,10 +49,10 @@ export class HeadlessChromiumDriverFactory {
         },
       })
       .catch(error => {
-        log(
+        logger.warning(
           `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
         );
-        log(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
         return null;
       });
   }
@@ -114,6 +114,7 @@ export class HeadlessChromiumDriverFactory {
         new HeadlessChromiumDriver(page, {
           maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger,
+          inspect: this.browserConfig.inspect,
         })
       );
 

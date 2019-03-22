@@ -70,6 +70,41 @@ describe('getSeries', function () {
     });
   });
 
+  it('adds the seriesId to each point', function () {
+    const table = {
+      columns: [{ id: '0' }, { id: '1' }, { id: '3' }],
+      rows: [
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+        { '0': 1, '1': 2, '2': 3 },
+      ]
+    };
+
+    const chart = {
+      aspects: {
+        x: [{ accessor: 0 }],
+        y: [
+          { accessor: 1, title: '0' },
+          { accessor: 2, title: '1' },
+        ]
+      }
+    };
+
+    const series = getSeries(table, chart);
+
+    series[0].values.forEach(function (point) {
+      expect(point)
+        .to.have.property('seriesId', 1);
+    });
+
+    series[1].values.forEach(function (point) {
+      expect(point)
+        .to.have.property('seriesId', 2);
+    });
+  });
+
   it('produces multiple series if there are multiple y aspects', function () {
 
     const table = {

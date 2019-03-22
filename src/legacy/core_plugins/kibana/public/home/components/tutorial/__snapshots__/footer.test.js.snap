@@ -5,15 +5,9 @@ exports[`render 1`] = `
   <EuiHorizontalRule />
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiText
@@ -30,7 +24,6 @@ exports[`render 1`] = `
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -38,6 +31,7 @@ exports[`render 1`] = `
         fill={true}
         href="/app/myapp"
         iconSide="left"
+        size="m"
         type="button"
       >
         launch myapp

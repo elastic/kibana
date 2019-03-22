@@ -2,16 +2,9 @@
 
 exports[`ConditionExpression renders with appliesTo, operator and value supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
@@ -89,7 +82,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
@@ -138,21 +130,13 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
           className="euiExpression"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -190,7 +174,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -212,7 +195,6 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButtonIcon
@@ -230,16 +212,9 @@ exports[`ConditionExpression renders with appliesTo, operator and value supplied
 
 exports[`ConditionExpression renders with only value supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
@@ -316,7 +291,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
@@ -365,21 +339,13 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
           className="euiExpression"
         >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -416,7 +382,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -438,7 +403,6 @@ exports[`ConditionExpression renders with only value supplied 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButtonIcon

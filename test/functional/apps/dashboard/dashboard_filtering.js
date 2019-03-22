@@ -46,9 +46,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardAddPanel.addEveryVisualization('"Filter Bytes Test"');
         await dashboardAddPanel.addEverySavedSearch('"Filter Bytes Test"');
 
-        // TODO: Remove once https://github.com/elastic/kibana/issues/22561 is fixed
-        await dashboardPanelActions.removePanelByTitle('Filter Bytes Test: timelion split 5 on bytes');
-
         await dashboardAddPanel.closeAddPanel();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.waitForRenderComplete();
@@ -286,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(5);
 
-        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await pieChart.expectPieSliceCount(5);

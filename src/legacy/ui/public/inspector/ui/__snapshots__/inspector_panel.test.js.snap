@@ -144,18 +144,12 @@ exports[`InspectorPanel should render as expected 1`] = `
     >
       <EuiFlexGroup
         alignItems="center"
-        component="div"
-        direction="row"
-        gutterSize="l"
         justifyContent="spaceBetween"
-        responsive={true}
-        wrap={false}
       >
         <div
           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <EuiFlexItem
-            component="div"
             grow={true}
           >
             <div
@@ -174,7 +168,6 @@ exports[`InspectorPanel should render as expected 1`] = `
             </div>
           </EuiFlexItem>
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <div

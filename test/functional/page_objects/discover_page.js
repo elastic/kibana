@@ -86,13 +86,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

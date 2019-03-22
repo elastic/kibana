@@ -83,7 +83,7 @@ export const esaggs = () => ({
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
       forceFetch: true,
-      isHierarchical: args.metricsAtAllLevels,
+      metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters: handlers.inspectorAdapters,
       queryFilter,

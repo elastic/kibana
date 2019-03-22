@@ -19,15 +19,9 @@ exports[`Header should mark the input as invalid 1`] = `
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiForm
@@ -97,7 +91,6 @@ exports[`Header should mark the input as invalid 1`] = `
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -108,6 +101,7 @@ exports[`Header should mark the input as invalid 1`] = `
         iconType="arrowRight"
         isDisabled={true}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -140,15 +134,9 @@ exports[`Header should render normally 1`] = `
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiForm
@@ -214,7 +202,6 @@ exports[`Header should render normally 1`] = `
       </EuiForm>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiButton
@@ -225,6 +212,7 @@ exports[`Header should render normally 1`] = `
         iconType="arrowRight"
         isDisabled={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

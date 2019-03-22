@@ -24,7 +24,9 @@ export const uptime = (kibana: any) =>
         }),
         icon: 'plugins/uptime/icons/heartbeat_white.svg',
         euiIconType: 'uptimeApp',
-        title: 'Uptime',
+        title: i18n.translate('xpack.uptime.uptimeFeatureCatalogueTitle', {
+          defaultMessage: 'Uptime',
+        }),
         main: 'plugins/uptime/app',
         order: 8900,
         url: '/app/uptime#/',

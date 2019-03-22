@@ -14,6 +14,9 @@
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
 
+# Platform
+/src/core/  @elastic/kibana-platform
+
 # Security
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security

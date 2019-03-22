@@ -10,7 +10,7 @@ import {
   TRACE_ID,
   TRANSACTION_ID
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { DiscoverLink } from './DiscoverLink';
 
 export function getDiscoverQuery(transaction: Transaction) {

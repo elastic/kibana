@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export { ElasticsearchServiceStart } from './elasticsearch_service';
+export { ElasticsearchServiceSetup } from './elasticsearch_service';
 export { CallAPIOptions, ClusterClient } from './cluster_client';
 
-import { CoreContext } from '../../types';
+import { CoreContext } from '../core_context';
 import { ElasticsearchService } from './elasticsearch_service';
 
 /** @internal */

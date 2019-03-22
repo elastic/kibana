@@ -588,6 +588,50 @@ export namespace FlyoutItemQuery {
   };
 }
 
+export namespace LogSummary {
+  export type Variables = {
+    sourceId?: string | null;
+    start: number;
+    end: number;
+    bucketSize: number;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logSummaryBetween: LogSummaryBetween;
+  };
+
+  export type LogSummaryBetween = {
+    __typename?: 'InfraLogSummaryInterval';
+
+    start?: number | null;
+
+    end?: number | null;
+
+    buckets: Buckets[];
+  };
+
+  export type Buckets = {
+    __typename?: 'InfraLogSummaryBucket';
+
+    start: number;
+
+    end: number;
+
+    entriesCount: number;
+  };
+}
+
 export namespace MetadataQuery {
   export type Variables = {
     sourceId: string;
@@ -863,50 +907,6 @@ export namespace LogEntries {
     __typename?: 'InfraLogMessageConstantSegment';
 
     constant: string;
-  };
-}
-
-export namespace LogSummary {
-  export type Variables = {
-    sourceId?: string | null;
-    start: number;
-    end: number;
-    bucketSize: number;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logSummaryBetween: LogSummaryBetween;
-  };
-
-  export type LogSummaryBetween = {
-    __typename?: 'InfraLogSummaryInterval';
-
-    start?: number | null;
-
-    end?: number | null;
-
-    buckets: Buckets[];
-  };
-
-  export type Buckets = {
-    __typename?: 'InfraLogSummaryBucket';
-
-    start: number;
-
-    end: number;
-
-    entriesCount: number;
   };
 }
 
