@@ -56,7 +56,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/kbn-eslint-plugin-custom/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
@@ -243,7 +243,7 @@ module.exports = {
         'packages/kbn-plugin-generator/**/*',
         'packages/kbn-plugin-helpers/**/*',
         'packages/kbn-eslint-import-resolver-kibana/**/*',
-        'packages/kbn-eslint-plugin-license-header/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
         'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*',
