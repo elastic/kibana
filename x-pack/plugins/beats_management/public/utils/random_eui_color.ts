@@ -6,19 +6,9 @@
 import { sample } from 'lodash';
 
 export const randomEUIColor = (euiVars: any) => {
-  const rgb = sample(
+  return sample(
     Object.keys(euiVars)
       .filter(key => key.startsWith('euiColorVis'))
       .map(key => (euiVars as any)[key])
   );
-
-  const matchedrgb = rgb.match(
-    /^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i
-  );
-  return matchedrgb && matchedrgb.length === 4
-    ? '#' +
-        ('0' + parseInt(matchedrgb[1], 10).toString(16)).slice(-2) +
-        ('0' + parseInt(matchedrgb[2], 10).toString(16)).slice(-2) +
-        ('0' + parseInt(matchedrgb[3], 10).toString(16)).slice(-2)
-    : '';
 };

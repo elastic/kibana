@@ -113,6 +113,7 @@ export const BeatsCMTagsTable: React.SFC<ComponentProps> = props => {
 
   return (
     <Table
+      pageSize={props.options.size}
       kueryBarProps={
         props.hasSearch
           ? {

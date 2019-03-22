@@ -41,6 +41,7 @@ interface TableProps {
   };
   hideTableControls?: boolean;
   kueryBarProps?: KueryBarProps;
+  pageSize: number;
   items: {
     list: any[];
     page: number;
@@ -101,7 +102,7 @@ export class Table extends React.Component<TableProps, TableState> {
 
     const pagination = {
       pageIndex: this.props.items.page !== -1 ? this.props.items.page : this.state.pageIndex,
-      pageSize: TABLE_CONFIG.INITIAL_ROW_SIZE,
+      pageSize: this.props.pageSize,
       pageSizeOptions: TABLE_CONFIG.PAGE_SIZE_OPTIONS,
     };
 
