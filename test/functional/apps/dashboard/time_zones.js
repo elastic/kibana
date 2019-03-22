@@ -22,7 +22,7 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
-  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'timePicker', 'settings', 'common']);
 
   describe('dashboard time zones', () => {
     before(async () => {
