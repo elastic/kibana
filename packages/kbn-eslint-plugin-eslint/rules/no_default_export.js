@@ -19,11 +19,11 @@
 
 module.exports = {
   meta: {
-    schema: []
+    schema: [],
   },
   create: context => ({
-    ExportDefaultDeclaration: (node) => {
+    ExportDefaultDeclaration: node => {
       context.report(node, 'Default exports not allowed.');
-    }
-  })
+    },
+  }),
 };

@@ -24,8 +24,8 @@ const dedent = require('dedent');
 const ruleTester = new RuleTester({
   parser: 'babel-eslint',
   parserOptions: {
-    ecmaVersion: 2015
-  }
+    ecmaVersion: 2015,
+  },
 });
 
 ruleTester.run('@kbn/eslint/require-license-header', rule, {
@@ -47,7 +47,7 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       `,
 
       options: [{ license: '// license' }],
-    }
+    },
   ],
 
   invalid: [
@@ -61,8 +61,8 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       errors: [
         {
           message: '"license" option is required',
-        }
-      ]
+        },
+      ],
     },
 
     // content cannot contain multiple block comments
@@ -71,14 +71,12 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [
-        { license: '/* one *//* two */' }
-      ],
+      options: [{ license: '/* one *//* two */' }],
       errors: [
         {
           message: '"license" option must only include a single comment',
-        }
-      ]
+        },
+      ],
     },
 
     // content cannot contain multiple line comments
@@ -87,14 +85,12 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [
-        { license: `// one\n// two` }
-      ],
+      options: [{ license: `// one\n// two` }],
       errors: [
         {
           message: '"license" option must only include a single comment',
-        }
-      ]
+        },
+      ],
     },
 
     // content cannot contain expressions
@@ -108,14 +104,14 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
           license: dedent`
             /* license */
             console.log('hello world');
-          `
-        }
+          `,
+        },
       ],
       errors: [
         {
           message: '"license" option must only include a single comment',
-        }
-      ]
+        },
+      ],
     },
 
     // content is not a single comment
@@ -124,14 +120,12 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
         console.log('foo')
       `,
 
-      options: [
-        { license: `console.log('hello world');` }
-      ],
+      options: [{ license: `console.log('hello world');` }],
       errors: [
         {
           message: '"license" option must only include a single comment',
-        }
-      ]
+        },
+      ],
     },
 
     // missing license header
@@ -144,19 +138,21 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       errors: [
         {
           message: 'File must start with a license header',
-        }
+        },
       ],
 
       output: dedent`
         /* license */
 
         console.log('foo')
-      `
+      `,
     },
 
     // strips newlines before the license comment
     {
-      code: '\n\n' + dedent`
+      code:
+        '\n\n' +
+        dedent`
         /* license */
 
         console.log('foo')
@@ -166,14 +162,14 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       errors: [
         {
           message: 'License header must be at the very beginning of the file',
-        }
+        },
       ],
 
       output: dedent`
         /* license */
 
         console.log('foo')
-      `
+      `,
     },
 
     // moves license header before other nodes if necessary
@@ -188,7 +184,7 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
       errors: [
         {
           message: 'License header must be at the very beginning of the file',
-        }
+        },
       ],
 
       output: dedent`
@@ -197,7 +193,7 @@ ruleTester.run('@kbn/eslint/require-license-header', rule, {
         /* not license */
 
         console.log('foo')
-      `
+      `,
     },
-  ]
+  ],
 });
