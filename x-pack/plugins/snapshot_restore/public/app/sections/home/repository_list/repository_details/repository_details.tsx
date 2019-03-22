@@ -6,8 +6,8 @@
 import React, { Fragment } from 'react';
 
 import { useAppDependencies } from '../../../../index';
-import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
-import { useRequest } from '../../../../services/use_request';
+import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
+import { useRequest } from '../../../../services/http';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';

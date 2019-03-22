@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import { AppState } from '../types';
+import { AppState } from '../../types';
 
 const StateContext = createContext<AppState>({});
 

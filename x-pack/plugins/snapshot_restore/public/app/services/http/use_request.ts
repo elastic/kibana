@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState } from 'react';
-import { API_BASE_PATH } from '../../../common/constants';
-import { useAppDependencies } from '../index';
+import { API_BASE_PATH } from '../../../../common/constants';
+import { useAppDependencies } from '../../index';
 
 export const useRequest = ({
   path,

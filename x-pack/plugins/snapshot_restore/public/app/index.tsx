@@ -8,7 +8,7 @@ import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
 import { App } from './app';
-import { AppStateProvider, initialState, reducer } from './services/app_state';
+import { AppStateProvider, initialState, reducer } from './services/state';
 import { AppCore, AppDependencies, AppPlugins } from './types';
 
 export { BASE_PATH as CLIENT_BASE_PATH } from './constants';
