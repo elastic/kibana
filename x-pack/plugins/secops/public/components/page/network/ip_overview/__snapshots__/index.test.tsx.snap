@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IP Overview Component rendering it renders the default IP Overview 1`] = `
+<Component>
+  <IpOverview
+    data={
+      Object {
+        "destination": Object {
+          "firstSeen": "2019-02-07T17:19:41.648Z",
+          "geo": Object {},
+          "host": Object {
+            "architecture": "armv7l",
+            "id": "b19a781f683541a7a25ee345133aa399",
+            "name": "raspberrypi",
+            "os": Object {
+              "family": "",
+              "kernel": "4.14.50-v7+",
+              "name": "Raspbian GNU/Linux",
+              "platform": "raspbian",
+              "version": "9 (stretch)",
+            },
+          },
+          "lastSeen": "2019-02-07T17:19:41.648Z",
+        },
+        "source": Object {
+          "firstSeen": "2019-02-07T17:19:41.636Z",
+          "geo": Object {},
+          "host": Object {
+            "architecture": "armv7l",
+            "id": "b19a781f683541a7a25ee345133aa399",
+            "name": "raspberrypi",
+            "os": Object {
+              "family": "",
+              "kernel": "4.14.50-v7+",
+              "name": "Raspbian GNU/Linux",
+              "platform": "raspbian",
+              "version": "9 (stretch)",
+            },
+          },
+          "lastSeen": "2019-02-07T17:19:41.636Z",
+        },
+      }
+    }
+    endDate={618472800000}
+    ip="'10.10.10.1'"
+    loading={false}
+    startDate={552204000000}
+    type="page"
+  />
+</Component>
+`;

@@ -9,6 +9,7 @@ import { createMocks, schemas } from './graphql';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createEventsResolvers, createScalarDetailItemValueResolvers } from './graphql/events';
 import { createHostsResolvers } from './graphql/hosts';
+import { createIpOverviewResolvers } from './graphql/ip_overview';
 import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createScalarDateResolvers } from './graphql/scalar_date';
@@ -31,6 +32,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createAuthenticationsResolvers(libs) as IResolvers,
       createEventsResolvers(libs) as IResolvers,
       createHostsResolvers(libs) as IResolvers,
+      createIpOverviewResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createScalarDetailItemValueResolvers() as IResolvers,
       createNetworkResolvers(libs) as IResolvers,

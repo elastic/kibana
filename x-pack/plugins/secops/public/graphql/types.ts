@@ -43,6 +43,10 @@ export interface Source {
   EventDetails: EventDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
+
+  IpOverview?: IpOverviewData | null;
+
+  KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -51,8 +55,6 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
-
-  KpiNetwork?: KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -346,9 +348,25 @@ export interface EventEcsFields {
 }
 
 export interface GeoEcsFields {
+  continent_name?: string | null;
+
+  city_name?: string | null;
+
+  country_name?: string | null;
+
   country_iso_code?: string | null;
 
+  location?: Location | null;
+
+  region_iso_code?: string | null;
+
   region_name?: string | null;
+}
+
+export interface Location {
+  lon?: number | null;
+
+  lat?: number | null;
 }
 
 export interface NetworkEcsField {
@@ -615,6 +633,34 @@ export interface HostItem {
   lastBeat?: Date | null;
 }
 
+export interface IpOverviewData {
+  source?: Overview | null;
+
+  destination?: Overview | null;
+}
+
+export interface Overview {
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+
+  domains?: string[] | null;
+
+  host?: HostEcsFields | null;
+
+  geo?: GeoEcsFields | null;
+}
+
+export interface KpiNetworkData {
+  networkEvents?: number | null;
+
+  uniqueFlowId?: number | null;
+
+  activeAgents?: number | null;
+
+  uniquePrivateIps?: number | null;
+}
+
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -714,16 +760,6 @@ export interface SayMyName {
   appName: string;
 }
 
-export interface KpiNetworkData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  activeAgents?: number | null;
-
-  uniquePrivateIps?: number | null;
-}
-
 // ====================================================
 // InputTypes
 // ====================================================
@@ -802,6 +838,22 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface IpOverviewSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+
+  ip: string;
+}
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface NetworkTopNFlowSourceArgs {
   direction: NetworkTopNFlowDirection;
 
@@ -834,13 +886,6 @@ export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
-
-  filterQuery?: string | null;
-}
-export interface KpiNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
 
   filterQuery?: string | null;
 }
@@ -1386,6 +1431,109 @@ export namespace GetHostsTableQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetIpOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    filterQuery?: string | null;
+    ip: string;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    IpOverview?: IpOverview | null;
+  };
+
+  export type IpOverview = {
+    __typename?: 'IpOverviewData';
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+  };
+
+  export type _Source = {
+    __typename?: 'Overview';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+
+    geo?: Geo | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: string | null;
+
+    city_name?: string | null;
+
+    country_iso_code?: string | null;
+
+    country_name?: string | null;
+
+    location?: Location | null;
+
+    region_iso_code?: string | null;
+
+    region_name?: string | null;
+  };
+
+  export type Location = {
+    __typename?: 'Location';
+
+    lat?: number | null;
+
+    lon?: number | null;
+  };
+
+  export type Destination = {
+    __typename?: 'Overview';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+
+    geo?: _Geo | null;
+  };
+
+  export type _Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: string | null;
+
+    city_name?: string | null;
+
+    country_iso_code?: string | null;
+
+    country_name?: string | null;
+
+    location?: _Location | null;
+
+    region_iso_code?: string | null;
+
+    region_name?: string | null;
+  };
+
+  export type _Location = {
+    __typename?: 'Location';
+
+    lat?: number | null;
+
+    lon?: number | null;
   };
 }
 

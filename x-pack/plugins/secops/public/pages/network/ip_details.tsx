@@ -7,17 +7,19 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
+import { IpOverview } from '../../components/page/network/ip_overview';
 import { GlobalTime } from '../../containers/global_time';
+import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -26,8 +28,16 @@ const basePath = chrome.getBasePath();
 const type = networkModel.NetworkType.details;
 
 interface IPDetailsComponentReduxProps {
-  filterQueryExpression: string;
+  filterQuery: string;
 }
+
+const CustomPageContent = styled.div`
+  margin-top: 106px;
+`;
+
+const CustomPageContentBody = styled.div`
+  padding: 12px;
+`;
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
@@ -36,20 +46,40 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     match: {
       params: { ip },
     },
-    filterQueryExpression,
+    filterQuery,
   }) => (
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-              <PageContentBody data-test-subj="pane1ScrollContainer">
+            <CustomPageContent data-test-subj="pageContent">
+              <CustomPageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
-                  {({ poll, to, from, setQuery }) => <>{`Hello ${decodeIpv6(ip)}!`}</>}
+                  {({ poll, to, from, setQuery }) => (
+                    <IpOverviewQuery
+                      sourceId="default"
+                      startDate={from}
+                      endDate={to}
+                      filterQuery={filterQuery}
+                      type={networkModel.NetworkType.page}
+                      ip={decodeIpv6(ip)}
+                    >
+                      {({ id, ipOverviewData, loading }) => (
+                        <IpOverview
+                          ip={decodeIpv6(ip)}
+                          data={ipOverviewData}
+                          startDate={from}
+                          endDate={to}
+                          loading={loading}
+                          type={networkModel.NetworkType.page}
+                        />
+                      )}
+                    </IpOverviewQuery>
+                  )}
                 </GlobalTime>
-              </PageContentBody>
-            </PageContent>
+              </CustomPageContentBody>
+            </CustomPageContent>
           </>
         ) : (
           <EmptyPage
@@ -77,6 +107,9 @@ export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {
     text: i18n.NETWORK,
     href: getNetworkUrl(),
+  },
+  {
+    text: 'ip',
   },
   {
     text: decodeIpv6(ip),

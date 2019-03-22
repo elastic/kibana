@@ -41,3 +41,11 @@ export const TotalVirusLink = pure<{ children?: React.ReactNode; link: string }>
     </EuiLink>
   )
 );
+
+export const WhoIsLink = pure<{ children?: React.ReactNode; domain: string }>(
+  ({ children, domain }) => (
+    <EuiLink href={`https://www.iana.org/whois?q=${encodeURI(domain)}`} target="_blank">
+      {children ? children : domain}
+    </EuiLink>
+  )
+);

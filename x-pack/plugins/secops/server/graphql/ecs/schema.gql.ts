@@ -18,8 +18,18 @@ export const ecsSchema = gql`
     dataset: String
   }
 
+  type Location {
+    lon: Float
+    lat: Float
+  }
+
   type GeoEcsFields {
+    continent_name: String
+    city_name: String
+    country_name: String
     country_iso_code: String
+    location: Location
+    region_iso_code: String
     region_name: String
   }
 
