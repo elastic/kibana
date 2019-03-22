@@ -8,7 +8,7 @@
     "declarationMap": true
   },
   "include": [
-    "./src/core/server/index.ts",
-    "./src/core/public/index.ts"
+    "src/core/server/index.ts",
+    "src/core/public/index.ts"
   ]
 }

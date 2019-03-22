@@ -29,26 +29,37 @@ export const TranspileTypescriptTask = {
     const typesProjectBuild = new Project(build.resolvePath('tsconfig.types.json'));
 
     // these projects are built in the build folder
-    const defaultProject = new Project(build.resolvePath('tsconfig.json'));
-    const browserProject = new Project(build.resolvePath('tsconfig.browser.json'));
+    const defaultProjectBuild = new Project(build.resolvePath('tsconfig.json'));
+    const browserProjectBuild = new Project(build.resolvePath('tsconfig.browser.json'));
 
     // update the default config to exclude **/public/**/* files
-    await write(defaultProject.tsConfigPath, JSON.stringify({
-      ...defaultProject.config,
+    await write(defaultProjectBuild.tsConfigPath, JSON.stringify({
+      ...defaultProjectBuild.config,
       exclude: [
-        ...defaultProject.config.exclude,
+        ...defaultProjectBuild.config.exclude,
         'src/**/public/**/*'
       ]
     }));
 
     // update the browser config file to include **/public/**/* files
-    await write(browserProject.tsConfigPath, JSON.stringify({
-      ...browserProject.config,
+    await write(browserProjectBuild.tsConfigPath, JSON.stringify({
+      ...browserProjectBuild.config,
       include: [
-        ...browserProject.config.include,
+        ...browserProjectBuild.config.include,
         'src/**/public/**/*',
         'typings/**/*',
-        'target/types/public/**/*'
+        'target/types/**/*'
+      ]
+    }));
+
+    // update types config to include src/core/public/index.ts
+    // unlike `include`, specifying the `files` configuration property
+    // will include files regardless of any exclusion rules
+    await write(typesProjectBuild.tsConfigPath, JSON.stringify({
+      ...typesProjectBuild.config,
+      files: [
+        ...(typesProjectBuild.config.files || []),
+        'src/core/public/index.ts'
       ]
     }));
 
@@ -58,8 +69,8 @@ export const TranspileTypescriptTask = {
       // Browser needs to be compiled before server code so that any shared code
       // is compiled to the lowest common denominator (server's CommonJS format)
       // which can be supported by both environments.
-      browserProject.tsConfigPath,
-      defaultProject.tsConfigPath,
+      browserProjectBuild.tsConfigPath,
+      defaultProjectBuild.tsConfigPath,
     ];
 
     // compile each typescript config file
