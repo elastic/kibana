@@ -34,7 +34,7 @@ export interface SumOperation {
 
 export type QueryColumn = DateHistogramOperation | SumOperation;
 
-export interface QueryViewModel {
+export interface VisModelQuery {
   indexPattern: string;
   select: {
     [id: string]: QueryColumn;
@@ -55,25 +55,54 @@ export interface IndexPatterns {
  * The basic properties which are shared over all editor plugins
  * are defined here, anything else is in the private property and scoped by plugin
  */
-export interface ViewModel<K extends string = any, T = any> {
+export interface VisModel<K extends string = any, T = any> {
   indexPatterns: IndexPatterns | null;
   queries: {
-    [id: string]: QueryViewModel;
+    [id: string]: VisModelQuery;
   };
   editorPlugin: string;
   title: string;
   private: { [key in K]: T };
 }
 
-export function selectColumn(id: string, model: ViewModel) {
+// This type should be used if it is not known which private states exist on a VisModel
+export type UnknownVisModel = VisModel<string, unknown>;
+
+export function selectColumn(id: string, model: VisModel) {
   const [queryId] = id.split('_');
   const query = model.queries[queryId];
 
   return query ? query.select[id] : undefined;
 }
 
+export function updatePrivateState<K extends string, T>(name: K) {
+  return (visModel: VisModel, privateStateUpdate: Partial<T>) => {
+    return {
+      ...visModel,
+      private: {
+        ...visModel.private,
+        [name]: { ...visModel.private[name], ...privateStateUpdate },
+      },
+    } as VisModel<K, T>;
+  };
+}
+
+export function getColumnIdByIndex(
+  queries: {
+    [id: string]: VisModelQuery;
+  },
+  queryIndex: number,
+  columnIndex: number
+): string | undefined {
+  const queryId = Object.keys(queries).sort()[queryIndex];
+  if (queryId) {
+    const query = queries[queryId];
+    return Object.keys(query.select).sort()[columnIndex];
+  }
+}
+
 // Generate our dummy-data
-export function initialState(): ViewModel<any, any> {
+export function initialState(): VisModel<any, any> {
   return {
     indexPatterns: null,
     queries: {
@@ -85,16 +114,16 @@ export function initialState(): ViewModel<any, any> {
         },
       },
     },
-    editorPlugin: 'bar_chart',
+    editorPlugin: 'xy_chart',
     title: 'Sum of bytes over time',
     private: {
-      barChart: {
+      xyChart: {
         xAxis: {
-          title: 'Sum of bytes',
+          title: 'Timestamp per 30 seconds',
           columns: ['q1_0'],
         },
         yAxis: {
-          title: 'Timestamp per 30 seconds',
+          title: 'Sum of bytes',
           columns: ['q1_1'],
         },
       },

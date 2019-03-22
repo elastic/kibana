@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { config as barChartConfig } from '../bar_chart_plugin';
-import { ViewModel } from '../common/lib';
+import { UnknownVisModel, VisModel } from '../public/common/lib';
 
-export interface PanelComponentProps<S extends ViewModel = ViewModel> {
-  viewModel: S;
-  onChangeViewModel: (newState: S) => void;
+import { config as pieChartConfig } from '../pie_chart_plugin';
+import { config as xyChartConfig } from '../xy_chart_plugin';
+
+export interface PanelComponentProps<S extends VisModel = VisModel> {
+  visModel: S;
+  onChangeVisModel: (newState: S) => void;
 }
 
-export interface Suggestion<S extends ViewModel = ViewModel> {
-  expression: string;
+export interface Suggestion<S extends VisModel = VisModel> {
+  pluginName: string;
+  previewExpression: string;
   score: number;
-  viewModel: S;
+  visModel: S;
   title: string;
+  iconType: string;
 }
 
 /**
@@ -28,36 +32,34 @@ export interface Suggestion<S extends ViewModel = ViewModel> {
  *    Also contains a score which is used to sort the suggestions from all plugins
  */
 
-export interface EditorPlugin<S extends ViewModel = ViewModel> {
+export interface EditorPlugin<S extends VisModel = VisModel> {
   name: string;
   DataPanel: React.ComponentType<PanelComponentProps<S>>;
   ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
   HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
-  TopAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
-  BottomAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
-  LeftAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
-  RightAxisPanel?: React.ComponentType<PanelComponentProps<S>>;
-  toExpression: (viewModel: S, mode: 'view' | 'edit') => string;
-  getSuggestions: (viewModel: S) => Array<Suggestion<S>>;
-  getInitialState: (viewModel: S) => S;
+  WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
+  toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
+  getSuggestions?: (visModel: S) => Array<Suggestion<S>>;
+  getInitialState: (visModel: UnknownVisModel) => S;
 }
 
-const configMap: { [key: string]: EditorPlugin<any> } = {
-  bar_chart: barChartConfig,
+const pluginMap: { [key: string]: EditorPlugin<any> } = {
+  xy_chart: xyChartConfig,
+  pie_chart: pieChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
 export const registry = {
-  getByName(editorConfigName: string) {
-    if (configMap[editorConfigName]) {
-      return configMap[editorConfigName];
+  getByName(pluginName: string) {
+    if (pluginMap[pluginName]) {
+      return pluginMap[pluginName];
     }
-    throw new Error('editorConfig not found');
+    throw new Error('editor plugin not found');
   },
   register(name: string, config: any) {
-    configMap[name] = config;
+    pluginMap[name] = config;
   },
   getAll() {
-    return Object.values(configMap);
+    return Object.values(pluginMap);
   },
 };
