@@ -10,6 +10,7 @@ import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
 import snapshotEmpty from './fixtures/snapshot_empty';
+import snapshotSimpleQueryString from './fixtures/snapshot_simple_query_string';
 
 export default function ({ getService }) {
   describe('snapshot query', () => {
@@ -88,6 +89,37 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotQuery });
       expect(data).to.eql(snapshotEmpty);
+    });
+
+    it('will fetch results for simple_query_string filters', async () => {
+      const filters = JSON.stringify({
+        bool: {
+          must: [
+            {
+              simple_query_string: { query: 'http' },
+            },
+            { match: { 'monitor.status': { query: 'up', operator: 'and' } } },
+            { range: { 'monitor.duration.us': { lt: 20000000 } } },
+          ],
+          must_not: [{ simple_query_string: { query: 'production' } }, { term: { down: true } }],
+        },
+      });
+      const getSnapshotQuery = {
+        operationName: 'Snapshot',
+        query: getSnapshotQueryString,
+        variables: {
+          dateRangeStart: '2019-01-28T17:40:08.078Z',
+          dateRangeEnd: '2019-01-28T19:00:16.078Z',
+          filters,
+        },
+      };
+      const {
+        body: { data },
+      } = await supertest
+        .post('/api/uptime/graphql')
+        .set('kbn-xsrf', 'foo')
+        .send({ ...getSnapshotQuery });
+      expect(data).to.eql(snapshotSimpleQueryString);
     });
     // TODO: test for host, port, etc.
   });
