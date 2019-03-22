@@ -36,7 +36,14 @@ export function ComboBoxProvider({ getService }) {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
-      await find.clickByCssSelector(`.euiComboBoxOption[title^="${value.trim()}"]`);
+
+      // if it doesn't find the item which text starts with value, it will choose the first option
+      try {
+        await find.clickByCssSelector(`.euiComboBoxOption[title^="${value ? value.trim() : value}"]`);
+      } catch (err) {
+        await find.clickByCssSelector('.euiComboBoxOption');
+      }
+
       await this.closeOptionsList(comboBoxElement);
     }
 

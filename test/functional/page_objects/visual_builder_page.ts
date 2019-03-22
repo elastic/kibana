@@ -240,7 +240,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async fillInVariable(name = 'test', metric = 'count', nth = 0) {
+    public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
       const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);

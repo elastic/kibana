@@ -77,7 +77,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.createNewAgg();
-        await PageObjects.visualBuilder.selectAggType('math', 1);
+        await PageObjects.visualBuilder.selectAggType('Math', 1);
         await PageObjects.visualBuilder.fillInVariable();
         await PageObjects.visualBuilder.fillInExpression('params.test + 1');
       });
