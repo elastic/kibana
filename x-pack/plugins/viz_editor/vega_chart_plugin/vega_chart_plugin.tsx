@@ -51,7 +51,7 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<VegaCha
 
 function toExpression(viewState: VegaChartVisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
-  return `sample_data | vega_data_prep spec='${viewState.private.vegaChart.spec.replace(
+  return `sample_data | vega_data_prep from='now-2M' to='now' spec='${viewState.private.vegaChart.spec.replace(
     /\n/g,
     ''
   )}' | vega spec=''`;

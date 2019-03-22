@@ -21,6 +21,8 @@ function sampleVisFunction() {
       spec: {
         types: ['string'],
       },
+      from: { types: ['string'] },
+      to: { types: ['string'] },
     },
     context: { types: ['datatable'] },
     fn(context: any, args: any) {
@@ -30,6 +32,9 @@ function sampleVisFunction() {
       );
       return {
         type: 'vega_literal_data',
+        timeRange: { from: args.from, to: args.to },
+        query: [],
+        filters: [],
         value: {
           spec: specWithData,
         },

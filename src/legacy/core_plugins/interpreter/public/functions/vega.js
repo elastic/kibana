@@ -50,8 +50,8 @@ export const vega = () => ({
 
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', []),
-      filters: get(context, 'filters', []),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
       visParams: { spec },
       forceFetch: true
     });
