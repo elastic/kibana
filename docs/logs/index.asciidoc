@@ -34,7 +34,7 @@ other.
 [float]
 === Configure source
 
-The source configuration UI can be accessed via the corresponding
+Configure source can be accessed via the corresponding
 image:logs/images/logs-configure-source-gear-icon.png[Configure source icon]
 button in the toolbar.
 
