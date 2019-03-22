@@ -70,7 +70,7 @@ function FieldParamEditor({
           isClearable={false}
           isInvalid={isInvalid}
           onChange={onChange}
-          data-test-subj="field-select"
+          data-test-subj="visDefaultEditorField"
           fullWidth={true}
           onBlur={setTouched}
         />

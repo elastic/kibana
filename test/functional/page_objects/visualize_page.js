@@ -34,6 +34,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common', 'header']);
   const defaultFindTimeout = config.get('timeouts.find');
+  const comboBox = getService('comboBox');
 
   class VisualizePage {
 
@@ -488,12 +489,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // select our agg
       const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
       await aggItem.click();
-      const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
-      // open field selection list
-      await fieldSelect.click();
+      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
-      await testSubjects.click(field);
+      await comboBox.setElement(fieldSelect, field);
       // enter custom label
       await this.setCustomLabel(label, index);
     }
@@ -546,12 +544,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .field-select
+        [data-test-subj="visDefaultEditorField"]
       `;
-      await find.clickByCssSelector(selector);
-      await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-      await input.pressKeys(browser.keys.RETURN);
+      const fieldEl = await find.byCssSelector(selector);
+      await comboBox.setElement(fieldEl, fieldValue);
     }
 
     async selectFieldById(fieldValue, id) {
