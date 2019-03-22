@@ -77,7 +77,7 @@ export class DataRecognizer {
             json: JSON.parse(file)
           });
         } catch (error) {
-          mlLog('warning', `Data recognizer error parsing ${dir}/manifest.json`);
+          mlLog('warning', `Data recognizer error parsing ${dir}/manifest.json. ${error}`);
         }
       }
 
@@ -103,7 +103,7 @@ export class DataRecognizer {
       try {
         match = await this.searchForFields(moduleConfig, indexPattern);
       } catch (error) {
-        mlLog('warning', `Data recognizer error running query defined for module ${moduleConfig.id}`);
+        mlLog('warning', `Data recognizer error running query defined for module ${moduleConfig.id}. ${error}`);
       }
 
       if (match === true) {
@@ -179,7 +179,7 @@ export class DataRecognizer {
           config: JSON.parse(jobConfig)
         });
       } catch (error) {
-        mlLog('warning', `Data recognizer error loading config for job ${job.id} for module ${id}`);
+        mlLog('warning', `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`);
       }
     }));
 
@@ -196,7 +196,7 @@ export class DataRecognizer {
           config
         });
       } catch (error) {
-        mlLog('warning', `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}`);
+        mlLog('warning', `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`);
       }
     }));
 
@@ -217,7 +217,7 @@ export class DataRecognizer {
               config
             });
           } catch (error) {
-            mlLog('warning', `Data recognizer error loading config for ${key} ${obj.id} for module ${id}`);
+            mlLog('warning', `Data recognizer error loading config for ${key} ${obj.id} for module ${id}. ${error}`);
           }
         }));
       }));
