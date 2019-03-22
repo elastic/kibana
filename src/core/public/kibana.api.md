@@ -8,39 +8,39 @@ import { default } from 'react';
 import * as Rx from 'rxjs';
 
 // @public
-export interface CoreStart {
-    // Warning: (ae-forgotten-export) The symbol "BasePathStart" needs to be exported by the entry point index.d.ts
+export interface CoreSetup {
+    // Warning: (ae-forgotten-export) The symbol "BasePathSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    basePath: BasePathStart;
-    // Warning: (ae-forgotten-export) The symbol "ChromeStart" needs to be exported by the entry point index.d.ts
+    basePath: BasePathSetup;
+    // Warning: (ae-forgotten-export) The symbol "ChromeSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    chrome: ChromeStart;
-    // Warning: (ae-forgotten-export) The symbol "FatalErrorsStart" needs to be exported by the entry point index.d.ts
+    chrome: ChromeSetup;
+    // Warning: (ae-forgotten-export) The symbol "FatalErrorsSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    fatalErrors: FatalErrorsStart;
-    // Warning: (ae-forgotten-export) The symbol "HttpStart" needs to be exported by the entry point index.d.ts
+    fatalErrors: FatalErrorsSetup;
+    // Warning: (ae-forgotten-export) The symbol "HttpSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    http: HttpStart;
-    // Warning: (ae-forgotten-export) The symbol "I18nStart" needs to be exported by the entry point index.d.ts
+    http: HttpSetup;
+    // Warning: (ae-forgotten-export) The symbol "I18nSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    i18n: I18nStart;
-    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataStart" needs to be exported by the entry point index.d.ts
+    i18n: I18nSetup;
+    // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    injectedMetadata: InjectedMetadataStart;
-    // Warning: (ae-forgotten-export) The symbol "NotificationsStart" needs to be exported by the entry point index.d.ts
+    injectedMetadata: InjectedMetadataSetup;
+    // Warning: (ae-forgotten-export) The symbol "NotificationsSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    notifications: NotificationsStart;
-    // Warning: (ae-forgotten-export) The symbol "UiSettingsClient" needs to be exported by the entry point index.d.ts
+    notifications: NotificationsSetup;
+    // Warning: (ae-forgotten-export) The symbol "UiSettingsSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    uiSettings: UiSettingsClient;
+    uiSettings: UiSettingsSetup;
 }
 
 // Warning: (ae-internal-missing-underscore) The name CoreSystem should be prefixed with an underscore because the declaration is marked as "@internal"
@@ -52,7 +52,7 @@ export class CoreSystem {
     // (undocumented)
     constructor(params: Params);
     // (undocumented)
-    start(): {
+    setup(): {
         fatalErrors: {
             add: (error: string | Error, source?: string | undefined) => never;
             get$: () => import("rxjs").Observable<{

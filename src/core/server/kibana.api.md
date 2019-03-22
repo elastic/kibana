@@ -35,6 +35,17 @@ export class ClusterClient {
     close(): void;
     }
 
+// Warning: (ae-internal-missing-underscore) The name DiscoveredPlugin should be prefixed with an underscore because the declaration is marked as "@internal"
+// 
+// @internal
+export interface DiscoveredPlugin {
+    // Warning: (ae-forgotten-export) The symbol "ConfigPath" needs to be exported by the entry point index.d.ts
+    readonly configPath: ConfigPath;
+    readonly id: PluginName;
+    readonly optionalPlugins: ReadonlyArray<PluginName>;
+    readonly requiredPlugins: ReadonlyArray<PluginName>;
+}
+
 // @public
 export interface Logger {
     debug(message: string, meta?: LogMeta): void;
@@ -79,7 +90,7 @@ export interface PluginInitializerContext {
 export type PluginName = string;
 
 // @public
-export interface PluginStartContext {
+export interface PluginSetupContext {
     // (undocumented)
     elasticsearch: {
         adminClient$: Observable<ClusterClient>;

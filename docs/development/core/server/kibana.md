@@ -17,7 +17,7 @@
 |  [LoggerFactory](./kibana.loggerfactory.md) | The single purpose of `LoggerFactory` interface is to define a way to retrieve a context-based logger instance. |
 |  [LogMeta](./kibana.logmeta.md) | Contextual metadata |
 |  [PluginInitializerContext](./kibana.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
-|  [PluginStartContext](./kibana.pluginstartcontext.md) | Context passed to the plugins `start` method. |
+|  [PluginSetupContext](./kibana.pluginsetupcontext.md) | Context passed to the plugins `setup` method. |
 
 ## Type Aliases
 
