@@ -32,9 +32,31 @@ function buildSize(query: Query, esQuery: any) {
 }
 
 /**
+ * Set the order property, if the query defines one
+ */
+function buildOrderBy(query: Query, esQuery: any) {
+  if (!query.orderBy) {
+    return esQuery;
+  }
+
+  return {
+    ...esQuery,
+    sort: query.orderBy.map(({ col, direction }) => ({
+      [col]: {
+        order: direction,
+        missing: '_first',
+        unmapped_type: 'keyword',
+      },
+    })),
+  };
+}
+
+/**
  * Convert our internal query representation into an Elasticsearch query
  */
 export function toEsQuery(query: Query): any {
   const sanitizedQuery = sanitizeQuery(query);
-  return buildSize(sanitizedQuery, buildWhere(sanitizedQuery, buildSelect(sanitizedQuery, {})));
+  const builderFunctions = [buildOrderBy, buildSize, buildWhere, buildSelect];
+
+  return builderFunctions.reduce((acc: any, fn) => fn(sanitizedQuery, acc));
 }

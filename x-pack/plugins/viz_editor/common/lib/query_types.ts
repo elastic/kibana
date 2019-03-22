@@ -108,6 +108,11 @@ export type BooleanOperation = And | Or | Gt | Gte | Lt | Lte | Eq | Ne;
 
 export type WhereOperation = And | Or;
 
+export interface OrderByOperation {
+  col: string;
+  direction: 'asc' | 'desc';
+}
+
 export interface Query {
   index: string;
 
@@ -116,6 +121,8 @@ export interface Query {
 
   // The subset of documents we're querying
   where?: WhereOperation;
+
+  orderBy?: OrderByOperation[];
 
   // Defaults to 1000?
   size?: number;
