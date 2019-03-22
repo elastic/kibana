@@ -197,6 +197,7 @@ export default () => Joi.object({
         )
         .default('#cheap-source-map'),
     }),
+    workers: Joi.number(),
     profile: Joi.boolean().default(false)
   }).default(),
   status: Joi.object({
