@@ -35,5 +35,22 @@ export const UptimePageProvider = ({
         throw new Error('Expected monitor name not found');
       }
     }
+
+    public async applyCustomFilterQuery(datePickerStartValue: string, filterQuery: string) {
+      const expectedFilteredMonitors = [
+        'monitor-page-link-auto-http-0X970CBD2F2102BFA8',
+        'monitor-page-link-auto-http-0X9CB71300ABD5A2A8',
+        'monitor-page-link-auto-http-0XC9CDA429418EDC2B',
+        'monitor-page-link-auto-http-0XD9AE729FC1C1E04A',
+        'monitor-page-link-auto-http-0XDD2D4E60FD4A61C3',
+      ];
+      await pageObjects.common.navigateToApp('uptime');
+      await pageObjects.timePicker.setAbsoluteStart(datePickerStartValue);
+      await uptimeService.runFilterBarQuery(filterQuery);
+      await Promise.all(
+        expectedFilteredMonitors.map(monitorLink => uptimeService.assertExists(monitorLink))
+      );
+      // TODO: add a check for the snapshot values
+    }
   }();
 };

@@ -115,6 +115,7 @@ export const FilterBar = ({
     <EuiFlexGroup>
       <EuiFlexItem grow>
         <EuiSearchBar
+          box={{ 'data-test-subj': 'uptime-filter-bar-input' }}
           // TODO: update typing
           onChange={({ query }: { query?: { text: string } }) => {
             try {
