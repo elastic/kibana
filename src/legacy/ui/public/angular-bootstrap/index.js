@@ -25,15 +25,11 @@ angular.module('ui.bootstrap', [
   'ui.bootstrap.transition',
   'ui.bootstrap.alert',
   'ui.bootstrap.bindHtml',
-  'ui.bootstrap.buttons',
   'ui.bootstrap.position',
-  'ui.bootstrap.dropdown',
   'ui.bootstrap.modal',
   'ui.bootstrap.pagination',
   'ui.bootstrap.tooltip',
-  'ui.bootstrap.popover',
   'ui.bootstrap.progressbar',
-  'ui.bootstrap.tabs',
   'ui.bootstrap.timepicker',
   'ui.bootstrap.typeahead'
 ]);
@@ -46,12 +42,9 @@ angular.module('ui.bootstrap.tpls', [
   'template/pagination/pagination.html',
   'template/tooltip/tooltip-html-unsafe-popup.html',
   'template/tooltip/tooltip-popup.html',
-  'template/popover/popover.html',
   'template/progressbar/bar.html',
   'template/progressbar/progress.html',
   'template/progressbar/progressbar.html',
-  'template/tabs/tab.html',
-  'template/tabs/tabset.html',
   'template/timepicker/timepicker.html',
   'template/typeahead/typeahead-match.html',
   'template/typeahead/typeahead-popup.html'
@@ -59,14 +52,10 @@ angular.module('ui.bootstrap.tpls', [
 
 import './alert/alert';
 import './bindHtml/bindHtml';
-import './buttons/buttons';
-import './dropdown/dropdown';
 import './modal/modal';
 import './pagination/pagination';
-import './popover/popover';
 import './position/position';
 import './progressbar/progressbar';
-import './tabs/tabs';
 import './timepicker/timepicker';
 import './tooltip/tooltip';
 import './transition/transition';
@@ -114,12 +103,6 @@ angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache',
   $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);
 }]);
 
-import popover from './popover/popover.html';
-
-angular.module('template/popover/popover.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/popover/popover.html', popover);
-}]);
-
 import bar from './progressbar/bar.html';
 
 angular.module('template/progressbar/bar.html', []).run(['$templateCache', function($templateCache) {
@@ -136,18 +119,6 @@ import progressbar from './progressbar/progressbar.html';
 
 angular.module('template/progressbar/progressbar.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('template/progressbar/progressbar.html', progressbar);
-}]);
-
-import tab from './tabs/tab.html';
-
-angular.module('template/tabs/tab.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tab.html', tab);
-}]);
-
-import tabset from './tabs/tabset.html';
-
-angular.module('template/tabs/tabset.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tabs/tabset.html', tabset);
 }]);
 
 import timepicker from './timepicker/timepicker.html';

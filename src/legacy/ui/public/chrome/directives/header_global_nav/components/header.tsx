@@ -217,7 +217,12 @@ class HeaderUI extends Component<Props, State> {
             iconType: navLink.euiIconType,
             icon:
               !navLink.euiIconType && navLink.icon ? (
-                <EuiImage size="s" alt="" aria-hidden={true} url={`/${navLink.icon}`} />
+                <EuiImage
+                  size="s"
+                  alt=""
+                  aria-hidden={true}
+                  url={chrome.addBasePath(`/${navLink.icon}`)}
+                />
               ) : (
                 undefined
               ),
