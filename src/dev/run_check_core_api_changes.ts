@@ -156,7 +156,7 @@ async function run(folder: string): Promise<boolean> {
           {dim $} node scripts/check_core_api_changes --accept
 
         Options:
-          --accept    {dim Accepts all changes by updating the API Review file \`common/core_api_review/kibana.api.ts\` and documentation}
+          --accept    {dim Accepts all changes by updating the API Review files and documentation}
           --docs      {dim Updates the Core API documentation}
           --help      {dim Show this message}
       `)
@@ -175,11 +175,13 @@ async function run(folder: string): Promise<boolean> {
   });
 
   const { apiChanged, warnings, errors } = runApiExtractor(folder, opts.accept);
+  const apiReviewFilePath =
+    apiExtractorConfig(folder)!.apiReviewFile!.apiReviewFolder + 'kibana.api.md';
 
   if (apiChanged && opts.accept) {
     log.warning(`You have changed the public signature of the ${folder} Core API`);
     log.warning(
-      `Please commit the updated API documentation and the review file in \`common/core_api_review/kibana.api.ts\` \n`
+      `Please commit the updated API documentation and the review file in '${apiReviewFilePath}' \n`
     );
   }
 
@@ -187,7 +189,7 @@ async function run(folder: string): Promise<boolean> {
     log.warning('You have changed the public signature of the Kibana Core API');
     log.warning(
       'To accept these changes run `node scripts/check_core_api_changes.js --accept` and then:\n' +
-        '\t 1. Commit the updated documentation and API review file `common/core_api_review/kibana.api.ts` \n' +
+        `\t 1. Commit the updated documentation and API review file ${apiReviewFilePath}' \n` +
         "\t 2. Describe the change in your PR including whether it's a major, minor or patch"
     );
   }
