@@ -7,7 +7,8 @@
 import * as Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
-import { API_PREFIX, PLUGIN_ID } from './common';
+import { PLUGIN_ID } from './common';
+import { route as routeQuery } from './server/query';
 
 export function vizEditor(kibana: any) {
   return new kibana.Plugin({
@@ -35,13 +36,7 @@ export function vizEditor(kibana: any) {
     },
 
     init(server: Legacy.Server) {
-      server.route({
-        path: `${API_PREFIX}/example`,
-        method: 'GET',
-        handler: () => {
-          return { time: new Date() };
-        },
-      });
+      routeQuery(server);
     },
   });
 }
