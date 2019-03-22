@@ -47,7 +47,8 @@ export const TranspileTypescriptTask = {
       include: [
         ...browserProject.config.include,
         'src/**/public/**/*',
-        'typings/**/*'
+        'typings/**/*',
+        'target/types/public/**/*'
       ]
     }));
 
