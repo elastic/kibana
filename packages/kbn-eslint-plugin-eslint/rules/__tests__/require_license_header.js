@@ -21,15 +21,14 @@ const { RuleTester } = require('eslint');
 const rule = require('../require_license_header');
 const dedent = require('dedent');
 
-const RULE_NAME = '@kbn/custom/require-license-header';
-
 const ruleTester = new RuleTester({
   parser: 'babel-eslint',
   parserOptions: {
     ecmaVersion: 2015
   }
 });
-ruleTester.run(RULE_NAME, rule, {
+
+ruleTester.run('@kbn/eslint/require-license-header', rule, {
   valid: [
     {
       code: dedent`

@@ -21,15 +21,14 @@ const { RuleTester } = require('eslint');
 const rule = require('../disallow_license_headers');
 const dedent = require('dedent');
 
-const RULE_NAME = '@kbn/custom/disallow-license-headers';
-
 const ruleTester = new RuleTester({
   parser: 'babel-eslint',
   parserOptions: {
     ecmaVersion: 2015
   }
 });
-ruleTester.run(RULE_NAME, rule, {
+
+ruleTester.run('@kbn/eslint/disallow-license-headers', rule, {
   valid: [
     {
       code: dedent`
