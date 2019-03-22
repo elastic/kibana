@@ -40,7 +40,7 @@ export interface EditorPlugin<S extends VisModel = VisModel> {
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
   toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
   getSuggestions?: (visModel: S) => Array<Suggestion<S>>;
-  getInitialState: (visModel: UnknownVisModel) => UnknownVisModel;
+  getInitialState: (visModel: UnknownVisModel) => S;
 }
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {

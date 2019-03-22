@@ -13,8 +13,8 @@ import {
   Axis,
   getColumnIdByIndex,
   selectColumn,
-  setPrivateState,
   UnknownVisModel,
+  updatePrivateState,
   VisModel,
 } from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
@@ -26,7 +26,7 @@ interface PieChartPrivateState {
 
 type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
 
-const setPieState = setPrivateState<'pieChart', PieChartPrivateState>('pieChart');
+const setPieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
 
 function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   return (
@@ -109,7 +109,7 @@ function toExpression(viewState: PieChartVisModel) {
 
 function prefillPrivateState(visModel: UnknownVisModel) {
   if (visModel.private.pieChart) {
-    return visModel;
+    return visModel as PieChartVisModel;
   }
 
   // TODO we maybe need a more stable way to get these

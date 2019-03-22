@@ -6,8 +6,6 @@
 
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
-import clone from 'lodash-es/clone';
-import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
 import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
@@ -15,8 +13,8 @@ import {
   Axis,
   getColumnIdByIndex,
   selectColumn,
-  setPrivateState,
   UnknownVisModel,
+  updatePrivateState,
   VisModel,
 } from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
@@ -29,7 +27,7 @@ interface XyChartPrivateState {
 
 type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
 
-const setXyState = setPrivateState<'xyChart', XyChartPrivateState>('xyChart');
+const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
 
 function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   return (
@@ -48,6 +46,7 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChart
       xyChart: { xAxis, yAxis, displayType },
     },
   } = visModel;
+
   return (
     <>
       <div className="configPanel-axis">
@@ -64,13 +63,8 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChart
             },
           ]}
           valueOfSelected={displayType || 'line'}
-          onChange={(value: string) => {
-            const updatedVisModel = setWith(
-              clone(visModel),
-              'private.xyChart.displayType',
-              value,
-              clone
-            );
+          onChange={(value: 'line' | 'area') => {
+            const updatedVisModel = updateXyState(visModel, { displayType: value });
             onChangeVisModel(updatedVisModel);
           }}
         />
@@ -97,12 +91,12 @@ function toExpression(viewState: XyChartVisModel) {
   return `sample_data | xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
-function prefillPrivateState(visModel: UnknownVisModel, displayType?: string) {
+function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
   if (visModel.private.xyChart) {
     if (displayType) {
-      return setWith(clone(visModel), 'private.xyChart.displayType', displayType, clone);
+      return updateXyState(visModel, { displayType });
     } else {
-      return visModel;
+      return visModel as XyChartVisModel;
     }
   }
 
@@ -111,12 +105,12 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: string) {
   const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
 
   if (xAxisRef && yAxisRef) {
-    return setXyState(visModel, {
+    return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
     });
   } else {
-    return setXyState(visModel, {
+    return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [] },
       yAxis: { title: 'Y Axis', columns: [] },
     });

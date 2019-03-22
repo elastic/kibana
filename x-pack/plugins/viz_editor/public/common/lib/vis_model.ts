@@ -75,15 +75,15 @@ export function selectColumn(id: string, model: VisModel) {
   return query ? query.select[id] : undefined;
 }
 
-export function setPrivateState<K extends string, T>(name: K) {
-  return (visModel: VisModel, newPrivateState: T) => {
+export function updatePrivateState<K extends string, T>(name: K) {
+  return (visModel: VisModel, privateStateUpdate: Partial<T>) => {
     return {
       ...visModel,
       private: {
         ...visModel.private,
-        [name]: newPrivateState,
+        [name]: { ...visModel.private[name], ...privateStateUpdate },
       },
-    };
+    } as VisModel<K, T>;
   };
 }
 
