@@ -135,8 +135,6 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
 
-      // we filter out the features here which don't have any privileges to simplify the logic within
-      const featuresWithPrivileges = features.filter(feature => Object.keys(feature.privileges).length > 0);
       render(
         <I18nContext>
           <EditRolePage
@@ -149,7 +147,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             spaces={spaces}
             spacesEnabled={enableSpaceAwarePrivileges}
             uiCapabilities={uiCapabilities}
-            features={featuresWithPrivileges}
+            features={features}
             privileges={privileges}
           />
         </I18nContext>, domNode);

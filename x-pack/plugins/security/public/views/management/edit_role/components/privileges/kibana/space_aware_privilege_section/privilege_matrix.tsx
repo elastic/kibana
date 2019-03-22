@@ -288,11 +288,14 @@ export class PrivilegeMatrix extends Component<Props, State> {
         return <PrivilegeDisplay privilege={globalBasePrivilege} />;
       }
 
-      const actualPrivileges = this.props.calculatedPrivileges[column.spacesIndex].feature[
-        feature.id
-      ].actualPrivilege;
+      const featureCalculatedPrivilege = this.props.calculatedPrivileges[column.spacesIndex]
+        .feature[feature.id];
 
-      return <PrivilegeDisplay privilege={actualPrivileges} />;
+      return (
+        <PrivilegeDisplay
+          privilege={featureCalculatedPrivilege && featureCalculatedPrivilege.actualPrivilege}
+        />
+      );
     } else {
       // not global
 
@@ -315,7 +318,7 @@ export class PrivilegeMatrix extends Component<Props, State> {
       return (
         <PrivilegeDisplay
           explanation={featurePrivilegeExplanation}
-          privilege={featurePrivilegeExplanation.actualPrivilege}
+          privilege={featurePrivilegeExplanation && featurePrivilegeExplanation.actualPrivilege}
         />
       );
     }

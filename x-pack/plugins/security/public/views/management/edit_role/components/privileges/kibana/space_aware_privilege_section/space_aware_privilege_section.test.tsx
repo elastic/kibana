@@ -9,6 +9,7 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { KibanaPrivileges } from '../../../../../../../../common/model';
 import { KibanaPrivilegeCalculatorFactory } from '../../../../../../../lib/kibana_privilege_calculator';
 import { RoleValidator } from '../../../../lib/validate_role';
+import { PrivilegeMatrix } from './privilege_matrix';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';
 import { SpaceAwarePrivilegeSection } from './space_aware_privilege_section';
@@ -116,6 +117,26 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]').simulate('click');
 
     expect(wrapper.find(PrivilegeSpaceForm)).toHaveLength(1);
+  });
+
+  it('hides privilege matrix when the role is reserved', () => {
+    const props = buildProps({
+      role: {
+        name: '',
+        metadata: {
+          _reserved: true,
+        },
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [],
+      },
+    });
+
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection.WrappedComponent {...props} />);
+    expect(wrapper.find(PrivilegeMatrix)).toHaveLength(0);
   });
 
   describe('with base privilege set to "read"', () => {

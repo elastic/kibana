@@ -32,7 +32,7 @@ export interface PrivilegeExplanation {
 export interface CalculatedPrivilege {
   base: PrivilegeExplanation;
   feature: {
-    [featureId: string]: PrivilegeExplanation;
+    [featureId: string]: PrivilegeExplanation | undefined;
   };
   _reserved: undefined | string[];
 }
@@ -51,9 +51,11 @@ export interface AllowedPrivilege {
     canUnassign: boolean;
   };
   feature: {
-    [featureId: string]: {
-      privileges: string[];
-      canUnassign: boolean;
-    };
+    [featureId: string]:
+      | {
+          privileges: string[];
+          canUnassign: boolean;
+        }
+      | undefined;
   };
 }
