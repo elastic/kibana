@@ -6,17 +6,9 @@
 
 import { rootReducer } from '../rootReducer';
 
-const ISO_DATE_PATTERN = /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/;
-
 describe('root reducer', () => {
   it('should return the initial state', () => {
-    const state = rootReducer(undefined, {});
-
-    expect(state.urlParams.start).toMatch(ISO_DATE_PATTERN);
-    expect(state.urlParams.end).toMatch(ISO_DATE_PATTERN);
-
-    delete state.urlParams.start;
-    delete state.urlParams.end;
+    const state = rootReducer(undefined, {} as any);
 
     expect(state).toEqual({
       location: { hash: '', pathname: '', search: '' },
