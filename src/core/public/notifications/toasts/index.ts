@@ -18,5 +18,5 @@
  */
 
 export { ToastsService } from './toasts_service';
-export { ToastsStart, ToastInput } from './toasts_start';
+export { ToastsSetup, ToastInput } from './toasts_start';
 export { Toast } from '@elastic/eui';

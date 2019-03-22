@@ -231,7 +231,7 @@ export async function startTestServers({
 
   const root = createRootWithCorePlugins(kbnSettings);
 
-  await root.start();
+  await root.setup();
 
   const kbnServer = getKbnServer(root);
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
