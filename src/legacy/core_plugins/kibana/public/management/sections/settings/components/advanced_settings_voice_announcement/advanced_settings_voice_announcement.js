@@ -87,6 +87,10 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
     this.setState({ isDelaying: false });
   };
 
+  componentWillUnmount = () => {
+    clearTimeout(this.delayID);
+  };
+
   render() {
     if (this.state.query === '') {
       return null;
