@@ -29,7 +29,7 @@ setHttpClient(axios.create(), $q);
 const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
   const userActions = {
     // Follower indices user actions
-    followerIndicesListActions() {
+    followerIndicesList() {
       const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
 
       const selectFollowerIndexAt = (index = 0) => {
