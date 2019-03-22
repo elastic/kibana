@@ -19,14 +19,8 @@ See also <<release-highlights>> and <<release-notes>>.
 * <<breaking_70_advanced_settings_changes>>
 * <<breaking_70_UI_changes>>
 
-////
-The following section is re-used in the Installation and Upgrade Guide
-[[breaking_70_notable]]
-=== Notable breaking changes
-////
-// tag::notable-breaking-changes[]
-
-// end::notable-breaking-changes[]
+//NOTE: The notable-breaking-changes tagged regions are re-used in the
+//Installation and Upgrade Guide
 
 [float]
 [[breaking_70_api_changes]]
@@ -38,6 +32,7 @@ The following section is re-used in the Installation and Upgrade Guide
 
 *Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
 
+//tag::notable-breaking-changes[]
 [float]
 ==== Saved object structure change
 *Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
@@ -80,12 +75,13 @@ Example structure after:
 --------------------------------------------------
 
 *Impact:* Users who query directly for ids will have to use the new `hasReference` in the find API. Users who save ids within attributes will have to move them into the `references` attribute and have a named reference to it.
-
+// end::notable-breaking-changes[]
 
 [float]
 [[breaking_70_browser_support_changes]]
 === Browser support changes
 
+//tag::notable-breaking-changes[]
 [float]
 ==== Removed support for using PhantomJS browser for screenshots in Reporting
 *Details:* Since the first release of Kibana Reporting, PhantomJS was used as
@@ -109,7 +105,9 @@ effectively removes RHEL 6 OS server support from Kibana Reporting. Users with
 RHEL 6 must upgrade to RHEL 7 to use Kibana Reporting starting with version
 7.0.0 of the Elastic stack.
 ============
+// end::notable-breaking-changes[]
 
+//tag::notable-breaking-changes[]
 [float]
 ==== Legacy browsers (namely IE11) will see a security warning message whenever they load Kibana
 *Details:* Kibana now has a Content Security Policy, but it's only effective if browsers enforce it, and since older
@@ -118,7 +116,7 @@ browsers like Internet Explorer 11 do not support CSP, we show them a warning me
 *Impact:* Nothing needs to be done necessarily, but if you don't need to support legacy browsers like IE11, we recommend
 that you set `csp.strict: true` in your kibana.yml to block access to those browsers entirely. If your organization requires
 users to use IE11, you might like to disable the warning entirely with `csp.warnLegacyBrowsers: false` in your kibana.yml.
-
+// end::notable-breaking-changes[]
 
 [float]
 [[breaking_70_ems_changes]]
@@ -192,6 +190,7 @@ should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies u
 Consider using <<management-cross-cluster-search>> instead, which does not 
 require kibana.yml configurations in Kibana.
 
+//tag::notable-breaking-changes[]
 [float]
 ==== `elasticsearch.ssl.ca` is no longer valid
 
@@ -199,7 +198,9 @@ require kibana.yml configurations in Kibana.
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.certificateAuthorities` instead.
+// end::notable-breaking-changes[]
 
+//tag::notable-breaking-changes[]
 [float]
 ==== `elasticsearch.ssl.cert` is no longer valid
 
@@ -207,7 +208,9 @@ file has been removed.
 file has been removed.
 
 *Impact:* Use `elasticsearch.ssl.certificate` instead.
+// end::notable-breaking-changes[]
 
+//tag::notable-breaking-changes[]
 [float]
 ==== `elasticsearch.ssl.verify` is no longer valid
 
@@ -217,7 +220,9 @@ file has been removed.
 *Impact:* Use `elasticsearch.ssl.verificationMode` instead. If you set
 `elasticsearch.ssl.verify` to `true`, that is equal to setting
 `elasticsearch.ssl.verificationMode` to `full`.
+// end::notable-breaking-changes[]
 
+//tag::notable-breaking-changes[]
 [float]
 ==== `elasticsearch.url` is no longer valid
 
@@ -230,6 +235,7 @@ port in `elasticsearch.hosts` is protocol dependent: https ports will use 443,
 and http ports will use 80. If your `elasticsearch.url` setting was dependent on
 an unspecified port set to 9200, append `:9200` to the url in the
 `elasticsearch.hosts` setting.
+// end::notable-breaking-changes[]
 
 [float]
 ==== `i18n.defaultLocale` is no longer valid
