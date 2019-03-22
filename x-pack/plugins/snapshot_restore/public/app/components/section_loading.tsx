@@ -12,7 +12,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export function SectionLoading({ children }: Props) {
+export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => {
   return (
     <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -26,4 +26,4 @@ export function SectionLoading({ children }: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+};

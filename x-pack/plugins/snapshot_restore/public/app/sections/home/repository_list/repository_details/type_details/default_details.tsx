@@ -22,7 +22,9 @@ interface Props {
   repository: Repository;
 }
 
-export const DefaultDetails = ({ repository: { name, settings } }: Props) => {
+export const DefaultDetails: React.FunctionComponent<Props> = ({
+  repository: { name, settings },
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },

@@ -15,7 +15,7 @@ interface Props {
   repository: HDFSRepository;
 }
 
-export const HDFSDetails = ({ repository }: Props) => {
+export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

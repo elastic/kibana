@@ -37,7 +37,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
+export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryName, onClose }) => {
   const {
     core: {
       i18n,

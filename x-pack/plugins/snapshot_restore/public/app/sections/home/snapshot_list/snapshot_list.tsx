@@ -6,6 +6,6 @@
 
 import React from 'react';
 
-export const SnapshotList = () => {
+export const SnapshotList: React.FunctionComponent = () => {
   return <div>List of snapshots</div>;
 };

@@ -21,12 +21,12 @@ interface MatchParams {
 
 interface Props extends RouteComponentProps<MatchParams> {}
 
-export const SnapshotRestoreHome = ({
+export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
   match: {
     params: { section },
   },
   history,
-}: Props) => {
+}) => {
   const [activeSection, setActiveSection] = useState<Section>(section);
 
   const {

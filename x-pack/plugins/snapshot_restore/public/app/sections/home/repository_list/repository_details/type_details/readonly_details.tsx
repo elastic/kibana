@@ -15,7 +15,7 @@ interface Props {
   repository: ReadonlyRepository;
 }
 
-export const ReadonlyDetails = ({ repository }: Props) => {
+export const ReadonlyDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

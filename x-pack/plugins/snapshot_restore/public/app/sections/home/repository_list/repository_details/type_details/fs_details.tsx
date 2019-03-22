@@ -15,7 +15,7 @@ interface Props {
   repository: FSRepository;
 }
 
-export const FSDetails = ({ repository }: Props) => {
+export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

@@ -23,12 +23,12 @@ interface MatchParams {
 }
 interface Props extends RouteComponentProps<MatchParams> {}
 
-export const RepositoryList = ({
+export const RepositoryList: React.FunctionComponent<Props> = ({
   match: {
     params: { name },
   },
   history,
-}: Props) => {
+}) => {
   const section = 'repositories' as Section;
   const {
     core: {

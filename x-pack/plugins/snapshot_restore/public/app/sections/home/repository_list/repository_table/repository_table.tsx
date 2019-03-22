@@ -17,7 +17,11 @@ interface Props {
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
-export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }: Props) => {
+export const RepositoryTable: React.FunctionComponent<Props> = ({
+  repositories,
+  reload,
+  openRepositoryDetails,
+}) => {
   const {
     core: { i18n },
   } = useAppDependencies();

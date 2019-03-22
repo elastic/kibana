@@ -14,7 +14,7 @@ interface Props {
   repository: AzureRepository;
 }
 
-export const AzureDetails = ({ repository }: Props) => {
+export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

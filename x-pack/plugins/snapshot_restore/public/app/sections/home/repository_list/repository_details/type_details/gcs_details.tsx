@@ -15,7 +15,7 @@ interface Props {
   repository: GCSRepository;
 }
 
-export const GCSDetails = ({ repository }: Props) => {
+export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

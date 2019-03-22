@@ -15,7 +15,7 @@ interface Props {
   repository: S3Repository;
 }
 
-export const S3Details = ({ repository }: Props) => {
+export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

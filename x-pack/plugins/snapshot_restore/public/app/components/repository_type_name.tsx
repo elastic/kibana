@@ -14,7 +14,7 @@ interface Props {
   delegateType?: RepositoryType;
 }
 
-export const RepositoryTypeName = ({ type, delegateType }: Props) => {
+export const RepositoryTypeName: React.FunctionComponent<Props> = ({ type, delegateType }) => {
   const {
     core: {
       i18n: { FormattedMessage },
