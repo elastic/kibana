@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -122,10 +122,13 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
   readonly path: string;
 }
 
-type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknown>> = (
+type PluginInitializer<TExposedSetup, TDependenciesSetup extends Record<PluginName, unknown>> = (
   coreContext: PluginInitializerContext
 ) => {
-  start: (pluginStartContext: PluginStartContext, dependencies: TDependencies) => TExposed;
+  setup: (
+    pluginSetupContext: PluginSetupContext,
+    dependencies: TDependenciesSetup
+  ) => TExposedSetup;
   stop?: () => void;
 };
 
@@ -135,8 +138,8 @@ type PluginInitializer<TExposed, TDependencies extends Record<PluginName, unknow
  * @internal
  */
 export class Plugin<
-  TStart = unknown,
-  TDependencies extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TSetup = unknown,
+  TDependenciesSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
@@ -147,7 +150,7 @@ export class Plugin<
 
   private readonly log: Logger;
 
-  private instance?: ReturnType<PluginInitializer<TStart, TDependencies>>;
+  private instance?: ReturnType<PluginInitializer<TSetup, TDependenciesSetup>>;
 
   constructor(
     public readonly path: string,
@@ -164,18 +167,18 @@ export class Plugin<
   }
 
   /**
-   * Instantiates plugin and calls `start` function exposed by the plugin initializer.
-   * @param startContext Context that consists of various core services tailored specifically
-   * for the `start` lifecycle event.
+   * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
+   * @param setupContext Context that consists of various core services tailored specifically
+   * for the `setup` lifecycle event.
    * @param dependencies The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `start` function.
+   * is the contract returned by the dependency's `setup` function.
    */
-  public async start(startContext: PluginStartContext, dependencies: TDependencies) {
+  public async setup(setupContext: PluginSetupContext, dependencies: TDependenciesSetup) {
     this.instance = this.createPluginInstance();
 
-    this.log.info('Starting plugin');
+    this.log.info('Setting up plugin');
 
-    return await this.instance.start(startContext, dependencies);
+    return await this.instance.setup(setupContext, dependencies);
   }
 
   /**
@@ -183,7 +186,7 @@ export class Plugin<
    */
   public async stop() {
     if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't started.`);
+      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
     this.log.info('Stopping plugin');
@@ -204,7 +207,7 @@ export class Plugin<
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TStart, TDependencies>;
+      plugin: PluginInitializer<TSetup, TDependenciesSetup>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
@@ -219,8 +222,8 @@ export class Plugin<
       );
     }
 
-    if (typeof instance.start !== 'function') {
-      throw new Error(`Instance of plugin "${this.name}" does not define "start" function.`);
+    if (typeof instance.setup !== 'function') {
+      throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
     return instance;

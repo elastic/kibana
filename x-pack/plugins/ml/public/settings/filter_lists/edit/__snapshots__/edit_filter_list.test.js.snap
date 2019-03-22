@@ -97,6 +97,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -210,6 +211,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -318,6 +320,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -410,6 +413,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -502,6 +506,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -611,6 +616,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -720,6 +726,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -829,6 +836,7 @@ exports[`EditFilterList updates the items per page 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

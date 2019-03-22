@@ -21,11 +21,11 @@ import { Observable } from 'rxjs';
 
 import { LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { HttpService, HttpServiceStart } from './http_service';
+import { HttpService, HttpServiceSetup } from './http_service';
 import { Router } from './router';
 
 export { Router, KibanaRequest } from './router';
-export { HttpService, HttpServiceStart };
+export { HttpService, HttpServiceSetup };
 export { HttpServerInfo } from './http_server';
 export { BasePathProxyServer } from './base_path_proxy_server';
 

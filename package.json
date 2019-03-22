@@ -82,7 +82,8 @@
       "packages/*",
       "x-pack",
       "x-pack/plugins/*",
-      "test/plugin_functional/plugins/*"
+      "test/plugin_functional/plugins/*",
+      "test/interpreter_functional/plugins/*"
     ],
     "nohoist": [
       "**/@types/*",
@@ -95,7 +96,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.4.2",
+    "@elastic/eui": "9.5.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -388,6 +389,7 @@
     "normalize-path": "^3.0.0",
     "pixelmatch": "4.0.2",
     "pkg-up": "^2.0.0",
+    "pngjs": "^3.4.0",
     "postcss": "^7.0.5",
     "postcss-url": "^8.0.0",
     "prettier": "^1.14.3",
