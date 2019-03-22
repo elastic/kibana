@@ -21,7 +21,7 @@ const { RuleTester } = require('eslint');
 const rule = require('../require_license_header');
 const dedent = require('dedent');
 
-const RULE_NAME = '@kbn/license-header/require-license-header';
+const RULE_NAME = '@kbn/custom/require-license-header';
 
 const ruleTester = new RuleTester({
   parser: 'babel-eslint',

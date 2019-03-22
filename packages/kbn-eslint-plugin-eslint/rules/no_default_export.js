@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { VislibProvider } from './vislib';
-
-// eslint-disable-next-line @kbn/eslint/no-default-export
-export default VislibProvider;
+module.exports = {
+  meta: {
+    schema: []
+  },
+  create: context => ({
+    ExportDefaultDeclaration: (node) => {
+      context.report(node, 'Default exports not allowed.');
+    }
+  })
+};
