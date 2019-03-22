@@ -18,26 +18,36 @@
  */
 
 import { connect } from 'react-redux';
-import { DashboardGrid } from './dashboard_grid';
+import { Dispatch } from 'redux';
 import { updatePanels } from '../actions';
-import {
-  getPanels,
-  getViewMode,
-  getUseMargins,
-} from '../selectors';
+import { getPanels, getUseMargins, getViewMode } from '../selectors';
+import { DashboardViewMode, PanelStateMap } from '../selectors/types';
+import { DashboardGrid } from './dashboard_grid';
 
-const mapStateToProps = ({ dashboard }) => ({
+interface DashboardGridContainerStateProps {
+  panels: PanelStateMap;
+  dashboardViewMode: DashboardViewMode;
+  useMargins: boolean;
+}
+
+interface DashboardGridContainerDispatchProps {
+  onPanelsUpdated(updatedPanels: PanelStateMap): void;
+}
+
+const mapStateToProps = ({ dashboard }: any): any => ({
   panels: getPanels(dashboard),
   dashboardViewMode: getViewMode(dashboard),
   useMargins: getUseMargins(dashboard),
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  onPanelsUpdated: updatedPanels => dispatch(updatePanels(updatedPanels)),
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  onPanelsUpdated: (updatedPanels: PanelStateMap) => dispatch(updatePanels(updatedPanels)),
 });
 
-export const DashboardGridContainer = connect(
+export const DashboardGridContainer = connect<
+  DashboardGridContainerStateProps,
+  DashboardGridContainerDispatchProps
+>(
   mapStateToProps,
   mapDispatchToProps
 )(DashboardGrid);
-
