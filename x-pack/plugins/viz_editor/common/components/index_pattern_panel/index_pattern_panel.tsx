@@ -24,19 +24,19 @@ interface Props {
 }
 
 interface State {
-  selectedIndexName: string;
+  selectedIndexPatternId: string;
 }
 
 function initialState(): State {
   const settingsClient = chrome.getUiSettingsClient();
   return {
-    selectedIndexName: settingsClient.get('defaultIndex') || '',
+    selectedIndexPatternId: settingsClient.get('defaultIndex') || '',
   };
 }
 
-function getIndexPatternFromName(indexPatterns: IndexPatterns, title: string) {
+function getIndexPatternFromId(indexPatterns: IndexPatterns, id: string) {
   return Object.values(indexPatterns).find(indexPattern => {
-    return indexPattern.title === title;
+    return indexPattern.id === id;
   });
 }
 
@@ -59,7 +59,7 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
         );
 
         setState({
-          selectedIndexName: state.selectedIndexName || loadedIndexPatterns[0].title,
+          selectedIndexPatternId: state.selectedIndexPatternId || loadedIndexPatterns[0].id,
         });
       });
     },
@@ -70,15 +70,15 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPattern = getIndexPatternFromName(indexPatterns, state.selectedIndexName);
+  const indexPattern = getIndexPatternFromId(indexPatterns, state.selectedIndexPatternId);
 
   if (!indexPattern) {
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ title }) => ({
+  const indexPatternNames = Object.values(indexPatterns).map(({ title, id }) => ({
     text: title,
-    value: title,
+    value: id,
     inputDisplay: title,
   }));
 
@@ -86,11 +86,11 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     <>
       <EuiSuperSelect
         options={indexPatternNames}
-        valueOfSelected={state.selectedIndexName}
+        valueOfSelected={state.selectedIndexPatternId}
         onChange={(value: string) => {
           setState({
             ...state,
-            selectedIndexName: value,
+            selectedIndexPatternId: value,
           });
         }}
       />
