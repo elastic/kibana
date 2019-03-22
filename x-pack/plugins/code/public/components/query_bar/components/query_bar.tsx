@@ -5,7 +5,7 @@
  */
 
 import { debounce, isEqual } from 'lodash';
-import React, { Component, RefObject } from 'react';
+import React, { Component } from 'react';
 
 import { SearchOptions as ISearchOptions } from '../../../actions';
 import { matchPairs } from '../lib/match_pairs';

@@ -180,7 +180,7 @@ export class LspIndexer extends AbstractIndexer {
         reference: this.options.enableGlobalReference,
       });
 
-      if (response && response.result.length > 0 && response.result[0]) {
+      if (response && response.result && response.result.length > 0 && response.result[0]) {
         const { symbols, references } = response.result[0];
         for (const symbol of symbols) {
           await this.batchIndexHelper.index(SymbolIndexName(repoUri), symbol);

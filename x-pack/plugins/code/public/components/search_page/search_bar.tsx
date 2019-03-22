@@ -28,7 +28,7 @@ interface Props {
 }
 
 export class SearchBar extends React.PureComponent<Props> {
-  public queryBar: any | null = null;
+  public queryBar: any = null;
 
   public onSearchChanged = (query: string) => {
     // Update the url and push to history as well.

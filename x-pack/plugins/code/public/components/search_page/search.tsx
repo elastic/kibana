@@ -67,7 +67,7 @@ class SearchPage extends React.PureComponent<Props, State> {
     uri: '',
   };
 
-  public searchBar: any | null = null;
+  public searchBar: any = null;
 
   public componentDidMount() {
     chrome.breadcrumbs.push({ text: `Search` });
