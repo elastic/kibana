@@ -92,6 +92,7 @@ function extendRecentlyAccessedHistoryItem(
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
+    objectTypeAriaAppendix: navLink ? `, ${navLink.id.replace('kibana:', '')}` : '',
   };
 }
 
@@ -250,7 +251,7 @@ class HeaderUI extends Component<Props, State> {
             label: truncateRecentItemLabel(item.label),
             // TODO: Add what type of app/saved object to title attr
             title: `${item.label}`,
-            'aria-label': item.label,
+            'aria-label': `${item.label}${item.objectTypeAriaAppendix}`,
             href: item.href,
             iconType: item.euiIconType,
           })),
