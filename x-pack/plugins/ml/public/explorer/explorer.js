@@ -962,7 +962,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       filteredFields,
       queryString,
       tableQueryString }) => {
-      const { swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
+      const { selectedCells, swimlaneViewByFieldName, viewBySwimlaneOptions } = this.state;
       let selectedViewByFieldName = swimlaneViewByFieldName;
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
@@ -979,9 +979,9 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
         this.updateExplorer(stateUpdate, false);
       } else {
-        // Set View by dropdown to first relevant fieldName based on incoming filter
+        // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
         for (let i = 0; i < filteredFields.length; i++) {
-          if (viewBySwimlaneOptions.includes(filteredFields[i])) {
+          if (viewBySwimlaneOptions.includes(filteredFields[i]) && (selectedCells === null)) {
             selectedViewByFieldName = filteredFields[i];
             this.props.appStateHandler(
               APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
