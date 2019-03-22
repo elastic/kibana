@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { ReadonlyRepository } from '../../../../../../../common/types/repository_types';
+import { ReadonlyRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';

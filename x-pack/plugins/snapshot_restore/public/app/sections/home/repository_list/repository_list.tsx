@@ -7,7 +7,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { Repository } from '../../../../../common/types/repository_types';
+import { Repository } from '../../../../../common/types';
 import { BASE_PATH, Section } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useRequest } from '../../../services/use_request';

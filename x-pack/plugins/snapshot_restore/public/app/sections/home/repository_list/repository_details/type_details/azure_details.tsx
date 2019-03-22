@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { AzureRepository } from '../../../../../../../common/types/repository_types';
+import { AzureRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
 interface Props {

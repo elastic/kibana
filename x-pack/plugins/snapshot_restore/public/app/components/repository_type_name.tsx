@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { RepositoryType, RepositoryTypes } from '../../../common/types/repository_types';
+import { RepositoryType, RepositoryTypes } from '../../../common/types';
 import { useAppDependencies } from '../index';
 
 interface Props {

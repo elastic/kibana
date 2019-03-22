@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { FSRepository } from '../../../../../../../common/types/repository_types';
+import { FSRepository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';

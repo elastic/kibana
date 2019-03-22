@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { Repository } from '../../../common/types/repository_types';
+import { Repository } from '../../../common/types';
 
 interface Props {
   children: (deleteRepository: DeleteRepository) => React.ReactNode;

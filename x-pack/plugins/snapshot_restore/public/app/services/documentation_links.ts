@@ -3,11 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  RepositoryDocPaths,
-  RepositoryType,
-  RepositoryTypes,
-} from '../../../common/types/repository_types';
+import { RepositoryDocPaths, RepositoryType, RepositoryTypes } from '../../../common/types';
 
 export const getRepositoryTypeDocUrl = (
   type: RepositoryType,

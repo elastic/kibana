@@ -11,7 +11,7 @@ declare module '@elastic/eui' {
 
 import React, { Fragment } from 'react';
 
-import { Repository } from '../../../../../../../common/types/repository_types';
+import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
 import 'brace/theme/textmate';

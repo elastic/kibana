@@ -9,7 +9,7 @@ import { useAppDependencies } from '../../../../index';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 import { useRequest } from '../../../../services/use_request';
 
-import { Repository, RepositoryTypes } from '../../../../../../common/types/repository_types';
+import { Repository, RepositoryTypes } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   RepositoryTypeName,

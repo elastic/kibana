@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { S3Repository } from '../../../../../../../common/types/repository_types';
+import { S3Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
 import { EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';

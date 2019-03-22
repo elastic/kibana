@@ -5,11 +5,7 @@
  */
 import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useState } from 'react';
-import {
-  Repository,
-  RepositoryType,
-  RepositoryTypes,
-} from '../../../../../../common/types/repository_types';
+import { Repository, RepositoryType, RepositoryTypes } from '../../../../../../common/types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 

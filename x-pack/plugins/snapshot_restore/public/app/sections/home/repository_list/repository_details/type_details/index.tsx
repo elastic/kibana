@@ -13,7 +13,7 @@ import {
   Repository,
   RepositoryTypes,
   S3Repository,
-} from '../../../../../../../common/types/repository_types';
+} from '../../../../../../../common/types';
 
 import { AzureDetails } from './azure_details';
 import { DefaultDetails } from './default_details';
