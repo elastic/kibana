@@ -23,11 +23,11 @@ import { WatchHistory } from './components/watch_detail/watch_history_component'
 import { I18nContext } from 'ui/i18n';
 
 let elem;
-const renderReact = async (elem, watchId) => {
+const renderReact = async (elem, watchId, kbnUrlService) => {
   render(
     <I18nContext>
       <WatchDetail watchId={watchId}/>
-      <WatchHistory watchId={watchId}/>
+      <WatchHistory watchId={watchId} urlService={kbnUrlService}/>
     </I18nContext>,
     elem
   );
@@ -94,6 +94,7 @@ routes
     controller: class WatchDetailRouteController {
       constructor($injector, $scope, $http) {
         const $route = $injector.get('$route');
+        const kbnUrlService = $injector.get('kbnUrl');
         this.initialHistoryRange = $route.current.locals.initialHistoryRange;
         this.watch = $route.current.locals.watch;
         this.watchHistoryItems = $route.current.locals.watchHistoryItems;
@@ -102,7 +103,7 @@ routes
         setHttpClient($http);
         $scope.$$postDigest(() => {
           elem = document.getElementById('watchDetailReactRoot');
-          renderReact(elem, $route.current.params.id);
+          renderReact(elem, $route.current.params.id, kbnUrlService);
           manageAngularLifecycle($scope, $route, elem);
         });
       }

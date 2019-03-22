@@ -21,7 +21,6 @@ import { WATCH_STATES } from '../../../../../common/constants';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +34,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { DeleteWatchesModal } from 'x-pack/plugins/watcher/public/components/delete_watches_modal';
 
 // TODO: remove duplication, [pcs]
 const stateToIcon: { [key: string]: JSX.Element } = {
@@ -45,11 +45,20 @@ const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
 };
 
-const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
+const WatchHistoryUI = ({
+  intl,
+  watchId,
+  urlService,
+}: {
+  intl: InjectedIntl;
+  watchId: string;
+  urlService: any;
+}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isActivated, setIsActivated] = useState<boolean>(true);
   const [history, setWatchHistory] = useState([]);
   const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
+  const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [itemDetail, setItemDetail] = useState<{
     id?: string;
     details?: any;
@@ -57,6 +66,8 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     watchStatus?: { actionStatuses?: any };
   }>({});
   const [watch, setWatch] = useState({});
+
+  const kbnUrlService = urlService;
 
   const pagination = {
     initialPageSize: 10,
@@ -218,15 +229,33 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   const activationButtonText = isActivated ? 'Deactivate Watch' : 'Activate Watch';
   return (
     <EuiPageContent>
+      <DeleteWatchesModal
+        callback={(deleted?: string[]) => {
+          if (deleted) {
+            kbnUrlService.redirect('/management/elasticsearch/watcher/watches');
+          }
+          setWatchesToDelete([]);
+        }}
+        watchesToDelete={watchesToDelete}
+      />
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
         </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => window.alert('Button clicked')}>
-            Delete Watch
-          </EuiButtonEmpty>
+          <EuiButton
+            data-test-subj="btnDeleteWatch"
+            onClick={() => {
+              setWatchesToDelete([watchId]);
+            }}
+            color="danger"
+            disabled={false}
+          >
+            <FormattedMessage
+              id="xpack.watcher.sections.watchList.deleteWatchButtonLabel"
+              defaultMessage="Delete"
+            />
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
