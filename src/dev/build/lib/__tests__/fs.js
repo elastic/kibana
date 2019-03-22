@@ -48,6 +48,7 @@ describe('dev/build/lib/fs', () => {
   // ensure WORLD_EXECUTABLE is actually executable by all
   before(async () => {
     chmodSync(WORLD_EXECUTABLE, 0o777);
+    expect(getCommonMode(WORLD_EXECUTABLE)).to.be('777');
   });
 
   // clean and recreate TMP directory
