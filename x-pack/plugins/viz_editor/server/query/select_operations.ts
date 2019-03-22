@@ -12,13 +12,16 @@
 
 import {
   AvgOperation,
+  chunkBy,
+  ChunkResult,
   Column,
   CountOperation,
   DateHistogramOperation,
+  isEmpty,
+  partition,
   Query,
   SelectOperation,
 } from '../../common';
-import { chunkBy, ChunkResult, isEmpty, partition } from './util';
 
 /**
  * A handful of transformation functions for a select operation,

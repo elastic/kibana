@@ -8,10 +8,18 @@
  * Logic to convert an Elasticsearch query result into a tabular format.
  *********************************************************************************************/
 
-import { Column, Query, SelectOperation } from '../../common';
+import {
+  chunkBy,
+  ChunkResult,
+  Column,
+  first,
+  flatten,
+  isEmpty,
+  Query,
+  SelectOperation,
+} from '../../common';
 import { sanitizeQuery } from './sanitize_query';
 import { hasAggregations } from './select_operations';
-import { chunkBy, ChunkResult, first, flatten, isEmpty } from './util';
 
 /**
  * Select the group by fields from the Elasticsearch query result

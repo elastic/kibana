@@ -8,8 +8,7 @@
  * Logic to convert our query shape into an Elastic search filter clause.
  *********************************************************************************************/
 
-import { And, BooleanOperation, Eq, Gt, Gte, Lt, Lte, Ne, Or, Query } from '../../common';
-import { isEmpty } from './util';
+import { And, BooleanOperation, Eq, Gt, Gte, isEmpty, Lt, Lte, Ne, Or, Query } from '../../common';
 
 /**
  * A function that converts a where operation to an ES boolean operation

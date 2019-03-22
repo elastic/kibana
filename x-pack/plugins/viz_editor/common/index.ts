@@ -6,3 +6,4 @@
 
 export * from './constants';
 export * from './query_types';
+export * from './util';
