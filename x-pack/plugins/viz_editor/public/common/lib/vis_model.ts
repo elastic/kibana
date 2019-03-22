@@ -75,6 +75,20 @@ export function selectColumn(id: string, model: VisModel) {
   return query ? query.select[id] : undefined;
 }
 
+export function getColumnIdByIndex(
+  queries: {
+    [id: string]: VisModelQuery;
+  },
+  queryIndex: number,
+  columnIndex: number
+): string | undefined {
+  const queryId = Object.keys(queries).sort()[queryIndex];
+  if (queryId) {
+    const query = queries[queryId];
+    return Object.keys(query.select).sort()[columnIndex];
+  }
+}
+
 // Generate our dummy-data
 export function initialState(): VisModel<any, any> {
   return {

@@ -11,7 +11,13 @@ import setWith from 'lodash-es/setWith';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
 import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
-import { Axis, selectColumn, UnknownVisModel, VisModel } from '../public/common/lib';
+import {
+  Axis,
+  getColumnIdByIndex,
+  selectColumn,
+  UnknownVisModel,
+  VisModel,
+} from '../public/common/lib';
 import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
 
 interface PieChartPrivateState {
@@ -106,10 +112,10 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   }
 
   // TODO we maybe need a more stable way to get these
-  const xAxisRef = 'q1_0';
-  const yAxisRef = 'q1_1';
+  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
+  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
 
-  if (visModel.queries.q1!.select.q1_0 && visModel.queries.q1!.select.q1_1) {
+  if (xAxisRef && yAxisRef) {
     return setWith(
       clone(visModel),
       'private.pieChart',
