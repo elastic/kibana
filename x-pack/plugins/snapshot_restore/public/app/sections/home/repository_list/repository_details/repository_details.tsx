@@ -5,7 +5,7 @@
  */
 import React, { Fragment } from 'react';
 
-import { AppStateInterface, useAppState } from '../../../../services/app_context';
+import { useAppDependencies } from '../../../../index';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 import { useRequest } from '../../../../services/use_request';
 
@@ -37,14 +37,13 @@ interface Props {
 }
 
 export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
-  const [
-    {
-      core: {
-        i18n,
-        documentation: { esDocBasePath, esPluginDocBasePath },
-      },
+  const {
+    core: {
+      i18n,
+      documentation: { esDocBasePath, esPluginDocBasePath },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
+
   const { FormattedMessage } = i18n;
   const { error, loading, data: repository } = useRequest({
     path: `repositories/${repositoryName}`,

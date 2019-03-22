@@ -12,7 +12,7 @@ declare module '@elastic/eui' {
 import React, { Fragment } from 'react';
 
 import { Repository } from '../../../../../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../../../../../services/app_context';
+import { useAppDependencies } from '../../../../../index';
 
 import 'brace/theme/textmate';
 
@@ -23,13 +23,11 @@ interface Props {
 }
 
 export const DefaultDetails = ({ repository: { name, settings } }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
 
   return (
     <Fragment>

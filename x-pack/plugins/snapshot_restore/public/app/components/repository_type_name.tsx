@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 import { RepositoryType, RepositoryTypes } from '../../../common/types/repository_types';
-import { AppStateInterface, useAppState } from '../services/app_context';
+import { useAppDependencies } from '../index';
 
 interface Props {
   type: RepositoryType;
@@ -14,13 +14,11 @@ interface Props {
 }
 
 export const RepositoryTypeName = ({ type, delegateType }: Props) => {
-  const [
-    {
-      core: {
-        i18n: { FormattedMessage },
-      },
+  const {
+    core: {
+      i18n: { FormattedMessage },
     },
-  ] = useAppState() as [AppStateInterface];
+  } = useAppDependencies();
 
   const typeNameMap: { [key in RepositoryType]: JSX.Element } = {
     [RepositoryTypes.fs]: (
