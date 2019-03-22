@@ -17,22 +17,9 @@
  * under the License.
  */
 
-import config from './config';
+/* eslint-env jest */
 
-export default {
-  ...config,
-  testMatch: [
-    '**/integration_tests/**/*.test.js',
-    '**/integration_tests/**/*.test.ts',
-  ],
-  testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
-  ),
-  reporters: [
-    'default',
-    ['<rootDir>/src/dev/jest/junit_reporter.js', { reportName: 'Jest Integration Tests' }],
-  ],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/dev/jest/setup/after_env.integration.js'
-  ]
-};
+/**
+ * Set the default timeout for the integration test suite to 30 seconds
+ */
+jest.setTimeout(30 * 1000);
