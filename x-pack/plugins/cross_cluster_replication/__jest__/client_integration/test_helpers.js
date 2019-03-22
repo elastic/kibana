@@ -127,8 +127,8 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../test_utils';
 
-export const initTestBed = (component, props = {}) => {
-  const testBed = registerTestBed(component, {}, ccrStore)(props);
+export const initTestBed = (component, props = {}, options) => {
+  const testBed = registerTestBed(component, {}, ccrStore)(props, options);
   const getUserActions = initUserActions(testBed);
 
   return {

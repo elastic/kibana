@@ -4,17 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { mountWithIntl } from '../enzyme_helpers';
 import { findTestSubject as findTestSubjectHelper } from '../index';
 
 const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
 
-const history = {
-  location: { search: '' },
-  replace: () => {}
+const defaultOptions = {
+  memoryRouter: {
+    wrapRoute: true,
+  },
 };
+
+const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => {}) => {
+  return class extends Component {
+      static contextTypes = {
+        router: PropTypes.object
+      };
+
+      componentDidMount() {
+        const { router } = this.context;
+        onRouter(router);
+      }
+
+      render() {
+        return (
+          <Route
+            path={componentRoutePath}
+            render={() => <WrappedComponent {...this.props} />}
+          />
+        );
+      }
+  };
+};
+
 
 /**
  * Register a testBed for a React component to be tested inside a Redux provider
@@ -34,14 +60,19 @@ const history = {
  * - form.setInput() Method to update a form input value
  * - form.selectCheckBox() Method to select a form checkbox
  */
-export const registerTestBed = (Component, defaultProps, store = {}) => (props) => {
+export const registerTestBed = (Component, defaultProps, store = {}) => (props, options = defaultOptions) => {
+  const Comp = options.memoryRouter.wrapRoute === false
+    ? Component
+    : withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter);
+
   const component = mountWithIntl(
     <Provider store={store}>
-      <Component
-        history={history}
-        {...defaultProps}
-        {...props}
-      />
+      <MemoryRouter
+        initialEntries={options.memoryRouter.initialEntries || ['/']}
+        initialIndex={options.memoryRouter.initialIndex || 0}
+      >
+        <Comp {...defaultProps} {...props} />
+      </MemoryRouter>
     </Provider>
   );
 

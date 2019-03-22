@@ -5,9 +5,6 @@
  */
 
 import sinon from 'sinon';
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { MemoryRouter, Route } from 'react-router-dom';
 
 import { initTestBed, mockServerResponses, nextTick } from './test_helpers';
 import { CrossClusterReplicationHome } from '../../public/app/sections/home/home';
@@ -24,28 +21,13 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
-class AppMock extends Component {
-  static contextTypes = {
-    router: PropTypes.object
-  };
-
-  componentDidMount() {
-    const { router } = this.context;
-    routing.reactRouter = router;
+const testBedOptions = {
+  memoryRouter: {
+    initialEntries: [`${BASE_PATH}/follower_indices`],
+    componentRoutePath: `${BASE_PATH}/:section`,
+    onRouter: (router) => routing.reactRouter = router
   }
-
-  render() {
-    return (
-      <Route component={CrossClusterReplicationHome} path={`${BASE_PATH}/:section`}/>
-    );
-  }
-}
-
-const AppWithRouter = () => (
-  <MemoryRouter initialEntries={[`${BASE_PATH}/follower_indices`]}>
-    <AppMock />
-  </MemoryRouter>
-);
+};
 
 describe('<CrossClusterReplicationHome />', () => {
   let server;
@@ -61,7 +43,7 @@ describe('<CrossClusterReplicationHome />', () => {
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      ({ exists, find, component } = initTestBed(AppWithRouter));
+      ({ exists, find, component } = initTestBed(CrossClusterReplicationHome, undefined, testBedOptions));
     });
 
     test('should set the correct an app title', () => {
