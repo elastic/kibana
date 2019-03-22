@@ -12,6 +12,7 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
       fill={true}
       iconSide="left"
       onClick={[MockFunction]}
+      size="m"
       type="button"
     >
       upgrade button text

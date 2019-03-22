@@ -154,7 +154,7 @@
   },
   "dependencies": {
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.4.2",
+    "@elastic/eui": "9.5.0",
     "@elastic/javascript-typescript-langserver": "^0.1.19",
     "@elastic/lsp-extension": "^0.1.1",
     "@elastic/node-crypto": "0.1.2",
