@@ -555,6 +555,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickImportDone() {
