@@ -66,6 +66,9 @@ class SearchPage extends React.PureComponent<Props, State> {
   public state = {
     uri: '',
   };
+
+  public searchBar: any = null;
+
   public componentDidMount() {
     chrome.breadcrumbs.push({ text: `Search` });
   }
@@ -142,7 +145,14 @@ class SearchPage extends React.PureComponent<Props, State> {
       repositorySearchResults,
     } = this.props;
 
-    let mainComp = <EmptyPlaceholder query={query} />;
+    let mainComp = (
+      <EmptyPlaceholder
+        query={query}
+        toggleOptionsFlyout={() => {
+          this.searchBar.toggleOptionsFlyout();
+        }}
+      />
+    );
     let repoStats: any[] = [];
     let languageStats: any[] = [];
     if (
@@ -227,6 +237,7 @@ class SearchPage extends React.PureComponent<Props, State> {
               repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
               query={this.props.query}
               onSearchScopeChanged={this.props.onSearchScopeChanged}
+              ref={element => (this.searchBar = element)}
             />
             {mainComp}
           </EuiFlexItem>

@@ -109,6 +109,8 @@ export class CodeQueryBar extends Component<Props, State> {
 
   public inputRef: HTMLInputElement | null = null;
 
+  public optionFlyout: any | null = null;
+
   private componentIsUnmounting = false;
 
   public isDirty = () => {
@@ -384,6 +386,12 @@ export class CodeQueryBar extends Component<Props, State> {
     }
   }
 
+  public toggleOptionsFlyout() {
+    if (this.optionFlyout) {
+      this.optionFlyout.toggleOptionsFlyout();
+    }
+  }
+
   public render() {
     const inputRef = (node: HTMLInputElement | null) => {
       if (node) {
@@ -442,6 +450,7 @@ export class CodeQueryBar extends Component<Props, State> {
                       repoSearchResults={this.props.repoSearchResults}
                       searchLoading={this.props.searchLoading}
                       searchOptions={this.props.searchOptions}
+                      ref={element => (this.optionFlyout = element)}
                     />
                   </div>
                 </div>
