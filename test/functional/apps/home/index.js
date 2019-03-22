@@ -19,12 +19,14 @@
 
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
   describe('homepage app', function () {
     this.tags('ciGroup6');
 
-    before(function () {
-      return browser.setWindowSize(1200, 800);
+    before(async () => {
+      await browser.setWindowSize(1200, 800);
+      await esArchiver.load('discover');
     });
 
     loadTestFile(require.resolve('./_navigation'));
