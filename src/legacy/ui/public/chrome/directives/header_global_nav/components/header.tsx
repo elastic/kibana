@@ -249,8 +249,7 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            // TODO: Add what type of app/saved object to title attr
-            title: `${item.label}`,
+            title: `${item.label}${item.objectTypeAriaAppendix}`,
             'aria-label': `${item.label}${item.objectTypeAriaAppendix}`,
             href: item.href,
             iconType: item.euiIconType,
