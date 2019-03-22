@@ -34,7 +34,7 @@ const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => 
         return (
           <Route
             path={componentRoutePath}
-            render={() => <WrappedComponent {...this.props} />}
+            render={(props) => <WrappedComponent {...props} {...this.props} />}
           />
         );
       }
