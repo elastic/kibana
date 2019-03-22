@@ -5,7 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { RepositoryType, RepositoryTypes } from '../../../common/types';
+import { REPOSITORY_TYPES } from '../../../common/constants';
+import { RepositoryType } from '../../../common/types';
 import { useAppDependencies } from '../index';
 
 interface Props {
@@ -21,43 +22,43 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
   } = useAppDependencies();
 
   const typeNameMap: { [key in RepositoryType]: JSX.Element } = {
-    [RepositoryTypes.fs]: (
+    [REPOSITORY_TYPES.fs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.fileSystemTypeName"
         defaultMessage="Shared File System"
       />
     ),
-    [RepositoryTypes.url]: (
+    [REPOSITORY_TYPES.url]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.readonlyTypeName"
         defaultMessage="Read-only URL"
       />
     ),
-    [RepositoryTypes.s3]: (
+    [REPOSITORY_TYPES.s3]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.s3TypeName"
         defaultMessage="AWS S3"
       />
     ),
-    [RepositoryTypes.hdfs]: (
+    [REPOSITORY_TYPES.hdfs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.hdfsTypeName"
         defaultMessage="HDFS File System"
       />
     ),
-    [RepositoryTypes.azure]: (
+    [REPOSITORY_TYPES.azure]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.azureTypeName"
         defaultMessage="Azure"
       />
     ),
-    [RepositoryTypes.gcs]: (
+    [REPOSITORY_TYPES.gcs]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.gcsTypeName"
         defaultMessage="Google Cloud Storage"
       />
     ),
-    [RepositoryTypes.source]: (
+    [REPOSITORY_TYPES.source]: (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryType.sourceTypeName"
         defaultMessage="Source"
@@ -69,7 +70,7 @@ export const RepositoryTypeName = ({ type, delegateType }: Props) => {
     return typeNameMap[repositoryType] || <Fragment>{type}</Fragment>;
   };
 
-  if (type === RepositoryTypes.source && delegateType) {
+  if (type === REPOSITORY_TYPES.source && delegateType) {
     return (
       <Fragment>
         <FormattedMessage

@@ -9,7 +9,8 @@ import { useAppDependencies } from '../../../../index';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation_links';
 import { useRequest } from '../../../../services/use_request';
 
-import { Repository, RepositoryTypes } from '../../../../../../common/types';
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   RepositoryTypeName,
@@ -116,7 +117,7 @@ export const RepositoryDetails = ({ repositoryName, onClose }: Props) => {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            {type === RepositoryTypes.source ? (
+            {type === REPOSITORY_TYPES.source ? (
               <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
             ) : (
               <RepositoryTypeName type={type} />

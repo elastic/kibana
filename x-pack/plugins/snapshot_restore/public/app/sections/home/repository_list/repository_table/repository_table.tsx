@@ -5,7 +5,9 @@
  */
 import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import React, { useState } from 'react';
-import { Repository, RepositoryType, RepositoryTypes } from '../../../../../../common/types';
+
+import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
 import { useAppDependencies } from '../../../../index';
 
@@ -42,7 +44,7 @@ export const RepositoryTable = ({ repositories, reload, openRepositoryDetails }:
       truncateText: true,
       sortable: true,
       render: (type: RepositoryType, repository: Repository) => {
-        if (type === RepositoryTypes.source) {
+        if (type === REPOSITORY_TYPES.source) {
           return (
             <RepositoryTypeName type={type} delegateType={repository.settings.delegate_type} />
           );

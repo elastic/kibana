@@ -12,16 +12,6 @@ export type HDFSRepositoryType = 'hdfs';
 export type AzureRepositoryType = 'azure';
 export type GCSRepositoryType = 'gcs';
 
-export enum RepositoryTypes {
-  fs = 'fs',
-  url = 'url',
-  source = 'source',
-  s3 = 's3',
-  hdfs = 'hdfs',
-  azure = 'azure',
-  gcs = 'gcs',
-}
-
 export type RepositoryType =
   | FSRepositoryType
   | ReadonlyRepositoryType
@@ -30,17 +20,6 @@ export type RepositoryType =
   | HDFSRepositoryType
   | AzureRepositoryType
   | GCSRepositoryType;
-
-export enum RepositoryDocPaths {
-  default = 'modules-snapshots.html',
-  fs = 'modules-snapshots.html#_shared_file_system_repository',
-  url = 'modules-snapshots.html#_read_only_url_repository',
-  source = 'modules-snapshots.html#_source_only_repository',
-  s3 = 'repository-s3.html',
-  hdfs = 'repository-hdfs.html',
-  azure = 'repository-azure.html',
-  gcs = 'repository-gcs.html',
-}
 
 export interface FSRepository {
   name: string;

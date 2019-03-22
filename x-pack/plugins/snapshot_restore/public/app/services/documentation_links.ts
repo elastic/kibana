@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { RepositoryDocPaths, RepositoryType, RepositoryTypes } from '../../../common/types';
+import { REPOSITORY_DOC_PATHS, REPOSITORY_TYPES } from '../../../common/constants';
+import { RepositoryType } from '../../../common/types';
 
 export const getRepositoryTypeDocUrl = (
   type: RepositoryType,
@@ -11,21 +12,21 @@ export const getRepositoryTypeDocUrl = (
   esPluginDocBasePath: string
 ): string => {
   switch (type) {
-    case RepositoryTypes.fs:
-      return `${esDocBasePath}${RepositoryDocPaths.fs}`;
-    case RepositoryTypes.url:
-      return `${esDocBasePath}${RepositoryDocPaths.url}`;
-    case RepositoryTypes.source:
-      return `${esDocBasePath}${RepositoryDocPaths.source}`;
-    case RepositoryTypes.s3:
-      return `${esPluginDocBasePath}${RepositoryDocPaths.s3}`;
-    case RepositoryTypes.hdfs:
-      return `${esPluginDocBasePath}${RepositoryDocPaths.hdfs}`;
-    case RepositoryTypes.azure:
-      return `${esPluginDocBasePath}${RepositoryDocPaths.azure}`;
-    case RepositoryTypes.gcs:
-      return `${esPluginDocBasePath}${RepositoryDocPaths.gcs}`;
+    case REPOSITORY_TYPES.fs:
+      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.fs}`;
+    case REPOSITORY_TYPES.url:
+      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.url}`;
+    case REPOSITORY_TYPES.source:
+      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.source}`;
+    case REPOSITORY_TYPES.s3:
+      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.s3}`;
+    case REPOSITORY_TYPES.hdfs:
+      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.hdfs}`;
+    case REPOSITORY_TYPES.azure:
+      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.azure}`;
+    case REPOSITORY_TYPES.gcs:
+      return `${esPluginDocBasePath}${REPOSITORY_DOC_PATHS.gcs}`;
     default:
-      return `${esDocBasePath}${RepositoryDocPaths.default}`;
+      return `${esDocBasePath}${REPOSITORY_DOC_PATHS.default}`;
   }
 };
