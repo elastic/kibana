@@ -19,7 +19,6 @@
 
 import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { GridData } from '../types';
 
 export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
