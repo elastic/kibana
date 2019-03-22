@@ -12,7 +12,7 @@ export const TELEMETRY_DOC_ID = 'file-upload-telemetry';
 
 export interface Telemetry {
   filesUploadedTotalCount: number;
-  filesUploadedTypesTotalCount: object;
+  filesUploadedTypesTotalCounts: object;
   filesUploadedByApp: object;
 }
 
@@ -20,73 +20,63 @@ export interface TelemetrySavedObject {
   attributes: Telemetry;
 }
 
-export function createTelemetry(count: number = 0): Telemetry {
+export function initTelemetry(): Telemetry {
   return {
-    filesUploadedTotalCount: count,
-    filesUploadedTypesTotalCount: {},
+    filesUploadedTotalCount: 0,
+    filesUploadedTypesTotalCounts: {},
     filesUploadedByApp: {},
   };
 }
 
-export function getSavedObjectsClient(server: Server): any {
-  const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
+function getInternalRepository(server: Server): any {
+  const { getSavedObjectsRepository } = server.savedObjects;
   const callWithInternalUser = callWithInternalUserFactory(server);
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  return new SavedObjectsClient(internalRepository);
+  return getSavedObjectsRepository(callWithInternalUser);
 }
 
-export async function updateTelemetry(
-  internalRepository,
-  app = 'unspecified-app',
-  fileType = 'unspecified-file-type'
-) {
-  const nameAndId = 'file-upload-telemetry';
-
+export async function getTelemetry(server: Server): Promise<Telemetry> {
+  const internalRepository = getInternalRepository(server);
   let telemetrySavedObject;
+
   try {
-    telemetrySavedObject = await internalRepository.get(nameAndId, nameAndId);
+    telemetrySavedObject = await internalRepository.get(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID);
   } catch (e) {
     // Fail silently
   }
 
-  if (telemetrySavedObject && telemetrySavedObject.attributes) {
-    const {
-      filesUploadedTotalCount,
-      filesUploadedTypesTotalCount,
-      filesUploadedByApp,
-    } = telemetrySavedObject.attributes;
-
-    await internalRepository.update(nameAndId, nameAndId, {
-      filesUploadedTotalCount: (filesUploadedTotalCount || 0) + 1,
-      filesUploadedTypesTotalCount: {
-        ...filesUploadedTypesTotalCount,
-        [fileType]: _.get(filesUploadedTypesTotalCount, fileType, 0) + 1,
-      },
-      filesUploadedByApp: {
-        ...filesUploadedByApp,
-        [app]: {
-          ..._.get(filesUploadedByApp, app, {}),
-          [fileType]: _.get(filesUploadedByApp, `${app}.${fileType}`, 0) + 1,
-        },
-      },
+  if (!telemetrySavedObject) {
+    telemetrySavedObject = await internalRepository.create(TELEMETRY_DOC_ID, initTelemetry(), {
+      id: TELEMETRY_DOC_ID,
     });
-  } else {
-    await internalRepository.create(
-      'file-upload-telemetry',
-      {
-        filesUploadedTotalCount: 1,
-        filesUploadedTypesTotalCount: {
-          [fileType]: 1,
-        },
-        filesUploadedByApp: {
-          [app]: {
-            [fileType]: 1,
-          },
-        },
-      },
-      {
-        id: 'file-upload-telemetry',
-      }
-    );
   }
+  return telemetrySavedObject.attributes;
+}
+
+export async function updateTelemetry({
+  server,
+  app = 'unspecified-app',
+  fileType = 'unspecified-file-type',
+}: {
+  server: Server;
+  app: string;
+  fileType: string;
+}) {
+  const telemetry = await getTelemetry(server);
+  const internalRepository = getInternalRepository(server);
+  const { filesUploadedTotalCount, filesUploadedTypesTotalCounts, filesUploadedByApp } = telemetry;
+
+  await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, {
+    filesUploadedTotalCount: filesUploadedTotalCount + 1,
+    filesUploadedTypesTotalCounts: {
+      ...filesUploadedTypesTotalCounts,
+      [fileType]: _.get(filesUploadedTypesTotalCounts, fileType, 0) + 1,
+    },
+    filesUploadedByApp: {
+      ...filesUploadedByApp,
+      [app]: {
+        ..._.get(filesUploadedByApp, app, {}),
+        [fileType]: _.get(filesUploadedByApp, `${app}.${fileType}`, 0) + 1,
+      },
+    },
+  });
 }

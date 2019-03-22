@@ -4,7 +4,7 @@
       "filesUploadedTotalCount": {
         "type": "long"
       },
-      "filesUploadedTypesTotalCount": {
+      "filesUploadedTypesTotalCounts": {
         "dynamic": "true",
         "properties": {}
       },
