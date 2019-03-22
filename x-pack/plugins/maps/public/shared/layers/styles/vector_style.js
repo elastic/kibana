@@ -229,7 +229,7 @@ export class VectorStyle extends AbstractStyle {
     for (let i = 0; i < features.length; i++) {
       const unscaledValue = parseFloat(features[i].properties[fieldName]);
       let scaledValue;
-      if (typeof  unscaledValue !== 'number' || isNaN(unscaledValue)) {//cannot scale
+      if (isNaN(unscaledValue)) {//cannot scale
         scaledValue = -1;//put outside range
       } else if (diff === 0) {//values are identical
         scaledValue = 1;//snap to end of color range
