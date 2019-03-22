@@ -107,9 +107,17 @@ export function registerJobsRoute(server) {
     handler: async (request) => {
       try {
         const { jobIds } = request.payload;
+        // For our API integration tests we need to wait for the jobs to be stopped
+        // in order to be able to delete them sequencially.
+        const { waitForCompletion } = request.params;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })))
+
+        const stopRollupJob = id => callWithRequest('rollup.stopJob', { id, waitForCompletion: waitForCompletion === 'true' });
+
+        return await Promise
+          .all(jobIds.map(stopRollupJob))
           .then(() => ({ success: true }));
+
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);

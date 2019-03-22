@@ -93,10 +93,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
   rollup.stopJob = ca({
     urls: [
       {
-        fmt: '/_rollup/job/<%=id%>/_stop',
+        fmt: '/_rollup/job/<%=id%>/_stop?wait_for_completion=<%=waitForCompletion%>',
         req: {
           id: {
             type: 'string'
+          },
+          waitForCompletion: {
+            type: 'boolean'
           }
         }
       },
