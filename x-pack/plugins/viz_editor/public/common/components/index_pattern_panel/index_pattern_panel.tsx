@@ -34,12 +34,6 @@ function initialState(): State {
   };
 }
 
-function getIndexPatternFromId(indexPatterns: IndexPatterns, id: string) {
-  return Object.values(indexPatterns).find(indexPattern => {
-    return indexPattern.id === id;
-  });
-}
-
 export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
   const [state, setState] = useState(() => initialState());
 
@@ -70,13 +64,13 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPattern = getIndexPatternFromId(indexPatterns, state.selectedIndexPatternId);
+  const indexPattern = indexPatterns[state.selectedIndexPatternId];
 
   if (!indexPattern) {
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ title, id }) => ({
+  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
     text: title,
     value: id,
     inputDisplay: title,
