@@ -24,20 +24,14 @@ interface Props {
 }
 
 interface State {
-  selectedIndexName: string;
+  selectedIndexId: string;
 }
 
 function initialState(): State {
   const settingsClient = chrome.getUiSettingsClient();
   return {
-    selectedIndexName: settingsClient.get('defaultIndex') || '',
+    selectedIndexId: settingsClient.get('defaultIndex') || '',
   };
-}
-
-function getIndexPatternFromName(indexPatterns: IndexPatterns, title: string) {
-  return Object.values(indexPatterns).find(indexPattern => {
-    return indexPattern.title === title;
-  });
 }
 
 export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
@@ -59,7 +53,7 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
         );
 
         setState({
-          selectedIndexName: state.selectedIndexName || loadedIndexPatterns[0].title,
+          selectedIndexId: state.selectedIndexId || loadedIndexPatterns[0].id,
         });
       });
     },
@@ -70,15 +64,15 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPattern = getIndexPatternFromName(indexPatterns, state.selectedIndexName);
+  const indexPattern = indexPatterns[state.selectedIndexId];
 
   if (!indexPattern) {
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ title }) => ({
+  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
     text: title,
-    value: title,
+    value: id,
     inputDisplay: title,
   }));
 
@@ -86,11 +80,11 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     <>
       <EuiSuperSelect
         options={indexPatternNames}
-        valueOfSelected={state.selectedIndexName}
+        valueOfSelected={state.selectedIndexId}
         onChange={(value: string) => {
           setState({
             ...state,
-            selectedIndexName: value,
+            selectedIndexId: value,
           });
         }}
       />
