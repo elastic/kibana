@@ -15,7 +15,34 @@ import routes from 'ui/routes';
 
 import { HashRouter } from 'react-router-dom';
 
-import { AppCore, AppPlugins } from './app/types';
+export interface AppCore {
+  i18n: {
+    [i18nPackage: string]: any;
+    Context: typeof I18nContext;
+    FormattedMessage: typeof FormattedMessage;
+  };
+  chrome: typeof chrome;
+  notification: {
+    fatalError: typeof fatalError;
+  };
+  http: {
+    getClient(): any;
+    setClient(client: any): void;
+  };
+  documentation: {
+    esDocBasePath: string;
+    esPluginDocBasePath: string;
+  };
+}
+
+export interface AppPlugins {
+  management: {
+    sections: typeof management;
+    constants: {
+      BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
+    };
+  };
+}
 
 export interface Core extends AppCore {
   routing: {
