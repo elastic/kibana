@@ -39,6 +39,26 @@ JOB:
   - kibana-ciGroup6-38
   - kibana-ciGroup6-39
   - kibana-ciGroup6-40
+  - kibana-ciGroup6-41
+  - kibana-ciGroup6-42
+  - kibana-ciGroup6-43
+  - kibana-ciGroup6-44
+  - kibana-ciGroup6-45
+  - kibana-ciGroup6-46
+  - kibana-ciGroup6-47
+  - kibana-ciGroup6-48
+  - kibana-ciGroup6-49
+  - kibana-ciGroup6-50
+  - kibana-ciGroup6-51
+  - kibana-ciGroup6-52
+  - kibana-ciGroup6-53
+  - kibana-ciGroup6-54
+  - kibana-ciGroup6-55
+  - kibana-ciGroup6-56
+  - kibana-ciGroup6-57
+  - kibana-ciGroup6-58
+  - kibana-ciGroup6-59
+  - kibana-ciGroup6-60
 
 # `~` is yaml for `null`
 exclude: ~
