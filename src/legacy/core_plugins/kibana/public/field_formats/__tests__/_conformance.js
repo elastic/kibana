@@ -43,7 +43,7 @@ const formatIds = [
   'static_lookup'
 ];
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default describe('conformance', function () {
 
   const getConfig = (...args) => config.get(...args);
