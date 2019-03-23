@@ -24,18 +24,20 @@ const { assert, normalizeWhitespace, init } = require('../lib');
 module.exports = {
   meta: {
     fixable: 'code',
-    schema: [{
-      type: 'object',
-      properties: {
-        licenses: {
-          type: 'array',
-          items: {
-            type: 'string'
-          }
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          licenses: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
         },
+        additionalProperties: false,
       },
-      additionalProperties: false,
-    }]
+    ],
   },
   create: context => {
     return {
@@ -49,8 +51,14 @@ module.exports = {
           return licenses.map((license, i) => {
             const parsed = babelEslint.parse(license);
 
-            assert(!parsed.body.length, `"licenses[${i}]" option must only include a single comment`);
-            assert(parsed.comments.length === 1, `"licenses[${i}]" option must only include a single comment`);
+            assert(
+              !parsed.body.length,
+              `"licenses[${i}]" option must only include a single comment`
+            );
+            assert(
+              parsed.comments.length === 1,
+              `"licenses[${i}]" option must only include a single comment`
+            );
 
             return normalizeWhitespace(parsed.comments[0].value);
           });
@@ -69,10 +77,10 @@ module.exports = {
               message: 'This license header is not allowed in this file.',
               fix(fixer) {
                 return fixer.remove(node);
-              }
+              },
             });
           });
       },
     };
-  }
+  },
 };

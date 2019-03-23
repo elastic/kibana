@@ -28,20 +28,22 @@ function isHashbang(text) {
 module.exports = {
   meta: {
     fixable: 'code',
-    schema: [{
-      type: 'object',
-      properties: {
-        license: {
-          type: 'string',
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          license: {
+            type: 'string',
+          },
         },
+        additionalProperties: false,
       },
-      additionalProperties: false,
-    }]
+    ],
   },
   create: context => {
     return {
       Program(program) {
-        const license = init(context, program, function () {
+        const license = init(context, program, function() {
           const options = context.options[0] || {};
           const license = options.license;
 
@@ -49,11 +51,14 @@ module.exports = {
 
           const parsed = babelEslint.parse(license);
           assert(!parsed.body.length, '"license" option must only include a single comment');
-          assert(parsed.comments.length === 1, '"license" option must only include a single comment');
+          assert(
+            parsed.comments.length === 1,
+            '"license" option must only include a single comment'
+          );
 
           return {
             source: license,
-            nodeValue: normalizeWhitespace(parsed.comments[0].value)
+            nodeValue: normalizeWhitespace(parsed.comments[0].value),
           };
         });
 
@@ -62,9 +67,9 @@ module.exports = {
         }
 
         const sourceCode = context.getSourceCode();
-        const comment = sourceCode.getAllComments().find(node => (
-          normalizeWhitespace(node.value) === license.nodeValue
-        ));
+        const comment = sourceCode
+          .getAllComments()
+          .find(node => normalizeWhitespace(node.value) === license.nodeValue);
 
         // no licence comment
         if (!comment) {
@@ -72,7 +77,7 @@ module.exports = {
             message: 'File must start with a license header',
             loc: {
               start: { line: 1, column: 0 },
-              end: { line: 1, column: sourceCode.lines[0].length - 1 }
+              end: { line: 1, column: sourceCode.lines[0].length - 1 },
             },
             fix(fixer) {
               if (isHashbang(sourceCode.lines[0])) {
@@ -80,13 +85,15 @@ module.exports = {
               }
 
               return fixer.replaceTextRange([0, 0], license.source + '\n\n');
-            }
+            },
           });
           return;
         }
 
         // ensure there is nothing before the comment
-        const sourceBeforeNode = sourceCode.getText().slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
+        const sourceBeforeNode = sourceCode
+          .getText()
+          .slice(0, sourceCode.getIndexFromLoc(comment.loc.start));
         if (sourceBeforeNode.length && !isHashbang(sourceBeforeNode)) {
           context.report({
             node: comment,
@@ -103,10 +110,10 @@ module.exports = {
                 fixer.remove(comment),
                 fixer.replaceTextRange([0, 0], license.source + '\n\n'),
               ];
-            }
+            },
           });
         }
       },
     };
-  }
+  },
 };
