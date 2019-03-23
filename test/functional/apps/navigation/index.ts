@@ -17,20 +17,4 @@
  * under the License.
  */
 
-export default function ({ getService, loadTestFile }) {
-  const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
-
-  describe('homepage app', function () {
-    this.tags('ciGroup6');
-
-    before(async () => {
-      await browser.setWindowSize(1200, 800);
-      await esArchiver.load('discover');
-    });
-
-    loadTestFile(require.resolve('./_home'));
-    loadTestFile(require.resolve('./_add_data'));
-    loadTestFile(require.resolve('./_sample_data'));
-  });
-}
+export * from './navigation';

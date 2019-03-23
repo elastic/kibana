@@ -47,6 +47,19 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     }
 
     /**
+     * Get the current href for the app with name
+     * @param name
+     */
+    public async getHref(name: string) {
+      const links = await this.readLinks();
+      const link = links.find(l => l.text === name);
+      if (!link) {
+        throw new Error(`There is no app link with the title "${name}"`);
+      }
+      return link.href;
+    }
+
+    /**
      * Determine if an app link with the given name exists
      * @param name
      */

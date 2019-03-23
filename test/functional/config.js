@@ -26,6 +26,7 @@ export default async function ({ readConfigFile }) {
 
   return {
     testFiles: [
+      require.resolve('./apps/navigation'),
       require.resolve('./apps/console'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/context'),
