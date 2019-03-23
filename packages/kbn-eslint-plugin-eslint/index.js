@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { VislibProvider } from './vislib';
-
-// eslint-disable-next-line @kbn/eslint/no-default-export
-export default VislibProvider;
+module.exports = {
+  rules: {
+    'require-license-header': require('./rules/require_license_header'),
+    'disallow-license-headers': require('./rules/disallow_license_headers'),
+    'no-default-export': require('./rules/no_default_export'),
+  },
+};
