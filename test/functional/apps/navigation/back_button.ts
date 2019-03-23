@@ -45,8 +45,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('navigation/basic');
 
       await browser.setWindowSize(1200, 800);
-      await browser.execute(resetSessionStorage);
       await PageObjects.common.navigateToApp('home');
+      await browser.execute(resetSessionStorage);
+      await browser.refresh();
     });
 
     // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
