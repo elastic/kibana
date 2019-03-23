@@ -6,6 +6,11 @@ exports[`FilterBar component renders the component without errors 1`] = `
     grow={true}
   >
     <EuiSearchBar
+      box={
+        Object {
+          "data-test-subj": "uptime-filter-bar-input",
+        }
+      }
       filters={
         Array [
           Object {
