@@ -47,7 +47,12 @@ it('builds light themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
+"h1, h2, h3, h4, h5, h6, p {
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 16px; }
+
+foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -72,7 +77,12 @@ it('builds dark themed SASS', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
+"h1, h2, h3, h4, h5, h6, p {
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 16px; }
+
+foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -101,7 +111,12 @@ it('rewrites url imports', async () => {
 
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
-"foo bar {
+"h1, h2, h3, h4, h5, h6, p {
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 16px; }
+
+foo bar {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
