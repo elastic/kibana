@@ -29,21 +29,28 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
 
-  function getLocalBrowserUrl() {
+  // get the url from the browser, other methods standardize encoding but we want raw encoding from browser
+  function getRawBrowserUrl() {
     return window.location.href;
   }
 
-  describe.only('Kibana navigation', function describeIndexTests() {
+  // prevent old lastUrl's from mucking up our navigation
+  function resetSessionStorage() {
+    window.sessionStorage.clear();
+  }
+
+  describe.only('back button', function describeIndexTests() {
     before(async () => {
       await esArchiver.load('makelogs');
       await esArchiver.load('navigation/basic');
 
       await browser.setWindowSize(1200, 800);
+      await browser.execute(resetSessionStorage);
       await PageObjects.common.navigateToApp('home');
     });
 
     // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
-    it('back button should work when revisiting url app with global state in url', async () => {
+    it('works after clicking link with strong url encoding in hash of href', async () => {
       // Navigate to discover app
       await appsMenu.clickLink('Dashboard');
       await PageObjects.dashboard.loadSavedDashboard('New Dashboard');
@@ -53,7 +60,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // Assert that url has decoded version of the url
-      expect(await browser.execute(getLocalBrowserUrl)).to.contain(`description:''`);
+      expect(await browser.execute(getRawBrowserUrl)).to.contain(`description:''`);
 
       // Navigate to visualize app via app link
       await appsMenu.clickLink('Visualize');
@@ -85,7 +92,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         'navigation to home app',
         async () =>
-          (await browser.execute(getLocalBrowserUrl)) ===
+          (await browser.execute(getRawBrowserUrl)) ===
           'http://localhost:5620/app/kibana#/home?_g=()'
       );
 
@@ -93,7 +100,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         'hash to be properly encoded',
         async () =>
-          (await browser.execute(getLocalBrowserUrl)) ===
+          (await browser.execute(getRawBrowserUrl)) ===
           'http://localhost:5620/app/kibana#/home?_g=()&a=b%2Fc'
       );
     });

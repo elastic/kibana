@@ -17,4 +17,13 @@
  * under the License.
  */
 
-export * from './navigation';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+// tslint:disable-next-line no-default-export
+export default function({ loadTestFile }: FtrProviderContext) {
+  describe('navigation', function() {
+    this.tags('ciGroup6');
+
+    loadTestFile(require.resolve('./back_button'));
+  });
+}
