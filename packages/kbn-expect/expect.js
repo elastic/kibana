@@ -71,6 +71,10 @@ function Assertion (obj, flag, parent) {
 
         for (var fn in Assertion.prototype) {
           if (Assertion.prototype.hasOwnProperty(fn) && fn != name) {
+            if (typeof this[name] === 'function' && fn === 'length') {
+              continue;
+            }
+
             this[name][fn] = bind(assertion[fn], assertion);
           }
         }
