@@ -1,12 +1,12 @@
-[[release-highlights-7.0.0]]
-== 7.0.0 release highlights
+[[release-highlights-7.1.0]]
+== 7.1.0 release highlights
 ++++
-<titleabbrev>7.0.0</titleabbrev>
+<titleabbrev>7.1.0</titleabbrev>
 ++++
 
-coming[7.0.0]
+coming[7.1.0]
 
-See also <<breaking-changes-7.0>> and <<release-notes>>.
+See also <<breaking-changes>> and <<release-notes>>.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
