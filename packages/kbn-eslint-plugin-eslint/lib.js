@@ -17,9 +17,31 @@
  * under the License.
  */
 
-module.exports = {
-  rules: {
-    'require-license-header': require('./rules/require_license_header'),
-    'disallow-license-headers': require('./rules/disallow_license_headers'),
-  },
+exports.assert = function assert(truth, message) {
+  if (truth) {
+    return;
+  }
+
+  const error = new Error(message);
+  error.failedAssertion = true;
+  throw error;
+};
+
+exports.normalizeWhitespace = function normalizeWhitespace(string) {
+  return string.replace(/\s+/g, ' ');
+};
+
+exports.init = function(context, program, initStep) {
+  try {
+    return initStep();
+  } catch (error) {
+    if (error.failedAssertion) {
+      context.report({
+        node: program,
+        message: error.message,
+      });
+    } else {
+      throw error;
+    }
+  }
 };
