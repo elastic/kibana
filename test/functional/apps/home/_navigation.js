@@ -43,48 +43,32 @@ export default function ({ getService, getPageObjects }) {
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app
-      log.debug(`--> PageObjects.common.navigateToApp('home')`);
       await PageObjects.common.navigateToApp('home');
-      log.debug(`<-- PageObjects.common.navigateToApp('home')`);
       const homeUrl = await browser.getCurrentUrl();
 
       // Navigate to discover app
-      log.debug(`--> appsMenu.clickLink('Discover')`);
       await appsMenu.clickLink('Discover');
-      log.debug(`<-- appsMenu.clickLink('Discover')`);
       const discoverUrl = await browser.getCurrentUrl();
-      log.debug(`--> PageObjects.timePicker.setAbsoluteRange(fromTime, toTime)`);
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug(`<-- PageObjects.timePicker.setAbsoluteRange(fromTime, toTime)`);
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
       // Navigate to dashboard app
-      log.debug(`--> appsMenu.clickLink('Dashboard')`);
       await appsMenu.clickLink('Dashboard');
-      log.debug(`<-- appsMenu.clickLink('Dashboard')`);
 
       // Navigating back to discover
-      log.debug(`--> browser.goBack()`);
       await browser.goBack();
-      log.debug(`<-- browser.goBack()`);
       currUrl = await browser.getCurrentUrl();
       expect(currUrl).to.be(modifiedTimeDiscoverUrl);
 
       // Navigating back from time settings
-      log.debug(`--> browser.goBack()`);
       await browser.goBack(); // undo time settings
-      log.debug(`<-- browser.goBack()`);
-      log.debug(`--> browser.goBack()`);
       await browser.goBack(); // undo automatically set config, should it be in the history stack? (separate issue!)
-      log.debug(`<-- browser.goBack()`);
       currUrl = await browser.getCurrentUrl();
       // Discover view also keeps adds some default arguments into the _a URL parameter, so we can only check that the url starts the same.
       expect(currUrl.startsWith(discoverUrl)).to.be(true);
 
       // Navigate back home
-      log.debug(`--> browser.goBack()`);
       await browser.goBack();
-      log.debug(`<-- browser.goBack()`);
       currUrl = await browser.getCurrentUrl();
       expect(currUrl).to.be(homeUrl);
     });

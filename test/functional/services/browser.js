@@ -23,7 +23,6 @@ import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function BrowserProvider({ getService }) {
-  const log = getService('log');
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   class BrowserService {
@@ -64,7 +63,6 @@ export async function BrowserProvider({ getService }) {
     async getCurrentUrl() {
       // strip _t=Date query param when url is read
       const current = await driver.getCurrentUrl();
-      log.debug('getCurrentUrl() =>', current, '(stripping _t query param)');
       const currentWithoutTime = modifyUrl(current, parsed => {
         delete parsed.query._t;
       });
