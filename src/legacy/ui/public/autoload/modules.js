@@ -47,7 +47,6 @@ import '../url';
 import '../watch_multi';
 import '../react_components';
 import '../i18n';
-import '../query_bar/directive';
 
 import '@elastic/ui-ace';
 import { uiModules } from 'ui/modules';
