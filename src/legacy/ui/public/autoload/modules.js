@@ -27,7 +27,6 @@ import '../debounce';
 import '../es';
 import '../events';
 import '../fancy_forms';
-import '../filter_bar';
 import '../filter_manager';
 import '../index_patterns';
 import '../listen';
