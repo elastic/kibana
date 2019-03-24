@@ -32,6 +32,11 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 require('ui/autoload/all');
+
+// TODO: remove ui imports completely (move to plugins)
+import 'ui/kbn_top_nav';
+import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');

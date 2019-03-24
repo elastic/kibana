@@ -20,7 +20,6 @@
 import 'angular';
 import '../chrome';
 import '../bind';
-import '../kbn_top_nav';
 import '../bound_to_config_obj';
 import '../config';
 import '../courier';
@@ -47,7 +46,6 @@ import '../timepicker';
 import '../tooltip';
 import '../url';
 import '../watch_multi';
-import '../saved_objects/ui/saved_object_save_as_checkbox';
 import '../react_components';
 import '../i18n';
 import '../query_bar/directive';

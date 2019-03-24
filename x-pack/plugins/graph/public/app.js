@@ -14,7 +14,10 @@ import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
+// TODO: remove ui imports completely (move to plugins)
+import 'ui/kbn_top_nav';
 import 'ui/directives/saved_object_finder';
+import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
