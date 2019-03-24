@@ -8,6 +8,7 @@ exports[`ExplorerNoInfluencersFound snapshot 1`] = `
       fill={true}
       href="ml#/jobs"
       iconSide="left"
+      size="m"
       type="button"
     >
       <FormattedMessage
