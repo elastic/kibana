@@ -23,7 +23,6 @@ import '../bind';
 import '../config';
 import '../courier';
 import '../es';
-import '../events';
 import '../fancy_forms';
 import '../listen';
 import '../notify';
