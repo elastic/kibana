@@ -19,7 +19,6 @@
 
 import 'angular';
 import '../chrome';
-import '../bind';
 import '../config';
 import '../courier';
 import '../es';
