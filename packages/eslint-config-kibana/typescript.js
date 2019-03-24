@@ -60,6 +60,9 @@ module.exports = {
       // those extended rules arrays
       rules: Object.assign(
         {
+          // Most of the ports were done according
+          // https://github.com/typescript-eslint/typescript-eslint/blob/master/packages/eslint-plugin/ROADMAP.md
+          //
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
           '@typescript-eslint/array-type': ['error', 'array-simple'],
