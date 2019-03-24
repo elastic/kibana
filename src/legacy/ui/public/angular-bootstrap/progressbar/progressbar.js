@@ -34,33 +34,33 @@ angular.module('ui.bootstrap.progressbar', [])
     };
 }])
 
-.directive('progress', function() {
-    return {
-        restrict: 'EA',
-        replace: true,
-        transclude: true,
-        controller: 'ProgressController',
-        require: 'progress',
-        scope: {},
-        templateUrl: 'template/progressbar/progress.html'
-    };
-})
+.directive('progress', function() {	
+  return {	
+      restrict: 'EA',	
+      replace: true,	
+      transclude: true,	
+      controller: 'ProgressController',	
+      require: 'progress',	
+      scope: {},	
+      templateUrl: 'template/progressbar/progress.html'	
+  };	
+})	
 
-.directive('bar', function() {
-    return {
-        restrict: 'EA',
-        replace: true,
-        transclude: true,
-        require: '^progress',
-        scope: {
-            value: '=',
-            type: '@'
-        },
-        templateUrl: 'template/progressbar/bar.html',
-        link: function(scope, element, attrs, progressCtrl) {
-            progressCtrl.addBar(scope, element);
-        }
-    };
+.directive('bar', function() {	
+  return {	
+      restrict: 'EA',	
+      replace: true,	
+      transclude: true,	
+      require: '^progress',	
+      scope: {	
+          value: '=',	
+          type: '@'	
+      },	
+      templateUrl: 'template/progressbar/bar.html',	
+      link: function(scope, element, attrs, progressCtrl) {	
+          progressCtrl.addBar(scope, element);	
+      }	
+  };	
 })
 
 .directive('progressbar', function() {
