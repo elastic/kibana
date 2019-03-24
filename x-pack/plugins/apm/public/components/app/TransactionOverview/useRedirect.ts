@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Location } from 'history';
+import { History, Location } from 'history';
 import { useEffect } from 'react';
-import { history } from '../../shared/Links/url_helpers';
 
-export function useRedirect(redirectLocation?: Location) {
+export function useRedirect(history: History, redirectLocation?: Location) {
   useEffect(() => {
     if (redirectLocation) {
       history.replace(redirectLocation);

@@ -4,90 +4,91 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
-import { History } from 'history';
+import createHistory from 'history/createHashHistory';
 import React from 'react';
-import { RouteComponentProps } from 'react-router';
-import { TransactionOverviewView } from '..';
+import { Provider } from 'react-redux';
+import { Router } from 'react-router-dom';
+import { queryByLabelText, render } from 'react-testing-library';
+// @ts-ignore
+import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
+import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import { TransactionOverview } from '..';
 
-jest.mock(
-  'ui/chrome',
-  () => ({
-    getBasePath: () => `/some/base/path`,
-    getInjected: (key: string) => {
-      if (key === 'mlEnabled') {
-        return true;
-      }
-      throw new Error(`inexpected key ${key}`);
-    },
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'timepicker:timeDefaults':
-              return { from: 'now-15m', to: 'now', mode: 'quick' };
-            case 'timepicker:refreshIntervalDefaults':
-              return { display: 'Off', pause: false, value: 0 };
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        }
-      };
-    }
-  }),
-  { virtual: true }
-);
+function setup(props: {
+  urlParams: IUrlParams;
+  serviceTransactionTypes: string[];
+}) {
+  const store = configureStore();
+  const history = createHistory();
+  history.replace = jest.fn();
 
-const setup = () => {
-  const routerProps = {
-    location: { search: '' },
-    history: {
-      push: jest.fn() as History['push'],
-      replace: jest.fn() as History['replace']
-    }
-  } as RouteComponentProps;
+  const { container } = render(
+    <Provider store={store}>
+      <Router history={history}>
+        <TransactionOverview {...props} />
+      </Router>
+    </Provider>
+  );
 
-  const props = {
-    ...routerProps,
-    agentName: 'test-agent',
-    serviceName: 'test-service',
-    serviceTransactionTypes: ['firstType', 'secondType'],
-    urlParams: { transactionType: 'test-type', serviceName: 'MyServiceName' }
-  };
-
-  const wrapper = shallow(<TransactionOverviewView {...props} />);
-  return { props, wrapper };
-};
+  return { container, history };
+}
 
 describe('TransactionOverviewView', () => {
-  describe('when  no transaction type is given', () => {
+  describe('when no transaction type is given', () => {
     it('should render null', () => {
-      const { wrapper } = setup();
-      wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
-      expect(wrapper).toMatchInlineSnapshot(`""`);
+      const { container } = setup({
+        serviceTransactionTypes: ['firstType', 'secondType'],
+        urlParams: {
+          serviceName: 'MyServiceName'
+        }
+      });
+      expect(container).toMatchInlineSnapshot(`<div />`);
     });
 
     it('should redirect to first type', () => {
-      const { wrapper, props } = setup();
-      wrapper.setProps({ urlParams: { serviceName: 'MyServiceName' } });
-      expect(props.history.replace).toHaveBeenCalledWith({
-        pathname: '/MyServiceName/transactions/firstType',
-        search: ''
+      const { history } = setup({
+        serviceTransactionTypes: ['firstType', 'secondType'],
+        urlParams: {
+          serviceName: 'MyServiceName'
+        }
       });
+      expect(history.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pathname: '/MyServiceName/transactions/firstType'
+        })
+      );
     });
   });
 
-  it('should render with type filter controls', () => {
-    const { wrapper } = setup();
-    expect(wrapper).toMatchSnapshot();
+  const FILTER_BY_TYPE_LABEL = 'Filter by type';
+
+  describe('when transactionType is selected and multiple transaction types are given', () => {
+    it('should render dropdown with transaction types', () => {
+      const { container } = setup({
+        serviceTransactionTypes: ['firstType', 'secondType'],
+        urlParams: {
+          transactionType: 'secondType',
+          serviceName: 'MyServiceName'
+        }
+      });
+
+      expect(
+        queryByLabelText(container, FILTER_BY_TYPE_LABEL)
+      ).toMatchSnapshot();
+    });
   });
 
-  it('should render without type filter controls if there is just a single type', () => {
-    const { wrapper } = setup();
-    wrapper.setProps({
-      serviceTransactionTypes: ['singleType']
+  describe('when a transaction type is selected, and there are no other transaction types', () => {
+    it('should not render a dropdown with transaction types', () => {
+      const { container } = setup({
+        serviceTransactionTypes: ['firstType'],
+        urlParams: {
+          transactionType: 'firstType',
+          serviceName: 'MyServiceName'
+        }
+      });
+
+      expect(queryByLabelText(container, FILTER_BY_TYPE_LABEL)).toBeNull();
     });
-    expect(wrapper.find('EuiFormRow').exists()).toBe(false);
-    expect(wrapper).toMatchSnapshot();
   });
 });

@@ -58,6 +58,7 @@ export function TransactionOverviewView({
 
   // redirect to first transaction type
   useRedirect(
+    history,
     getRedirectLocation({
       urlParams,
       location,
@@ -80,6 +81,7 @@ export function TransactionOverviewView({
     <React.Fragment>
       {serviceTransactionTypes.length > 1 ? (
         <EuiFormRow
+          id="transaction-type-select-row"
           label={i18n.translate(
             'xpack.apm.transactionsTable.filterByTypeLabel',
             {
