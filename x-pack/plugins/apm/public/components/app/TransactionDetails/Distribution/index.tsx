@@ -98,25 +98,25 @@ export class TransactionDistribution extends Component<Props> {
   public redirectToTransactionType() {
     const { urlParams, location, distribution } = this.props;
 
-    if (!distribution || !distribution.defaultSample) {
+    if (
+      !distribution ||
+      !distribution.defaultSample ||
+      urlParams.traceId ||
+      urlParams.transactionId
+    ) {
       return;
     }
 
     const { traceId, transactionId } = distribution.defaultSample;
-    const hasIncorrectSample =
-      traceId !== urlParams.traceId ||
-      transactionId !== urlParams.transactionId;
 
-    if (hasIncorrectSample) {
-      history.replace({
-        ...location,
-        search: fromQuery({
-          ...toQuery(location.search),
-          traceId,
-          transactionId
-        })
-      });
-    }
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        traceId,
+        transactionId
+      })
+    });
   }
 
   public componentDidMount() {
@@ -130,16 +130,7 @@ export class TransactionDistribution extends Component<Props> {
   public render() {
     const { location, distribution, urlParams } = this.props;
 
-    if (!distribution) {
-      return null;
-    }
-
-    // delay rendering until after redirect
-    const hasIncorrectSample =
-      distribution.defaultSample &&
-      (distribution.defaultSample.traceId !== urlParams.traceId ||
-        distribution.defaultSample.transactionId !== urlParams.transactionId);
-    if (hasIncorrectSample) {
+    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
       return null;
     }
 
