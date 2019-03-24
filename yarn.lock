@@ -9219,6 +9219,13 @@ eslint-plugin-babel@^5.3.0:
   dependencies:
     eslint-rule-composer "^0.3.0"
 
+eslint-plugin-ban@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-ban/-/eslint-plugin-ban-1.2.0.tgz#d65867ffcca542465004ad07d51d1c635a8514dc"
+  integrity sha512-UKdGRnKnaTo8dFnLYEgErBBmcDW1p/OtqFDdYz4a1QBduJpJFSNllz06psu53YMBShVK5bLGg798/E9LGf1bog==
+  dependencies:
+    requireindex "~1.2.0"
+
 eslint-plugin-import@^2.16.0:
   version "2.16.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-import/-/eslint-plugin-import-2.16.0.tgz#97ac3e75d0791c4fac0e15ef388510217be7f66f"
@@ -9265,6 +9272,11 @@ eslint-plugin-no-unsanitized@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/eslint-plugin-no-unsanitized/-/eslint-plugin-no-unsanitized-3.0.2.tgz#83c6fcf8e34715112757e03dd4ee436dce29ed45"
   integrity sha512-JnwpoH8Sv4QOjrTDutENBHzSnyYtspdjtglYtqUtAHe6f6LLKqykJle+UwFPg23GGwt5hI3amS9CRDezW8GAww==
+
+eslint-plugin-prefer-arrow@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-prefer-arrow/-/eslint-plugin-prefer-arrow-1.1.5.tgz#ad2b91b126eb208547da7af9e9719b3598a5a063"
+  integrity sha512-vjwd/I3R0jjMbzjMxaekzHz5/ohTLparvxtW5f/7tAXvM8h4/z/C4HR6l7qv5e0JnYRSTfyzad0OiJxlnI1bBw==
 
 eslint-plugin-prefer-object-spread@^1.2.1:
   version "1.2.1"
@@ -20387,7 +20399,7 @@ requirefresh@^2.0.0:
   dependencies:
     editions "^1.1.1"
 
-requireindex@^1.2.0:
+requireindex@^1.2.0, requireindex@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/requireindex/-/requireindex-1.2.0.tgz#3463cdb22ee151902635aa6c9535d4de9c2ef1ef"
   integrity sha512-L9jEkOi3ASd9PYit2cwRfyppc9NoABujTP8/5gFcbERmo5jUoAKovIC3fsF17pkTnGsrByysqX+Kxd2OTNI1ww==

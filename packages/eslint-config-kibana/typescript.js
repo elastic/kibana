@@ -12,8 +12,6 @@
 const semver = require('semver');
 const PKG = require('../../package.json');
 
-// TODO: Apply old typescript rules
-// const typescriptEslintRecommendedRules = require('@typescript-eslint/eslint-plugin').configs.recommended.rules;
 const eslintConfigPrettierTypescriptEslintRules = require('eslint-config-prettier/@typescript-eslint').rules;
 
 module.exports = {
@@ -24,8 +22,10 @@ module.exports = {
 
       plugins: [
         '@typescript-eslint',
-        'prefer-object-spread',
+        'ban',
         'jsx-a11y',
+        'prefer-arrow',
+        'prefer-object-spread',
       ],
 
       settings: {
@@ -59,7 +59,113 @@ module.exports = {
       // For now we are using an workaround to create
       // those extended rules arrays
       rules: Object.assign(
-        {},
+        {
+          // Old recommended tslint rules
+          '@typescript-eslint/adjacent-overload-signatures': 'error',
+          '@typescript-eslint/array-type': ['error', 'array-simple'],
+          '@typescript-eslint/ban-types': 'error',
+          'camelcase': 'off',
+          '@typescript-eslint/camelcase': 'error',
+          '@typescript-eslint/class-name-casing': 'error',
+          '@typescript-eslint/explicit-member-accessibility': 'error',
+          'indent': 'off',
+          '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
+          '@typescript-eslint/prefer-function-type': 'error',
+          '@typescript-eslint/prefer-interface': 'error',
+          '@typescript-eslint/member-ordering': 'error',
+          '@typescript-eslint/no-angle-bracket-type-assertion': 'error',
+          '@typescript-eslint/no-empty-interface': 'error',
+          '@typescript-eslint/no-misused-new': 'error',
+          '@typescript-eslint/no-namespace': 'error',
+          '@typescript-eslint/no-triple-slash-reference': 'error',
+          '@typescript-eslint/no-var-requires': 'error',
+          '@typescript-eslint/type-annotation-spacing': 'error',
+          '@typescript-eslint/unified-signatures': 'error',
+          'arrow-body-style': 'error',
+          'arrow-parens': 'error',
+          'curly': 'error',
+          'constructor-super': 'error',
+          'comma-dangle': ['error', 'always-multiline'],
+          'dot-notation': 'error',
+          'eol-last': 'error',
+          'eqeqeq': ['error', 'always', {'null': 'ignore'}],
+          'guard-for-in': 'error',
+          'import/order': 'error',
+          'max-classes-per-file': ['error', 1],
+          'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
+          'new-parens': 'error',
+          'no-caller': 'error',
+          'no-bitwise': 'error',
+          'no-cond-assign': 'error',
+          'no-multiple-empty-lines': 'error',
+          'no-console': 'error',
+          'no-new-wrappers': 'error',
+          'no-debugger': 'error',
+          'no-unused-labels ': 'error',
+          'no-empty': 'error',
+          'no-eval': 'error',
+          'no-shadow': 'error',
+          'no-throw-literal': 'error',
+          'no-trailing-spaces': 'error',
+          'no-undef-init': 'error',
+          'no-unsafe-finally': 'error',
+          'no-unused-expression': 'error',
+          'no-var': 'error',
+          'object-curly-spacing': 'error',
+          'object-shorthand': 'error',
+          'one-var': 'error',
+          'prefer-arrow/prefer-arrow-functions': 'error',
+          'prefer-const': 'error',
+          'quote-props': ['error', 'consistent-as-needed'],
+          'quotes': ['error', 'double', { 'avoidEscape': true }],
+          'radix': 'error',
+          'semicolon': 'error',
+          'space-before-function-paren': ['error', {
+            'anonymous': 'never',
+            'named': 'never',
+            'asyncArrow': 'always'
+          }],
+          'spaced-comment': 'error',
+          'sort-keys': 'error',
+          'use-isnan': 'error',
+
+          // Old tslint yml override or defined rules
+          'ban/ban': [
+            2,
+            {'name': ['describe', 'only'], 'message': 'No exclusive suites.'},
+            {'name': ['it', 'only'], 'message': 'No exclusive tests.'},
+            {'name': ['test', 'only'], 'message': 'No exclusive tests.'},
+
+          ],
+          'jsx-a11y/accessible-emoji': 'error',
+          'jsx-a11y/alt-text': 'error',
+          'jsx-a11y/anchor-has-content': 'error',
+          'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
+          'jsx-a11y/aria-props': 'error',
+          'jsx-a11y/aria-proptypes': 'error',
+          'jsx-a11y/aria-role': 'error',
+          'jsx-a11y/aria-unsupported-elements': 'error',
+          'jsx-a11y/click-events-have-key-events': 'error',
+          'jsx-a11y/heading-has-content': 'error',
+          'jsx-a11y/html-has-lang': 'error',
+          'jsx-a11y/iframe-has-title': 'error',
+          'jsx-a11y/interactive-supports-focus': 'error',
+          'jsx-a11y/media-has-caption': 'error',
+          'jsx-a11y/mouse-events-have-key-events': 'error',
+          'jsx-a11y/no-access-key': 'error',
+          'jsx-a11y/no-distracting-elements': 'error',
+          'jsx-a11y/no-interactive-element-to-noninteractive-role': 'error',
+          'jsx-a11y/no-noninteractive-element-interactions': 'error',
+          'jsx-a11y/no-noninteractive-element-to-interactive-role': 'error',
+          'jsx-a11y/no-onchange': 'error',
+          'jsx-a11y/no-redundant-roles': 'error',
+          'jsx-a11y/role-has-required-aria-props': 'error',
+          'jsx-a11y/role-supports-aria-props': 'error',
+          'jsx-a11y/scope': 'error',
+          'jsx-a11y/tabindex-no-positive': 'error',
+          'jsx-a11y/label-has-associated-control': 'error',
+          'kibana-custom/no-default-export': 'error',
+        },
         eslintConfigPrettierTypescriptEslintRules,
       )
     },
