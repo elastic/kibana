@@ -5,39 +5,27 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
-import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
-import { TraceListRequest } from '../../../store/reactReduxRequest/traceList';
-import { EmptyMessage } from '../../shared/EmptyMessage';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { loadTraceList } from '../../../services/rest/apm/traces';
+import { IUrlParams } from '../../../store/urlParams';
 import { TraceList } from './TraceList';
 
 interface Props {
-  urlParams: object;
+  urlParams: IUrlParams;
 }
 
 export function TraceOverview(props: Props) {
-  const { urlParams } = props;
+  const { start, end, kuery } = props.urlParams;
+  const { status, data = [] } = useFetcher(loadTraceList, {
+    start,
+    end,
+    kuery
+  });
 
   return (
     <EuiPanel>
-      <TraceListRequest
-        urlParams={urlParams}
-        render={({ data, status }: RRRRenderResponse<TraceListAPIResponse>) => (
-          <TraceList
-            items={data}
-            isLoading={status === 'LOADING'}
-            noItemsMessage={
-              <EmptyMessage
-                heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
-                  defaultMessage: 'No traces found for this query'
-                })}
-              />
-            }
-          />
-        )}
-      />
+      <TraceList items={data} isLoading={status === FETCH_STATUS.LOADING} />
     </EuiPanel>
   );
 }
