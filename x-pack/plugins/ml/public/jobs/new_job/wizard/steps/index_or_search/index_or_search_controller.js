@@ -21,6 +21,7 @@ import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes'
 import template from './index_or_search.html';
 import { timefilter } from 'ui/timefilter';
 import 'ui/directives/paginated_selectable_list';
+import 'ui/directives/saved_object_finder';
 
 uiRoutes
   .when('/jobs/new_job', {
