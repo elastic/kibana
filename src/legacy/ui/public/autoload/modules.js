@@ -22,7 +22,6 @@ import '../chrome';
 import '../config';
 import '../courier';
 import '../es';
-import '../listen';
 import '../notify';
 import '../private';
 import '../promises';
