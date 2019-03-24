@@ -29,7 +29,6 @@ import 'ui/doc_table';
 import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
-import 'ui/directives/validate_json';
 import 'ui/filters/moment';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';

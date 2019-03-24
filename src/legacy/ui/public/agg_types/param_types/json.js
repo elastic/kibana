@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import '../directives/validate_json';
 import editorHtml from '../controls/raw_json.html';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';

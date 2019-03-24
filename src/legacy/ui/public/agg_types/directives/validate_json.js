@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 
