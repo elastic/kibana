@@ -207,7 +207,7 @@ export const pingsSchema = gql`
     "The timestamp of the ping's creation"
     timestamp: String!
     "Milliseconds from the timestamp to the current time"
-    millisFromNow: UnsignedInteger
+    millisFromNow: String
     "The agent that recorded the ping"
     beat: Beat
     docker: Docker

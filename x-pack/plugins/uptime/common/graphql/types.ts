@@ -45,7 +45,7 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: UnsignedInteger | null;
+  millisFromNow?: string | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
