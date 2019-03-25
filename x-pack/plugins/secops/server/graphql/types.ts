@@ -3321,7 +3321,13 @@ export namespace KpiNetworkDataResolvers {
 
     activeAgents?: ActiveAgentsResolver<number | null, TypeParent, Context>;
 
-    uniquePrivateIps?: UniquePrivateIpsResolver<number | null, TypeParent, Context>;
+    uniqueSourcePrivateIps?: UniqueSourcePrivateIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationPrivateIps?: UniqueDestinationPrivateIpsResolver<
+      number | null,
+      TypeParent,
+      Context
+    >;
   }
 
   export type NetworkEventsResolver<
@@ -3339,7 +3345,12 @@ export namespace KpiNetworkDataResolvers {
     Parent = KpiNetworkData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type UniquePrivateIpsResolver<
+  export type UniqueSourcePrivateIpsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationPrivateIpsResolver<
     R = number | null,
     Parent = KpiNetworkData,
     Context = SecOpsContext
