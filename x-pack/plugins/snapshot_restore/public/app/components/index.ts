@@ -6,5 +6,7 @@
 
 export { RepositoryDeleteProvider } from './repository_delete_provider';
 export { RepositoryTypeName } from './repository_type_name';
+export { RepositoryForm } from './repository_form';
+
 export { SectionError } from './section_error';
 export { SectionLoading } from './section_loading';

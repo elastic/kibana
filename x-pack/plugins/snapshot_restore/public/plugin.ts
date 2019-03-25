@@ -27,7 +27,7 @@ export class Plugin {
         defaultMessage: 'Snapshot and Restore',
       }),
       order: 7,
-      url: `#${CLIENT_BASE_PATH}/repositories`,
+      url: `#${CLIENT_BASE_PATH}`,
     });
 
     const unmountReactApp = (elem: Element | undefined | null): void => {
@@ -37,16 +37,10 @@ export class Plugin {
     };
 
     // Register react root
-    routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id`, {
+    routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
       controller: ($scope: any, $route: any, $http: ng.IHttpService, $q: any) => {
         let elem: Element | null | undefined;
-
-        // React-router's <Redirect> does not play well with the angular router. It will cause this controller
-        // to re-execute without the $destroy handler being called. This means that the app will be mounted twice
-        // creating a memory leak when leaving (only 1 app will be unmounted).
-        // To avoid this, we unmount the React app each time we enter the controller.
-        unmountReactApp(elem);
 
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.

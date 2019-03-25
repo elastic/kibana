@@ -3,29 +3,40 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiButtonIcon, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+} from '@elastic/eui';
 import React, { useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
+import { BASE_PATH, Section } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 
-interface Props {
+interface Props extends RouteComponentProps {
   repositories: Repository[];
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
-export const RepositoryTable: React.FunctionComponent<Props> = ({
+export const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
   reload,
   openRepositoryDetails,
+  history,
 }) => {
   const {
     core: { i18n },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
+  const section = 'repositories' as Section;
   const [selectedItems, setSelectedItems] = useState<Repository[]>([]);
 
   const columns = [
@@ -152,12 +163,29 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       undefined
     ),
     toolsRight: (
-      <EuiButton color="secondary" iconType="refresh" onClick={reload}>
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
-          defaultMessage="Reload repositories"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
+        <EuiFlexItem>
+          <EuiButton color="secondary" iconType="refresh" onClick={reload}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
+              defaultMessage="Reload"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton
+            onClick={() => history.push(`${BASE_PATH}/${section}/add`)}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="srRepositoriesAddButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
+              defaultMessage="Register a repository"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
     box: {
       incremental: true,
@@ -203,3 +231,5 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     />
   );
 };
+
+export const RepositoryTable = withRouter(RepositoryTableUi);

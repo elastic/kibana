@@ -9,7 +9,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
-import { BASE_PATH, Section } from '../../constants';
+import { BASE_PATH, getHomeBreadcrumb, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 
 import { RepositoryList } from './repository_list';
@@ -65,15 +65,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
   };
 
   useEffect(() => {
-    chrome.breadcrumbs.set([
-      management.constants.BREADCRUMB,
-      {
-        text: i18n.translate('xpack.snapshotRestore.home.BreadcrumbTitle', {
-          defaultMessage: 'Snapshot and Restore',
-        }),
-        href: `#${BASE_PATH}`,
-      },
-    ]);
+    chrome.breadcrumbs.set([management.constants.BREADCRUMB, getHomeBreadcrumb(i18n.translate)]);
   }, []);
 
   return (

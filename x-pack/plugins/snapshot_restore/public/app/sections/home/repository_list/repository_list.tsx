@@ -106,12 +106,10 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         }
         actions={
           <EuiButton
-            onClick={() => {
-              /* placeholder */
-            }}
+            onClick={() => history.push(`${BASE_PATH}/${section}/add`)}
             fill
             iconType="plusInCircle"
-            data-test-subj="srRepositoriesEmptyPromptCreateButton"
+            data-test-subj="srRepositoriesEmptyPromptAddButton"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.addRepositoryButtonLabel"
