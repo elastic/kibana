@@ -137,7 +137,7 @@ describe('TokenAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       callWithInternalUser
         .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
@@ -307,7 +307,7 @@ describe('TokenAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       const authenticationError = new Error('failed to refresh token');
       callWithInternalUser
@@ -328,12 +328,41 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be.eql(authenticationError);
     });
 
+    it('redirects non-AJAX requests to /login and clears session if token document is missing', async () => {
+      const request = requestFixture({ path: '/some-path' });
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .rejects({
+          statusCode: 500,
+          body: { error: { reason: 'token document is missing and must be present' } },
+        });
+
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .rejects(new errors.BadRequest('failed to refresh token'));
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledOnce(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/base-path/login?next=%2Fsome-path');
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(null);
+      expect(authenticationResult.error).to.be.eql(undefined);
+    });
+
     it('redirects non-AJAX requests to /login and clears session if token refresh fails with 400 error', async () => {
       const request = requestFixture({ path: '/some-path' });
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
-        .rejects({ body: { error: { reason: 'token expired' } } });
+        .rejects({ statusCode: 401 });
 
       callWithInternalUser
         .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
@@ -359,7 +388,7 @@ describe('TokenAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
-        .rejects({ body: { error: { reason: 'token expired' } } });
+        .rejects({ statusCode: 401 });
 
       const authenticationError = new errors.BadRequest('failed to refresh token');
       callWithInternalUser
@@ -385,7 +414,7 @@ describe('TokenAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
-        .returns(Promise.reject({ body: { error: { reason: 'token expired' } } }));
+        .rejects({ statusCode: 401 });
 
       callWithInternalUser
         .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
