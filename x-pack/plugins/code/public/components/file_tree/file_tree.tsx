@@ -242,7 +242,7 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   private isPathOpen(path: string) {
-    return this.props.openedPaths.some(p => p.startsWith(path));
+    return this.props.openedPaths.includes(path);
   }
 }
 
