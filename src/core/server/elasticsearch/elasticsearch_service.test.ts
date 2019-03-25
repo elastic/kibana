@@ -54,11 +54,11 @@ beforeEach(() => {
 
 afterEach(() => jest.clearAllMocks());
 
-describe('#start', () => {
+describe('#setup', () => {
   test('returns legacy Elasticsearch config as a part of the contract', async () => {
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
-    await expect(startContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
+    await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
   });
@@ -70,12 +70,12 @@ describe('#start', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
     const [esConfig, adminClient, dataClient] = await combineLatest(
-      startContract.legacy.config$,
-      startContract.adminClient$,
-      startContract.dataClient$
+      setupContract.legacy.config$,
+      setupContract.adminClient$,
+      setupContract.dataClient$
     )
       .pipe(first())
       .toPromise();
@@ -100,13 +100,13 @@ describe('#start', () => {
   });
 
   test('returns `createClient` as a part of the contract', async () => {
-    const startContract = await elasticsearchService.start();
+    const setupContract = await elasticsearchService.setup();
 
     const mockClusterClientInstance = { close: jest.fn() };
     MockClusterClient.mockImplementation(() => mockClusterClientInstance);
 
     const mockConfig = { logQueries: true };
-    const clusterClient = startContract.createClient('some-custom-type', mockConfig as any);
+    const clusterClient = setupContract.createClient('some-custom-type', mockConfig as any);
 
     expect(clusterClient).toBe(mockClusterClientInstance);
 
@@ -125,7 +125,7 @@ describe('#stop', () => {
       () => mockAdminClusterClientInstance
     ).mockImplementationOnce(() => mockDataClusterClientInstance);
 
-    await elasticsearchService.start();
+    await elasticsearchService.setup();
     await elasticsearchService.stop();
 
     expect(mockAdminClusterClientInstance.close).toHaveBeenCalledTimes(1);

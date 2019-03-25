@@ -37,7 +37,7 @@ export const regionmap = () => ({
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
     return {
       type: 'render',
@@ -45,7 +45,7 @@ export const regionmap = () => ({
       value: {
         visData: context,
         visType: 'region_map',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getExpressionType } from '../pointseries/lib/get_expression_type';
 import { emptyTable, testTable } from '../../common/__tests__/fixtures/test_tables';
 

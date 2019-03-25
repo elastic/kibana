@@ -13,13 +13,17 @@ import {
   EuiPanel,
   EuiFormRow,
   EuiFieldText,
-  EuiRange,
   EuiSpacer,
-  EuiCallOut,
+  EuiCallOut
 } from '@elastic/eui';
+
 import { ValidatedRange } from '../../../shared/components/validated_range';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ValidatedDualRange } from 'ui/validated_range';
+
+const MIN_ZOOM = 0;
+const MAX_ZOOM = 24;
 
 export function SettingsPanel(props) {
 
@@ -28,14 +32,9 @@ export function SettingsPanel(props) {
     props.updateLabel(props.layerId, label);
   };
 
-  const onMinZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMinZoom(props.layerId, zoom);
-  };
-
-  const onMaxZoomChange = (event) => {
-    const zoom = parseInt(event.target.value, 10);
-    props.updateMaxZoom(props.layerId, zoom);
+  const onZoomChange = ([min, max]) => {
+    props.updateMinZoom(props.layerId, Math.max(MIN_ZOOM, parseInt(min, 10)));
+    props.updateMaxZoom(props.layerId, Math.min(MAX_ZOOM, parseInt(max, 10)));
   };
 
   const onAlphaChange = (alpha) => {
@@ -81,34 +80,20 @@ export function SettingsPanel(props) {
       >
         <EuiFlexGroup>
           <EuiFlexItem>
+
             <EuiFormRow
-              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.minZoomLabel', {
-                defaultMessage: 'Min zoom'
+              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
+                defaultMessage: 'Visible zoom range'
               })}
             >
-              <EuiRange
-                min={0}
-                max={24}
-                value={props.minZoom.toString()}
-                onChange={onMinZoomChange}
+              <ValidatedDualRange
+                min={MIN_ZOOM}
+                max={MAX_ZOOM}
+                value={[props.minZoom, props.maxZoom]}
                 showInput
                 showRange
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.maxZoomLabel', {
-                defaultMessage: 'Max zoom'
-              })}
-            >
-              <EuiRange
-                min={0}
-                max={24}
-                value={props.maxZoom.toString()}
-                onChange={onMaxZoomChange}
-                showInput
-                showRange
+                onChange={onZoomChange}
+                allowEmptyRange={false}
               />
             </EuiFormRow>
           </EuiFlexItem>

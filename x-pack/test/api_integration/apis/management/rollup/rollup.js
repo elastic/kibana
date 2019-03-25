@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
 
 import { registerHelpers } from './rollup.test_helpers';
@@ -23,10 +23,10 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers({ supertest, es });
 
-  describe('Rollup jobs', () => {
+  describe('jobs', () => {
     after(() => cleanUp());
 
-    describe('Rollup indices', () => {
+    describe('indices', () => {
       it('should return an empty object when there are no rollup indices', async () => {
         const uri = `${API_BASE_PATH}/indices`;
 
@@ -74,7 +74,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('Crud', () => {
+    describe('crud', () => {
       describe('list', () => {
         it('should return an empty array when there are no jobs', async () => {
           const { body } = await supertest
@@ -206,7 +206,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('Actions', () => {
+    describe('actions', () => {
       describe('start', () => {
         let job;
 

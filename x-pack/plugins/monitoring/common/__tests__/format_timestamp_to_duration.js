@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import { formatTimestampToDuration } from '../format_timestamp_to_duration';
 import { CALCULATE_DURATION_SINCE, CALCULATE_DURATION_UNTIL } from '../constants';

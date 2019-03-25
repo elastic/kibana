@@ -34,6 +34,11 @@ it('Should return true when lower and upper values are not set (empty range)', (
   expect(isValid).toBe(true);
 });
 
+it('Should return false when lower and upper values are not set (empty range) and empty ranges are not allowed', () => {
+  const { isValid } = isRangeValid(['', ''], 1, 10, false);
+  expect(isValid).toBe(false);
+});
+
 it('Should return false when lower value is not set and upper value is set', () => {
   const { isValid, errorMessage } = isRangeValid(['', 3], 1, 10);
   expect(isValid).toBe(false);

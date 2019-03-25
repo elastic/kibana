@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const PLUGIN_ID = 'reporting';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 

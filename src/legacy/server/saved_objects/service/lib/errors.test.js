@@ -45,18 +45,21 @@ describe('savedObjectsClient/errorTypes', () => {
       const errorObj = createUnsupportedTypeError('someType');
 
       it('should have the unsupported type message', () => {
-        expect(errorObj).toHaveProperty('message', 'Unsupported saved object type: \'someType\': Bad Request');
+        expect(errorObj).toHaveProperty(
+          'message',
+          "Unsupported saved object type: 'someType': Bad Request"
+        );
       });
 
       it('has boom properties', () => {
         expect(errorObj.output.payload).toMatchObject({
           statusCode: 400,
-          message: 'Unsupported saved object type: \'someType\': Bad Request',
+          message: "Unsupported saved object type: 'someType': Bad Request",
           error: 'Bad Request',
         });
       });
 
-      it('should be identified by \'isBadRequestError\' method', () => {
+      it("should be identified by 'isBadRequestError' method", () => {
         expect(isBadRequestError(errorObj)).toBeTruthy();
       });
     });
@@ -67,7 +70,7 @@ describe('savedObjectsClient/errorTypes', () => {
         expect(errorObj.message).toEqual('test reason message: Bad Request');
       });
 
-      it('should be identified by \'isBadRequestError\' method', () => {
+      it("should be identified by 'isBadRequestError' method", () => {
         expect(isBadRequestError(errorObj)).toBeTruthy();
       });
 
