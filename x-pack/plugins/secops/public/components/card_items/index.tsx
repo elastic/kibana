@@ -47,27 +47,33 @@ const CardTitle = pure<{ isLoading: boolean; value: number | null | undefined }>
   )
 );
 
-export const CardItemsComponent = pure<CardItemsProps>(({ fields, description, isLoading }) => (
-  <EuiFlexItem key={description}>
-    {fields.length === 1 ? (
-      <EuiCard
-        title={<CardTitle isLoading={isLoading} value={fields[0].value} />}
-        description={fields[0].description}
-      />
-    ) : (
-      <EuiCard
-        title={fields.map(field => (
-          <EuiFlexGroup key={field.description} gutterSize="s" justifyContent="spaceBetween">
-            <EuiFlexItem grow={false} component="span">
-              <CardTitle isLoading={isLoading} value={field.value} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} component="span">
-              {field.description}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ))}
-        description={description}
-      />
-    )}
-  </EuiFlexItem>
-));
+export const CardItemsComponent = pure<CardItemsProps>(
+  ({ fields, description, isLoading, key }) => (
+    <EuiFlexItem key={`card-items-${key}`}>
+      {fields.length === 1 ? (
+        <EuiCard
+          title={<CardTitle isLoading={isLoading} value={fields[0].value} />}
+          description={fields[0].description}
+        />
+      ) : (
+        <EuiCard
+          title={fields.map(field => (
+            <EuiFlexGroup
+              key={`card-items-field-${field.key}`}
+              gutterSize="s"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem grow={false} component="span">
+                <CardTitle isLoading={isLoading} value={field.value} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} component="span">
+                {field.description}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ))}
+          description={description}
+        />
+      )}
+    </EuiFlexItem>
+  )
+);

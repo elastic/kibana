@@ -67,9 +67,9 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
   return (
     <EuiFlexGroup>
-      {fieldTitleMapping.map((card, idx) => (
+      {fieldTitleMapping.map(card => (
         <CardItemsComponent
-          key={`kpi-network-summary-${card.description}-${idx}`}
+          key={`kpi-network-summary-${card.fields[0].description}`}
           isLoading={loading}
           description={card.description}
           fields={addValueToFields(card.fields, data)}
