@@ -103,7 +103,7 @@ export default function (kibana) {
       }
 
       const config = server.config();
-      const legacyEsConfig = await server.newPlatform.start.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
+      const legacyEsConfig = await server.newPlatform.setup.core.elasticsearch.legacy.config$.pipe(first()).toPromise();
       const proxyConfigCollection = new ProxyConfigCollection(options.proxyConfig);
       const proxyPathFilters = options.proxyFilter.map(str => new RegExp(str));
 
