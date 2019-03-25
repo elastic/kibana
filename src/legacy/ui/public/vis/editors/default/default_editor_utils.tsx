@@ -21,9 +21,8 @@ import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { AggType } from 'ui/agg_types';
 
 type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
-  label: string;
   value?: AggType;
-  options?: EuiComboBoxOptionProps[];
+  options?: ComboBoxGroupedOption[];
 };
 
 /**
@@ -32,9 +31,12 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
  * @param aggs An array of aggregations that will be grouped.
  * @param groupBy A field name which aggregations is grouped by.
  *
- * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options.
+ * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an ampry array.
  */
-function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type'): ComboBoxGroupedOption[] {
+function groupAggregationsBy(
+  aggs: AggType[],
+  groupBy: string = 'type'
+): ComboBoxGroupedOption[] | [] {
   if (!Array.isArray(aggs)) {
     return [];
   }
@@ -64,7 +66,7 @@ function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type'): ComboBo
   });
 
   if (groupedOptions.length === 1 && !groupedOptions[0].label) {
-    return groupedOptions[0].options;
+    return groupedOptions[0].options || [];
   }
 
   return groupedOptions;
