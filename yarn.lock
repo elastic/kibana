@@ -822,10 +822,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.4.2":
-  version "9.4.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.4.2.tgz#530ec18f9b1cb3972824a707cc0cb3005c6c5028"
-  integrity sha512-2fH+WiYYq1tPn5mEvg5NR5b9TjVYY0cM26HPERMRMZyAenGFQtjhansO8qFlTl/MAYz5GsQ7ejgdtzu095opdw==
+"@elastic/eui@9.5.0":
+  version "9.5.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.5.0.tgz#233b4722b0cd2506793472ec1c6b97640a365229"
+  integrity sha512-LXtCNJxdbH6+ajb1x0/AvEAnpdNMQzlDubj+yqP8XShNiNBPMa3M7Hzdb5iSPJ4TL/EPuGrUQbMPx4aZNKLc1g==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -2180,6 +2180,13 @@
   version "16.8.2"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-16.8.2.tgz#9bd7d33f908b243ff0692846ef36c81d4941ad12"
   integrity sha512-MX7n1wq3G/De15RGAAqnmidzhr2Y9O/ClxPxyqaNg96pGyeXUYPSvujgzEVpLo9oIP4Wn1UETl+rxTN02KEpBw==
+  dependencies:
+    "@types/react" "*"
+
+"@types/react-grid-layout@^0.16.7":
+  version "0.16.7"
+  resolved "https://registry.yarnpkg.com/@types/react-grid-layout/-/react-grid-layout-0.16.7.tgz#53d5f5034deb0c60e25a0fa578141e9a0982011f"
+  integrity sha512-A3tW9xySd03KGONkp8gP4+QRLuT1Mcx++m0hO0nZIM4H/Qwz8GsiDv+9okbmHk5HcsHwY5Jdsn6Cv50hwoNG+A==
   dependencies:
     "@types/react" "*"
 
