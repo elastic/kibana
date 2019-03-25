@@ -26,10 +26,38 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   };
 }
 
+const cache = new Map();
+
+export function _clearCache() {
+  cache.clear();
+}
+
 export async function callApi<T = void>(
   fetchOptions: KFetchOptions,
   options?: KFetchKibanaOptions
 ): Promise<T> {
+  const cacheKey = JSON.stringify(fetchOptions);
+  const cacheResponse = cache.get(cacheKey);
+  if (cacheResponse) {
+    return cacheResponse;
+  }
+
   const combinedFetchOptions = fetchOptionsWithDebug(fetchOptions);
-  return await kfetch(combinedFetchOptions, options);
+  const res = await kfetch(combinedFetchOptions, options);
+
+  if (isCachable(fetchOptions)) {
+    cache.set(cacheKey, res);
+  }
+
+  return res;
+}
+
+function isCachable(fetchOptions: KFetchOptions) {
+  const end = fetchOptions.query && fetchOptions.query.end;
+
+  // do not cache items where the `end` param is in the future
+  return (
+    end === undefined ||
+    (typeof end === 'string' && new Date(end).getTime() < Date.now())
+  );
 }

@@ -17,8 +17,8 @@ export enum FETCH_STATUS {
 export class MissingArgumentsError extends Error {}
 
 export function useFetcher<Opts, Response>(
-  fn: (options: Opts) => Promise<Response>,
-  options: Opts
+  fn: (fnOptions: Opts) => Promise<Response>,
+  fnOptions: Opts
 ) {
   const { dispatchStatus } = useContext(FetchStatusContext);
   const [result, setResult] = useState<{
@@ -27,21 +27,28 @@ export function useFetcher<Opts, Response>(
     error?: Error;
   }>({});
 
-  const useEffectKey = [...Object.keys(options), ...Object.values(options)];
+  const useEffectKey = [...Object.keys(fnOptions), ...Object.values(fnOptions)];
 
   useEffect(() => {
     let didCancel = false;
+    let didFinish = false;
 
-    dispatchStatus({ name: fn.name, isLoading: true });
-
-    setResult({
-      data: result.data, // preserve data from previous state while loading next state
-      status: FETCH_STATUS.LOADING,
-      error: undefined
+    // only apply the loading indicator if the promise did not resolve immediately
+    // the promise will resolve immediately if the value was found in cache
+    requestAnimationFrame(() => {
+      if (!didFinish && !didCancel) {
+        dispatchStatus({ name: fn.name, isLoading: true });
+        setResult({
+          data: result.data, // preserve data from previous state while loading next state
+          status: FETCH_STATUS.LOADING,
+          error: undefined
+        });
+      }
     });
 
-    fn(options)
+    fn(fnOptions)
       .then(data => {
+        didFinish = true;
         if (!didCancel) {
           dispatchStatus({ name: fn.name, isLoading: false });
           setResult({
@@ -52,6 +59,7 @@ export function useFetcher<Opts, Response>(
         }
       })
       .catch(e => {
+        didFinish = true;
         if (e instanceof MissingArgumentsError) {
           return;
         }
