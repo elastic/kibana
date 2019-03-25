@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -15,9 +14,8 @@ import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
+import { AuditdNetflow } from './auditd_netflow';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
-import { SourceDest } from './source_dest_ip';
-
 import * as i18n from './translations';
 
 const Details = styled.div`
@@ -109,7 +107,7 @@ export const AuditdLoggedinLine = pure<Props>(
 );
 
 export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
-  ({ browserFields, data }) => {
+  ({ data }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session', data);
     const hostName: string | null | undefined = get('host.name', data);
@@ -132,7 +130,7 @@ export const AuditdLoggedinDetails = pure<{ browserFields: BrowserFields; data: 
             userName={userName}
           />
           <EuiSpacer size="s" />
-          <SourceDest data={data} browserFields={browserFields} />
+          <AuditdNetflow data={data} />
         </Details>
       );
     } else {

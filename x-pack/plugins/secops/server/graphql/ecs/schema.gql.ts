@@ -13,13 +13,19 @@ export const ecsSchema = gql`
     id: Float
     module: String
     severity: Float
+    start: Date
+    end: Date
     action: String
     type: String
     dataset: String
   }
 
   type GeoEcsFields {
+    continent_name: String
+    country_name: String
     country_iso_code: String
+    city_name: String
+    region_iso_code: String
     region_name: String
   }
 
@@ -87,15 +93,21 @@ export const ecsSchema = gql`
   }
 
   type SourceEcsFields {
+    bytes: Float
     ip: String
     port: Float
     domain: [String!]
+    geo: GeoEcsFields
+    packets: Float
   }
 
   type DestinationEcsFields {
+    bytes: Float
     ip: String
     port: Float
     domain: [String!]
+    geo: GeoEcsFields
+    packets: Float
   }
 
   type SuricataAlertData {
@@ -111,6 +123,32 @@ export const ecsSchema = gql`
 
   type SuricataEcsFields {
     eve: SuricataEveData
+  }
+
+  type TlsJa3Data {
+    hash: String
+  }
+
+  type FingerprintData {
+    sha1: String
+  }
+
+  type TlsClientCertificateData {
+    fingerprint: FingerprintData
+  }
+
+  type TlsServerCertificateData {
+    fingerprint: FingerprintData
+  }
+
+  type TlsFingerprintsData {
+    ja3: TlsJa3Data
+  }
+
+  type TlsEcsFields {
+    client_certificate: TlsClientCertificateData
+    fingerprints: TlsFingerprintsData
+    server_certificate: TlsServerCertificateData
   }
 
   type ZeekConnectionData {
@@ -231,19 +269,13 @@ export const ecsSchema = gql`
     group: String
   }
 
-  enum NetworkDirectionEcs {
-    inbound
-    outbound
-    internal
-    external
-    unknown
-  }
-
   type NetworkEcsField {
     bytes: Float
+    community_id: String
+    direction: String
     packets: Float
+    protocol: String
     transport: String
-    direction: [NetworkDirectionEcs!]
   }
 
   type ECS {
@@ -257,10 +289,12 @@ export const ecsSchema = gql`
     network: NetworkEcsField
     source: SourceEcsFields
     suricata: SuricataEcsFields
+    tls: TlsEcsFields
     zeek: ZeekEcsFields
     http: HttpEcsFields
     url: UrlEcsFields
     timestamp: Date
+    message: [String!]
     user: UserEcsFields
     process: ProcessEcsFields
   }

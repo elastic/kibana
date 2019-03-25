@@ -15,11 +15,9 @@ import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 import { DraggableBadge } from '../../../draggables';
 
+import { AuditdNetflow } from './auditd_netflow';
 import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
-import { SourceDest } from './source_dest_ip';
-
 import * as i18n from './translations';
-
 const Details = styled.div`
   margin: 10px 0px 10px 10px;
 `;
@@ -161,7 +159,7 @@ export const AuditdEndedSessionDetails = pure<{ browserFields: BrowserFields; da
             secondary={secondary}
           />
           <EuiSpacer size="s" />
-          <SourceDest data={data} browserFields={browserFields} />
+          <AuditdNetflow data={data} />
         </Details>
       );
     } else {

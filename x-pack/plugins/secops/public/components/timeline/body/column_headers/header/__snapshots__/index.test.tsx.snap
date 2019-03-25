@@ -12,7 +12,7 @@ exports[`Header renders correctly against snapshot 1`] = `
       <Styled(EuiFlexItem)
         grow={false}
       >
-        <Styled(Styled(styled.div)) />
+        <Styled(styled.div) />
       </Styled(EuiFlexItem)>
     }
     height="100%"

@@ -203,11 +203,31 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
+  bytes?: number | null;
+
   ip?: string | null;
 
   port?: number | null;
 
   domain?: string[] | null;
+
+  geo?: GeoEcsFields | null;
+
+  packets?: number | null;
+}
+
+export interface GeoEcsFields {
+  continent_name?: string | null;
+
+  country_name?: string | null;
+
+  country_iso_code?: string | null;
+
+  city_name?: string | null;
+
+  region_iso_code?: string | null;
+
+  region_name?: string | null;
 }
 
 export interface HostEcsFields {
@@ -295,6 +315,8 @@ export interface Ecs {
 
   suricata?: SuricataEcsFields | null;
 
+  tls?: TlsEcsFields | null;
+
   zeek?: ZeekEcsFields | null;
 
   http?: HttpEcsFields | null;
@@ -302,6 +324,8 @@ export interface Ecs {
   url?: UrlEcsFields | null;
 
   timestamp?: Date | null;
+
+  message?: string[] | null;
 
   user?: UserEcsFields | null;
 
@@ -349,11 +373,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
+  bytes?: number | null;
+
   ip?: string | null;
 
   port?: number | null;
 
   domain?: string[] | null;
+
+  geo?: GeoEcsFields | null;
+
+  packets?: number | null;
 }
 
 export interface EventEcsFields {
@@ -367,6 +397,10 @@ export interface EventEcsFields {
 
   severity?: number | null;
 
+  start?: Date | null;
+
+  end?: Date | null;
+
   action?: string | null;
 
   type?: string | null;
@@ -374,20 +408,18 @@ export interface EventEcsFields {
   dataset?: string | null;
 }
 
-export interface GeoEcsFields {
-  country_iso_code?: string | null;
-
-  region_name?: string | null;
-}
-
 export interface NetworkEcsField {
   bytes?: number | null;
 
+  community_id?: string | null;
+
+  direction?: string | null;
+
   packets?: number | null;
 
-  transport?: string | null;
+  protocol?: string | null;
 
-  direction?: NetworkDirectionEcs[] | null;
+  transport?: string | null;
 }
 
 export interface SuricataEcsFields {
@@ -406,6 +438,34 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface TlsEcsFields {
+  client_certificate?: TlsClientCertificateData | null;
+
+  fingerprints?: TlsFingerprintsData | null;
+
+  server_certificate?: TlsServerCertificateData | null;
+}
+
+export interface TlsClientCertificateData {
+  fingerprint?: FingerprintData | null;
+}
+
+export interface FingerprintData {
+  sha1?: string | null;
+}
+
+export interface TlsFingerprintsData {
+  ja3?: TlsJa3Data | null;
+}
+
+export interface TlsJa3Data {
+  hash?: string | null;
+}
+
+export interface TlsServerCertificateData {
+  fingerprint?: FingerprintData | null;
 }
 
 export interface ZeekEcsFields {
@@ -671,7 +731,7 @@ export interface NetworkTopNFlowItem {
 
   server?: TopNFlowItem | null;
 
-  network?: NetworkEcsField | null;
+  network?: TopNFlowNetworkEcsField | null;
 }
 
 export interface TopNFlowItem {
@@ -680,6 +740,16 @@ export interface TopNFlowItem {
   domain?: string[] | null;
 
   ip?: string | null;
+}
+
+export interface TopNFlowNetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface NetworkDnsData {
@@ -895,14 +965,6 @@ export enum Direction {
   desc = 'desc',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
-}
-
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -919,6 +981,17 @@ export enum NetworkTopNFlowType {
   destination = 'destination',
   server = 'server',
   source = 'source',
+}
+
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
 }
 
 export enum NetworkDnsFields {
@@ -1524,13 +1597,24 @@ export namespace LastSourceHostResolvers {
 
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = SourceEcsFields> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
     ip?: IpResolver<string | null, TypeParent, Context>;
 
     port?: PortResolver<number | null, TypeParent, Context>;
 
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
+
+    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
   }
 
+  export type BytesResolver<
+    R = number | null,
+    Parent = SourceEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type IpResolver<
     R = string | null,
     Parent = SourceEcsFields,
@@ -1544,6 +1628,63 @@ export namespace SourceEcsFieldsResolvers {
   export type DomainResolver<
     R = string[] | null,
     Parent = SourceEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type GeoResolver<
+    R = GeoEcsFields | null,
+    Parent = SourceEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = SourceEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace GeoEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = GeoEcsFields> {
+    continent_name?: ContinentNameResolver<string | null, TypeParent, Context>;
+
+    country_name?: CountryNameResolver<string | null, TypeParent, Context>;
+
+    country_iso_code?: CountryIsoCodeResolver<string | null, TypeParent, Context>;
+
+    city_name?: CityNameResolver<string | null, TypeParent, Context>;
+
+    region_iso_code?: RegionIsoCodeResolver<string | null, TypeParent, Context>;
+
+    region_name?: RegionNameResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ContinentNameResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CountryNameResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CountryIsoCodeResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CityNameResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RegionIsoCodeResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type RegionNameResolver<
+    R = string | null,
+    Parent = GeoEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -1780,6 +1921,8 @@ export namespace EcsResolvers {
 
     suricata?: SuricataResolver<SuricataEcsFields | null, TypeParent, Context>;
 
+    tls?: TlsResolver<TlsEcsFields | null, TypeParent, Context>;
+
     zeek?: ZeekResolver<ZeekEcsFields | null, TypeParent, Context>;
 
     http?: HttpResolver<HttpEcsFields | null, TypeParent, Context>;
@@ -1787,6 +1930,8 @@ export namespace EcsResolvers {
     url?: UrlResolver<UrlEcsFields | null, TypeParent, Context>;
 
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    message?: MessageResolver<string[] | null, TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
 
@@ -1843,6 +1988,11 @@ export namespace EcsResolvers {
     Parent = Ecs,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type TlsResolver<
+    R = TlsEcsFields | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type ZeekResolver<
     R = ZeekEcsFields | null,
     Parent = Ecs,
@@ -1863,6 +2013,11 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
+  export type MessageResolver<
+    R = string[] | null,
+    Parent = Ecs,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type UserResolver<
     R = UserEcsFields | null,
     Parent = Ecs,
@@ -2009,13 +2164,24 @@ export namespace PrimarySecondaryResolvers {
 
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = DestinationEcsFields> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
     ip?: IpResolver<string | null, TypeParent, Context>;
 
     port?: PortResolver<number | null, TypeParent, Context>;
 
     domain?: DomainResolver<string[] | null, TypeParent, Context>;
+
+    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
   }
 
+  export type BytesResolver<
+    R = number | null,
+    Parent = DestinationEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type IpResolver<
     R = string | null,
     Parent = DestinationEcsFields,
@@ -2028,6 +2194,16 @@ export namespace DestinationEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
     R = string[] | null,
+    Parent = DestinationEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type GeoResolver<
+    R = GeoEcsFields | null,
+    Parent = DestinationEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
     Parent = DestinationEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -2044,6 +2220,10 @@ export namespace EventEcsFieldsResolvers {
     module?: ModuleResolver<string | null, TypeParent, Context>;
 
     severity?: SeverityResolver<number | null, TypeParent, Context>;
+
+    start?: StartResolver<Date | null, TypeParent, Context>;
+
+    end?: EndResolver<Date | null, TypeParent, Context>;
 
     action?: ActionResolver<string | null, TypeParent, Context>;
 
@@ -2077,6 +2257,16 @@ export namespace EventEcsFieldsResolvers {
     Parent = EventEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type StartResolver<
+    R = Date | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = Date | null,
+    Parent = EventEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
   export type ActionResolver<
     R = string | null,
     Parent = EventEcsFields,
@@ -2094,38 +2284,33 @@ export namespace EventEcsFieldsResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace GeoEcsFieldsResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = GeoEcsFields> {
-    country_iso_code?: CountryIsoCodeResolver<string | null, TypeParent, Context>;
-
-    region_name?: RegionNameResolver<string | null, TypeParent, Context>;
-  }
-
-  export type CountryIsoCodeResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type RegionNameResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace NetworkEcsFieldResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkEcsField> {
     bytes?: BytesResolver<number | null, TypeParent, Context>;
 
+    community_id?: CommunityIdResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<string | null, TypeParent, Context>;
+
     packets?: PacketsResolver<number | null, TypeParent, Context>;
 
-    transport?: TransportResolver<string | null, TypeParent, Context>;
+    protocol?: ProtocolResolver<string | null, TypeParent, Context>;
 
-    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+    transport?: TransportResolver<string | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
     R = number | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type CommunityIdResolver<
+    R = string | null,
+    Parent = NetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = string | null,
     Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -2134,13 +2319,13 @@ export namespace NetworkEcsFieldResolvers {
     Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type TransportResolver<
+  export type ProtocolResolver<
     R = string | null,
     Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type DirectionResolver<
-    R = NetworkDirectionEcs[] | null,
+  export type TransportResolver<
+    R = string | null,
     Parent = NetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -2199,6 +2384,100 @@ export namespace SuricataAlertDataResolvers {
   export type SignatureIdResolver<
     R = number | null,
     Parent = SuricataAlertData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsEcsFieldsResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TlsEcsFields> {
+    client_certificate?: ClientCertificateResolver<
+      TlsClientCertificateData | null,
+      TypeParent,
+      Context
+    >;
+
+    fingerprints?: FingerprintsResolver<TlsFingerprintsData | null, TypeParent, Context>;
+
+    server_certificate?: ServerCertificateResolver<
+      TlsServerCertificateData | null,
+      TypeParent,
+      Context
+    >;
+  }
+
+  export type ClientCertificateResolver<
+    R = TlsClientCertificateData | null,
+    Parent = TlsEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type FingerprintsResolver<
+    R = TlsFingerprintsData | null,
+    Parent = TlsEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ServerCertificateResolver<
+    R = TlsServerCertificateData | null,
+    Parent = TlsEcsFields,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsClientCertificateDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TlsClientCertificateData> {
+    fingerprint?: FingerprintResolver<FingerprintData | null, TypeParent, Context>;
+  }
+
+  export type FingerprintResolver<
+    R = FingerprintData | null,
+    Parent = TlsClientCertificateData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace FingerprintDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = FingerprintData> {
+    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+  }
+
+  export type Sha1Resolver<
+    R = string | null,
+    Parent = FingerprintData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsFingerprintsDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TlsFingerprintsData> {
+    ja3?: Ja3Resolver<TlsJa3Data | null, TypeParent, Context>;
+  }
+
+  export type Ja3Resolver<
+    R = TlsJa3Data | null,
+    Parent = TlsFingerprintsData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsJa3DataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TlsJa3Data> {
+    hash?: HashResolver<string | null, TypeParent, Context>;
+  }
+
+  export type HashResolver<
+    R = string | null,
+    Parent = TlsJa3Data,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsServerCertificateDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TlsServerCertificateData> {
+    fingerprint?: FingerprintResolver<FingerprintData | null, TypeParent, Context>;
+  }
+
+  export type FingerprintResolver<
+    R = FingerprintData | null,
+    Parent = TlsServerCertificateData,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }
@@ -3050,7 +3329,7 @@ export namespace NetworkTopNFlowItemResolvers {
 
     server?: ServerResolver<TopNFlowItem | null, TypeParent, Context>;
 
-    network?: NetworkResolver<NetworkEcsField | null, TypeParent, Context>;
+    network?: NetworkResolver<TopNFlowNetworkEcsField | null, TypeParent, Context>;
   }
 
   export type IdResolver<
@@ -3084,7 +3363,7 @@ export namespace NetworkTopNFlowItemResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type NetworkResolver<
-    R = NetworkEcsField | null,
+    R = TopNFlowNetworkEcsField | null,
     Parent = NetworkTopNFlowItem,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -3112,6 +3391,39 @@ export namespace TopNFlowItemResolvers {
   export type IpResolver<
     R = string | null,
     Parent = TopNFlowItem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TopNFlowNetworkEcsFieldResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = TopNFlowNetworkEcsField> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+
+    transport?: TransportResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = TopNFlowNetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = TopNFlowNetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type TransportResolver<
+    R = string | null,
+    Parent = TopNFlowNetworkEcsField,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = NetworkDirectionEcs[] | null,
+    Parent = TopNFlowNetworkEcsField,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
 }

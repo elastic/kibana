@@ -34,7 +34,7 @@ describe('AuditAcquiredCredsDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/acquired credentials to/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/acquired credentials to/usr/bin/gpgconf--list-dirs agent-socketgpgconf'
       );
     });
 

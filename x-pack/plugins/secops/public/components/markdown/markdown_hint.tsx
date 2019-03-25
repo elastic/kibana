@@ -9,6 +9,12 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
+import * as i18n from './translations';
+
+const Heading = styled.span`
+  margin-right: 5px;
+`;
+
 const Bold = styled.span`
   font-weight: bold;
   margin-right: 5px;
@@ -47,14 +53,19 @@ export const MarkdownHint = pure<{ show: boolean }>(({ show }) => (
     size="xs"
     visibility={show ? 'inline' : 'hidden'}
   >
-    <Bold data-test-subj="bold-hint">**bold**</Bold>
-    <Italic data-test-subj="italic-hint">_italics_</Italic>
-    <Code data-test-subj="code-hint">`code`</Code>
-    <TrailingWhitespace>{'[link](url)'}</TrailingWhitespace>
-    <TrailingWhitespace>* bullet</TrailingWhitespace>
-    <Code data-test-subj="preformatted-hint">```preformatted```</Code>
-    <TrailingWhitespace>{'>quote'}</TrailingWhitespace>
-    ~~<Strikethrough data-test-subj="strikethrough-hint">strikethrough</Strikethrough>~~
-    <ImageUrl>{'![image](url)'}</ImageUrl>
+    <Heading data-test-subj="heading-hint">{i18n.MARKDOWN_HINT_HEADING}</Heading>
+    <Bold data-test-subj="bold-hint">{i18n.MARKDOWN_HINT_BOLD}</Bold>
+    <Italic data-test-subj="italic-hint">{i18n.MARKDOWN_HINT_ITALICS}</Italic>
+    <Code data-test-subj="code-hint">{i18n.MARKDOWN_HINT_CODE}</Code>
+    <TrailingWhitespace>{i18n.MARKDOWN_HINT_URL}</TrailingWhitespace>
+    <TrailingWhitespace>{i18n.MARKDOWN_HINT_BULLET}</TrailingWhitespace>
+    <Code data-test-subj="preformatted-hint">{i18n.MARKDOWN_HINT_PREFORMATTED}</Code>
+    <TrailingWhitespace>{i18n.MARKDOWN_HINT_QUOTE}</TrailingWhitespace>
+    ~~
+    <Strikethrough data-test-subj="strikethrough-hint">
+      {i18n.MARKDOWN_HINT_STRIKETHROUGH}
+    </Strikethrough>
+    ~~
+    <ImageUrl>{i18n.MARKDOWN_HINT_IMAGE_URL}</ImageUrl>
   </MarkdownHintContainer>
 ));

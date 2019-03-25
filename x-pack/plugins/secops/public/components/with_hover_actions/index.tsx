@@ -35,7 +35,6 @@ interface State {
 const HoverActionsPanelContainer = styled.div`
   height: 100%;
   position: relative;
-  width: 0px;
 `;
 
 const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
@@ -48,6 +47,7 @@ const WithHoverActionsContainer = styled.div`
   display: flex;
   flex-direction: row;
   height: 100%;
+  padding-right: 5px;
 `;
 
 /**

@@ -12,7 +12,6 @@ import {
   Properties,
   showDescriptionThreshold,
   showHistoryThreshold,
-  showNotesThreshold,
   showStreamLiveThreshold,
 } from '.';
 
@@ -198,8 +197,8 @@ describe('Properties', () => {
     ).toEqual(false);
   });
 
-  test('it renders a notes button on the right when the width is at least as wide as the threshold', () => {
-    const width = showNotesThreshold;
+  test('it renders a notes button on the left', () => {
+    const width = showDescriptionThreshold - 1;
 
     const wrapper = mount(
       <Properties
@@ -225,43 +224,10 @@ describe('Properties', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="properties-right"]')
+        .find('[data-test-subj="properties-left"]')
         .find('[data-test-subj="timeline-notes-button-large"]')
         .exists()
     ).toEqual(true);
-  });
-
-  test('it does NOT render a notes button on the right when the width is less than the threshold', () => {
-    const width = showNotesThreshold - 1;
-
-    const wrapper = mount(
-      <Properties
-        associateNote={jest.fn()}
-        createTimeline={jest.fn()}
-        isFavorite={false}
-        isLive={false}
-        title=""
-        description=""
-        getNotesByIds={jest.fn()}
-        noteIds={[]}
-        history={[]}
-        timelineId="abc"
-        updateDescription={jest.fn()}
-        updateIsFavorite={jest.fn()}
-        updateIsLive={jest.fn()}
-        updateTitle={jest.fn()}
-        updateNote={jest.fn()}
-        usersViewing={usersViewing}
-        width={width}
-      />
-    );
-
-    expect(
-      wrapper
-        .find('[data-test-subj="properties-right"]')
-        .find('[data-test-subj="timeline-notes-button-large"]')
-        .exists()
-    ).toEqual(false);
   });
 
   test('it renders a history button on the right when the width is at least as wide as the threshold', () => {

@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
 
-import { SourceDest } from './source_dest_ip';
+import { AuditdNetflow } from './auditd_netflow';
 import { SuricataRefs } from './suricata_refs';
 import { SuricataSignature } from './suricata_signature';
 
@@ -31,7 +31,7 @@ export const SuricataDetails = pure<{ browserFields: BrowserFields; data: Ecs }>
           <SuricataSignature id={data._id} signature={signature} signatureId={signatureId} />
           <SuricataRefs signatureId={signatureId} />
           <EuiSpacer size="s" />
-          <SourceDest data={data} browserFields={browserFields} />
+          <AuditdNetflow data={data} />
         </Details>
       );
     } else {

@@ -72,6 +72,12 @@ export const suricataFieldsMap: Readonly<Record<string, string>> = {
   'suricata.eve.alert.signature_id': 'suricata.eve.alert.signature_id',
 };
 
+export const tlsFieldsMap: Readonly<Record<string, string>> = {
+  'tls.client_certificate.fingerprint.sha1': 'tls.client_certificate.fingerprint.sha1',
+  'tls.fingerprints.ja3.hash': 'tls.fingerprints.ja3.hash',
+  'tls.server_certificate.fingerprint.sha1': 'tls.server_certificate.fingerprint.sha1',
+};
+
 export const urlFieldsMap: Readonly<Record<string, string>> = {
   'url.original': 'url.original',
   'url.domain': 'url.domain',
@@ -146,22 +152,40 @@ export const zeekFieldsMap: Readonly<Record<string, string>> = {
 };
 
 export const sourceFieldsMap: Readonly<Record<string, string>> = {
+  'source.bytes': 'source.bytes',
   'source.ip': 'source.ip',
+  'source.packets': 'source.packets',
   'source.port': 'source.port',
   'source.domain': 'source.domain',
+  'source.geo.continent_name': 'source.geo.continent_name',
+  'source.geo.country_name': 'source.geo.country_name',
+  'source.geo.country_iso_code': 'source.geo.country_iso_code',
+  'source.geo.city_name': 'source.geo.city_name',
+  'source.geo.region_iso_code': 'source.geo.region_iso_code',
+  'source.geo.region_name': 'source.geo.region_name',
 };
 
 export const destinationFieldsMap: Readonly<Record<string, string>> = {
+  'destination.bytes': 'destination.bytes',
   'destination.ip': 'destination.ip',
+  'destination.packets': 'destination.packets',
   'destination.port': 'destination.port',
   'destination.domain': 'destination.domain',
+  'destination.geo.continent_name': 'destination.geo.continent_name',
+  'destination.geo.country_name': 'destination.geo.country_name',
+  'destination.geo.country_iso_code': 'destination.geo.country_iso_code',
+  'destination.geo.city_name': 'destination.geo.city_name',
+  'destination.geo.region_iso_code': 'destination.geo.region_iso_code',
+  'destination.geo.region_name': 'destination.geo.region_name',
 };
 
 export const networkFieldsMap: Readonly<Record<string, string>> = {
-  'network.transport': 'network.transport',
-  'network.direction': 'network.direction',
   'network.bytes': 'network.bytes',
+  'network.community_id': 'network.community_id',
+  'network.direction': 'network.direction',
   'network.packets': 'network.packets',
+  'network.protocol': 'network.protocol',
+  'network.transport': 'network.transport',
 };
 
 export const geoFieldsMap: Readonly<Record<string, string>> = {
@@ -177,6 +201,8 @@ export const eventBaseFieldsMap: Readonly<Record<string, string>> = {
   'event.id': 'suricata.eve.flow_id',
   'event.module': 'event.module',
   'event.severity': 'event.severity',
+  'event.start': 'event.start',
+  'event.end': 'event.end',
   'event.type': 'event.type',
   'event.dataset': 'event.dataset',
 };
@@ -191,6 +217,7 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...networkFieldsMap },
   ...{ ...sourceFieldsMap },
   ...{ ...suricataFieldsMap },
+  ...{ ...tlsFieldsMap },
   ...{ ...zeekFieldsMap },
   ...{ ...httpFieldsMap },
   ...{ ...userFieldsMap },

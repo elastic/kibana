@@ -34,7 +34,7 @@ describe('AuditdEndedSessionDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/ended from/usr/bin/gpgconf--list-dirs agent-socket'
+        'Sessionjohnson@zeek-sanfranin/ended from/usr/bin/gpgconf--list-dirs agent-socketgpgconf'
       );
     });
 

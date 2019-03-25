@@ -18,7 +18,7 @@ import { FlyoutHeader } from '../header';
 
 import * as i18n from './translations';
 
-const minWidthPixels = 415; // do not allow the flyout to shrink below this width (pixels)
+const minWidthPixels = 440; // do not allow the flyout to shrink below this width (pixels)
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 interface OwnProps {
   children: React.ReactNode;

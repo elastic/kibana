@@ -18,9 +18,11 @@ describe('Events', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <FormattedFieldValue
-        value={get('timestamp', mockEcsData[0])}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="timestamp"
         fieldType="date"
+        value={get('timestamp', mockEcsData[0])}
       />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
@@ -29,9 +31,11 @@ describe('Events', () => {
   test('it renders a localized date tooltip for a field type of date that has a valid timestamp', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        value={get('timestamp', mockEcsData[0])}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="timestamp"
         fieldType="date"
+        value={get('timestamp', mockEcsData[0])}
       />
     );
 
@@ -41,9 +45,11 @@ describe('Events', () => {
   test('it does NOT render a localized date tooltip when field type is NOT date, even if it contains valid timestamp', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        value={get('timestamp', mockEcsData[0])}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="timestamp"
         fieldType="text"
+        value={get('timestamp', mockEcsData[0])}
       />
     );
 
@@ -58,9 +64,11 @@ describe('Events', () => {
 
     const wrapper = mount(
       <FormattedFieldValue
-        value={get('timestamp', hasBadDate)}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="timestamp"
         fieldType="date"
+        value={get('timestamp', hasBadDate)}
       />
     );
 
@@ -70,9 +78,11 @@ describe('Events', () => {
   test('it renders the value for a non-date field when the field is populated', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        value={get('event.module', mockEcsData[0])}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="event.module"
         fieldType="text"
+        value={get('event.module', mockEcsData[0])}
       />
     );
 
@@ -82,9 +92,11 @@ describe('Events', () => {
   test('it renders placeholder text for a non-date field when the field is NOT populated', () => {
     const wrapper = mount(
       <FormattedFieldValue
-        value={get('fake.field', mockEcsData[0])}
+        eventId={mockEcsData[0]._id}
+        contextId="test"
         fieldName="fake.field"
         fieldType="text"
+        value={get('fake.field', mockEcsData[0])}
       />
     );
 
