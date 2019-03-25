@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses, nextTick, getRandomString, findTestSubject } from './test_helpers';
+import { initTestBed, mockHttpRequests, nextTick, getRandomString, findTestSubject } from './test_helpers';
 import { AutoFollowPatternList } from '../../public/app/sections/home/auto_follow_pattern_list';
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -29,14 +29,12 @@ describe('<AutoFollowPatternList />', () => {
   let getUserActions;
   let tableCellsValues;
   let rows;
-  let mockLoadAutoFollowPattern;
-  let mockDeleteAutoFollowPattern;
-  let mockAutoFollowStats;
+  let updateHttpMockResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    ({ mockLoadAutoFollowPattern, mockDeleteAutoFollowPattern, mockAutoFollowStats } = mockServerResponses(server));
+    (updateHttpMockResponse = mockHttpRequests(server));
   });
 
   describe('on component mount', () => {
@@ -90,7 +88,7 @@ describe('<AutoFollowPatternList />', () => {
     let clickAutoFollowPatternAt;
 
     beforeEach(async () => {
-      mockLoadAutoFollowPattern({ patterns: autoFollowPatterns });
+      updateHttpMockResponse('loadAutoFollowPatterns', { patterns: autoFollowPatterns });
 
       // Mount the component
       ({
@@ -181,7 +179,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        mockDeleteAutoFollowPattern({ itemsDeleted: [autoFollowPattern1.name] });
+        updateHttpMockResponse('deleteAutoFollowPattern', { itemsDeleted: [autoFollowPattern1.name] });
 
         selectAutoFollowPatternAt(0);
         clickBulkDeleteButton();
@@ -303,7 +301,7 @@ describe('<AutoFollowPatternList />', () => {
           leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
           autoFollowException: { type: 'exception', reason: message }
         }];
-        mockAutoFollowStats({ recentAutoFollowErrors });
+        updateHttpMockResponse('autoFollowStats', { recentAutoFollowErrors });
 
         clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(false);

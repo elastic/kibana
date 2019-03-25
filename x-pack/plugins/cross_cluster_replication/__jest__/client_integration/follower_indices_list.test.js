@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockServerResponses, nextTick, getRandomString } from './test_helpers';
+import { initTestBed, mockHttpRequests, nextTick, getRandomString } from './test_helpers';
 import { FollowerIndicesList } from '../../public/app/sections/home/follower_indices_list';
 import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
@@ -28,12 +28,12 @@ describe('<FollowerIndicesList />', () => {
   let getMetadataFromEuiTable;
   let getUserActions;
   let tableCellsValues;
-  let mockLoadFollowerIndices;
+  let updateHttpMockResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    ({ mockLoadFollowerIndices } = mockServerResponses(server));
+    (updateHttpMockResponse = mockHttpRequests(server));
   });
 
   describe('on component mount', () => {
@@ -79,8 +79,7 @@ describe('<FollowerIndicesList />', () => {
     let clickFollowerIndexAt;
 
     beforeEach(async () => {
-      // Mock Http Request that loads Follower indices
-      mockLoadFollowerIndices({ indices: followerIndices });
+      updateHttpMockResponse('loadFollowerIndices', { indices: followerIndices });
 
       // Mount the component
       ({

@@ -137,29 +137,29 @@ export const initTestBed = (component, props = {}, options) => {
   };
 };
 
-export const mockServerResponses = server => {
+export const mockHttpRequests = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },
     JSON.stringify({ ...defaultResponse, ...response }),
   ]);
 
-  const mockLoadFollowerIndices = (response) => {
+  const setLoadFollowerIndicesResponse = (response) => {
     const defaultResponse = { indices: [] };
 
-    server.respondWith('GET', /api\/cross_cluster_replication\/follower_indices/,
+    server.respondWith('GET', 'api/cross_cluster_replication/follower_indices',
       mockResponse(defaultResponse, response));
   };
 
-  const mockLoadAutoFollowPattern = (response) => {
+  const setLoadAutoFollowPatternsResponse = (response) => {
     const defaultResponse = { patterns: [] };
 
-    server.respondWith('GET', /api\/cross_cluster_replication\/auto_follow_patterns/,
+    server.respondWith('GET', 'api/cross_cluster_replication/auto_follow_patterns',
       mockResponse(defaultResponse, response)
     );
   };
 
-  const mockDeleteAutoFollowPattern = (response) => {
+  const setDeleteAutoFollowPatternResponse = (response) => {
     const defaultResponse = { errors: [], itemsDeleted: [] };
 
     server.respondWith('DELETE', /api\/cross_cluster_replication\/auto_follow_patterns/,
@@ -167,7 +167,7 @@ export const mockServerResponses = server => {
     );
   };
 
-  const mockAutoFollowStats = (response) => {
+  const setAutoFollowStatsResponse = (response) => {
     const defaultResponse = {
       numberOfFailedFollowIndices: 0,
       numberOfFailedRemoteClusterStateRequests: 0,
@@ -180,19 +180,33 @@ export const mockServerResponses = server => {
       }]
     };
 
-    server.respondWith('GET', /api\/cross_cluster_replication\/stats\/auto_follow/,
+    server.respondWith('GET', 'api/cross_cluster_replication/stats/auto_follow',
       mockResponse(defaultResponse, response)
     );
   };
 
-  mockLoadFollowerIndices();
-  mockLoadAutoFollowPattern();
-  mockAutoFollowStats();
+  /**
+   * Set all http request to their default response
+   */
+  setLoadFollowerIndicesResponse();
+  setLoadAutoFollowPatternsResponse();
+  setAutoFollowStatsResponse();
 
-  return {
-    mockLoadFollowerIndices,
-    mockLoadAutoFollowPattern,
-    mockDeleteAutoFollowPattern,
-    mockAutoFollowStats,
+  /**
+   * Return a method to override any of the http reques
+   */
+  return (request, response) => {
+    const mapRequestToHelper = {
+      'loadFollowerIndices': setLoadFollowerIndicesResponse,
+      'loadAutoFollowPatterns': setLoadAutoFollowPatternsResponse,
+      'deleteAutoFollowPattern': setDeleteAutoFollowPatternResponse,
+      'autoFollowStats': setAutoFollowStatsResponse,
+    };
+
+    if (!mapRequestToHelper[request]) {
+      throw new Error(`Did not find a helper to set http response for request ${request}`);
+    }
+
+    return mapRequestToHelper[request](response);
   };
 };
