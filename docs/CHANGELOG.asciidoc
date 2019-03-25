@@ -417,7 +417,7 @@ formatter {pull}25654[#25654]
 == {kib} 7.0.0-alpha1
 
 [float]
-[[breaking-7.0.0]]
+[[breaking-7.0.0-alpha1]]
 === Breaking changes
 
 For more details about breaking changes in this release, see 
@@ -438,14 +438,14 @@ Operations::
 * Plugin installer defers optimization step until server start {pull}26983[#26983]
 
 [float]
-[[deprecation-7.0.0]]
+[[deprecation-7.0.0-alpha1]]
 === Deprecations
 
 Geo::
 * Fixes legacy tilemap loading {pull}22095[#22095]
 
 [float]
-[[K7-design-7.0.0]]
+[[K7-design-7.0.0-alpha1]]
 === K7 UI Design
 
 {kib} 7.0.0-alpha1 includes a new design for {kib} called K7. In this early stage, 
@@ -455,7 +455,7 @@ off the *k7design* setting. The option to switch to the old design
 will be removed before 7.0.0 GA.
 
 [float]
-[[enhancement-7.0.0]]
+[[enhancement-7.0.0-alpha1]]
 === Enhancements
 
 Machine Learning::
