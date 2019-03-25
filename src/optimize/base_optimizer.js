@@ -60,6 +60,7 @@ export default class BaseOptimizer {
     this.uiBundles = opts.uiBundles;
     this.discoveredPlugins = opts.discoveredPlugins;
     this.profile = opts.profile || false;
+    this.workers = opts.workers;
 
     switch (opts.sourceMaps) {
       case true:
@@ -140,6 +141,10 @@ export default class BaseOptimizer {
   }
 
   getThreadPoolCpuCount() {
+    if (this.workers) {
+      return this.workers;
+    }
+
     const cpus = os.cpus();
     if (!cpus) {
       // sometimes this call returns undefined so we fall back to 1: https://github.com/nodejs/node/issues/19022

@@ -69,6 +69,7 @@ export default async (kbnServer, server, config) => {
     discoveredPlugins: newPlatform.start.plugins.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
+    workers: config.get('optimize.workers'),
   });
 
   server.log(
