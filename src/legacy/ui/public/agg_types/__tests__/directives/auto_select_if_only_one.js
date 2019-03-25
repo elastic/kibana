@@ -18,7 +18,7 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../../directives/auto_select_if_only_one';
 

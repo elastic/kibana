@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'timelion', 'settings', 'timePicker']);
