@@ -54,7 +54,7 @@ class CodeSideTabs extends React.PureComponent<Props> {
     const fileTabContent = this.props.loadingFileTree ? (
       this.renderLoadingSpinner('file')
     ) : (
-      <div className="codeFileTree--container">{<FileTree />}</div>
+      <div className="codeFileTree__container">{<FileTree />}</div>
     );
     const structureTabContent = this.props.loadingStructureTree ? (
       this.renderLoadingSpinner('structure')
