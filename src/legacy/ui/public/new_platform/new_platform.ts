@@ -17,34 +17,34 @@
  * under the License.
  */
 
-import { BasePathStart } from '../../../../core/public/base_path';
-import { ChromeStart } from '../../../../core/public/chrome';
-import { FatalErrorsStart } from '../../../../core/public/fatal_errors';
-import { HttpStart } from '../../../../core/public/http';
-import { I18nStart } from '../../../../core/public/i18n';
-import { InjectedMetadataStart } from '../../../../core/public/injected_metadata';
-import { NotificationsStart } from '../../../../core/public/notifications';
-import { UiSettingsClient } from '../../../../core/public/ui_settings';
+import { BasePathSetup } from '../../../../core/public/base_path';
+import { ChromeSetup } from '../../../../core/public/chrome';
+import { FatalErrorsSetup } from '../../../../core/public/fatal_errors';
+import { HttpSetup } from '../../../../core/public/http';
+import { I18nSetup } from '../../../../core/public/i18n';
+import { InjectedMetadataSetup } from '../../../../core/public/injected_metadata';
+import { NotificationsSetup } from '../../../../core/public/notifications';
+import { UiSettingsSetup } from '../../../../core/public/ui_settings';
 
-interface CoreStart {
-  i18n: I18nStart;
-  injectedMetadata: InjectedMetadataStart;
-  fatalErrors: FatalErrorsStart;
-  notifications: NotificationsStart;
-  http: HttpStart;
-  basePath: BasePathStart;
-  uiSettings: UiSettingsClient;
-  chrome: ChromeStart;
+interface CoreSetup {
+  i18n: I18nSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup;
+  notifications: NotificationsSetup;
+  http: HttpSetup;
+  basePath: BasePathSetup;
+  uiSettings: UiSettingsSetup;
+  chrome: ChromeSetup;
 }
 
 const runtimeContext = {
   start: {
-    core: null as CoreStart | null,
+    core: null as CoreSetup | null,
     plugins: {},
   },
 };
 
-export function __newPlatformInit__(core: CoreStart) {
+export function __newPlatformInit__(core: CoreSetup) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already initialized');
   }

@@ -183,6 +183,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         iconSide="left"
         isDisabled={true}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -201,6 +202,7 @@ exports[`CalendarForm Renders calendar form 1`] = `
         href="undefined/app/ml#/settings/calendars_list"
         iconSide="left"
         isDisabled={false}
+        size="m"
         type="button"
       >
         <FormattedMessage
