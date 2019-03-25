@@ -89,7 +89,7 @@ test('`setup` calls plugin.setup with context and dependencies', async () => {
 });
 
 test('`stop` fails if plugin is not setup up', async () => {
-  await expect(plugin.stop()).rejects.toThrowErrorMatchingInlineSnapshot(
+  expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
     `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
   );
 });
@@ -105,5 +105,5 @@ test('`stop` does not fail if plugin.stop does not exist', async () => {
   mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
   await plugin.load(addBasePath);
   await plugin.setup({} as any, {} as any);
-  await expect(plugin.stop()).resolves.not.toThrow();
+  expect(() => plugin.stop()).not.toThrow();
 });

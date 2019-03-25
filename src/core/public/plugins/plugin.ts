@@ -29,7 +29,7 @@ export type PluginInitializer<TSetup, TDependencies extends Record<string, unkno
   core: PluginInitializerContext
 ) => {
   setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
-  stop?: () => void | Promise<void>;
+  stop?: () => void;
 };
 
 /**
@@ -83,7 +83,7 @@ export class Plugin<
   /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
-  public async stop() {
+  public stop() {
     if (this.instance === undefined) {
       throw new Error(
         `Plugin "${this.discoveredPlugin.id}" can't be stopped since it isn't set up.`
@@ -91,7 +91,7 @@ export class Plugin<
     }
 
     if (typeof this.instance.stop === 'function') {
-      await this.instance.stop();
+      this.instance.stop();
     }
 
     this.instance = undefined;

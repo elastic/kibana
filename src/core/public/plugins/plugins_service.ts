@@ -90,7 +90,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
   public async stop() {
     // Stop plugins in reverse dependency order.
     for (const plugin of [...this.plugins.values()].reverse()) {
-      await plugin.stop();
+      plugin.stop();
     }
   }
 
