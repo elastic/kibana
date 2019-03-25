@@ -26,27 +26,39 @@ export const visdata = () => ({
   help: i18n.translate('interpreter.functions.visualization.help', {
     defaultMessage: 'Loads saved visualization data'
   }),
+  context: {
+    types: ['filter'],
+  },
   args: {
     id: {
       types: ['string'],
     },
-    from: {
-      types: ['string'],
-    },
-    to: {
-      types: ['string'],
-    }
   },
   async fn(context, args) {
     const loader = await getVisualizeLoader();
     const handler = await loader.loadById(args.id);
-    handler.dataLoaderParams.timeRange = {
-      from: args.from,
-      to: args.to,
-    };
-    const data = await handler.fetch(true, true);
+    if (context.and.find(f => f.type === 'time')) {
+      const timeFilter = context.and.find(f => f.type === 'time');
+      handler.dataLoaderParams.timeRange = {
+        from: timeFilter.from,
+        to: timeFilter.to,
+      };
+    }
 
-    if (!data.rows || !data.columns) throw('visualization datasource does not return table');
+    let data;
+
+    try {
+      data = await handler.fetch(true, true, false);
+    } catch (e) {
+      const negativeTimeIntervalMsg = 'Zero or negative time interval not supported';
+      if (e.message.includes(negativeTimeIntervalMsg)) {
+        const errorMessage = `visualization requires time range. prepend expression with 
+        'filters | ' and add time picker to workpad`;
+        throw new Error(errorMessage);
+      }
+    }
+
+    if (!data.rows || !data.columns) throw new Error('visualization datasource does not return table');
 
     return {
       type: 'datatable',

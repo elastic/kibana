@@ -428,7 +428,11 @@ export class EmbeddedVisualizeHandler {
     this.fetchAndRender();
   };
 
-  private fetch = (forceFetch: boolean = false, tableOnly: boolean = false) => {
+  private fetch = (
+    forceFetch: boolean = false,
+    tableOnly: boolean = false,
+    handleErrors = true
+  ) => {
     this.dataLoaderParams.aggs = this.vis.getAggConfig();
     this.dataLoaderParams.forceFetch = forceFetch;
     this.dataLoaderParams.tableOnly = tableOnly;
@@ -454,7 +458,13 @@ export class EmbeddedVisualizeHandler {
         }
         return data;
       })
-      .catch(this.handleDataLoaderError);
+      .catch(e => {
+        if (handleErrors) {
+          this.handleDataLoaderError(e);
+        } else {
+          throw e;
+        }
+      });
   };
 
   /**
