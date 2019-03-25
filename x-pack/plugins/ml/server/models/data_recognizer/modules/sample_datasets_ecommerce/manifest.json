@@ -1,0 +1,30 @@
+{
+  "id": "sample_dataset_ecommerce",
+  "title": "Kibana Sample Data Ecommerce",
+  "description": "Find anomalies in Kibana Sample Data for Ecommerce",
+  "type": "Sample Dataset",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "kibana_sample_data_ecommerce",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term":  { "_index": "kibana_sample_data_ecommerce" } }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "mean_taxful_total_price",
+      "file": "mean_taxful_total_price.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-mean_taxful_total_price",
+      "file": "datafeed_mean_taxful_total_price.json",
+      "job_id": "mean_taxful_total_price"
+    }
+  ],
+  "kibana": {
+}
+}
