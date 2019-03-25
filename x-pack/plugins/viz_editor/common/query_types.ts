@@ -124,6 +124,6 @@ export interface Query {
 
   orderBy?: OrderByOperation[];
 
-  // Defaults to 1000?
+  // Defaults to 100?
   size?: number;
 }
