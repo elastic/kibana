@@ -57,7 +57,7 @@ export default class KbnServer {
     const { plugins, elasticsearch, serverOptions, handledConfigPaths } = core;
 
     this.newPlatform = {
-      start: {
+      setup: {
         core: {
           elasticsearch,
         },
