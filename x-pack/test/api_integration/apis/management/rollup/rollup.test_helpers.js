@@ -81,7 +81,7 @@ export const registerHelpers = ({ supertest, es }) => {
     const jobIds = Array.isArray(ids) ? ids : [ids];
 
     return supertest
-      .post(`${API_BASE_PATH}/stop?wait_for_completion=true`)
+      .post(`${API_BASE_PATH}/stop?waitForCompletion=true`)
       .set('kbn-xsrf', 'xxx')
       .send({ jobIds });
   };

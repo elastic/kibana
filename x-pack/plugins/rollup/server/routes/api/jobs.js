@@ -109,7 +109,7 @@ export function registerJobsRoute(server) {
         const { jobIds } = request.payload;
         // For our API integration tests we need to wait for the jobs to be stopped
         // in order to be able to delete them sequencially.
-        const { waitForCompletion } = request.params;
+        const { waitForCompletion } = request.query;
         const callWithRequest = callWithRequestFactory(server, request);
 
         const stopRollupJob = id => callWithRequest('rollup.stopJob', { id, waitForCompletion: waitForCompletion === 'true' });
