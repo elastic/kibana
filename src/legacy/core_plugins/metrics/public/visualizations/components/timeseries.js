@@ -28,8 +28,10 @@ import {
   Position,
   Settings,
   getAxisId,
+  CurveType
 } from '@elastic/charts';
 import { GRID_LINE_CONFIG } from '../lib/config';
+import { calculateFillColor } from '../lib/calculate_fill_color';
 
 import '@elastic/charts/dist/style.css';
 
@@ -39,6 +41,11 @@ export class TimeSeries extends Component {
     this.state = {};
   }
 
+  computeColor(color, fill) {
+    const { fillColor } = calculateFillColor(color, fill);
+
+    return fillColor;
+  }
 
   render() {
     const { min, max, mode } = this.props.yaxes[0];
@@ -53,19 +60,34 @@ export class TimeSeries extends Component {
           onBrushEnd={this.props.onBrush}
         />
         {
-          this.props.series.map(({ id, label, data, bars }) => (
-            <LineSeries
-              key={id}
-              id={getSpecId(label)}
-              seriesType={bars.show ? 'bar' : 'line'}
-              xScaleType={ScaleType.Time}
-              yScaleType={mode || ScaleType.Linear}
-              xAccessor={0}
-              yAccessors={[1]}
-              data={data}
-              yScaleToDataExtent={false}
-            />
-          ))
+          this.props.series.map(({ id, label, data, bars, lines, color }) => {
+            const lineCustomSeriesColors = new Map();
+            const lineDataSeriesColorValues = {
+              colorValues: [],
+              specId: getSpecId(label),
+            };
+
+            const { fill } = bars;
+            const { steps } = lines;
+
+            lineCustomSeriesColors.set(lineDataSeriesColorValues, this.computeColor(color, fill));
+
+            return (
+              <LineSeries
+                key={`${id}-${label}`}
+                id={getSpecId(label)}
+                seriesType={bars.show ? 'bar' : 'line'}
+                xScaleType={ScaleType.Time}
+                yScaleType={mode || ScaleType.Linear}
+                xAccessor={0}
+                yAccessors={[1]}
+                data={data}
+                yScaleToDataExtent={false}
+                customSeriesColors={lineCustomSeriesColors}
+                curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
+              />
+            );
+          })
         }
         <Axis
           id={getAxisId('bottom')}

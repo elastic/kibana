@@ -94,7 +94,7 @@
     ]
   },
   "dependencies": {
-    "@elastic/charts": "^3.2.0",
+    "@elastic/charts": "^3.3.0",
     "@elastic/datemath": "5.0.2",
     "@elastic/eui": "9.4.0",
     "@elastic/filesaver": "1.1.2",
