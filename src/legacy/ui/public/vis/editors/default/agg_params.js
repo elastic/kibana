@@ -56,8 +56,15 @@ uiModules
           updateEditorConfig('default');
         });
 
-        $scope.onParamChange = (agg, paramName, value) => {
-          if(agg.params[paramName] !== value) {
+        $scope.onParamChange = (agg, paramName, subModel, value) => {
+          if(subModel) {
+            if (!agg.params[paramName]) {
+              agg.params[paramName] = {};
+            }
+            if (agg.params[paramName][subModel] !== value) {
+              agg.params[paramName][subModel] = value;
+            }
+          } else if (agg.params[paramName] !== value) {
             agg.params[paramName] = value;
           }
         };

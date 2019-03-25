@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import editorHtml from '../controls/regular_expression.html';
+import { RegexParamEditor } from '../controls/regular_expression';
 import { BaseParamType } from './base';
 import { createLegacyClass } from '../../utils/legacy_class';
 
@@ -28,7 +28,8 @@ function RegexParamType(config) {
   RegexParamType.Super.call(this, config);
 }
 
-RegexParamType.prototype.editor = editorHtml;
+RegexParamType.prototype.editorComponent = RegexParamEditor;
+RegexParamType.prototype.subModel = 'pattern';
 
 /**
  * Disabled state of the agg param
