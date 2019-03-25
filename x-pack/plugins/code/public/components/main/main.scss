@@ -63,8 +63,7 @@
 
 .code-directory__node {
   width: calc(200rem / 14);
-  margin: 0 $euiSizeS $euiSizeS;
-  padding: $euiSizeXS;
+  padding: $euiSizeS;
   border-radius: $euiBorderRadius;
   white-space: nowrap;
   color: $euiColorFullShade;
@@ -248,10 +247,10 @@
 }
 
 .code-link {
+  margin: 0 $euiSizeS $euiSizeS;
+  border-radius: $euiBorderRadius;
   &:focus {
-    box-shadow: none;
-    outline: none;
-    animation: none;
+    text-decoration: underline;
   }
 }
 
