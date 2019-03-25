@@ -192,7 +192,8 @@ export default function ({ getService }) {
           await createJob(payload);
         });
 
-        it('should delete a job that was created', async () => {
+        it('should delete a job that has been stopped', async () => {
+          await stopJob(jobId);
           const { body } = await deleteJob(jobId).expect(200);
           expect(body).to.eql({ success: true });
         });

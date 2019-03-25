@@ -45,6 +45,10 @@ export function registerJobsRoute(server) {
           ...rest
         } = request.payload.job;
 
+        console.log('--------------------------------');
+        console.log('Creating rollup jobs...');
+        console.log('jobId', id);
+
         const callWithRequest = callWithRequestFactory(server, request);
 
         // Create job.
@@ -75,6 +79,10 @@ export function registerJobsRoute(server) {
     handler: async (request) => {
       try {
         const { jobIds } = request.payload;
+        console.log('--------------------------------');
+        console.log('Starting rollup jobs...');
+        console.log('JobIDs', jobIds);
+
         const callWithRequest = callWithRequestFactory(server, request);
         return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })))
           .then(() => ({ success: true }));
@@ -113,7 +121,7 @@ export function registerJobsRoute(server) {
         const callWithRequest = callWithRequestFactory(server, request);
 
         console.log('--------------------------------');
-        console.log('About to stopping rollup jobs...');
+        console.log('Stopping rollup jobs...');
         console.log('JobIDs', jobIds);
         console.log('Wait for completion:', waitForCompletion === 'true');
 
@@ -142,6 +150,10 @@ export function registerJobsRoute(server) {
     handler: async (request) => {
       try {
         const { jobIds } = request.payload;
+        console.log('--------------------------------');
+        console.log('Deleting rollup jobs...');
+        console.log('JobIDs', jobIds);
+
         const callWithRequest = callWithRequestFactory(server, request);
         return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })))
           .then(() => ({ success: true }));
