@@ -69,6 +69,7 @@ export function resolveImportErrorsTestSuiteFactory(
             message: `Unsupported saved object type: 'wigwags': Bad Request`,
             statusCode: 400,
             error: 'Bad Request',
+            type: 'unknown',
           },
         },
       ],

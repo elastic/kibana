@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../__jest__/utils';
+import { registerTestBed } from '../../../../../../test_utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
@@ -34,22 +34,22 @@ const initTestBed = registerTestBed(JobList, defaultProps, rollupJobsStore);
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
-    const { testSubjectExists } = initTestBed();
+    const { exists } = initTestBed();
 
-    expect(testSubjectExists('jobListEmptyPrompt')).toBeTruthy();
+    expect(exists('jobListEmptyPrompt')).toBeTruthy();
   });
 
   it('should display a loading message when loading the jobs', () => {
-    const { component, testSubjectExists } = initTestBed({ isLoading: true });
+    const { component, exists } = initTestBed({ isLoading: true });
 
-    expect(testSubjectExists('jobListLoading')).toBeTruthy();
+    expect(exists('jobListLoading')).toBeTruthy();
     expect(component.find('JobTableUi').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
-    const { component, testSubjectExists } = initTestBed({ hasJobs: true });
+    const { component, exists } = initTestBed({ hasJobs: true });
 
-    expect(testSubjectExists('jobListLoading')).toBeFalsy();
+    expect(exists('jobListLoading')).toBeFalsy();
     expect(component.find('JobTableUi').length).toBeTruthy();
   });
 
@@ -72,7 +72,7 @@ describe('<JobList />', () => {
   });
 
   describe('when there is an API error', () => {
-    const { testSubjectExists, findTestSubject } = initTestBed({
+    const { exists, find } = initTestBed({
       jobLoadError: {
         status: 400,
         data: { statusCode: 400, error: 'Houston we got a problem.' }
@@ -80,20 +80,20 @@ describe('<JobList />', () => {
     });
 
     it('should display a callout with the status and the message', () => {
-      expect(testSubjectExists('jobListError')).toBeTruthy();
-      expect(findTestSubject('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
+      expect(exists('jobListError')).toBeTruthy();
+      expect(find('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
     });
   });
 
   describe('when the user does not have the permission to access it', () =>  {
-    const { testSubjectExists } = initTestBed({ jobLoadError: { status: 403 } });
+    const { exists } = initTestBed({ jobLoadError: { status: 403 } });
 
     it('should render a callout message', () => {
-      expect(testSubjectExists('jobListNoPermission')).toBeTruthy();
+      expect(exists('jobListNoPermission')).toBeTruthy();
     });
 
     it('should display the page header', () => {
-      expect(testSubjectExists('jobListPageHeader')).toBeTruthy();
+      expect(exists('jobListPageHeader')).toBeTruthy();
     });
   });
 });

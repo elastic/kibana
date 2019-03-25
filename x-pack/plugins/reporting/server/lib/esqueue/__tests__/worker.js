@@ -347,12 +347,6 @@ describe('Worker class', function () {
         expect(body._source).to.eql({ excludes: excludedFields });
       });
 
-      it('should search by job type', function () {
-        const { body } = getSearchParams(jobtype);
-        const conditions = get(body, conditionPath);
-        expect(conditions.must).to.eql({ term: { jobtype: jobtype } });
-      });
-
       it('should search for pending or expired jobs', function () {
         const { body } = getSearchParams(jobtype);
         const conditions = get(body, conditionPath);
@@ -709,7 +703,7 @@ describe('Worker class', function () {
       });
 
       it('should update the job with the workerFn output', function () {
-        const workerFn = function (jobPayload) {
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return payload;
         };
@@ -719,6 +713,7 @@ describe('Worker class', function () {
           .then(() => {
             sinon.assert.calledOnce(updateSpy);
             const query = updateSpy.firstCall.args[1];
+
             expect(query).to.have.property('index', job._index);
             expect(query).to.have.property('id', job._id);
             expect(query).to.have.property('if_seq_no', job._seq_no);
@@ -731,7 +726,7 @@ describe('Worker class', function () {
 
       it('should update the job status and completed time', function () {
         const startTime = moment().valueOf();
-        const workerFn = function (jobPayload) {
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return new Promise(function (resolve) {
             setTimeout(() => resolve(payload), 10);
@@ -906,7 +901,7 @@ describe('Worker class', function () {
         const timeout = 20;
         cancellationCallback = function () {};
 
-        const workerFn = function (payload, cancellationToken) {
+        const workerFn = function (job, payload, cancellationToken) {
           cancellationToken.on(cancellationCallback);
           return new Promise(function (resolve) {
             setTimeout(() => {

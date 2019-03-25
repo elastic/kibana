@@ -38,10 +38,10 @@ export const kibanaPie = () => ({
     },
   },
   async fn(context, args) {
-    const responseHandler = vislibSlicesResponseHandler().handler;
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const responseHandler = vislibSlicesResponseHandler().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
 
     return {
       type: 'render',
@@ -49,7 +49,7 @@ export const kibanaPie = () => ({
       value: {
         visData: convertedData,
         visType: 'pie',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

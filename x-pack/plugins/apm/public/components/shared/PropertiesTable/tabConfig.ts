@@ -8,8 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { get, indexBy, uniq } from 'lodash';
 import { first, has } from 'lodash';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 
 export type PropertyTabKey =
   | keyof Transaction

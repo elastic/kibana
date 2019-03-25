@@ -19,6 +19,7 @@
 
 import { sortBy } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
+import '../directives/scroll_bottom';
 import editorHtml from '../controls/field.html';
 import { BaseParamType } from './base';
 import '../../filters/field_type';

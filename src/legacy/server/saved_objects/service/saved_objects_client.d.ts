@@ -68,6 +68,7 @@ export interface UpdateOptions extends BaseOptions {
 export interface BulkGetObject {
   id: string;
   type: string;
+  fields?: string[];
 }
 export type BulkGetObjects = BulkGetObject[];
 

@@ -56,66 +56,54 @@ const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient,
   inst.stop = jest.fn();
 });
 
-// Load the service
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { UiSettingsService } from './ui_settings_service';
 
-const httpStart = {
-  addLoadingCount: jest.fn(),
-};
+const httpSetup = httpServiceMock.createSetupContract();
 
-const defaultDeps: any = {
-  notifications: {
-    notificationsStart: true,
-  },
-  http: httpStart,
-  injectedMetadata: {
-    injectedMetadataStart: true,
-    getKibanaVersion: jest.fn().mockReturnValue('kibanaVersion'),
-    getLegacyMetadata: jest.fn().mockReturnValue({
-      uiSettings: {
-        defaults: { legacyInjectedUiSettingDefaults: true },
-        user: { legacyInjectedUiSettingUserValues: true },
-      },
-    }),
-  },
-  basePath: {
-    basePathStart: true,
-  },
+const defaultDeps = {
+  notifications: notificationServiceMock.createSetupContract(),
+  http: httpSetup,
+  injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
+  basePath: basePathServiceMock.createSetupContract(),
 };
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('#start', () => {
+describe('#setup', () => {
   it('returns an instance of UiSettingsClient', () => {
-    const start = new UiSettingsService().start(defaultDeps);
-    expect(start).toBeInstanceOf(MockUiSettingsClient);
+    const setup = new UiSettingsService().setup(defaultDeps);
+    expect(setup).toBeInstanceOf(MockUiSettingsClient);
   });
 
   it('constructs UiSettingsClient and UiSettingsApi', () => {
-    new UiSettingsService().start(defaultDeps);
+    new UiSettingsService().setup(defaultDeps);
 
     expect(MockUiSettingsApi).toMatchSnapshot('UiSettingsApi args');
     expect(MockUiSettingsClient).toMatchSnapshot('UiSettingsClient args');
   });
 
   it('passes the uiSettings loading count to the loading count api', () => {
-    new UiSettingsService().start(defaultDeps);
+    new UiSettingsService().setup(defaultDeps);
 
-    expect(httpStart.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
+    expect(httpSetup.addLoadingCount).toMatchSnapshot('http.addLoadingCount calls');
   });
 });
 
 describe('#stop', () => {
-  it('runs fine if service never started', () => {
+  it('runs fine if service never set up', () => {
     const service = new UiSettingsService();
     expect(() => service.stop()).not.toThrowError();
   });
 
   it('stops the uiSettingsClient and uiSettingsApi', () => {
     const service = new UiSettingsService();
-    const client = service.start(defaultDeps);
+    const client = service.setup(defaultDeps);
     const [[{ api }]] = MockUiSettingsClient.mock.calls;
     jest.spyOn(client, 'stop');
     jest.spyOn(api, 'stop');

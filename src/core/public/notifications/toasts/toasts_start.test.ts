@@ -19,9 +19,9 @@
 
 import { take } from 'rxjs/operators';
 
-import { ToastsStart } from './toasts_start';
+import { ToastsSetup } from './toasts_start';
 
-async function getCurrentToasts(toasts: ToastsStart) {
+async function getCurrentToasts(toasts: ToastsSetup) {
   return await toasts
     .get$()
     .pipe(take(1))
@@ -30,7 +30,7 @@ async function getCurrentToasts(toasts: ToastsStart) {
 
 describe('#get$()', () => {
   it('returns observable that emits NEW toast list when something added or removed', () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const onToasts = jest.fn();
 
     toasts.get$().subscribe(onToasts);
@@ -57,7 +57,7 @@ describe('#get$()', () => {
   });
 
   it('does not emit a new toast list when unknown toast is passed to remove()', () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const onToasts = jest.fn();
 
     toasts.get$().subscribe(onToasts);
@@ -71,14 +71,14 @@ describe('#get$()', () => {
 
 describe('#add()', () => {
   it('returns toast objects with auto assigned id', () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const toast = toasts.add({ title: 'foo' });
     expect(toast).toHaveProperty('id');
     expect(toast).toHaveProperty('title', 'foo');
   });
 
   it('adds the toast to toasts list', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const toast = toasts.add({});
 
     const currentToasts = await getCurrentToasts(toasts);
@@ -87,27 +87,27 @@ describe('#add()', () => {
   });
 
   it('increments the toast ID for each additional toast', () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     expect(toasts.add({})).toHaveProperty('id', '0');
     expect(toasts.add({})).toHaveProperty('id', '1');
     expect(toasts.add({})).toHaveProperty('id', '2');
   });
 
   it('accepts a string, uses it as the title', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     expect(toasts.add('foo')).toHaveProperty('title', 'foo');
   });
 });
 
 describe('#remove()', () => {
   it('removes a toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     toasts.remove(toasts.add('Test'));
     expect(await getCurrentToasts(toasts)).toHaveLength(0);
   });
 
   it('ignores unknown toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     toasts.add('Test');
     toasts.remove({ id: 'foo' });
 
@@ -118,12 +118,12 @@ describe('#remove()', () => {
 
 describe('#addSuccess()', () => {
   it('adds a success toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     expect(toasts.addSuccess({})).toHaveProperty('color', 'success');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const toast = toasts.addSuccess({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
@@ -132,12 +132,12 @@ describe('#addSuccess()', () => {
 
 describe('#addWarning()', () => {
   it('adds a warning toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     expect(toasts.addWarning({})).toHaveProperty('color', 'warning');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const toast = toasts.addWarning({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
@@ -146,12 +146,12 @@ describe('#addWarning()', () => {
 
 describe('#addDanger()', () => {
   it('adds a danger toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     expect(toasts.addDanger({})).toHaveProperty('color', 'danger');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup();
     const toast = toasts.addDanger({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);

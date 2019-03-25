@@ -17,12 +17,12 @@
  * under the License.
  */
 
-// @ts-ignore untyped dependency
-import { registries } from '@kbn/interpreter/public';
 import { EventEmitter } from 'events';
 import { debounce, forEach, get } from 'lodash';
 import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
+// @ts-ignore untyped dependency
+import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
