@@ -18,6 +18,7 @@
  */
 
 import { CoreSetup } from '..';
+import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
 import { Plugin } from './plugin';
@@ -38,12 +39,13 @@ export interface PluginsServiceSetup {
  * @internal
  */
 export class PluginsService implements CoreService<PluginsServiceSetup> {
-  private readonly plugins: Map<string, Plugin<unknown, Record<string, unknown>>> = new Map();
+  /** Plugin wrappers in topological order. */
+  private readonly plugins: Map<PluginName, Plugin<unknown, Record<string, unknown>>> = new Map();
 
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup(deps: PluginsServiceSetupDeps) {
-    // Construct plugin wrappers
+    // Construct plugin wrappers, depending on the topological order set by the server.
     deps.injectedMetadata
       .getPlugins()
       .forEach(({ id, plugin }) =>
@@ -65,9 +67,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
         (depContracts, dependency) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
           // missing optional dependency.
-          if (contracts.get(dependency)) {
+          if (contracts.get(dependency) !== undefined) {
             depContracts[dependency] = contracts.get(dependency);
           }
+
           return depContracts;
         },
         {} as { [dep: string]: unknown }

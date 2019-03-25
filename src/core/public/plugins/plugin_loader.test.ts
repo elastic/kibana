@@ -87,18 +87,24 @@ test('`loadPluginBundles` includes the basePath', async () => {
   );
 });
 
-test('`loadPluginBundles` rejects if any script fails', async () => {
+test('`loadPluginBundles` rejects if script.onerror is called', async () => {
   const loadPromise = loadPluginBundle(addBasePath, 'plugin-a');
-
   const fakeScriptTag1 = createdScriptTags[0];
-
-  // Setup a fake initializer as if a plugin bundle had actually been loaded.
-  const fakeInitializer1 = jest.fn();
-  window.__kbnBundles__['plugin/plugin-a'] = fakeInitializer1;
   // Call the error on the second script
   fakeScriptTag1.onerror(new Error('Whoa there!'));
 
-  await expect(loadPromise).rejects.toThrowError('Whoa there!');
+  await expect(loadPromise).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Failed to load \\"plugin-a\\" bundle (/bundles/plugin/plugin-a.bundle.js)"`
+  );
+});
+
+test('`loadPluginBundles` rejects if timeout is reached', async () => {
+  await expect(
+    // Override the timeout to 1 ms for testi.
+    loadPluginBundle(addBasePath, 'plugin-a', { timeoutMs: 1 })
+  ).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Timeout reached when loading \\"plugin-a\\" bundle (/bundles/plugin/plugin-a.bundle.js)"`
+  );
 });
 
 test('`loadPluginBundles` rejects if bundle does attach an initializer to window.__kbnBundles__', async () => {

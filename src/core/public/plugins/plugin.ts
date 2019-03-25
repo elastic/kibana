@@ -49,7 +49,7 @@ export class Plugin<
   private instance?: ReturnType<PluginInitializer<TSetup, TDependenciesSetup>>;
 
   constructor(
-    public readonly discoveredPlugin: DiscoveredPlugin,
+    readonly discoveredPlugin: DiscoveredPlugin,
     private readonly initializerContext: PluginInitializerContext
   ) {
     this.name = discoveredPlugin.id;
@@ -85,9 +85,7 @@ export class Plugin<
    */
   public stop() {
     if (this.instance === undefined) {
-      throw new Error(
-        `Plugin "${this.discoveredPlugin.id}" can't be stopped since it isn't set up.`
-      );
+      throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
     if (typeof this.instance.stop === 'function') {
@@ -105,9 +103,7 @@ export class Plugin<
     const instance = this.initializer(this.initializerContext);
 
     if (typeof instance.setup !== 'function') {
-      throw new Error(
-        `Instance of plugin "${this.discoveredPlugin.id}" does not define "setup" function.`
-      );
+      throw new Error(`Instance of plugin "${this.name}" does not define "setup" function.`);
     }
 
     return instance;

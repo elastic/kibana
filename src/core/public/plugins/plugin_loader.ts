@@ -40,6 +40,12 @@ declare global {
 }
 
 /**
+ * Timeout for loading a single script in milliseconds.
+ * @internal
+ */
+export const LOAD_TIMEOUT = 120 * 1000; // 2 minutes
+
+/**
  * Loads the bundle for a plugin onto the page and returns their PluginInitializer. This should
  * be called for all plugins (once per plugin) in parallel using Promise.all.
  *
@@ -60,7 +66,8 @@ export const loadPluginBundle: LoadPluginBundle = <
   TDependencies extends Record<string, unknown>
 >(
   addBasePath: (path: string) => string,
-  pluginName: PluginName
+  pluginName: PluginName,
+  { timeoutMs = LOAD_TIMEOUT } = {}
 ) =>
   new Promise<PluginInitializer<TSetup, TDependencies>>((resolve, reject) => {
     const script = document.createElement('script');
@@ -74,10 +81,18 @@ export const loadPluginBundle: LoadPluginBundle = <
     // Add kbnNonce for CSP
     script.setAttribute('nonce', window.__kbnNonce__);
 
+    const cleanupTag = () => {
+      clearTimeout(timeout);
+      // Set to null for IE memory leak issue. Webpack does the same thing.
+      // @ts-ignore
+      script.onload = script.onerror = null;
+    };
+
     // Wire up resolve and reject
     script.onload = () => {
-      const initializer = window.__kbnBundles__[`plugin/${pluginName}`];
+      cleanupTag();
 
+      const initializer = window.__kbnBundles__[`plugin/${pluginName}`];
       if (!initializer || typeof initializer !== 'function') {
         reject(
           new Error(`Definition of plugin "${pluginName}" should be a function (${bundlePath}).`)
@@ -86,7 +101,16 @@ export const loadPluginBundle: LoadPluginBundle = <
         resolve(initializer as PluginInitializer<TSetup, TDependencies>);
       }
     };
-    script.onerror = reject;
+
+    script.onerror = () => {
+      cleanupTag();
+      reject(new Error(`Failed to load "${pluginName}" bundle (${bundlePath})`));
+    };
+
+    const timeout = setTimeout(() => {
+      cleanupTag();
+      reject(new Error(`Timeout reached when loading "${pluginName}" bundle (${bundlePath})`));
+    }, timeoutMs);
 
     // Add the script tag to the end of the body to start downloading
     document.body.appendChild(script);
@@ -94,5 +118,6 @@ export const loadPluginBundle: LoadPluginBundle = <
 
 export type LoadPluginBundle = <TSetup, TDependencies extends Record<string, unknown>>(
   addBasePath: (path: string) => string,
-  pluginName: PluginName
+  pluginName: PluginName,
+  options?: { timeoutMs?: number }
 ) => Promise<PluginInitializer<TSetup, TDependencies>>;
