@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { metadataQuery } from '../../../../plugins/infra/public/containers/metadata/metadata.gql_query';
 import { MetadataQuery } from '../../../../plugins/infra/public/graphql/types';

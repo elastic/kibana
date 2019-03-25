@@ -18,7 +18,7 @@
  */
 
 import { Scanner } from '../scanner';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import 'elasticsearch-browser';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';

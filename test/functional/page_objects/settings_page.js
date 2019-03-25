@@ -18,7 +18,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function SettingsPageProvider({ getService, getPageObjects }) {
   const log = getService('log');

@@ -19,7 +19,7 @@
 
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { IndexedArray } from '..';
 
 // this is generally a data-structure that IndexedArray is good for managing

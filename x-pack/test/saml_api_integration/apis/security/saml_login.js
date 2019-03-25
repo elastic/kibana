@@ -8,7 +8,7 @@ import querystring from 'querystring';
 import url from 'url';
 import { delay } from 'bluebird';
 import { getLogoutRequest, getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml_tools';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import request from 'request';
 
 export default function ({ getService }) {

@@ -29,7 +29,7 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking discover.clickFieldListItemVisualize
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');

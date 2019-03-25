@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SearchCache } from '../search_cache';
 
 describe(`SearchCache`, () => {

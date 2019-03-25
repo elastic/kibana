@@ -47,6 +47,15 @@ module.exports = {
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
+    '@kbn/eslint/module_migration': [
+      'error',
+      [
+        {
+          from: 'expect.js',
+          to: '@kbn/expect',
+        },
+      ],
+    ],
   },
 
   overrides: [
