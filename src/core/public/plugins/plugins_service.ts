@@ -37,7 +37,6 @@ export interface PluginsServiceSetup {
  *
  * @internal
  */
-// tslint:disable max-classes-per-file
 export class PluginsService implements CoreService<PluginsServiceSetup> {
   private readonly plugins: Map<string, Plugin<unknown, Record<string, unknown>>> = new Map();
 
