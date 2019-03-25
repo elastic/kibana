@@ -101,7 +101,7 @@ See <<breaking-changes-6.0, breaking changes>> for the changes to be aware of
 when migrating your application from one version of Kibana to another.
 
 Canvas::
-* Updates Readme.md to reflect plugin changes {pull}30816[#30816]
+* Updates the https://github.com/elastic/kibana/blob/master/x-pack/plugins/canvas/README.md[README.md] to reflect that Canvas plugins must now use the Kibana platform. {pull}30816[#30816]
 
 [float]
 [[enhancement-6.7.0]]
