@@ -69,3 +69,19 @@ export interface DataFramePreviewRequest {
 export interface DataFrameRequest extends DataFramePreviewRequest {
   dest: string;
 }
+
+export const pivotSupportedAggs = [
+  'avg',
+  'cardinality',
+  'max',
+  'min',
+  'sum',
+  'value_count',
+] as PivotAggSupportedAggs[];
+
+// Wizard Step 1 Exposed Config
+export interface PivotState {
+  query: SimpleQuery;
+  groupBy: Label[];
+  aggList: Label[];
+}

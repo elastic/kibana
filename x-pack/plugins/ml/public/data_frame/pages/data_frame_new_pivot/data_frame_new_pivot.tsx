@@ -18,10 +18,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { PivotState } from './common';
 import { DataFrameNewPivotWizard } from './data_frame_new_pivot_wizard';
 
 interface Props {
   indexPattern: StaticIndexPattern;
+  configHandler(s: PivotState): void;
 }
 
 export const DataFrameNewPivot: React.SFC<Props> = props => (

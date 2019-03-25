@@ -6,7 +6,7 @@
 
 import { uniq } from 'lodash';
 
-import React, { ChangeEvent, Fragment, SFC, useState } from 'react';
+import React, { ChangeEvent, Fragment, SFC, useEffect, useState } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -32,16 +32,17 @@ import {
   DropDownOption,
   Label,
   OptionsDataElement,
+  PivotState,
+  pivotSupportedAggs,
   SimpleQuery,
-} from './type_definitions';
-
-const aggs = ['avg', 'cardinality', 'max', 'min', 'sum', 'value_count'];
+} from './common';
 
 interface Props {
   indexPattern: StaticIndexPattern;
+  configHandler(s: PivotState): void;
 }
 
-export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern }) => {
+export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern, configHandler }) => {
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
@@ -100,7 +101,7 @@ export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern })
 
   fields.forEach(field => {
     const o: DropDownOption = { label: field.name, options: [] };
-    aggs.forEach(agg => {
+    pivotSupportedAggs.forEach(agg => {
       if (
         (agg === 'cardinality' && (field.type === 'string' || field.type === 'ip')) ||
         (agg !== 'cardinality' && field.type === 'number')
@@ -125,6 +126,13 @@ export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern })
       },
     },
   };
+
+  useEffect(
+    () => {
+      configHandler({ query: pivotQuery, groupBy: pivotGroupBy, aggList });
+    },
+    [pivotQuery, pivotGroupBy, aggList]
+  );
 
   const displaySearch = search === '*' ? '' : search;
 
