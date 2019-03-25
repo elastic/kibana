@@ -9,15 +9,9 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCodeBlock,
   EuiTitle,
-  EuiOverlayMask,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -33,7 +27,7 @@ const localStorage = new Storage(window.localStorage);
 export class FilterEditor extends Component {
 
   state = {
-    isModalOpen: false,
+    isPopoverOpen: false,
     indexPatterns: [],
   }
 
@@ -67,77 +61,52 @@ export class FilterEditor extends Component {
     this.setState({ indexPatterns });
   }
 
-  _openModal = () => {
-    this.setState({ isModalOpen: true });
+  _open = () => {
+    this.setState({ isPopoverOpen: true });
   }
 
-  _closeModal = () => {
-    this.setState({ isModalOpen: false });
+  _close = () => {
+    this.setState({ isPopoverOpen: false });
   }
 
   _onQueryChange = ({ query }) => {
     this.props.setLayerQuery(this.props.layer.getId(), query);
-    this._closeModal();
+    this._close();
   }
 
-  _renderModal() {
-    if (!this.state.isModalOpen) {
-      return null;
-    }
-
+  _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
     return (
-      <EuiOverlayMask>
-        <EuiModal
-          onClose={this._closeModal}
-          maxWidth={false}
-          data-test-subj="mapFilterEditorModal"
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle >
-              <FormattedMessage
-                id="xpack.maps.layerPanel.filterEditor.modal.headerTitle"
-                defaultMessage="Set layer filter"
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody className="mapFilterEditorModalBody">
-            <QueryBar
-              query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-              onSubmit={this._onQueryChange}
-              appName="maps"
-              showDatePicker={false}
-              indexPatterns={this.state.indexPatterns}
-              store={localStorage}
-              customSubmitButton={
-                <EuiButton
-                  fill
-                  data-test-subj="mapFilterEditorSubmitButton"
-                >
-                  <FormattedMessage
-                    id="xpack.maps.layerPanel.filterEditor.modal.queryBarSubmitButtonLabel"
-                    defaultMessage="Set filter"
-                  />
-                </EuiButton>
-              }
-            />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButtonEmpty
-              onClick={this._closeModal}
-            >
-              <FormattedMessage
-                id="xpack.maps.layerPanel.filterEditor.modal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+      <EuiPopover
+        id="layerQueryPopover"
+        button={this._renderOpenButton()}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this._close}
+        anchorPosition="leftCenter"
+      >
+        <div className="mapFilterEditor">
+          <QueryBar
+            query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            onSubmit={this._onQueryChange}
+            appName="maps"
+            showDatePicker={false}
+            indexPatterns={this.state.indexPatterns}
+            store={localStorage}
+            customSubmitButton={
+              <EuiButton
+                fill
+                data-test-subj="mapFilterEditorSubmitButton"
+              >
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.filterEditor.modal.queryBarSubmitButtonLabel"
+                  defaultMessage="Set filter"
+                />
+              </EuiButton>
+            }
+          />
+        </div>
+      </EuiPopover>
     );
   }
 
@@ -157,7 +126,7 @@ export class FilterEditor extends Component {
     );
   }
 
-  _renderOpenModalButton() {
+  _renderOpenButton() {
     const query = this.props.layer.getQuery();
     const openModalButtonLabel = query && query.query
       ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
@@ -169,7 +138,7 @@ export class FilterEditor extends Component {
 
     return (
       <EuiButton
-        onClick={this._openModal}
+        onClick={this._open}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
       >
         {openModalButtonLabel}
@@ -191,9 +160,7 @@ export class FilterEditor extends Component {
 
         {this._renderQuery()}
 
-        {this._renderOpenModalButton()}
-
-        {this._renderModal()}
+        {this._renderQueryPopover()}
       </Fragment>
     );
   }

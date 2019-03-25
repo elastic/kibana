@@ -1,4 +1,4 @@
-.mapFilterEditorModalBody {
-  width: 85vw;
+.mapFilterEditor {
+  width: calc(95vw - #{$euiSizeXXL * 11});
   overflow-y: visible;
 }
