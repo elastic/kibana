@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { Repository } from '../../../common/types';
-import { useAppDependencies } from '../index';
+import { Repository } from '../../../../common/types';
+import { useAppDependencies } from '../../index';
 
 // import {
 //   EuiPageBody,
@@ -17,7 +17,7 @@ interface Props {
   repository?: Repository;
 }
 
-export const RepositoryForm = ({ repository }: Props) => {
+export const RepositoryForm: React.FunctionComponent<Props> = ({ repository }) => {
   const {
     core: {
       i18n: { FormattedMessage },

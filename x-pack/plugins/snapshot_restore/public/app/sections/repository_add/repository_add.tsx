@@ -10,7 +10,7 @@ import { useAppDependencies } from '../../index';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-export const RepositoryAdd = () => {
+export const RepositoryAdd: React.FunctionComponent = () => {
   const {
     core: { i18n, chrome },
     plugins: { management },
