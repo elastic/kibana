@@ -25,6 +25,7 @@ jest.mock('ui/notify/fatal_error', () => ({
 import * as Rx from 'rxjs';
 import { subscribeWithScope } from './subscribe_with_scope';
 
+// eslint-disable-next-line prefer-const
 let $rootScope: Scope;
 
 class Scope {

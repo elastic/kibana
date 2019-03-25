@@ -54,9 +54,7 @@ describe('assign_tags_to_beats', () => {
 
     expect(result.assignments).toEqual([{ status: 200, result: 'updated' }]);
 
-    let beat;
-
-    beat = await serverLibs.beats.getById(
+    const beat = await serverLibs.beats.getById(
       {
         kind: 'internal',
       },

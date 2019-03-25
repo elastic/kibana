@@ -5,7 +5,7 @@
  */
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function statusPage({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Status page', function statusPageTestSuite() {
     this.tags('ciGroup4');

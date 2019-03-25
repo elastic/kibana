@@ -20,7 +20,7 @@
 import expect from 'expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line:no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const log = getService('log');

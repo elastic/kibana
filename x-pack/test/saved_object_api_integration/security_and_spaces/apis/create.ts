@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { createTestSuiteFactory } from '../../common/suites/create';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');

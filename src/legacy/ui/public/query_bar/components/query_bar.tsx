@@ -571,7 +571,7 @@ export class QueryBarUI extends Component<Props, State> {
               aria-owns="kbnTypeahead__items"
               aria-controls="kbnTypeahead__items"
             >
-              <form role="form" name="queryBarForm">
+              <form name="queryBarForm">
                 <div role="search">
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText

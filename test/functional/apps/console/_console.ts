@@ -31,7 +31,7 @@ GET _search
 
 `.trim();
 
-// eslint-disable-next-line no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');

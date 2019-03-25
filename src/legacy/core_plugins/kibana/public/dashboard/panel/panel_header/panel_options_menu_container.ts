@@ -158,6 +158,7 @@ const mergeProps = (
   };
 
   const toggleExpandedPanel = () => {
+    // eslint-disable-next-line no-unused-expressions
     isExpanded ? onMinimizePanel() : onMaximizePanel();
     closeMyContextMenuPanel();
   };

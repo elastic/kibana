@@ -24,7 +24,7 @@ export const log = {
    * @param  ...args
    */
   write(...args: any[]) {
-    // eslint-disable no-console
+    // eslint-disable-next-line no-console
     console.log(...args);
   },
 };

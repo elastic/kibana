@@ -6,7 +6,7 @@
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// eslint-disable-next-line:no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
   // TODO: add UI functional tests
   const pageObjects = getPageObjects(['uptime']);

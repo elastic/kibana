@@ -5,7 +5,7 @@
  */
 import { TestInvoker } from './lib/types';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function spaceSelectorFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const config = getService('config');
   const esArchiver = getService('esArchiver');

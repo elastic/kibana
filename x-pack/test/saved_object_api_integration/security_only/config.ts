@@ -6,5 +6,5 @@
 
 import { createTestConfig } from '../common/config';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default createTestConfig('security_only', { disabledPlugins: ['spaces'], license: 'trial' });

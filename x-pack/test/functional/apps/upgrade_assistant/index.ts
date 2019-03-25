@@ -5,7 +5,7 @@
  */
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function upgradeCheckup({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Upgrade checkup ', function upgradeAssistantTestSuite() {
     this.tags('ciGroup4');

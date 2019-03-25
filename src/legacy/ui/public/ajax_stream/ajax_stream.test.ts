@@ -19,7 +19,7 @@
 
 import { ajaxStream, XMLHttpRequestLike } from './ajax_stream';
 
-// eslint-disable-next-line:no-empty
+// eslint-disable-next-line no-empty
 function noop() {}
 
 describe('ajaxStream', () => {

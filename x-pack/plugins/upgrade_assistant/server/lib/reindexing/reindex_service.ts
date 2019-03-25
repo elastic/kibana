@@ -582,7 +582,7 @@ export const reindexServiceFactory = (
           });
 
           // Cleanup any changes, ignoring any errors.
-          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(e => lockedReindexOp);
+          lockedReindexOp = await cleanupChanges(lockedReindexOp).catch(err => lockedReindexOp);
         }
 
         return lockedReindexOp;

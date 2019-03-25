@@ -5,7 +5,7 @@
  */
 import { TestInvoker } from './lib/types';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function statusPageFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);

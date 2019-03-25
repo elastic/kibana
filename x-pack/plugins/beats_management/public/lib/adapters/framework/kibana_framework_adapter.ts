@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
 import { IScope } from 'angular';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import * as React from 'react';
@@ -220,7 +221,6 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 }
 
-// eslint-disable-next-line max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: KibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<BufferedKibanaServiceCall<KibanaAdapterServiceRefs>> = [];

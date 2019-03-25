@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { selectTestSuiteFactory } from '../../common/suites/select';
 
-// eslint-disable no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function selectSpaceTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');

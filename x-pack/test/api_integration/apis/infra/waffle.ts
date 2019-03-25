@@ -179,5 +179,5 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// eslint-disable-next-line no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default waffleTests;

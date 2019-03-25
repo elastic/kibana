@@ -345,7 +345,6 @@ export interface CallClusterWithRequest {
   (request: Request, endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;
   (request: Request, endpoint: 'tasks.get', params: TasksGetParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['get']>;
   (request: Request, endpoint: 'tasks.list', params: TasksListParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['list']>;
-  /* eslint-enable */
 
   // other APIs accessed via transport.request
   (
@@ -368,6 +367,7 @@ export interface CallClusterWithRequest {
     clientParams: any,
     options?: CallClusterOptions
   ): Promise<T>;
+  /* eslint-enable */
 }
 
 export interface CallCluster {
@@ -507,7 +507,6 @@ export interface CallCluster {
   (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['cancel']>;
   (endpoint: 'tasks.get', params: TasksGetParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['get']>;
   (endpoint: 'tasks.list', params: TasksListParams, options?: CallClusterOptions): ReturnType<ESClient['tasks']['list']>;
-  /* eslint-enable */
 
   // other APIs accessed via transport.request
   (endpoint: 'transport.request', clientParams: AssistantAPIClientParams, options?: {}): Promise<
@@ -519,6 +518,7 @@ export interface CallCluster {
 
   // Catch-all definition
   <T = any>(endpoint: string, clientParams: any, options?: CallClusterOptions): Promise<T>;
+  /* eslint-enable */
 }
 
 export interface ElasticsearchPlugin {
