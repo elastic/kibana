@@ -159,6 +159,7 @@ from the job datafeed config in custom URLs {pull}26957[#26957]
 * Converts Setting page to React/EUI {pull}27144[#27144]
 * Ensures loading indicator is present on initial jobs load {pull}27151[#27151]
 * Prevents a new calendar save if a calendar with that id already exists {pull}27104[#27104]
+* Edits data recognizer modules to use KQL in saved objects {pull}32766[#32766]
 Observability::
 * Converts monitor sparklines to histogram {pull}28502[#28502]
 * Adds crosshair sync for monitor page charts {pull}28631[#28631]
@@ -283,6 +284,7 @@ Geo::
 * Fixes EMS hotlink {pull}26868[#26868]
 * Fixes feature/align map config settings {pull}19450[#19450]
 * Removes `geotile_grid` aggregation from non-geospatial visualizations {pull}31354[#31354]
+* Coerces string doc-values to numbers if used in styling {pull}33657[#33657]
 Infrastructure::
 * Fixes server-side retrieval of the {kib} version {pull}31440[#31440]
 * Fixes react router import {pull}33659[#33659]
@@ -355,6 +357,7 @@ Machine Learning::
 * Displays an ordinal y axis for low cardinality rare charts {pull}24852[#24852]
 * Fixes typo in job validation message {pull}25130[#25130]
 * Removes deprecated `angularjs` based jobs list and related code {pull}25216[#25216]
+* Skips invalid modules when data recognizer lists matches {pull}33703[#33703]
 Management::
 * Removes grunt sterilize - its been replaced by `kbn clean` {pull}27825[#27825]
 * Makes Index management table more responsive {pull}28882[#28882]
