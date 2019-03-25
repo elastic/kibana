@@ -54,9 +54,6 @@ export default function ({ getService }) {
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  migrationVersion: {
-                    visualization: '7.0.0'
-                  },
                   type: 'visualization',
                   updated_at: '2017-09-21T18:51:23.794Z',
                   version: resp.body.saved_objects[0].version,
@@ -70,7 +67,7 @@ export default function ({ getService }) {
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                   },
                   migrationVersion: {
-                    visualization: '7.0.0',
+                    visualization: '7.1.0',
                   },
                   references: [{
                     name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
