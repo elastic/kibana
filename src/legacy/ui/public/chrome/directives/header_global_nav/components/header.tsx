@@ -54,6 +54,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
@@ -88,11 +89,25 @@ function extendRecentlyAccessedHistoryItem(
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
 
+  let titleAndAriaLabel = recentlyAccessed.label;
+  if (navLink) {
+    const objectTypeForAriaAppendix = navLink ? navLink.title : '';
+    const translateKey = navLink.id.replace('kibana:', '');
+    const translateId = `common.ui.recentLinks.${translateKey}.ScreenReaderLabel`;
+    titleAndAriaLabel = i18n.translate(translateId, {
+      defaultMessage: '{label}, type: {objectType}',
+      values: {
+        label: recentlyAccessed.label,
+        objectType: objectTypeForAriaAppendix,
+      },
+    });
+  }
+
   return {
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
-    objectTypeAriaAppendix: navLink ? `, ${navLink.id.replace('kibana:', '')}` : '',
+    titleAndAriaLabel,
   };
 }
 
@@ -249,8 +264,8 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            title: `${item.label}${item.objectTypeAriaAppendix}`,
-            'aria-label': `${item.label}${item.objectTypeAriaAppendix}`,
+            title: item.titleAndAriaLabel,
+            'aria-label': item.titleAndAriaLabel,
             href: item.href,
             iconType: item.euiIconType,
           })),
