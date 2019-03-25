@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { parseRange } from '../range';
 
 describe('Range parsing utility', function () {

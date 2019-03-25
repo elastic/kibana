@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { delay } from 'bluebird';
