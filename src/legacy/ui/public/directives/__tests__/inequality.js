@@ -116,7 +116,7 @@ describe('greater_than model validator directive', function () {
         [undefined, null, ''].forEach(val => {
           $rootScope.value = val;
           $rootScope.$digest();
-          expect(element.hasClass('ng-invalid')).to.be.ok();
+          expect(element.hasClass('ng-valid')).to.be.ok();
         });
       });
     });
