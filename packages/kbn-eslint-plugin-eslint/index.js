@@ -17,6 +17,10 @@
  * under the License.
  */
 
-export { SystemLoader } from './system_loader';
-export { System } from './system';
-export { KibanaSystem } from './system_types';
+module.exports = {
+  rules: {
+    'require-license-header': require('./rules/require_license_header'),
+    'disallow-license-headers': require('./rules/disallow_license_headers'),
+    'no-default-export': require('./rules/no_default_export'),
+  },
+};

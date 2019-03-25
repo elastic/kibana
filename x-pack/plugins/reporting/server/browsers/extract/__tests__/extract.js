@@ -7,18 +7,19 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import expect from 'expect.js';
+import { resolve } from 'path';
 
 import { extract } from '../extract';
 import { ExtractError } from '../extract_error';
 import { promisify } from 'util';
 
-const FIXTURES_FOLDER = `${__dirname}/__fixtures__`;
-const SRC_FILE_UNCOMPRESSED = `${FIXTURES_FOLDER}/extract_test_file.js`;
+const FIXTURES_FOLDER = resolve(__dirname, '__fixtures__');
+const SRC_FILE_UNCOMPRESSED = resolve(FIXTURES_FOLDER, 'file.md');
 const SRC_FILE_COMPRESSED_ZIP = `${SRC_FILE_UNCOMPRESSED}.zip`;
 const SRC_FILE_COMPRESSED_BZ2 = `${SRC_FILE_UNCOMPRESSED}.bz2`;
 const SRC_FILE_COMPRESSED_TAR_BZ2 = `${SRC_FILE_UNCOMPRESSED}.tar.bz2`;
-const EXTRACT_TARGET_FOLDER = `${FIXTURES_FOLDER}/extract_target`;
-const EXTRACT_TARGET_FILE = `${EXTRACT_TARGET_FOLDER}/extract_test_file.js`;
+const EXTRACT_TARGET_FOLDER = resolve(FIXTURES_FOLDER, 'extract_target');
+const EXTRACT_TARGET_FILE = resolve(EXTRACT_TARGET_FOLDER, 'file.md');
 
 const fsp = {
   mkdir: promisify(fs.mkdir),
