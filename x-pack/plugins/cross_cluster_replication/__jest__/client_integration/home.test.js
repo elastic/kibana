@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockHttpRequests, nextTick } from './test_helpers';
+import { initTestBed, mockAllHttpRequests, nextTick } from './test_helpers';
 import { CrossClusterReplicationHome } from '../../public/app/sections/home/home';
 import { BASE_PATH } from '../../common/constants';
 import routing from '../../public/app/services/routing';
@@ -38,7 +38,7 @@ describe('<CrossClusterReplicationHome />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    mockHttpRequests(server);
+    mockAllHttpRequests(server);
   });
 
   describe('on component mount', () => {

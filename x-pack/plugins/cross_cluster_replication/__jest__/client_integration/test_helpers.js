@@ -137,7 +137,7 @@ export const initTestBed = (component, props = {}, options) => {
   };
 };
 
-export const mockHttpRequests = server => {
+export const mockAllHttpRequests = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },

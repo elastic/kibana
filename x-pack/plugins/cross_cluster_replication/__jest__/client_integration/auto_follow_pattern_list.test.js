@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockHttpRequests, nextTick, getRandomString, findTestSubject } from './test_helpers';
+import { initTestBed, mockAllHttpRequests, nextTick, getRandomString, findTestSubject } from './test_helpers';
 import { AutoFollowPatternList } from '../../public/app/sections/home/auto_follow_pattern_list';
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -34,7 +34,7 @@ describe('<AutoFollowPatternList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    (updateHttpMockResponse = mockHttpRequests(server));
+    (updateHttpMockResponse = mockAllHttpRequests(server));
   });
 
   describe('on component mount', () => {

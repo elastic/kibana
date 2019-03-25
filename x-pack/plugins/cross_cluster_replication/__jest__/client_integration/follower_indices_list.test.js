@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockHttpRequests, nextTick, getRandomString } from './test_helpers';
+import { initTestBed, mockAllHttpRequests, nextTick, getRandomString } from './test_helpers';
 import { FollowerIndicesList } from '../../public/app/sections/home/follower_indices_list';
 import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
@@ -33,7 +33,7 @@ describe('<FollowerIndicesList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    (updateHttpMockResponse = mockHttpRequests(server));
+    (updateHttpMockResponse = mockAllHttpRequests(server));
   });
 
   describe('on component mount', () => {
