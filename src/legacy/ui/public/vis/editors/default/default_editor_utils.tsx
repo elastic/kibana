@@ -26,7 +26,15 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   options?: EuiComboBoxOptionProps[];
 };
 
-function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type') {
+/**
+ * Groups and sorts alphabetically aggregation objects and returns an array of options that are compatible with EuiComboBox options.
+ *
+ * @param aggs An array of aggregations that will be grouped.
+ * @param groupBy A field name which aggregations is grouped by.
+ *
+ * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options.
+ */
+function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type'): ComboBoxGroupedOption[] {
   if (!Array.isArray(aggs)) {
     return [];
   }
