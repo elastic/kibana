@@ -23,9 +23,9 @@ If you’d like to use {kib} with Simplified Chinese, set `i18n.locale` to
 image::images/highlights-6.7.0-localization.png[Kibana in Simplified Chinese]
 
 [float]
-=== Maps for geospatial analysis (beta)
+=== Maps for geospatial analysis
 
-{kib} has a new application built for geospatial analysis: *Maps*.  “Where” is 
+beta[] {kib} has a new application built for geospatial analysis: *Maps*.  “Where” is 
 a critical question for most data points, and *Maps* enables you to ask 
 (and answer) meaningful questions for your location-based data. *Maps*
 doubles down on geo and introduces all new features, such as support for 
@@ -36,12 +36,6 @@ To get started, check out this <<maps-getting-started, Maps tutorial>>.
 [role="screenshot"]
 image::images/highlights-6.7.0-maps.png[Kibana Maps user interface]
 
-The *Maps* functionality is in beta and is subject to change. The design 
-and code is less mature than official GA features and is being provided as-is 
-with no warranties. Please try this functionality in your test and development 
-environments and provide feedback in the 
-https://discuss.elastic.co/c/kibana[Elastic community forums].
-
 [float]
 === Follower indices in Cross-Cluster Replication
 
@@ -50,7 +44,7 @@ and {kib} supports this feature with *Add Follower Index*.  With this new UI,
 you can replicate data from existing indices, or set up local followers on 
 a case-by-case basis. CCR is a https://www.elastic.co/subscriptions[Platinum feature]
 and is ready for production use in 6.7. CCR is available through a 30-day trial license,
-which you can activate in {kib} *License Management*.
+which you can <<managing-licenses, activate in {kib} License Management>>.
 
 [role="screenshot"]
 image::images/highlights-6.7.0-add-follower.png[Add Follower Index UI]
@@ -63,7 +57,7 @@ on the support for {ref}/frozen-indices.html[frozen indices] in {es} 6.7, {kib}
 adds the ability to freeze and 
 unfreeze indices in the cold phase. Freezing an index keeps it searchable for a longer 
 period and reduces the hardware requirements. {kib} also now allows you to 
-<<creating-index-lifecycle-policies, set a priority for recovering an index>>
+{ref}/recovery-prioritization.html[set a priority for recovering an index]
 after node restart. 
 
 In 6.7, ILM officially moves out of beta and into production use.
@@ -75,9 +69,9 @@ image::images/highlights-6.7.0-ilm.png[Cold phase in Index Lifecycle Management]
 === Frozen indices in Index Management
 
 {kib} has several enhancements in *Index Management* related to frozen indices  
-You can now freeze and unfreeze indices from the *Manage* menu. {kib} also 
+You can now freeze and unfreeze indices from the *Manage* menu. {kib} also now
 marks frozen indices, follower indices, and rollup indices with badges, 
-so you can distinguish them at-a-glance. 
+so you can easily distinguish them at-a-glance. 
 
 [role="screenshot"]
 image::images/highlights-6.7.0-index-management.png[Badges in Index Management]
@@ -98,7 +92,7 @@ easily access them from the asset picker when you add image elements.
 image::images/highlights-6.7.0-canvas.png[Canvas in 6.7]
 
 Also in 6.7, you can download the workpad directly from the *Edit* view. 
-Click the link in the workpad header to download a JSON file.  
+Simply click the link in the workpad header to download a JSON file.  
 
 
 [float]
@@ -146,11 +140,11 @@ image::images/highlights-6.7.0-uptime.png[Uptime]
 === Reindex tool reintroduced
 
 The reindex tool available in {kib} 5.6 has been reintroduced in 6.7 to assist 
-with your upgrade to {es} 7.0. The reindex feature is enhanced in several important ways. 
-When you initiate a reindex through the Upgrade Assistant, the process is now 
+with your upgrade to {es} 7.0. The reindex feature is enhanced in two important ways. 
+When you initiate a <<upgrade-assistant, reindex through the Upgrade Assistant>>, the process is now 
 managed in the background. You can navigate away from the page and get an 
 updated status for the reindex when you return. When reindexing, {kib} also now 
-fixes commonly used settings that were removed in 7.0. Finally, if 
+fixes commonly used settings that were removed in 7.0. If 
 reindexing fails, the tool reverts any changes back to the initial state.
 
 
