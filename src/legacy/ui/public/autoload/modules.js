@@ -24,7 +24,6 @@ import '../kbn_top_nav';
 import '../bound_to_config_obj';
 import '../config';
 import '../courier';
-import '../debounce';
 import '../doc_title';
 import '../es';
 import '../events';
