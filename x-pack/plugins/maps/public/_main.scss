@@ -49,3 +49,207 @@
 .euiColorPicker__emptySwatch {
   position: relative;
 }
+
+// ***********************
+// pelias-geocoder.css
+// From github.com/joxit/pelias-mapbox-gl-js/pelias-geocoder.css
+// TODO Since I can't figure out how to import the CSS file, I've just copied it here.
+
+/* ---------------------------- */
+/* ---------- global ---------- */
+/* ---------------------------- */
+
+.pelias-ctrl, .pelias-ctrl * {
+  box-sizing: border-box;
+}
+
+.pelias-ctrl {
+  font: 14px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  width: calc(100% / 3);
+  min-width: 328px;
+  max-width: 420px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --------------------------- */
+/* ---------- input ---------- */
+/* --------------------------- */
+
+.pelias-ctrl .pelias-ctrl-input-actions-wrapper {
+  width: 100%;
+  float: left;
+  background-color: #fff;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  overflow: hidden;
+  pointer-events: auto;
+  height: 42px;
+}
+
+.pelias-ctrl .pelias-ctrl-input-wrapper {
+  float: left;
+  position: relative;
+  width: calc(100% - 42px);
+  height: 100%;
+  padding: 10px 42px 10px 10px;
+}
+
+.pelias-ctrl.with-routing .pelias-ctrl-input-wrapper {
+  width: calc(100% - 84px);
+}
+
+.pelias-ctrl .pelias-ctrl-actions-wrapper {
+  padding: 5px;
+  float: left;
+  height: 100%;
+}
+
+.pelias-ctrl input {
+  font-size: 14px;
+  float: left;
+  border: 0;
+  height: 100%;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
+}
+
+.pelias-ctrl input:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
+.pelias-ctrl .pelias-ctrl-icon-cross {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 42px;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M38 12.83L35.17 10 24 21.17 12.83 10 10 12.83 21.17 24 10 35.17 12.83 38 24 26.83 35.17 38 38 35.17 26.83 24z'/%3E%3C/svg%3E") center no-repeat;
+  background-size: 40%;
+}
+
+/* ------------------------------------ */
+/* ---------- input - action ---------- */
+/* ------------------------------------ */
+
+.pelias-ctrl .pelias-ctrl-action-icon {
+  float: left;
+  width: 42px;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  background-size: 60%;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.pelias-ctrl .pelias-ctrl-action-icon {
+  border-left: 1px solid #eeeeef;
+}
+
+.pelias-ctrl .pelias-ctrl-action-icon-search {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M31 28h-1.59l-.55-.55C30.82 25.18 32 22.23 32 19c0-7.18-5.82-13-13-13S6 11.82 6 19s5.82 13 13 13c3.23 0 6.18-1.18 8.45-3.13l.55.55V31l10 9.98L40.98 38 31 28zm-12 0c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z'/%3E%3C/svg%3E");
+}
+
+.pelias-ctrl .pelias-ctrl-action-icon-search.disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cpath d='M31 28h-1.59l-.55-.55C30.82 25.18 32 22.23 32 19c0-7.18-5.82-13-13-13S6 11.82 6 19s5.82 13 13 13c3.23 0 6.18-1.18 8.45-3.13l.55.55V31l10 9.98L40.98 38 31 28zm-12 0c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9z' fill='%23cccccc' /%3E%3C/svg%3E");
+}
+
+/* ----------------------------- */
+/* ---------- results ---------- */
+/* ----------------------------- */
+
+.pelias-ctrl .pelias-ctrl-results {
+  width: 100%;
+  background-color: #fff;
+  float: left;
+  border-radius: 4px;
+  pointer-events: auto;
+}
+
+.pelias-ctrl .pelias-ctrl-result {
+  padding: 10px;
+  float: left;
+  width: 100%;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.pelias-ctrl .pelias-ctrl-results-list {
+  float: left;
+  width: 100%;
+}
+
+.pelias-ctrl .pelias-ctrl-result:hover {
+  background-color: #eeeeef;
+}
+
+.pelias-ctrl .pelias-ctrl-result:focus {
+  background-color: #eeeeef;
+  outline: none;
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result + .pelias-ctrl-wrapper-label {
+  display: block;
+  margin-left: 30px;
+}
+
+.pelias-ctrl .pelias-ctrl-result .pelias-ctrl-separator, .pelias-ctrl .pelias-ctrl-result .pelias-ctrl-location {
+  opacity: .4;
+  font-size: 14px;
+}
+
+.pelias-ctrl .pelias-ctrl-result .pelias-ctrl-bold {
+  font-weight: 500;
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  display: block;
+  float: left;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result-city {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3Cpath d='M616 192H480V24c0-13.26-10.74-24-24-24H312c-13.26 0-24 10.74-24 24v72h-64V16c0-8.84-7.16-16-16-16h-16c-8.84 0-16 7.16-16 16v80h-64V16c0-8.84-7.16-16-16-16H80c-8.84 0-16 7.16-16 16v80H24c-13.26 0-24 10.74-24 24v360c0 17.67 14.33 32 32 32h576c17.67 0 32-14.33 32-32V216c0-13.26-10.75-24-24-24zM128 404c0 6.63-5.37 12-12 12H76c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12H76c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12H76c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm128 192c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm160 96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12V76c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm160 288c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40zm0-96c0 6.63-5.37 12-12 12h-40c-6.63 0-12-5.37-12-12v-40c0-6.63 5.37-12 12-12h40c6.63 0 12 5.37 12 12v40z'/%3E%3C/svg%3E");
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result-flag {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M336.174 80c-49.132 0-93.305-32-161.913-32-31.301 0-58.303 6.482-80.721 15.168a48.04 48.04 0 0 0 2.142-20.727C93.067 19.575 74.167 1.594 51.201.104 23.242-1.71 0 20.431 0 48c0 17.764 9.657 33.262 24 41.562V496c0 8.837 7.163 16 16 16h16c8.837 0 16-7.163 16-16v-83.443C109.869 395.28 143.259 384 199.826 384c49.132 0 93.305 32 161.913 32 58.479 0 101.972-22.617 128.548-39.981C503.846 367.161 512 352.051 512 335.855V95.937c0-34.459-35.264-57.768-66.904-44.117C409.193 67.309 371.641 80 336.174 80zM464 336c-21.783 15.412-60.824 32-102.261 32-59.945 0-102.002-32-161.913-32-43.361 0-96.379 9.403-127.826 24V128c21.784-15.412 60.824-32 102.261-32 59.945 0 102.002 32 161.913 32 43.271 0 96.32-17.366 127.826-32v240z'/%3E%3C/svg%3E");
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result-marker {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath d='M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0zM192 272c44.183 0 80-35.817 80-80s-35.817-80-80-80-80 35.817-80 80 35.817 80 80 80z'/%3E%3C/svg%3E");
+}
+
+.pelias-ctrl .pelias-ctrl-icon-result-road {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M573.19 402.67l-139.79-320C428.43 71.29 417.6 64 405.68 64h-97.59l2.45 23.16c.5 4.72-3.21 8.84-7.96 8.84h-29.16c-4.75 0-8.46-4.12-7.96-8.84L267.91 64h-97.59c-11.93 0-22.76 7.29-27.73 18.67L2.8 402.67C-6.45 423.86 8.31 448 30.54 448h196.84l10.31-97.68c.86-8.14 7.72-14.32 15.91-14.32h68.8c8.19 0 15.05 6.18 15.91 14.32L348.62 448h196.84c22.23 0 36.99-24.14 27.73-45.33zM260.4 135.16a8 8 0 0 1 7.96-7.16h39.29c4.09 0 7.53 3.09 7.96 7.16l4.6 43.58c.75 7.09-4.81 13.26-11.93 13.26h-40.54c-7.13 0-12.68-6.17-11.93-13.26l4.59-43.58zM315.64 304h-55.29c-9.5 0-16.91-8.23-15.91-17.68l5.07-48c.86-8.14 7.72-14.32 15.91-14.32h45.15c8.19 0 15.05 6.18 15.91 14.32l5.07 48c1 9.45-6.41 17.68-15.91 17.68z'/%3E%3C/svg%3E");
+}
+
+/* --------------------------- */
+/* ---------- utils ---------- */
+/* --------------------------- */
+
+.pelias-ctrl .pelias-ctrl-shadow {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 -1px 0 rgba(0, 0, 0, 0.02);
+}
+
+.pelias-ctrl .pelias-ctrl-disabled {
+  cursor: initial;
+}
+
+.pelias-ctrl .pelias-ctrl-hide {
+  visibility: hidden;
+}
+
+// End pelias-geocoder.css
+// ***********************

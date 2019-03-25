@@ -232,6 +232,7 @@
     "oppsy": "^2.0.0",
     "papaparse": "^4.6.0",
     "pdfmake": "0.1.33",
+    "pelias-mapbox-gl-js": "joxit/pelias-mapbox-gl-js",
     "pluralize": "3.1.0",
     "pngjs": "3.3.1",
     "polished": "^1.9.2",

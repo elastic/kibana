@@ -17958,6 +17958,10 @@ pegjs@0.9.0, pegjs@~0.9.0:
   resolved "https://registry.yarnpkg.com/pegjs/-/pegjs-0.9.0.tgz#f6aefa2e3ce56169208e52179dfe41f89141a369"
   integrity sha1-9q76LjzlYWkgjlIXnf5B+JFBo2k=
 
+pelias-mapbox-gl-js@joxit/pelias-mapbox-gl-js:
+  version "1.0.0"
+  resolved "https://codeload.github.com/joxit/pelias-mapbox-gl-js/tar.gz/c0a6bb537a4fe06d48c51db57578d1f460c0ded7"
+
 pend@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/pend/-/pend-1.2.0.tgz#7a57eb550a6783f9115331fcf4663d5c8e007a50"

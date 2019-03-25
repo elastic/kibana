@@ -6,6 +6,8 @@
 
 import _ from 'lodash';
 import mapboxgl from 'mapbox-gl';
+import PeliasGeocoder from 'pelias-mapbox-gl-js';
+import PinIcon from '@elastic/eui/lib/components/icon/assets/pin.svg';
 
 export async function createMbMapInstance(node, initialView) {
   return new Promise((resolve) => {
@@ -30,6 +32,21 @@ export async function createMbMapInstance(node, initialView) {
     mbMap.touchZoomRotate.disableRotation();
     mbMap.addControl(
       new mapboxgl.NavigationControl({ showCompass: false }), 'top-left'
+    );
+    // SVG icon needs to be converted to an image to display on the map.
+    const iconImage = new Image(16, 16);
+    iconImage.onload = () => mbMap.addImage('eui-pin', iconImage);
+    iconImage.src = PinIcon;
+    mbMap.addControl(
+      new PeliasGeocoder({
+        flyTo: 'hybrid',
+        wof: true,
+        url: 'http://35.197.1.63:3100/v1',
+        useFocusPoint: true,
+        marker: {
+          icon: 'eui-pin'
+        }
+      }), 'top-left'
     );
     mbMap.on('load', () => {
       resolve(mbMap);
