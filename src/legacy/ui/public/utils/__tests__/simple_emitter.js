@@ -18,7 +18,7 @@
  */
 
 import { SimpleEmitter } from '../simple_emitter';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 describe('SimpleEmitter class', function () {

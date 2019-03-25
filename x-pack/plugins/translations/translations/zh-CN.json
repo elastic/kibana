@@ -3435,7 +3435,6 @@
     "xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle": "跨度详情",
     "xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel": "导航定时",
     "xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel": "堆栈追溯",
-    "xpack.apm.transactionDetails.spanFlyout.tagsTabLabel": "标记",
     "xpack.apm.transactionDetails.spanFlyout.typeLabel": "类型",
     "xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel": "在 Discover 中查看跨度",
     "xpack.apm.transactionDetails.timestampLabel": "时间戳",

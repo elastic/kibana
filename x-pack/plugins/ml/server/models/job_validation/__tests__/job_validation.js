@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { validateJob } from '../job_validation';
 
 // mock callWithRequest
