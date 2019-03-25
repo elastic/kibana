@@ -34,11 +34,11 @@ const selectItems = createSelector(
   logEntriesSelectors.selectIsReloadingEntries,
   logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
+  (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
     isReloading && !isAutoReloading
       ? []
       : logEntries.map(logEntry =>
-          createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)
+          createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
         )
 );
 

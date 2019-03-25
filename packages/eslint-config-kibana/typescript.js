@@ -119,6 +119,7 @@ module.exports = {
           'object-curly-spacing': 'error',
           'object-shorthand': 'error',
           // 'one-var': 'error',
+          'one-var': ['error', { 'initialized': 'always', 'uninitialized': 'never' }],
           // 'prefer-arrow/prefer-arrow-functions': 'error',
           'prefer-const': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
@@ -131,7 +132,9 @@ module.exports = {
             'named': 'never',
             'asyncArrow': 'always'
           }],
-          // 'spaced-comment': 'error',
+          'spaced-comment': ["error", "always", {
+            "exceptions": ["/"]
+          }],
           'use-isnan': 'error',
 
           // Old tslint yml override or defined rules
