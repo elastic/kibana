@@ -8,11 +8,11 @@ import React, { Fragment, useEffect, useState } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { EuiEmptyPrompt, EuiInMemoryTable, EuiProgress } from '@elastic/eui';
+import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { SimpleQuery } from './type_definitions';
+import { DataFramePreviewRequest, SimpleQuery } from './type_definitions';
 
 interface Props {
   aggs: any[];
@@ -39,7 +39,7 @@ export const DataFrameNewPivotPreview: React.SFC<Props> = ({
 
       setLoading(true);
 
-      const request: any = {
+      const request: DataFramePreviewRequest = {
         source: indexPattern.title,
         pivot: {
           group_by: {},

@@ -80,3 +80,33 @@ type MlListGroupItemProps = CommonProps & {
 };
 
 export type MlListGroupItem = FunctionComponent<MlListGroupItemProps>;
+
+// DataFramePreviewRequest
+type PivotGroupBySupportedAggs = 'terms';
+type PivotGroupBy = {
+  [key in PivotGroupBySupportedAggs]: {
+    field: string;
+  }
+};
+type PivotGroupByDict = Dictionary<PivotGroupBy>;
+
+type PivotAggSupportedAggs = 'avg' | 'cardinality' | 'max' | 'min' | 'sum' | 'value_count';
+type PivotAgg = {
+  [key in PivotAggSupportedAggs]: {
+    field: string;
+  }
+};
+type PivotAggDict = Dictionary<PivotAgg>;
+
+export interface DataFramePreviewRequest {
+  pivot: {
+    group_by: PivotGroupByDict;
+    aggregations: PivotAggDict;
+  };
+  query?: any;
+  source: string;
+}
+
+export interface DataFrameRequest extends DataFramePreviewRequest {
+  dest: string;
+}
