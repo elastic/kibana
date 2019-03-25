@@ -112,6 +112,11 @@ export function registerJobsRoute(server) {
         const { waitForCompletion } = request.query;
         const callWithRequest = callWithRequestFactory(server, request);
 
+        console.log('--------------------------------');
+        console.log('About to stopping rollup jobs...');
+        console.log('JobIDs', jobIds);
+        console.log('Wait for completion:', waitForCompletion === 'true');
+
         const stopRollupJob = id => callWithRequest('rollup.stopJob', { id, waitForCompletion: waitForCompletion === 'true' });
 
         return await Promise
