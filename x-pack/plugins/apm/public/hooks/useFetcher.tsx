@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { FetchStatusContext } from '../components/app/Main/FetchStatus';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -19,51 +20,56 @@ export function useFetcher<Opts, Response>(
   fn: (options: Opts) => Promise<Response>,
   options: Opts
 ) {
+  const { dispatchStatus } = useContext(FetchStatusContext);
   const [result, setResult] = useState<{
     data?: Response;
     status?: FETCH_STATUS;
     error?: Error;
   }>({});
 
-  useEffect(
-    () => {
-      let didCancel = false;
+  const useEffectKey = [...Object.keys(options), ...Object.values(options)];
 
-      setResult({
-        data: result.data, // preserve data from previous state while loading next state
-        status: FETCH_STATUS.LOADING,
-        error: undefined
+  useEffect(() => {
+    let didCancel = false;
+
+    dispatchStatus({ name: fn.name, isLoading: true });
+
+    setResult({
+      data: result.data, // preserve data from previous state while loading next state
+      status: FETCH_STATUS.LOADING,
+      error: undefined
+    });
+
+    fn(options)
+      .then(data => {
+        if (!didCancel) {
+          dispatchStatus({ name: fn.name, isLoading: false });
+          setResult({
+            data,
+            status: FETCH_STATUS.SUCCESS,
+            error: undefined
+          });
+        }
+      })
+      .catch(e => {
+        if (e instanceof MissingArgumentsError) {
+          return;
+        }
+        if (!didCancel) {
+          dispatchStatus({ name: fn.name, isLoading: false });
+          setResult({
+            data: undefined,
+            status: FETCH_STATUS.FAILURE,
+            error: e
+          });
+        }
       });
 
-      fn(options)
-        .then(data => {
-          if (!didCancel) {
-            setResult({
-              data,
-              status: FETCH_STATUS.SUCCESS,
-              error: undefined
-            });
-          }
-        })
-        .catch(e => {
-          if (e instanceof MissingArgumentsError) {
-            return;
-          }
-          if (!didCancel) {
-            setResult({
-              data: undefined,
-              status: FETCH_STATUS.FAILURE,
-              error: e
-            });
-          }
-        });
+    return () => {
+      dispatchStatus({ name: fn.name, isLoading: false });
+      didCancel = true;
+    };
+  }, useEffectKey);
 
-      return () => {
-        didCancel = true;
-      };
-    },
-    [...Object.keys(options), ...Object.values(options)]
-  );
-
-  return result;
+  return result || {};
 }

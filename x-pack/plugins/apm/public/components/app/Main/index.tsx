@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { px, topNavHeight, unit, units } from '../../../style/variables';
 // @ts-ignore
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
+import { FetchStatus } from './FetchStatus';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
 import { ScrollToTopOnPathChange } from './ScrollToTopOnPathChange';
@@ -23,17 +24,19 @@ const MainContainer = styled.div`
 
 export function Main() {
   return (
-    <MainContainer>
-      <UpdateBreadcrumbs />
-      <Route component={ConnectRouterToRedux} />
-      <Route component={ScrollToTopOnPathChange} />
-      <LicenseCheck>
-        <Switch>
-          {routes.map((route, i) => (
-            <Route key={i} {...route} />
-          ))}
-        </Switch>
-      </LicenseCheck>
-    </MainContainer>
+    <FetchStatus>
+      <MainContainer>
+        <UpdateBreadcrumbs />
+        <Route component={ConnectRouterToRedux} />
+        <Route component={ScrollToTopOnPathChange} />
+        <LicenseCheck>
+          <Switch>
+            {routes.map((route, i) => (
+              <Route key={i} {...route} />
+            ))}
+          </Switch>
+        </LicenseCheck>
+      </MainContainer>
+    </FetchStatus>
   );
 }
