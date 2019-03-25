@@ -87,7 +87,7 @@ export class FilterEditor extends Component {
         closePopover={this._close}
         anchorPosition="leftCenter"
       >
-        <div className="mapFilterEditor">
+        <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <QueryBar
             query={layerQuery ? layerQuery : { language: settings.get('search:queryLanguage'), query: '' }}
             onSubmit={this._onQueryChange}

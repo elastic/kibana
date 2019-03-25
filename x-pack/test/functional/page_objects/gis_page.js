@@ -233,8 +233,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async setLayerQuery(layerName, query) {
       await this.openLayerPanel(layerName);
       await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
-      const filterEditorModal = await testSubjects.find('mapFilterEditorModal');
-      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorModal);
+      const filterEditorContainer = await testSubjects.find('mapFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
       await queryBarInFilterEditor.click();
       const input = await find.activeElement();
       await input.clearValue();
