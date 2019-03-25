@@ -51,11 +51,12 @@ module.exports = {
   rules: {
     'no-restricted-imports': [2, restrictedModules],
     'no-restricted-modules': [2, restrictedModules],
-    'import/no-restricted-paths': [
-      2,
+    '@kbn/eslint/no-restricted-paths': [
+      'error',
       {
         zones: [
           {
+            // when tslint is removed we will check *.ts files as well
             target: './src/legacy/.*js$',
             from: [
               corePublicPattern,
@@ -89,11 +90,12 @@ module.exports = {
             target: './src/plugins/.*/server/.*js$',
             from: [corePublicPattern, coreServerPattern, pluginsPublicPattern],
           },
-          // the rule doesn't support 'from' as an array, so we flatten it
-        ].reduce(
-          (acc, zone) => acc.concat(zone.from.map(from => ({ target: zone.target, from }))),
-          []
-        ),
+          {
+            target: './src/plugins/.*/(public|server)/.*js$',
+            from: [pluginsPublicPattern, pluginsServerPattern],
+            allowSameFolder: true,
+          },
+        ],
       },
     ],
   },
