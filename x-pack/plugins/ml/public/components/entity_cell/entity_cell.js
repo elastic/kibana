@@ -15,10 +15,11 @@ import {
   EuiText,
   EuiToolTip
 } from '@elastic/eui';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 
-function getAddFilter({ entityName, entityValue, filter, intl }) {
+function getAddFilter({ entityName, entityValue, filter }) {
   return (
     <EuiToolTip
       content={<FormattedMessage
@@ -31,8 +32,7 @@ function getAddFilter({ entityName, entityValue, filter, intl }) {
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '+')}
         iconType="plusInCircle"
-        aria-label={intl.formatMessage({
-          id: 'xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel',
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.addFilterAriaLabel', {
           defaultMessage: 'Add filter'
         })}
       />
@@ -40,7 +40,7 @@ function getAddFilter({ entityName, entityValue, filter, intl }) {
   );
 }
 
-function getRemoveFilter({ entityName, entityValue, filter, intl }) {
+function getRemoveFilter({ entityName, entityValue, filter }) {
   return (
     <EuiToolTip
       content={<FormattedMessage
@@ -53,8 +53,7 @@ function getRemoveFilter({ entityName, entityValue, filter, intl }) {
         className="filter-button"
         onClick={() => filter(entityName, entityValue, '-')}
         iconType="minusInCircle"
-        aria-label={intl.formatMessage({
-          id: 'xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel',
+        aria-label={i18n.translate('xpack.ml.anomaliesTable.entityCell.removeFilterAriaLabel', {
           defaultMessage: 'Remove filter'
         })}
       />
@@ -67,11 +66,10 @@ function getRemoveFilter({ entityName, entityValue, filter, intl }) {
  * of the entity, such as a partitioning or influencer field value, and optionally links for
  * adding or removing a filter on this entity.
  */
-export const EntityCell = injectI18n(function EntityCell({
+export const EntityCell = function EntityCell({
   entityName,
   entityValue,
   filter,
-  intl,
   wrapText = false
 }) {
   const valueText = (entityName !== 'mlcategory') ? entityValue : `mlcategory ${entityValue}`;
@@ -85,8 +83,8 @@ export const EntityCell = injectI18n(function EntityCell({
         <span className={textWrapperClass}>{valueText}</span>
         {shouldDisplayIcons &&
           <React.Fragment>
-            {getAddFilter({ entityName, entityValue, filter, intl })}
-            {getRemoveFilter({ entityName, entityValue, filter, intl })}
+            {getAddFilter({ entityName, entityValue, filter })}
+            {getRemoveFilter({ entityName, entityValue, filter })}
           </React.Fragment>
         }
       </div>
@@ -110,10 +108,10 @@ export const EntityCell = injectI18n(function EntityCell({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="row" alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                {getAddFilter({ entityName, entityValue, filter, intl })}
+                {getAddFilter({ entityName, entityValue, filter })}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {getRemoveFilter({ entityName, entityValue, filter, intl })}
+                {getRemoveFilter({ entityName, entityValue, filter })}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -121,9 +119,9 @@ export const EntityCell = injectI18n(function EntityCell({
       </EuiFlexGroup>
     );
   }
-});
+};
 
-EntityCell.WrappedComponent.propTypes = {
+EntityCell.propTypes = {
   entityName: PropTypes.string,
   entityValue: PropTypes.any,
   filter: PropTypes.func,
