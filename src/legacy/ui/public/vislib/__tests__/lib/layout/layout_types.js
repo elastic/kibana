@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { VislibLibLayoutLayoutTypesProvider } from '../../../lib/layout/layout_types';
 
 describe('Vislib Layout Types Test Suite', function () {
