@@ -166,6 +166,7 @@ export const registerHelpers = ({ supertest, es }) => {
   return {
     createIndexWithMappings,
     getJobPayload,
+    loadJobs,
     createJob,
     deleteJob,
     startJob,
