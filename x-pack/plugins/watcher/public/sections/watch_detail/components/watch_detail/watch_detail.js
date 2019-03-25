@@ -10,7 +10,7 @@ import moment from 'moment-timezone';
 import { toastNotifications } from 'ui/notify';
 import 'ui/config';
 import 'ui/url';
-import 'ui/table_info';
+import '../../../../directives/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/license';

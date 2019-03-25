@@ -5,6 +5,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import '../../directives/json_input';
 import template from './watch_history_item_detail.html';
 import 'ace';
 

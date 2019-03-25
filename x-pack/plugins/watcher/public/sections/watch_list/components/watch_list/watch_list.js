@@ -13,7 +13,7 @@ import { PAGINATION, REFRESH_INTERVALS, WATCH_TYPES } from 'plugins/watcher/../c
 import 'ui/pager_control';
 import 'ui/pager';
 import 'ui/react_components';
-import 'ui/table_info';
+import '../../../../directives/table_info';
 import 'plugins/watcher/components/tool_bar_selected_count';
 import 'plugins/watcher/components/forbidden_message';
 import 'plugins/watcher/services/watches';

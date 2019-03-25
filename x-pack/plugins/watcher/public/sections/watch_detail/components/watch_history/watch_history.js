@@ -8,7 +8,7 @@ import 'ui/filters/moment';
 import { uiModules } from 'ui/modules';
 import 'ui/pager_control';
 import 'ui/pager';
-import 'ui/table_info';
+import '../../../../directives/table_info';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 
 import { PAGINATION } from 'plugins/watcher/../common/constants';
