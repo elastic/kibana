@@ -26,7 +26,7 @@ function initChrome() {
   return chrome;
 }
 
-const newPlatformBasePath = basePathServiceMock.createStartContract();
+const newPlatformBasePath = basePathServiceMock.createSetupContract();
 __newPlatformInit__(newPlatformBasePath);
 
 beforeEach(() => {

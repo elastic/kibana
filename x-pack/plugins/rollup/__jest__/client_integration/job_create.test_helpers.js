@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 
-import { registerTestBed } from '../utils';
+import { registerTestBed } from '../../../../test_utils';
 import { rollupJobsStore } from '../../public/crud_app/store';
 import {
   setHttp,
@@ -25,21 +25,21 @@ const JOB_TO_CREATE = {
   interval: '24h'
 };
 
-const initUserActions = (component, findTestSubject) => {
+const initUserActions = (component, find) => {
   const clickNextStep = () => {
-    const button = findTestSubject('rollupJobNextButton');
+    const button = find('rollupJobNextButton');
     button.simulate('click');
     component.update();
   };
 
   const clickPreviousStep = () => {
-    const button = findTestSubject('rollupJobBackButton');
+    const button = find('rollupJobBackButton');
     button.simulate('click');
     component.update();
   };
 
   const clickSave = () => {
-    const button = findTestSubject('rollupJobSaveButton');
+    const button = find('rollupJobSaveButton');
     button.simulate('click');
     component.update();
   };
@@ -84,7 +84,7 @@ const initGoToStep = (fillFormFields, clickNextStep) => async (targetStep) => {
 
 export const initTestBed = () => {
   const testBed = registerTestBed(JobCreate, {}, rollupJobsStore)();
-  const userActions = initUserActions(testBed.component, testBed.findTestSubject);
+  const userActions = initUserActions(testBed.component, testBed.find);
   const fillFormFields = initFillFormFields(testBed.form);
   const goToStep = initGoToStep(fillFormFields, userActions.clickNextStep);
   const getEuiStepsHorizontalActive = () => testBed.component.find('.euiStepHorizontal-isSelected').text();

@@ -116,6 +116,8 @@ module.controller('MlExplorerController', function (
           filterData
         }
       });
+      $scope.jobSelectionUpdateInProgress = false;
+      $scope.$applyAsync();
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
@@ -196,19 +198,25 @@ module.controller('MlExplorerController', function (
   const explorerSubscriber = explorer$.subscribe(loadJobsListener);
 
   // Listen for changes to job selection.
+  $scope.jobSelectionUpdateInProgress = false;
   $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
+    $scope.jobSelectionUpdateInProgress = true;
     jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   });
 
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
@@ -230,7 +238,9 @@ module.controller('MlExplorerController', function (
   });
 
   function redrawOnResize() {
-    explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    }
   }
 
   $scope.appStateHandler = ((action, payload) => {

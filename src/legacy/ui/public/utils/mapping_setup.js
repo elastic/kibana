@@ -20,7 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default function MappingSetupService() {
   const mappingSetup = this;
 

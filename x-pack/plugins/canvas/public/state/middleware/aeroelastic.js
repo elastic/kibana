@@ -286,6 +286,10 @@ export const aeroelastic = ({ dispatch, getState }) => {
     aero.commit(page, 'shapeSelect', { shapes: [] });
   };
 
+  const unhoverShape = page => {
+    aero.commit(page, 'cursorPosition', {});
+  };
+
   return next => action => {
     // get information before the state is changed
     const prevPage = getSelectedPage(getState());
@@ -326,6 +330,7 @@ export const aeroelastic = ({ dispatch, getState }) => {
       } else {
         unselectShape(prevPage); // deselect persistent groups as they're not currently selections in Redux
       }
+      unhoverShape(prevPage); // ensure hover box isn't stuck on page change, no matter how action originated
     }
 
     next(action);
