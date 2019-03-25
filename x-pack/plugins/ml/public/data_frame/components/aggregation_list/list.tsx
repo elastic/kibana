@@ -6,16 +6,12 @@
 
 import React from 'react';
 
-import { MlListGroup, MlListGroupItem } from '../../pages/data_frame_new_pivot/type_definitions';
-
 import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiListGroup,
-  // This isn't part of EUI's type definitions yet.
-  // @ts-ignore
   EuiListGroupItem,
 } from '@elastic/eui';
 
@@ -33,13 +29,10 @@ interface ListProps {
   deleteHandler(l: string): void;
 }
 
-const ListGroup: MlListGroup = EuiListGroup;
-const ListGroupItem: MlListGroupItem = EuiListGroupItem;
-
 export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
-  <ListGroup flush={true}>
+  <EuiListGroup flush={true}>
     {list.map((l: string) => (
-      <ListGroupItem
+      <EuiListGroupItem
         key={l}
         label={
           <EuiFlexGroup>
@@ -69,5 +62,5 @@ export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData
         }}
       />
     ))}
-  </ListGroup>
+  </EuiListGroup>
 );

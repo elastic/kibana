@@ -6,27 +6,17 @@
 
 import React from 'react';
 
-import { MlListGroup, MlListGroupItem } from '../../pages/data_frame_new_pivot/type_definitions';
-
-import {
-  EuiListGroup,
-  // This isn't part of EUI's type definitions yet.
-  // @ts-ignore
-  EuiListGroupItem,
-} from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 interface ListProps {
   list: string[];
   deleteHandler(l: string): void;
 }
 
-const ListGroup: MlListGroup = EuiListGroup;
-const ListGroupItem: MlListGroupItem = EuiListGroupItem;
-
 export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
-  <ListGroup flush={true}>
+  <EuiListGroup flush={true}>
     {list.map((l: string) => (
-      <ListGroupItem
+      <EuiListGroupItem
         key={l}
         label={l}
         extraAction={{
@@ -38,5 +28,5 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
         }}
       />
     ))}
-  </ListGroup>
+  </EuiListGroup>
 );

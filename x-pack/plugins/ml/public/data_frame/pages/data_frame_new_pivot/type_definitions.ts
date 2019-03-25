@@ -4,14 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  CommonProps,
-  EuiButtonIconProps,
-  EuiButtonPropsForButtonOrLink,
-  IconType,
-} from '@elastic/eui';
-import { FunctionComponent, ReactNode, ReactPropTypes } from 'react';
-
 import { DefaultOperator } from 'elasticsearch';
 
 import { Dictionary } from 'x-pack/plugins/ml/common/types/common';
@@ -47,39 +39,6 @@ export interface SimpleQuery {
     };
   };
 }
-
-type MlListGroupProps = CommonProps & {
-  bordered?: boolean;
-  flush?: boolean;
-  listItems?: Array<FunctionComponent<MlListGroupItemProps>>;
-  maxWidth?: boolean | number | string;
-  showToolTips?: boolean;
-  wrapText?: boolean;
-};
-
-export type MlListGroup = FunctionComponent<MlListGroupProps>;
-
-type MlListGroupItemProps = CommonProps & {
-  size?: 'xs' | 's' | 'm' | 'l';
-  label: ReactNode;
-  isActive?: boolean;
-  isDisabled?: boolean;
-  href?: string;
-  iconType?: IconType;
-  icon?: ReactPropTypes['element'];
-  showToolTip?: boolean;
-  extraAction?: EuiButtonPropsForButtonOrLink<
-    CommonProps &
-      EuiButtonIconProps & {
-        iconType: IconType;
-        alwaysShow?: boolean;
-      }
-  >;
-  wrapText?: boolean;
-  onClick?(): void;
-};
-
-export type MlListGroupItem = FunctionComponent<MlListGroupItemProps>;
 
 // DataFramePreviewRequest
 type PivotGroupBySupportedAggs = 'terms';
