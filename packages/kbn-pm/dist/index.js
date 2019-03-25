@@ -17861,6 +17861,7 @@ function getProjectPaths(rootPath, options) {
     // In anyway, have a plugin declaring their own dependencies is the
     // correct and the expect behavior.
     projectPaths.push((0, _path.resolve)(rootPath, 'test/plugin_functional/plugins/*'));
+    projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
     if (!ossOnly) {
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
