@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit } from 'lodash';
+import { cloneDeep, get, isEmpty, omit } from 'lodash';
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -145,6 +145,38 @@ export const migrations = {
       } catch (e) {
         throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
       }
+    },
+    '7.1.0': (doc) => {
+      // [TSVB] Migrate percentile-rank aggregation (value -> values)
+      const visStateJSON = get(doc, 'attributes.visState');
+
+      if (visStateJSON) {
+        let visState;
+        try {
+          visState = JSON.parse(visStateJSON);
+        } catch (e) {
+          // Let it go, the data is invalid and we'll leave it as is
+        }
+        if (visState && visState.type === 'metrics') {
+          const series = get(visState, 'params.series') || [];
+
+          series.forEach(series => {
+            if (!isEmpty(series.metrics)) {
+              series.metrics.forEach(metric => {
+                if (metric.type === 'percentile_rank' && metric.value) {
+                  metric.values = [metric.value];
+
+                  delete metric.value;
+                }
+              });
+            }
+          });
+
+          doc.attributes.visState = JSON.stringify(visState);
+        }
+      }
+
+      return cloneDeep(doc);
     }
   },
   dashboard: {
