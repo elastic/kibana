@@ -646,16 +646,16 @@ export class QueryBarUI extends Component<Props, State> {
       />
     );
 
-    if (this.props.showDatePicker) {
-      return (
-        <EuiFlexGroup responsive={false} gutterSize="s">
-          {this.renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
+    if (!this.props.showDatePicker) {
+      return button;
     }
 
-    return button;
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="s">
+        {this.renderDatePicker()}
+        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   private renderDatePicker() {
