@@ -20,7 +20,7 @@ export const ACTIVE_AGENTS = i18n.translate('xpack.secops.kpiNetwork.source.acti
 export const UNIQUE_PRIVATE_IPS = i18n.translate(
   'xpack.secops.kpiNetwork.source.uniquePrivateIpsTitle',
   {
-    defaultMessage: 'Unique Private IP',
+    defaultMessage: 'Unique Private IPs',
   }
 );
 
