@@ -16,30 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { BasePathService, BasePathStart } from './base_path_service';
+import { BasePathService, BasePathSetup } from './base_path_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<BasePathStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<BasePathSetup> = {
     get: jest.fn(),
     addToPath: jest.fn(),
     removeFromPath: jest.fn(),
   };
-  startContract.get.mockReturnValue('get');
-  startContract.addToPath.mockReturnValue('addToPath');
-  startContract.removeFromPath.mockReturnValue('removeFromPath');
-  return startContract;
+  setupContract.get.mockReturnValue('get');
+  setupContract.addToPath.mockReturnValue('addToPath');
+  setupContract.removeFromPath.mockReturnValue('removeFromPath');
+  return setupContract;
 };
 
 type BasePathServiceContract = PublicMethodsOf<BasePathService>;
 const createMock = () => {
   const mocked: jest.Mocked<BasePathServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const basePathServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

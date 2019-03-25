@@ -116,11 +116,5 @@ export async function getRenderedHref(
 
 export function mockNow(date: string) {
   const fakeNow = new Date(date).getTime();
-  const realDateNow = global.Date.now.bind(global.Date);
-
-  global.Date.now = jest.fn(() => fakeNow);
-
-  return () => {
-    global.Date.now = realDateNow;
-  };
+  return jest.spyOn(Date, 'now').mockReturnValue(fakeNow);
 }

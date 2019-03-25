@@ -63,15 +63,24 @@ export class DataRecognizer {
     const configs = [];
     const dirs = await this.listDirs(this.modulesDir);
     await Promise.all(dirs.map(async (dir) => {
-      const file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
+      let file;
       try {
-        configs.push({
-          dirName: dir,
-          json: JSON.parse(file)
-        });
+        file = await this.readFile(`${this.modulesDir}/${dir}/manifest.json`);
       } catch (error) {
-        mlLog('warning', `Error parsing ${dir}/manifest.json`);
+        mlLog('warning', `Data recognizer skipping folder ${dir} as manifest.json cannot be read`);
       }
+
+      if (file !== undefined) {
+        try {
+          configs.push({
+            dirName: dir,
+            json: JSON.parse(file)
+          });
+        } catch (error) {
+          mlLog('warning', `Data recognizer error parsing ${dir}/manifest.json. ${error}`);
+        }
+      }
+
     }));
 
     return configs;
@@ -90,8 +99,14 @@ export class DataRecognizer {
 
     await Promise.all(manifestFiles.map(async (i) => {
       const moduleConfig = i.json;
-      const match = await this.searchForFields(moduleConfig, indexPattern);
-      if (match) {
+      let match = false;
+      try {
+        match = await this.searchForFields(moduleConfig, indexPattern);
+      } catch (error) {
+        mlLog('warning', `Data recognizer error running query defined for module ${moduleConfig.id}. ${error}`);
+      }
+
+      if (match === true) {
         let logo = null;
         if (moduleConfig.logoFile) {
           try {
@@ -131,6 +146,7 @@ export class DataRecognizer {
       size,
       body
     });
+
     return (resp.hits.total !== 0);
   }
 
@@ -155,25 +171,33 @@ export class DataRecognizer {
     const kibana = {};
     // load all of the job configs
     await Promise.all(manifestJSON.jobs.map(async (job) => {
-      const jobConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${job.file}`);
-      // use the file name for the id
-      jobs.push({
-        id: `${prefix}${job.id}`,
-        config: JSON.parse(jobConfig)
-      });
+      try {
+        const jobConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${job.file}`);
+        // use the file name for the id
+        jobs.push({
+          id: `${prefix}${job.id}`,
+          config: JSON.parse(jobConfig)
+        });
+      } catch (error) {
+        mlLog('warning', `Data recognizer error loading config for job ${job.id} for module ${id}. ${error}`);
+      }
     }));
 
     // load all of the datafeed configs
     await Promise.all(manifestJSON.datafeeds.map(async (datafeed) => {
-      const datafeedConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`);
-      const config = JSON.parse(datafeedConfig);
-      // use the job id from the manifestFile
-      config.job_id = `${prefix}${datafeed.job_id}`;
+      try {
+        const datafeedConfig = await this.readFile(`${this.modulesDir}/${dirName}/${ML_DIR}/${datafeed.file}`);
+        const config = JSON.parse(datafeedConfig);
+        // use the job id from the manifestFile
+        config.job_id = `${prefix}${datafeed.job_id}`;
 
-      datafeeds.push({
-        id: prefixDatafeedId(datafeed.id, prefix),
-        config
-      });
+        datafeeds.push({
+          id: prefixDatafeedId(datafeed.id, prefix),
+          config
+        });
+      } catch (error) {
+        mlLog('warning', `Data recognizer error loading config for datafeed ${datafeed.id} for module ${id}. ${error}`);
+      }
     }));
 
     // load all of the kibana saved objects
@@ -182,15 +206,19 @@ export class DataRecognizer {
       await Promise.all(kKeys.map(async (key) => {
         kibana[key] = [];
         await Promise.all(manifestJSON.kibana[key].map(async (obj) => {
-          const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
-          // use the file name for the id
-          const kId = obj.file.replace('.json', '');
-          const config = JSON.parse(kConfig);
-          kibana[key].push({
-            id: kId,
-            title: config.title,
-            config
-          });
+          try {
+            const kConfig = await this.readFile(`${this.modulesDir}/${dirName}/${KIBANA_DIR}/${key}/${obj.file}`);
+            // use the file name for the id
+            const kId = obj.file.replace('.json', '');
+            const config = JSON.parse(kConfig);
+            kibana[key].push({
+              id: kId,
+              title: config.title,
+              config
+            });
+          } catch (error) {
+            mlLog('warning', `Data recognizer error loading config for ${key} ${obj.id} for module ${id}. ${error}`);
+          }
         }));
       }));
     }
@@ -218,6 +246,7 @@ export class DataRecognizer {
     end,
     request
   ) {
+
     this.savedObjectsClient = request.getSavedObjectsClient();
     this.indexPatterns = await this.loadIndexPatterns();
 
