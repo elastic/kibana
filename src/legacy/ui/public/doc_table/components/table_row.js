@@ -47,7 +47,7 @@ const MIN_LINE_LENGTH = 20;
  */
 module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, config) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
-  const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
+  const truncateByHeightTemplate = _.template(noWhiteSpace(require('./truncate_by_height.html')));
 
   return {
     restrict: 'A',
