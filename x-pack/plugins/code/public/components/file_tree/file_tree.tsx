@@ -8,26 +8,13 @@ import React from 'react';
 
 import { EuiIcon, EuiSideNav, EuiText } from '@elastic/eui';
 import classes from 'classnames';
-
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import { FileTree as Tree, FileTreeItemType } from '../../../model';
 import { closeTreePath, fetchRepoTree, FetchRepoTreePayload, openTreePath } from '../../actions';
 import { EuiSideNavItem, MainRouteParams, PathTypes } from '../../common/types';
 import { RootState } from '../../reducers';
 import { encodeRevisionString } from '../../utils/url';
-
-const DirectoryNode = styled.span`
-  margin-left: ${theme.euiSizeS};
-  vertical-align: middle;
-`;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: Tree;
@@ -100,10 +87,10 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
-    const className = 'code-file-node';
+    const className = 'codeFileTree__item';
     let bg = null;
     if (this.props.match.params.path === node.path) {
-      bg = <div ref={el => this.scrollIntoView(el)} className="code-full-width-file-node" />;
+      bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
     }
     const onClick = () => {
       const path = flattenFrom ? flattenFrom.path! : node.path!;
@@ -113,7 +100,7 @@ export class CodeFileTree extends React.Component<Props> {
     switch (node.type) {
       case FileTreeItemType.Directory: {
         return (
-          <Container>
+          <div className="codeFileTree__group">
             <div
               data-test-subj={`codeFileTreeNode-Directory-${node.path}`}
               className={className}
@@ -123,90 +110,85 @@ export class CodeFileTree extends React.Component<Props> {
               onClick={onClick}
             >
               {forceOpen ? (
-                <EuiIcon type="arrowDown" size="s" className="codeFileTree--icon" />
+                <EuiIcon type="arrowDown" size="s" className="codeFileTree__icon" />
               ) : (
-                <EuiIcon type="arrowRight" size="s" className="codeFileTree--icon" />
+                <EuiIcon type="arrowRight" size="s" className="codeFileTree__icon" />
               )}
-              <EuiIcon
-                type={forceOpen ? 'folderOpen' : 'folderClosed'}
-                data-test-subj={`codeFileTreeNode-Directory-Icon-${node.path}-${
-                  forceOpen ? 'open' : 'closed'
-                }`}
-              />
-              <DirectoryNode>
+              <EuiIcon type={forceOpen ? 'folderOpen' : 'folderClosed'} />
+              <span className="codeFileTree__directory">
                 <EuiText size="s" grow={false} className="eui-displayInlineBlock">
                   {`${node.name}/`}
                 </EuiText>
-              </DirectoryNode>
+              </span>
             </div>
             {bg}
-          </Container>
+          </div>
         );
       }
       case FileTreeItemType.Submodule: {
         return (
-          <Container>
+          <div className="codeFileTree__group">
             <div
               data-test-subj={`codeFileTreeNode-Submodule-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
-              className={classes(className, 'code-file-tree-file')}
+              className={classes(className, 'codeFileTree__file')}
               role="button"
             >
               <EuiIcon type="submodule" />
-              <DirectoryNode>
+              <span className="codeFileTree__directory">
                 <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
-              </DirectoryNode>
+              </span>
             </div>
             {bg}
-          </Container>
+          </div>
         );
       }
       case FileTreeItemType.Link: {
         return (
-          <Container>
+          <div className="codeFileTree__group">
             <div
               data-test-subj={`codeFileTreeNode-Link-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
-              className={classes(className, 'code-file-tree-file')}
+              className={classes(className, 'codeFileTree__file')}
               role="button"
             >
               <EuiIcon type="symlink" />
-              <DirectoryNode>
+              <span className="codeFileTree__directory">
                 <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
-              </DirectoryNode>
+              </span>
             </div>
             {bg}
-          </Container>
+          </div>
         );
       }
       case FileTreeItemType.File: {
         return (
-          <Container>
+          <div className="codeFileTree__group">
             <div
               data-test-subj={`codeFileTreeNode-File-${node.path}`}
               tabIndex={0}
               onKeyDown={onClick}
               onClick={onClick}
-              className={classes(className, 'code-file-tree-file')}
+              className={classes(className, 'codeFileTree__file')}
               role="button"
             >
               <EuiIcon type="document" />
-              <DirectoryNode>
+              <span className="codeFileTree__directory">
                 <EuiText size="s" grow={false} color="default" className="eui-displayInlineBlock">
                   {node.name}
                 </EuiText>
-              </DirectoryNode>
+              </span>
             </div>
             {bg}
-          </Container>
+          </div>
         );
       }
     }

@@ -29,3 +29,17 @@
     text-align: center;
   }
 }
+
+// EUI Overrides
+// TODO: Add 'code' prefixed classnames
+.euiSideNavItem--root + .euiSideNavItem--root {
+  margin-top: 1rem;
+}
+
+.euiSideNavItem__items:after {
+  width: 0;
+}
+
+.euiSideNavItem--trunk > .euiSideNavItem__items {
+  margin-left: $euiSize;
+}
