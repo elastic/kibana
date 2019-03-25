@@ -1,0 +1,30 @@
+{
+  "id": "sample_dataset_weblogs",
+  "title": "Kibana Sample Data Web Logs",
+  "description": "Find anomalies in Kibana Sample Data for Web Logs",
+  "type": "Sample Dataset",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "kibana_sample_data_logs",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term":  { "_index": "kibana_sample_data_logs" } }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "mean_bytes_by_file_extension",
+      "file": "mean_bytes_by_file_extension.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-mean_bytes_by_file_extension",
+      "file": "datafeed_mean_bytes_by_file_extension.json",
+      "job_id": "mean_bytes_by_file_extension"
+    }
+  ],
+  "kibana": {
+}
+}
