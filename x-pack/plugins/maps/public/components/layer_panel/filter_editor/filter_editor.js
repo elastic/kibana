@@ -13,6 +13,8 @@ import {
   EuiTitle,
   EuiPopover,
   EuiSpacer,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -101,7 +103,7 @@ export class FilterEditor extends Component {
                 data-test-subj="mapFilterEditorSubmitButton"
               >
                 <FormattedMessage
-                  id="xpack.maps.layerPanel.filterEditor.modal.queryBarSubmitButtonLabel"
+                  id="xpack.maps.layerPanel.filterEditor.queryBarSubmitButtonLabel"
                   defaultMessage="Set filter"
                 />
               </EuiButton>
@@ -115,12 +117,23 @@ export class FilterEditor extends Component {
   _renderQuery() {
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
-      return null;
+      return (
+        <EuiText>
+          <p>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.maps.layerPanel.filterEditor.emptyState.description"
+                defaultMessage="Add a filter to narrow the layer data."
+              />
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      );
     }
 
     return (
       <Fragment>
-        <EuiCodeBlock>
+        <EuiCodeBlock paddingSize="s">
           {query.query}
         </EuiCodeBlock>
         <EuiSpacer size="m" />
@@ -130,7 +143,7 @@ export class FilterEditor extends Component {
 
   _renderOpenButton() {
     const query = this.props.layer.getQuery();
-    const openModalButtonLabel = query && query.query
+    const openButtonLabel = query && query.query
       ? i18n.translate('xpack.maps.layerPanel.filterEditor.editFilterButtonLabel', {
         defaultMessage: 'Edit filter'
       })
@@ -145,7 +158,7 @@ export class FilterEditor extends Component {
         iconType="arrowDown"
         iconSide="right"
       >
-        {openModalButtonLabel}
+        {openButtonLabel}
       </EuiButton>
     );
   }
