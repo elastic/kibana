@@ -64,9 +64,9 @@ operations. Using the following procedure
 - For each result
   - if the result type is a secret type
     - delete the encrypted attribute field
-  - otherwise keep the results intacted
+  - otherwise keep the results intact
 
-The wrapper will be injected for all saved object repositories.
+The wrapper will be injected for all saved object clients.
 
 ## Benefits
 
