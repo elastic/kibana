@@ -170,7 +170,7 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
     }
     if (schemaName === 'split') {
       schemaName = `split_${agg.params.row ? 'row' : 'column'}`;
-      skipMetrics = true;
+      skipMetrics = responseAggs.length - metrics.length > 1;
     }
     if (!schemas[schemaName]) {
       schemas[schemaName] = [];
@@ -219,9 +219,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const expression = prepareString('expression', visState.params.markdown);
     const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${expression}${visConfig}`;
+    return `kibana_markdown ${visConfig}`;
   },
   table: (visState, schemas) => {
     const visConfig = {

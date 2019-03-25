@@ -45,16 +45,34 @@ describe('extractErrors()', () => {
           message: 'Conflict',
         },
       },
+      {
+        id: '3',
+        type: 'dashboard',
+        attributes: {},
+        references: [],
+        error: {
+          statusCode: 400,
+          message: 'Bad Request',
+        },
+      },
     ];
     const result = extractErrors(savedObjects);
     expect(result).toMatchInlineSnapshot(`
 Array [
   Object {
     "error": Object {
-      "message": "Conflict",
-      "statusCode": 409,
+      "type": "conflict",
     },
     "id": "2",
+    "type": "dashboard",
+  },
+  Object {
+    "error": Object {
+      "message": "Bad Request",
+      "statusCode": 400,
+      "type": "unknown",
+    },
+    "id": "3",
     "type": "dashboard",
   },
 ]

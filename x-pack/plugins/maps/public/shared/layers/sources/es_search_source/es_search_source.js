@@ -167,7 +167,7 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatProperties(properties) {
+  async filterAndFormatPropertiesToHtml(properties) {
     const filteredProperties = {};
     this._descriptor.tooltipProperties.forEach(propertyName => {
       filteredProperties[propertyName] = _.get(properties, propertyName, '-');
@@ -186,8 +186,9 @@ export class ESSearchSource extends AbstractESSource {
       if (!field) {
         return;
       }
-
-      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+      const htmlConverter = field.format.getConverterFor('html');
+      filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
+        field.format.convert(filteredProperties[propertyName]);
     });
 
     return filteredProperties;

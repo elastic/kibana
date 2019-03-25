@@ -72,6 +72,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=BOUNDARY',
       },
     };
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     const { payload, statusCode } = await server.inject(request);
     const response = JSON.parse(payload);
     expect(statusCode).toBe(200);
@@ -100,6 +101,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -145,6 +147,7 @@ describe('POST /api/saved_objects/_import', () => {
         'content-Type': 'multipart/form-data; boundary=EXAMPLE',
       },
     };
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
     savedObjectsClient.bulkCreate.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -178,8 +181,7 @@ describe('POST /api/saved_objects/_import', () => {
           id: 'my-pattern',
           type: 'index-pattern',
           error: {
-            statusCode: 409,
-            message: 'version conflict, document already exists',
+            type: 'conflict',
           },
         },
       ],

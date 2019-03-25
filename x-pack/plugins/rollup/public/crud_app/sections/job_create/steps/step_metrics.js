@@ -136,6 +136,7 @@ export class StepMetricsUi extends Component {
             >
               <EuiCheckbox
                 id={`${fieldName}-${type}-checkbox`}
+                data-test-subj={`rollupJobMetricsCheckbox-${type}`}
                 label={label}
                 checked={isSelected}
                 onChange={() => this.setMetric(fieldName, type, !isSelected)}
@@ -210,7 +211,7 @@ export class StepMetricsUi extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="rollupJobCreateMetricsTitle">
               <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepMetricsTitle"
@@ -239,6 +240,7 @@ export class StepMetricsUi extends Component {
               href={metricsDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateMetricsDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepMetrics.readDocsButtonLabel"
@@ -267,8 +269,10 @@ export class StepMetricsUi extends Component {
               fields={metricsFields}
               selectedFields={metrics}
               onSelectField={this.onSelectField}
+              dataTestSubj="rollupJobMetricsFieldChooser"
             />
           )}
+          dataTestSubj="rollupJobMetricsFieldList"
         />
 
         {this.renderErrors()}

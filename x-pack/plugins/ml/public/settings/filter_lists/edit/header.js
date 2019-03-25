@@ -167,7 +167,7 @@ export const EditFilterListHeader = injectI18n(function ({
                 <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
                 <p>
                   <FormattedMessage

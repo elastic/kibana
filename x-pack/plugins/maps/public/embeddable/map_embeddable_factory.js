@@ -10,7 +10,7 @@ import { EmbeddableFactory } from 'ui/embeddable';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { createMapPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
@@ -49,7 +49,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
     return new MapEmbeddable({
       onEmbeddableStateChanged,
       savedMap,
-      editUrl: chrome.addBasePath(`/app/maps#/map/${panelMetadata.id}`),
+      editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
       indexPatterns,
     });
   }

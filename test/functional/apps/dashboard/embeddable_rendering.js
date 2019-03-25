@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
+  let visNames = [];
 
   const expectAllDataRenders = async () => {
     await pieChart.expectPieSliceCount(16);
@@ -90,7 +91,8 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/33504
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 
@@ -107,21 +109,23 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('adding visualizations', async () => {
-      await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
+      visNames = await dashboardAddPanel.addEveryVisualization('"Rendering Test"');
+      await dashboardExpect.visualizationsArePresent(visNames);
 
       // This one is rendered via svg which lets us do better testing of what is being rendered.
-      await dashboardAddPanel.addVisualization('Filter Bytes Test: vega');
-
+      visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // await dashboardExpect.panelCount(27);
+      await dashboardExpect.visualizationsArePresent(visNames);
+      expect(visNames.length).to.be.equal(27);
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
     it('adding saved searches', async () => {
-      await dashboardAddPanel.addEverySavedSearch('"Rendering Test"');
+      const visAndSearchNames = visNames.concat(await dashboardAddPanel.addEverySavedSearch('"Rendering Test"'));
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      // await dashboardExpect.panelCount(28);
+      await dashboardExpect.visualizationsArePresent(visAndSearchNames);
+      expect(visAndSearchNames.length).to.be.equal(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });

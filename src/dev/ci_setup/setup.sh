@@ -26,14 +26,21 @@ else
   exit 1
 fi
 
+
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
-export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 
-echo "-> KIBANA_DIR $KIBANA_DIR"
-echo "-> XPACK_DIR $XPACK_DIR"
-echo "-> PARENT_DIR $PARENT_DIR"
-echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
+parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
+export PARENT_DIR="$parentDir"
+
+kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_BRANCH="$kbnBranch"
+
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+echo " -- XPACK_DIR='$XPACK_DIR'"
+echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
@@ -77,7 +84,6 @@ else
   else
     curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
   fi
-
 fi
 
 ###

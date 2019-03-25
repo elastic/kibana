@@ -21,6 +21,7 @@ import template from './timelion_help.html';
 import { uiModules } from 'ui/modules';
 import _ from 'lodash';
 import moment from 'moment';
+import '../../components/timelionhelp_tabs_directive';
 
 const app = uiModules.get('apps/timelion', []);
 
@@ -32,6 +33,11 @@ app.directive('timelionHelp', function ($http, i18n) {
       $scope.functions = {
         list: [],
         details: null
+      };
+
+      $scope.activeTab = 'funcref';
+      $scope.activateTab = function (tabName) {
+        $scope.activeTab = tabName;
       };
 
       function init() {

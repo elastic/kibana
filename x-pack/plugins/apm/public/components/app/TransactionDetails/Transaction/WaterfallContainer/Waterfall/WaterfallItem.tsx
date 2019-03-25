@@ -10,7 +10,9 @@ import styled from 'styled-components';
 import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { asTime } from 'x-pack/plugins/apm/public/utils/formatters';
+import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
+import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 type ItemType = 'transaction' | 'span';
@@ -40,6 +42,7 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   background-color: ${props =>
     props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
+
   &:hover {
     background-color: ${theme.euiColorLightestShade};
   }
@@ -80,6 +83,7 @@ interface IWaterfallItemProps {
   item: IWaterfallItem;
   color: string;
   isSelected: boolean;
+  errorCount: number;
   onClick: () => unknown;
 }
 
@@ -96,8 +100,7 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   }
 
   // icon for RUM agent transactions
-  const isRumAgent = item.transaction.agent.name === 'js-base';
-  if (isRumAgent) {
+  if (isRumAgentName(item.transaction.agent.name)) {
     return <EuiIcon type="globe" />;
   }
 
@@ -145,6 +148,7 @@ export function WaterfallItem({
   item,
   color,
   isSelected,
+  errorCount,
   onClick
 }: IWaterfallItemProps) {
   if (!totalDuration) {
@@ -172,6 +176,12 @@ export function WaterfallItem({
         <PrefixIcon item={item} />
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
+        {errorCount > 0 && item.docType === 'transaction' ? (
+          <ErrorCountBadge
+            errorCount={errorCount}
+            transaction={item.transaction}
+          />
+        ) : null}
         <Duration item={item} />
       </ItemText>
     </Container>

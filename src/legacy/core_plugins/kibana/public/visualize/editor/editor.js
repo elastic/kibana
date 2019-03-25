@@ -355,7 +355,8 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', (query) => {
+    $scope.$watch('state.query', (newQuery) => {
+      const query = migrateLegacyQuery(newQuery);
       $scope.updateQueryAndFetch({ query });
     });
 
@@ -443,7 +444,7 @@ function VisEditor(
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
     timefilter.setTime(dateRange);
-    $state.query = migrateLegacyQuery(query);
+    $state.query = query;
     $scope.fetch();
   };
 

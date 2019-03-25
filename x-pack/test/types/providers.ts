@@ -5,9 +5,11 @@
  */
 
 import { EsArchiver } from '../../../src/es_archiver';
+import { UptimeProvider } from '../functional/services/uptime';
 
 export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: 'esArchiver'): EsArchiver;
+  getService(serviceName: 'uptime'): ReturnType<typeof UptimeProvider>;
   getService(serviceName: string): any;
   getPageObjects(pageObjectNames: string[]): any;
   loadTestFile(path: string): void;

@@ -13,8 +13,6 @@ function report {
 
 trap report EXIT
 
-source src/dev/ci_setup/checkout_sibling_es.sh
-
 export TEST_BROWSER_HEADLESS=1
 
 echo " -> Ensuring all functional tests are in a ciGroup"
@@ -36,7 +34,6 @@ installDir="$PARENT_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
 echo " -> Running functional and api tests"
 cd "$XPACK_DIR"
 node scripts/functional_tests --debug --bail --kibana-install-dir "$installDir" --include-tag "ciGroup$CI_GROUP"
