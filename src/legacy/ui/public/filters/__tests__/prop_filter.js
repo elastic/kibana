@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { propFilter } from '../_prop_filter';
 
 describe('prop filter', function () {

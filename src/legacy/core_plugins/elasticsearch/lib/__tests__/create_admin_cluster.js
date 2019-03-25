@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { set, get, partial } from 'lodash';
 import { createAdminCluster } from '../create_admin_cluster';

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SavedObject } from '../saved_object';
 
 describe('SavedObject', () => {

@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { findObjectByTitle } from '../find_object_by_title';
 import { SavedObject } from '../saved_object';
 
