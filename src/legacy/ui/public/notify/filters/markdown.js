@@ -18,7 +18,7 @@
  */
 
 import MarkdownIt from 'markdown-it';
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 import 'angular-sanitize';
 
 const markdownIt = new MarkdownIt({
