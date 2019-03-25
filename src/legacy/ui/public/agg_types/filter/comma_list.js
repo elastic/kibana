@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { uiModules } from '../modules';
+import { uiModules } from 'ui/modules';
 
 import {
   parseCommaSeparatedList,
   formatListAsProse,
-} from '../../../utils';
+} from '../../../../utils';
 
 uiModules
   .get('kibana')
