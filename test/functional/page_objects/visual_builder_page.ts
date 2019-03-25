@@ -160,6 +160,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * setting label for markdown visualization
      *
      * @param {string} variableName
+     * @param type
      * @memberof VisualBuilderPage
      */
     public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
@@ -170,12 +171,15 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       } else {
         const input = await find.byCssSelector(SELECTOR);
         if (process.platform === 'darwin') {
-          await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
+          // Mac workaround
+          for (let i = 0; i <= type.length; i++) {
+            await input.pressKeys(browser.keys.BACK_SPACE);
+          }
         } else {
           await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
+          await input.pressKeys(browser.keys.NULL); // Release modifier keys
+          await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
         }
-        await input.pressKeys(browser.keys.NULL); // Release modifier keys
-        await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
       }
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
