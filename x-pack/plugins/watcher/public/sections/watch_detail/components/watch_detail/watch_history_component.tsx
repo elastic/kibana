@@ -65,6 +65,7 @@ const WatchHistoryUI = ({
     watchId?: string;
     watchStatus?: { actionStatuses?: any };
   }>({});
+  const [executionDetail, setExecutionDetail] = useState<string>(null);
 
   const kbnUrlService = urlService;
 
@@ -82,7 +83,7 @@ const WatchHistoryUI = ({
     { value: 'now-1y', text: 'Last 1 year' },
   ];
   const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
-    watchHistoryTimeSpanOptions[0].text
+    watchHistoryTimeSpanOptions[0].value
   );
 
   const columns = [
@@ -138,14 +139,11 @@ const WatchHistoryUI = ({
   ];
 
   const onTimespanChange = (e: any) => {
-    //'now-1h'
     const timespan = e.target.value;
     setWatchHistoryTimeSpan(timespan);
     loadWatchHistory(timespan);
   };
   const loadWatchHistory = async (timespan: string) => {
-    // TODO[pcs]: this is a duplicate call, pass this down to component
-    // we need the watch detail here because it contains types for actions
     const loadedWatchHistory = await fetchWatchHistory(watchId, timespan);
     setWatchHistory(loadedWatchHistory);
     setIsLoading(false);
@@ -157,9 +155,9 @@ const WatchHistoryUI = ({
   };
 
   const showDetailFlyout = async (item: { id: string }) => {
-    // TODO[pcs]: figure out why the above de-structuring works
     const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
     setItemDetail(watchHistoryItemDetail);
+    setExecutionDetail(JSON.stringify(watchHistoryItemDetail.details, null, 2));
     return setIsDetailVisible(true);
   };
 
@@ -206,7 +204,6 @@ const WatchHistoryUI = ({
       },
     ];
 
-    const executionDetails = JSON.stringify(itemDetail.details, null, 2);
     flyout = (
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
@@ -236,7 +233,7 @@ const WatchHistoryUI = ({
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem>
-            <EuiCodeBlock language="javascript">{executionDetails}</EuiCodeBlock>
+            <EuiCodeBlock language="javascript">{executionDetail}</EuiCodeBlock>
             <EuiSpacer />
           </EuiFlexItem>
         </EuiFlexGroup>
