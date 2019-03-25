@@ -11,7 +11,6 @@ import React, { useEffect, useState } from 'react';
 import {
   activateWatch,
   deactivateWatch,
-  fetchWatchDetail,
   fetchWatchHistory,
   fetchWatchHistoryDetail,
 } from '../../../../lib/api';
@@ -30,6 +29,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -65,7 +65,6 @@ const WatchHistoryUI = ({
     watchId?: string;
     watchStatus?: { actionStatuses?: any };
   }>({});
-  const [watch, setWatch] = useState({});
 
   const kbnUrlService = urlService;
 
@@ -73,6 +72,18 @@ const WatchHistoryUI = ({
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
   };
+
+  const watchHistoryTimeSpanOptions = [
+    { value: 'now-1h', text: 'Last one hour' },
+    { value: 'now-24h', text: 'Last 24 hours' },
+    { value: 'now-7d', text: 'Last 7 days' },
+    { value: 'now-30d', text: 'Last 30 days' },
+    { value: 'now-6M', text: 'Last 6 months' },
+    { value: 'now-1y', text: 'Last 1 year' },
+  ];
+  const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
+    watchHistoryTimeSpanOptions[0].text
+  );
 
   const columns = [
     {
@@ -125,12 +136,17 @@ const WatchHistoryUI = ({
       },
     },
   ];
-  const loadWatchHistory = async () => {
+
+  const onTimespanChange = (e: any) => {
+    //'now-1h'
+    const timespan = e.target.value;
+    setWatchHistoryTimeSpan(timespan);
+    loadWatchHistory(timespan);
+  };
+  const loadWatchHistory = async (timespan: string) => {
     // TODO[pcs]: this is a duplicate call, pass this down to component
     // we need the watch detail here because it contains types for actions
-    const loadedWatch = await fetchWatchDetail(watchId);
-    setWatch(loadedWatch);
-    const loadedWatchHistory = await fetchWatchHistory(watchId, 'now-1h');
+    const loadedWatchHistory = await fetchWatchHistory(watchId, timespan);
     setWatchHistory(loadedWatchHistory);
     setIsLoading(false);
   };
@@ -141,6 +157,7 @@ const WatchHistoryUI = ({
   };
 
   const showDetailFlyout = async (item: { id: string }) => {
+    // TODO[pcs]: figure out why the above de-structuring works
     const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
     setItemDetail(watchHistoryItemDetail);
     return setIsDetailVisible(true);
@@ -157,7 +174,7 @@ const WatchHistoryUI = ({
   };
 
   useEffect(() => {
-    loadWatchHistory();
+    loadWatchHistory(watchHistoryTimeSpan);
     // only run the first time the component loads
   }, []);
 
@@ -239,6 +256,15 @@ const WatchHistoryUI = ({
         watchesToDelete={watchesToDelete}
       />
       <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSelect
+            options={watchHistoryTimeSpanOptions}
+            value={watchHistoryTimeSpan}
+            onChange={onTimespanChange}
+            // TODO[pcs]: define aria labels
+            aria-label=""
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton onClick={() => toggleWatchActivation()}>{activationButtonText}</EuiButton>
         </EuiFlexItem>
