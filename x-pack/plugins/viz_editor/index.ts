@@ -7,7 +7,8 @@
 import * as Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
-import { API_PREFIX, PLUGIN_ID } from './common';
+import { PLUGIN_ID } from './common';
+import { route as routeQuery } from './server/query';
 
 export function vizEditor(kibana: any) {
   return new kibana.Plugin({
@@ -40,13 +41,8 @@ export function vizEditor(kibana: any) {
       server.injectUiAppVars(PLUGIN_ID, async () => {
         return await (server as any).getInjectedUiAppVars('kibana');
       });
-      server.route({
-        path: `${API_PREFIX}/example`,
-        method: 'GET',
-        handler: () => {
-          return { time: new Date() };
-        },
-      });
+
+      routeQuery(server);
     },
   });
 }
