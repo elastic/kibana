@@ -15,16 +15,16 @@ export const telemetryJWKS: PublicJWKS = {
       alg: 'RSA-OAEP',
       e: 'AQAB',
       n:
-        'r4yXWQW38QJh7SkO_MJe07uQdIFvYiw-HZ0M4sixye60aShyjlHocQPHrFQ4KN7MbKDN0_SMFTKFB5fXrPRV_iPfSkOzD-qW6S9-QtIMmQD2L_jRbpYNnbXuuT5c3yf3EzQr2RGjMLvFhPi-ir-ltdn_kAWBf2rSXME4XOmNDKDx8i30VDi-7subwl5SyeVWhm2x3QvAl5nTrlFEpgtR4chOzcd9dY_5L2DjHPbAur7_jFetUU8Es0M-FCrxtSZkFO43TlMurklO7yT7tQ4bsO-BOe0X00gZhXahKtTZmFWXMQJfhRekVpoUlvOqaOHjH-gl47eiRoyLWyQA9zIYaBhWwRmCeGTWbFa5zlBcr3kujnWXPwVoOpOo8TXHkAHqYfWNSrI_IRaAwIufHUMXFjSYdUy7hUu59-LSitsgwfyKYhN2PQFtaIijfDTVZUm0cMtUIwH7U_ytpFSndsGkZHGAsrqtrEuCpjiK01PVvwhGYac_V6DvCEUMpCYq2y1muUQe7e7Ms4p_MZaiNCS4x6Y_b2VTkcPgi3dbcDE6fOJ3RbGolU0JEbG8CE44TE81bWPYdGhe7oCTvVhe9NTHgENSb_p2JabHkFuEatmy87uQO_NScJ6YmlCgS152TY3v0Tfu3j5NEaRT4W3JcPdcXS_jkjfrc-jW-uR7l4G1qvs',
+        'kxa9RFxodOb5DPO4m87sXlp82-V1UD6fguSKmJgvMIcK7BsOmgFyYlWC6m23WfGkkR02fi6WlgBXx2PsZIr3dKCzA6O3KaJSzTh09VWANnSk2A0s6k-1Qe8Hyr8QKjtWjRYiUPJ0uB5sZZ0143RR1szFS17bIZn3VxT4RS9SDzvCkh5QYFJnHqTokIrdMc_DYIOjvC7mxCvqwhbh2vDVvovcn2d7xN8WPV2Ax1Sf9D9lvMcUO5DN-08VHLjm7eX_NKZXf21qRXqXQyQnsGWMdMeke5x5PWvl0ckv3Ip7YsaBLNH3HcId2gVx9QnnxlVb16oGWqu_t7wuOkKpSoiBNQ'
     },
     {
       kty: 'RSA',
-      kid: 'kibana_prod',
+      kid: 'kibana',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
       n:
-        'r4yXWQW38QJh7SkO_MJe07uQdIFvYiw-HZ0M4sixye60aShyjlHocQPHrFQ4KN7MbKDN0_SMFTKFB5fXrPRV_iPfSkOzD-qW6S9-QtIMmQD2L_jRbpYNnbXuuT5c3yf3EzQr2RGjMLvFhPi-ir-ltdn_kAWBf2rSXME4XOmNDKDx8i30VDi-7subwl5SyeVWhm2x3QvAl5nTrlFEpgtR4chOzcd9dY_5L2DjHPbAur7_jFetUU8Es0M-FCrxtSZkFO43TlMurklO7yT7tQ4bsO-BOe0X00gZhXahKtTZmFWXMQJfhRekVpoUlvOqaOHjH-gl47eiRoyLWyQA9zIYaBhWwRmCeGTWbFa5zlBcr3kujnWXPwVoOpOo8TXHkAHqYfWNSrI_IRaAwIufHUMXFjSYdUy7hUu59-LSitsgwfyKYhN2PQFtaIijfDTVZUm0cMtUIwH7U_ytpFSndsGkZHGAsrqtrEuCpjiK01PVvwhGYac_V6DvCEUMpCYq2y1muUQe7e7Ms4p_MZaiNCS4x6Y_b2VTkcPgi3dbcDE6fOJ3RbGolU0JEbG8CE44TE81bWPYdGhe7oCTvVhe9NTHgENSb_p2JabHkFuEatmy87uQO_NScJ6YmlCgS152TY3v0Tfu3j5NEaRT4W3JcPdcXS_jkjfrc-jW-uR7l4G1qvs',
+        'sF8XTRkCq13LTMeQG8R69nmiwjA9Pxj-R_DkaUTbfGMQebLJZAT1dhyaphoXUXson1nurSXFS7CKktR0cgrh17_Ngw1o0YooYKEGy9V6c1vMytNQ-PH3gTIP_kVx-ceKuwkLj9g36PLt9GDT8lxdxqB350acLzFuaoNmzfI76tkr0vwh2dBdt2n_h5szyvRAcmVSJDfi1G-DqsOivrSlIgOIsrzPcwHobONYq24M2Jaa5YYtSKsybUixaymFoqllaDa2PiYx9VaDQ712vDR4jjPnXHS8k6gPZcHDDscuYfnbedwiaiVjWBA8Is0TXdLd2cr3uV_URCBIQjPGJXllOw'
     },
   ],
 };
