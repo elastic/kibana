@@ -61,8 +61,10 @@ export class FilterEditor extends Component {
     this.setState({ indexPatterns });
   }
 
-  _open = () => {
-    this.setState({ isPopoverOpen: true });
+  _toggle = () => {
+    this.setState(prevState => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   }
 
   _close = () => {
@@ -138,8 +140,10 @@ export class FilterEditor extends Component {
 
     return (
       <EuiButton
-        onClick={this._open}
+        onClick={this._toggle}
         data-test-subj="mapLayerPanelOpenFilterEditorButton"
+        iconType="arrowDown"
+        iconSide="right"
       >
         {openModalButtonLabel}
       </EuiButton>
