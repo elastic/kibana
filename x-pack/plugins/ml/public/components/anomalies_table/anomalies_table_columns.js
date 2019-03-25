@@ -67,7 +67,8 @@ export function getColumns(
   showRuleEditorFlyout,
   itemIdToExpandedRowMap,
   toggleRow,
-  filter) {
+  filter,
+  influencerFilter) {
 
   const columns = [
     {
@@ -153,6 +154,7 @@ export function getColumns(
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
           influencers={influencers}
+          influencerFilter={influencerFilter}
         />
       ),
       textOnly: true,

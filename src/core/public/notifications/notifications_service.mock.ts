@@ -16,29 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { NotificationsService, NotificationsStart } from './notifications_service';
+import { NotificationsService, NotificationsSetup } from './notifications_service';
 import { toastsServiceMock } from './toasts/toasts_service.mock';
-import { ToastsStart } from './toasts/toasts_start';
+import { ToastsSetup } from './toasts/toasts_start';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<NotificationsStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<NotificationsSetup> = {
     // we have to suppress type errors until decide how to mock es6 class
-    toasts: (toastsServiceMock.createStartContract() as unknown) as ToastsStart,
+    toasts: (toastsServiceMock.createSetupContract() as unknown) as ToastsSetup,
   };
-  return startContract;
+  return setupContract;
 };
 
 type NotificationsServiceContract = PublicMethodsOf<NotificationsService>;
 const createMock = () => {
   const mocked: jest.Mocked<NotificationsServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const notificationServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

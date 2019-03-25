@@ -17588,6 +17588,7 @@ function getProjectPaths(rootPath, options) {
     // In anyway, have a plugin declaring their own dependencies is the
     // correct and the expect behavior.
     projectPaths.push((0, _path.resolve)(rootPath, 'test/plugin_functional/plugins/*'));
+    projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
     if (!ossOnly) {
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
@@ -31761,7 +31762,7 @@ Object.defineProperty(exports, 'buildProductionProjects', {
   }
 });
 
-var _prepare_project_dependencies = __webpack_require__(585);
+var _prepare_project_dependencies = __webpack_require__(547);
 
 Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
   enumerable: true,
@@ -31946,8 +31947,8 @@ const EventEmitter = __webpack_require__(45);
 const path = __webpack_require__(16);
 const arrify = __webpack_require__(370);
 const globby = __webpack_require__(371);
-const cpFile = __webpack_require__(577);
-const CpyError = __webpack_require__(584);
+const cpFile = __webpack_require__(539);
+const CpyError = __webpack_require__(546);
 
 const preprocessSrcPath = (srcPath, options) => options.cwd ? path.resolve(options.cwd, srcPath) : srcPath;
 
@@ -32069,8 +32070,8 @@ module.exports = function (val) {
 const arrayUnion = __webpack_require__(138);
 const glob = __webpack_require__(36);
 const fastGlob = __webpack_require__(372);
-const dirGlob = __webpack_require__(573);
-const gitignore = __webpack_require__(574);
+const dirGlob = __webpack_require__(535);
+const gitignore = __webpack_require__(536);
 
 const DEFAULT_FILTER = () => false;
 
@@ -32219,10 +32220,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var merge2 = __webpack_require__(374);
 var optionsManager = __webpack_require__(375);
 var taskManager = __webpack_require__(376);
-var reader_async_1 = __webpack_require__(552);
-var reader_stream_1 = __webpack_require__(571);
-var reader_sync_1 = __webpack_require__(572);
-var arrayUtils = __webpack_require__(568);
+var reader_async_1 = __webpack_require__(514);
+var reader_stream_1 = __webpack_require__(533);
+var reader_sync_1 = __webpack_require__(534);
+var arrayUtils = __webpack_require__(530);
 /**
  * Returns a set of works based on provided tasks and class of the reader.
  */
@@ -32948,10 +32949,10 @@ var extend = __webpack_require__(394);
  * Local dependencies
  */
 
-var compilers = __webpack_require__(520);
-var parsers = __webpack_require__(548);
-var cache = __webpack_require__(549);
-var utils = __webpack_require__(550);
+var compilers = __webpack_require__(488);
+var parsers = __webpack_require__(510);
+var cache = __webpack_require__(511);
+var utils = __webpack_require__(512);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -33828,16 +33829,15 @@ module.exports = micromatch;
 var toRegex = __webpack_require__(385);
 var unique = __webpack_require__(397);
 var extend = __webpack_require__(394);
-var define = __webpack_require__(398);
 
 /**
  * Local dependencies
  */
 
-var compilers = __webpack_require__(405);
-var parsers = __webpack_require__(420);
+var compilers = __webpack_require__(398);
+var parsers = __webpack_require__(413);
 var Braces = __webpack_require__(423);
-var utils = __webpack_require__(406);
+var utils = __webpack_require__(399);
 var MAX_LENGTH = 1024 * 64;
 var cache = {};
 
@@ -33940,8 +33940,9 @@ braces.create = function(pattern, options) {
     throw new TypeError('expected a string');
   }
 
-  if (pattern.length >= MAX_LENGTH) {
-    throw new Error('expected pattern to be less than ' + MAX_LENGTH + ' characters');
+  var maxLength = (options && options.maxLength) || MAX_LENGTH;
+  if (pattern.length >= maxLength) {
+    throw new Error('expected pattern to be less than ' + maxLength + ' characters');
   }
 
   function create() {
@@ -33975,7 +33976,11 @@ braces.create = function(pattern, options) {
       arr = unique(arr);
     }
 
-    define(arr, 'result', result);
+    Object.defineProperty(arr, 'result', {
+      enumerable: false,
+      value: result
+    });
+
     return arr;
   }
 
@@ -34002,8 +34007,9 @@ braces.makeRe = function(pattern, options) {
     throw new TypeError('expected a string');
   }
 
-  if (pattern.length >= MAX_LENGTH) {
-    throw new Error('expected pattern to be less than ' + MAX_LENGTH + ' characters');
+  var maxLength = (options && options.maxLength) || MAX_LENGTH;
+  if (pattern.length >= maxLength) {
+    throw new Error('expected pattern to be less than ' + maxLength + ' characters');
   }
 
   function makeRe() {
@@ -35106,613 +35112,9 @@ module.exports.immutable = function uniqueImmutable(arr) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, 2017, Jon Schlinkert.
- * Released under the MIT License.
- */
 
 
-
-var isDescriptor = __webpack_require__(399);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 399 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(400);
-var isAccessor = __webpack_require__(401);
-var isData = __webpack_require__(403);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 400 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-module.exports = function kindOf(val) {
-  if (val === void 0) return 'undefined';
-  if (val === null) return 'null';
-
-  var type = typeof val;
-  if (type === 'boolean') return 'boolean';
-  if (type === 'string') return 'string';
-  if (type === 'number') return 'number';
-  if (type === 'symbol') return 'symbol';
-  if (type === 'function') {
-    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
-  }
-
-  if (isArray(val)) return 'array';
-  if (isBuffer(val)) return 'buffer';
-  if (isArguments(val)) return 'arguments';
-  if (isDate(val)) return 'date';
-  if (isError(val)) return 'error';
-  if (isRegexp(val)) return 'regexp';
-
-  switch (ctorName(val)) {
-    case 'Symbol': return 'symbol';
-    case 'Promise': return 'promise';
-
-    // Set, Map, WeakSet, WeakMap
-    case 'WeakMap': return 'weakmap';
-    case 'WeakSet': return 'weakset';
-    case 'Map': return 'map';
-    case 'Set': return 'set';
-
-    // 8-bit typed arrays
-    case 'Int8Array': return 'int8array';
-    case 'Uint8Array': return 'uint8array';
-    case 'Uint8ClampedArray': return 'uint8clampedarray';
-
-    // 16-bit typed arrays
-    case 'Int16Array': return 'int16array';
-    case 'Uint16Array': return 'uint16array';
-
-    // 32-bit typed arrays
-    case 'Int32Array': return 'int32array';
-    case 'Uint32Array': return 'uint32array';
-    case 'Float32Array': return 'float32array';
-    case 'Float64Array': return 'float64array';
-  }
-
-  if (isGeneratorObj(val)) {
-    return 'generator';
-  }
-
-  // Non-plain objects
-  type = toString.call(val);
-  switch (type) {
-    case '[object Object]': return 'object';
-    // iterators
-    case '[object Map Iterator]': return 'mapiterator';
-    case '[object Set Iterator]': return 'setiterator';
-    case '[object String Iterator]': return 'stringiterator';
-    case '[object Array Iterator]': return 'arrayiterator';
-  }
-
-  // other
-  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
-};
-
-function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
-}
-
-function isArray(val) {
-  if (Array.isArray) return Array.isArray(val);
-  return val instanceof Array;
-}
-
-function isError(val) {
-  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
-}
-
-function isDate(val) {
-  if (val instanceof Date) return true;
-  return typeof val.toDateString === 'function'
-    && typeof val.getDate === 'function'
-    && typeof val.setDate === 'function';
-}
-
-function isRegexp(val) {
-  if (val instanceof RegExp) return true;
-  return typeof val.flags === 'string'
-    && typeof val.ignoreCase === 'boolean'
-    && typeof val.multiline === 'boolean'
-    && typeof val.global === 'boolean';
-}
-
-function isGeneratorFn(name, val) {
-  return ctorName(name) === 'GeneratorFunction';
-}
-
-function isGeneratorObj(val) {
-  return typeof val.throw === 'function'
-    && typeof val.return === 'function'
-    && typeof val.next === 'function';
-}
-
-function isArguments(val) {
-  try {
-    if (typeof val.length === 'number' && typeof val.callee === 'function') {
-      return true;
-    }
-  } catch (err) {
-    if (err.message.indexOf('callee') !== -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
-    return val.constructor.isBuffer(val);
-  }
-  return false;
-}
-
-
-/***/ }),
-/* 401 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(402);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 402 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-module.exports = function kindOf(val) {
-  if (val === void 0) return 'undefined';
-  if (val === null) return 'null';
-
-  var type = typeof val;
-  if (type === 'boolean') return 'boolean';
-  if (type === 'string') return 'string';
-  if (type === 'number') return 'number';
-  if (type === 'symbol') return 'symbol';
-  if (type === 'function') {
-    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
-  }
-
-  if (isArray(val)) return 'array';
-  if (isBuffer(val)) return 'buffer';
-  if (isArguments(val)) return 'arguments';
-  if (isDate(val)) return 'date';
-  if (isError(val)) return 'error';
-  if (isRegexp(val)) return 'regexp';
-
-  switch (ctorName(val)) {
-    case 'Symbol': return 'symbol';
-    case 'Promise': return 'promise';
-
-    // Set, Map, WeakSet, WeakMap
-    case 'WeakMap': return 'weakmap';
-    case 'WeakSet': return 'weakset';
-    case 'Map': return 'map';
-    case 'Set': return 'set';
-
-    // 8-bit typed arrays
-    case 'Int8Array': return 'int8array';
-    case 'Uint8Array': return 'uint8array';
-    case 'Uint8ClampedArray': return 'uint8clampedarray';
-
-    // 16-bit typed arrays
-    case 'Int16Array': return 'int16array';
-    case 'Uint16Array': return 'uint16array';
-
-    // 32-bit typed arrays
-    case 'Int32Array': return 'int32array';
-    case 'Uint32Array': return 'uint32array';
-    case 'Float32Array': return 'float32array';
-    case 'Float64Array': return 'float64array';
-  }
-
-  if (isGeneratorObj(val)) {
-    return 'generator';
-  }
-
-  // Non-plain objects
-  type = toString.call(val);
-  switch (type) {
-    case '[object Object]': return 'object';
-    // iterators
-    case '[object Map Iterator]': return 'mapiterator';
-    case '[object Set Iterator]': return 'setiterator';
-    case '[object String Iterator]': return 'stringiterator';
-    case '[object Array Iterator]': return 'arrayiterator';
-  }
-
-  // other
-  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
-};
-
-function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
-}
-
-function isArray(val) {
-  if (Array.isArray) return Array.isArray(val);
-  return val instanceof Array;
-}
-
-function isError(val) {
-  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
-}
-
-function isDate(val) {
-  if (val instanceof Date) return true;
-  return typeof val.toDateString === 'function'
-    && typeof val.getDate === 'function'
-    && typeof val.setDate === 'function';
-}
-
-function isRegexp(val) {
-  if (val instanceof RegExp) return true;
-  return typeof val.flags === 'string'
-    && typeof val.ignoreCase === 'boolean'
-    && typeof val.multiline === 'boolean'
-    && typeof val.global === 'boolean';
-}
-
-function isGeneratorFn(name, val) {
-  return ctorName(name) === 'GeneratorFunction';
-}
-
-function isGeneratorObj(val) {
-  return typeof val.throw === 'function'
-    && typeof val.return === 'function'
-    && typeof val.next === 'function';
-}
-
-function isArguments(val) {
-  try {
-    if (typeof val.length === 'number' && typeof val.callee === 'function') {
-      return true;
-    }
-  } catch (err) {
-    if (err.message.indexOf('callee') !== -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
-    return val.constructor.isBuffer(val);
-  }
-  return false;
-}
-
-
-/***/ }),
-/* 403 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(404);
-
-module.exports = function isDataDescriptor(obj, prop) {
-  // data descriptor properties
-  var data = {
-    configurable: 'boolean',
-    enumerable: 'boolean',
-    writable: 'boolean'
-  };
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-};
-
-
-/***/ }),
-/* 404 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-module.exports = function kindOf(val) {
-  if (val === void 0) return 'undefined';
-  if (val === null) return 'null';
-
-  var type = typeof val;
-  if (type === 'boolean') return 'boolean';
-  if (type === 'string') return 'string';
-  if (type === 'number') return 'number';
-  if (type === 'symbol') return 'symbol';
-  if (type === 'function') {
-    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
-  }
-
-  if (isArray(val)) return 'array';
-  if (isBuffer(val)) return 'buffer';
-  if (isArguments(val)) return 'arguments';
-  if (isDate(val)) return 'date';
-  if (isError(val)) return 'error';
-  if (isRegexp(val)) return 'regexp';
-
-  switch (ctorName(val)) {
-    case 'Symbol': return 'symbol';
-    case 'Promise': return 'promise';
-
-    // Set, Map, WeakSet, WeakMap
-    case 'WeakMap': return 'weakmap';
-    case 'WeakSet': return 'weakset';
-    case 'Map': return 'map';
-    case 'Set': return 'set';
-
-    // 8-bit typed arrays
-    case 'Int8Array': return 'int8array';
-    case 'Uint8Array': return 'uint8array';
-    case 'Uint8ClampedArray': return 'uint8clampedarray';
-
-    // 16-bit typed arrays
-    case 'Int16Array': return 'int16array';
-    case 'Uint16Array': return 'uint16array';
-
-    // 32-bit typed arrays
-    case 'Int32Array': return 'int32array';
-    case 'Uint32Array': return 'uint32array';
-    case 'Float32Array': return 'float32array';
-    case 'Float64Array': return 'float64array';
-  }
-
-  if (isGeneratorObj(val)) {
-    return 'generator';
-  }
-
-  // Non-plain objects
-  type = toString.call(val);
-  switch (type) {
-    case '[object Object]': return 'object';
-    // iterators
-    case '[object Map Iterator]': return 'mapiterator';
-    case '[object Set Iterator]': return 'setiterator';
-    case '[object String Iterator]': return 'stringiterator';
-    case '[object Array Iterator]': return 'arrayiterator';
-  }
-
-  // other
-  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
-};
-
-function ctorName(val) {
-  return val.constructor ? val.constructor.name : null;
-}
-
-function isArray(val) {
-  if (Array.isArray) return Array.isArray(val);
-  return val instanceof Array;
-}
-
-function isError(val) {
-  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
-}
-
-function isDate(val) {
-  if (val instanceof Date) return true;
-  return typeof val.toDateString === 'function'
-    && typeof val.getDate === 'function'
-    && typeof val.setDate === 'function';
-}
-
-function isRegexp(val) {
-  if (val instanceof RegExp) return true;
-  return typeof val.flags === 'string'
-    && typeof val.ignoreCase === 'boolean'
-    && typeof val.multiline === 'boolean'
-    && typeof val.global === 'boolean';
-}
-
-function isGeneratorFn(name, val) {
-  return ctorName(name) === 'GeneratorFunction';
-}
-
-function isGeneratorObj(val) {
-  return typeof val.throw === 'function'
-    && typeof val.return === 'function'
-    && typeof val.next === 'function';
-}
-
-function isArguments(val) {
-  try {
-    if (typeof val.length === 'number' && typeof val.callee === 'function') {
-      return true;
-    }
-  } catch (err) {
-    if (err.message.indexOf('callee') !== -1) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
-    return val.constructor.isBuffer(val);
-  }
-  return false;
-}
-
-
-/***/ }),
-/* 405 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(406);
+var utils = __webpack_require__(399);
 
 module.exports = function(braces, options) {
   braces.compiler
@@ -35995,26 +35397,34 @@ function hasQueue(node) {
 
 
 /***/ }),
-/* 406 */
+/* 399 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var splitString = __webpack_require__(407);
+var splitString = __webpack_require__(400);
 var utils = module.exports;
 
 /**
  * Module dependencies
  */
 
-utils.define = __webpack_require__(398);
 utils.extend = __webpack_require__(394);
-utils.flatten = __webpack_require__(413);
-utils.isObject = __webpack_require__(411);
-utils.fillRange = __webpack_require__(414);
-utils.repeat = __webpack_require__(419);
+utils.flatten = __webpack_require__(406);
+utils.isObject = __webpack_require__(404);
+utils.fillRange = __webpack_require__(407);
+utils.repeat = __webpack_require__(412);
 utils.unique = __webpack_require__(397);
+
+utils.define = function(obj, key, val) {
+  Object.defineProperty(obj, key, {
+    writable: true,
+    configurable: true,
+    enumerable: false,
+    value: val
+  });
+};
 
 /**
  * Returns true if the given string contains only empty brace sets.
@@ -36332,12 +35742,12 @@ utils.last = function(arr, n) {
 };
 
 utils.escapeRegex = function(str) {
-  return str.replace(/\\?([!^*?()\[\]{}+?/])/g, '\\$1');
+  return str.replace(/\\?([!^*?()[\]{}+?/])/g, '\\$1');
 };
 
 
 /***/ }),
-/* 407 */
+/* 400 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36350,7 +35760,7 @@ utils.escapeRegex = function(str) {
 
 
 
-var extend = __webpack_require__(408);
+var extend = __webpack_require__(401);
 
 module.exports = function(str, options, fn) {
   if (typeof str !== 'string') {
@@ -36515,14 +35925,14 @@ function keepEscaping(opts, str, idx) {
 
 
 /***/ }),
-/* 408 */
+/* 401 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isExtendable = __webpack_require__(409);
-var assignSymbols = __webpack_require__(412);
+var isExtendable = __webpack_require__(402);
+var assignSymbols = __webpack_require__(405);
 
 module.exports = Object.assign || function(obj/*, objects*/) {
   if (obj === null || typeof obj === 'undefined') {
@@ -36582,7 +35992,7 @@ function isEnum(obj, key) {
 
 
 /***/ }),
-/* 409 */
+/* 402 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36595,7 +36005,7 @@ function isEnum(obj, key) {
 
 
 
-var isPlainObject = __webpack_require__(410);
+var isPlainObject = __webpack_require__(403);
 
 module.exports = function isExtendable(val) {
   return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
@@ -36603,7 +36013,7 @@ module.exports = function isExtendable(val) {
 
 
 /***/ }),
-/* 410 */
+/* 403 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36616,7 +36026,7 @@ module.exports = function isExtendable(val) {
 
 
 
-var isObject = __webpack_require__(411);
+var isObject = __webpack_require__(404);
 
 function isObjectObject(o) {
   return isObject(o) === true
@@ -36647,7 +36057,7 @@ module.exports = function isPlainObject(o) {
 
 
 /***/ }),
-/* 411 */
+/* 404 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36666,7 +36076,7 @@ module.exports = function isObject(val) {
 
 
 /***/ }),
-/* 412 */
+/* 405 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36713,7 +36123,7 @@ module.exports = function(receiver, objects) {
 
 
 /***/ }),
-/* 413 */
+/* 406 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36742,7 +36152,7 @@ function flat(arr, res) {
 
 
 /***/ }),
-/* 414 */
+/* 407 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36756,10 +36166,10 @@ function flat(arr, res) {
 
 
 var util = __webpack_require__(29);
-var isNumber = __webpack_require__(415);
+var isNumber = __webpack_require__(408);
 var extend = __webpack_require__(394);
-var repeat = __webpack_require__(417);
-var toRegex = __webpack_require__(418);
+var repeat = __webpack_require__(410);
+var toRegex = __webpack_require__(411);
 
 /**
  * Return a range of numbers or letters.
@@ -36957,7 +36367,7 @@ module.exports = fillRange;
 
 
 /***/ }),
-/* 415 */
+/* 408 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36970,7 +36380,7 @@ module.exports = fillRange;
 
 
 
-var typeOf = __webpack_require__(416);
+var typeOf = __webpack_require__(409);
 
 module.exports = function isNumber(num) {
   var type = typeOf(num);
@@ -36986,7 +36396,7 @@ module.exports = function isNumber(num) {
 
 
 /***/ }),
-/* 416 */
+/* 409 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(391);
@@ -37108,7 +36518,7 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
-/* 417 */
+/* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37185,7 +36595,7 @@ function repeat(str, num) {
 
 
 /***/ }),
-/* 418 */
+/* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37198,8 +36608,8 @@ function repeat(str, num) {
 
 
 
-var repeat = __webpack_require__(417);
-var isNumber = __webpack_require__(415);
+var repeat = __webpack_require__(410);
+var isNumber = __webpack_require__(408);
 var cache = {};
 
 function toRegexRange(min, max, options) {
@@ -37486,7 +36896,7 @@ module.exports = toRegexRange;
 
 
 /***/ }),
-/* 419 */
+/* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37511,14 +36921,14 @@ module.exports = function repeat(ele, num) {
 
 
 /***/ }),
-/* 420 */
+/* 413 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Node = __webpack_require__(421);
-var utils = __webpack_require__(406);
+var Node = __webpack_require__(414);
+var utils = __webpack_require__(399);
 
 /**
  * Braces parsers
@@ -37593,7 +37003,7 @@ module.exports = function(braces, options) {
     .set('bracket', function() {
       var isInside = this.isInside('brace');
       var pos = this.position();
-      var m = this.match(/^(?:\[([!^]?)([^\]]{2,}|\]\-)(\]|[^*+?]+)|\[)/);
+      var m = this.match(/^(?:\[([!^]?)([^\]]{2,}|\]-)(\]|[^*+?]+)|\[)/);
       if (!m) return;
 
       var prev = this.prev();
@@ -37644,7 +37054,7 @@ module.exports = function(braces, options) {
     .set('multiplier', function() {
       var isInside = this.isInside('brace');
       var pos = this.position();
-      var m = this.match(/^\{(,+(?:(\{,+\})*),*|,*(?:(\{,+\})*),+)\}/);
+      var m = this.match(/^\{((?:,|\{,+\})+)\}/);
       if (!m) return;
 
       this.multiplier = true;
@@ -37795,7 +37205,7 @@ module.exports = function(braces, options) {
     .set('text', function() {
       var isInside = this.isInside('brace');
       var pos = this.position();
-      var m = this.match(/^((?!\\)[^${}\[\]])+/);
+      var m = this.match(/^((?!\\)[^${}[\]])+/);
       if (!m) return;
 
       var prev = this.prev();
@@ -37878,14 +37288,14 @@ function concatNodes(pos, node, parent, options) {
 
 
 /***/ }),
-/* 421 */
+/* 414 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isObject = __webpack_require__(411);
-var define = __webpack_require__(398);
+var isObject = __webpack_require__(404);
+var define = __webpack_require__(415);
 var utils = __webpack_require__(422);
 var ownNames;
 
@@ -38377,13 +37787,617 @@ exports = module.exports = Node;
 
 
 /***/ }),
+/* 415 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * define-property <https://github.com/jonschlinkert/define-property>
+ *
+ * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isDescriptor = __webpack_require__(416);
+
+module.exports = function defineProperty(obj, prop, val) {
+  if (typeof obj !== 'object' && typeof obj !== 'function') {
+    throw new TypeError('expected an object or function.');
+  }
+
+  if (typeof prop !== 'string') {
+    throw new TypeError('expected `prop` to be a string.');
+  }
+
+  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
+    return Object.defineProperty(obj, prop, val);
+  }
+
+  return Object.defineProperty(obj, prop, {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: val
+  });
+};
+
+
+/***/ }),
+/* 416 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
+ *
+ * Copyright (c) 2015-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var typeOf = __webpack_require__(417);
+var isAccessor = __webpack_require__(418);
+var isData = __webpack_require__(420);
+
+module.exports = function isDescriptor(obj, key) {
+  if (typeOf(obj) !== 'object') {
+    return false;
+  }
+  if ('get' in obj) {
+    return isAccessor(obj, key);
+  }
+  return isData(obj, key);
+};
+
+
+/***/ }),
+/* 417 */
+/***/ (function(module, exports) {
+
+var toString = Object.prototype.toString;
+
+module.exports = function kindOf(val) {
+  if (val === void 0) return 'undefined';
+  if (val === null) return 'null';
+
+  var type = typeof val;
+  if (type === 'boolean') return 'boolean';
+  if (type === 'string') return 'string';
+  if (type === 'number') return 'number';
+  if (type === 'symbol') return 'symbol';
+  if (type === 'function') {
+    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
+  }
+
+  if (isArray(val)) return 'array';
+  if (isBuffer(val)) return 'buffer';
+  if (isArguments(val)) return 'arguments';
+  if (isDate(val)) return 'date';
+  if (isError(val)) return 'error';
+  if (isRegexp(val)) return 'regexp';
+
+  switch (ctorName(val)) {
+    case 'Symbol': return 'symbol';
+    case 'Promise': return 'promise';
+
+    // Set, Map, WeakSet, WeakMap
+    case 'WeakMap': return 'weakmap';
+    case 'WeakSet': return 'weakset';
+    case 'Map': return 'map';
+    case 'Set': return 'set';
+
+    // 8-bit typed arrays
+    case 'Int8Array': return 'int8array';
+    case 'Uint8Array': return 'uint8array';
+    case 'Uint8ClampedArray': return 'uint8clampedarray';
+
+    // 16-bit typed arrays
+    case 'Int16Array': return 'int16array';
+    case 'Uint16Array': return 'uint16array';
+
+    // 32-bit typed arrays
+    case 'Int32Array': return 'int32array';
+    case 'Uint32Array': return 'uint32array';
+    case 'Float32Array': return 'float32array';
+    case 'Float64Array': return 'float64array';
+  }
+
+  if (isGeneratorObj(val)) {
+    return 'generator';
+  }
+
+  // Non-plain objects
+  type = toString.call(val);
+  switch (type) {
+    case '[object Object]': return 'object';
+    // iterators
+    case '[object Map Iterator]': return 'mapiterator';
+    case '[object Set Iterator]': return 'setiterator';
+    case '[object String Iterator]': return 'stringiterator';
+    case '[object Array Iterator]': return 'arrayiterator';
+  }
+
+  // other
+  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
+};
+
+function ctorName(val) {
+  return val.constructor ? val.constructor.name : null;
+}
+
+function isArray(val) {
+  if (Array.isArray) return Array.isArray(val);
+  return val instanceof Array;
+}
+
+function isError(val) {
+  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
+}
+
+function isDate(val) {
+  if (val instanceof Date) return true;
+  return typeof val.toDateString === 'function'
+    && typeof val.getDate === 'function'
+    && typeof val.setDate === 'function';
+}
+
+function isRegexp(val) {
+  if (val instanceof RegExp) return true;
+  return typeof val.flags === 'string'
+    && typeof val.ignoreCase === 'boolean'
+    && typeof val.multiline === 'boolean'
+    && typeof val.global === 'boolean';
+}
+
+function isGeneratorFn(name, val) {
+  return ctorName(name) === 'GeneratorFunction';
+}
+
+function isGeneratorObj(val) {
+  return typeof val.throw === 'function'
+    && typeof val.return === 'function'
+    && typeof val.next === 'function';
+}
+
+function isArguments(val) {
+  try {
+    if (typeof val.length === 'number' && typeof val.callee === 'function') {
+      return true;
+    }
+  } catch (err) {
+    if (err.message.indexOf('callee') !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * If you need to support Safari 5-7 (8-10 yr-old browser),
+ * take a look at https://github.com/feross/is-buffer
+ */
+
+function isBuffer(val) {
+  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
+    return val.constructor.isBuffer(val);
+  }
+  return false;
+}
+
+
+/***/ }),
+/* 418 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
+ *
+ * Copyright (c) 2015-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var typeOf = __webpack_require__(419);
+
+// accessor descriptor properties
+var accessor = {
+  get: 'function',
+  set: 'function',
+  configurable: 'boolean',
+  enumerable: 'boolean'
+};
+
+function isAccessorDescriptor(obj, prop) {
+  if (typeof prop === 'string') {
+    var val = Object.getOwnPropertyDescriptor(obj, prop);
+    return typeof val !== 'undefined';
+  }
+
+  if (typeOf(obj) !== 'object') {
+    return false;
+  }
+
+  if (has(obj, 'value') || has(obj, 'writable')) {
+    return false;
+  }
+
+  if (!has(obj, 'get') || typeof obj.get !== 'function') {
+    return false;
+  }
+
+  // tldr: it's valid to have "set" be undefined
+  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
+  // was used to get the value, and only `get` was defined by the user
+  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
+    return false;
+  }
+
+  for (var key in obj) {
+    if (!accessor.hasOwnProperty(key)) {
+      continue;
+    }
+
+    if (typeOf(obj[key]) === accessor[key]) {
+      continue;
+    }
+
+    if (typeof obj[key] !== 'undefined') {
+      return false;
+    }
+  }
+  return true;
+}
+
+function has(obj, key) {
+  return {}.hasOwnProperty.call(obj, key);
+}
+
+/**
+ * Expose `isAccessorDescriptor`
+ */
+
+module.exports = isAccessorDescriptor;
+
+
+/***/ }),
+/* 419 */
+/***/ (function(module, exports) {
+
+var toString = Object.prototype.toString;
+
+module.exports = function kindOf(val) {
+  if (val === void 0) return 'undefined';
+  if (val === null) return 'null';
+
+  var type = typeof val;
+  if (type === 'boolean') return 'boolean';
+  if (type === 'string') return 'string';
+  if (type === 'number') return 'number';
+  if (type === 'symbol') return 'symbol';
+  if (type === 'function') {
+    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
+  }
+
+  if (isArray(val)) return 'array';
+  if (isBuffer(val)) return 'buffer';
+  if (isArguments(val)) return 'arguments';
+  if (isDate(val)) return 'date';
+  if (isError(val)) return 'error';
+  if (isRegexp(val)) return 'regexp';
+
+  switch (ctorName(val)) {
+    case 'Symbol': return 'symbol';
+    case 'Promise': return 'promise';
+
+    // Set, Map, WeakSet, WeakMap
+    case 'WeakMap': return 'weakmap';
+    case 'WeakSet': return 'weakset';
+    case 'Map': return 'map';
+    case 'Set': return 'set';
+
+    // 8-bit typed arrays
+    case 'Int8Array': return 'int8array';
+    case 'Uint8Array': return 'uint8array';
+    case 'Uint8ClampedArray': return 'uint8clampedarray';
+
+    // 16-bit typed arrays
+    case 'Int16Array': return 'int16array';
+    case 'Uint16Array': return 'uint16array';
+
+    // 32-bit typed arrays
+    case 'Int32Array': return 'int32array';
+    case 'Uint32Array': return 'uint32array';
+    case 'Float32Array': return 'float32array';
+    case 'Float64Array': return 'float64array';
+  }
+
+  if (isGeneratorObj(val)) {
+    return 'generator';
+  }
+
+  // Non-plain objects
+  type = toString.call(val);
+  switch (type) {
+    case '[object Object]': return 'object';
+    // iterators
+    case '[object Map Iterator]': return 'mapiterator';
+    case '[object Set Iterator]': return 'setiterator';
+    case '[object String Iterator]': return 'stringiterator';
+    case '[object Array Iterator]': return 'arrayiterator';
+  }
+
+  // other
+  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
+};
+
+function ctorName(val) {
+  return val.constructor ? val.constructor.name : null;
+}
+
+function isArray(val) {
+  if (Array.isArray) return Array.isArray(val);
+  return val instanceof Array;
+}
+
+function isError(val) {
+  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
+}
+
+function isDate(val) {
+  if (val instanceof Date) return true;
+  return typeof val.toDateString === 'function'
+    && typeof val.getDate === 'function'
+    && typeof val.setDate === 'function';
+}
+
+function isRegexp(val) {
+  if (val instanceof RegExp) return true;
+  return typeof val.flags === 'string'
+    && typeof val.ignoreCase === 'boolean'
+    && typeof val.multiline === 'boolean'
+    && typeof val.global === 'boolean';
+}
+
+function isGeneratorFn(name, val) {
+  return ctorName(name) === 'GeneratorFunction';
+}
+
+function isGeneratorObj(val) {
+  return typeof val.throw === 'function'
+    && typeof val.return === 'function'
+    && typeof val.next === 'function';
+}
+
+function isArguments(val) {
+  try {
+    if (typeof val.length === 'number' && typeof val.callee === 'function') {
+      return true;
+    }
+  } catch (err) {
+    if (err.message.indexOf('callee') !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * If you need to support Safari 5-7 (8-10 yr-old browser),
+ * take a look at https://github.com/feross/is-buffer
+ */
+
+function isBuffer(val) {
+  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
+    return val.constructor.isBuffer(val);
+  }
+  return false;
+}
+
+
+/***/ }),
+/* 420 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
+ *
+ * Copyright (c) 2015-2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var typeOf = __webpack_require__(421);
+
+module.exports = function isDataDescriptor(obj, prop) {
+  // data descriptor properties
+  var data = {
+    configurable: 'boolean',
+    enumerable: 'boolean',
+    writable: 'boolean'
+  };
+
+  if (typeOf(obj) !== 'object') {
+    return false;
+  }
+
+  if (typeof prop === 'string') {
+    var val = Object.getOwnPropertyDescriptor(obj, prop);
+    return typeof val !== 'undefined';
+  }
+
+  if (!('value' in obj) && !('writable' in obj)) {
+    return false;
+  }
+
+  for (var key in obj) {
+    if (key === 'value') continue;
+
+    if (!data.hasOwnProperty(key)) {
+      continue;
+    }
+
+    if (typeOf(obj[key]) === data[key]) {
+      continue;
+    }
+
+    if (typeof obj[key] !== 'undefined') {
+      return false;
+    }
+  }
+  return true;
+};
+
+
+/***/ }),
+/* 421 */
+/***/ (function(module, exports) {
+
+var toString = Object.prototype.toString;
+
+module.exports = function kindOf(val) {
+  if (val === void 0) return 'undefined';
+  if (val === null) return 'null';
+
+  var type = typeof val;
+  if (type === 'boolean') return 'boolean';
+  if (type === 'string') return 'string';
+  if (type === 'number') return 'number';
+  if (type === 'symbol') return 'symbol';
+  if (type === 'function') {
+    return isGeneratorFn(val) ? 'generatorfunction' : 'function';
+  }
+
+  if (isArray(val)) return 'array';
+  if (isBuffer(val)) return 'buffer';
+  if (isArguments(val)) return 'arguments';
+  if (isDate(val)) return 'date';
+  if (isError(val)) return 'error';
+  if (isRegexp(val)) return 'regexp';
+
+  switch (ctorName(val)) {
+    case 'Symbol': return 'symbol';
+    case 'Promise': return 'promise';
+
+    // Set, Map, WeakSet, WeakMap
+    case 'WeakMap': return 'weakmap';
+    case 'WeakSet': return 'weakset';
+    case 'Map': return 'map';
+    case 'Set': return 'set';
+
+    // 8-bit typed arrays
+    case 'Int8Array': return 'int8array';
+    case 'Uint8Array': return 'uint8array';
+    case 'Uint8ClampedArray': return 'uint8clampedarray';
+
+    // 16-bit typed arrays
+    case 'Int16Array': return 'int16array';
+    case 'Uint16Array': return 'uint16array';
+
+    // 32-bit typed arrays
+    case 'Int32Array': return 'int32array';
+    case 'Uint32Array': return 'uint32array';
+    case 'Float32Array': return 'float32array';
+    case 'Float64Array': return 'float64array';
+  }
+
+  if (isGeneratorObj(val)) {
+    return 'generator';
+  }
+
+  // Non-plain objects
+  type = toString.call(val);
+  switch (type) {
+    case '[object Object]': return 'object';
+    // iterators
+    case '[object Map Iterator]': return 'mapiterator';
+    case '[object Set Iterator]': return 'setiterator';
+    case '[object String Iterator]': return 'stringiterator';
+    case '[object Array Iterator]': return 'arrayiterator';
+  }
+
+  // other
+  return type.slice(8, -1).toLowerCase().replace(/\s/g, '');
+};
+
+function ctorName(val) {
+  return val.constructor ? val.constructor.name : null;
+}
+
+function isArray(val) {
+  if (Array.isArray) return Array.isArray(val);
+  return val instanceof Array;
+}
+
+function isError(val) {
+  return val instanceof Error || (typeof val.message === 'string' && val.constructor && typeof val.constructor.stackTraceLimit === 'number');
+}
+
+function isDate(val) {
+  if (val instanceof Date) return true;
+  return typeof val.toDateString === 'function'
+    && typeof val.getDate === 'function'
+    && typeof val.setDate === 'function';
+}
+
+function isRegexp(val) {
+  if (val instanceof RegExp) return true;
+  return typeof val.flags === 'string'
+    && typeof val.ignoreCase === 'boolean'
+    && typeof val.multiline === 'boolean'
+    && typeof val.global === 'boolean';
+}
+
+function isGeneratorFn(name, val) {
+  return ctorName(name) === 'GeneratorFunction';
+}
+
+function isGeneratorObj(val) {
+  return typeof val.throw === 'function'
+    && typeof val.return === 'function'
+    && typeof val.next === 'function';
+}
+
+function isArguments(val) {
+  try {
+    if (typeof val.length === 'number' && typeof val.callee === 'function') {
+      return true;
+    }
+  } catch (err) {
+    if (err.message.indexOf('callee') !== -1) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * If you need to support Safari 5-7 (8-10 yr-old browser),
+ * take a look at https://github.com/feross/is-buffer
+ */
+
+function isBuffer(val) {
+  if (val.constructor && typeof val.constructor.isBuffer === 'function') {
+    return val.constructor.isBuffer(val);
+  }
+  return false;
+}
+
+
+/***/ }),
 /* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var typeOf = __webpack_require__(416);
+var typeOf = __webpack_require__(409);
 var utils = module.exports;
 
 /**
@@ -39409,17 +39423,18 @@ function assert(val, message) {
 "use strict";
 
 
+var extend = __webpack_require__(394);
 var Snapdragon = __webpack_require__(424);
-var compilers = __webpack_require__(405);
-var parsers = __webpack_require__(420);
-var utils = __webpack_require__(406);
+var compilers = __webpack_require__(398);
+var parsers = __webpack_require__(413);
+var utils = __webpack_require__(399);
 
 /**
  * Customize Snapdragon parser and renderer
  */
 
 function Braces(options) {
-  this.options = utils.extend({}, options);
+  this.options = extend({}, options);
 }
 
 /**
@@ -39427,6 +39442,8 @@ function Braces(options) {
  */
 
 Braces.prototype.init = function(options) {
+  if (this.isInitialized) return;
+  this.isInitialized = true;
   var opts = utils.createOptions({}, this.options, options);
   this.snapdragon = this.options.snapdragon || new Snapdragon(opts);
   this.compiler = this.snapdragon.compiler;
@@ -39463,23 +39480,12 @@ Braces.prototype.init = function(options) {
 };
 
 /**
- * Lazily initialize braces
- */
-
-Braces.prototype.lazyInit = function(options) {
-  if (!this.isInitialized) {
-    this.isInitialized = true;
-    this.init(options);
-  }
-};
-
-/**
  * Decorate `.parse` method
  */
 
 Braces.prototype.parse = function(ast, options) {
-  if (utils.isObject(ast) && ast.nodes) return ast;
-  this.lazyInit(options);
+  if (ast && typeof ast === 'object' && ast.nodes) return ast;
+  this.init(options);
   return this.snapdragon.parse(ast, options);
 };
 
@@ -39491,10 +39497,9 @@ Braces.prototype.compile = function(ast, options) {
   if (typeof ast === 'string') {
     ast = this.parse(ast, options);
   } else {
-    this.lazyInit(options);
+    this.init(options);
   }
-  var res = this.snapdragon.compile(ast, options);
-  return res;
+  return this.snapdragon.compile(ast, options);
 };
 
 /**
@@ -39530,10 +39535,10 @@ module.exports = Braces;
 
 
 var Base = __webpack_require__(425);
-var define = __webpack_require__(473);
-var Compiler = __webpack_require__(480);
-var Parser = __webpack_require__(517);
-var utils = __webpack_require__(497);
+var define = __webpack_require__(386);
+var Compiler = __webpack_require__(455);
+var Parser = __webpack_require__(485);
+var utils = __webpack_require__(465);
 var regexCache = {};
 var cache = {};
 
@@ -39711,13 +39716,13 @@ module.exports.Parser = Parser;
 
 
 var util = __webpack_require__(29);
-var define = __webpack_require__(398);
-var CacheBase = __webpack_require__(426);
-var Emitter = __webpack_require__(427);
-var isObject = __webpack_require__(411);
-var merge = __webpack_require__(445);
-var pascal = __webpack_require__(448);
-var cu = __webpack_require__(449);
+var define = __webpack_require__(426);
+var CacheBase = __webpack_require__(427);
+var Emitter = __webpack_require__(428);
+var isObject = __webpack_require__(404);
+var merge = __webpack_require__(446);
+var pascal = __webpack_require__(449);
+var cu = __webpack_require__(450);
 
 /**
  * Optionally define a custom `cache` namespace to use.
@@ -40150,17 +40155,55 @@ module.exports.namespace = namespace;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+/*!
+ * define-property <https://github.com/jonschlinkert/define-property>
+ *
+ * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
 
 
-var isObject = __webpack_require__(411);
-var Emitter = __webpack_require__(427);
-var visit = __webpack_require__(428);
-var toPath = __webpack_require__(431);
-var union = __webpack_require__(432);
-var del = __webpack_require__(436);
-var get = __webpack_require__(434);
-var has = __webpack_require__(441);
-var set = __webpack_require__(444);
+
+var isDescriptor = __webpack_require__(416);
+
+module.exports = function defineProperty(obj, prop, val) {
+  if (typeof obj !== 'object' && typeof obj !== 'function') {
+    throw new TypeError('expected an object or function.');
+  }
+
+  if (typeof prop !== 'string') {
+    throw new TypeError('expected `prop` to be a string.');
+  }
+
+  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
+    return Object.defineProperty(obj, prop, val);
+  }
+
+  return Object.defineProperty(obj, prop, {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: val
+  });
+};
+
+
+/***/ }),
+/* 427 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isObject = __webpack_require__(404);
+var Emitter = __webpack_require__(428);
+var visit = __webpack_require__(429);
+var toPath = __webpack_require__(432);
+var union = __webpack_require__(433);
+var del = __webpack_require__(437);
+var get = __webpack_require__(435);
+var has = __webpack_require__(442);
+var set = __webpack_require__(445);
 
 /**
  * Create a `Cache` constructor that when instantiated will
@@ -40414,7 +40457,7 @@ module.exports.namespace = namespace;
 
 
 /***/ }),
-/* 427 */
+/* 428 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -40583,7 +40626,7 @@ Emitter.prototype.hasListeners = function(event){
 
 
 /***/ }),
-/* 428 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40596,8 +40639,8 @@ Emitter.prototype.hasListeners = function(event){
 
 
 
-var visit = __webpack_require__(429);
-var mapVisit = __webpack_require__(430);
+var visit = __webpack_require__(430);
+var mapVisit = __webpack_require__(431);
 
 module.exports = function(collection, method, val) {
   var result;
@@ -40620,7 +40663,7 @@ module.exports = function(collection, method, val) {
 
 
 /***/ }),
-/* 429 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40633,7 +40676,7 @@ module.exports = function(collection, method, val) {
 
 
 
-var isObject = __webpack_require__(411);
+var isObject = __webpack_require__(404);
 
 module.exports = function visit(thisArg, method, target, val) {
   if (!isObject(thisArg) && typeof thisArg !== 'function') {
@@ -40660,14 +40703,14 @@ module.exports = function visit(thisArg, method, target, val) {
 
 
 /***/ }),
-/* 430 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(29);
-var visit = __webpack_require__(429);
+var visit = __webpack_require__(430);
 
 /**
  * Map `visit` over an array of objects.
@@ -40704,7 +40747,7 @@ function isObject(val) {
 
 
 /***/ }),
-/* 431 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40717,7 +40760,7 @@ function isObject(val) {
 
 
 
-var typeOf = __webpack_require__(416);
+var typeOf = __webpack_require__(409);
 
 module.exports = function toPath(args) {
   if (typeOf(args) !== 'arguments') {
@@ -40744,16 +40787,16 @@ function filter(arr) {
 
 
 /***/ }),
-/* 432 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var isObject = __webpack_require__(395);
-var union = __webpack_require__(433);
-var get = __webpack_require__(434);
-var set = __webpack_require__(435);
+var union = __webpack_require__(434);
+var get = __webpack_require__(435);
+var set = __webpack_require__(436);
 
 module.exports = function unionValue(obj, prop, value) {
   if (!isObject(obj)) {
@@ -40781,7 +40824,7 @@ function arrayify(val) {
 
 
 /***/ }),
-/* 433 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40817,7 +40860,7 @@ module.exports = function union(init) {
 
 
 /***/ }),
-/* 434 */
+/* 435 */
 /***/ (function(module, exports) {
 
 /*!
@@ -40873,7 +40916,7 @@ function toString(val) {
 
 
 /***/ }),
-/* 435 */
+/* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40886,9 +40929,9 @@ function toString(val) {
 
 
 
-var toPath = __webpack_require__(431);
+var toPath = __webpack_require__(432);
 var extend = __webpack_require__(394);
-var isPlainObject = __webpack_require__(410);
+var isPlainObject = __webpack_require__(403);
 var isObject = __webpack_require__(395);
 
 module.exports = function(obj, path, val) {
@@ -40943,7 +40986,7 @@ module.exports = function(obj, path, val) {
 
 
 /***/ }),
-/* 436 */
+/* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40956,8 +40999,8 @@ module.exports = function(obj, path, val) {
 
 
 
-var isObject = __webpack_require__(411);
-var has = __webpack_require__(437);
+var isObject = __webpack_require__(404);
+var has = __webpack_require__(438);
 
 module.exports = function unset(obj, prop) {
   if (!isObject(obj)) {
@@ -40982,7 +41025,7 @@ module.exports = function unset(obj, prop) {
 
 
 /***/ }),
-/* 437 */
+/* 438 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40995,9 +41038,9 @@ module.exports = function unset(obj, prop) {
 
 
 
-var isObject = __webpack_require__(438);
-var hasValues = __webpack_require__(440);
-var get = __webpack_require__(434);
+var isObject = __webpack_require__(439);
+var hasValues = __webpack_require__(441);
+var get = __webpack_require__(435);
 
 module.exports = function(obj, prop, noZero) {
   if (isObject(obj)) {
@@ -41008,7 +41051,7 @@ module.exports = function(obj, prop, noZero) {
 
 
 /***/ }),
-/* 438 */
+/* 439 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41021,7 +41064,7 @@ module.exports = function(obj, prop, noZero) {
 
 
 
-var isArray = __webpack_require__(439);
+var isArray = __webpack_require__(440);
 
 module.exports = function isObject(val) {
   return val != null && typeof val === 'object' && isArray(val) === false;
@@ -41029,7 +41072,7 @@ module.exports = function isObject(val) {
 
 
 /***/ }),
-/* 439 */
+/* 440 */
 /***/ (function(module, exports) {
 
 var toString = {}.toString;
@@ -41040,7 +41083,7 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 440 */
+/* 441 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41083,7 +41126,7 @@ module.exports = function hasValue(o, noZero) {
 
 
 /***/ }),
-/* 441 */
+/* 442 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41096,9 +41139,9 @@ module.exports = function hasValue(o, noZero) {
 
 
 
-var isObject = __webpack_require__(411);
-var hasValues = __webpack_require__(442);
-var get = __webpack_require__(434);
+var isObject = __webpack_require__(404);
+var hasValues = __webpack_require__(443);
+var get = __webpack_require__(435);
 
 module.exports = function(val, prop) {
   return hasValues(isObject(val) && prop ? get(val, prop) : val);
@@ -41106,7 +41149,7 @@ module.exports = function(val, prop) {
 
 
 /***/ }),
-/* 442 */
+/* 443 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41119,8 +41162,8 @@ module.exports = function(val, prop) {
 
 
 
-var typeOf = __webpack_require__(443);
-var isNumber = __webpack_require__(415);
+var typeOf = __webpack_require__(444);
+var isNumber = __webpack_require__(408);
 
 module.exports = function hasValue(val) {
   // is-number checks for NaN and other edge cases
@@ -41173,7 +41216,7 @@ module.exports = function hasValue(val) {
 
 
 /***/ }),
-/* 443 */
+/* 444 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isBuffer = __webpack_require__(391);
@@ -41298,7 +41341,7 @@ module.exports = function kindOf(val) {
 
 
 /***/ }),
-/* 444 */
+/* 445 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41311,9 +41354,9 @@ module.exports = function kindOf(val) {
 
 
 
-var split = __webpack_require__(407);
+var split = __webpack_require__(400);
 var extend = __webpack_require__(394);
-var isPlainObject = __webpack_require__(410);
+var isPlainObject = __webpack_require__(403);
 var isObject = __webpack_require__(395);
 
 module.exports = function(obj, prop, val) {
@@ -41356,14 +41399,14 @@ module.exports = function(obj, prop, val) {
 
 
 /***/ }),
-/* 445 */
+/* 446 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isExtendable = __webpack_require__(446);
-var forIn = __webpack_require__(447);
+var isExtendable = __webpack_require__(447);
+var forIn = __webpack_require__(448);
 
 function mixinDeep(target, objects) {
   var len = arguments.length, i = 0;
@@ -41412,7 +41455,7 @@ module.exports = mixinDeep;
 
 
 /***/ }),
-/* 446 */
+/* 447 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41425,7 +41468,7 @@ module.exports = mixinDeep;
 
 
 
-var isPlainObject = __webpack_require__(410);
+var isPlainObject = __webpack_require__(403);
 
 module.exports = function isExtendable(val) {
   return isPlainObject(val) || typeof val === 'function' || Array.isArray(val);
@@ -41433,7 +41476,7 @@ module.exports = function isExtendable(val) {
 
 
 /***/ }),
-/* 447 */
+/* 448 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41456,7 +41499,7 @@ module.exports = function forIn(obj, fn, thisArg) {
 
 
 /***/ }),
-/* 448 */
+/* 449 */
 /***/ (function(module, exports) {
 
 /*!
@@ -41483,14 +41526,14 @@ module.exports = pascalcase;
 
 
 /***/ }),
-/* 449 */
+/* 450 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util = __webpack_require__(29);
-var utils = __webpack_require__(450);
+var utils = __webpack_require__(451);
 
 /**
  * Expose class utils
@@ -41855,7 +41898,7 @@ cu.bubble = function(Parent, events) {
 
 
 /***/ }),
-/* 450 */
+/* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41869,10 +41912,10 @@ var utils = {};
  * Lazily required module dependencies
  */
 
-utils.union = __webpack_require__(433);
-utils.define = __webpack_require__(451);
-utils.isObj = __webpack_require__(411);
-utils.staticExtend = __webpack_require__(458);
+utils.union = __webpack_require__(434);
+utils.define = __webpack_require__(386);
+utils.isObj = __webpack_require__(404);
+utils.staticExtend = __webpack_require__(452);
 
 
 /**
@@ -41883,609 +41926,7 @@ module.exports = utils;
 
 
 /***/ }),
-/* 451 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(452);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
 /* 452 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(453);
-var isAccessor = __webpack_require__(454);
-var isData = __webpack_require__(456);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 453 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 454 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(455);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 455 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 456 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(457);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 457 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 458 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42498,8 +41939,8 @@ module.exports = function kindOf(val) {
 
 
 
-var copy = __webpack_require__(459);
-var define = __webpack_require__(466);
+var copy = __webpack_require__(453);
+var define = __webpack_require__(386);
 var util = __webpack_require__(29);
 
 /**
@@ -42582,15 +42023,15 @@ module.exports = extend;
 
 
 /***/ }),
-/* 459 */
+/* 453 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var typeOf = __webpack_require__(416);
-var copyDescriptor = __webpack_require__(460);
-var define = __webpack_require__(461);
+var typeOf = __webpack_require__(409);
+var copyDescriptor = __webpack_require__(454);
+var define = __webpack_require__(386);
 
 /**
  * Copy static properties, prototype properties, and descriptors from one object to another.
@@ -42763,7 +42204,7 @@ module.exports.has = has;
 
 
 /***/ }),
-/* 460 */
+/* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42851,1578 +42292,16 @@ function isObject(val) {
 
 
 /***/ }),
-/* 461 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(462);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 462 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(463);
-var isAccessor = __webpack_require__(464);
-var isData = __webpack_require__(465);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 463 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 464 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(416);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 465 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(416);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 466 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(467);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 467 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(468);
-var isAccessor = __webpack_require__(469);
-var isData = __webpack_require__(471);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 468 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 469 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(470);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 470 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 471 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(472);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 472 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 473 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(474);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 474 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(475);
-var isAccessor = __webpack_require__(476);
-var isData = __webpack_require__(478);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 475 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 476 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(477);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 477 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 478 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(479);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 479 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 480 */
+/* 455 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var use = __webpack_require__(481);
-var define = __webpack_require__(473);
-var debug = __webpack_require__(490)('snapdragon:compiler');
-var utils = __webpack_require__(497);
+var use = __webpack_require__(456);
+var define = __webpack_require__(386);
+var debug = __webpack_require__(458)('snapdragon:compiler');
+var utils = __webpack_require__(465);
 
 /**
  * Create a new `Compiler` with the given `options`.
@@ -44576,7 +42455,7 @@ Compiler.prototype = {
 
     // source map support
     if (opts.sourcemap) {
-      var sourcemaps = __webpack_require__(516);
+      var sourcemaps = __webpack_require__(484);
       sourcemaps(this);
       this.mapVisit(this.ast.nodes);
       this.applySourceMaps();
@@ -44597,7 +42476,7 @@ module.exports = Compiler;
 
 
 /***/ }),
-/* 481 */
+/* 456 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44610,7 +42489,7 @@ module.exports = Compiler;
 
 
 
-var utils = __webpack_require__(482);
+var utils = __webpack_require__(457);
 
 module.exports = function base(app, opts) {
   if (!utils.isObject(app) && typeof app !== 'function') {
@@ -44725,7 +42604,7 @@ module.exports = function base(app, opts) {
 
 
 /***/ }),
-/* 482 */
+/* 457 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44739,8 +42618,8 @@ var utils = {};
  * Lazily required module dependencies
  */
 
-utils.define = __webpack_require__(483);
-utils.isObject = __webpack_require__(411);
+utils.define = __webpack_require__(386);
+utils.isObject = __webpack_require__(404);
 
 
 utils.isString = function(val) {
@@ -44755,609 +42634,7 @@ module.exports = utils;
 
 
 /***/ }),
-/* 483 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(484);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 484 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(485);
-var isAccessor = __webpack_require__(486);
-var isData = __webpack_require__(488);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 485 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 486 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(487);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 487 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 488 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(489);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 489 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 490 */
+/* 458 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -45366,14 +42643,14 @@ module.exports = function kindOf(val) {
  */
 
 if (typeof process !== 'undefined' && process.type === 'renderer') {
-  module.exports = __webpack_require__(491);
+  module.exports = __webpack_require__(459);
 } else {
-  module.exports = __webpack_require__(494);
+  module.exports = __webpack_require__(462);
 }
 
 
 /***/ }),
-/* 491 */
+/* 459 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -45382,7 +42659,7 @@ if (typeof process !== 'undefined' && process.type === 'renderer') {
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(492);
+exports = module.exports = __webpack_require__(460);
 exports.log = log;
 exports.formatArgs = formatArgs;
 exports.save = save;
@@ -45564,7 +42841,7 @@ function localstorage() {
 
 
 /***/ }),
-/* 492 */
+/* 460 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -45580,7 +42857,7 @@ exports.coerce = coerce;
 exports.disable = disable;
 exports.enable = enable;
 exports.enabled = enabled;
-exports.humanize = __webpack_require__(493);
+exports.humanize = __webpack_require__(461);
 
 /**
  * The currently active debug mode names, and names to skip.
@@ -45772,7 +43049,7 @@ function coerce(val) {
 
 
 /***/ }),
-/* 493 */
+/* 461 */
 /***/ (function(module, exports) {
 
 /**
@@ -45930,14 +43207,14 @@ function plural(ms, n, name) {
 
 
 /***/ }),
-/* 494 */
+/* 462 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var tty = __webpack_require__(495);
+var tty = __webpack_require__(463);
 var util = __webpack_require__(29);
 
 /**
@@ -45946,7 +43223,7 @@ var util = __webpack_require__(29);
  * Expose `debug()` as the module.
  */
 
-exports = module.exports = __webpack_require__(492);
+exports = module.exports = __webpack_require__(460);
 exports.init = init;
 exports.log = log;
 exports.formatArgs = formatArgs;
@@ -46125,7 +43402,7 @@ function createWritableStdioStream (fd) {
 
     case 'PIPE':
     case 'TCP':
-      var net = __webpack_require__(496);
+      var net = __webpack_require__(464);
       stream = new net.Socket({
         fd: fd,
         readable: false,
@@ -46184,19 +43461,19 @@ exports.enable(load());
 
 
 /***/ }),
-/* 495 */
+/* 463 */
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
-/* 496 */
+/* 464 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 497 */
+/* 465 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -46207,8 +43484,8 @@ module.exports = require("net");
  */
 
 exports.extend = __webpack_require__(394);
-exports.SourceMap = __webpack_require__(498);
-exports.sourceMapResolve = __webpack_require__(509);
+exports.SourceMap = __webpack_require__(466);
+exports.sourceMapResolve = __webpack_require__(477);
 
 /**
  * Convert backslash in the given string to forward slashes
@@ -46251,7 +43528,7 @@ exports.last = function(arr, n) {
 
 
 /***/ }),
-/* 498 */
+/* 466 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -46259,13 +43536,13 @@ exports.last = function(arr, n) {
  * Licensed under the New BSD license. See LICENSE.txt or:
  * http://opensource.org/licenses/BSD-3-Clause
  */
-exports.SourceMapGenerator = __webpack_require__(499).SourceMapGenerator;
-exports.SourceMapConsumer = __webpack_require__(505).SourceMapConsumer;
-exports.SourceNode = __webpack_require__(508).SourceNode;
+exports.SourceMapGenerator = __webpack_require__(467).SourceMapGenerator;
+exports.SourceMapConsumer = __webpack_require__(473).SourceMapConsumer;
+exports.SourceNode = __webpack_require__(476).SourceNode;
 
 
 /***/ }),
-/* 499 */
+/* 467 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46275,10 +43552,10 @@ exports.SourceNode = __webpack_require__(508).SourceNode;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var base64VLQ = __webpack_require__(500);
-var util = __webpack_require__(502);
-var ArraySet = __webpack_require__(503).ArraySet;
-var MappingList = __webpack_require__(504).MappingList;
+var base64VLQ = __webpack_require__(468);
+var util = __webpack_require__(470);
+var ArraySet = __webpack_require__(471).ArraySet;
+var MappingList = __webpack_require__(472).MappingList;
 
 /**
  * An instance of the SourceMapGenerator represents a source map which is
@@ -46687,7 +43964,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
 
 
 /***/ }),
-/* 500 */
+/* 468 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46727,7 +44004,7 @@ exports.SourceMapGenerator = SourceMapGenerator;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var base64 = __webpack_require__(501);
+var base64 = __webpack_require__(469);
 
 // A single base 64 digit can contain 6 bits of data. For the base 64 variable
 // length quantities we use in the source map spec, the first bit is the sign,
@@ -46833,7 +44110,7 @@ exports.decode = function base64VLQ_decode(aStr, aIndex, aOutParam) {
 
 
 /***/ }),
-/* 501 */
+/* 469 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -46906,7 +44183,7 @@ exports.decode = function (charCode) {
 
 
 /***/ }),
-/* 502 */
+/* 470 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -47329,7 +44606,7 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
 
 
 /***/ }),
-/* 503 */
+/* 471 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -47339,7 +44616,7 @@ exports.compareByGeneratedPositionsInflated = compareByGeneratedPositionsInflate
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(502);
+var util = __webpack_require__(470);
 var has = Object.prototype.hasOwnProperty;
 var hasNativeMap = typeof Map !== "undefined";
 
@@ -47456,7 +44733,7 @@ exports.ArraySet = ArraySet;
 
 
 /***/ }),
-/* 504 */
+/* 472 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -47466,7 +44743,7 @@ exports.ArraySet = ArraySet;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(502);
+var util = __webpack_require__(470);
 
 /**
  * Determine whether mappingB is after mappingA with respect to generated
@@ -47541,7 +44818,7 @@ exports.MappingList = MappingList;
 
 
 /***/ }),
-/* 505 */
+/* 473 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -47551,11 +44828,11 @@ exports.MappingList = MappingList;
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var util = __webpack_require__(502);
-var binarySearch = __webpack_require__(506);
-var ArraySet = __webpack_require__(503).ArraySet;
-var base64VLQ = __webpack_require__(500);
-var quickSort = __webpack_require__(507).quickSort;
+var util = __webpack_require__(470);
+var binarySearch = __webpack_require__(474);
+var ArraySet = __webpack_require__(471).ArraySet;
+var base64VLQ = __webpack_require__(468);
+var quickSort = __webpack_require__(475).quickSort;
 
 function SourceMapConsumer(aSourceMap) {
   var sourceMap = aSourceMap;
@@ -48629,7 +45906,7 @@ exports.IndexedSourceMapConsumer = IndexedSourceMapConsumer;
 
 
 /***/ }),
-/* 506 */
+/* 474 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -48746,7 +46023,7 @@ exports.search = function search(aNeedle, aHaystack, aCompare, aBias) {
 
 
 /***/ }),
-/* 507 */
+/* 475 */
 /***/ (function(module, exports) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -48866,7 +46143,7 @@ exports.quickSort = function (ary, comparator) {
 
 
 /***/ }),
-/* 508 */
+/* 476 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* -*- Mode: js; js-indent-level: 2; -*- */
@@ -48876,8 +46153,8 @@ exports.quickSort = function (ary, comparator) {
  * http://opensource.org/licenses/BSD-3-Clause
  */
 
-var SourceMapGenerator = __webpack_require__(499).SourceMapGenerator;
-var util = __webpack_require__(502);
+var SourceMapGenerator = __webpack_require__(467).SourceMapGenerator;
+var util = __webpack_require__(470);
 
 // Matches a Windows-style `\r\n` newline or a `\n` newline used by all other
 // operating systems these days (capturing the result).
@@ -49285,17 +46562,17 @@ exports.SourceNode = SourceNode;
 
 
 /***/ }),
-/* 509 */
+/* 477 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014, 2015, 2016, 2017 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
-var sourceMappingURL   = __webpack_require__(510)
-var resolveUrl         = __webpack_require__(511)
-var decodeUriComponent = __webpack_require__(512)
-var urix               = __webpack_require__(514)
-var atob               = __webpack_require__(515)
+var sourceMappingURL   = __webpack_require__(478)
+var resolveUrl         = __webpack_require__(479)
+var decodeUriComponent = __webpack_require__(480)
+var urix               = __webpack_require__(482)
+var atob               = __webpack_require__(483)
 
 
 
@@ -49593,7 +46870,7 @@ module.exports = {
 
 
 /***/ }),
-/* 510 */
+/* 478 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// Copyright 2014 Simon Lydell
@@ -49656,7 +46933,7 @@ void (function(root, factory) {
 
 
 /***/ }),
-/* 511 */
+/* 479 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014 Simon Lydell
@@ -49674,13 +46951,13 @@ module.exports = resolveUrl
 
 
 /***/ }),
-/* 512 */
+/* 480 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2017 Simon Lydell
 // X11 (“MIT”) Licensed. (See LICENSE.)
 
-var decodeUriComponent = __webpack_require__(513)
+var decodeUriComponent = __webpack_require__(481)
 
 function customDecodeUriComponent(string) {
   // `decodeUriComponent` turns `+` into ` `, but that's not wanted.
@@ -49691,7 +46968,7 @@ module.exports = customDecodeUriComponent
 
 
 /***/ }),
-/* 513 */
+/* 481 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49792,7 +47069,7 @@ module.exports = function (encodedURI) {
 
 
 /***/ }),
-/* 514 */
+/* 482 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright 2014 Simon Lydell
@@ -49815,7 +47092,7 @@ module.exports = urix
 
 
 /***/ }),
-/* 515 */
+/* 483 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49829,7 +47106,7 @@ module.exports = atob.atob = atob;
 
 
 /***/ }),
-/* 516 */
+/* 484 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -49837,8 +47114,8 @@ module.exports = atob.atob = atob;
 
 var fs = __webpack_require__(23);
 var path = __webpack_require__(16);
-var define = __webpack_require__(473);
-var utils = __webpack_require__(497);
+var define = __webpack_require__(386);
+var utils = __webpack_require__(465);
 
 /**
  * Expose `mixin()`.
@@ -49981,19 +47258,19 @@ exports.comment = function(node) {
 
 
 /***/ }),
-/* 517 */
+/* 485 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var use = __webpack_require__(481);
+var use = __webpack_require__(456);
 var util = __webpack_require__(29);
-var Cache = __webpack_require__(518);
-var define = __webpack_require__(473);
-var debug = __webpack_require__(490)('snapdragon:parser');
-var Position = __webpack_require__(519);
-var utils = __webpack_require__(497);
+var Cache = __webpack_require__(486);
+var define = __webpack_require__(386);
+var debug = __webpack_require__(458)('snapdragon:parser');
+var Position = __webpack_require__(487);
+var utils = __webpack_require__(465);
 
 /**
  * Create a new `Parser` with the given `input` and `options`.
@@ -50521,7 +47798,7 @@ module.exports = Parser;
 
 
 /***/ }),
-/* 518 */
+/* 486 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50628,13 +47905,13 @@ MapCache.prototype.del = function mapDelete(key) {
 
 
 /***/ }),
-/* 519 */
+/* 487 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var define = __webpack_require__(473);
+var define = __webpack_require__(386);
 
 /**
  * Store position for a node
@@ -50649,14 +47926,14 @@ module.exports = function Position(start, parser) {
 
 
 /***/ }),
-/* 520 */
+/* 488 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var nanomatch = __webpack_require__(521);
-var extglob = __webpack_require__(531);
+var nanomatch = __webpack_require__(489);
+var extglob = __webpack_require__(500);
 
 module.exports = function(snapdragon) {
   var compilers = snapdragon.compiler.compilers;
@@ -50733,7 +48010,7 @@ function escapeExtglobs(compiler) {
 
 
 /***/ }),
-/* 521 */
+/* 489 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -50751,10 +48028,10 @@ var extend = __webpack_require__(394);
  * Local dependencies
  */
 
-var compilers = __webpack_require__(522);
-var parsers = __webpack_require__(523);
-var cache = __webpack_require__(525);
-var utils = __webpack_require__(527);
+var compilers = __webpack_require__(490);
+var parsers = __webpack_require__(491);
+var cache = __webpack_require__(493);
+var utils = __webpack_require__(495);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -51583,7 +48860,7 @@ module.exports = nanomatch;
 
 
 /***/ }),
-/* 522 */
+/* 490 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51909,7 +49186,7 @@ module.exports = function(nanomatch, options) {
 
 
 /***/ }),
-/* 523 */
+/* 491 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -51917,7 +49194,7 @@ module.exports = function(nanomatch, options) {
 
 var regexNot = __webpack_require__(396);
 var toRegex = __webpack_require__(385);
-var isOdd = __webpack_require__(524);
+var isOdd = __webpack_require__(492);
 
 /**
  * Characters to use in negation regex (we want to "not" match
@@ -52304,7 +49581,7 @@ module.exports.not = NOT_REGEX;
 
 
 /***/ }),
-/* 524 */
+/* 492 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52317,7 +49594,7 @@ module.exports.not = NOT_REGEX;
 
 
 
-var isNumber = __webpack_require__(415);
+var isNumber = __webpack_require__(408);
 
 module.exports = function isOdd(i) {
   if (!isNumber(i)) {
@@ -52331,14 +49608,14 @@ module.exports = function isOdd(i) {
 
 
 /***/ }),
-/* 525 */
+/* 493 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = new (__webpack_require__(526))();
+module.exports = new (__webpack_require__(494))();
 
 
 /***/ }),
-/* 526 */
+/* 494 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52351,7 +49628,7 @@ module.exports = new (__webpack_require__(526))();
 
 
 
-var MapCache = __webpack_require__(518);
+var MapCache = __webpack_require__(486);
 
 /**
  * Create a new `FragmentCache` with an optional object to use for `caches`.
@@ -52473,7 +49750,7 @@ exports = module.exports = FragmentCache;
 
 
 /***/ }),
-/* 527 */
+/* 495 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52487,11 +49764,11 @@ var path = __webpack_require__(16);
  */
 
 var Snapdragon = __webpack_require__(424);
-utils.define = __webpack_require__(398);
-utils.diff = __webpack_require__(528);
+utils.define = __webpack_require__(496);
+utils.diff = __webpack_require__(497);
 utils.extend = __webpack_require__(394);
-utils.pick = __webpack_require__(529);
-utils.typeOf = __webpack_require__(530);
+utils.pick = __webpack_require__(498);
+utils.typeOf = __webpack_require__(499);
 utils.unique = __webpack_require__(397);
 
 /**
@@ -52858,7 +50135,45 @@ utils.unixify = function(options) {
 
 
 /***/ }),
-/* 528 */
+/* 496 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * define-property <https://github.com/jonschlinkert/define-property>
+ *
+ * Copyright (c) 2015, 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+
+
+var isDescriptor = __webpack_require__(416);
+
+module.exports = function defineProperty(obj, prop, val) {
+  if (typeof obj !== 'object' && typeof obj !== 'function') {
+    throw new TypeError('expected an object or function.');
+  }
+
+  if (typeof prop !== 'string') {
+    throw new TypeError('expected `prop` to be a string.');
+  }
+
+  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
+    return Object.defineProperty(obj, prop, val);
+  }
+
+  return Object.defineProperty(obj, prop, {
+    configurable: true,
+    enumerable: false,
+    writable: true,
+    value: val
+  });
+};
+
+
+/***/ }),
+/* 497 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52912,7 +50227,7 @@ function diffArray(one, two) {
 
 
 /***/ }),
-/* 529 */
+/* 498 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -52925,7 +50240,7 @@ function diffArray(one, two) {
 
 
 
-var isObject = __webpack_require__(411);
+var isObject = __webpack_require__(404);
 
 module.exports = function pick(obj, keys) {
   if (!isObject(obj) && typeof obj !== 'function') {
@@ -52954,7 +50269,7 @@ module.exports = function pick(obj, keys) {
 
 
 /***/ }),
-/* 530 */
+/* 499 */
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -53107,7 +50422,7 @@ function isBuffer(val) {
 
 
 /***/ }),
-/* 531 */
+/* 500 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53125,10 +50440,10 @@ var toRegex = __webpack_require__(385);
  * Local dependencies
  */
 
-var compilers = __webpack_require__(532);
-var parsers = __webpack_require__(545);
-var Extglob = __webpack_require__(547);
-var utils = __webpack_require__(546);
+var compilers = __webpack_require__(501);
+var parsers = __webpack_require__(507);
+var Extglob = __webpack_require__(509);
+var utils = __webpack_require__(508);
 var MAX_LENGTH = 1024 * 64;
 
 /**
@@ -53445,13 +50760,13 @@ module.exports = extglob;
 
 
 /***/ }),
-/* 532 */
+/* 501 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var brackets = __webpack_require__(533);
+var brackets = __webpack_require__(502);
 
 /**
  * Extglob compilers
@@ -53621,7 +50936,7 @@ module.exports = function(extglob) {
 
 
 /***/ }),
-/* 533 */
+/* 502 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53631,14 +50946,14 @@ module.exports = function(extglob) {
  * Local dependencies
  */
 
-var compilers = __webpack_require__(534);
-var parsers = __webpack_require__(536);
+var compilers = __webpack_require__(503);
+var parsers = __webpack_require__(505);
 
 /**
  * Module dependencies
  */
 
-var debug = __webpack_require__(490)('expand-brackets');
+var debug = __webpack_require__(458)('expand-brackets');
 var extend = __webpack_require__(394);
 var Snapdragon = __webpack_require__(424);
 var toRegex = __webpack_require__(385);
@@ -53839,13 +51154,13 @@ module.exports = brackets;
 
 
 /***/ }),
-/* 534 */
+/* 503 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var posix = __webpack_require__(535);
+var posix = __webpack_require__(504);
 
 module.exports = function(brackets) {
   brackets.compiler
@@ -53933,7 +51248,7 @@ module.exports = function(brackets) {
 
 
 /***/ }),
-/* 535 */
+/* 504 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -53962,14 +51277,14 @@ module.exports = {
 
 
 /***/ }),
-/* 536 */
+/* 505 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var utils = __webpack_require__(537);
-var define = __webpack_require__(538);
+var utils = __webpack_require__(506);
+var define = __webpack_require__(386);
 
 /**
  * Text regex
@@ -54188,7 +51503,7 @@ module.exports.TEXT_REGEX = TEXT_REGEX;
 
 
 /***/ }),
-/* 537 */
+/* 506 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -54229,617 +51544,15 @@ exports.createRegex = function(pattern, include) {
 
 
 /***/ }),
-/* 538 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * define-property <https://github.com/jonschlinkert/define-property>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var isDescriptor = __webpack_require__(539);
-
-module.exports = function defineProperty(obj, prop, val) {
-  if (typeof obj !== 'object' && typeof obj !== 'function') {
-    throw new TypeError('expected an object or function.');
-  }
-
-  if (typeof prop !== 'string') {
-    throw new TypeError('expected `prop` to be a string.');
-  }
-
-  if (isDescriptor(val) && ('set' in val || 'get' in val)) {
-    return Object.defineProperty(obj, prop, val);
-  }
-
-  return Object.defineProperty(obj, prop, {
-    configurable: true,
-    enumerable: false,
-    writable: true,
-    value: val
-  });
-};
-
-
-/***/ }),
-/* 539 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-descriptor <https://github.com/jonschlinkert/is-descriptor>
- *
- * Copyright (c) 2015-2017, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(540);
-var isAccessor = __webpack_require__(541);
-var isData = __webpack_require__(543);
-
-module.exports = function isDescriptor(obj, key) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-  if ('get' in obj) {
-    return isAccessor(obj, key);
-  }
-  return isData(obj, key);
-};
-
-
-/***/ }),
-/* 540 */
-/***/ (function(module, exports) {
-
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  var type = typeof val;
-
-  // primitivies
-  if (type === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (type === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (type === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (type === 'function' || val instanceof Function) {
-    if (typeof val.constructor.name !== 'undefined' && val.constructor.name.slice(0, 9) === 'Generator') {
-      return 'generatorfunction';
-    }
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-  if (type === '[object Promise]') {
-    return 'promise';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-  
-  if (type === '[object Map Iterator]') {
-    return 'mapiterator';
-  }
-  if (type === '[object Set Iterator]') {
-    return 'setiterator';
-  }
-  if (type === '[object String Iterator]') {
-    return 'stringiterator';
-  }
-  if (type === '[object Array Iterator]') {
-    return 'arrayiterator';
-  }
-  
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-/**
- * If you need to support Safari 5-7 (8-10 yr-old browser),
- * take a look at https://github.com/feross/is-buffer
- */
-
-function isBuffer(val) {
-  return val.constructor
-    && typeof val.constructor.isBuffer === 'function'
-    && val.constructor.isBuffer(val);
-}
-
-
-/***/ }),
-/* 541 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-accessor-descriptor <https://github.com/jonschlinkert/is-accessor-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(542);
-
-// accessor descriptor properties
-var accessor = {
-  get: 'function',
-  set: 'function',
-  configurable: 'boolean',
-  enumerable: 'boolean'
-};
-
-function isAccessorDescriptor(obj, prop) {
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (has(obj, 'value') || has(obj, 'writable')) {
-    return false;
-  }
-
-  if (!has(obj, 'get') || typeof obj.get !== 'function') {
-    return false;
-  }
-
-  // tldr: it's valid to have "set" be undefined
-  // "set" might be undefined if `Object.getOwnPropertyDescriptor`
-  // was used to get the value, and only `get` was defined by the user
-  if (has(obj, 'set') && typeof obj[key] !== 'function' && typeof obj[key] !== 'undefined') {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (!accessor.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === accessor[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-function has(obj, key) {
-  return {}.hasOwnProperty.call(obj, key);
-}
-
-/**
- * Expose `isAccessorDescriptor`
- */
-
-module.exports = isAccessorDescriptor;
-
-
-/***/ }),
-/* 542 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 543 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*!
- * is-data-descriptor <https://github.com/jonschlinkert/is-data-descriptor>
- *
- * Copyright (c) 2015, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-
-
-var typeOf = __webpack_require__(544);
-
-// data descriptor properties
-var data = {
-  configurable: 'boolean',
-  enumerable: 'boolean',
-  writable: 'boolean'
-};
-
-function isDataDescriptor(obj, prop) {
-  if (typeOf(obj) !== 'object') {
-    return false;
-  }
-
-  if (typeof prop === 'string') {
-    var val = Object.getOwnPropertyDescriptor(obj, prop);
-    return typeof val !== 'undefined';
-  }
-
-  if (!('value' in obj) && !('writable' in obj)) {
-    return false;
-  }
-
-  for (var key in obj) {
-    if (key === 'value') continue;
-
-    if (!data.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (typeOf(obj[key]) === data[key]) {
-      continue;
-    }
-
-    if (typeof obj[key] !== 'undefined') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * Expose `isDataDescriptor`
- */
-
-module.exports = isDataDescriptor;
-
-
-/***/ }),
-/* 544 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var isBuffer = __webpack_require__(391);
-var toString = Object.prototype.toString;
-
-/**
- * Get the native `typeof` a value.
- *
- * @param  {*} `val`
- * @return {*} Native javascript type
- */
-
-module.exports = function kindOf(val) {
-  // primitivies
-  if (typeof val === 'undefined') {
-    return 'undefined';
-  }
-  if (val === null) {
-    return 'null';
-  }
-  if (val === true || val === false || val instanceof Boolean) {
-    return 'boolean';
-  }
-  if (typeof val === 'string' || val instanceof String) {
-    return 'string';
-  }
-  if (typeof val === 'number' || val instanceof Number) {
-    return 'number';
-  }
-
-  // functions
-  if (typeof val === 'function' || val instanceof Function) {
-    return 'function';
-  }
-
-  // array
-  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
-    return 'array';
-  }
-
-  // check for instances of RegExp and Date before calling `toString`
-  if (val instanceof RegExp) {
-    return 'regexp';
-  }
-  if (val instanceof Date) {
-    return 'date';
-  }
-
-  // other objects
-  var type = toString.call(val);
-
-  if (type === '[object RegExp]') {
-    return 'regexp';
-  }
-  if (type === '[object Date]') {
-    return 'date';
-  }
-  if (type === '[object Arguments]') {
-    return 'arguments';
-  }
-  if (type === '[object Error]') {
-    return 'error';
-  }
-
-  // buffer
-  if (isBuffer(val)) {
-    return 'buffer';
-  }
-
-  // es6: Map, WeakMap, Set, WeakSet
-  if (type === '[object Set]') {
-    return 'set';
-  }
-  if (type === '[object WeakSet]') {
-    return 'weakset';
-  }
-  if (type === '[object Map]') {
-    return 'map';
-  }
-  if (type === '[object WeakMap]') {
-    return 'weakmap';
-  }
-  if (type === '[object Symbol]') {
-    return 'symbol';
-  }
-
-  // typed arrays
-  if (type === '[object Int8Array]') {
-    return 'int8array';
-  }
-  if (type === '[object Uint8Array]') {
-    return 'uint8array';
-  }
-  if (type === '[object Uint8ClampedArray]') {
-    return 'uint8clampedarray';
-  }
-  if (type === '[object Int16Array]') {
-    return 'int16array';
-  }
-  if (type === '[object Uint16Array]') {
-    return 'uint16array';
-  }
-  if (type === '[object Int32Array]') {
-    return 'int32array';
-  }
-  if (type === '[object Uint32Array]') {
-    return 'uint32array';
-  }
-  if (type === '[object Float32Array]') {
-    return 'float32array';
-  }
-  if (type === '[object Float64Array]') {
-    return 'float64array';
-  }
-
-  // must be a plain object
-  return 'object';
-};
-
-
-/***/ }),
-/* 545 */
+/* 507 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var brackets = __webpack_require__(533);
-var define = __webpack_require__(398);
-var utils = __webpack_require__(546);
+var brackets = __webpack_require__(502);
+var define = __webpack_require__(496);
+var utils = __webpack_require__(508);
 
 /**
  * Characters to use in text regex (we want to "not" match
@@ -54994,14 +51707,14 @@ module.exports = parsers;
 
 
 /***/ }),
-/* 546 */
+/* 508 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var regex = __webpack_require__(396);
-var Cache = __webpack_require__(526);
+var Cache = __webpack_require__(494);
 
 /**
  * Utils
@@ -55070,7 +51783,7 @@ utils.createRegex = function(str) {
 
 
 /***/ }),
-/* 547 */
+/* 509 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55081,15 +51794,15 @@ utils.createRegex = function(str) {
  */
 
 var Snapdragon = __webpack_require__(424);
-var define = __webpack_require__(398);
+var define = __webpack_require__(496);
 var extend = __webpack_require__(394);
 
 /**
  * Local dependencies
  */
 
-var compilers = __webpack_require__(532);
-var parsers = __webpack_require__(545);
+var compilers = __webpack_require__(501);
+var parsers = __webpack_require__(507);
 
 /**
  * Customize Snapdragon parser and renderer
@@ -55155,14 +51868,14 @@ module.exports = Extglob;
 
 
 /***/ }),
-/* 548 */
+/* 510 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var extglob = __webpack_require__(531);
-var nanomatch = __webpack_require__(521);
+var extglob = __webpack_require__(500);
+var nanomatch = __webpack_require__(489);
 var regexNot = __webpack_require__(396);
 var toRegex = __webpack_require__(385);
 var not;
@@ -55245,14 +51958,14 @@ function textRegex(pattern) {
 
 
 /***/ }),
-/* 549 */
+/* 511 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = new (__webpack_require__(526))();
+module.exports = new (__webpack_require__(494))();
 
 
 /***/ }),
-/* 550 */
+/* 512 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55266,11 +51979,11 @@ var path = __webpack_require__(16);
  */
 
 var Snapdragon = __webpack_require__(424);
-utils.define = __webpack_require__(398);
-utils.diff = __webpack_require__(528);
+utils.define = __webpack_require__(496);
+utils.diff = __webpack_require__(497);
 utils.extend = __webpack_require__(394);
-utils.pick = __webpack_require__(529);
-utils.typeOf = __webpack_require__(551);
+utils.pick = __webpack_require__(498);
+utils.typeOf = __webpack_require__(513);
 utils.unique = __webpack_require__(397);
 
 /**
@@ -55568,7 +52281,7 @@ utils.unixify = function(options) {
 
 
 /***/ }),
-/* 551 */
+/* 513 */
 /***/ (function(module, exports) {
 
 var toString = Object.prototype.toString;
@@ -55703,7 +52416,7 @@ function isBuffer(val) {
 
 
 /***/ }),
-/* 552 */
+/* 514 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55719,8 +52432,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var readdir = __webpack_require__(553);
-var reader_1 = __webpack_require__(566);
+var readdir = __webpack_require__(515);
+var reader_1 = __webpack_require__(528);
 var ReaderAsync = /** @class */ (function (_super) {
     __extends(ReaderAsync, _super);
     function ReaderAsync() {
@@ -55756,15 +52469,15 @@ exports.default = ReaderAsync;
 
 
 /***/ }),
-/* 553 */
+/* 515 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const readdirSync = __webpack_require__(554);
-const readdirAsync = __webpack_require__(562);
-const readdirStream = __webpack_require__(565);
+const readdirSync = __webpack_require__(516);
+const readdirAsync = __webpack_require__(524);
+const readdirStream = __webpack_require__(527);
 
 module.exports = exports = readdirAsyncPath;
 exports.readdir = exports.readdirAsync = exports.async = readdirAsyncPath;
@@ -55848,7 +52561,7 @@ function readdirStreamStat (dir, options) {
 
 
 /***/ }),
-/* 554 */
+/* 516 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55856,11 +52569,11 @@ function readdirStreamStat (dir, options) {
 
 module.exports = readdirSync;
 
-const DirectoryReader = __webpack_require__(555);
+const DirectoryReader = __webpack_require__(517);
 
 let syncFacade = {
-  fs: __webpack_require__(560),
-  forEach: __webpack_require__(561),
+  fs: __webpack_require__(522),
+  forEach: __webpack_require__(523),
   sync: true
 };
 
@@ -55889,7 +52602,7 @@ function readdirSync (dir, options, internalOptions) {
 
 
 /***/ }),
-/* 555 */
+/* 517 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -55898,9 +52611,9 @@ function readdirSync (dir, options, internalOptions) {
 const Readable = __webpack_require__(28).Readable;
 const EventEmitter = __webpack_require__(45).EventEmitter;
 const path = __webpack_require__(16);
-const normalizeOptions = __webpack_require__(556);
-const stat = __webpack_require__(558);
-const call = __webpack_require__(559);
+const normalizeOptions = __webpack_require__(518);
+const stat = __webpack_require__(520);
+const call = __webpack_require__(521);
 
 /**
  * Asynchronously reads the contents of a directory and streams the results
@@ -56276,14 +52989,14 @@ module.exports = DirectoryReader;
 
 
 /***/ }),
-/* 556 */
+/* 518 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const path = __webpack_require__(16);
-const globToRegExp = __webpack_require__(557);
+const globToRegExp = __webpack_require__(519);
 
 module.exports = normalizeOptions;
 
@@ -56460,7 +53173,7 @@ function normalizeOptions (options, internalOptions) {
 
 
 /***/ }),
-/* 557 */
+/* 519 */
 /***/ (function(module, exports) {
 
 module.exports = function (glob, opts) {
@@ -56597,13 +53310,13 @@ module.exports = function (glob, opts) {
 
 
 /***/ }),
-/* 558 */
+/* 520 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const call = __webpack_require__(559);
+const call = __webpack_require__(521);
 
 module.exports = stat;
 
@@ -56678,7 +53391,7 @@ function symlinkStat (fs, path, lstats, callback) {
 
 
 /***/ }),
-/* 559 */
+/* 521 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56739,14 +53452,14 @@ function callOnce (fn) {
 
 
 /***/ }),
-/* 560 */
+/* 522 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 const fs = __webpack_require__(23);
-const call = __webpack_require__(559);
+const call = __webpack_require__(521);
 
 /**
  * A facade around {@link fs.readdirSync} that allows it to be called
@@ -56810,7 +53523,7 @@ exports.lstat = function (path, callback) {
 
 
 /***/ }),
-/* 561 */
+/* 523 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56839,7 +53552,7 @@ function syncForEach (array, iterator, done) {
 
 
 /***/ }),
-/* 562 */
+/* 524 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56847,12 +53560,12 @@ function syncForEach (array, iterator, done) {
 
 module.exports = readdirAsync;
 
-const maybe = __webpack_require__(563);
-const DirectoryReader = __webpack_require__(555);
+const maybe = __webpack_require__(525);
+const DirectoryReader = __webpack_require__(517);
 
 let asyncFacade = {
   fs: __webpack_require__(23),
-  forEach: __webpack_require__(564),
+  forEach: __webpack_require__(526),
   async: true
 };
 
@@ -56894,7 +53607,7 @@ function readdirAsync (dir, options, callback, internalOptions) {
 
 
 /***/ }),
-/* 563 */
+/* 525 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56921,7 +53634,7 @@ module.exports = function maybe (cb, promise) {
 
 
 /***/ }),
-/* 564 */
+/* 526 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56957,7 +53670,7 @@ function asyncForEach (array, iterator, done) {
 
 
 /***/ }),
-/* 565 */
+/* 527 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56965,11 +53678,11 @@ function asyncForEach (array, iterator, done) {
 
 module.exports = readdirStream;
 
-const DirectoryReader = __webpack_require__(555);
+const DirectoryReader = __webpack_require__(517);
 
 let streamFacade = {
   fs: __webpack_require__(23),
-  forEach: __webpack_require__(564),
+  forEach: __webpack_require__(526),
   async: true
 };
 
@@ -56989,15 +53702,15 @@ function readdirStream (dir, options, internalOptions) {
 
 
 /***/ }),
-/* 566 */
+/* 528 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var path = __webpack_require__(16);
-var deep_1 = __webpack_require__(567);
-var entry_1 = __webpack_require__(570);
+var deep_1 = __webpack_require__(529);
+var entry_1 = __webpack_require__(532);
 var Reader = /** @class */ (function () {
     function Reader(options) {
         this.options = options;
@@ -57063,14 +53776,14 @@ exports.default = Reader;
 
 
 /***/ }),
-/* 567 */
+/* 529 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var arrayUtils = __webpack_require__(568);
-var pathUtils = __webpack_require__(569);
+var arrayUtils = __webpack_require__(530);
+var pathUtils = __webpack_require__(531);
 var patternUtils = __webpack_require__(378);
 var DeepFilter = /** @class */ (function () {
     function DeepFilter(options, micromatchOptions) {
@@ -57146,7 +53859,7 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 568 */
+/* 530 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57169,7 +53882,7 @@ exports.max = max;
 
 
 /***/ }),
-/* 569 */
+/* 531 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57187,7 +53900,7 @@ exports.isDotDirectory = isDotDirectory;
 
 
 /***/ }),
-/* 570 */
+/* 532 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57265,7 +53978,7 @@ exports.default = DeepFilter;
 
 
 /***/ }),
-/* 571 */
+/* 533 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57282,8 +53995,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var stream = __webpack_require__(28);
-var readdir = __webpack_require__(553);
-var reader_1 = __webpack_require__(566);
+var readdir = __webpack_require__(515);
+var reader_1 = __webpack_require__(528);
 var TransformStream = /** @class */ (function (_super) {
     __extends(TransformStream, _super);
     function TransformStream(reader) {
@@ -57326,7 +54039,7 @@ exports.default = ReaderStream;
 
 
 /***/ }),
-/* 572 */
+/* 534 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57342,8 +54055,8 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var readdir = __webpack_require__(553);
-var reader_1 = __webpack_require__(566);
+var readdir = __webpack_require__(515);
+var reader_1 = __webpack_require__(528);
 var ReaderSync = /** @class */ (function (_super) {
     __extends(ReaderSync, _super);
     function ReaderSync() {
@@ -57378,7 +54091,7 @@ exports.default = ReaderSync;
 
 
 /***/ }),
-/* 573 */
+/* 535 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57433,7 +54146,7 @@ module.exports.sync = (input, opts) => {
 
 
 /***/ }),
-/* 574 */
+/* 536 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57441,9 +54154,9 @@ module.exports.sync = (input, opts) => {
 const fs = __webpack_require__(23);
 const path = __webpack_require__(16);
 const fastGlob = __webpack_require__(372);
-const gitIgnore = __webpack_require__(575);
+const gitIgnore = __webpack_require__(537);
 const pify = __webpack_require__(62);
-const slash = __webpack_require__(576);
+const slash = __webpack_require__(538);
 
 const DEFAULT_IGNORE = [
 	'**/node_modules/**',
@@ -57535,7 +54248,7 @@ module.exports.sync = o => {
 
 
 /***/ }),
-/* 575 */
+/* 537 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57967,7 +54680,7 @@ typeof process !== 'undefined' && (process.env && process.env.IGNORE_TEST_WIN32 
 
 
 /***/ }),
-/* 576 */
+/* 538 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -57985,17 +54698,17 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 577 */
+/* 539 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(16);
 const fsConstants = __webpack_require__(23).constants;
-const {Buffer} = __webpack_require__(578);
-const CpFileError = __webpack_require__(580);
-const fs = __webpack_require__(582);
-const ProgressEmitter = __webpack_require__(583);
+const {Buffer} = __webpack_require__(540);
+const CpFileError = __webpack_require__(542);
+const fs = __webpack_require__(544);
+const ProgressEmitter = __webpack_require__(545);
 
 module.exports = (src, dest, opts) => {
 	if (!src || !dest) {
@@ -58145,11 +54858,11 @@ module.exports.sync = (src, dest, opts) => {
 
 
 /***/ }),
-/* 578 */
+/* 540 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(579)
+var buffer = __webpack_require__(541)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -58213,18 +54926,18 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 579 */
+/* 541 */
 /***/ (function(module, exports) {
 
 module.exports = require("buffer");
 
 /***/ }),
-/* 580 */
+/* 542 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(581);
+const NestedError = __webpack_require__(543);
 
 class CpFileError extends NestedError {
 	constructor(message, nested) {
@@ -58238,7 +54951,7 @@ module.exports = CpFileError;
 
 
 /***/ }),
-/* 581 */
+/* 543 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var inherits = __webpack_require__(43);
@@ -58292,7 +55005,7 @@ module.exports = NestedError;
 
 
 /***/ }),
-/* 582 */
+/* 544 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58300,7 +55013,7 @@ module.exports = NestedError;
 const fs = __webpack_require__(22);
 const makeDir = __webpack_require__(90);
 const pify = __webpack_require__(62);
-const CpFileError = __webpack_require__(580);
+const CpFileError = __webpack_require__(542);
 
 const fsP = pify(fs);
 
@@ -58445,7 +55158,7 @@ if (fs.copyFileSync) {
 
 
 /***/ }),
-/* 583 */
+/* 545 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -58486,12 +55199,12 @@ module.exports = ProgressEmitter;
 
 
 /***/ }),
-/* 584 */
+/* 546 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const NestedError = __webpack_require__(581);
+const NestedError = __webpack_require__(543);
 
 class CpyError extends NestedError {
 	constructor(message, nested) {
@@ -58505,7 +55218,7 @@ module.exports = CpyError;
 
 
 /***/ }),
-/* 585 */
+/* 547 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

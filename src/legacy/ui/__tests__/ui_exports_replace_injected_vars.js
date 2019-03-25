@@ -60,7 +60,7 @@ describe('UiExports', function () {
       plugins: { paths: [resolve(__dirname, './fixtures/test_app')] },
     });
 
-    await root.start();
+    await root.setup();
 
     kbnServer = getKbnServer(root);
 

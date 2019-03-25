@@ -1,7 +1,7 @@
 [[canvas-common-functions]]
 === Canvas common functions
 
-beta[]The common functions can run anywhere, which means they'll execute wherever 
+The common functions can run anywhere, which means they'll execute wherever 
 the expression is currently executing. For example, if the engine is currently 
 running on the server, the functions will run on the server.
 

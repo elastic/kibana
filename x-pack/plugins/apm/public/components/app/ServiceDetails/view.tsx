@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Location } from 'history';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 // @ts-ignore
@@ -23,36 +23,39 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
   public render() {
     const { urlParams, location } = this.props;
     return (
-      <React.Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1>{urlParams.serviceName}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ServiceIntegrations
-              location={this.props.location}
-              urlParams={urlParams}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <ServiceDetailsRequest
+        urlParams={urlParams}
+        render={({ data }) => {
+          return (
+            <Fragment>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiTitle size="l">
+                    <h1>{urlParams.serviceName}</h1>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ServiceIntegrations
+                    transactionTypes={data.types}
+                    location={this.props.location}
+                    urlParams={urlParams}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
 
-        <EuiSpacer />
+              <EuiSpacer />
 
-        <FilterBar />
+              <FilterBar />
 
-        <ServiceDetailsRequest
-          urlParams={urlParams}
-          render={({ data }) => (
-            <ServiceDetailTabs
-              location={location}
-              urlParams={urlParams}
-              transactionTypes={data.types}
-            />
-          )}
-        />
-      </React.Fragment>
+              <ServiceDetailTabs
+                location={location}
+                urlParams={urlParams}
+                transactionTypes={data.types}
+              />
+            </Fragment>
+          );
+        }}
+      />
     );
   }
 }

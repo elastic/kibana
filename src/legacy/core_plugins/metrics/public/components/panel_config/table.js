@@ -68,7 +68,8 @@ class TablePanelConfig extends Component {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
     const field = fields[model.index_pattern].find(field => field.name === pivotId);
-    const pivotType = field.type || model.pivot_type;
+    const pivotType = get(field, 'type', model.pivot_type);
+
     this.props.onChange({
       pivot_id: pivotId,
       pivot_type: pivotType
