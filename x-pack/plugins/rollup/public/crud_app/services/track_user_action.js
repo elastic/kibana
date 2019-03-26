@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUserActionUri } from '../../../../../common/user_action';
+import { createUiMetricUri } from '../../../../../common/ui_metric';
 import { UA_APP_NAME } from '../../../common';
 import { getHttp } from './http_provider';
 
 export function trackUserAction(actionType) {
-  const userActionUri = createUserActionUri(UA_APP_NAME, actionType);
-  getHttp().post(userActionUri);
+  const uiMetricUri = createUiMetricUri(UA_APP_NAME, actionType);
+  getHttp().post(uiMetricUri);
 }
 
 /**

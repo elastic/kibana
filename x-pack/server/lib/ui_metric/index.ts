@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createUserActionUri } from './user_action';
+export { fetchUiMetrics } from './fetch_ui_metrics';

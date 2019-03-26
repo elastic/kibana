@@ -18,7 +18,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('User Action', () => {
-    loadTestFile(require.resolve('./user_action'));
+  describe('UI Metric', () => {
+    loadTestFile(require.resolve('./ui_metric'));
   });
 }

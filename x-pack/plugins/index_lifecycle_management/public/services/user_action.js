@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-import { createUserActionUri } from '../../../../common/user_action';
+import { createUiMetricUri } from '../../../../common/ui_metric';
 
 import {
   UA_APP_NAME,
@@ -32,8 +32,8 @@ import {
 import { getHttpClient } from './api';
 
 export function trackUserAction(actionType, httpClient = getHttpClient()) {
-  const userActionUri = createUserActionUri(UA_APP_NAME, actionType);
-  httpClient.post(userActionUri);
+  const uiMetricUri = createUiMetricUri(UA_APP_NAME, actionType);
+  httpClient.post(uiMetricUri);
 }
 
 export function getUserActionsForPhases(phases) {

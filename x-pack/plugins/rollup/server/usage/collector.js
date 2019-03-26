@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { fetchUserActions } from '../../../../server/lib/user_action';
+import { fetchUiMetrics } from '../../../../server/lib/ui_metric';
 import { UA_APP_NAME, USER_ACTIONS } from '../../common';
 
 const ROLLUP_USAGE_TYPE = 'rollups';
@@ -182,7 +182,7 @@ export function registerRollupUsageCollector(server) {
         rollupVisualizationsFromSavedSearches,
       } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
 
-      const userActions = await fetchUserActions(server, UA_APP_NAME, USER_ACTIONS);
+      const uiMetrics = await fetchUiMetrics(server, UA_APP_NAME, USER_ACTIONS);
 
       return {
         index_patterns: {
@@ -197,7 +197,7 @@ export function registerRollupUsageCollector(server) {
             total: rollupVisualizationsFromSavedSearches,
           },
         },
-        user_actions: userActions,
+        ui_metrics: uiMetrics,
       };
     },
   });

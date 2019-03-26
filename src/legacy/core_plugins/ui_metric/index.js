@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { registerUserActionRoute } from './server/routes/api/user_action';
+import { registerUserActionRoute } from './server/routes/api/ui_metric';
 
 export default function (kibana) {
   return new kibana.Plugin({
-    id: 'user_action',
+    id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
 
     uiExports: {

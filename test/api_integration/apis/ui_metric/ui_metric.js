@@ -23,10 +23,10 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('user_action API', () => {
+  describe('ui_metric API', () => {
     it('increments the count field in the document defined by the {app}/{action_type} path', async () => {
       await supertest
-        .post('/api/user_action/myApp/myAction')
+        .post('/api/ui_metric/myApp/myAction')
         .set('kbn-xsrf', 'kibana')
         .expect(200);
 
@@ -41,7 +41,7 @@ export default function ({ getService }) {
 
     it('supports comma-delimited action types', async () => {
       await supertest
-        .post('/api/user_action/myApp/myAction1,myAction2')
+        .post('/api/ui_metric/myApp/myAction1,myAction2')
         .set('kbn-xsrf', 'kibana')
         .expect(200);
 
