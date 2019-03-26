@@ -33,9 +33,12 @@ coming[7.0.0-rc1]
 For more details about breaking changes in this release, see 
 <<breaking-changes-7.0, Breaking changes in 7.0>>.
 
+Design::
+* {kib} 7.0.0-rc1 includes a new design for {kib} called K7. 
 Discover::
-* Does not apply `query:queryString:options` to `query_string` filters {pull}15640[#15640]
+* Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {pull}15640[#15640]
 * Removes `default_field` from `query:queryString:options` {pull}18966[#18966]
+* Makes KQL the default query language for new searches {pull}27092[#27092]
 Design::
 * Removes references to K6 EUI, using the default UI theme in its place {pull}29152[#29152]
 Geo::
@@ -58,13 +61,10 @@ Operations::
 * Creates separate startup scripts for development and production {pull}13806[#13806]
 * Sets default port based on protocol  {pull}21564[#21564]
 * Removes deprecated `/shorten` API {pull}21861[#21861]
-* Plugin installer defers optimization step until server start {pull}26983[#26983]
 Platform::
 * Removes deprecated `i18n.defaultLocale` setting {pull}29325[#29325]
 * Removes previously deprecated `elasticsearch*` settings. {pull}29496[#29496]
 * Adds new "references" attribute to saved objects for relationships {pull}28199[#28199]
-Querying & Filtering::
-* Makes KQL the default query language for new searches {pull}27092[#27092]
 Reporting::
 * Removes Phantom dependency {pull}27142[#27142]
 Security::
@@ -86,26 +86,6 @@ Visualizations::
 * Removes old visualize wizard URL {pull}28982[#28982]
 * Removes legacy response handler {pull}28985[#28985]
 * Removes `legacyIcon` from visualizations {pull}28981[#28981]
-
-[float]
-[[highlight-7.0.0-rc1]]
-=== Highlights
-Canvas::
-* Canvas now has a template tab in the workpad manager where users can find workpad templates, 
-demos, and tutorials to help them get started. See {pull}23966[#23966] for more information.
-Kibana App:: 
-* Visualizations in Kibana will use a new data pipeline introduced as part of Canvas. 
-The change does not yet apply to Vega, Timelion, or Time Series Visual Builder (TSVB). 
-See {pull}25711[#25711] for more information.
-Index Lifecyle Management:: 
-* Implements a user interface to create, update, edit, or delete index lifecyle policies.
-See {pull}25553[#25553] for more information.
-K7 UI Design::
-* {kib} 7.0.0-rc1 includes a new design for {kib} called K7. In this early stage, 
-K7 is still a little rough around the edges. If you'd like to switch back to the 
-existing K6 design, go to *Management > Advanced Settings* and turn 
-off the *k7design* setting. The option to switch to the old design 
-will be removed before 7.0.0 GA.
 
 
 [float]
