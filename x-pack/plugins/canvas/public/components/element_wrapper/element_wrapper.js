@@ -9,41 +9,22 @@ import PropTypes from 'prop-types';
 import { Positionable } from '../positionable';
 import { ElementContent } from '../element_content';
 
-export class ElementWrapper extends React.PureComponent {
-  static propTypes = {
-    renderable: PropTypes.object,
-    transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    createHandlers: PropTypes.func.isRequired,
-    state: PropTypes.string,
-    expression: PropTypes.string,
-  };
+export const ElementWrapper = props => {
+  const { renderable, transformMatrix, width, height, state, selectedPage, createHandlers } = props;
+  const handlers = createHandlers(selectedPage);
 
-  constructor(props) {
-    super(props);
-    this._handlers = null;
-    this.createHandlers();
-  }
+  return (
+    <Positionable transformMatrix={transformMatrix} width={width} height={height}>
+      <ElementContent renderable={renderable} state={state} handlers={handlers} />
+    </Positionable>
+  );
+};
 
-  componentDidUpdate(nextProps) {
-    if (nextProps.expression !== this.props.expression) {
-      this.createHandlers();
-    }
-  }
-
-  createHandlers() {
-    console.log('wrapper createHandlers');
-    this._handlers = this.props.createHandlers(this.props.selectedPage);
-  }
-
-  render() {
-    const { renderable, transformMatrix, width, height, state } = this.props;
-
-    return (
-      <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-        <ElementContent renderable={renderable} state={state} handlers={this._handlers} />
-      </Positionable>
-    );
-  }
-}
+ElementWrapper.propTypes = {
+  renderable: PropTypes.object,
+  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  createHandlers: PropTypes.func.isRequired,
+  state: PropTypes.string,
+};
