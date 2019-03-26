@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SelectOperation } from '../../common';
+import { Query } from '../../../common';
 
 export interface IndexPatternField {
   name: string;
@@ -19,12 +19,6 @@ export interface IndexPattern {
   timeFieldName?: string;
   fields: IndexPatternField[];
   fieldFormatMap?: string;
-}
-
-export interface VisModelQuery {
-  select: {
-    [id: string]: SelectOperation;
-  };
 }
 
 export interface Axis {
@@ -44,7 +38,7 @@ export interface IndexPatterns {
 export interface VisModel<K extends string = any, T = any> {
   indexPatterns: IndexPatterns | null;
   queries: {
-    [id: string]: VisModelQuery;
+    [id: string]: Query;
   };
   editorPlugin: string;
   title: string;
@@ -55,10 +49,10 @@ export interface VisModel<K extends string = any, T = any> {
 export type UnknownVisModel = VisModel<string, unknown>;
 
 export function selectColumn(id: string, model: VisModel) {
-  const [queryId] = id.split('_');
+  const [queryId, columnIndex] = id.split('_');
   const query = model.queries[queryId];
 
-  return query ? query.select[id] : undefined;
+  return query ? query.select[parseInt(columnIndex, 10)] : undefined;
 }
 
 export function updatePrivateState<K extends string, T>(name: K) {
@@ -75,7 +69,7 @@ export function updatePrivateState<K extends string, T>(name: K) {
 
 export function getColumnIdByIndex(
   queries: {
-    [id: string]: VisModelQuery;
+    [id: string]: Query;
   },
   queryIndex: number,
   columnIndex: number
@@ -93,11 +87,11 @@ export function initialState(): VisModel<any, any> {
     indexPatterns: null,
     queries: {
       q1: {
-        indexPattern: 'index-pattern:aaa',
-        select: {
-          q1_0: { op: 'date_histogram', arg: { field: '@timestamp', interval: '30s' } },
-          q1_1: { op: 'sum', arg: 'bytes' },
-        },
+        index: 'index-pattern:aaa',
+        select: [
+          { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
+          { operation: 'sum', argument: 'bytes' },
+        ],
       },
     },
     editorPlugin: 'xy_chart',
