@@ -32,7 +32,7 @@ import {
   PHASE_FREEZE_ENABLED,
   PHASE_INDEX_PRIORITY,
   PHASE_ROLLOVER_MAX_DOCUMENTS
-} from '../constants';
+} from '../../constants';
 import {
   defaultEmptyDeletePhase,
   defaultEmptyColdPhase,
