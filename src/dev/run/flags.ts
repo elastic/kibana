@@ -42,19 +42,12 @@ export function getFlags(argv: string[], options: Options): Flags {
 
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
     string: flagOpts.string,
-    boolean: flagOpts.boolean,
+    boolean: [...(flagOpts.boolean || []), 'verbose', 'quiet', 'silent', 'debug', 'help'],
     alias: {
       ...(flagOpts.alias || {}),
       v: 'verbose',
     },
-    default: {
-      ...(flagOpts.default || {}),
-      verbose: false,
-      quiet: false,
-      silent: false,
-      debug: false,
-      help: false,
-    },
+    default: flagOpts.default,
     unknown: (name: string) => {
       unexpected.push(name);
 

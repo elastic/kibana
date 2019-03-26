@@ -23,4 +23,5 @@ export TEST_BROWSER_HEADLESS=1
 
 if [ "$CI_GROUP" == "1" ]; then
   "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease;
+  "$(FORCE_COLOR=0 yarn bin)/grunt" run:interpreterFunctionalTestsRelease;
 fi

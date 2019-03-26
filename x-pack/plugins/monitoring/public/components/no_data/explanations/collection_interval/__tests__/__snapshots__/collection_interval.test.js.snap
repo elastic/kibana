@@ -452,6 +452,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             iconSide="left"
             isLoading={true}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button
@@ -774,6 +775,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             iconSide="left"
             isLoading={false}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

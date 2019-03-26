@@ -49,6 +49,7 @@ exports[`renders DashboardCloneModal 1`] = `
         fill={false}
         iconSide="left"
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -64,6 +65,7 @@ exports[`renders DashboardCloneModal 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage
