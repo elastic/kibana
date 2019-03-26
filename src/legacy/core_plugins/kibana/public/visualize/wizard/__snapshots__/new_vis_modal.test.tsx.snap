@@ -1125,10 +1125,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                           className="euiScreenReaderOnly"
                                         >
                                           <FormattedMessage
-                                            defaultMessage="{resultCount} {resultCount, plural,
-                            one {type}
-                            other {types}
-                          } found"
+                                            defaultMessage="{resultCount} {resultCount, plural, one {type} other {types} } found"
                                             id="kbn.visualize.newVisWizard.resultsFound"
                                             values={
                                               Object {
@@ -1188,7 +1185,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1231,7 +1228,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1284,7 +1281,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -1327,7 +1324,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -1379,7 +1376,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
+                              <NewVisHelp>
                                 <EuiText
                                   grow={true}
                                   size="m"
@@ -1398,7 +1395,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>
@@ -2595,7 +2592,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2638,7 +2635,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2691,7 +2688,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 <div
                                                   className="euiKeyPadMenuItem__icon"
                                                 >
-                                                  <Component
+                                                  <VisTypeIcon
                                                     visType={
                                                       Object {
                                                         "hidden": false,
@@ -2734,7 +2731,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                         />
                                                       </empty>
                                                     </EuiIcon>
-                                                  </Component>
+                                                  </VisTypeIcon>
                                                 </div>
                                                 <p
                                                   className="euiKeyPadMenuItem__label"
@@ -2786,7 +2783,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                   className="euiSpacer euiSpacer--m"
                                 />
                               </EuiSpacer>
-                              <Component>
+                              <NewVisHelp>
                                 <EuiText
                                   grow={true}
                                   size="m"
@@ -2805,7 +2802,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     </p>
                                   </div>
                                 </EuiText>
-                              </Component>
+                              </NewVisHelp>
                             </div>
                           </EuiFlexItem>
                         </div>
