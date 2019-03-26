@@ -4,35 +4,48 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n } from '@kbn/i18n';
-
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import i18n from '@kbn/i18n';
 import { flatten } from 'lodash';
 const type = 'operator';
 
-const equalsText = i18n.translate('xpack.kueryAutocomplete.equalOperatorDescription.equalsText', {
-  defaultMessage: 'equals',
-  description: 'Part of xpack.kueryAutocomplete.equalOperatorDescription. Full text: "equals some value"'
-});
-const lessThanOrEqualToText = i18n.translate('xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText', {
-  defaultMessage: 'less than or equal to',
-  description: 'Part of xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: "is less than or equal to some value"'
-});
-const greaterThanOrEqualToText = i18n.translate('xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText', {
-  defaultMessage: 'greater than or equal to',
-  description: 'Part of xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: "is greater than or equal to some value"'
-});
-const lessThanText = i18n.translate('xpack.kueryAutocomplete.lessThanOperatorDescription.lessThanText', {
-  defaultMessage: 'less than',
-  description: 'Part of xpack.kueryAutocomplete.lessThanOperatorDescription. Full text: "is less than some value"'
-});
-const greaterThanText = i18n.translate('xpack.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText', {
-  defaultMessage: 'greater than',
-  description: 'Part of xpack.kueryAutocomplete.greaterThanOperatorDescription. Full text: "is greater than some value"'
-});
-const existsText = i18n.translate('xpack.kueryAutocomplete.existOperatorDescription.existsText', {
-  defaultMessage: 'exists',
-  description: 'Part of xpack.kueryAutocomplete.existOperatorDescription. Full text: "exists in any form"'
-});
+const equalsText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.equalOperatorDescription.equalsText"
+    defaultMessage="equals"
+    description="Part of xpack.kueryAutocomplete.equalOperatorDescription. Full text: 'equals some value'"
+  />);
+const lessThanOrEqualToText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText"
+    defaultMessage="less than or equal to"
+    description="Part of xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: 'is less than or equal to some value'"
+  />);
+const greaterThanOrEqualToText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText"
+    defaultMessage="greater than or equal to"
+    description="Part of xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: 'is greater than or equal to some value'"
+  />);
+const lessThanText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.lessThanOperatorDescription.lessThanText"
+    defaultMessage="less than"
+    description="Part of xpack.kueryAutocomplete.lessThanOperatorDescription. Full text: 'is less than some value'"
+  />);
+const greaterThanText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText"
+    defaultMessage="greater than"
+    description="Part of xpack.kueryAutocomplete.greaterThanOperatorDescription. Full text: 'is greater than some value'"
+  />);
+const existsText = (
+  <FormattedMessage
+    id="xpack.kueryAutocomplete.existOperatorDescription.existsText"
+    defaultMessage="exists"
+    description="Part of xpack.kueryAutocomplete.existOperatorDescription. Full text: 'exists in any form'"
+  />);
 
 const operators = {
   ':': {
