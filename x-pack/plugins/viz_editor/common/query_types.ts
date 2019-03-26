@@ -8,7 +8,10 @@
 // Select clause
 // ----------------------------------------
 
+export type OperationName = 'column' | 'count' | 'date_histogram' | 'sum' | 'avg';
+
 export interface Aliasable {
+  operation: OperationName;
   alias?: string;
 }
 

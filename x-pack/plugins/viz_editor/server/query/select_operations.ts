@@ -18,6 +18,7 @@ import {
   CountOperation,
   DateHistogramOperation,
   isEmpty,
+  OperationName,
   partition,
   Query,
   SelectOperation,
@@ -38,8 +39,8 @@ export interface SelectDefinition {
  * SelectDefinition, used to convert our definitions into the equivalent
  * Elasticsearch DSL.
  */
-export const selectOperations: { [operation: string]: SelectDefinition } = {
-  col: {
+export const selectOperations: { [operation in OperationName]: SelectDefinition } = {
+  column: {
     getName(op: ColumnOperation) {
       return op.alias || op.argument.field;
     },
