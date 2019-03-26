@@ -7,6 +7,7 @@
 import { UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from '../pie_chart_plugin';
+import { config as vegaChartConfig } from '../vega_chart_plugin';
 import { config as xyChartConfig } from '../xy_chart_plugin';
 
 export interface PanelComponentProps<S extends VisModel = VisModel> {
@@ -46,6 +47,7 @@ export interface EditorPlugin<S extends VisModel = VisModel> {
 const pluginMap: { [key: string]: EditorPlugin<any> } = {
   xy_chart: xyChartConfig,
   pie_chart: pieChartConfig,
+  vega_chart: vegaChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected

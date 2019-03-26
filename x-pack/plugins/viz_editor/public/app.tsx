@@ -34,6 +34,7 @@ import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { registries, renderersRegistry } from 'plugins/interpreter/registries';
 import { registerPipeline as registerPiePipeline } from '../pie_chart_plugin';
+import { registerPipeline as registerVegaPipeline } from '../vega_chart_plugin';
 import { registerPipeline as registerXYPipeline } from '../xy_chart_plugin';
 
 // TODO: Convert this to the "new platform" way of doing UI
@@ -58,3 +59,4 @@ registerFunctions(registries);
 // As soon as it has, the entrypoint of this plugin should take care of this
 registerXYPipeline(registries);
 registerPiePipeline(registries);
+registerVegaPipeline(registries);

@@ -28,6 +28,7 @@ export const vega = () => ({
   context: {
     types: [
       'kibana_context',
+      'vega_literal_data',
       'null',
     ],
   },
@@ -45,11 +46,13 @@ export const vega = () => ({
     const Private = $injector.get('Private');
     const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
+    const spec = context.type === 'vega_literal_data' ? context.value.spec : args.spec;
+
     const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
-      visParams: { spec: args.spec },
+      visParams: { spec },
       forceFetch: true
     });
 
@@ -60,7 +63,7 @@ export const vega = () => ({
         visData: response,
         visType: 'vega',
         visConfig: {
-          spec: args.spec
+          spec
         },
       }
     };

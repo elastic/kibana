@@ -88,7 +88,9 @@ export class Visualization extends React.Component<VisualizationProps> {
 
   public shouldComponentUpdate(nextProps: VisualizationProps): boolean {
     if (nextProps.uiState !== this.props.uiState) {
-      throw new Error('Changing uiState on <Visualization/> is not supported!');
+      // TODO this comment should NOT go into master. It is necessary for the moment to support rendering in the new vis editor because
+      // the expression integration is very buggy.
+      // throw new Error('Changing uiState on <Visualization/> is not supported!');
     }
     return true;
   }
