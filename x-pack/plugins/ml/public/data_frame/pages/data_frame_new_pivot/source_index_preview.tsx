@@ -14,12 +14,14 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiInMemoryTable, EuiProgress } from '@
 
 import { ml } from '../../../services/ml_api_service';
 
+import { Dictionary } from '../../../../common/types/common';
+
 import { SimpleQuery } from './common';
 
 interface Props {
   indexPattern: StaticIndexPattern;
   query: SimpleQuery;
-  cellClick(search: string): void;
+  cellClick?(search: string): void;
 }
 
 const SEARCH_SIZE = 1000;
@@ -70,17 +72,23 @@ export const SourceIndexPreview: React.SFC<Props> = ({ cellClick, indexPattern, 
       return value;
     })
     .map(k => {
-      return {
+      const c = {
         field: k,
         name: k,
+        render: undefined,
         sortable: true,
         truncateText: true,
-        render: (d: string) => (
+      } as Dictionary<any>;
+
+      if (cellClick) {
+        c.render = (d: string) => (
           <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
             {d}
           </EuiButtonEmpty>
-        ),
-      };
+        );
+      }
+
+      return c;
     });
 
   return (

@@ -10,9 +10,12 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { EuiButton, EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { DefinePivot, DefinePivotExposedState, getDefaultPivotState } from './define_pivot';
-
-const DefinePivotBlur = () => <p>This is not the current step.</p>;
+import {
+  DefinePivotExposedState,
+  DefinePivotForm,
+  getDefaultPivotState,
+} from './define_pivot_form';
+import { DefinePivotSummary } from './define_pivot_summary';
 
 const JobDetails = () => <p>Job Details are the current step.</p>;
 const JobDetailsBlur = () => <p>Job Details are not the current step.</p>;
@@ -67,13 +70,13 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   const pivot =
     step === WIZARD_STEPS.DEFINE_PIVOT ? (
-      <DefinePivot
+      <DefinePivotForm
         indexPattern={indexPattern}
         onChange={definePivotHandler}
         overrides={pivotState}
       />
     ) : (
-      <DefinePivotBlur />
+      <DefinePivotSummary indexPattern={indexPattern} {...pivotState} />
     );
   const jobDetails = step === WIZARD_STEPS.JOB_DETAILS ? <JobDetails /> : <JobDetailsBlur />;
   const jobCreate = step === WIZARD_STEPS.JOB_CREATE ? <JobCreate /> : <JobCreateBlur />;

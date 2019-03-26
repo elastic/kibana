@@ -10,7 +10,7 @@ import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
 interface ListProps {
   list: string[];
-  deleteHandler(l: string): void;
+  deleteHandler?(l: string): void;
 }
 
 export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
@@ -19,13 +19,16 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
       <EuiListGroupItem
         key={l}
         label={l}
-        extraAction={{
-          onClick: () => deleteHandler(l),
-          iconType: 'cross',
-          iconSize: 's',
-          'aria-label': l,
-          alwaysShow: false,
-        }}
+        extraAction={
+          (deleteHandler && {
+            onClick: () => deleteHandler(l),
+            iconType: 'cross',
+            iconSize: 's',
+            'aria-label': l,
+            alwaysShow: false,
+          }) ||
+          undefined
+        }
       />
     ))}
   </EuiListGroup>

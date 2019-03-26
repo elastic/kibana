@@ -26,7 +26,7 @@ interface OptionsDataElement {
 interface ListProps {
   list: string[];
   optionsData: Dictionary<OptionsDataElement>;
-  deleteHandler(l: string): void;
+  deleteHandler?(l: string): void;
 }
 
 export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
@@ -53,13 +53,16 @@ export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        extraAction={{
-          onClick: () => deleteHandler(l),
-          iconType: 'cross',
-          iconSize: 's',
-          'aria-label': l,
-          alwaysShow: false,
-        }}
+        extraAction={
+          (deleteHandler && {
+            onClick: () => deleteHandler(l),
+            iconType: 'cross',
+            iconSize: 's',
+            'aria-label': l,
+            alwaysShow: false,
+          }) ||
+          undefined
+        }
       />
     ))}
   </EuiListGroup>
