@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RESERVED_DIR_JEST_INTEGRATION_TESTS } from '../../../src/dev/constants';
 import config from './config';
 
 export default {
   ...config,
   testMatch: [
-    '**/integration_tests/**/*.test.js',
-    '**/integration_tests/**/*.test.ts',
+    `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.js`,
+    `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.ts`,
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
-    (pattern) => !pattern.includes('integration_tests')
+    (pattern) => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
   ),
   reporters: [
     'default',
