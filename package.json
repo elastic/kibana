@@ -346,6 +346,7 @@
     "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-prettier": "^3.0.1",
     "eslint-plugin-react": "^7.12.4",
+    "eslint-plugin-react-hooks": "^1.6.0",
     "faker": "1.1.0",
     "fetch-mock": "7.3.0",
     "geckodriver": "1.12.2",
