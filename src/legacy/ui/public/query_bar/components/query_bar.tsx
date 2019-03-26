@@ -46,10 +46,11 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiOutsideClickDetector,
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 
 // @ts-ignore
-import { EuiSuperDatePicker, EuiSuperUpdateButton } from '@elastic/eui';
+import { EuiSuperUpdateButton } from '@elastic/eui';
 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
@@ -95,7 +96,7 @@ interface Props {
   isRefreshPaused?: boolean;
   refreshInterval?: number;
   showAutoRefreshOnly?: boolean;
-  onRefreshChange?: (isPaused: boolean, refreshInterval: number) => void;
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
 }
 
 interface State {

@@ -4,15 +4,9 @@ exports[`Header should render normally 1`] = `
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiTitle
@@ -29,20 +23,14 @@ exports[`Header should render normally 1`] = `
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
@@ -66,7 +54,6 @@ exports[`Header should render normally 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty
@@ -86,7 +73,6 @@ exports[`Header should render normally 1`] = `
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiButtonEmpty

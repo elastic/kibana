@@ -200,6 +200,11 @@ export function explorerChartsContainerServiceFactory(callback) {
         return [];
       }
 
+      // Sort records in ascending time order matching up with chart data
+      records.sort((recordA, recordB) => {
+        return recordA[ML_TIME_FIELD_NAME] - recordB[ML_TIME_FIELD_NAME];
+      });
+
       let chartData;
       if (eventDistribution.length > 0 && records.length > 0) {
         const filterField = records[0].by_field_value || records[0].over_field_value;
@@ -210,7 +215,7 @@ export function explorerChartsContainerServiceFactory(callback) {
           // For rare chart values we are only interested wether a value is either `0` or not,
           // `0` acts like a flag in the chart whether to display the dot/marker.
           // All other charts (single metric, population) are metric based and with
-          // those a value of `null` acts as the flag to hide a datapoint.
+          // those a value of `null` acts as the flag to hide a data point.
           if (
             (chartType === CHART_TYPE.EVENT_DISTRIBUTION && value > 0) ||
             (chartType !== CHART_TYPE.EVENT_DISTRIBUTION && value !== null)
@@ -234,51 +239,44 @@ export function explorerChartsContainerServiceFactory(callback) {
       const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
       _.each(records, (record) => {
         // Look for a chart point with the same time as the record.
-        // If none found, find closest time in chartData set.
+        // If none found, insert a point for anomalies due to a gap in the data.
         const recordTime = record[ML_TIME_FIELD_NAME];
-        let chartPoint = findNearestChartPointToTime(chartDataForPointSearch, recordTime);
-
+        let chartPoint = findChartPointForTime(chartDataForPointSearch, recordTime);
         if (chartPoint === undefined) {
-          // In case there is a record with a time after that of the last chart point, set the score
-          // for the last chart point to that of the last record, if that record has a higher score.
-          const lastChartPoint = chartData[chartData.length - 1];
-          const lastChartPointScore = lastChartPoint.anomalyScore || 0;
-          if (record.record_score > lastChartPointScore) {
-            chartPoint = lastChartPoint;
-          }
+          chartPoint = { date: new Date(recordTime),  value: null };
+          chartData.push(chartPoint);
         }
 
-        if (chartPoint !== undefined) {
-          chartPoint.anomalyScore = record.record_score;
+        chartPoint.anomalyScore = record.record_score;
 
-          if (record.actual !== undefined) {
-            chartPoint.actual = record.actual;
-            chartPoint.typical = record.typical;
-          } else {
-            const causes = _.get(record, 'causes', []);
-            if (causes.length > 0) {
-              chartPoint.byFieldName = record.by_field_name;
-              chartPoint.numberOfCauses = causes.length;
-              if (causes.length === 1) {
-                // If only a single cause, copy actual and typical values to the top level.
-                const cause = _.first(record.causes);
-                chartPoint.actual = cause.actual;
-                chartPoint.typical = cause.typical;
-              }
+        if (record.actual !== undefined) {
+          chartPoint.actual = record.actual;
+          chartPoint.typical = record.typical;
+        } else {
+          const causes = _.get(record, 'causes', []);
+          if (causes.length > 0) {
+            chartPoint.byFieldName = record.by_field_name;
+            chartPoint.numberOfCauses = causes.length;
+            if (causes.length === 1) {
+              // If only a single cause, copy actual and typical values to the top level.
+              const cause = _.first(record.causes);
+              chartPoint.actual = cause.actual;
+              chartPoint.typical = cause.typical;
             }
           }
-
-          if (record.multi_bucket_impact !== undefined) {
-            chartPoint.multiBucketImpact = record.multi_bucket_impact;
-          }
         }
+
+        if (record.multi_bucket_impact !== undefined) {
+          chartPoint.multiBucketImpact = record.multi_bucket_impact;
+        }
+
       });
 
       // Add a scheduledEvents property to any points in the chart data set
       // which correspond to times of scheduled events for the job.
       if (scheduledEvents !== undefined) {
         _.each(scheduledEvents, (events, time) => {
-          const chartPoint = findNearestChartPointToTime(chartDataForPointSearch, Number(time));
+          const chartPoint = findChartPointForTime(chartDataForPointSearch, Number(time));
           if (chartPoint !== undefined) {
             // Note if the scheduled event coincides with an absence of the underlying metric data,
             // we don't worry about plotting the event.
@@ -303,43 +301,8 @@ export function explorerChartsContainerServiceFactory(callback) {
       return chartData;
     }
 
-    function findNearestChartPointToTime(chartData, time) {
-      let chartPoint;
-      for (let i = 0; i < chartData.length; i++) {
-        if (chartData[i].date === time) {
-          chartPoint = chartData[i];
-          break;
-        }
-      }
-
-      if (chartPoint === undefined) {
-        // Find nearest point in time.
-        // loop through line items until the date is greater than bucketTime
-        // grab the current and previous items in the and compare the time differences
-        let foundItem;
-        for (let i = 0; i < chartData.length; i++) {
-          const itemTime = chartData[i].date;
-          if ((itemTime > time) && (i > 0)) {
-            const item = chartData[i];
-            const previousItem = (i > 0 ? chartData[i - 1] : null);
-
-            const diff1 = Math.abs(time - previousItem.date);
-            const diff2 = Math.abs(time - itemTime);
-
-            // foundItem should be the item with a date closest to bucketTime
-            if (previousItem === null || diff1 > diff2) {
-              foundItem = item;
-            } else {
-              foundItem = previousItem;
-            }
-            break;
-          }
-        }
-
-        chartPoint = foundItem;
-      }
-
-      return chartPoint;
+    function findChartPointForTime(chartData, time) {
+      return chartData.find(point => point.date === time);
     }
 
     Promise.all(seriesPromises)

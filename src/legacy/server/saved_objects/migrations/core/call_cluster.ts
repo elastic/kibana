@@ -23,6 +23,8 @@
  * funcationality contained here.
  */
 
+import { IndexMapping } from '../../../mappings';
+
 export interface CallCluster {
   (path: 'bulk', opts: { body: object[] }): Promise<BulkResult>;
   (path: 'count', opts: CountOpts): Promise<{ count: number; _shards: ShardsInfo }>;
@@ -184,21 +186,4 @@ export interface IndexInfo {
 
 export interface IndicesInfo {
   [index: string]: IndexInfo;
-}
-
-export interface MappingProperties {
-  [type: string]: any;
-}
-
-export interface MappingMeta {
-  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
-  // with each key being a root-level mapping property, and each value being
-  // the md5 hash of that mapping's value when the index was created.
-  migrationMappingPropertyHashes?: { [k: string]: string };
-}
-
-export interface IndexMapping {
-  dynamic: string;
-  properties: MappingProperties;
-  _meta?: MappingMeta;
 }

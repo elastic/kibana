@@ -10,7 +10,7 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
 } from '../../../common/elasticsearch_fieldnames';
-import { Transaction } from '../../../typings/es_schemas/Transaction';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {

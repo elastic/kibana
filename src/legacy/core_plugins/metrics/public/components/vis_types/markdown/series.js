@@ -196,7 +196,7 @@ MarkdownSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
 };
 
 const MarkdownSeries = injectI18n(MarkdownSeriesUi);

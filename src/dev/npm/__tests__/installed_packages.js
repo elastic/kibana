@@ -20,7 +20,7 @@
 import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { getInstalledPackages } from '../installed_packages';
 

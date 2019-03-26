@@ -40,9 +40,9 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
+export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(resp, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
+  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
     const properties = {};
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -101,7 +101,7 @@ export class ESJoinSource extends AbstractESSource {
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
 
-    let resp;
+    let rawEsData;
     try {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
@@ -117,7 +117,7 @@ export class ESJoinSource extends AbstractESSource {
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
-      resp = await fetchSearchSourceAndRecordWithInspector({
+      rawEsData = await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
@@ -144,15 +144,12 @@ export class ESJoinSource extends AbstractESSource {
       return configState.type === 'count';
     });
     const countPropertyName = _.get(countConfigState, 'id');
-
     return {
-      rawData: resp,
-      propertiesMap: extractPropertiesMap(resp, metricPropertyNames, countPropertyName),
+      propertiesMap: extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName),
     };
   }
 
   isFilterByMapBounds() {
-    // TODO
     return false;
   }
 
@@ -211,5 +208,9 @@ export class ESJoinSource extends AbstractESSource {
   async getDisplayName() {
     //no need to localize. this is never rendered.
     return `es_table ${this._descriptor.indexPatternId}`;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }

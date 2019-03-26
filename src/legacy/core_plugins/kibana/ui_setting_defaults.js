@@ -323,8 +323,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When set to false, all filters are applied to all visualizations. ' +
-          'When set to true, filter(s) will be ignored for a visualization ' +
+          'When disabled, all filters are applied to all visualizations. ' +
+          'When enabled, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
@@ -1055,18 +1055,6 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
-    },
-    'rollups:enableIndexPatterns': {
-      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
-        defaultMessage: 'Enable rollup index patterns',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
-        defaultMessage:
-          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
-          'visualizations based on rollup data. Refresh the page to apply the changes.',
-      }),
-      category: ['rollups'],
     },
   };
 }

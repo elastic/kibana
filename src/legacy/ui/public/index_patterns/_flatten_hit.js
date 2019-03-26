@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 
+const flattenedCache = new WeakMap();
+
 // Takes a hit, merges it with any stored/scripted fields, and with the metaFields
 // returns a flattened version
 export function IndexPatternsFlattenHitProvider(config) {
@@ -67,24 +69,36 @@ export function IndexPatternsFlattenHitProvider(config) {
       });
     }(hit._source));
 
-    // assign the meta fields
-    _.each(metaFields, function (meta) {
-      if (meta === '_source') return;
-      flat[meta] = hit[meta];
-    });
-
-    // unwrap computed fields
-    _.forOwn(hit.fields, function (val, key) {
-      if (key[0] === '_' && !_.contains(metaFields, key)) return;
-      flat[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
-    });
-
     return flat;
+  }
+
+  function decorateFlattenedWrapper(hit) {
+    return function (flattened) {
+      // assign the meta fields
+      _.each(metaFields, function (meta) {
+        if (meta === '_source') return;
+        flattened[meta] = hit[meta];
+      });
+
+      // unwrap computed fields
+      _.forOwn(hit.fields, function (val, key) {
+        if (key[0] === '_' && !_.contains(metaFields, key)) return;
+        flattened[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
+      });
+
+      return flattened;
+    };
   }
 
   return function flattenHitWrapper(indexPattern) {
     return function cachedFlatten(hit, deep = false) {
-      return hit.$$_flattened || (hit.$$_flattened = flattenHit(indexPattern, hit, deep));
+      const decorateFlattened = decorateFlattenedWrapper(hit);
+      const cached = flattenedCache.get(hit);
+      const flattened = cached || flattenHit(indexPattern, hit, deep);
+      if (!cached) {
+        flattenedCache.set(hit, { ...flattened });
+      }
+      return decorateFlattened(flattened);
     };
   };
 }

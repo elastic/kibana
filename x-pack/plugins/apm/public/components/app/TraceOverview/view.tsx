@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
@@ -20,21 +21,23 @@ export function TraceOverview(props: Props) {
   const { urlParams } = props;
 
   return (
-    <TraceListRequest
-      urlParams={urlParams}
-      render={({ data, status }: RRRRenderResponse<TraceListAPIResponse>) => (
-        <TraceList
-          items={data}
-          isLoading={status === 'LOADING'}
-          noItemsMessage={
-            <EmptyMessage
-              heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
-                defaultMessage: 'No traces found for this query'
-              })}
-            />
-          }
-        />
-      )}
-    />
+    <EuiPanel>
+      <TraceListRequest
+        urlParams={urlParams}
+        render={({ data, status }: RRRRenderResponse<TraceListAPIResponse>) => (
+          <TraceList
+            items={data}
+            isLoading={status === 'LOADING'}
+            noItemsMessage={
+              <EmptyMessage
+                heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+                  defaultMessage: 'No traces found for this query'
+                })}
+              />
+            }
+          />
+        )}
+      />
+    </EuiPanel>
   );
 }

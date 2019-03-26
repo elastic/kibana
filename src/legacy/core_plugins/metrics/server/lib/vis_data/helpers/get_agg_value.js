@@ -19,6 +19,7 @@
 
 import { get, includes, max, min, sum } from 'lodash';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from './metric_types';
+import { toPercentileNumber } from './to_percentile_number';
 
 const aggFns = {
   max,
@@ -40,13 +41,12 @@ export default (row, metric) => {
 
   switch (metric.type) {
     case METRIC_TYPES.PERCENTILE:
-      let percentileKey = `${metric.percent}`;
-      if (!/\./.test(`${metric.percent}`)) {
-        percentileKey = `${metric.percent}.0`;
-      }
+      const percentileKey = toPercentileNumber(`${metric.percent}`);
+
       return row[metric.id].values[percentileKey];
     case METRIC_TYPES.PERCENTILE_RANK:
-      const percentileRankKey = `${metric.value}`;
+      const percentileRankKey = toPercentileNumber(`${metric.value}`);
+
       return (
         row[metric.id] &&
         row[metric.id].values &&

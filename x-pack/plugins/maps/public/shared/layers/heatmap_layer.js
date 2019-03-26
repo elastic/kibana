@@ -45,10 +45,19 @@ export class HeatmapLayer extends AbstractLayer {
     return metricfields[0].propertyKey;
   }
 
+
+  _getMbLayerId() {
+    return this.getId() + '_heatmap';
+  }
+
+  getMbLayerIds() {
+    return [this._getMbLayerId()];
+  }
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());
-    const mbLayerId = this.getId() + '_heatmap';
+    const mbLayerId = this._getMbLayerId();
 
     if (!mbSource) {
       mbMap.addSource(this.getId(), {
