@@ -7,6 +7,11 @@
 import gql from 'graphql-tag';
 
 export const ipOverviewSchema = gql`
+  enum IpOverviewType {
+    destination
+    source
+  }
+
   type Overview {
     firstSeen: Date
     lastSeen: Date

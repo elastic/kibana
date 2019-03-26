@@ -8,6 +8,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import {
   Direction,
+  IpOverviewType,
   NetworkDnsFields,
   NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
@@ -20,6 +21,7 @@ import {
   setNetworkFilterQueryDraft,
   updateDnsLimit,
   updateDnsSort,
+  updateIpOverviewFlowType,
   updateIsPtrIncluded,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
@@ -27,7 +29,7 @@ import {
   updateTopNFlowType,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
-import { NetworkModel } from './model';
+import { NetworkModel, NetworkType } from './model';
 
 export type NetworkState = NetworkModel;
 
@@ -56,7 +58,11 @@ export const initialNetworkState: NetworkState = {
     filterQueryDraft: null,
   },
   details: {
-    queries: null,
+    queries: {
+      ipOverview: {
+        flowType: IpOverviewType.source,
+      },
+    },
     filterQuery: null,
     filterQueryDraft: null,
   },
@@ -70,7 +76,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         dns: {
-          ...state[networkType].queries!.dns,
+          ...state[NetworkType.page].queries.dns,
           limit,
         },
       },
@@ -83,7 +89,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         dns: {
-          ...state[networkType].queries!.dns,
+          ...state[NetworkType.page].queries.dns,
           dnsSortField,
         },
       },
@@ -96,7 +102,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         dns: {
-          ...state[networkType].queries!.dns,
+          ...state[NetworkType.page].queries.dns,
           isPtrIncluded,
         },
       },
@@ -109,7 +115,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         topNFlow: {
-          ...state[networkType].queries!.topNFlow,
+          ...state[NetworkType.page].queries.topNFlow,
           limit,
         },
       },
@@ -122,9 +128,9 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         topNFlow: {
-          ...state[networkType].queries!.topNFlow,
+          ...state[NetworkType.page].queries.topNFlow,
           ...helperUpdateTopNFlowDirection(
-            state[networkType].queries!.topNFlow.topNFlowType,
+            state[NetworkType.page].queries.topNFlow.topNFlowType,
             topNFlowDirection
           ),
         },
@@ -138,7 +144,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         topNFlow: {
-          ...state[networkType].queries!.topNFlow,
+          ...state[NetworkType.page].queries.topNFlow,
           topNFlowSort,
         },
       },
@@ -151,7 +157,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[networkType].queries,
         topNFlow: {
-          ...state[networkType].queries!.topNFlow,
+          ...state[NetworkType.page].queries.topNFlow,
           topNFlowType,
           topNFlowSort: {
             field: NetworkTopNFlowFields.bytes,
@@ -174,6 +180,19 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       ...state[networkType],
       filterQueryDraft: filterQuery.query,
       filterQuery,
+    },
+  }))
+  .case(updateIpOverviewFlowType, (state, { flowType }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        ipOverview: {
+          ...state[NetworkType.details].queries.ipOverview,
+          flowType,
+        },
+      },
     },
   }))
   .build();

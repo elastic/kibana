@@ -5128,6 +5128,24 @@
           }
         ],
         "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "IpOverviewType",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "destination",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "source", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
+        "possibleTypes": null
       }
     ],
     "directives": [

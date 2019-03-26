@@ -15,10 +15,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { connect } from 'react-redux';
+import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
 
-import { IpOverviewData } from '../../../../graphql/types';
-import { networkModel } from '../../../../store/local';
+import { IpOverviewData, IpOverviewType } from '../../../../graphql/types';
+import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 
+import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 export const IpOverviewId = 'ip-overview';
@@ -32,25 +36,45 @@ interface OwnProps {
   type: networkModel.NetworkType;
 }
 
-type IpOverviewProps = OwnProps;
+interface IpOverviewReduxProps {
+  flowType: IpOverviewType;
+}
 
-export class IpOverview extends React.PureComponent<IpOverviewProps> {
+interface IpOverViewDispatchProps {
+  updateIpOverviewFlowType: ActionCreator<{
+    flowType: IpOverviewType;
+  }>;
+}
+
+type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps;
+
+class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {
-    const { ip, data } = this.props;
+    const { ip, data, loading, flowType } = this.props;
     return (
       <EuiFlexGroup direction="column">
         <EuiHorizontalRule margin="xs" />
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h1>{ip}</h1>
-            </EuiText>
-          </EuiFlexItem>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>{ip}</h1>
+              </EuiText>
+            </EuiFlexItem>
+            <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
+              <SelectType
+                id={`${IpOverviewId}-select-type`}
+                selectedType={flowType}
+                onChangeType={this.onChangeType}
+                isLoading={loading}
+              />
+            </SelectTypeItem>
+          </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiDescriptionList type="column" align="center" compressed>
               <EuiDescriptionListTitle>{i18n.LAST_SEEN}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {data.source && data.source.firstSeen}
+                {data[flowType] && data[flowType]!.firstSeen}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
@@ -61,23 +85,40 @@ export class IpOverview extends React.PureComponent<IpOverviewProps> {
             <EuiDescriptionList type="column" align="center" compressed>
               <EuiDescriptionListTitle>{i18n.LAST_SEEN}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {data.source && data.source.lastSeen}
+                {data[flowType] && data[flowType]!.lastSeen}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem />
         </EuiFlexGroup>
         <EuiTitle size="s">
-          <h3>External Links:</h3>
+          <h4>External Links:</h4>
         </EuiTitle>
       </EuiFlexGroup>
     );
   }
-  // private onChangeFlowType = (topNFlowType: NetworkTopNFlowType) =>
-  //   // this.props.updateFlowType({ topNFlowType, networkType: this.props.type });
-  //   console.log('type updated');
+  private onChangeType = (flowType: IpOverviewType) => {
+    this.props.updateIpOverviewFlowType({ flowType });
+  };
 }
+
+const makeMapStateToProps = () => {
+  const getIpOverviewSelector = networkSelectors.ipOverviewSelector();
+  const mapStateToProps = (state: State) => getIpOverviewSelector(state);
+  return mapStateToProps;
+};
+
+export const IpOverview = connect(
+  makeMapStateToProps,
+  {
+    updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
+  }
+)(IpOverviewComponent);
 
 // const getDraggable = ({ id, field, value }: DefaultDraggableType) => {
 //   return <DefaultDraggable id={id} field={field} name={name} value={value} />;
 // };
+
+const SelectTypeItem = styled(EuiFlexItem)`
+  min-width: 180px;
+`;

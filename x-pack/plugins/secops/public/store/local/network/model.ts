@@ -5,6 +5,7 @@
  */
 
 import {
+  IpOverviewType,
   NetworkDnsSortField,
   NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
@@ -21,6 +22,7 @@ export interface BasicQuery {
   limit: number;
 }
 
+// Network Page Models
 export interface TopNFlowQuery extends BasicQuery {
   topNFlowType: NetworkTopNFlowType;
   topNFlowSort: NetworkTopNFlowSortField;
@@ -37,13 +39,29 @@ interface NetworkQueries {
   dns: DnsQuery;
 }
 
-export interface GenericNetworkModel {
+export interface NetworkPageModel {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
-  queries: NetworkQueries | null;
+  queries: NetworkQueries;
 }
 
+// IP Details Models
+export interface IpOverviewQuery {
+  flowType: IpOverviewType;
+}
+
+interface IpOverviewQueries {
+  ipOverview: IpOverviewQuery;
+}
+
+export interface NetworkDetailsModel {
+  filterQuery: SerializedFilterQuery | null;
+  filterQueryDraft: KueryFilterQuery | null;
+  queries: IpOverviewQueries;
+}
+
+// Network Model
 export interface NetworkModel {
-  page: GenericNetworkModel;
-  details: GenericNetworkModel;
+  [NetworkType.page]: NetworkPageModel;
+  [NetworkType.details]: NetworkDetailsModel;
 }

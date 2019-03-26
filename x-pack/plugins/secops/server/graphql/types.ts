@@ -972,6 +972,11 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
+export enum IpOverviewType {
+  destination = 'destination',
+  source = 'source',
+}
+
 // ====================================================
 // END: Typescript template
 // ====================================================

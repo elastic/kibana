@@ -4,49 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
 import { isFromKueryExpressionValid } from '../../../lib/keury';
 import { State } from '../../reducer';
 
-import { GenericNetworkModel, NetworkType } from './model';
+import { NetworkDetailsModel, NetworkPageModel } from './model';
 
-const selectNetwork = (state: State, networkType: NetworkType): GenericNetworkModel =>
-  get(networkType, state.local.network);
+const selectNetworkPage = (state: State): NetworkPageModel => state.local.network.page;
+
+const selectNetworkDetails = (state: State): NetworkDetailsModel => state.local.network.details;
 
 export const dnsSelector = () =>
   createSelector(
-    selectNetwork,
-    network => network.queries!.dns
+    selectNetworkPage,
+    network => network.queries.dns
   );
 
 export const topNFlowSelector = () =>
   createSelector(
-    selectNetwork,
-    network => network.queries!.topNFlow
+    selectNetworkPage,
+    network => network.queries.topNFlow
   );
 
 export const networkFilterQueryExpression = () =>
   createSelector(
-    selectNetwork,
+    selectNetworkPage,
     network => (network.filterQuery ? network.filterQuery.query.expression : null)
   );
 
 export const networkFilterQueryAsJson = () =>
   createSelector(
-    selectNetwork,
+    selectNetworkPage,
     network => (network.filterQuery ? network.filterQuery.serializedQuery : null)
   );
 
 export const networkFilterQueryDraft = () =>
   createSelector(
-    selectNetwork,
+    selectNetworkPage,
     network => network.filterQueryDraft
   );
 
 export const isNetworkFilterQueryDraftValid = () =>
   createSelector(
-    selectNetwork,
+    selectNetworkPage,
     network => isFromKueryExpressionValid(network.filterQueryDraft)
+  );
+
+// IP Details Selectors
+export const ipOverviewSelector = () =>
+  createSelector(
+    selectNetworkDetails,
+    network => network.queries.ipOverview
   );

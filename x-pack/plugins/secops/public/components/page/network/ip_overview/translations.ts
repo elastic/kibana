@@ -27,3 +27,15 @@ export const EXTERNAL_LINKS = i18n.translate(
     defaultMessage: 'External Links',
   }
 );
+export const AS_SOURCE = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.asSourceDropDownOptionLabel',
+  {
+    defaultMessage: 'As Source',
+  }
+);
+export const AS_DESTINATION = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.asDestinationDropDownOptionLabel',
+  {
+    defaultMessage: 'As Destination',
+  }
+);

@@ -2,7 +2,7 @@
 
 exports[`IP Overview Component rendering it renders the default IP Overview 1`] = `
 <Component>
-  <IpOverview
+  <Connect(IpOverviewComponent)
     data={
       Object {
         "destination": Object {

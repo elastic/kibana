@@ -130,9 +130,8 @@ class NetworkDnsComponentQuery extends QueryTemplate<
 }
 
 const makeMapStateToProps = () => {
-  const getNetworkDnsSelectorSelector = networkSelectors.dnsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) =>
-    getNetworkDnsSelectorSelector(state, type);
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const mapStateToProps = (state: State) => getNetworkDnsSelector(state);
 
   return mapStateToProps;
 };

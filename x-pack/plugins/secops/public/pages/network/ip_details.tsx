@@ -25,7 +25,6 @@ import { NetworkKql } from './kql';
 import * as i18n from './translations';
 
 const basePath = chrome.getBasePath();
-const type = networkModel.NetworkType.details;
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -62,7 +61,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       startDate={from}
                       endDate={to}
                       filterQuery={filterQuery}
-                      type={networkModel.NetworkType.page}
+                      type={networkModel.NetworkType.details}
                       ip={decodeIpv6(ip)}
                     >
                       {({ id, ipOverviewData, loading }) => (
@@ -72,7 +71,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           startDate={from}
                           endDate={to}
                           loading={loading}
-                          type={networkModel.NetworkType.page}
+                          type={networkModel.NetworkType.details}
                         />
                       )}
                     </IpOverviewQuery>
@@ -97,7 +96,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
 const makeMapStateToProps = () => {
   const getNetworkFilterQuery = networkSelectors.networkFilterQueryExpression();
   return (state: State) => ({
-    filterQueryExpression: getNetworkFilterQuery(state, type) || '',
+    filterQueryExpression: getNetworkFilterQuery(state) || '',
   });
 };
 
@@ -107,9 +106,6 @@ export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {
     text: i18n.NETWORK,
     href: getNetworkUrl(),
-  },
-  {
-    text: 'ip',
   },
   {
     text: decodeIpv6(ip),
