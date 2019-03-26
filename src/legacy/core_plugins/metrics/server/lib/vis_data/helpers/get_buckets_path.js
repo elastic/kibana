@@ -18,31 +18,33 @@
  */
 
 import { startsWith } from 'lodash';
+import { METRIC_TYPES } from './metric_types';
+import { toPercentileNumber } from './to_percentile_number';
+
 const percentileTest = /\[[0-9\.]+\]$/;
-const percentileNumberTest = /\d+\.\d+/;
+
 export default (id, metrics) => {
   const metric = metrics.find(m => startsWith(id, m.id));
   let bucketsPath = String(id);
 
   switch (metric.type) {
-    case 'derivative':
+    case METRIC_TYPES.DERIVATIVE:
       bucketsPath += '[normalized_value]';
       break;
     // For percentiles we need to breakout the percentile key that the user
     // specified. This information is stored in the key using the following pattern
     // {metric.id}[{percentile}]
-    case 'percentile':
+    case METRIC_TYPES.PERCENTILE:
       if (percentileTest.test(bucketsPath)) break;
       const percent = metric.percentiles[0];
-      const percentileKey = percentileNumberTest.test(`${percent.value}`) ? `${percent.value}` : `${percent.value}.0`;
-      bucketsPath += `[${percentileKey}]`;
+      bucketsPath += `[${toPercentileNumber(percent.value)}]`;
       break;
-    case 'percentile_rank':
-      bucketsPath += `[${metric.value}]`;
+    case METRIC_TYPES.PERCENTILE_RANK:
+      bucketsPath += `[${toPercentileNumber(metric.value)}]`;
       break;
-    case 'std_deviation':
-    case 'variance':
-    case 'sum_of_squares':
+    case METRIC_TYPES.STD_DEVIATION:
+    case METRIC_TYPES.VARIANCE:
+    case METRIC_TYPES.SUM_OF_SQUARES:
       if (/^std_deviation/.test(metric.type) && ~['upper', 'lower'].indexOf(metric.mode)) {
         bucketsPath += `[std_${metric.mode}]`;
       } else {

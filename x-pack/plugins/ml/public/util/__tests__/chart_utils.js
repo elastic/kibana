@@ -8,7 +8,7 @@
 
 import $ from 'jquery';
 import d3 from 'd3';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   chartLimits,
   filterAxisLabels,

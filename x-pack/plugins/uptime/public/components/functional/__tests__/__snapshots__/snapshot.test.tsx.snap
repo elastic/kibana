@@ -3,15 +3,9 @@
 exports[`Snapshot component renders without errors 1`] = `
 <EuiFlexGroup
   alignItems="baseline"
-  component="div"
-  direction="row"
   gutterSize="xl"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={4}
   >
     <EuiTitle
@@ -32,18 +26,10 @@ exports[`Snapshot component renders without errors 1`] = `
       paddingSize="m"
     >
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
         gutterSize="xl"
         justifyContent="spaceEvenly"
-        responsive={true}
-        wrap={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -59,10 +45,7 @@ exports[`Snapshot component renders without errors 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -78,10 +61,7 @@ exports[`Snapshot component renders without errors 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -101,7 +81,6 @@ exports[`Snapshot component renders without errors 1`] = `
     </EuiPanel>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={8}
     style={
       Object {

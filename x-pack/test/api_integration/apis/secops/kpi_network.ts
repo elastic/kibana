@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { kpiNetworkQuery } from '../../../../plugins/secops/public/containers/kpi_network/index.gql_query';
 import { GetKpiNetworkQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';

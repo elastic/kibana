@@ -433,18 +433,13 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -457,6 +452,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
             iconSide="left"
             isLoading={true}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button
@@ -760,18 +756,13 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -784,6 +775,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
             iconSide="left"
             isLoading={false}
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

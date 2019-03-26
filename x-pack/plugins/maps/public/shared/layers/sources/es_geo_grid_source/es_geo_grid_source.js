@@ -20,7 +20,6 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
 import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../../common/constants';
-import { filterPropertiesForTooltip } from '../../util';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
@@ -318,9 +317,7 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  async filterAndFormatProperties(properties) {
-    const metricFields = this.getMetricFields();
-    return filterPropertiesForTooltip(metricFields, properties);
-
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }

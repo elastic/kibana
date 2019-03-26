@@ -2,13 +2,8 @@
 
 exports[`LayerPanel is rendered 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
   direction="column"
   gutterSize="none"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlyoutHeader
     className="mapLayerPanel__header"
@@ -16,15 +11,10 @@ exports[`LayerPanel is rendered 1`] = `
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonIcon
@@ -42,10 +32,7 @@ exports[`LayerPanel is rendered 1`] = `
           />
         </EuiButtonIcon>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="s"
           textTransform="none"

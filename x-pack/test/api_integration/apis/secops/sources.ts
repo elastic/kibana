@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { sourceQuery } from '../../../../plugins/secops/public/containers/source/index.gql_query';
 import { SourceQuery } from '../../../../plugins/secops/public/graphql/types';
 

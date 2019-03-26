@@ -34,7 +34,7 @@ export async function lintFiles(log: ToolingLog, files: File[]) {
   await require('stylelint/lib/cli')(paths);
 
   if (process.exitCode === 2) {
-    throw createFailError('[stylelint] failure', 1);
+    throw createFailError('[stylelint] failure');
   } else {
     log.success('[stylelint] staged files linted successfully');
   }

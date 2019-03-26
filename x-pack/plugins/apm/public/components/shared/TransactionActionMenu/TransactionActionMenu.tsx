@@ -20,7 +20,7 @@ import React from 'react';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { getRisonHref } from 'x-pack/plugins/apm/public/components/shared/Links/rison_helpers';
 import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { getDiscoverQuery } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { QueryWithIndexPattern } from '../Links/DiscoverLinks/QueryWithIndexPattern';
 

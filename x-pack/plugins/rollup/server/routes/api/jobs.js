@@ -76,8 +76,19 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.startJob', { id })))
+          .then(() => ({ success: true }));
       } catch(err) {
+        // There is an issue opened on ES to handle the following error correctly
+        // https://github.com/elastic/elasticsearch/issues/39845
+        // Until then we'll modify the response here.
+        if (err.message.includes('Cannot start task for Rollup Job')) {
+          err.status = 400;
+          err.statusCode = 400;
+          err.body.error.status = 400;
+          err.displayName = 'Bad request';
+        }
+
         if (isEsError(err)) {
           return wrapEsError(err);
         }
@@ -97,7 +108,8 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.stopJob', { id })))
+          .then(() => ({ success: true }));
       } catch(err) {
         if (isEsError(err)) {
           return wrapEsError(err);
@@ -118,13 +130,23 @@ export function registerJobsRoute(server) {
       try {
         const { jobIds } = request.payload;
         const callWithRequest = callWithRequestFactory(server, request);
-        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })));
+        return await Promise.all(jobIds.map(id => callWithRequest('rollup.deleteJob', { id })))
+          .then(() => ({ success: true }));
       } catch(err) {
+        // There is an issue opened on ES to handle the following error correctly
+        // https://github.com/elastic/elasticsearch/issues/39845
+        // Until then we'll modify the response here.
+        if (err.response && err.response.includes('Job must be [STOPPED] before deletion')) {
+          err.status = 400;
+          err.statusCode = 400;
+          err.displayName = 'Bad request';
+          err.message = JSON.parse(err.response).task_failures[0].reason.reason;
+        }
         if (isEsError(err)) {
-          return wrapEsError(err);
+          throw wrapEsError(err);
         }
 
-        return wrapUnknownError(err);
+        throw wrapUnknownError(err);
       }
     },
   });

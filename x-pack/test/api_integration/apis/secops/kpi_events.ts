@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { find } from 'lodash';
 
 import { kpiEventsQuery } from '../../../../plugins/secops/public/containers/kpi_events/index.gql_query';

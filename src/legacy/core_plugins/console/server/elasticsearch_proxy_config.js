@@ -23,9 +23,9 @@ import http from 'http';
 import https from 'https';
 import url from 'url';
 
-const readFile = (file) => readFileSync(file, 'utf8');
+const readFile = file => readFileSync(file, 'utf8');
 
-const createAgent = (legacyConfig) => {
+const createAgent = legacyConfig => {
   const target = url.parse(_.head(legacyConfig.hosts));
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
@@ -49,8 +49,11 @@ const createAgent = (legacyConfig) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  // TODO: Don't check into master -- temp fix
-  if (legacyConfig.ssl && legacyConfig.ssl.certificateAuthorities && legacyConfig.ssl.certificateAuthorities.length > 0) {
+  if (
+    legacyConfig.ssl &&
+    Array.isArray(legacyConfig.ssl.certificateAuthorities) &&
+    legacyConfig.ssl.certificateAuthorities.length > 0
+  ) {
     agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
@@ -68,9 +71,9 @@ const createAgent = (legacyConfig) => {
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (legacyConfig) => {
+export const getElasticsearchProxyConfig = legacyConfig => {
   return {
     timeout: legacyConfig.requestTimeout.asMilliseconds(),
-    agent: createAgent(legacyConfig)
+    agent: createAgent(legacyConfig),
   };
 };

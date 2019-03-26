@@ -251,18 +251,13 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -274,6 +269,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             fill={true}
             iconSide="left"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

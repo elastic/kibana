@@ -11,7 +11,7 @@ Usage:
 Options:
   --help                         Display this menu and exit. 
   --config <file>                Pass in a config. Can pass in multiple configs. 
-  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: snapshot
+  --esFrom <snapshot|source>     Build Elasticsearch from source or run from snapshot. Default: $TEST_ES_FROM or snapshot
   --kibana-install-dir <dir>     Run Kibana from existing install directory instead of from source. 
   --bail                         Stop the test run at the first failure. 
   --grep <pattern>               Pattern to select which tests to run. 
@@ -32,6 +32,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],
@@ -49,6 +50,7 @@ Object {
   ],
   "createLogger": [Function],
   "debug": true,
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],
@@ -65,6 +67,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],
@@ -83,6 +86,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": Object {
     "server.foo": "bar",
   },
@@ -100,6 +104,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "quiet": true,
   "suiteTags": Object {
@@ -116,8 +121,25 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "silent": true,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
+}
+`;
+
+exports[`process options for run tests CLI accepts source value for $TEST_ES_FROM 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "source",
+  "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],
     "include": Array [],
@@ -148,6 +170,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "installDir": "foo",
   "suiteTags": Object {
@@ -164,6 +187,7 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "grep": "management",
   "suiteTags": Object {
@@ -180,11 +204,28 @@ Object {
     <absolute path>/foo,
   ],
   "createLogger": [Function],
+  "esFrom": "snapshot",
   "extraKbnOpts": undefined,
   "suiteTags": Object {
     "exclude": Array [],
     "include": Array [],
   },
   "verbose": true,
+}
+`;
+
+exports[`process options for run tests CLI prioritizes source flag over $TEST_ES_FROM 1`] = `
+Object {
+  "assertNoneExcluded": false,
+  "configs": Array [
+    <absolute path>/foo,
+  ],
+  "createLogger": [Function],
+  "esFrom": "snapshot",
+  "extraKbnOpts": undefined,
+  "suiteTags": Object {
+    "exclude": Array [],
+    "include": Array [],
+  },
 }
 `;
