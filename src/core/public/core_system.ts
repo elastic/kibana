@@ -118,7 +118,7 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.setup();
       const fatalErrors = this.fatalErrors.setup({ i18n });
       const http = this.http.setup({ fatalErrors });
-      const overlay = this.overlay.start({ i18n });
+      const overlays = this.overlay.setup({ i18n });
       const basePath = this.basePath.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
         notifications,
@@ -140,7 +140,7 @@ export class CoreSystem {
         basePath,
         uiSettings,
         chrome,
-        overlay,
+        overlays,
       });
 
       return { fatalErrors };

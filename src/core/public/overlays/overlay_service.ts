@@ -19,20 +19,20 @@
 
 import { FlyoutService } from './flyout';
 
-import { I18nStart } from '../i18n';
+import { I18nSetup } from '../i18n';
 
 interface Deps {
-  i18n: I18nStart;
+  i18n: I18nSetup;
 }
 
 export class OverlayService {
   private flyoutService: FlyoutService = new FlyoutService();
 
-  public start({ i18n }: Deps) {
+  public setup({ i18n }: Deps) {
     return {
       openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
     };
   }
 }
 
-export type OverlayStart = ReturnType<OverlayService['start']>;
+export type OverlaySetup = ReturnType<OverlayService['setup']>;

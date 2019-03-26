@@ -36,7 +36,7 @@ interface CoreSetup {
   basePath: BasePathSetup;
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
-  overlay: OverlaySetup;
+  overlays: OverlaySetup;
 }
 
 const runtimeContext = {

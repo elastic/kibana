@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { OverlayService, OverlayStart } from './overlay_service';
+export { OverlayService, OverlaySetup } from './overlay_service';
 export { FlyoutSession } from './flyout';

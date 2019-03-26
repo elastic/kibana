@@ -27,7 +27,7 @@ import { EuiFlyout } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { getOrCreateContainerElement } from './dom_utils';
 
-import { I18nStart } from '../i18n';
+import { I18nSetup } from '../i18n';
 
 const CONTAINER_ID = 'flyout-container';
 
@@ -83,7 +83,7 @@ class FlyoutService {
    * @return {FlyoutSession} The session instance for the opened flyout panel.
    */
   public openFlyout = (
-    i18n: I18nStart,
+    i18n: I18nSetup,
     flyoutChildren: React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;

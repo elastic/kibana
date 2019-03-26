@@ -16,27 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { OverlaySetup } from './overlay_service';
 
-import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
-import { FatalErrorsSetup } from './fatal_errors';
-import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { OverlaySetup } from './overlays';
-import { UiSettingsSetup } from './ui_settings';
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<PublicMethodsOf<OverlaySetup>> = {
+    openFlyout: jest.fn(),
+  };
+  return setupContract;
+};
 
-export { CoreSystem } from './core_system';
-
-export interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
-  overlays: OverlaySetup;
-}
+export const overlayServiceMock = {
+  createSetupContract: createSetupContractMock,
+};
