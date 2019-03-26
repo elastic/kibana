@@ -33,8 +33,6 @@ coming[7.0.0-rc1]
 For more details about breaking changes in this release, see 
 <<breaking-changes-7.0, Breaking changes in 7.0>>.
 
-Design::
-* {kib} 7.0.0-rc1 includes a new design for {kib} called K7. 
 Discover::
 * Allows user to use advanced query DSL directly, and does not apply `query:queryString:options` to `query_string` filters automatically {pull}15640[#15640]
 * Removes `default_field` from `query:queryString:options` {pull}18966[#18966]
@@ -104,6 +102,7 @@ Canvas::
 Dashboard::
 * Adds `href` option in addition to `onClick` for navigational links {pull}25233[#25233]
 Design::
+* Implements a new design for {kib} called K7 
 * Updates logos for marketing {pull}25489[#25489]
 * Adds Kibana 7.0 breadcrumbs to home screen {pull}26605[#26605]
 * Moves elastic/eui typings to single file {pull}23950[#23950]
@@ -533,7 +532,7 @@ if the field is switched, and then switched back to the previous field {pull}251
 * Dedupes by index pattern ID rather than object identity {pull}32350[#32350]
 * Ensures extra columns are not shown in table visualization when `showPartialRows:true` {pull}27154[#27154]
 * Uses default index pattern when one is not present in Visualize {pull}30574[#30574]
-* Surfaces visualization loader errors in the UI. {pull}30594[#30594]
+* Surfaces visualization loader errors in the UI {pull}30594[#30594]
 
 
 
@@ -993,7 +992,7 @@ Visualizations::
 * Adds a console.error for visualize errors {pull}24581[#24581]
 
 [float]
-[[bug-7.0.0]]
+[[bug-7.0.0-alpha1]]
 === Bug fixes
 
 APM::
