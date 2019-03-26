@@ -107,9 +107,9 @@ class TableVis extends Component {
 
       switch (metric.type) {
         case METRIC_TYPES.PERCENTILE:
-          return `${defaultLabel} (${last(metric.percentiles).value})`;
+          return `${defaultLabel} (${last(metric.percentiles).value || 0})`;
         case METRIC_TYPES.PERCENTILE_RANK:
-          return `${defaultLabel} (${last(metric.values)})`;
+          return `${defaultLabel} (${last(metric.values) || 0})`;
         default:
           return defaultLabel;
       }
