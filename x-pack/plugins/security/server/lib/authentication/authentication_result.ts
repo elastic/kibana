@@ -160,4 +160,19 @@ export class AuthenticationResult {
   public redirected() {
     return this.status === AuthenticationResultStatus.Redirected;
   }
+
+  /**
+   * Checks whether authentication result implies state update.
+   */
+  public shouldUpdateState() {
+    // State shouldn't be updated in case it wasn't set or was specifically set to `null`.
+    return this.options.state != null;
+  }
+
+  /**
+   * Checks whether authentication result implies state clearing.
+   */
+  public shouldClearState() {
+    return this.options.state === null;
+  }
 }
