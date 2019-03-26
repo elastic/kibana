@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
-  EuiCallOut
 } from '@elastic/eui';
 
 import { ValidatedRange } from '../../../shared/components/validated_range';
@@ -25,7 +24,7 @@ import { ValidatedDualRange } from 'ui/validated_range';
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 24;
 
-export function SettingsPanel(props) {
+export function LayerSettings(props) {
 
   const onLabelChange = (event) => {
     const label = event.target.value;
@@ -39,34 +38,6 @@ export function SettingsPanel(props) {
 
   const onAlphaChange = (alpha) => {
     props.updateAlpha(props.layerId, alpha);
-  };
-
-  const onSourceChange = ({ propName, value }) => {
-    props.updateSourceProp(props.layerId, propName, value);
-  };
-
-  const renderLayerErrors = () => {
-    if (!props.layer.hasErrors()) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          color="warning"
-          title={
-            i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-              defaultMessage: 'Unable to load layer'
-            })
-          }
-        >
-          <p data-test-subj="layerErrorMessage">
-            {props.layer.getErrors()}
-          </p>
-        </EuiCallOut>
-        <EuiSpacer margin="m"/>
-      </Fragment>
-    );
   };
 
   const renderZoomSliders = () => {
@@ -146,17 +117,14 @@ export function SettingsPanel(props) {
 
   return (
     <Fragment>
-
-      {renderLayerErrors()}
-
       <EuiPanel>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h5>
                 <FormattedMessage
-                  id="xpack.maps.layerPanel.settingsPanel.settingsTitle"
-                  defaultMessage="Settings"
+                  id="xpack.maps.layerPanel.layerSettingsTitle"
+                  defaultMessage="Layer Settings"
                 />
               </h5>
             </EuiTitle>
@@ -170,9 +138,9 @@ export function SettingsPanel(props) {
         {renderZoomSliders()}
 
         {renderAlphaSlider()}
-
-        {props.layer.renderSourceSettingsEditor({ onChange: onSourceChange })}
       </EuiPanel>
+
+      <EuiSpacer size="s" />
     </Fragment>
   );
 }
