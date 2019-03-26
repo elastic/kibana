@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
 import { Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { KibanaAction } from '../../selectors/types';

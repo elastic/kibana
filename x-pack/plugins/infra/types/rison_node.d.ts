@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// eslint-disable variable-name
 
 declare module 'rison-node' {
   export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface RisonArray extends Array<RisonValue> {}
 
   export interface RisonObject {

@@ -75,15 +75,17 @@ module.exports = {
           // '@typescript-eslint/explicit-member-accessibility': 'error',
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
-          // '@typescript-eslint/prefer-function-type': 'error',
+          '@typescript-eslint/prefer-function-type': 'error',
           '@typescript-eslint/prefer-interface': 'error',
-          // '@typescript-eslint/member-ordering': 'error',
+          '@typescript-eslint/member-ordering': ['error', {
+            'default': ['public-static-field', 'static-field', 'instance-field']
+          }],
           '@typescript-eslint/no-angle-bracket-type-assertion': 'error',
-          // '@typescript-eslint/no-empty-interface': 'error',
+          '@typescript-eslint/no-empty-interface': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/no-triple-slash-reference': 'error',
-          // '@typescript-eslint/no-var-requires': 'error',
+          // '@typescript-eslint/no-var-requires': 'error', // can't reproduce tslint behaviour
           '@typescript-eslint/type-annotation-spacing': 'error',
           // '@typescript-eslint/unified-signatures': 'error',
           'arrow-body-style': 'error',
@@ -95,7 +97,12 @@ module.exports = {
           'eol-last': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
-          // 'import/order': 'error',
+          'import/order': ['error', {
+            'groups': [
+              ['external', 'builtin'],
+              'internal',
+            ]
+          }],
           'max-classes-per-file': ['error', 1],
           'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
           'new-parens': 'error',
@@ -118,9 +125,8 @@ module.exports = {
           'no-var': 'error',
           'object-curly-spacing': 'error',
           'object-shorthand': 'error',
-          // 'one-var': 'error',
-          'one-var': ['error', { 'initialized': 'always', 'uninitialized': 'never' }],
-          // 'prefer-arrow/prefer-arrow-functions': 'error',
+          // 'one-var': 'error', // can't reproduce tslint behaviour
+          // 'prefer-arrow/prefer-arrow-functions': [ 'error', { "singleReturnOnly": true } ], // can't reproduce tslint behaviour
           'prefer-const': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import { createAction } from 'redux-actions';
 import { KibanaAction } from '../../selectors/types';
 import { PanelId, PanelState, PanelStateMap } from '../selectors';

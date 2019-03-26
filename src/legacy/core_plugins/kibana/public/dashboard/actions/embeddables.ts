@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import _ from 'lodash';
 import { createAction } from 'redux-actions';
 import { getEmbeddableCustomization, getPanel } from '../../selectors';

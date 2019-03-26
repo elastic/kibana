@@ -46,6 +46,7 @@ export abstract class KibanaSystem<C, D extends SystemsType, E = void> {
  *
  * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes
  */
-export interface KibanaSystemClassStatic<C, D extends SystemsType, E = void> {
-  new (kibana: C, deps: D): KibanaSystem<C, D, E>;
-}
+export type KibanaSystemClassStatic<C, D extends SystemsType, E = void> = new (
+  kibana: C,
+  deps: D
+) => KibanaSystem<C, D, E>;
