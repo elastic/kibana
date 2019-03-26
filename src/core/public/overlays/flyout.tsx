@@ -17,6 +17,8 @@
  * under the License.
  */
 
+/* tslint:disable max-classes-per-file */
+
 import React from 'react';
 
 import { Subject } from 'rxjs';
@@ -24,8 +26,6 @@ import { Subject } from 'rxjs';
 import { EuiFlyout } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { I18nContext } from 'ui/i18n';
-
-let activeSession: FlyoutSession | null = null;
 
 const CONTAINER_ID = 'flyout-container';
 
@@ -58,18 +58,18 @@ class FlyoutSession {
 
   private closeSubject = new Subject<void>();
 
-  constructor() {
+  constructor(private readonly activeSessionGetter: () => FlyoutSession | null) {
     this.onClose = this.closeSubject.toPromise();
   }
 
   /**
    * Closes the opened flyout as long as it's still the open one.
    * If this is not the active session anymore, this method won't do anything.
-   * If this session was still active and a flyout was closed, the 'closed'
-   * event will be emitted on this FlyoutSession instance.
+   * If this session was still active and a flyout was closed, the {@link #onClose}
+   * promise will be resolved when calling this.
    */
   public close(): void {
-    if (activeSession === this) {
+    if (this.activeSessionGetter() === this) {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
         ReactDOM.unmountComponentAtNode(container);
@@ -80,37 +80,41 @@ class FlyoutSession {
   }
 }
 
-/**
- * Opens a flyout panel with the given component inside. You can use
- * {@link FlyoutSession#close} on the return value to close the flyout.
- *
- * @param flyoutChildren - Mounts the children inside a fly out panel
- * @return {FlyoutSession} The session instance for the opened flyout panel.
- */
-export function openFlyout(
-  flyoutChildren: React.ReactNode,
-  flyoutProps: {
-    closeButtonAriaLabel?: string;
-    'data-test-subj'?: string;
-  } = {}
-): FlyoutSession {
-  // If there is an active inspector session close it before opening a new one.
-  if (activeSession) {
-    activeSession.close();
-  }
-  const container = getOrCreateContainerElement();
-  const session = (activeSession = new FlyoutSession());
+class FlyoutService {
+  private activeSession: FlyoutSession | null = null;
 
-  ReactDOM.render(
-    <I18nContext>
-      <EuiFlyout {...flyoutProps} onClose={() => session.close()}>
-        {flyoutChildren}
-      </EuiFlyout>
-    </I18nContext>,
-    container
-  );
+  /**
+   * Opens a flyout panel with the given component inside. You can use
+   * {@link FlyoutSession#close} on the return value to close the flyout.
+   *
+   * @param flyoutChildren - Mounts the children inside a fly out panel
+   * @return {FlyoutSession} The session instance for the opened flyout panel.
+   */
+  public openFlyout = (
+    flyoutChildren: React.ReactNode,
+    flyoutProps: {
+      closeButtonAriaLabel?: string;
+      'data-test-subj'?: string;
+    } = {}
+  ): FlyoutSession => {
+    // If there is an active inspector session close it before opening a new one.
+    if (this.activeSession) {
+      this.activeSession.close();
+    }
+    const container = getOrCreateContainerElement();
+    const session = (this.activeSession = new FlyoutSession(() => this.activeSession));
 
-  return session;
+    ReactDOM.render(
+      <I18nContext>
+        <EuiFlyout {...flyoutProps} onClose={() => session.close()}>
+          {flyoutChildren}
+        </EuiFlyout>
+      </I18nContext>,
+      container
+    );
+
+    return session;
+  };
 }
 
-export { FlyoutSession };
+export { FlyoutService, FlyoutSession };

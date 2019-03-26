@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { openFlyout } from './flyout';
+import { FlyoutService } from './flyout';
 
 export class OverlayService {
+  private flyoutService: FlyoutService = new FlyoutService();
+
   public start() {
     return {
-      openFlyout,
+      openFlyout: this.flyoutService.openFlyout,
     };
   }
 }
