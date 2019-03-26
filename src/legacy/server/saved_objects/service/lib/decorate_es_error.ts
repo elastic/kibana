@@ -26,30 +26,33 @@ const {
   NoConnections,
   RequestTimeout,
   Conflict,
+  // @ts-ignore
   401: NotAuthorized,
+  // @ts-ignore
   403: Forbidden,
+  // @ts-ignore
   413: RequestEntityTooLarge,
   NotFound,
   BadRequest,
 } = elasticsearch.errors;
 
 import {
-  decorateBadRequestError,
-  decorateNotAuthorizedError,
-  decorateForbiddenError,
-  decorateRequestEntityTooLargeError,
   createGenericNotFoundError,
+  decorateBadRequestError,
   decorateConflictError,
   decorateEsUnavailableError,
+  decorateForbiddenError,
   decorateGeneralError,
+  decorateNotAuthorizedError,
+  decorateRequestEntityTooLargeError,
 } from './errors';
 
-export function decorateEsError(error) {
+export function decorateEsError(error: any) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error', {});
+  const { reason } = get(error, 'body.error');
   if (
     error instanceof ConnectionFault ||
     error instanceof ServiceUnavailable ||
