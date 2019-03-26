@@ -11,6 +11,14 @@ import { getJobs } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
+jest.mock('../../../services', () => {
+  const services = require.requireActual('../../../services');
+  return {
+    ...services,
+    trackUserAction: jest.fn(),
+  };
+});
+
 const defaultProps = {
   jobs: [],
   pager: new Pager(20, 10, 1),
