@@ -17,20 +17,12 @@
  * under the License.
  */
 
-function samplePanelAction(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      contextMenuActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
+var force = require('./force')(process.argv);
+
+var uid = process.getuid && process.getuid();
+var isRoot = require('./is_root')(uid);
+
+if(isRoot && !force) {
+  console.error('Kibana should not be run as root.  Use --allow-root to continue.');
+  process.exit(1);
 }
-
-module.exports = function (kibana) {
-  return [
-    samplePanelAction(kibana),
-  ];
-};
-

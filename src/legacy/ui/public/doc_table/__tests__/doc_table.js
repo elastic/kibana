@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import '../../private';

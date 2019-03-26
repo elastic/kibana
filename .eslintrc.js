@@ -78,6 +78,15 @@ module.exports = {
         ],
       },
     ],
+    '@kbn/eslint/module_migration': [
+      'error',
+      [
+        {
+          from: 'expect.js',
+          to: '@kbn/expect',
+        },
+      ],
+    ],
   },
 
   overrides: [

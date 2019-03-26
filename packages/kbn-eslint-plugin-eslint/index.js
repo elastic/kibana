@@ -23,5 +23,6 @@ module.exports = {
     'disallow-license-headers': require('./rules/disallow_license_headers'),
     'no-default-export': require('./rules/no_default_export'),
     'no-restricted-paths': require('./rules/no_restricted_paths'),
+    module_migration: require('./rules/module_migration'),
   },
 };
