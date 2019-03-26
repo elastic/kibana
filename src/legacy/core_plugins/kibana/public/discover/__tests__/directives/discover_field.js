@@ -22,7 +22,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import 'ui/private';
 import '../../components/field_chooser/discover_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
