@@ -19,24 +19,23 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { get, assign, last } from 'lodash';
-import AggSelect from './agg_select';
-import FieldSelect from './field_select';
-import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import { assign, last } from 'lodash';
+import AggSelect from '../agg_select';
+import FieldSelect from '../field_select';
+import AggRow from '../agg_row';
+import createChangeHandler from '../../lib/create_change_handler';
+import createSelectHandler from '../../lib/create_select_handler';
+import { PercentileRankValues } from './percentile_rank_values';
 
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldNumber,
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import AddDeleteButtons from '../add_delete_buttons';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -52,58 +51,11 @@ export const PercentileRankAgg = props => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
-  const handlePercentileRankValueChange = (values) => {
+  const handlePercentileRankValuesChange = (values) => {
     handleChange(assign({}, model, {
       values,
     }));
   };
-
-  const onChangeValue = (index, event) => {
-    percentileRankValueRows[index] = get(event, 'target.value');
-
-    handlePercentileRankValueChange(percentileRankValueRows);
-  };
-
-  const onDeleteValue = index => (
-    handlePercentileRankValueChange(
-      percentileRankValueRows
-        .filter((item, currentIndex) => index !== currentIndex))
-  );
-
-  const onAddValue = () => handlePercentileRankValueChange([...percentileRankValueRows, '']);
-
-  const renderValuesRows = (value, key) => (
-    <div className="tvbAggRow__percentileRankValue" key={key}>
-      <EuiFlexGroup responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiFormLabel htmlFor={htmlId('value')}>
-            <FormattedMessage
-              id="tsvb.percentileRank.valueLabel"
-              defaultMessage="Value:"
-            />
-          </EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFieldNumber
-            value={value === '' ? '' : Number(value)}
-            placeholder={0}
-            onChange={onChangeValue.bind(null, key)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AddDeleteButtons
-            onAdd={onAddValue}
-            onDelete={onDeleteValue.bind(null, key)}
-            disableDelete={isTablePanel || percentileRankValueRows.length < 2}
-            disableAdd={isTablePanel}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer/>
-    </div>
-  );
-
-  const percentileRankRenderedRows = percentileRankValueRows.map(renderValuesRows);
 
   return (
     <AggRow
@@ -149,9 +101,12 @@ export const PercentileRankAgg = props => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer/>
-      <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-        {isTablePanel ? last(percentileRankRenderedRows) : percentileRankRenderedRows}
-      </EuiFlexGroup>
+      <PercentileRankValues
+        disableAdd={isTablePanel}
+        disableDelete={isTablePanel}
+        model={isTablePanel ? [last(percentileRankValueRows)] : percentileRankValueRows}
+        onChange={handlePercentileRankValuesChange}
+      />
     </AggRow>
   );
 };
