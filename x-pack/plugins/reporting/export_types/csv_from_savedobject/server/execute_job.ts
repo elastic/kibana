@@ -9,7 +9,6 @@ import { CONTENT_TYPE_CSV } from '../../../common/constants';
 // @ts-ignore
 import { createTaggedLogger, cryptoFactory, oncePerServer } from '../../../server/lib';
 import { JobDocPayload, KbnServer, Logger } from '../../../types';
-import {} from '../types';
 import { createGenerateCsv } from './lib/generate_csv';
 
 interface JobDocOutputPseudo {
