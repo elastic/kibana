@@ -30,7 +30,11 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 import { VisSavedObject, VisualizeLoaderParams } from './types';
 
 export class VisualizeLoader {
-  constructor(private readonly savedVisualizations: any, private readonly Private: IPrivate) {}
+  constructor(
+    private readonly savedVisualizations: any,
+    private readonly pipelineDataLoader: any,
+    private readonly Private: IPrivate
+  ) {}
 
   /**
    * Renders a saved visualization specified by its id into a DOM element.
@@ -135,14 +139,19 @@ export class VisualizeLoader {
       queryFilter: this.Private(FilterBarQueryFilterProvider),
       // lets add Private to the params, we'll need to pass it to visualize later
       Private: this.Private,
+      pipelineDataLoader: this.pipelineDataLoader,
     };
 
     return new EmbeddedVisualizeHandler(element, savedObj, handlerParams);
   }
 }
 
-function VisualizeLoaderProvider(savedVisualizations: any, Private: IPrivate) {
-  return new VisualizeLoader(savedVisualizations, Private);
+function VisualizeLoaderProvider(
+  savedVisualizations: any,
+  interpreterConfig: any,
+  Private: IPrivate
+) {
+  return new VisualizeLoader(savedVisualizations, interpreterConfig.enabledInPipeline, Private);
 }
 
 /**
