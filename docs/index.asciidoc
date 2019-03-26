@@ -42,6 +42,8 @@ include::timelion.asciidoc[]
 
 include::canvas.asciidoc[]
 
+include::localization.asciidoc[]
+
 include::ml/index.asciidoc[]
 
 include::maps/index.asciidoc[]
