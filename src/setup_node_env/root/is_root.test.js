@@ -17,6 +17,16 @@
  * under the License.
  */
 
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+var isRoot = require('./is_root');
+
+
+describe('isRoot', function () {
+
+  test('0 is root', function () {
+    expect(isRoot(0)).toBeTruthy();
+  });
+
+  test('not 0 is not root', function () {
+    expect(isRoot(5)).toBeFalsy();
+  });
+});

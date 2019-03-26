@@ -17,6 +17,6 @@
  * under the License.
  */
 
-require('./root');
-require('./node_version_validator');
-require('./babel_register');
+module.exports = function (uid) {
+  return uid === 0;
+};
