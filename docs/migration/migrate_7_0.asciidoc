@@ -174,7 +174,7 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 [float]
 ==== Removed support for users relying on direct index privileges to the Kibana index in Elasticsearch
 *Details:* With the introduction of Kibana RBAC in 6.4, users no longer require privileges to the Kibana index in Elasticsearch. Instead, users
-should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required.
+should be granted <<kibana-privileges>>. Prior to 7.0, when a user that relies upon direct index privileges logs into Kibana, a deprecation warning is logged. The only role that should have privileges to the Kibana index in Elasticsearch is the `kibana_system` role, or a custom role which the Kibana server uses. If you are using the `kibana_user` or `kibana_dashboard_only_user` role to grant access to Kibana, or a custom role using <<kibana-privileges>>, no changes are required. 
 
 *Impact:* You must change any roles which grant access to Kibana using index privileges to instead use <<kibana-privileges>>. Watcher jobs using the Reporting attachment type must be updated as well.
 
