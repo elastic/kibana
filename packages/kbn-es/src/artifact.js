@@ -59,7 +59,7 @@ exports.Artifact = class Artifact {
 
     log.info('downloading artifact info from %s', chalk.bold(url));
     const abc = new AbortController();
-    const resp = await fetch(url);
+    const resp = await fetch(url, { signal: abc.signal });
     const json = await resp.text();
 
     if (resp.status === 404) {
