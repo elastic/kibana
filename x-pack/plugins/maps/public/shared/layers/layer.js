@@ -65,7 +65,6 @@ export class AbstractLayer {
         joinDescriptor.right.id = uuid();
       });
     }
-    console.log('clonedDescriptor', clonedDescriptor);
     return clonedDescriptor;
   }
 
