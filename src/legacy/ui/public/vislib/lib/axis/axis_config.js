@@ -119,7 +119,7 @@ export function VislibLibAxisConfigProvider() {
         }
       }
 
-      if (this.isTimeDomain()) {
+      if (this.isTimeDomain() && this.data.get('xAxisFormat')) {
         this._values.labels.timezone = getFormat(this.data.get('xAxisFormat')).param('timezone');
       }
 
