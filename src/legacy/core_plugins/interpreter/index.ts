@@ -33,11 +33,12 @@ export default function InterpreterPlugin(kibana: any) {
         interpreterConfig: server.config().get('interpreter'),
       }),
     },
-    config: (Joi: any) =>
-      Joi.object({
+    config: (Joi: any) => {
+      return Joi.object({
         enabled: Joi.boolean().default(true),
         enableInVisualize: Joi.boolean().default(false),
-      }).default(),
+      }).default();
+    },
     init,
   };
 
