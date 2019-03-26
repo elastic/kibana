@@ -8,7 +8,6 @@
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
-import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
 import {
   Axis,
   getColumnIdByIndex,
@@ -28,17 +27,6 @@ interface XyChartPrivateState {
 type XyChartVisModel = VisModel<'xyChart', XyChartPrivateState>;
 
 const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
-
-function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
-  return (
-    <IndexPatternPanel
-      indexPatterns={visModel.indexPatterns}
-      onChangeIndexPatterns={indexPatterns => {
-        onChangeVisModel({ ...visModel, indexPatterns });
-      }}
-    />
-  );
-}
 
 function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChartVisModel>) {
   const {
@@ -88,7 +76,7 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<XyChart
 function toExpression(viewState: XyChartVisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `sample_data | xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
+  return `xy_chart displayType=${viewState.private.xyChart.displayType || 'line'}`;
 }
 
 function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | 'area') {
@@ -140,7 +128,6 @@ function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', 
 export const config: EditorPlugin<XyChartVisModel> = {
   name: 'xy_chart',
   toExpression,
-  DataPanel: dataPanel,
   ConfigPanel: configPanel,
   getSuggestions: visModel => [
     getSuggestion(visModel, 'line', 'Standard line chart'),

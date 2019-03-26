@@ -8,6 +8,7 @@ import * as Joi from 'joi';
 import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN_ID } from './common';
+import { route as routeSql } from './server/essql';
 import { route as routeQuery } from './server/query';
 
 export function vizEditor(kibana: any) {
@@ -43,6 +44,7 @@ export function vizEditor(kibana: any) {
       });
 
       routeQuery(server);
+      routeSql(server);
     },
   });
 }

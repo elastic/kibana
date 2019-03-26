@@ -6,18 +6,18 @@
 
 import { Query } from '../../../common';
 
-export interface IndexPatternField {
+export interface Field {
   name: string;
   type: string;
   aggregatable: boolean;
   searchable: boolean;
 }
 
-export interface IndexPattern {
+export interface Datasource {
   id: string;
   title: string;
   timeFieldName?: string;
-  fields: IndexPatternField[];
+  fields: Field[];
   fieldFormatMap?: string;
 }
 
@@ -26,8 +26,8 @@ export interface Axis {
   columns: string[];
 }
 
-export interface IndexPatterns {
-  [id: string]: IndexPattern;
+export interface Datasources {
+  [id: string]: Datasource;
 }
 
 /**
@@ -36,10 +36,11 @@ export interface IndexPatterns {
  * are defined here, anything else is in the private property and scoped by plugin
  */
 export interface VisModel<K extends string = any, T = any> {
-  indexPatterns: IndexPatterns | null;
+  datasources: Datasources | null;
   queries: {
     [id: string]: Query;
   };
+  datasourcePlugin: string;
   editorPlugin: string;
   title: string;
   private: { [key in K]: T };
@@ -84,10 +85,10 @@ export function getColumnIdByIndex(
 // Generate our dummy-data
 export function initialState(): VisModel<any, any> {
   return {
-    indexPatterns: null,
+    datasources: null,
     queries: {
       q1: {
-        index: 'index-pattern:aaa',
+        datsourceId: 'index-pattern:aaa',
         select: [
           { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
           { operation: 'sum', argument: 'bytes' },
@@ -95,6 +96,7 @@ export function initialState(): VisModel<any, any> {
       },
     },
     editorPlugin: 'xy_chart',
+    datasourcePlugin: 'essql',
     title: 'Sum of bytes over time',
     private: {
       xyChart: {
@@ -106,6 +108,9 @@ export function initialState(): VisModel<any, any> {
           title: 'Sum of bytes',
           columns: ['q1_1'],
         },
+      },
+      essql: {
+        sql: '',
       },
     },
   };

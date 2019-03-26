@@ -8,7 +8,6 @@
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { columnSummary } from '../public/common/components/config_panel';
-import { IndexPatternPanel } from '../public/common/components/index_pattern_panel';
 import {
   Axis,
   getColumnIdByIndex,
@@ -27,17 +26,6 @@ interface PieChartPrivateState {
 type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
 
 const updatePieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
-
-function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
-  return (
-    <IndexPatternPanel
-      indexPatterns={visModel.indexPatterns}
-      onChangeIndexPatterns={indexPatterns => {
-        onChangeVisModel({ ...visModel, indexPatterns });
-      }}
-    />
-  );
-}
 
 function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<PieChartVisModel>) {
   const {
@@ -104,7 +92,7 @@ function toExpression(viewState: PieChartVisModel) {
   };
   // TODO prob. do this on an AST object and stringify afterwards
   // TODO actually use the stuff from the viewState
-  return `sample_data | pie_chart | kibana_pie visConfig='${JSON.stringify(legacyConfig)}'`;
+  return `pie_chart | kibana_pie visConfig='${JSON.stringify(legacyConfig)}'`;
 }
 
 function prefillPrivateState(visModel: UnknownVisModel) {
@@ -144,7 +132,6 @@ function getSuggestion(visModel: PieChartVisModel) {
 export const config: EditorPlugin<PieChartVisModel> = {
   name: 'pie_chart',
   toExpression,
-  DataPanel: dataPanel,
   ConfigPanel: configPanel,
   getSuggestions: visModel => [getSuggestion(visModel)],
   // this part should check whether the x and y axes have to be initialized in some way

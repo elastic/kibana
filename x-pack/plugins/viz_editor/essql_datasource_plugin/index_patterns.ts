@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { IndexPattern } from '../../lib';
+import { Datasource } from '../public/common/lib';
 
 export const getIndexPatterns = () => {
   const savedObjectsClient = chrome.getSavedObjectsClient();
@@ -20,7 +20,7 @@ export const getIndexPatterns = () => {
           id,
           title: attributes.title,
           fields: JSON.parse(attributes.fields as string),
-        }) as IndexPattern;
+        }) as Datasource;
       });
     })
     .catch(err => {

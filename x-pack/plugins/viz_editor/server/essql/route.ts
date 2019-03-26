@@ -10,30 +10,29 @@
 
 import { Legacy } from 'kibana';
 import { API_PREFIX, Query } from '../../common';
-import { toEsQuery } from './to_es_query';
-import { toTable } from './to_table';
 
 /**
  * Expose a RESTful endpoint that runs an Elasticsearch query based on our
  * query model, and returns a tabular result.
  */
 export function route(server: Legacy.Server) {
-  const { callWithRequest } = server.plugins.elasticsearch.createCluster('data', {});
+  const { callWithRequest } = server.plugins.elasticsearch.createCluster('sql', {});
 
   server.route({
-    path: `${API_PREFIX}/search`,
+    path: `${API_PREFIX}/sqlfields`,
     method: 'POST',
     async handler(req) {
-      const query = req.payload as Query;
-      const esQuery = toEsQuery(query);
-      const result = await callWithRequest(req, 'search', {
-        index: query.datsourceId,
-        body: esQuery,
+      const payload = req.payload as any;
+      const result = await callWithRequest(req, 'transport.request', {
+        path: '/_sql?format=json',
+        method: 'POST',
+        body: {
+          query: payload.sql,
+          fetch_size: 1,
+        },
       });
 
-      return {
-        rows: toTable(query, result),
-      };
+      return result.columns;
     },
   });
 }

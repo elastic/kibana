@@ -17,6 +17,8 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
+  // @ts-ignore
+  EuiSuperSelect,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
 import { initialState, VisModel } from '../../common/lib';
@@ -27,7 +29,8 @@ import 'brace/mode/javascript';
 import 'brace/snippets/javascript';
 import 'brace/theme/github';
 
-import { registry } from '../../editor_plugin_registry';
+import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
+import { registry as editorRegistry } from '../../editor_plugin_registry';
 
 type Action =
   | { type: 'loaded' }
@@ -58,8 +61,14 @@ function reducer(state: RootState, action: Action): RootState {
 export function Main(props: MainProps) {
   const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
 
-  const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
-    state.visModel.editorPlugin
+  const {
+    ConfigPanel,
+    WorkspacePanel,
+    toExpression: toRenderExpression,
+  } = editorRegistry.getByName(state.visModel.editorPlugin);
+
+  const { DataPanel, toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
+    state.visModel.datasourcePlugin
   );
 
   const onChangeVisModel = (newState: VisModel) => {
@@ -72,17 +81,34 @@ export function Main(props: MainProps) {
   };
 
   // TODO add a meaningful default expression builder implementation here
-  const expression = toExpression
-    ? toExpression(state.visModel, 'edit')
-    : `esquery { query } | ${state.visModel.editorPlugin}_chart { config }`;
+  const renderExpression = toRenderExpression
+    ? toRenderExpression(state.visModel, 'edit')
+    : `${state.visModel.editorPlugin}_chart { config }`;
 
-  const suggestions = registry
+  const fetchExpression = toDataFetchExpression
+    ? toDataFetchExpression(state.visModel, 'edit')
+    : `${state.visModel.editorPlugin}_chart { config }`;
+
+  const expression = `${fetchExpression} | ${renderExpression}`;
+
+  const suggestions = editorRegistry
     .getAll()
     .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
 
   return (
     <EuiPage>
       <EuiPageSideBar>
+        Switch datasource:
+        <EuiSuperSelect
+          options={datasourceRegistry
+            .getAll()
+            .map(({ name }) => ({ value: name, inputDisplay: name }))}
+          valueOfSelected={state.visModel.datasourcePlugin}
+          onChange={(value: string) => {
+            // TODO this should also clear the references to all of the datasources
+            onChangeVisModel({ ...state.visModel, datasourcePlugin: value, datasources: null });
+          }}
+        />
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">

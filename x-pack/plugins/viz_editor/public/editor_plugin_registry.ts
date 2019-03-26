@@ -35,7 +35,6 @@ export interface Suggestion<S extends VisModel = VisModel> {
 
 export interface EditorPlugin<S extends VisModel = VisModel> {
   name: string;
-  DataPanel: React.ComponentType<PanelComponentProps<S>>;
   ConfigPanel: React.ComponentType<PanelComponentProps<S>>;
   HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;

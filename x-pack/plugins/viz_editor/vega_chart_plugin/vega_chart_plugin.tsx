@@ -19,20 +19,6 @@ const updateVegaState = updatePrivateState<'vegaChart', VegaChartPrivateState>('
 const updateSpec = (visModel: VegaChartVisModel, spec: string) =>
   updateVegaState(visModel, { spec });
 
-function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VegaChartVisModel>) {
-  return (
-    <>
-      The following query is used to fetch data (not implemented yet):
-      <EuiTextArea
-        style={{ height: 400 }}
-        fullWidth
-        readOnly
-        value={JSON.stringify(visModel.queries, null, 2)}
-      />
-    </>
-  );
-}
-
 function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<VegaChartVisModel>) {
   const [text, updateText] = useState(visModel.private.vegaChart.spec);
   return (
@@ -51,7 +37,7 @@ function configPanel({ visModel, onChangeVisModel }: PanelComponentProps<VegaCha
 
 function toExpression(viewState: VegaChartVisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
-  return `sample_data | vega_data_prep from='now-2M' to='now' spec='${viewState.private.vegaChart.spec.replace(
+  return `vega_data_prep from='now-2M' to='now' spec='${viewState.private.vegaChart.spec.replace(
     /\n/g,
     ''
   )}' | vega spec=''`;
@@ -88,7 +74,6 @@ function getSuggestion(visModel: VegaChartVisModel) {
 export const config: EditorPlugin<VegaChartVisModel> = {
   name: 'vega_chart',
   toExpression,
-  DataPanel: dataPanel,
   ConfigPanel: configPanel,
   getSuggestions: visModel => [getSuggestion(visModel)],
   // this part should check whether the x and y axes have to be initialized in some way
