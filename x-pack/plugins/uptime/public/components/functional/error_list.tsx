@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
 import { ErrorListItem } from '../../../common/graphql/types';
 import { MonitorName } from './monitor_name';
 

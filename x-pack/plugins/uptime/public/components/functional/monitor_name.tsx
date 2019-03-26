@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiLink } from '@elastic/eui';
-import { get } from 'lodash';
-import React, { Fragment } from 'react';
-import { LatestMonitor } from '../../../common/graphql/types';
+import React from 'react';
 
 interface MonitorNameProps {
   id: string;

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
+import { FilterBar as FilterBarType } from '../../../common/graphql/types';
 import { filterBarSearchSchema } from './search_schema';
 
 interface FilterBarProps {
