@@ -28,11 +28,7 @@
  */
 const path = require('path');
 const resolve = require('eslint-module-utils/resolve').default;
-const containsPath = require('contains-path');
-
-function toArray(value) {
-  return Array.isArray(value) ? value : [value];
-}
+const mm = require('micromatch');
 
 function isStaticRequire(node) {
   return (
@@ -46,8 +42,12 @@ function isStaticRequire(node) {
   );
 }
 
+function resolveBasePath(basePath) {
+  return path.isAbsolute(basePath) ? basePath : path.relative(process.cwd(), basePath);
+}
+
 function traverseToTopFolder(src, pattern) {
-  while (containsPath(src, pattern)) {
+  while (mm([src], pattern).length > 0) {
     const srcIdx = src.lastIndexOf(path.sep);
     src = src.slice(0, srcIdx);
   }
@@ -61,9 +61,6 @@ function isSameFolderOrDescendent(src, imported, pattern) {
 }
 
 module.exports = {
-  /**
-   *@type {import('eslint').Rule}
-   */
   meta: {
     schema: [
       {
@@ -75,7 +72,9 @@ module.exports = {
             items: {
               type: 'object',
               properties: {
-                target: { type: 'string' },
+                target: {
+                  anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+                },
                 from: {
                   anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
                 },
@@ -91,46 +90,33 @@ module.exports = {
     ],
   },
 
-  /**
-   *@param {import('eslint').Rule.RuleContext} context runtime context
-   *@returns {import('eslint').Rule.RuleListener}
-   */
   create(context) {
     const options = context.options[0] || {};
     const zones = options.zones || [];
-    const basePath = options.basePath || process.cwd();
-    const currentFilename = context.getFilename();
-    const matchingZones = zones.filter(zone => {
-      const targetPath = path.resolve(basePath, zone.target);
-
-      return containsPath(currentFilename, targetPath);
-    });
+    const basePath = options.basePath ? resolveBasePath(options.basePath) : process.cwd();
 
     function checkForRestrictedImportPath(importPath, node) {
       const absoluteImportPath = resolve(importPath, context);
-
       if (!absoluteImportPath) return;
-      for (const zone of matchingZones) {
-        for (const from of toArray(zone.from)) {
-          const absoluteFrom = path.resolve(basePath, from);
 
-          if (!containsPath(absoluteImportPath, absoluteFrom)) continue;
-          if (
-            zone.allowSameFolder &&
-            isSameFolderOrDescendent(
-              resolve(currentFilename, context),
-              absoluteImportPath,
-              absoluteFrom
-            )
-          ) {
-            continue;
-          }
+      const currentFilename = context.getFilename();
+      for (const { target, from, allowSameFolder } of zones) {
+        const srcFilePath = resolve(currentFilename, context);
 
-          context.report({
-            node,
-            message: `Unexpected path "${importPath}" imported in restricted zone.`,
-          });
-        }
+        const relativeSrcFile = path.relative(basePath, srcFilePath);
+        const relativeImportFile = path.relative(basePath, absoluteImportPath);
+
+        if (
+          !mm([relativeSrcFile], target).length ||
+          !mm([relativeImportFile], from).length ||
+          (allowSameFolder && isSameFolderOrDescendent(relativeSrcFile, relativeImportFile, from))
+        )
+          continue;
+
+        context.report({
+          node,
+          message: `Unexpected path "${importPath}" imported in restricted zone.`,
+        });
       }
     }
 

@@ -32,10 +32,6 @@ const ELASTIC_LICENSE_HEADER = `
  */
 `;
 
-const corePublicPattern = './src/core/public/(?!utils|index).*';
-const coreServerPattern = './src/core/server/(?!index).*';
-const pluginsPublicPattern = './src/plugins/.*/public/(?!index).*';
-const pluginsServerPattern = './src/plugins/.*/server/(?!index).*';
 module.exports = {
   extends: ['@elastic/eslint-config-kibana', '@elastic/eslint-config-kibana/jest'],
   plugins: ['@kbn/eslint-plugin-eslint'],
@@ -56,43 +52,27 @@ module.exports = {
       {
         zones: [
           {
-            // when tslint is removed we will check *.ts files as well
-            target: './src/legacy/.*js$',
-            from: [
-              corePublicPattern,
-              coreServerPattern,
-              pluginsPublicPattern,
-              pluginsServerPattern,
+            target: [
+              'src/legacy/**/*',
+              'x-pack/**/*',
+              '!x-pack/**/*.test.*',
+              'src/plugins/**/(public|server)/**/*',
+              'src/core/(public|server)/**/*',
             ],
-          },
-          {
-            target: './x-pack/(?!.*test).*js$',
             from: [
-              corePublicPattern,
-              coreServerPattern,
-              pluginsPublicPattern,
-              pluginsServerPattern,
+              'src/core/public/**/*',
+              '!src/core/public/index*',
+              '!src/core/public/utils/**/*',
+
+              'src/core/server/**/*',
+              '!src/core/server/index*',
+
+              'src/plugins/**/public/**/*',
+              '!src/plugins/**/public/index*',
+
+              'src/plugins/**/server/**/*',
+              '!src/plugins/**/server/index*',
             ],
-          },
-          {
-            target: './src/core/public/.*js$',
-            from: [coreServerPattern, pluginsPublicPattern, pluginsServerPattern],
-          },
-          {
-            target: './src/core/server/.*js$',
-            from: [corePublicPattern, pluginsPublicPattern, pluginsServerPattern],
-          },
-          {
-            target: './src/plugins/.*/public/.*js$',
-            from: [corePublicPattern, coreServerPattern, pluginsServerPattern],
-          },
-          {
-            target: './src/plugins/.*/server/.*js$',
-            from: [corePublicPattern, coreServerPattern, pluginsPublicPattern],
-          },
-          {
-            target: './src/plugins/.*/(public|server)/.*js$',
-            from: [pluginsPublicPattern, pluginsServerPattern],
             allowSameFolder: true,
           },
         ],
