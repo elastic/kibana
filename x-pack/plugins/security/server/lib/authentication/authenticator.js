@@ -141,24 +141,24 @@ class Authenticator {
         ownsSession ? existingSession.state : null
       );
 
-      if (ownsSession || authenticationResult.state) {
+      if (ownsSession || authenticationResult.shouldUpdateState()) {
         // If authentication succeeds or requires redirect we should automatically extend existing user session,
         // unless authentication has been triggered by a system API request. In case provider explicitly returns new
         // state we should store it in the session regardless of whether it's a system API request or not.
         const sessionCanBeUpdated = (authenticationResult.succeeded() || authenticationResult.redirected())
-          && (authenticationResult.state || !isSystemApiRequest);
+          && (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
 
         // If provider owned the session, but failed to authenticate anyway, that likely means that
         // session is not valid and we should clear it. Also provider can specifically ask to clear
         // session by setting it to `null` even if authentication attempt didn't fail.
-        if (authenticationResult.state === null || (
+        if (authenticationResult.shouldClearState() || (
           authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
         ) {
           await this._session.clear(request);
         } else if (sessionCanBeUpdated) {
           await this._session.set(
             request,
-            authenticationResult.state
+            authenticationResult.shouldUpdateState()
               ? { state: authenticationResult.state, provider: providerType }
               : existingSession
           );
