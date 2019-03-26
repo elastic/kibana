@@ -20,11 +20,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { formatSparklineCounts } from './format_sparkline_counts';
-import { MonitorNameID } from './monitor_name_id';
 
 interface MonitorListProps {
   primaryColor: string;
@@ -80,9 +80,16 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
           {
             field: 'ping.monitor.id',
             name: i18n.translate('xpack.uptime.monitorList.nameIdColumnLabel', {
-              defaultMessage: 'Name / ID',
+              defaultMessage: 'Name',
             }),
-            render: MonitorNameID
+            render: (id: string, monitor: LatestMonitor) => {
+              const name = get(monitor, 'ping.monitor.name');
+              return (
+                <EuiLink href={`#/monitor/${id}`} className="ut-monitor-name">
+                  {name ? name : <em>[Unnamed]</em>}
+                </EuiLink>
+              );
+            },
           },
           {
             field: 'ping.url.full',
