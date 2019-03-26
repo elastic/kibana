@@ -3650,7 +3650,6 @@
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.deleteButtonLabel": "删除",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.editButtonLabel": "编辑",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.leaderPatternsLabel": "Leader 模式",
-    "xpack.crossClusterReplication.autoFollowPatternDetailPanel.loadingLabel": "正在加载自动跟随模式……",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.notFoundLabel": "未找到自动跟随模式",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixEmptyValue": "无前缀",
     "xpack.crossClusterReplication.autoFollowPatternDetailPanel.prefixLabel": "前缀",

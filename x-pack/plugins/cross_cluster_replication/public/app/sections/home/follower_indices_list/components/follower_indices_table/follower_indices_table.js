@@ -93,7 +93,7 @@ export class FollowerIndicesTable extends PureComponent {
               {(resumeFollowerIndex) => (
                 <span
                   onClick={() => resumeFollowerIndex(name)}
-                  data-test-subj="ccrFollowerIndexListPauseActionButton"
+                  data-test-subj="ccrFollowerIndexListResumeActionButton"
                 >
                   <EuiIcon
                     aria-label={label}
@@ -109,7 +109,7 @@ export class FollowerIndicesTable extends PureComponent {
               {(pauseFollowerIndex) => (
                 <span
                   onClick={() => pauseFollowerIndex(followerIndex)}
-                  data-test-subj="ccrFollowerIndexListResumeActionButton"
+                  data-test-subj="ccrFollowerIndexListPauseActionButton"
                 >
                   <EuiIcon
                     aria-label={label}
@@ -319,6 +319,7 @@ export class FollowerIndicesTable extends PureComponent {
           cellProps={(item, column) => ({
             'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
           })}
+          data-test-subj="ccrFollowerIndexListTable"
         />
         {this.renderLoading()}
       </Fragment>

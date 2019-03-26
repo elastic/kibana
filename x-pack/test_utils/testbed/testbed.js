@@ -4,20 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { mountWithIntl } from '../enzyme_helpers';
-import { findTestSubject as findTestSubjectHelper } from '@elastic/eui/lib/test';
+import { findTestSubject as findTestSubjectHelper } from '../index';
 
 const registerTestSubjExists = component => (testSubject, count = 1) => findTestSubjectHelper(component, testSubject).length === count;
 
-export const registerTestBed = (Component, defaultProps, store = {}) => (props) => {
+const defaultOptions = {
+  memoryRouter: {
+    wrapRoute: true,
+  },
+};
+
+const withRoute = (WrappedComponent, componentRoutePath = '/', onRouter = () => {}) => {
+  return class extends Component {
+      static contextTypes = {
+        router: PropTypes.object
+      };
+
+      componentDidMount() {
+        const { router } = this.context;
+        onRouter(router);
+      }
+
+      render() {
+        return (
+          <Route
+            path={componentRoutePath}
+            render={(props) => <WrappedComponent {...props} {...this.props} />}
+          />
+        );
+      }
+  };
+};
+
+
+/**
+ * Register a testBed for a React component to be tested inside a Redux provider
+ *
+ * @param {React.SFC} Component A react component to test
+ * @param {object} defaultProps Props to initialize the component with
+ * @param {object} store The Redux store to initialize the Redux Provider with
+ *
+ * @returns {object} with the following properties:
+ *
+ * - component The component wrapped by the Redux provider
+ * - exists() Method to check if a test subject exists in the mounted component
+ * - find() Method to find a test subject in the mounted componenet
+ * - setProp() Method to update the props on the wrapped component
+ * - getFormErrorsMessages() Method that will find all the "".euiFormErrorText" from eui and return their text
+ * - getMetadataFromEuiTable() Method that will extract the table rows and column + their values from an Eui tablle component
+ * - form.setInput() Method to update a form input value
+ * - form.selectCheckBox() Method to select a form checkbox
+ */
+export const registerTestBed = (Component, defaultProps, store = {}) => (props, options = defaultOptions) => {
+  const Comp = options.memoryRouter.wrapRoute === false
+    ? Component
+    : withRoute(Component, options.memoryRouter.componentRoutePath, options.memoryRouter.onRouter);
+
   const component = mountWithIntl(
     <Provider store={store}>
-      <Component
-        {...defaultProps}
-        {...props}
-      />
+      <MemoryRouter
+        initialEntries={options.memoryRouter.initialEntries || ['/']}
+        initialIndex={options.memoryRouter.initialIndex || 0}
+      >
+        <Comp {...defaultProps} {...props} />
+      </MemoryRouter>
     </Provider>
   );
 
@@ -63,7 +118,13 @@ export const registerTestBed = (Component, defaultProps, store = {}) => (props) 
    * @param {ReactWrapper} table enzyme react wrapper of the EuiBasicTable
    */
   const getMetadataFromEuiTable = (tableTestSubject) => {
-    const rows = find(tableTestSubject)
+    const table = find(tableTestSubject);
+
+    if (!table.length) {
+      throw new Error(`Eui Table "${tableTestSubject}" not found.`);
+    }
+
+    const rows = table
       .find('tr')
       .slice(1) // we remove the first row as it is the table header
       .map(row => ({
