@@ -19,33 +19,27 @@
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 
-const createStartContractMock = () => {
-  const startContract = {
+const createSetupContractMock = () => {
+  const setupContract = {
     // we can mock some hapi server method when we need it
     server: {} as Server,
     options: {} as ServerOptions,
   };
-  return startContract;
+  return setupContract;
 };
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
-type HttpSericeContract = PublicMethodsOf<HttpService>;
+type HttpServiceContract = PublicMethodsOf<HttpService>;
 const createHttpServiceMock = () => {
-  const mocked: jest.Mocked<HttpSericeContract> = {
-    start: jest.fn(),
+  const mocked: jest.Mocked<HttpServiceContract> = {
+    setup: jest.fn(),
     stop: jest.fn(),
     registerRouter: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockResolvedValue(createSetupContractMock());
   return mocked;
 };
 
 export const httpServiceMock = {
   create: createHttpServiceMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

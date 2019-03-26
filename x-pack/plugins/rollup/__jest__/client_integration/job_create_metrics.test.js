@@ -21,8 +21,8 @@ jest.mock('lodash/function/debounce', () => fn => fn);
 
 describe('Create Rollup Job, step 5: Metrics', () => {
   let server;
-  let findTestSubject;
-  let testSubjectExists;
+  let find;
+  let exists;
   let userActions;
   let mockIndexPatternValidityResponse;
   let getEuiStepsHorizontalActive;
@@ -34,8 +34,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     server.respondImmediately = true;
     ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
     ({
-      findTestSubject,
-      testSubjectExists,
+      find,
+      exists,
       userActions,
       getEuiStepsHorizontalActive,
       goToStep,
@@ -52,7 +52,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
   const goToStepAndOpenFieldChooser = async () => {
     await goToStep(5);
-    findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+    find('rollupJobShowFieldChooserButton').simulate('click');
   };
 
   describe('layout', () => {
@@ -65,17 +65,17 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should have the title set to "Metrics"', () => {
-      expect(testSubjectExists('rollupJobCreateMetricsTitle')).toBe(true);
+      expect(exists('rollupJobCreateMetricsTitle')).toBe(true);
     });
 
     it('should have a link to the documentation', () => {
-      expect(testSubjectExists('rollupJobCreateMetricsDocsButton')).toBe(true);
+      expect(exists('rollupJobCreateMetricsDocsButton')).toBe(true);
     });
 
     it('should have the "next" and "back" button visible', () => {
-      expect(testSubjectExists('rollupJobBackButton')).toBe(true);
-      expect(testSubjectExists('rollupJobNextButton')).toBe(true);
-      expect(testSubjectExists('rollupJobSaveButton')).toBe(false);
+      expect(exists('rollupJobBackButton')).toBe(true);
+      expect(exists('rollupJobNextButton')).toBe(true);
+      expect(exists('rollupJobSaveButton')).toBe(false);
     });
 
     it('should go to the "Histogram" step when clicking the back button', async () => {
@@ -89,11 +89,11 @@ describe('Create Rollup Job, step 5: Metrics', () => {
     });
 
     it('should have a button to display the list of metrics fields to chose from', () => {
-      expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(false);
+      expect(exists('rollupJobMetricsFieldChooser')).toBe(false);
 
-      findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      find('rollupJobShowFieldChooserButton').simulate('click');
 
-      expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(true);
+      expect(exists('rollupJobMetricsFieldChooser')).toBe(true);
     });
   });
 
@@ -104,15 +104,15 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should have the title set to "Add metrics fields"', async () => {
-        expect(findTestSubject('rollupJobCreateFlyoutTitle').text()).toEqual('Add metrics fields');
+        expect(find('rollupJobCreateFlyoutTitle').text()).toEqual('Add metrics fields');
       });
 
       it('should have a button to close the flyout', () => {
-        expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(true);
+        expect(exists('rollupJobMetricsFieldChooser')).toBe(true);
 
-        findTestSubject('euiFlyoutCloseButton').simulate('click');
+        find('euiFlyoutCloseButton').simulate('click');
 
-        expect(testSubjectExists('rollupJobMetricsFieldChooser')).toBe(false);
+        expect(exists('rollupJobMetricsFieldChooser')).toBe(false);
       });
     });
 
@@ -151,8 +151,8 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
   describe('fields list', () => {
     const addFieldToList = (type = 'numeric') => {
-      if(!testSubjectExists('rollupJobMetricsFieldChooser-table')) {
-        findTestSubject('rollupJobShowFieldChooserButton').simulate('click');
+      if(!exists('rollupJobMetricsFieldChooser-table')) {
+        find('rollupJobShowFieldChooserButton').simulate('click');
       }
       const { rows } = getMetadataFromEuiTable('rollupJobMetricsFieldChooser-table');
       for (let i = 0; i < rows.length; i++) {
@@ -181,7 +181,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
         addFieldToList('numeric');
         numericTypeMetrics.forEach(type => {
           try {
-            expect(testSubjectExists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
+            expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
           } catch(e) {
             throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
           }
@@ -200,7 +200,7 @@ describe('Create Rollup Job, step 5: Metrics', () => {
 
         dateTypeMetrics.forEach(type => {
           try {
-            expect(testSubjectExists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
+            expect(exists(`rollupJobMetricsCheckbox-${type}`)).toBe(true);
           } catch(e) {
             throw(new Error(`Test subject "rollupJobMetricsCheckbox-${type}" was not found.`));
           }
@@ -214,15 +214,15 @@ describe('Create Rollup Job, step 5: Metrics', () => {
       });
 
       it('should not allow to go to the next step if at least one metric type is not selected', () => {
-        expect(testSubjectExists('rollupJobCreateStepError')).toBeFalsy();
+        expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
         addFieldToList('numeric');
         userActions.clickNextStep();
 
-        const stepError = findTestSubject('rollupJobCreateStepError');
+        const stepError = find('rollupJobCreateStepError');
         expect(stepError.length).toBeTruthy();
         expect(stepError.text()).toEqual('Select metrics types for these fields or remove them: a-numericField.');
-        expect(findTestSubject('rollupJobNextButton').props().disabled).toBe(true);
+        expect(find('rollupJobNextButton').props().disabled).toBe(true);
       });
 
       it('should have a delete button on each row to remove the metric field', async () => {

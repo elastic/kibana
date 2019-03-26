@@ -219,9 +219,8 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
     return `timelion_vis ${expression}${interval}`;
   },
   markdown: visState => {
-    const expression = prepareString('expression', visState.params.markdown);
     const visConfig = prepareJson('visConfig', visState.params);
-    return `kibana_markdown ${expression}${visConfig}`;
+    return `kibana_markdown ${visConfig}`;
   },
   table: (visState, schemas) => {
     const visConfig = {

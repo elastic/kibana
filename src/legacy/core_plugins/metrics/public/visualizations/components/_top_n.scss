@@ -24,6 +24,9 @@
 .tvbVisTopN__label {
   color: $tvbTextColor;
   padding: $euiSizeXS 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .tvbVisTopN__bar {

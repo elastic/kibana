@@ -6,7 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import 'uiExports/interpreter';
 import { register, registryFactory } from '@kbn/interpreter/common';
 import { initializeInterpreter } from './lib/interpreter';
 import { registries } from './registries';

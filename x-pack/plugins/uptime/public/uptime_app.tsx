@@ -65,6 +65,7 @@ export interface UptimeAppProps {
   routerBasename: string;
   updateBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
+  renderGlobalHelpControls(): void;
 }
 
 interface UptimeAppState {
@@ -131,6 +132,10 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
 
   public componentWillMount() {
     this.setBreadcrumbs([overviewBreadcrumb]);
+  }
+
+  public componentDidMount() {
+    this.props.renderGlobalHelpControls();
   }
 
   public render() {
@@ -200,26 +205,6 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                       />
                     </div>
                   </EuiHeaderSectionItem>
-                </EuiHeaderSection>
-                <EuiHeaderSection side="right">
-                  <EuiHeaderSection>
-                    <EuiHeaderLinks>
-                      <EuiHeaderLink
-                        aria-label={i18n.translate('xpack.uptime.header.helpLinkAriaLabel', {
-                          defaultMessage: 'Go to our discuss page',
-                        })}
-                        iconType="help"
-                        href="https://discuss.elastic.co/c/uptime"
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.header.helpLinkText"
-                          defaultMessage="Discuss"
-                          description="The link is to a support form called 'Discuss', where users can submit feedback."
-                        />
-                      </EuiHeaderLink>
-                    </EuiHeaderLinks>
-                  </EuiHeaderSection>
                 </EuiHeaderSection>
               </EuiHeader>
               <EuiPageContent>

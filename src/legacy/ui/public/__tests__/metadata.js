@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { metadata } from '../metadata';
 describe('ui/metadata', () => {
   it('is immutable', () => {

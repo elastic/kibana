@@ -81,7 +81,8 @@ export function registerReindexIndicesRoutes(
         callCluster,
         xpackInfo,
         reindexActions,
-        apmIndexPatterns
+        apmIndexPatterns,
+        server.log
       );
 
       try {
@@ -130,7 +131,8 @@ export function registerReindexIndicesRoutes(
         callCluster,
         xpackInfo,
         reindexActions,
-        apmIndexPatterns
+        apmIndexPatterns,
+        server.log
       );
 
       try {
@@ -170,7 +172,13 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        apmIndexPatterns,
+        server.log
+      );
 
       try {
         await reindexService.cancelReindexing(indexName);

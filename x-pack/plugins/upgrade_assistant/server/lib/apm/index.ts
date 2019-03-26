@@ -7,7 +7,7 @@
 import { Request } from 'hapi';
 import { get } from 'lodash';
 import minimatch from 'minimatch';
-import semver from 'semver';
+import { SemVer } from 'semver';
 import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 
 import { EnrichedDeprecationInfo } from '../es_migration_apis';
@@ -26,7 +26,7 @@ export async function getDeprecatedApmIndices(
   });
 
   return Object.keys(indices).reduce((deprecations: EnrichedDeprecationInfo[], index) => {
-    if (semver.lt(get(indices[index], 'mappings._meta.version', '0.0.0'), '7.0.0')) {
+    if (isLegacyApmIndex(index, indexPatterns, indices[index].mappings)) {
       deprecations.push({
         level: 'warning',
         message: 'APM index needs converted to 7.x format',
@@ -46,10 +46,14 @@ export const isLegacyApmIndex = (
   apmIndexPatterns: string[] = [],
   mappings: FlatSettings['mappings']
 ) => {
-  const clientVersion = get(mappings, '_meta.version', '0.0.0');
+  const clientVersion = new SemVer(get(mappings, '_meta.version', '0.0.0'));
+
+  if (clientVersion.compareMain('7.0.0') > -1) {
+    return false;
+  }
 
   const find = apmIndexPatterns.find(pattern => {
-    return minimatch(indexName, pattern) && semver.lt(clientVersion, '7.0.0'); // no client version or version < 7.0
+    return minimatch(indexName, pattern);
   });
 
   return Boolean(find);

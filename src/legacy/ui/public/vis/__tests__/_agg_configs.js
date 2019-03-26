@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { AggConfig } from '../agg_config';
 import { VisProvider } from '..';
