@@ -5,5 +5,4 @@
  */
 
 
-export { getRandomString } from './strings';
-export { nextTick } from './utils';
+export const nextTick = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));
