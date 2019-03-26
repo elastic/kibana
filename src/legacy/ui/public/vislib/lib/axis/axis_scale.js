@@ -182,7 +182,7 @@ export function VislibAxisScaleProvider() {
       if (this.axisConfig.isTimeDomain()) {
         // TODO somehow specify correct timezone here
         // console.log(this.axisConfig.get('labels.timezone'));
-        return d3.time.scale.utc(); // allow time scale
+        return d3.time.scale(); // allow time scale
       }
       if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();
       if (typeof d3.scale[scaleType] !== 'function') {
