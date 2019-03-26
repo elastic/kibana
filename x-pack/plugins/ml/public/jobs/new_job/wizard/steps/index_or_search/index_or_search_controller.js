@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Controller for the first step in the Create Job wizard, allowing the user to
  * select the Kibana index pattern or saved search to use for creating a job.
@@ -20,6 +18,8 @@ import { loadIndexPatterns, getIndexPatterns } from 'plugins/ml/util/index_utils
 import { checkMlNodesAvailable } from 'plugins/ml/ml_nodes_check/check_ml_nodes';
 import template from './index_or_search.html';
 import { timefilter } from 'ui/timefilter';
+import './paginated_selectable_list';
+import 'ui/directives/saved_object_finder';
 
 uiRoutes
   .when('/jobs/new_job', {
