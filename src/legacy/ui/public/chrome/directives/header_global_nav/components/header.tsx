@@ -92,7 +92,7 @@ function extendRecentlyAccessedHistoryItem(
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
     const objectTypeForAriaAppendix = navLink.title;
-    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.ScreenReaderLabel', {
+    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.screenReaderLabel', {
       defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
       values: {
         recentlyAccessedItemLinklabel: recentlyAccessed.label,
