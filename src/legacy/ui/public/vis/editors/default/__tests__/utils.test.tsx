@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import expect from 'expect.js';
 import { isValidJson } from '../utils';
 
 const input = {
@@ -28,23 +27,23 @@ const input = {
 describe('AggType utils', () => {
   describe('isValidJson', () => {
     it('should return true when empty string', () => {
-      expect(isValidJson('')).to.be(true);
+      expect(isValidJson('')).toBe(true);
     });
 
     it('should return true when undefine', () => {
-      expect(isValidJson(undefined as any)).to.be(true);
+      expect(isValidJson(undefined as any)).toBe(true);
     });
 
     it('should return false when invalid string', () => {
-      expect(isValidJson(input.invalid)).to.be(false);
+      expect(isValidJson(input.invalid)).toBe(false);
     });
 
     it('should return true when valid string', () => {
-      expect(isValidJson(input.valid)).to.be(true);
+      expect(isValidJson(input.valid)).toBe(true);
     });
 
     it('should return false if a number', () => {
-      expect(isValidJson('0')).to.be(false);
+      expect(isValidJson('0')).toBe(false);
     });
   });
 });

@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { BaseParamType } from '../../param_types/base';
 import { JsonParamType } from '../../param_types/json';
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSuggestionsProvider } from '../operator';
 import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 
