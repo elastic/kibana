@@ -30,10 +30,19 @@ interface AggParamReactWrapperProps<T> {
   value: T;
   isInvalid: boolean;
   onChange(value: T): void;
+  setValidity(isValid: boolean): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
-  const { agg, aggParam, paramEditor: ParamEditor, onChange, value, isInvalid } = props;
+  const {
+    agg,
+    aggParam,
+    paramEditor: ParamEditor,
+    onChange,
+    value,
+    isInvalid,
+    setValidity,
+  } = props;
   return (
     <ParamEditor
       value={value}
@@ -41,6 +50,7 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
       aggParam={aggParam}
       agg={agg}
       isInvalid={isInvalid}
+      setValidity={setValidity}
     />
   );
 }
