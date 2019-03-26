@@ -120,6 +120,7 @@ export function savedObjectsMixin(kbnServer, server) {
     SavedObjectsRepository,
     getSavedObjectsRepository: createRepository,
     getScopedSavedObjectsClient: (...args) => provider.getClient(...args),
+    buildScopedSavedObjectsClientProvider: (...args) => provider.build(...args),
     setScopedSavedObjectsClientFactory: (...args) => provider.setClientFactory(...args),
     addScopedSavedObjectsClientWrapperFactory: (...args) =>
       provider.addClientWrapperFactory(...args),
