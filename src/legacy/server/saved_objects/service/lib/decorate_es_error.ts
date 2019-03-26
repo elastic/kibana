@@ -52,7 +52,7 @@ export function decorateEsError(error: any) {
     throw new Error('Expected an instance of Error');
   }
 
-  const { reason } = get(error, 'body.error');
+  const { reason } = get(error, 'body.error', { reason: undefined });
   if (
     error instanceof ConnectionFault ||
     error instanceof ServiceUnavailable ||
