@@ -24,7 +24,7 @@ const mapDispatchToProps = (dispatch, { element }) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { resolvedArg, selectedPage } = stateProps;
-  const { element, restProps } = ownProps;
+  const { element, ...restProps } = ownProps;
   const { id, transformMatrix, width, height, expression, filter } = element;
 
   return {
