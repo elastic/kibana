@@ -34,14 +34,8 @@ export function initTelemetry(): Telemetry {
   };
 }
 
-function getInternalRepository(server: Server): any {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(server);
-  return getSavedObjectsRepository(callWithInternalUser);
-}
-
-export async function getTelemetry(server: Server): Promise<Telemetry> {
-  const internalRepository = getInternalRepository(server);
+export async function getTelemetry(server: Server, internalRepo?: object): Promise<Telemetry> {
+  const internalRepository = internalRepo || getInternalRepository(server);
   let telemetrySavedObject;
 
   try {
@@ -60,18 +54,39 @@ export async function getTelemetry(server: Server): Promise<Telemetry> {
 
 export async function updateTelemetry({
   server,
+  internalRepo,
   app = 'unspecified-app',
   fileType = 'unspecified-file-type',
 }: {
   server: Server;
+  internalRepo: object;
   app: string;
   fileType: string;
 }) {
-  const telemetry = await getTelemetry(server);
-  const internalRepository = getInternalRepository(server);
-  const { filesUploadedTotalCount, filesUploadedTypesTotalCounts, filesUploadedByApp } = telemetry;
+  const telemetry = await getTelemetry(server, internalRepo);
+  const internalRepository = internalRepo || getInternalRepository(server);
 
-  await internalRepository.update(TELEMETRY_DOC_ID, TELEMETRY_DOC_ID, {
+  await internalRepository.update(
+    TELEMETRY_DOC_ID,
+    TELEMETRY_DOC_ID,
+    incrementCounts({ app, fileType, ...telemetry })
+  );
+}
+
+export function incrementCounts({
+  filesUploadedTotalCount,
+  filesUploadedTypesTotalCounts,
+  filesUploadedByApp,
+  fileType,
+  app,
+}: {
+  filesUploadedTotalCount: number;
+  filesUploadedTypesTotalCounts: object;
+  filesUploadedByApp: object;
+  fileType: string;
+  app: string;
+}) {
+  return {
     filesUploadedTotalCount: filesUploadedTotalCount + 1,
     filesUploadedTypesTotalCounts: {
       ...filesUploadedTypesTotalCounts,
@@ -84,5 +99,5 @@ export async function updateTelemetry({
         [fileType]: _.get(filesUploadedByApp, `${app}.${fileType}`, 0) + 1,
       },
     },
-  });
+  };
 }
