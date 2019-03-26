@@ -53,7 +53,7 @@ export const selectOperations: { [operation: string]: SelectDefinition } = {
               sources: cols.map(col => ({
                 [col.alias!]: {
                   terms: {
-                    field: col.argument,
+                    field: col.argument.field,
                     missing_bucket: true,
                     order: 'asc',
                   },
