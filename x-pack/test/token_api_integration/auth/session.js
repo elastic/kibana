@@ -5,7 +5,7 @@
  */
 
 import request from 'request';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const delay = ms => new Promise(resolve => setTimeout(() => resolve(), ms));
 
