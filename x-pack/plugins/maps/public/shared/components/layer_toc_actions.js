@@ -120,8 +120,6 @@ export class LayerTocActions extends Component {
     return smallLegendIcon;
   }
 
-  _getActionItems
-
   _getPanels() {
 
     const visibilityToggle = this._getVisbilityIcon();
