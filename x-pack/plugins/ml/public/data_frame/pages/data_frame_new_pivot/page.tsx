@@ -18,15 +18,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { PivotState } from './common';
-import { DataFrameNewPivotWizard } from './data_frame_new_pivot_wizard';
+import { Wizard } from './wizard';
 
 interface Props {
   indexPattern: StaticIndexPattern;
-  configHandler(s: PivotState): void;
 }
 
-export const DataFrameNewPivot: React.SFC<Props> = props => (
+export const Page: React.SFC<Props> = ({ indexPattern }) => (
   <EuiPage>
     <EuiPageBody>
       <EuiPageContent>
@@ -38,7 +36,7 @@ export const DataFrameNewPivot: React.SFC<Props> = props => (
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody>
-          <DataFrameNewPivotWizard {...props} />
+          <Wizard indexPattern={indexPattern} />
         </EuiPageContentBody>
       </EuiPageContent>
     </EuiPageBody>

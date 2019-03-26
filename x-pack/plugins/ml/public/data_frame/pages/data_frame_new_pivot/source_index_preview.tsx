@@ -14,7 +14,7 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiInMemoryTable, EuiProgress } from '@
 
 import { ml } from '../../../services/ml_api_service';
 
-import { SimpleQuery } from './type_definitions';
+import { SimpleQuery } from './common';
 
 interface Props {
   indexPattern: StaticIndexPattern;
@@ -24,11 +24,7 @@ interface Props {
 
 const SEARCH_SIZE = 1000;
 
-export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
-  cellClick,
-  indexPattern,
-  query,
-}) => {
+export const SourceIndexPreview: React.SFC<Props> = ({ cellClick, indexPattern, query }) => {
   const [loading, setLoading] = useState(false);
   const [tableData, setTableData] = useState([]);
 
@@ -93,14 +89,10 @@ export const DataFrameSourceIndexPreview: React.SFC<Props> = ({
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
       <EuiInMemoryTable
-        className="mlDataFrameTable"
-        condensed="true"
         items={tableData}
         columns={columns}
         pagination={true}
-        responsive={true}
         hasActions={false}
-        isExpandable={false}
         isSelectable={false}
       />
     </Fragment>

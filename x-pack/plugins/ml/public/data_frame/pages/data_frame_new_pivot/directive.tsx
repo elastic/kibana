@@ -16,7 +16,7 @@ import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
 
-import { DataFrameNewPivot } from './data_frame_new_pivot';
+import { Page } from './page';
 
 module.directive('mlNewDataFrame', ($route: any, Private: any) => {
   return {
@@ -30,10 +30,7 @@ module.directive('mlNewDataFrame', ($route: any, Private: any) => {
         indexPattern,
       };
 
-      ReactDOM.render(
-        <I18nContext>{React.createElement(DataFrameNewPivot, props)}</I18nContext>,
-        element[0]
-      );
+      ReactDOM.render(<I18nContext>{React.createElement(Page, props)}</I18nContext>, element[0]);
 
       element.on('$destroy', () => {
         ReactDOM.unmountComponentAtNode(element[0]);

@@ -12,21 +12,16 @@ import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { DataFramePreviewRequest, SimpleQuery } from './type_definitions';
+import { DataFramePreviewRequest, OptionsDataElement, SimpleQuery } from './common';
 
 interface Props {
-  aggs: any[];
+  aggs: OptionsDataElement[];
   indexPattern: StaticIndexPattern;
   groupBy: string[];
   query: SimpleQuery['query'];
 }
 
-export const DataFrameNewPivotPreview: React.SFC<Props> = ({
-  aggs,
-  indexPattern,
-  groupBy,
-  query,
-}) => {
+export const PivotPreview: React.SFC<Props> = ({ aggs, indexPattern, groupBy, query }) => {
   const [loading, setLoading] = useState(false);
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
 
@@ -111,12 +106,7 @@ export const DataFrameNewPivotPreview: React.SFC<Props> = ({
       <h3>Data Frame Pivot Preview</h3>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <EuiInMemoryTable
-        condensed="true"
-        items={dataFramePreviewData}
-        columns={columns}
-        pagination={true}
-      />
+      <EuiInMemoryTable items={dataFramePreviewData} columns={columns} pagination={true} />
     </Fragment>
   );
 };

@@ -23,10 +23,12 @@ export interface DropDownOption {
 }
 
 // The internal representation of an aggregatino definition.
+type aggName = string;
+type fieldName = string;
 export interface OptionsDataElement {
-  agg: string;
-  field: string;
-  formRowLabel: string;
+  agg: PivotAggSupportedAggs;
+  field: fieldName;
+  formRowLabel: aggName;
 }
 
 export type OptionsDataElementDict = Dictionary<OptionsDataElement>;
@@ -51,11 +53,11 @@ type PivotGroupByDict = Dictionary<PivotGroupBy>;
 
 type PivotAggSupportedAggs = 'avg' | 'cardinality' | 'max' | 'min' | 'sum' | 'value_count';
 type PivotAgg = {
-  [key in PivotAggSupportedAggs]: {
-    field: string;
+  [key in PivotAggSupportedAggs]?: {
+    field: fieldName;
   }
 };
-type PivotAggDict = Dictionary<PivotAgg>;
+type PivotAggDict = { [key in aggName]: PivotAgg };
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -78,10 +80,3 @@ export const pivotSupportedAggs = [
   'sum',
   'value_count',
 ] as PivotAggSupportedAggs[];
-
-// Wizard Step 1 Exposed Config
-export interface PivotState {
-  query: SimpleQuery;
-  groupBy: Label[];
-  aggList: Label[];
-}

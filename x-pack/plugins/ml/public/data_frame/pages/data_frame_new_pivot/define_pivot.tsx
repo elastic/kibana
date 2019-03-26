@@ -23,8 +23,8 @@ import {
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
 import { AggList } from '../../components/aggregation_list/list';
 import { GroupByList } from '../../components/group_by_list/list';
-import { DataFrameNewPivotPreview } from './data_frame_new_pivot_preview';
-import { DataFrameSourceIndexPreview } from './data_frame_new_pivot_source_index_preview';
+import { PivotPreview } from './pivot_preview';
+import { SourceIndexPreview } from './source_index_preview';
 
 import { Dictionary } from '../../../../common/types/common';
 import {
@@ -32,17 +32,23 @@ import {
   DropDownOption,
   Label,
   OptionsDataElement,
-  PivotState,
   pivotSupportedAggs,
   SimpleQuery,
 } from './common';
 
-interface Props {
-  indexPattern: StaticIndexPattern;
-  configHandler(s: PivotState): void;
+export interface PivotState {
+  aggList: Label[];
+  groupBy: Label[];
+  query: SimpleQuery;
+  valid: boolean;
 }
 
-export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern, configHandler }) => {
+interface Props {
+  indexPattern: StaticIndexPattern;
+  onChange(s: PivotState): void;
+}
+
+export const DefinePivot: SFC<Props> = ({ indexPattern, onChange }) => {
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
@@ -129,7 +135,8 @@ export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern, c
 
   useEffect(
     () => {
-      configHandler({ query: pivotQuery, groupBy: pivotGroupBy, aggList });
+      const valid = pivotGroupBy.length > 0 && aggList.length > 0;
+      onChange({ query: pivotQuery, groupBy: pivotGroupBy, aggList, valid });
     },
     [pivotQuery, pivotGroupBy, aggList]
   );
@@ -178,13 +185,13 @@ export const DataFrameNewPivotWizardCreatePivot: SFC<Props> = ({ indexPattern, c
 
       <EuiFlexItem>
         <EuiText>
-          <DataFrameSourceIndexPreview
+          <SourceIndexPreview
             cellClick={addToSearch}
             indexPattern={indexPattern}
             query={pivotQuery}
           />
 
-          <DataFrameNewPivotPreview
+          <PivotPreview
             aggs={pivotAggs}
             groupBy={pivotGroupBy}
             indexPattern={indexPattern}

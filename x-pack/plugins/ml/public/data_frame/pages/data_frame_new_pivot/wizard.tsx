@@ -10,9 +10,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { EuiButton, EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { DataFrameNewPivotWizardCreatePivot } from './data_frame_new_pivot_wizard_create_pivot';
-
-import { PivotState } from './common';
+import { DefinePivot, PivotState } from './define_pivot';
 
 const DefinePivotBlur = () => <p>This is not the current step.</p>;
 
@@ -35,7 +33,7 @@ interface StepsNavProps {
   next?(): void;
 }
 
-const StepsNav: SFC<StepsNavProps> = ({
+const WizardNav: SFC<StepsNavProps> = ({
   previous,
   previousActive = true,
   next,
@@ -57,23 +55,19 @@ const StepsNav: SFC<StepsNavProps> = ({
 
 interface Props {
   indexPattern: StaticIndexPattern;
-  configHandler(s: PivotState): void;
 }
 
-export const DataFrameNewPivotWizard: SFC<Props> = ({ indexPattern }) => {
+export const Wizard: SFC<Props> = ({ indexPattern }) => {
   const [step, setStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
   const [pivotValid, setPivotValid] = useState(false);
 
   function definePivotHandler(config: PivotState) {
-    setPivotValid(config.groupBy.length > 0 && config.aggList.length > 0);
+    setPivotValid(config.valid);
   }
 
   const pivot =
     step === WIZARD_STEPS.DEFINE_PIVOT ? (
-      <DataFrameNewPivotWizardCreatePivot
-        indexPattern={indexPattern}
-        configHandler={definePivotHandler}
-      />
+      <DefinePivot indexPattern={indexPattern} onChange={definePivotHandler} />
     ) : (
       <DefinePivotBlur />
     );
@@ -87,7 +81,7 @@ export const DataFrameNewPivotWizard: SFC<Props> = ({ indexPattern }) => {
         <Fragment>
           {pivot}
           {step === WIZARD_STEPS.DEFINE_PIVOT && (
-            <StepsNav next={() => setStep(WIZARD_STEPS.JOB_DETAILS)} nextActive={pivotValid} />
+            <WizardNav next={() => setStep(WIZARD_STEPS.JOB_DETAILS)} nextActive={pivotValid} />
           )}
         </Fragment>
       ),
@@ -98,7 +92,7 @@ export const DataFrameNewPivotWizard: SFC<Props> = ({ indexPattern }) => {
         <Fragment>
           {jobDetails}
           {step === WIZARD_STEPS.JOB_DETAILS && (
-            <StepsNav
+            <WizardNav
               previous={() => setStep(WIZARD_STEPS.DEFINE_PIVOT)}
               next={() => setStep(WIZARD_STEPS.JOB_CREATE)}
             />
@@ -113,7 +107,7 @@ export const DataFrameNewPivotWizard: SFC<Props> = ({ indexPattern }) => {
         <Fragment>
           {jobCreate}
           {step === WIZARD_STEPS.JOB_CREATE && (
-            <StepsNav previous={() => setStep(WIZARD_STEPS.JOB_DETAILS)} />
+            <WizardNav previous={() => setStep(WIZARD_STEPS.JOB_DETAILS)} />
           )}
         </Fragment>
       ),
