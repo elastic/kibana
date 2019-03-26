@@ -5,14 +5,13 @@
  */
 
 import { connect } from 'react-redux';
-import { SettingsPanel } from './settings_panel';
+import { LayerSettings } from './layer_settings';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
 import {
   updateLayerLabel,
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
-  updateSourceProp,
 } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
@@ -33,9 +32,8 @@ function mapDispatchToProps(dispatch) {
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
-    updateSourceProp: (id, propName, value) => dispatch(updateSourceProp(id, propName, value)),
   };
 }
 
-const connectedSettingsPanel = connect(mapStateToProps, mapDispatchToProps)(SettingsPanel);
-export { connectedSettingsPanel as SettingsPanel };
+const connectedLayerSettings = connect(mapStateToProps, mapDispatchToProps)(LayerSettings);
+export { connectedLayerSettings as LayerSettings };
