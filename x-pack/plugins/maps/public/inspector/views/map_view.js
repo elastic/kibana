@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 
 import { InspectorView } from 'ui/inspector';
 import { MapDetails } from './map_details';
+import { i18n } from '@kbn/i18n';
 
 class MapViewComponent extends Component {
 
@@ -54,9 +55,13 @@ MapViewComponent.propTypes = {
 };
 
 const MapView = {
-  title: 'Map details',
+  title: i18n.translate('xpack.maps.inspector.mapDetailsViewTitle', {
+    defaultMessage: 'Map details'
+  }),
   order: 30,
-  help: `View the map state`,
+  help: i18n.translate('xpack.maps.inspector.mapDetailsViewHelpText', {
+    defaultMessage: 'View the map state'
+  }),
   shouldShow(adapters) {
     return Boolean(adapters.map);
   },

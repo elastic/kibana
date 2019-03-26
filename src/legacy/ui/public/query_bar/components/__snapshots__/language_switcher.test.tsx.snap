@@ -85,6 +85,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiSwitch
           checked={false}
@@ -191,6 +192,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiSwitch
           checked={true}

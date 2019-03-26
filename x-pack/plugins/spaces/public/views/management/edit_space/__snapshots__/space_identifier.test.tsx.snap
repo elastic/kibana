@@ -55,6 +55,7 @@ exports[`renders without crashing 1`] = `
         </EuiLink>
       </p>
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}

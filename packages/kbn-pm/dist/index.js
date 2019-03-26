@@ -230,7 +230,7 @@ function help() {
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in '../kibana-extra'.
+    folder and for all plugins in './plugins' and '../kibana-extra'.
 
     Available commands:
 
@@ -238,10 +238,10 @@ function help() {
 
     Global options:
 
-       -e, --exclude        Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
-       -i, --include        Include only specified projects. If left unspecified, it defaults to including all projects.
-       --oss                Do not include the x-pack when running command.
-       --skip-kibana-extra  Filter all plugins in ../kibana-extra when running command.
+       -e, --exclude          Exclude specified project. Can be specified multiple times to exclude multiple projects, e.g. '-e kibana -e @kbn/pm'.
+       -i, --include          Include only specified projects. If left unspecified, it defaults to including all projects.
+       --oss                  Do not include the x-pack when running command.
+       --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
   `);
 }
 
@@ -17575,7 +17575,7 @@ var _path = __webpack_require__(16);
  * Returns all the paths where plugins are located
  */
 function getProjectPaths(rootPath, options) {
-    const skipKibanaExtra = Boolean(options['skip-kibana-extra']);
+    const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
     const ossOnly = Boolean(options.oss);
     const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
     // This is needed in order to install the dependencies for the declared
@@ -17588,14 +17588,18 @@ function getProjectPaths(rootPath, options) {
     // In anyway, have a plugin declaring their own dependencies is the
     // correct and the expect behavior.
     projectPaths.push((0, _path.resolve)(rootPath, 'test/plugin_functional/plugins/*'));
+    projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
     if (!ossOnly) {
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
         projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
     }
-    if (!skipKibanaExtra) {
+    if (!skipKibanaPlugins) {
         projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*'));
         projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/packages/*'));
         projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/plugins/*'));
+        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*'));
+        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/packages/*'));
+        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/plugins/*'));
     }
     return projectPaths;
 } /*
@@ -55279,7 +55283,8 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 
 
 /**
- * All external projects are located within `../kibana-extra/{plugin}` relative
+ * All external projects are located within `./plugins/{plugin}` relative
+ * to the Kibana root directory or `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
 const isKibanaDep = depVersion => depVersion.includes('../../kibana/');

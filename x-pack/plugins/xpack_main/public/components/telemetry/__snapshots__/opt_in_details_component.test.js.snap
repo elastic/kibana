@@ -10,9 +10,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     ownFocus={true}
     size="m"
   >
-    <EuiFlyoutHeader
-      hasBorder={false}
-    >
+    <EuiFlyoutHeader>
       <EuiTitle
         size="m"
         textTransform="none"
@@ -43,16 +41,9 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
         justifyContent="spaceAround"
-        responsive={true}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
           <EuiLoadingSpinner

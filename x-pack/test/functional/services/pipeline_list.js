@@ -163,7 +163,8 @@ export function PipelineListProvider({ getService }) {
       await retry.waitFor('pipline list visible on screen', async () => {
         const container = await testSubjects.find(SUBJ_CONTAINER);
         const found = await container.findAllByCssSelector('table tbody');
-        return found.length > 0;
+        const isLoading = await testSubjects.exists('loadingPipelines');
+        return (found.length > 0) && (isLoading === false);
       });
     }
 

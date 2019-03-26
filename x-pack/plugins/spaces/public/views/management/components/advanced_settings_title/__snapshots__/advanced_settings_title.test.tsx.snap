@@ -3,15 +3,10 @@
 exports[`AdvancedSettingsTitle renders as expected 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <Component
@@ -25,8 +20,6 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
-    grow={true}
     style={
       Object {
         "marginLeft": "10px",

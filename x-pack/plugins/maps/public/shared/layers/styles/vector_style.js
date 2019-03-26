@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
 import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
@@ -45,7 +45,9 @@ export class VectorStyle extends AbstractStyle {
   }
 
   static getDisplayName() {
-    return 'Vector style';
+    return i18n.translate('xpack.maps.style.vector.displayNameLabel', {
+      defaultMessage: 'Vector style'
+    });
   }
 
   static description = '';
@@ -225,9 +227,9 @@ export class VectorStyle extends AbstractStyle {
 
     //scale to [0,1] domain
     for (let i = 0; i < features.length; i++) {
-      const unscaledValue = features[i].properties[fieldName];
+      const unscaledValue = parseFloat(features[i].properties[fieldName]);
       let scaledValue;
-      if (typeof  unscaledValue !== 'number' || isNaN(unscaledValue)) {//cannot scale
+      if (isNaN(unscaledValue)) {//cannot scale
         scaledValue = -1;//put outside range
       } else if (diff === 0) {//values are identical
         scaledValue = 1;//snap to end of color range

@@ -169,7 +169,7 @@ class MarkdownEditor extends Component {
               />
             </p>
           </EuiText>
-          <table className="table">
+          <table className="table" data-test-subj="tsvbMarkdownVariablesTable">
             <thead>
               <tr>
                 <th scope="col">
@@ -190,7 +190,7 @@ class MarkdownEditor extends Component {
           </table>
 
           {rows.length === 0 && (
-            <EuiTitle size="xxs" className="tvbMarkdownEditor__noVariables">
+            <EuiTitle size="xxs" className="tsvbMarkdownVariablesTable__noVariables" data-test-subj="tvbMarkdownEditor__noVariables">
               <span>
                 <FormattedMessage
                   id="tsvb.markdownEditor.noVariablesAvailableDescription"

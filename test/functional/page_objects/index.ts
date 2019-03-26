@@ -45,7 +45,6 @@ import { ShieldPageProvider } from './shield_page';
 import { TimePickerPageProvider } from './time_picker';
 // @ts-ignore not TS yet
 import { TimelionPageProvider } from './timelion_page';
-// @ts-ignore not TS yet
 import { VisualBuilderPageProvider } from './visual_builder_page';
 // @ts-ignore not TS yet
 import { VisualizePageProvider } from './visualize_page';

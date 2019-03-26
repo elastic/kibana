@@ -37,6 +37,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
+    async visualizationsArePresent(vizList) {
+      log.debug('Checking all visualisations are present on dashsboard');
+      const notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
+      expect(notLoaded).to.be.empty();
+    }
+
     async selectedLegendColorCount(color, expectedCount) {
       log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
       await retry.try(async () => {

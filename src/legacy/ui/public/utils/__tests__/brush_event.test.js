@@ -37,6 +37,7 @@ jest.mock('ui/chrome',
   }), { virtual: true });
 
 import _ from 'lodash';
+import moment from 'moment';
 import expect from 'expect.js';
 import { onBrushEvent } from '../brush_event';
 import { timefilter } from 'ui/timefilter';
@@ -160,32 +161,12 @@ describe('brushEvent', () => {
         expect($state.$newFilters.length)
           .to.equal(1);
         expect($state.$newFilters[0].range.anotherTimeField.gte)
-          .to.equal(rangeBegin);
+          .to.equal(moment(rangeBegin).toISOString());
         expect($state.$newFilters[0].range.anotherTimeField.lt)
-          .to.equal(rangeEnd);
+          .to.equal(moment(rangeEnd).toISOString());
         expect($state.$newFilters[0].range.anotherTimeField).to.have.property('format');
         expect($state.$newFilters[0].range.anotherTimeField.format)
-          .to.equal('epoch_millis');
-      });
-
-      test('converts Date fields to milliseconds', () => {
-        const event = _.cloneDeep(dateEvent);
-        const rangeBeginMs = JAN_01_2014;
-        const rangeEndMs = rangeBeginMs + DAY_IN_MS;
-        const rangeBegin = new Date(rangeBeginMs);
-        const rangeEnd = new Date(rangeEndMs);
-        event.range = [rangeBegin, rangeEnd];
-        onBrushEvent(event, $state);
-        expect($state)
-          .to.have.property('$newFilters');
-        expect($state.filters.length)
-          .to.equal(0);
-        expect($state.$newFilters.length)
-          .to.equal(1);
-        expect($state.$newFilters[0].range.anotherTimeField.gte)
-          .to.equal(rangeBeginMs);
-        expect($state.$newFilters[0].range.anotherTimeField.lt)
-          .to.equal(rangeEndMs);
+          .to.equal('strict_date_optional_time');
       });
     });
   });

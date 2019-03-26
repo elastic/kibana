@@ -6,11 +6,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Location } from 'history';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 
@@ -27,7 +27,7 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
         urlParams={urlParams}
         render={({ data }) => {
           return (
-            <React.Fragment>
+            <Fragment>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <EuiTitle size="l">
@@ -36,23 +36,23 @@ export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <ServiceIntegrations
+                    transactionTypes={data.types}
                     location={this.props.location}
                     urlParams={urlParams}
-                    serviceTransactionTypes={data.types}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
 
               <EuiSpacer />
 
-              <KueryBar />
+              <FilterBar />
 
               <ServiceDetailTabs
                 location={location}
                 urlParams={urlParams}
                 transactionTypes={data.types}
               />
-            </React.Fragment>
+            </Fragment>
           );
         }}
       />

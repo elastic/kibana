@@ -332,7 +332,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      await field.type(indexPatternName);
+      await field.type(indexPatternName, { charByChar: true });
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
       expect(currentName).to.eql(`${indexPatternName}${expectWildcard ? '*' : ''}`);
@@ -555,6 +555,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       }
       await testSubjects.click('importSavedObjectsImportBtn');
       log.debug(`done importing the file`);
+
+      // Wait for all the saves to happen
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickImportDone() {

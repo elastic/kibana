@@ -29,7 +29,7 @@ jest.mock('./settings_panel', () => ({
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { LayerPanel } from './view';
 
@@ -53,7 +53,7 @@ const defaultProps = {
 
 describe('LayerPanel', () => {
   test('is rendered', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerPanel
         {...defaultProps}
       />
@@ -69,7 +69,7 @@ describe('LayerPanel', () => {
   });
 
   test('should render empty panel when selectedLayer is null', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerPanel
         {...defaultProps}
         selectedLayer={undefined}

@@ -30,6 +30,7 @@ import 'plugins/ml/components/nav_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
 import 'plugins/ml/file_datavisualizer';
+import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
 

@@ -283,7 +283,7 @@ export class DashboardStateManager {
 
   getPanelIndexPatterns() {
     const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
-    return _.uniq(indexPatterns);
+    return _.uniq(indexPatterns, 'id');
   }
 
   /**

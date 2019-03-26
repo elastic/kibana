@@ -30,7 +30,7 @@ export default function percentile(bucket, panel, series) {
 
       // table allows only one percentile in a series (the last one will be chosen in case of several)
       const percentile = last(metric.percentiles);
-      let percentileKey = percentile.value;
+      let percentileKey = percentile.value ? percentile.value : 0;
       if (!/\./.test(percentileKey)) {
         percentileKey = `${percentileKey}.0`;
       }

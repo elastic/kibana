@@ -152,58 +152,6 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('markdown', () => {
-      before(async () => {
-        await PageObjects.visualBuilder.resetPage();
-        await PageObjects.visualBuilder.clickMarkdown();
-        await PageObjects.timePicker.setAbsoluteRange(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
-      });
-
-      it('should allow printing raw timestamp of data', async () => {
-        await retry.try(async () => {
-          await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-          const text = await PageObjects.visualBuilder.getMarkdownText();
-          expect(text).to.be('1442901600000');
-        });
-      });
-
-      it('should allow printing raw value of data', async () => {
-        await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
-        const text = await PageObjects.visualBuilder.getMarkdownText();
-        expect(text).to.be('6');
-      });
-
-      describe('allow time offsets', () => {
-        before(async () => {
-          await PageObjects.visualBuilder.enterMarkdown(
-            '{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}'
-          );
-          await PageObjects.visualBuilder.clickMarkdownData();
-          await PageObjects.visualBuilder.clickSeriesOption();
-        });
-
-        it('allow positive time offsets', async () => {
-          await PageObjects.visualBuilder.enterOffsetSeries('2h');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const text = await PageObjects.visualBuilder.getMarkdownText();
-          const [timestamp, value] = text.split('#');
-          expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('3');
-        });
-
-        it('allow negative time offsets', async () => {
-          await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-          await PageObjects.header.waitUntilLoadingHasFinished();
-          const text = await PageObjects.visualBuilder.getMarkdownText();
-          const [timestamp, value] = text.split('#');
-          expect(timestamp).to.be('1442901600000');
-          expect(value).to.be('23');
-        });
-      });
-    });
     // add a table sanity timestamp
     describe('table', () => {
       before(async () => {

@@ -1,0 +1,17 @@
+{
+  "file-upload-telemetry": {
+    "properties": {
+      "filesUploadedTotalCount": {
+        "type": "long"
+      },
+      "filesUploadedTypesTotalCounts": {
+        "dynamic": "true",
+        "properties": {}
+      },
+      "filesUploadedByApp": {
+        "dynamic": "true",
+        "properties": {}
+      }
+    }
+  }
+}

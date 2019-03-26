@@ -26,14 +26,21 @@ else
   exit 1
 fi
 
+
 export KIBANA_DIR="$dir"
 export XPACK_DIR="$KIBANA_DIR/x-pack"
-export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 
-echo "-> KIBANA_DIR $KIBANA_DIR"
-echo "-> XPACK_DIR $XPACK_DIR"
-echo "-> PARENT_DIR $PARENT_DIR"
-echo "-> TEST_ES_SNAPSHOT_VERSION $TEST_ES_SNAPSHOT_VERSION"
+parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
+export PARENT_DIR="$parentDir"
+
+kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_BRANCH="$kbnBranch"
+
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+echo " -- XPACK_DIR='$XPACK_DIR'"
+echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
 ### download node
@@ -77,14 +84,12 @@ else
   else
     curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
   fi
-
 fi
 
 ###
 ### "install" node into this shell
 ###
 export PATH="$nodeBin:$PATH"
-hash -r
 
 ###
 ### downloading yarn
@@ -102,15 +107,27 @@ yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 ###
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-hash -r
 
-# ###
-# ### use the chromedriver cache if it exists
-# ###
-# if [ -x "$dir/.chromedriver/master/chromedriver" ]; then
-#   export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/master/chromedriver"
-#   export CHROMEDRIVER_SKIP_DOWNLOAD=true
-# fi
+###
+### use the chromedriver cache if it exists
+###
+if [ -d "$dir/.chromedriver" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
+  cachedPkgVersion="$(cat "$dir/.chromedriver/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/chromedriver.zip"
+    export CHROMEDRIVER_SKIP_DOWNLOAD=true
+    echo " -- Using chromedriver cache at $CHROMEDRIVER_FILEPATH"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING CHROMEDRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  CHROMEDRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
 
 ###
 ### install dependencies

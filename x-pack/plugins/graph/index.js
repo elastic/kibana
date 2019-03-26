@@ -23,7 +23,6 @@ export function graph(kibana) {
         order: 9000,
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
-        description: 'Graph exploration',
         main: 'plugins/graph/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

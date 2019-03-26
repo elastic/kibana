@@ -160,7 +160,7 @@ describe('RegionMapsVisualizationTests', function () {
 
     it('should instantiate at zoom level 2', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -174,7 +174,7 @@ describe('RegionMapsVisualizationTests', function () {
 
     it('should update after resetting join field', async function () {
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -185,7 +185,7 @@ describe('RegionMapsVisualizationTests', function () {
       //this will actually create an empty image
       vis.params.selectedJoinField = { 'name': 'iso3', 'description': 'Three letter abbreviation' };
       vis.params.isDisplayWarning = false;//so we don't get notifications
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -202,7 +202,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should resize', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -212,7 +212,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       domNode.style.width = '256px';
       domNode.style.height = '128px';
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -223,7 +223,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       domNode.style.width = '512px';
       domNode.style.height = '512px';
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -240,7 +240,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should redo data', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -251,7 +251,7 @@ describe('RegionMapsVisualizationTests', function () {
       const newTableGroup = _.cloneDeep(dummyTableGroup);
       newTableGroup.rows.pop();//remove one shape
 
-      await regionMapsVisualization.render(newTableGroup, {
+      await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: false,
         aggs: false,
@@ -265,7 +265,7 @@ describe('RegionMapsVisualizationTests', function () {
       anotherTableGroup.rows.pop();//remove one shape
       domNode.style.width = '412px';
       domNode.style.height = '112px';
-      await regionMapsVisualization.render(anotherTableGroup, {
+      await regionMapsVisualization.render(anotherTableGroup, vis.params, {
         resize: true,
         params: false,
         aggs: false,
@@ -283,7 +283,7 @@ describe('RegionMapsVisualizationTests', function () {
     it('should redo data and color ramp', async function () {
 
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,
@@ -294,7 +294,7 @@ describe('RegionMapsVisualizationTests', function () {
       const newTableGroup = _.cloneDeep(dummyTableGroup);
       newTableGroup.rows.pop();//remove one shape
       vis.params.colorSchema = 'Blues';
-      await regionMapsVisualization.render(newTableGroup, {
+      await regionMapsVisualization.render(newTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: false,
@@ -314,7 +314,7 @@ describe('RegionMapsVisualizationTests', function () {
       vis.params.mapZoom = 4;
       vis.params.mapCenter = [36, -85];
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
-      await regionMapsVisualization.render(dummyTableGroup, {
+      await regionMapsVisualization.render(dummyTableGroup, vis.params, {
         resize: false,
         params: true,
         aggs: true,

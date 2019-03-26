@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const pipelineList = getService('pipelineList');
   const pipelineEditor = getService('pipelineEditor');
   const PageObjects = getPageObjects(['logstash']);
+  const retry = getService('retry');
 
   describe('pipeline create new', () => {
     let originalWindowSize;
@@ -67,11 +68,13 @@ export default function ({ getService, getPageObjects }) {
         await pipelineList.assertExists();
         await pipelineList.setFilter(id);
 
-        const rows = await pipelineList.readRows();
-        const newRow = rows.find(row => row.id === id);
+        await retry.try(async () => {
+          const rows = await pipelineList.readRows();
+          const newRow = rows.find(row => row.id === id);
 
-        expect(newRow)
-          .to.have.property('description', description);
+          expect(newRow)
+            .to.have.property('description', description);
+        });
       });
     });
 
@@ -84,9 +87,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.clickCancel();
 
-        await pipelineList.assertExists();
-        const currentRows = await pipelineList.readRows();
-        expect(originalRows).to.eql(currentRows);
+        await retry.try(async () => {
+          await pipelineList.assertExists();
+          const currentRows = await pipelineList.readRows();
+          expect(originalRows).to.eql(currentRows);
+        });
       });
     });
 

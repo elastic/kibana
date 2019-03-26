@@ -54,6 +54,8 @@ import { RenderableProvider } from './renderable';
 // @ts-ignore not TS yet
 import { ScreenshotsProvider } from './screenshots';
 // @ts-ignore not TS yet
+import { SnapshotsProvider } from './snapshots';
+// @ts-ignore not TS yet
 import { TableProvider } from './table';
 // @ts-ignore not TS yet
 import { TestSubjectsProvider } from './test_subjects';
@@ -63,13 +65,14 @@ import { PieChartProvider } from './visualizations';
 import { VisualizeListingTableProvider } from './visualize_listing_table';
 
 export const services = {
-  __leadfoot__: RemoteProvider,
+  __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
   find: FindProvider,
   testSubjects: TestSubjectsProvider,
   docTable: DocTableProvider,
   screenshots: ScreenshotsProvider,
+  snapshots: SnapshotsProvider,
   dashboardVisualizations: DashboardVisualizationProvider,
   dashboardExpect: DashboardExpectProvider,
   failureDebugging: FailureDebuggingProvider,

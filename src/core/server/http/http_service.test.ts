@@ -26,14 +26,15 @@ jest.mock('./http_server', () => ({
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { HttpConfig, HttpService, Router } from '.';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 
-beforeEach(() => {
-  logger.mockClear();
-  mockHttpServer.mockClear();
+const logger = loggingServiceMock.create();
+
+afterEach(() => {
+  jest.clearAllMocks();
 });
 
-test('creates and starts http server', async () => {
+test('creates and sets up http server', async () => {
   const config = {
     host: 'example.org',
     port: 1234,
@@ -54,12 +55,12 @@ test('creates and starts http server', async () => {
   expect(mockHttpServer.mock.instances.length).toBe(1);
   expect(httpServer.start).not.toHaveBeenCalled();
 
-  await service.start();
+  await service.setup();
 
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
-test('logs error if already started', async () => {
+test('logs error if already set up', async () => {
   const config = { ssl: {} } as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -73,9 +74,9 @@ test('logs error if already started', async () => {
 
   const service = new HttpService(config$.asObservable(), logger);
 
-  await service.start();
+  await service.setup();
 
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
 test('stops http server', async () => {
@@ -92,7 +93,7 @@ test('stops http server', async () => {
 
   const service = new HttpService(config$.asObservable(), logger);
 
-  await service.start();
+  await service.setup();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
 
@@ -121,10 +122,10 @@ test('register route handler', () => {
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
   expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
-test('throws if registering route handler after http server is started', () => {
+test('throws if registering route handler after http server is set up', () => {
   const config = {} as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -143,10 +144,10 @@ test('throws if registering route handler after http server is started', () => {
   service.registerRouter(router);
 
   expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(logger.mockCollect()).toMatchSnapshot();
+  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
 });
 
-test('returns http server contract on start', async () => {
+test('returns http server contract on setup', async () => {
   const httpServer = {
     server: {},
     options: { someOption: true },
@@ -160,5 +161,5 @@ test('returns http server contract on start', async () => {
 
   const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
 
-  expect(await service.start()).toBe(httpServer);
+  expect(await service.setup()).toBe(httpServer);
 });

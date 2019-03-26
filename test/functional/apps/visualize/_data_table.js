@@ -277,6 +277,25 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
+      it('should show correct data without showMetricsAtAllLevels even if showPartialRows is selected', async () => {
+        await PageObjects.visualize.clickOptionsTab();
+        await PageObjects.visualize.checkCheckbox('showPartialRows');
+        await PageObjects.visualize.clickGo();
+        const data = await PageObjects.visualize.getTableVisContent();
+        expect(data).to.be.eql([
+          [ 'jpg', 'CN', '1,718' ],
+          [ 'jpg', 'IN', '1,511' ],
+          [ 'jpg', 'US', '770' ],
+          [ 'jpg', 'ID', '314' ],
+          [ 'jpg', 'PK', '244' ],
+          [ 'css', 'CN', '422' ],
+          [ 'css', 'IN', '346' ],
+          [ 'css', 'US', '189' ],
+          [ 'css', 'ID', '68' ],
+          [ 'css', 'BR', '58' ],
+        ]);
+      });
+
       it('should show metrics on each level', async () => {
         await PageObjects.visualize.clickOptionsTab();
         await PageObjects.visualize.checkCheckbox('showMetricsAtAllLevels');
@@ -374,7 +393,7 @@ export default function ({ getService, getPageObjects }) {
         ]);
       });
 
-      it('should not show metrics for split bucket when using showMetricsAtAllLevels', async () => {
+      it('should show metrics for split bucket when using showMetricsAtAllLevels', async () => {
         await PageObjects.visualize.clickOptionsTab();
         await PageObjects.visualize.checkCheckbox('showMetricsAtAllLevels');
         await PageObjects.visualize.clickGo();

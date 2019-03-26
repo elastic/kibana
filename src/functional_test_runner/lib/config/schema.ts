@@ -135,7 +135,6 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI),
         reportName: Joi.string(),
-        rootDirectory: Joi.string(),
       })
       .default(),
 
@@ -218,6 +217,13 @@ export const schema = Joi.object()
     screenshots: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('screenshots')),
+      })
+      .default(),
+
+    // settings for the snapshots module
+    snapshots: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('snapshots')),
       })
       .default(),
 

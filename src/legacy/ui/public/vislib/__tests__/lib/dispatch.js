@@ -92,7 +92,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       });
     });
 
-    // test the addHoverEvent, addClickEvent, addBrushEvent methods by
+    // test the addHoverEvent, addClickEvent methods by
     // checking that they return function which bind the events expected
     function checkBoundAddMethod(name, event) {
       describe(name + ' method', function () {
@@ -119,7 +119,6 @@ describe('Vislib Dispatch Class Test Suite', function () {
     checkBoundAddMethod('addHoverEvent', 'mouseover');
     checkBoundAddMethod('addMouseoutEvent', 'mouseout');
     checkBoundAddMethod('addClickEvent', 'click');
-    checkBoundAddMethod('addBrushEvent', 'mousedown');
 
     describe('addMousePointer method', function () {
       it('should be a function', function () {

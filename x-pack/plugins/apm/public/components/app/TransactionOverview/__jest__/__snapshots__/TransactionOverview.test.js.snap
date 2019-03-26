@@ -7,6 +7,7 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
     fullWidth={false}
     hasEmptyLabelSpace={false}
     label="Filter by type"
+    labelType="label"
   >
     <EuiSelect
       compressed={false}
@@ -41,15 +42,32 @@ exports[`TransactionOverviewView should render with type filter controls 1`] = `
   <EuiSpacer
     size="l"
   />
-  <TransactionListRequest
-    render={[Function]}
-    urlParams={
-      Object {
-        "serviceName": "MyServiceName",
-        "transactionType": "test-type",
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h3>
+        Transactions
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <TransactionListRequest
+      render={[Function]}
+      urlParams={
+        Object {
+          "serviceName": "MyServiceName",
+          "transactionType": "test-type",
+        }
       }
-    }
-  />
+    />
+  </EuiPanel>
 </Fragment>
 `;
 
@@ -67,14 +85,31 @@ exports[`TransactionOverviewView should render without type filter controls if t
   <EuiSpacer
     size="l"
   />
-  <TransactionListRequest
-    render={[Function]}
-    urlParams={
-      Object {
-        "serviceName": "MyServiceName",
-        "transactionType": "test-type",
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="m"
+  >
+    <EuiTitle
+      size="xs"
+      textTransform="none"
+    >
+      <h3>
+        Transactions
+      </h3>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
+    <TransactionListRequest
+      render={[Function]}
+      urlParams={
+        Object {
+          "serviceName": "MyServiceName",
+          "transactionType": "test-type",
+        }
       }
-    }
-  />
+    />
+  </EuiPanel>
 </Fragment>
 `;

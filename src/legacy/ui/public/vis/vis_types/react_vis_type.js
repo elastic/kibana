@@ -32,7 +32,7 @@ export function ReactVisTypeProvider(Private) {
       this.vis = vis;
     }
 
-    render(visData, updateStatus) {
+    render(visData, visParams, updateStatus) {
       this.visData = visData;
 
       return new Promise((resolve) => {
@@ -44,6 +44,7 @@ export function ReactVisTypeProvider(Private) {
               config={config}
               vis={this.vis}
               visData={visData}
+              visParams={visParams}
               renderComplete={resolve}
               updateStatus={updateStatus}
             />

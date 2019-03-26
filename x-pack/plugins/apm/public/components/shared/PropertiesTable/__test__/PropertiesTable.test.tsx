@@ -6,32 +6,18 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import {
-  AgentFeatureTipMessage,
-  getPropertyTabNames,
-  PropertiesTable,
-  sortKeysByConfig
-} from '..';
+import { PropertiesTable, TabHelpMessage } from '..';
 import * as agentDocs from '../../../../utils/documentation/agents';
-import * as propertyConfig from '../propertyConfig';
 
 describe('PropertiesTable', () => {
-  beforeEach(() => {
-    mockPropertyConfig();
-  });
-
-  afterEach(() => {
-    unMockPropertyConfig();
-  });
-
   describe('PropertiesTable component', () => {
     it('should render with data', () => {
       expect(
         shallow(
           <PropertiesTable
             propData={{ a: 'hello', b: 'bananas' }}
-            propKey="testPropKey"
-            agentName="testAgentName"
+            propKey="kubernetes"
+            agentName="java"
           />
         )
       ).toMatchSnapshot();
@@ -39,9 +25,7 @@ describe('PropertiesTable', () => {
 
     it("should render empty when data isn't present", () => {
       expect(
-        shallow(
-          <PropertiesTable propKey="testPropKey" agentName="testAgentName" />
-        )
+        shallow(<PropertiesTable propKey="kubernetes" agentName="java" />)
       ).toMatchSnapshot();
     });
 
@@ -50,126 +34,40 @@ describe('PropertiesTable', () => {
         shallow(
           <PropertiesTable
             propData={{}}
-            propKey="testPropKey"
-            agentName="testAgentName"
+            propKey="kubernetes"
+            agentName="java"
           />
         )
       ).toMatchSnapshot();
     });
   });
 
-  describe('sortKeysByConfig', () => {
-    const testData = {
-      color: 'blue',
-      name: 'Jess',
-      age: '39',
-      numbers: [1, 2, 3],
-      _id: '44x099z'
-    };
-
-    it('should sort with presorted keys first', () => {
-      expect(sortKeysByConfig(testData, 'testProperty')).toEqual([
-        'name',
-        'age',
-        '_id',
-        'color',
-        'numbers'
-      ]);
-    });
-
-    it('should alpha-sort keys when there is no config value found', () => {
-      expect(sortKeysByConfig(testData, 'nonExistentKey')).toEqual([
-        '_id',
-        'age',
-        'color',
-        'name',
-        'numbers'
-      ]);
-    });
-  });
-
-  describe('getPropertyTabNames', () => {
-    it('should return selected and required keys only', () => {
-      const expectedTabsConfig = [
-        {
-          key: 'testProperty',
-          label: 'testPropertyLabel'
-        },
-        {
-          key: 'requiredProperty',
-          label: 'requiredPropertyLabel'
-        }
-      ];
-      expect(getPropertyTabNames({ testProperty: {} } as any)).toEqual(
-        expectedTabsConfig
-      );
-    });
-  });
-
-  describe('AgentFeatureTipMessage component', () => {
-    const featureName = 'user';
+  describe('TabHelpMessage component', () => {
+    const tabKey = 'user';
     const agentName = 'nodejs';
 
     it('should render when docs are returned', () => {
       jest
-        .spyOn(agentDocs, 'getAgentFeatureDocsUrl')
+        .spyOn(agentDocs, 'getAgentDocUrlForTab')
         .mockImplementation(() => 'mock-url');
 
       expect(
-        shallow(
-          <AgentFeatureTipMessage
-            featureName={featureName}
-            agentName={agentName}
-          />
-        )
+        shallow(<TabHelpMessage tabKey={tabKey} agentName={agentName} />)
       ).toMatchSnapshot();
-      expect(agentDocs.getAgentFeatureDocsUrl).toHaveBeenCalledWith(
-        featureName,
+      expect(agentDocs.getAgentDocUrlForTab).toHaveBeenCalledWith(
+        tabKey,
         agentName
       );
     });
 
     it('should render null empty string when no docs are returned', () => {
       jest
-        .spyOn(agentDocs, 'getAgentFeatureDocsUrl')
+        .spyOn(agentDocs, 'getAgentDocUrlForTab')
         .mockImplementation(() => undefined);
 
       expect(
-        shallow(
-          <AgentFeatureTipMessage
-            featureName={featureName}
-            agentName={agentName}
-          />
-        )
+        shallow(<TabHelpMessage tabKey={tabKey} agentName={agentName} />)
       ).toMatchSnapshot();
     });
   });
 });
-
-function mockPropertyConfig() {
-  // @ts-ignore
-  propertyConfig.PROPERTY_CONFIG = [
-    {
-      key: 'testProperty',
-      label: 'testPropertyLabel',
-      required: false,
-      presortedKeys: ['name', 'age']
-    },
-    {
-      key: 'optionalProperty',
-      label: 'optionalPropertyLabel',
-      required: false
-    },
-    {
-      key: 'requiredProperty',
-      label: 'requiredPropertyLabel',
-      required: true
-    }
-  ];
-}
-
-const originalPropertyConfig = propertyConfig.PROPERTY_CONFIG;
-function unMockPropertyConfig() {
-  // @ts-ignore
-  propertyConfig.PROPERTY_CONFIG = originalPropertyConfig;
-}

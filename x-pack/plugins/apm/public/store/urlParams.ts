@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
 import { createSelector } from 'reselect';
@@ -17,17 +18,51 @@ import { getDefaultDistributionSample } from './reactReduxRequest/transactionDis
 import { IReduxState } from './rootReducer';
 
 // ACTION TYPES
-export const TIMEPICKER_UPDATE = 'TIMEPICKER_UPDATE';
+export const TIME_RANGE_REFRESH = 'TIME_RANGE_REFRESH';
+export const TIMEPICKER_DEFAULTS = {
+  rangeFrom: 'now-24h',
+  rangeTo: 'now',
+  refreshPaused: 'true',
+  refreshInterval: '0'
+};
+
+interface TimeRange {
+  rangeFrom: string;
+  rangeTo: string;
+}
 
 interface LocationAction {
   type: typeof LOCATION_UPDATE;
   location: Location;
 }
-interface TimepickerAction {
-  type: typeof TIMEPICKER_UPDATE;
-  time: { min: number; max: number };
+interface TimeRangeRefreshAction {
+  type: typeof TIME_RANGE_REFRESH;
+  time: TimeRange;
 }
-type Action = LocationAction | TimepickerAction;
+export type APMAction = LocationAction | TimeRangeRefreshAction;
+
+function getParsedDate(rawDate?: string, opts = {}) {
+  if (rawDate) {
+    const parsed = datemath.parse(rawDate, opts);
+    if (parsed) {
+      return parsed.toISOString();
+    }
+  }
+}
+
+function getStart(prevState: IUrlParams, rangeFrom?: string) {
+  if (prevState.rangeFrom !== rangeFrom) {
+    return getParsedDate(rangeFrom);
+  }
+  return prevState.start;
+}
+
+function getEnd(prevState: IUrlParams, rangeTo?: string) {
+  if (prevState.rangeTo !== rangeTo) {
+    return getParsedDate(rangeTo, { roundUp: true });
+  }
+  return prevState.end;
+}
 
 // "urlParams" contains path and query parameters from the url, that can be easily consumed from
 // any (container) component with access to the store
@@ -37,7 +72,10 @@ type Action = LocationAction | TimepickerAction;
 // serviceName: opbeans-backend (path param)
 // transactionType: Brewing%20Bot (path param)
 // transactionId: 1321 (query param)
-export function urlParamsReducer(state = {}, action: Action) {
+export function urlParamsReducer(
+  state: IUrlParams = {},
+  action: APMAction
+): IUrlParams {
   switch (action.type) {
     case LOCATION_UPDATE: {
       const {
@@ -58,11 +96,23 @@ export function urlParamsReducer(state = {}, action: Action) {
         page,
         sortDirection,
         sortField,
-        kuery
+        kuery,
+        refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
+        refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
+        rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
+        rangeTo = TIMEPICKER_DEFAULTS.rangeTo
       } = toQuery(action.location.search);
 
       return removeUndefinedProps({
         ...state,
+
+        // date params
+        start: getStart(state, rangeFrom),
+        end: getEnd(state, rangeTo),
+        rangeFrom,
+        rangeTo,
+        refreshPaused: toBoolean(refreshPaused),
+        refreshInterval: toNumber(refreshInterval),
 
         // query params
         sortDirection,
@@ -74,7 +124,7 @@ export function urlParamsReducer(state = {}, action: Action) {
         detailTab: toString(detailTab),
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
-        kuery: legacyDecodeURIComponent(kuery as string | undefined),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
         processorEvent,
@@ -85,16 +135,20 @@ export function urlParamsReducer(state = {}, action: Action) {
       });
     }
 
-    case TIMEPICKER_UPDATE:
-      return { ...state, start: action.time.min, end: action.time.max };
+    case TIME_RANGE_REFRESH:
+      return {
+        ...state,
+        start: getParsedDate(action.time.rangeFrom),
+        end: getParsedDate(action.time.rangeTo)
+      };
 
     default:
       return state;
   }
 }
 
-function toNumber(value?: string | string[]) {
-  if (value !== undefined && !Array.isArray(value)) {
+export function toNumber(value?: string) {
+  if (value !== undefined) {
     return parseInt(value, 10);
   }
 }
@@ -109,6 +163,10 @@ function toString(str?: string | string[]) {
     return;
   }
   return str;
+}
+
+export function toBoolean(value?: string) {
+  return value === 'true';
 }
 
 function getPathAsArray(pathname: string) {
@@ -148,8 +206,8 @@ function getPathParams(pathname: string) {
 }
 
 // ACTION CREATORS
-export function updateTimePicker(time: string) {
-  return { type: TIMEPICKER_UPDATE, time };
+export function refreshTimeRange(time: TimeRange): TimeRangeRefreshAction {
+  return { type: TIME_RANGE_REFRESH, time };
 }
 
 // Selectors
@@ -173,14 +231,18 @@ export const getUrlParams = createSelector(
 
 export interface IUrlParams {
   detailTab?: string;
-  end?: number;
+  end?: string;
   errorGroupId?: string;
   flyoutDetailTab?: string;
   kuery?: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+  refreshInterval?: number;
+  refreshPaused?: boolean;
   serviceName?: string;
+  sortDirection?: string;
   sortField?: string;
-  sortDirection?: 'asc' | 'desc';
-  start?: number;
+  start?: string;
   traceId?: string;
   transactionId?: string;
   transactionName?: string;

@@ -21,12 +21,12 @@ const mockReadFileSync = jest.fn();
 jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
 
 import { duration } from 'moment';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import {
   ElasticsearchClientConfig,
   parseElasticsearchClientConfig,
 } from './elasticsearch_client_config';
-
+const logger = loggingServiceMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('parses minimally specified config', () => {
@@ -365,7 +365,7 @@ describe('#log', () => {
 
     expect(typeof esLogger.close).toBe('function');
 
-    expect(logger.mockCollect()).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
 Object {
   "debug": Array [],
   "error": Array [
@@ -411,7 +411,7 @@ Object {
 
     expect(typeof esLogger.close).toBe('function');
 
-    expect(logger.mockCollect()).toMatchInlineSnapshot(`
+    expect(loggingServiceMock.collect(logger)).toMatchInlineSnapshot(`
 Object {
   "debug": Array [
     Array [
