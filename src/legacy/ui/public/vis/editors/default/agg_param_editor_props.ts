@@ -30,7 +30,8 @@ interface AggParamEditorProps<T> {
 
 interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
   isInvalid: boolean;
-  setTouched: () => void;
+  setValidity(isValid: boolean): void;
+  setTouched(): void;
 }
 
 export { AggParamEditorProps, AggParamRequiredEditorProps };

@@ -26,7 +26,16 @@ type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   options?: EuiComboBoxOptionProps[];
 };
 
-function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelsName = 'title') {
+/**
+ * Groups and sorts alphabetically aggregation objects and returns an array of options that are compatible with EuiComboBox options.
+ *
+ * @param aggs An array of aggregations that will be grouped.
+ * @param groupBy A field name which aggregations is grouped by.
+ * @param labelName A name of a property which value will be displayed.
+ *
+ * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an ampry array.
+ */
+function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelName = 'title') {
   if (!Array.isArray(aggs)) {
     return [];
   }
@@ -34,7 +43,7 @@ function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelsNa
   const groupedOptions: ComboBoxGroupedOption[] = aggs.reduce((array: AggType[], type: AggType) => {
     const group = array.find(element => element.label === type[groupBy]);
     const option = {
-      label: type[labelsName],
+      label: type[labelName],
       value: type,
     };
 

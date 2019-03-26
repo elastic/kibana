@@ -31,6 +31,7 @@ uiModules
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid'
   ]))
@@ -58,6 +59,7 @@ uiModules
             on-change="onChange"
             value="paramValue"
             is-invalid="isInvalid"
+            set-validity="setValidity"
             set-touched="setTouched"
             indexed-fields="indexedFields"
           ></vis-agg-param-react-wrapper>`;
@@ -88,10 +90,6 @@ uiModules
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
-
-              if(ngModelCtrl) {
-                ngModelCtrl.$setViewValue(value);
-              }
             }, true);
           }
 
@@ -113,13 +111,12 @@ uiModules
             $scope.isInvalid = !$scope.paramValue;
           };
 
-          if(ngModelCtrl && $scope.aggParam.name === 'field') {
-            ngModelCtrl.$validators.fieldSelect = (value) => {
-              $scope.isInvalid = ngModelCtrl.$touched && !value;
-
-              return !!value;
-            };
-          }
+          $scope.setValidity = (isValid) => {
+            if(ngModelCtrl) {
+              $scope.isInvalid = ngModelCtrl.$touched ? !isValid : false;
+              ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
+            }
+          };
         }
       }
     };

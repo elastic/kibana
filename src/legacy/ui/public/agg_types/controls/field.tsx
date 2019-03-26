@@ -37,6 +37,7 @@ function FieldParamEditor({
   value,
   setValue,
   isInvalid,
+  setValidity,
   setTouched,
 }: AggParamRequiredEditorProps<FieldParamType>) {
   const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
@@ -51,6 +52,8 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
+
+  setValidity(!!value);
 
   return (
     <EuiFormRow
