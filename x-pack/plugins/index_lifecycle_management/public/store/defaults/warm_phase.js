@@ -32,3 +32,8 @@ export const defaultWarmPhase = {
   [WARM_PHASE_ON_ROLLOVER]: true,
   [PHASE_INDEX_PRIORITY]: 50
 };
+export const defaultEmptyWarmPhase = {
+  ...defaultWarmPhase,
+  [WARM_PHASE_ON_ROLLOVER]: false,
+  [PHASE_INDEX_PRIORITY]: ''
+};

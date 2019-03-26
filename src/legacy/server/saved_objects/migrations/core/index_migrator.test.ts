@@ -18,25 +18,40 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { SavedObjectsSchema } from '../../schema';
 import { RawSavedObjectDoc, SavedObjectsSerializer } from '../../serialization';
-import { CallCluster } from './call_cluster';
 import { IndexMigrator } from './index_migrator';
 
 describe('IndexMigrator', () => {
-  test('creates the index if it does not exist', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+  let testOpts: any;
 
-    opts.mappingProperties = { foo: { type: 'long' } };
+  beforeEach(() => {
+    testOpts = {
+      batchSize: 10,
+      callCluster: jest.fn(),
+      index: '.kibana',
+      log: jest.fn(),
+      mappingProperties: {},
+      pollInterval: 1,
+      scrollDuration: '1m',
+      documentMigrator: {
+        migrationVersion: {},
+        migrate: _.identity,
+      },
+      serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
+    };
+  });
+
+  test('creates the index if it does not exist', async () => {
+    const { callCluster } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'long' } };
 
     withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
 
-    await new IndexMigrator(opts).migrate();
+    await new IndexMigrator(testOpts).migrate();
 
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.create', {
+    expect(callCluster).toHaveBeenCalledWith('indices.create', {
       body: {
         mappings: {
           dynamic: 'strict',
@@ -78,12 +93,11 @@ describe('IndexMigrator', () => {
   });
 
   test('returns stats about the migration', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
     withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
 
-    const result = await new IndexMigrator(opts).migrate();
+    const result = await new IndexMigrator(testOpts).migrate();
 
     expect(result).toMatchObject({
       destIndex: '.kibana_1',
@@ -93,8 +107,7 @@ describe('IndexMigrator', () => {
   });
 
   test('fails if there are multiple root doc types', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
     withIndex(callCluster, {
       index: {
@@ -112,14 +125,13 @@ describe('IndexMigrator', () => {
       },
     });
 
-    await expect(new IndexMigrator(opts).migrate()).rejects.toThrow(
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow(
       /use the X-Pack upgrade assistant/
     );
   });
 
   test('fails if root doc type is not "doc"', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
     withIndex(callCluster, {
       index: {
@@ -136,16 +148,15 @@ describe('IndexMigrator', () => {
       },
     });
 
-    await expect(new IndexMigrator(opts).migrate()).rejects.toThrow(
+    await expect(new IndexMigrator(testOpts).migrate()).rejects.toThrow(
       /use the X-Pack upgrade assistant/
     );
   });
 
   test('retains mappings from the previous index', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
-    opts.mappingProperties = { foo: { type: 'text' } };
+    testOpts.mappingProperties = { foo: { type: 'text' } };
 
     withIndex(callCluster, {
       index: {
@@ -160,9 +171,9 @@ describe('IndexMigrator', () => {
       },
     });
 
-    await new IndexMigrator(opts).migrate();
+    await new IndexMigrator(testOpts).migrate();
 
-    sinon.assert.calledWith(callCluster, 'indices.create', {
+    expect(callCluster).toHaveBeenCalledWith('indices.create', {
       body: {
         mappings: {
           dynamic: 'strict',
@@ -205,33 +216,31 @@ describe('IndexMigrator', () => {
   });
 
   test('points the alias at the dest index', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
     withIndex(callCluster, { index: { status: 404 }, alias: { status: 404 } });
 
-    await new IndexMigrator(opts).migrate();
+    await new IndexMigrator(testOpts).migrate();
 
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
+    expect(callCluster).toHaveBeenCalledWith('indices.create', expect.any(Object));
+    expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
       body: { actions: [{ add: { alias: '.kibana', index: '.kibana_1' } }] },
     });
   });
 
   test('removes previous indices from the alias', async () => {
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
+    const { callCluster } = testOpts;
 
-    opts.documentMigrator.migrationVersion = {
+    testOpts.documentMigrator.migrationVersion = {
       dashboard: '2.4.5',
     };
 
     withIndex(callCluster, { numOutOfDate: 1 });
 
-    await new IndexMigrator(opts).migrate();
+    await new IndexMigrator(testOpts).migrate();
 
-    expect(ranMigration(opts)).toBeTruthy();
-    sinon.assert.calledWith(callCluster, 'indices.updateAliases', {
+    expect(callCluster).toHaveBeenCalledWith('indices.create', expect.any(Object));
+    expect(callCluster).toHaveBeenCalledWith('indices.updateAliases', {
       body: {
         actions: [
           { remove: { alias: '.kibana', index: '.kibana_1' } },
@@ -243,14 +252,15 @@ describe('IndexMigrator', () => {
 
   test('transforms all docs from the original index', async () => {
     let count = 0;
-    const opts = defaultOpts();
-    const callCluster = clusterStub(opts);
-    const migrateDoc = sinon.spy((doc: RawSavedObjectDoc) => ({
-      ...doc,
-      attributes: { name: ++count },
-    }));
+    const { callCluster } = testOpts;
+    const migrateDoc = jest.fn((doc: RawSavedObjectDoc) => {
+      return {
+        ...doc,
+        attributes: { name: ++count },
+      };
+    });
 
-    opts.documentMigrator = {
+    testOpts.documentMigrator = {
       migrationVersion: { foo: '1.2.3' },
       migrate: migrateDoc,
     };
@@ -263,57 +273,47 @@ describe('IndexMigrator', () => {
       ],
     });
 
-    await new IndexMigrator(opts).migrate();
+    await new IndexMigrator(testOpts).migrate();
 
     expect(count).toEqual(2);
-    sinon.assert.calledWith(migrateDoc, {
+    expect(migrateDoc).toHaveBeenCalledWith({
       id: '1',
       type: 'foo',
       attributes: { name: 'Bar' },
       migrationVersion: {},
       references: [],
     });
-    sinon.assert.calledWith(migrateDoc, {
+    expect(migrateDoc).toHaveBeenCalledWith({
       id: '2',
       type: 'foo',
       attributes: { name: 'Baz' },
       migrationVersion: {},
       references: [],
     });
-    expect(callCluster.args.filter(([action]) => action === 'bulk').length).toEqual(2);
-    sinon.assert.calledWith(callCluster, 'bulk', {
-      body: [
-        { index: { _id: 'foo:1', _index: '.kibana_2' } },
-        { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
-      ],
-    });
-    sinon.assert.calledWith(callCluster, 'bulk', {
-      body: [
-        { index: { _id: 'foo:2', _index: '.kibana_2' } },
-        { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
-      ],
-    });
+    const bulkCalls = callCluster.mock.calls.filter(([action]: any) => action === 'bulk');
+    expect(bulkCalls.length).toEqual(2);
+    expect(bulkCalls[0]).toEqual([
+      'bulk',
+      {
+        body: [
+          { index: { _id: 'foo:1', _index: '.kibana_2' } },
+          { foo: { name: 1 }, type: 'foo', migrationVersion: {}, references: [] },
+        ],
+      },
+    ]);
+    expect(bulkCalls[1]).toEqual([
+      'bulk',
+      {
+        body: [
+          { index: { _id: 'foo:2', _index: '.kibana_2' } },
+          { foo: { name: 2 }, type: 'foo', migrationVersion: {}, references: [] },
+        ],
+      },
+    ]);
   });
 });
 
-function defaultOpts() {
-  return {
-    batchSize: 10,
-    callCluster: sinon.stub(),
-    index: '.kibana',
-    log: sinon.stub(),
-    mappingProperties: {},
-    pollInterval: 1,
-    scrollDuration: '1m',
-    documentMigrator: {
-      migrationVersion: {},
-      migrate: _.identity,
-    },
-    serializer: new SavedObjectsSerializer(new SavedObjectsSchema()),
-  };
-}
-
-function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
+function withIndex(callCluster: jest.Mock, opts: any = {}) {
   const defaultIndex = {
     '.kibana_1': {
       aliases: { '.kibana': {} },
@@ -343,36 +343,28 @@ function withIndex(callCluster: sinon.SinonStub, opts: any = {}) {
         hits: docs[i] || [],
       },
     });
-  callCluster.withArgs('indices.get').returns(Promise.resolve(index));
-  callCluster.withArgs('indices.getAlias').returns(Promise.resolve(alias));
-  callCluster
-    .withArgs('reindex')
-    .returns(Promise.resolve({ task: 'zeid', _shards: { successful: 1, total: 1 } }));
-  callCluster.withArgs('tasks.get').returns(Promise.resolve({ completed: true }));
-  callCluster.withArgs('search').returns(searchResult(0));
 
-  _.range(1, docs.length).forEach(i => {
-    callCluster
-      .withArgs('scroll')
-      .onCall(i - 1)
-      .returns(searchResult(i));
+  let scrollCallCounter = 1;
+
+  callCluster.mockImplementation(method => {
+    if (method === 'indices.get') {
+      return Promise.resolve(index);
+    } else if (method === 'indices.getAlias') {
+      return Promise.resolve(alias);
+    } else if (method === 'reindex') {
+      return Promise.resolve({ task: 'zeid', _shards: { successful: 1, total: 1 } });
+    } else if (method === 'tasks.get') {
+      return Promise.resolve({ completed: true });
+    } else if (method === 'search') {
+      return searchResult(0);
+    } else if (method === 'bulk') {
+      return Promise.resolve({ items: [] });
+    } else if (method === 'count') {
+      return Promise.resolve({ count: numOutOfDate, _shards: { successful: 1, total: 1 } });
+    } else if (method === 'scroll' && scrollCallCounter <= docs.length) {
+      const result = searchResult(scrollCallCounter);
+      scrollCallCounter++;
+      return result;
+    }
   });
-
-  callCluster
-    .withArgs('scroll')
-    .onCall(docs.length - 1)
-    .returns(searchResult(docs.length));
-
-  callCluster.withArgs('bulk').returns(Promise.resolve({ items: [] }));
-  callCluster
-    .withArgs('count')
-    .returns(Promise.resolve({ count: numOutOfDate, _shards: { successful: 1, total: 1 } }));
-}
-
-function clusterStub(opts: { callCluster: CallCluster }) {
-  return opts.callCluster as sinon.SinonStub;
-}
-
-function ranMigration(opts: { callCluster: CallCluster }) {
-  return clusterStub(opts).calledWith('indices.create', sinon.match.any);
 }

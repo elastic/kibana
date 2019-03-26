@@ -58,7 +58,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
     const kqlFullName = (
       <FormattedMessage
         id="common.ui.queryBar.kqlFullLanguageName"
-        defaultMessage="Kibana query language"
+        defaultMessage="Kibana Query Language"
       />
     );
 

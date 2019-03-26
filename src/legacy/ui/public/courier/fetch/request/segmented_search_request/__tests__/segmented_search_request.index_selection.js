@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { times } from 'lodash';
 import sinon from 'sinon';
 

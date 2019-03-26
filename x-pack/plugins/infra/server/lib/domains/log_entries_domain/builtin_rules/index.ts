@@ -18,10 +18,10 @@ import { filebeatRedisRules } from './filebeat_redis';
 import { filebeatSystemRules } from './filebeat_system';
 import { filebeatTraefikRules } from './filebeat_traefik';
 
-import { genericRules } from './generic';
+import { getGenericRules } from './generic';
 import { genericWebserverRules } from './generic_webserver';
 
-export const builtinRules = [
+export const getBuiltinRules = (genericMessageFields: string[]) => [
   ...filebeatApache2Rules,
   ...filebeatNginxRules,
   ...filebeatRedisRules,
@@ -36,7 +36,7 @@ export const builtinRules = [
   ...filebeatOsqueryRules,
   ...filebeatTraefikRules,
   ...genericWebserverRules,
-  ...genericRules,
+  ...getGenericRules(genericMessageFields),
   {
     when: {
       exists: ['log.path'],

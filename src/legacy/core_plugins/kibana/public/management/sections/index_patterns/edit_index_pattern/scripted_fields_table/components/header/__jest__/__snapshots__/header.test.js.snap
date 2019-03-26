@@ -3,17 +3,8 @@
 exports[`Header should render normally 1`] = `
 <EuiFlexGroup
   alignItems="center"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiTitle
       size="s"
       textTransform="none"
@@ -40,7 +31,6 @@ exports[`Header should render normally 1`] = `
     </EuiText>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButton
@@ -49,6 +39,7 @@ exports[`Header should render normally 1`] = `
       fill={false}
       href=""
       iconSide="left"
+      size="m"
       type="button"
     >
       <FormattedMessage

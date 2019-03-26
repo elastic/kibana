@@ -59,8 +59,8 @@ export const SetPriorityInput = props => {
         <EuiFieldNumber
           id={`${phase}-${PHASE_INDEX_PRIORITY}`}
           value={phaseData[PHASE_INDEX_PRIORITY]}
-          onChange={async e => {
-            await setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
+          onChange={e => {
+            setPhaseData(PHASE_INDEX_PRIORITY, e.target.value);
           }}
           min={0}
         />

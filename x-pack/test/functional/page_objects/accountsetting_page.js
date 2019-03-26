@@ -5,7 +5,7 @@
  */
 
 //import { map as mapAsync } from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function AccountSettingProvider({ getService }) {
   const testSubjects = getService('testSubjects');

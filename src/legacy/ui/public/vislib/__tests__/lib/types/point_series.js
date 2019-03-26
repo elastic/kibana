@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import { VislibTypesPointSeries } from '../../../lib/types/point_series';
 

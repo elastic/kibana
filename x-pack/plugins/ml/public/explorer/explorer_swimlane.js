@@ -27,6 +27,7 @@ import { mlChartTooltipService } from '../components/chart_tooltip/chart_tooltip
 import { ALLOW_CELL_RANGE_SELECTION, dragSelect$ } from './explorer_dashboard_service';
 import { DRAG_SELECT_ACTION } from './explorer_constants';
 import { injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 const SCSS = {
   mlDragselectDragging: 'mlDragselectDragging',
@@ -36,6 +37,8 @@ const SCSS = {
 export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.Component {
   static propTypes = {
     chartWidth: PropTypes.number.isRequired,
+    filterActive: PropTypes.bool,
+    maskAll: PropTypes.bool,
     MlTimeBuckets: PropTypes.func.isRequired,
     swimlaneCellClick: PropTypes.func.isRequired,
     swimlaneData: PropTypes.shape({
@@ -196,6 +199,19 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     }
   }
 
+  maskIrrelevantSwimlanes(maskAll) {
+    if (maskAll === true) {
+      // This selects both overall and viewby swimlane
+      const allSwimlanes = d3.selectAll('.ml-explorer-swimlane');
+      allSwimlanes.selectAll('.lane-label').classed('lane-label-masked', true);
+      allSwimlanes.selectAll('.sl-cell-inner,.sl-cell-inner-dragselect').classed('sl-cell-inner-masked', true);
+    } else {
+      const overallSwimlane = d3.select('.ml-swimlane-overall');
+      overallSwimlane.selectAll('.lane-label').classed('lane-label-masked', true);
+      overallSwimlane.selectAll('.sl-cell-inner,.sl-cell-inner-dragselect').classed('sl-cell-inner-masked', true);
+    }
+  }
+
   clearSelection() {
     // This selects both overall and viewby swimlane
     const wrapper = d3.selectAll('.ml-explorer-swimlane');
@@ -219,6 +235,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     const {
       chartWidth,
+      filterActive,
+      maskAll,
       MlTimeBuckets,
       swimlaneCellClick,
       swimlaneData,
@@ -306,7 +324,17 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     d3LanesEnter.append('div')
       .classed('lane-label', true)
       .style('width', `${laneLabelWidth}px`)
-      .html(label => mlEscape(label))
+      .html(label => {
+        const showFilterContext = (filterActive === true && label === 'Overall');
+        if (showFilterContext) {
+          return i18n.translate('xpack.ml.explorer.overallSwimlaneUnfilteredLabel', {
+            defaultMessage: '{label} (unfiltered)',
+            values: { label: mlEscape(label) }
+          });
+        } else {
+          return mlEscape(label);
+        }
+      })
       .on('click', () => {
         if (selection && typeof selection.lanes !== 'undefined') {
           swimlaneCellClick({});
@@ -439,8 +467,9 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
     this.props.swimlaneRenderDoneListener();
 
     if (
-      (swimlaneType !== selectedType) ||
-      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionViewByFieldName)
+      ((swimlaneType !== selectedType) ||
+      (swimlaneData.fieldName !== undefined && swimlaneData.fieldName !== selectionViewByFieldName)) &&
+      filterActive === false
     ) {
       // Not this swimlane which was selected.
       return;
@@ -473,6 +502,8 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
 
     if (cellsToSelect.length > 1 || selectedMaxBucketScore > 0) {
       this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
+    } else if (filterActive === true) {
+      this.maskIrrelevantSwimlanes(maskAll);
     } else {
       this.clearSelection();
     }

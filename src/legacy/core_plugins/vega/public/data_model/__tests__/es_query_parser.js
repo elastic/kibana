@@ -18,8 +18,9 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
+import moment from 'moment';
 import { EsQueryParser } from '../es_query_parser';
 
 const second = 1000;
@@ -56,12 +57,12 @@ describe(`EsQueryParser time`, () => {
   it(`createRangeFilter({})`, () => {
     const obj = {};
     expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({ format: `epoch_millis`, gte: 1000, lte: 2000 }).and.to.be(obj);
+      .to.eql({ format: 'strict_date_optional_time', gte: moment(1000).toISOString(), lte: moment(2000).toISOString() }).and.to.be(obj);
   });
   it(`createRangeFilter(shift 1s)`, () => {
     const obj = { shift: 5, unit: 's' };
     expect(create(1000, 2000)._createRangeFilter(obj))
-      .to.eql({ format: `epoch_millis`, gte: 6000, lte: 7000 }).and.to.be(obj);
+      .to.eql({ format: 'strict_date_optional_time', gte: moment(6000).toISOString(), lte: moment(7000).toISOString() }).and.to.be(obj);
   });
 
 });
@@ -118,7 +119,7 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   it(`%timefilter% = max`, test({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));
   it(`%timefilter% = true`, test(
     { a: { '%timefilter%': true } },
-    { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }));
+    { a: { format: 'strict_date_optional_time', gte: moment(rangeStart).toISOString(), lte: moment(rangeEnd).toISOString() } }));
 });
 
 describe(`EsQueryParser.parseEsRequest`, () => {
@@ -144,7 +145,15 @@ describe(`EsQueryParser.parseEsRequest`, () => {
         bool: {
           must: [
             { match_all: { c: 3 } },
-            { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } }
+            {
+              range: {
+                abc: {
+                  format: 'strict_date_optional_time',
+                  gte: moment(rangeStart).toISOString(),
+                  lte: moment(rangeEnd).toISOString()
+                }
+              }
+            }
           ],
           must_not: [{ 'd': 4 }]
         }
@@ -161,7 +170,17 @@ describe(`EsQueryParser.parseEsRequest`, () => {
   it(`%timefield%='abc'`, test({ index: '_all', '%timefield%': 'abc' }, ctxArr,
     {
       index: '_all',
-      body: { query: { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } } }
+      body: {
+        query: {
+          range: {
+            abc: {
+              format: 'strict_date_optional_time',
+              gte: moment(rangeStart).toISOString(),
+              lte: moment(rangeEnd).toISOString()
+            }
+          }
+        }
+      }
     }
   ));
 

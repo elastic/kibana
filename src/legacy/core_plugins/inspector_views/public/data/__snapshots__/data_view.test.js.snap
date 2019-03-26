@@ -340,18 +340,12 @@ exports[`Inspector Data View component should render loading state 1`] = `
       >
         <EuiFlexGroup
           alignItems="center"
-          component="div"
-          direction="row"
-          gutterSize="l"
           justifyContent="center"
-          responsive={true}
-          wrap={false}
         >
           <div
             className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
           >
             <EuiFlexItem
-              component="div"
               grow={false}
             >
               <div
@@ -367,7 +361,6 @@ exports[`Inspector Data View component should render loading state 1`] = `
                     className="euiPanel euiPanel--paddingMedium eui-textCenter"
                   >
                     <EuiLoadingChart
-                      mono={false}
                       size="m"
                     >
                       <div

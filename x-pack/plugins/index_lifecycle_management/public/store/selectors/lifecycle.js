@@ -23,7 +23,8 @@ import {
   PHASE_FORCE_MERGE_SEGMENTS,
   PHASE_REPLICA_COUNT,
   WARM_PHASE_ON_ROLLOVER,
-  PHASE_INDEX_PRIORITY
+  PHASE_INDEX_PRIORITY,
+  PHASE_ROLLOVER_MAX_DOCUMENTS
 } from '../constants';
 import {
   getPhase,
@@ -48,6 +49,10 @@ export const maximumAgeRequiredMessage = i18n.translate('xpack.indexLifecycleMgm
 export const maximumSizeRequiredMessage =
   i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumIndexSizeMissingError', {
     defaultMessage: 'A maximum index size is required.'
+  });
+export const maximumDocumentsRequiredMessage =
+  i18n.translate('xpack.indexLifecycleMgmt.editPolicy.maximumDocumentsMissingError', {
+    defaultMessage: 'Maximum documents is required.'
   });
 export const positiveNumbersAboveZeroErrorMessage =
   i18n.translate('xpack.indexLifecycleMgmt.editPolicy.positiveNumberAboveZeroRequiredError', {
@@ -97,14 +102,18 @@ export const validatePhase = (type, phase, errors) => {
   }
   if (phase[PHASE_ROLLOVER_ENABLED]) {
     if (
-      !isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) &&
-      !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
+      !isNumber(phase[PHASE_ROLLOVER_MAX_AGE])
+      && !isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED])
+      && !isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS])
     ) {
       phaseErrors[PHASE_ROLLOVER_MAX_AGE] = [
         maximumAgeRequiredMessage
       ];
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
         maximumSizeRequiredMessage
+      ];
+      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [
+        maximumDocumentsRequiredMessage
       ];
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_AGE]) && phase[PHASE_ROLLOVER_MAX_AGE] < 1) {
@@ -114,6 +123,11 @@ export const validatePhase = (type, phase, errors) => {
     }
     if (isNumber(phase[PHASE_ROLLOVER_MAX_SIZE_STORED]) && phase[PHASE_ROLLOVER_MAX_SIZE_STORED] < 1) {
       phaseErrors[PHASE_ROLLOVER_MAX_SIZE_STORED] = [
+        positiveNumbersAboveZeroErrorMessage
+      ];
+    }
+    if (isNumber(phase[PHASE_ROLLOVER_MAX_DOCUMENTS]) && phase[PHASE_ROLLOVER_MAX_DOCUMENTS] < 1) {
+      phaseErrors[PHASE_ROLLOVER_MAX_DOCUMENTS] = [
         positiveNumbersAboveZeroErrorMessage
       ];
     }

@@ -34,6 +34,7 @@ import {
   updateDescription,
   updateHidePanelTitles,
   updateTimeRange,
+  updateRefreshConfig,
   clearStagedFilters,
   updateFilters,
   updateQuery,
@@ -148,6 +149,13 @@ export class DashboardStateManager {
     store.dispatch(updateTimeRange({
       from: FilterUtils.convertTimeToUTCString(newTimeFilter.from),
       to: FilterUtils.convertTimeToUTCString(newTimeFilter.to),
+    }));
+  }
+
+  handleRefreshConfigChange({ pause, value }) {
+    store.dispatch(updateRefreshConfig({
+      isPaused: pause,
+      interval: value,
     }));
   }
 
@@ -275,7 +283,7 @@ export class DashboardStateManager {
 
   getPanelIndexPatterns() {
     const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
-    return _.uniq(indexPatterns);
+    return _.uniq(indexPatterns, 'id');
   }
 
   /**

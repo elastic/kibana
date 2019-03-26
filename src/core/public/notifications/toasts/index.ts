@@ -18,5 +18,5 @@
  */
 
 export { ToastsService } from './toasts_service';
-export { ToastsStartContract, ToastInput } from './toasts_start_contract';
+export { ToastsSetup, ToastInput } from './toasts_start';
 export { Toast } from '@elastic/eui';

@@ -354,29 +354,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -457,17 +443,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -737,29 +717,15 @@ exports[`ilm summary extension should return extension when index has lifecycle 
       className="euiSpacer euiSpacer--m"
     />
   </EuiSpacer>
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
-  >
+  <EuiFlexGroup>
     <div
       className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl
@@ -840,17 +806,11 @@ exports[`ilm summary extension should return extension when index has lifecycle 
           </EuiDescriptionList>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <div
           className="euiFlexItem"
         >
           <EuiDescriptionList
-            align="left"
-            compressed={false}
-            textStyle="normal"
             type="column"
           >
             <dl

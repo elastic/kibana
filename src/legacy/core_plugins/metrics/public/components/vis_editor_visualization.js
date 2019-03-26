@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { get } from 'lodash';
 import { keyCodes, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
 import { getVisualizeLoader } from 'ui/visualize/loader/visualize_loader';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getInterval, convertIntervalIntoUnit, isIntervalValid, isGteInterval } from './lib/get_interval';
 
 const MIN_CHART_HEIGHT = 250;
 
@@ -30,7 +31,8 @@ class VisEditorVisualization extends Component {
     super(props);
     this.state = {
       height: MIN_CHART_HEIGHT,
-      dragging: false
+      dragging: false,
+      panelInterval: 0,
     };
 
     this.handleMouseUp = this.handleMouseUp.bind(this);
@@ -53,7 +55,7 @@ class VisEditorVisualization extends Component {
     this.handleMouseMove = (event) => {
       if (this.state.dragging) {
         this.setState((prevState) => ({
-          height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY)
+          height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY),
         }));
       }
     };
@@ -67,16 +69,16 @@ class VisEditorVisualization extends Component {
     if (this._handler) {
       this._handler.destroy();
     }
-    if(this._subscription) {
+    if (this._subscription) {
       this._subscription.unsubscribe();
     }
   }
 
   onUpdate = () => {
     this._handler.update({
-      timeRange: this.props.timeRange
+      timeRange: this.props.timeRange,
     });
-  }
+  };
 
   _loadVisualization() {
     getVisualizeLoader().then(loader => {
@@ -94,6 +96,7 @@ class VisEditorVisualization extends Component {
       });
 
       this._subscription = this._handler.data$.subscribe((data) => {
+        this.setPanelInterval(data.visData);
         this.props.onDataChange(data);
       });
 
@@ -101,6 +104,14 @@ class VisEditorVisualization extends Component {
         this.onUpdate();
       }
     });
+  }
+
+  setPanelInterval(visData) {
+    const panelInterval = getInterval(visData, this.props.model);
+
+    if (this.state.panelInterval !== panelInterval) {
+      this.setState({ panelInterval });
+    }
   }
 
   componentDidUpdate() {
@@ -115,6 +126,7 @@ class VisEditorVisualization extends Component {
   componentDidMount() {
     this._loadVisualization();
   }
+
   /**
    * Resize the chart height when pressing up/down while the drag handle
    * for resizing has the focus.
@@ -128,9 +140,37 @@ class VisEditorVisualization extends Component {
       this.setState((prevState) => {
         const newHeight = prevState.height + (keyCode === keyCodes.UP ? -15 : 15);
         return {
-          height: Math.max(MIN_CHART_HEIGHT, newHeight)
+          height: Math.max(MIN_CHART_HEIGHT, newHeight),
         };
       });
+    }
+  }
+
+  hasShowPanelIntervalValue() {
+    const type = get(this.props, 'model.type', '');
+
+    return [
+      'metric',
+      'top_n',
+      'gauge',
+      'markdown',
+      'table',
+    ].includes(type);
+  }
+
+  getFormattedPanelInterval() {
+    const interval = get(this.props, 'model.interval') || 'auto';
+    const isValid = isIntervalValid(interval);
+    const shouldShowActualInterval = interval === 'auto' || isGteInterval(interval);
+
+    if (shouldShowActualInterval || !isValid) {
+      const autoInterval = convertIntervalIntoUnit(this.state.panelInterval, false);
+
+      if (autoInterval) {
+        return `${autoInterval.unitValue}${autoInterval.unitString}`;
+      }
+    } else {
+      return interval;
     }
   }
 
@@ -140,6 +180,8 @@ class VisEditorVisualization extends Component {
     if (this.state.dragging) {
       style.userSelect = 'none';
     }
+
+    const panelInterval = this.hasShowPanelIntervalValue() && this.getFormattedPanelInterval();
 
     let applyMessage = (<FormattedMessage
       id="tsvb.visEditorVisualization.changesSuccessfullyAppliedMessage"
@@ -171,6 +213,22 @@ class VisEditorVisualization extends Component {
           />
         </EuiFlexItem>
 
+        {panelInterval &&
+        <EuiFlexItem grow={false}>
+          <EuiText color="default" size="xs">
+            <p>
+              <FormattedMessage
+                id="tsvb.visEditorVisualization.panelInterval"
+                defaultMessage="Interval: {panelInterval}"
+                values={{
+                  panelInterval: panelInterval,
+                }}
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        }
+
         <EuiFlexItem grow={false}>
           <EuiText color={dirty ? 'default' : 'subdued'} size="xs">
             <p>
@@ -180,14 +238,14 @@ class VisEditorVisualization extends Component {
         </EuiFlexItem>
 
         {!autoApply &&
-          <EuiFlexItem grow={false}>
-            <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>
-              <FormattedMessage
-                id="tsvb.visEditorVisualization.applyChangesLabel"
-                defaultMessage="Apply changes"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton iconType="play" fill size="s" onClick={this.props.onCommit} disabled={!dirty}>
+            <FormattedMessage
+              id="tsvb.visEditorVisualization.applyChangesLabel"
+              defaultMessage="Apply changes"
+            />
+          </EuiButton>
+        </EuiFlexItem>
         }
       </EuiFlexGroup>
     );
@@ -213,10 +271,10 @@ class VisEditorVisualization extends Component {
             onKeyDown={this.onSizeHandleKeyDown}
             aria-label={this.props.intl.formatMessage({
               id: 'tsvb.colorRules.adjustChartSizeAriaLabel',
-              defaultMessage: 'Press up/down to adjust the chart size'
+              defaultMessage: 'Press up/down to adjust the chart size',
             })}
           >
-            <i className="fa fa-ellipsis-h" />
+            <i className="fa fa-ellipsis-h"/>
           </button>
         </div>
       </div>

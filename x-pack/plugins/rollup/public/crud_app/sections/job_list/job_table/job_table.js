@@ -29,6 +29,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
+import { UA_SHOW_DETAILS_CLICK } from '../../../../../common';
+import { trackUserAction } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{
@@ -257,6 +259,7 @@ export class JobTableUi extends Component {
         content = (
           <EuiLink
             onClick={() => {
+              trackUserAction(UA_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >

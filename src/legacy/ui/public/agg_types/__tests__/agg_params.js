@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { AggParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';

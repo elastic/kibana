@@ -197,6 +197,7 @@ export default () => Joi.object({
         )
         .default('#cheap-source-map'),
     }),
+    workers: Joi.number().min(1),
     profile: Joi.boolean().default(false)
   }).default(),
   status: Joi.object({
@@ -249,6 +250,11 @@ export default () => Joi.object({
 
   i18n: Joi.object({
     locale: Joi.string().default('en'),
+  }).default(),
+
+  savedObjects: Joi.object({
+    maxImportPayloadBytes: Joi.number().default(10485760),
+    maxImportExportSize: Joi.number().default(10000),
   }).default(),
 
 }).default();

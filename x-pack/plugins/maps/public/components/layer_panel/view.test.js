@@ -22,14 +22,26 @@ jest.mock('./flyout_footer', () => ({
   }
 }));
 
-jest.mock('./settings_panel', () => ({
-  SettingsPanel: () => {
-    return (<div>mockSettingsPanel</div>);
+jest.mock('./layer_errors', () => ({
+  LayerErrors: () => {
+    return (<div>mockLayerErrors</div>);
+  }
+}));
+
+jest.mock('./layer_settings', () => ({
+  LayerSettings: () => {
+    return (<div>mockLayerSettings</div>);
+  }
+}));
+
+jest.mock('./source_settings', () => ({
+  SourceSettings: () => {
+    return (<div>mockSourceSettings</div>);
   }
 }));
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { LayerPanel } from './view';
 
@@ -42,7 +54,7 @@ const mockLayer = {
     ];
   },
   isJoinable: () => { return true; },
-  getLayerTypeIconName: () => { return 'vector'; }
+  getLayerTypeIconName: () => { return 'vector'; },
 };
 
 const defaultProps = {
@@ -53,7 +65,7 @@ const defaultProps = {
 
 describe('LayerPanel', () => {
   test('is rendered', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerPanel
         {...defaultProps}
       />
@@ -69,7 +81,7 @@ describe('LayerPanel', () => {
   });
 
   test('should render empty panel when selectedLayer is null', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <LayerPanel
         {...defaultProps}
         selectedLayer={undefined}

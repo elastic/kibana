@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TOCEntry } from './view';
 
@@ -30,7 +30,7 @@ const defaultProps = {
 
 describe('TOCEntry', () => {
   test('is rendered', async () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <TOCEntry
         {...defaultProps}
       />
@@ -47,7 +47,7 @@ describe('TOCEntry', () => {
 
   describe('props', () => {
     test('isReadOnly', async () => {
-      const component = shallow(
+      const component = shallowWithIntl(
         <TOCEntry
           {...defaultProps}
           isReadOnly={true}

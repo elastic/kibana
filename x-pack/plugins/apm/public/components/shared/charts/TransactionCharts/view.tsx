@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiPanel,
   EuiText,
   EuiTitle
 } from '@elastic/eui';
@@ -135,39 +136,43 @@ export class TransactionChartsView extends Component<TransactionChartProps> {
         render={hoverXHandlers => (
           <EuiFlexGrid columns={2}>
             <EuiFlexItem>
-              <ChartWrapper>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs">
-                      <span>{responseTimeLabel(transactionType)}</span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  {this.renderMLHeader()}
-                </EuiFlexGroup>
-                <CustomPlot
-                  noHits={noHits}
-                  series={responseTimeSeries}
-                  {...hoverXHandlers}
-                  tickFormatY={this.getResponseTimeTickFormatter}
-                  formatTooltipValue={this.getResponseTimeTooltipFormatter}
-                />
-              </ChartWrapper>
+              <EuiPanel>
+                <ChartWrapper>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem>
+                      <EuiTitle size="xs">
+                        <span>{responseTimeLabel(transactionType)}</span>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    {this.renderMLHeader()}
+                  </EuiFlexGroup>
+                  <CustomPlot
+                    noHits={noHits}
+                    series={responseTimeSeries}
+                    {...hoverXHandlers}
+                    tickFormatY={this.getResponseTimeTickFormatter}
+                    formatTooltipValue={this.getResponseTimeTooltipFormatter}
+                  />
+                </ChartWrapper>
+              </EuiPanel>
             </EuiFlexItem>
 
             <EuiFlexItem style={{ flexShrink: 1 }}>
-              <ChartWrapper>
-                <EuiTitle size="xs">
-                  <span>{tpmLabel(transactionType)}</span>
-                </EuiTitle>
-                <CustomPlot
-                  noHits={noHits}
-                  series={tpmSeries}
-                  {...hoverXHandlers}
-                  tickFormatY={this.getTPMFormatter}
-                  formatTooltipValue={this.getTPMTooltipFormatter}
-                  truncateLegends
-                />
-              </ChartWrapper>
+              <EuiPanel>
+                <ChartWrapper>
+                  <EuiTitle size="xs">
+                    <span>{tpmLabel(transactionType)}</span>
+                  </EuiTitle>
+                  <CustomPlot
+                    noHits={noHits}
+                    series={tpmSeries}
+                    {...hoverXHandlers}
+                    tickFormatY={this.getTPMFormatter}
+                    formatTooltipValue={this.getTPMTooltipFormatter}
+                    truncateLegends
+                  />
+                </ChartWrapper>
+              </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGrid>
         )}

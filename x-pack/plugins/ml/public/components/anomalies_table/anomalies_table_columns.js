@@ -67,7 +67,8 @@ export function getColumns(
   showRuleEditorFlyout,
   itemIdToExpandedRowMap,
   toggleRow,
-  filter) {
+  filter,
+  influencerFilter) {
 
   const columns = [
     {
@@ -153,6 +154,7 @@ export function getColumns(
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
           influencers={influencers}
+          influencerFilter={influencerFilter}
         />
       ),
       textOnly: true,
@@ -171,7 +173,7 @@ export function getColumns(
       }),
       render: (actual, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.actual, item.source.function, fieldFormat);
+        return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
       sortable: true
     });
@@ -185,7 +187,7 @@ export function getColumns(
       }),
       render: (typical, item) => {
         const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
-        return formatValue(item.typical, item.source.function, fieldFormat);
+        return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
       sortable: true
     });

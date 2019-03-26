@@ -49,5 +49,5 @@ export function lintFiles(log, files) {
   }
 
   log.error(cli.getFormatter()(report.results));
-  throw createFailError(`[eslint] ${failTypes.join(' & ')}`, 1);
+  throw createFailError(`[eslint] ${failTypes.join(' & ')}`);
 }

@@ -23,16 +23,17 @@ import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+jest.mock('../../../../package.json', () => mockPackage);
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 
 import { ConfigService, Env, ObjectToConfigAdapter } from '.';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { getEnvOptions } from './__mocks__/env';
 
 const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
+const logger = loggingServiceMock.create();
 
 test('returns config at path as observable', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'foo' }));

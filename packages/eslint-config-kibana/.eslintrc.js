@@ -18,7 +18,7 @@ module.exports = {
 
   settings: {
     react: {
-      version: semver.coerce(PKG.dependencies.react),
+      version: semver.valid(semver.coerce(PKG.dependencies.react)),
     },
   },
 
@@ -100,6 +100,7 @@ module.exports = {
     strict: [ 'error', 'never' ],
     'valid-typeof': 'error',
     'wrap-iife': [ 'error', 'outside' ],
+    'eol-last': ['error', 'always'],
     yoda: 'off',
 
     'object-curly-spacing': 'off', // overridden with babel/object-curly-spacing
@@ -150,7 +151,7 @@ module.exports = {
     'jsx-a11y/role-supports-aria-props': 'error',
     'jsx-a11y/scope': 'error',
     'jsx-a11y/tabindex-no-positive': 'error',
-    'jsx-a11y/label-has-associated-control': 'error',  
+    'jsx-a11y/label-has-associated-control': 'error',
     'react/jsx-equals-spacing': ['error', 'never'],
     'react/jsx-indent': ['error', 2],
     'react/no-will-update-set-state': 'error',

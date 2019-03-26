@@ -6,10 +6,12 @@
 
 import { InfraSourceConfiguration, UpdateSourceInput } from './graphql/types';
 
-export const convertChangeToUpdater = (change: UpdateSourceInput) => (
-  configuration: InfraSourceConfiguration
-): InfraSourceConfiguration => {
-  const updaters: Array<(c: InfraSourceConfiguration) => InfraSourceConfiguration> = [
+export const convertChangeToUpdater = (change: UpdateSourceInput) => <
+  C extends InfraSourceConfiguration
+>(
+  configuration: C
+): C => {
+  const updaters: Array<(c: C) => C> = [
     c => (change.setName ? { ...c, name: change.setName.name } : c),
     c => (change.setDescription ? { ...c, description: change.setDescription.description } : c),
     c =>
@@ -27,6 +29,7 @@ export const convertChangeToUpdater = (change: UpdateSourceInput) => (
             fields: {
               container: defaultTo(c.fields.container, change.setFields.container),
               host: defaultTo(c.fields.host, change.setFields.host),
+              message: c.fields.message,
               pod: defaultTo(c.fields.pod, change.setFields.pod),
               tiebreaker: defaultTo(c.fields.tiebreaker, change.setFields.tiebreaker),
               timestamp: defaultTo(c.fields.timestamp, change.setFields.timestamp),
