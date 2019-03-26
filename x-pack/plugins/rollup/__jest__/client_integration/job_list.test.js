@@ -114,7 +114,7 @@ describe('<JobList />', () => {
       expect(exists('rollupJobDetailFlyout')).toBe(true);
     });
 
-    test('should add the Job id to the route query params when opening the detail panel', async () => {
+    test('should add the Job id to the route query params when opening the detail panel', () => {
       const { rows } = getMetadataFromEuiTable('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');
 
