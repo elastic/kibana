@@ -11,21 +11,18 @@ removes encrypted attributes from being exposed through regular means.
 
 # Basic example
 
-Registering a type with the encryptedAttributes plugin
+Registering a type with the `savedObjectAttributeCrypto` plugin
 
 ```JS
-server.plugins.encryptedAttributes.registerType('action', ['secretParams']);
+server.plugins.savedObjectAttributeCrypto.registerType('action', ['secretParams']);
 ```
 
 Retrieve a method that would receive the decrypted attributes.
 
 ```JS
-const actionMethod = server.plugins.encryptedAttributes.buildDecryptionContext(id, type, (savedObject) => {
-  const { username, password } = savedObject.secretsParams;
-  ... // do integration with third party
-});
-... // later
-actionMethod(); // retrieve, decrypt, and invoke above method
+const fullObject = await server.plugins.savedObjectAttributeCrypto.get(it, type);
+
+const { username, password } = fullObject.secretsParams;
 ```
 
 # Motivation
@@ -44,7 +41,7 @@ wrapper around the client that would encrypt the registered attributes and
 remove any secret attributes on saved objects returned by the wrapped client.
 
 ```JS
-server.plugins.encryptedAttributes.registerType('action', ['secretParams']);
+server.plugins.savedObjectAttributeCrypto.registerType('action', ['secretParams']);
 ```
 
 If the wrapper gets a request to create, or update a registered type.
@@ -91,12 +88,9 @@ decrypted attributes then return an invokable method that would perform the
 retrieval of the saved object the decryption and invoking of the desired method.
 
 ```JS
-const actionMethod = server.plugins.encryptedAttributes.buildDecryptionContext(id, type, (savedObject) => {
-  const { username, password } = savedObject.secretsParams;
-  ... // do integration with third party
-});
-... // later
-actionMethod(); // retrieve, decrypt, and invoke above method
+const fullObject = await server.plugins.savedObjectAttributeCrypto.get(it, type);
+
+const { username, password } = fullObject.secretsParams;
 ```
 
 ## Benefits
@@ -130,7 +124,7 @@ the desired decryption contexts.
 
 # How we teach this
 
-`encryptedAttributes` as the name of the `thing` where it's seen as a separate
+`savedObjectAttributeCrypto` as the name of the `thing` where it's seen as a separate
 extension on top of the saved object service.
 
 Provide a readme.md in the plugin directory with examples for how to depend on
@@ -138,7 +132,7 @@ the plugin and define a type has hidden attributes.
 
 # Unresolved questions
 
-- Is `encryptedAttributes` an acceptable name for the plugin
+- Is `savedObjectAttributeCrypto` an acceptable name for the plugin
 - Is building a method that receives the object with the decrypted attributes
   make sense?
 - Are there other use-cases that are not served with that interface?
