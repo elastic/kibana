@@ -25,7 +25,7 @@ const mapDispatchToProps = (dispatch, { element }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { resolvedArg, selectedPage } = stateProps;
   const { element, restProps } = ownProps;
-  const { id, transformMatrix, width, height } = element;
+  const { id, transformMatrix, width, height, expression, filter } = element;
 
   return {
     selectedPage,
@@ -34,6 +34,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     transformMatrix,
     width,
     height,
+    expression,
+    filter,
     state: getState(resolvedArg),
     error: getError(resolvedArg),
     renderable: getValue(resolvedArg),
@@ -59,5 +61,9 @@ ElementWrapper.propTypes = {
     transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    // sometimes we get a shape, which lacks an expression
+    // so element properties can not be marked as required
+    expression: PropTypes.string,
+    filter: PropTypes.string,
   }).isRequired,
 };

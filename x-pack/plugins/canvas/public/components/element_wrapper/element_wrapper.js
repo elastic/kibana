@@ -15,16 +15,27 @@ export class ElementWrapper extends React.PureComponent {
     transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    state: PropTypes.string,
     createHandlers: PropTypes.func.isRequired,
+    state: PropTypes.string,
+    expression: PropTypes.string,
   };
 
   constructor(props) {
     super(props);
-    this._handlers = props.createHandlers(props.selectedPage);
+    this._handlers = null;
+    this.createHandlers();
   }
 
-  _handlers = null;
+  componentDidUpdate(nextProps) {
+    if (nextProps.expression !== this.props.expression) {
+      this.createHandlers();
+    }
+  }
+
+  createHandlers() {
+    console.log('wrapper createHandlers');
+    this._handlers = this.props.createHandlers(this.props.selectedPage);
+  }
 
   render() {
     const { renderable, transformMatrix, width, height, state } = this.props;
