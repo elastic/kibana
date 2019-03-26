@@ -91,14 +91,12 @@ function extendRecentlyAccessedHistoryItem(
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
-    const objectTypeForAriaAppendix = navLink ? navLink.title : '';
-    const translateKey = navLink.id.replace('kibana:', '');
-    const translateId = `common.ui.recentLinks.${translateKey}.ScreenReaderLabel`;
-    titleAndAriaLabel = i18n.translate(translateId, {
-      defaultMessage: '{label}, type: {objectType}',
+    const objectTypeForAriaAppendix = navLink.title;
+    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.ScreenReaderLabel', {
+      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
       values: {
-        label: recentlyAccessed.label,
-        objectType: objectTypeForAriaAppendix,
+        recentlyAccessedItemLinklabel: recentlyAccessed.label,
+        pageType: objectTypeForAriaAppendix,
       },
     });
   }
@@ -107,7 +105,7 @@ function extendRecentlyAccessedHistoryItem(
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
-    titleAndAriaLabel,
+    title: titleAndAriaLabel,
   };
 }
 
@@ -264,8 +262,8 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            title: item.titleAndAriaLabel,
-            'aria-label': item.titleAndAriaLabel,
+            title: item.title,
+            'aria-label': item.title,
             href: item.href,
             iconType: item.euiIconType,
           })),
