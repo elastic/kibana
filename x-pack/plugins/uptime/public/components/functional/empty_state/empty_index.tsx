@@ -16,7 +16,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 
-export const EmptyIndex = () => (
+interface EmptyIndexProps {
+  basePath: string;
+}
+
+export const EmptyIndex = ({ basePath }: EmptyIndexProps) => (
   <EuiFlexGroup justifyContent="center">
     <EuiFlexItem grow={false}>
       <EuiSpacer size="xs" />
@@ -43,7 +47,7 @@ export const EmptyIndex = () => (
                     configureHeartbeatLink: (
                       <EuiLink
                         target="_blank"
-                        href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuring-howto-heartbeat.html"
+                        href={`${basePath}/app/kibana#/home/tutorial/uptimeMonitors`}
                       >
                         <FormattedMessage
                           id="xpack.uptime.emptyState.configureHeartbeatLinkText"

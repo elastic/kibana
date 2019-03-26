@@ -16,9 +16,15 @@ import {
   MonitorListQuery,
   SnapshotQuery,
 } from '../components/queries';
+import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeCommonProps } from '../uptime_app';
 
-type Props = UptimeCommonProps;
+interface OverviewPageProps {
+  basePath: string;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
+}
+
+type Props = OverviewPageProps & UptimeCommonProps;
 
 interface OverviewPageState {
   currentFilterObj?: object;

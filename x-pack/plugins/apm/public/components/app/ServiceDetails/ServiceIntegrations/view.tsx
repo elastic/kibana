@@ -22,9 +22,7 @@ import { WatcherFlyout } from './WatcherFlyout';
 export interface ServiceIntegrationProps {
   mlAvailable: boolean;
   location: Location;
-  serviceDetails: {
-    types: string[];
-  };
+  transactionTypes: string[];
   urlParams: IUrlParams;
 }
 interface ServiceIntegrationState {
@@ -171,7 +169,7 @@ export class ServiceIntegrationsView extends React.Component<
           isOpen={this.state.activeFlyout === 'ML'}
           onClose={this.closeFlyouts}
           urlParams={this.props.urlParams}
-          serviceTransactionTypes={this.props.serviceDetails.types}
+          serviceTransactionTypes={this.props.transactionTypes}
         />
         <WatcherFlyout
           location={this.props.location}

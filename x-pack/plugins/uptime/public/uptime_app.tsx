@@ -61,6 +61,8 @@ export interface UptimePersistedState {
 }
 
 export interface UptimeAppProps {
+  // TODO: if we add a context to the Uptime UI, this should be included in it
+  basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
   initialDateRangeStart: string;
@@ -71,6 +73,7 @@ export interface UptimeAppProps {
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
+  renderGlobalHelpControls(): void;
 }
 
 type RefreshListener = () => void;
@@ -146,8 +149,12 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
     this.setBreadcrumbs([overviewBreadcrumb]);
   }
 
+  public componentDidMount() {
+    this.props.renderGlobalHelpControls();
+  }
+
   public render() {
-    const { routerBasename, client } = this.props;
+    const { basePath, routerBasename, client } = this.props;
     return (
       <I18nContext>
         <Router basename={routerBasename}>
@@ -201,6 +208,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                     path="/"
                     render={props => (
                       <OverviewPage
+                        basePath={basePath}
                         {...props}
                         {...this.props}
                         {...this.state}

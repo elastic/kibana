@@ -21,15 +21,17 @@ interface EmptyStateQueryResult {
 }
 
 interface EmptyStateProps {
+  basePath: string;
   children: JSX.Element[];
 }
 
 type Props = EmptyStateProps & UptimeCommonProps & UptimeGraphQLQueryProps<EmptyStateQueryResult>;
 
-export const makeEmptyStateQuery = ({ children, data, errors, loading }: Props) => {
+export const makeEmptyStateQuery = ({ basePath, children, data, errors, loading }: Props) => {
   const count = get(data, 'getDocCount.count', 0);
   return (
     <EmptyState
+      basePath={basePath}
       children={children}
       count={count}
       error={formatUptimeGraphQLErrorList(errors || [])}
