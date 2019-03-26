@@ -185,6 +185,7 @@ export class TOCEntry extends React.Component {
             cloneLayer={() => {
               cloneLayer(layer.getId());
             }}
+            isReadOnly={this.props.isReadOnly}
           />
         </EuiFlexItem>
         <EuiFlexItem>
