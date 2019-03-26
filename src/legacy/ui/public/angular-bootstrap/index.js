@@ -22,19 +22,15 @@ uiModules.get('kibana', [
  */
 angular.module('ui.bootstrap', [
   'ui.bootstrap.bindHtml',
-  'ui.bootstrap.position',
   'ui.bootstrap.modal',
-  'ui.bootstrap.pagination',
   'ui.bootstrap.tooltip',
   'ui.bootstrap.timepicker',
 ]);
 
 import './bindHtml/bindHtml';
 import './modal/modal';
-import './pagination/pagination';
-import './position/position';
-import './timepicker/timepicker';
 import './tooltip/tooltip';
+import './transition/transition';
 
 import backdrop from './modal/backdrop.html';
 
@@ -48,33 +44,14 @@ angular.module('template/modal/window.html', []).run(['$templateCache', function
   $templateCache.put('template/modal/window.html', modal);
 }]);
 
-import pager from './pagination/pager.html';
+import tooltipUnsafePopup from './tooltip/tooltip-html-unsafe-popup.html';	
 
-angular.module('template/pagination/pager.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/pagination/pager.html', pager);
+angular.module('template/tooltip/tooltip-html-unsafe-popup.html', []).run(['$templateCache', function($templateCache) {	
+ $templateCache.put('template/tooltip/tooltip-html-unsafe-popup.html', tooltipUnsafePopup);	
+}]);	
+
+import tooltipPopup from './tooltip/tooltip-popup.html';	
+
+angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {	
+ $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);	
 }]);
-
-import pagination from './pagination/pagination.html';
-
-angular.module('template/pagination/pagination.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/pagination/pagination.html', pagination);
-}]);
-
-import tooltipUnsafePopup from './tooltip/tooltip-html-unsafe-popup.html';
-
-angular.module('template/tooltip/tooltip-html-unsafe-popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tooltip/tooltip-html-unsafe-popup.html', tooltipUnsafePopup);
-}]);
-
-import tooltipPopup from './tooltip/tooltip-popup.html';
-
-angular.module('template/tooltip/tooltip-popup.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/tooltip/tooltip-popup.html', tooltipPopup);
-}]);
-
-import timepicker from './timepicker/timepicker.html';
-
-angular.module('template/timepicker/timepicker.html', []).run(['$templateCache', function($templateCache) {
-  $templateCache.put('template/timepicker/timepicker.html', timepicker);
-}]);
-

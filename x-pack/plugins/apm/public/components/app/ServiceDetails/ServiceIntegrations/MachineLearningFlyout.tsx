@@ -54,10 +54,17 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     hasMLJob: false,
     selectedTransactionType: this.props.urlParams.transactionType
   };
+  public willUnmount = false;
+
+  public componentWillUnmount() {
+    this.willUnmount = true;
+  }
 
   public async componentDidMount() {
     const indexPattern = await getAPMIndexPattern();
-    this.setState({ hasIndexPattern: !!indexPattern });
+    if (!this.willUnmount) {
+      this.setState({ hasIndexPattern: !!indexPattern });
+    }
   }
 
   // TODO: This should use `getDerivedStateFromProps`
