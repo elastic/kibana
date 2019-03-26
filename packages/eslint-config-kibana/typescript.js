@@ -70,8 +70,18 @@ module.exports = {
           '@typescript-eslint/array-type': ['error', 'array-simple'],
           '@typescript-eslint/ban-types': 'error',
           'camelcase': 'off',
-          // '@typescript-eslint/camelcase': 'error',
+          // TODO: still failing in ~8 different files and it doesn't offer
+          //  the configuration we need in order to get it working there.
+          //  Im thinking about disabling the rule on those files with
+          //  in-file comments.
+          '@typescript-eslint/camelcase': ['error', {
+            'properties': 'never',
+            'ignoreDestructuring': true
+          }],
           '@typescript-eslint/class-name-casing': 'error',
+          // TODO: disable this rule until a PR with more options to configure
+          //       get merged and we can then reproduce the old behaviour
+          // https://github.com/typescript-eslint/typescript-eslint/pull/322
           // '@typescript-eslint/explicit-member-accessibility': 'error',
           'indent': 'off',
           '@typescript-eslint/indent': [ 'error', 2, { SwitchCase: 1 } ],
@@ -85,9 +95,10 @@ module.exports = {
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/no-triple-slash-reference': 'error',
-          // '@typescript-eslint/no-var-requires': 'error', // can't reproduce tslint behaviour
+          // TODO: I'm thinking about not including this one
+          // '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/type-annotation-spacing': 'error',
-          // '@typescript-eslint/unified-signatures': 'error',
+          '@typescript-eslint/unified-signatures': 'error',
           'arrow-body-style': 'error',
           'arrow-parens': 'error',
           'comma-dangle': ['error', 'always-multiline'],
@@ -97,12 +108,14 @@ module.exports = {
           'eol-last': 'error',
           'eqeqeq': ['error', 'always', {'null': 'ignore'}],
           'guard-for-in': 'error',
-          'import/order': ['error', {
-            'groups': [
-              ['external', 'builtin'],
-              'internal',
-            ]
-          }],
+          // TODO: this should be replaced by a custom rule as this plugin
+          //       don't identify individual groups
+          // 'import/order': ['error', {
+          //   'groups': [
+          //     ['external', 'builtin'],
+          //     'internal'
+          //   ],
+          // }],
           'max-classes-per-file': ['error', 1],
           'max-len': [ 'error', { code: 120, ignoreComments: true, ignoreUrls: true } ],
           'new-parens': 'error',
@@ -125,6 +138,9 @@ module.exports = {
           'no-var': 'error',
           'object-curly-spacing': 'error',
           'object-shorthand': 'error',
+          // TODO: Those 2 rules are not working. The first one reports a lot of errors
+          //  in a bunch of a different files. The second one still output errors in a lot
+          //  of cases too. I'm thinking about removing them.
           // 'one-var': 'error', // can't reproduce tslint behaviour
           // 'prefer-arrow/prefer-arrow-functions': [ 'error', { "singleReturnOnly": true } ], // can't reproduce tslint behaviour
           'prefer-const': 'error',
@@ -132,7 +148,11 @@ module.exports = {
           'quote-props': ['error', 'consistent-as-needed'],
           'radix': 'error',
           'semi': 'error',
-          // 'sort-keys': 'error',
+          // TODO: It is not working at all, I'm just thinking about disabling it at all
+          // 'sort-keys': ['error', 'asc', {
+          //   'caseSensitive': false,
+          //   'natural': true
+          // }],
           'space-before-function-paren': ['error', {
             'anonymous': 'never',
             'named': 'never',
