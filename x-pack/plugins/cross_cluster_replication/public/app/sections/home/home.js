@@ -73,7 +73,7 @@ export class CrossClusterReplicationHome extends PureComponent {
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross Cluster Replication"
+                defaultMessage="Cross-Cluster Replication"
               />
             </h1>
           </EuiTitle>
