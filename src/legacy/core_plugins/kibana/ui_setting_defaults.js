@@ -323,8 +323,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When set to false, all filters are applied to all visualizations. ' +
-          'When set to true, filter(s) will be ignored for a visualization ' +
+          'When disabled, all filters are applied to all visualizations. ' +
+          'When enabled, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
