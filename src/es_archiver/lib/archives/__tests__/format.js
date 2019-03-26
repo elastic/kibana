@@ -20,7 +20,7 @@
 import Stream from 'stream';
 import { createGunzip } from 'zlib';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import {
   createListStream,

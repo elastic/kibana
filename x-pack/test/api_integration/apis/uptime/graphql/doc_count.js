@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getDocCountQueryString } from '../../../../../plugins/uptime/public/components/queries/empty_state/get_doc_count';
 import docCount from './fixtures/doc_count';
 
