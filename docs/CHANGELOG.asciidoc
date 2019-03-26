@@ -90,8 +90,6 @@ This section summarizes the changes in each release.
 [[release-notes-6.7.0]]
 == {kib} 6.7.0
 
-coming[6.7.0]
-
 
 [float]
 [[breaking-6.7.0]]
