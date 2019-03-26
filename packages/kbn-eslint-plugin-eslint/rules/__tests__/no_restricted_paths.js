@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable-line @kbn/eslint/require-license-header */
 /*
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.
@@ -192,6 +192,23 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
               from: resolve('./no_restricted_paths/server'),
             },
           ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "../server/b.js" imported in restricted zone.',
+          line: 1,
+          column: 19,
+        },
+      ],
+    },
+    {
+      code: 'const b = require("../server/b.js")',
+      filename: resolve('./no_restricted_paths/client/a.js'),
+      options: [
+        {
+          zones: [{ target: './client', from: './server' }],
+          basePath: resolve('./no_restricted_paths'),
         },
       ],
       errors: [

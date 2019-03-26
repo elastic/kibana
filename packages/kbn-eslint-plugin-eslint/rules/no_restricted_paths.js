@@ -1,4 +1,4 @@
-/* eslint-disable @kbn/eslint/require-license-header */
+/* eslint-disable-line @kbn/eslint/require-license-header */
 /* @notice
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.
@@ -84,6 +84,7 @@ module.exports = {
               additionalProperties: false,
             },
           },
+          basePath: { type: 'string' },
         },
         additionalProperties: false,
       },
@@ -97,7 +98,7 @@ module.exports = {
   create(context) {
     const options = context.options[0] || {};
     const zones = options.zones || [];
-    const basePath = process.cwd();
+    const basePath = options.basePath || process.cwd();
     const currentFilename = context.getFilename();
     const matchingZones = zones.filter(zone => {
       const targetPath = path.resolve(basePath, zone.target);
