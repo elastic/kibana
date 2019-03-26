@@ -16,7 +16,8 @@ describe('MonitorList component', () => {
     monitorResult = {
       monitors: [
         {
-          id: { key: 'auto-http-0X131221E73F825974', url: 'https://www.google.com/' },
+          id: 'auto-http-0X131221E73F825974',
+          url: { full: 'https://www.google.com/' },
           ping: {
             timestamp: '2019-01-28T18:43:15.077Z',
             monitor: {
@@ -58,7 +59,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0X3675F89EF0612091', url: 'http://localhost:12349/' },
+          id: 'auto-http-0X3675F89EF0612091',
+          url: { full: 'http://localhost:12349/' },
           ping: {
             timestamp: '2019-01-28T18:43:15.077Z',
             monitor: {
@@ -100,7 +102,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0X970CBD2F2102BFA8', url: 'http://www.google.com/' },
+          id: 'auto-http-0X970CBD2F2102BFA8',
+          url: { full: 'http://www.google.com/' },
           ping: {
             timestamp: '2019-01-28T18:43:15.077Z',
             monitor: {
@@ -142,7 +145,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0X9CB71300ABD5A2A8', url: 'https://www.github.com/' },
+          id: 'auto-http-0X9CB71300ABD5A2A8',
+          url: { full: 'https://www.github.com/' },
           ping: {
             timestamp: '2019-01-28T18:43:15.077Z',
             monitor: {
@@ -184,7 +188,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0XA8096548ECEB85B7', url: 'http://www.example.com/' },
+          id: 'auto-http-0XA8096548ECEB85B7',
+          url: { full: 'http://www.example.com/' },
           ping: {
             timestamp: '2019-01-28T18:43:07.078Z',
             monitor: {
@@ -226,7 +231,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0XC9CDA429418EDC2B', url: 'https://www.wikipedia.org/' },
+          id: 'auto-http-0XC9CDA429418EDC2B',
+          url: { full: 'https://www.wikipedia.org/' },
           ping: {
             timestamp: '2019-01-28T18:42:55.074Z',
             monitor: {
@@ -268,7 +274,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0XD9AE729FC1C1E04A', url: 'http://www.reddit.com/' },
+          id: 'auto-http-0XD9AE729FC1C1E04A',
+          url: { full: 'http://www.reddit.com/' },
           ping: {
             timestamp: '2019-01-28T18:43:13.074Z',
             monitor: {
@@ -310,7 +317,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0XDD2D4E60FD4A61C3', url: 'https://www.elastic.co' },
+          id: 'auto-http-0XDD2D4E60FD4A61C3',
+          url: { full: 'https://www.elastic.co' },
           ping: {
             timestamp: '2019-01-28T18:43:13.074Z',
             monitor: {
@@ -352,7 +360,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-http-0XE3B163481423197D', url: 'https://news.google.com/' },
+          id: 'auto-http-0XE3B163481423197D',
+          url: { full: 'https://news.google.com/' },
           ping: {
             timestamp: '2019-01-28T18:42:55.074Z',
             monitor: {
@@ -394,7 +403,8 @@ describe('MonitorList component', () => {
           ],
         },
         {
-          id: { key: 'auto-tcp-0X81440A68E839814C', url: 'tcp://localhost:9200' },
+          id: 'auto-tcp-0X81440A68E839814C',
+          url: { full: 'tcp://localhost:9200' },
           ping: {
             timestamp: '2019-01-28T18:43:16.078Z',
             monitor: {
