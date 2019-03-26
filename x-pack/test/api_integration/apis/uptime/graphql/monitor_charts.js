@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getMonitorChartsQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_charts/get_monitor_charts';
 import monitorCharts from './fixtures/monitor_charts';
 import monitorChartsEmptySet from './fixtures/monitor_charts_empty_set';

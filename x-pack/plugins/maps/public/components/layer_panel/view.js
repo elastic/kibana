@@ -10,7 +10,9 @@ import { StyleTabs } from './style_tabs';
 import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
-import { SettingsPanel } from './settings_panel';
+import { LayerErrors } from './layer_errors';
+import { LayerSettings } from './layer_settings';
+import { SourceSettings } from './source_settings';
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -191,11 +193,19 @@ export class LayerPanel extends React.Component {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody className="mapLayerPanel__body">
-          <SettingsPanel/>
-          <EuiSpacer size="s" />
+
+          <LayerErrors/>
+
+          <LayerSettings/>
+
+          <SourceSettings/>
+
           {this._renderFilterSection()}
+
           {this._renderJoinSection()}
+
           <StyleTabs layer={selectedLayer}/>
+
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">

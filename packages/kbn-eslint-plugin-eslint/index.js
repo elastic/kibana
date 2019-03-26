@@ -22,5 +22,6 @@ module.exports = {
     'require-license-header': require('./rules/require_license_header'),
     'disallow-license-headers': require('./rules/disallow_license_headers'),
     'no-default-export': require('./rules/no_default_export'),
+    module_migration: require('./rules/module_migration'),
   },
 };

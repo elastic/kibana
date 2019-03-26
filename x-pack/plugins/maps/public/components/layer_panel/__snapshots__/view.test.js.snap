@@ -82,10 +82,9 @@ exports[`LayerPanel is rendered 1`] = `
   <EuiFlyoutBody
     className="mapLayerPanel__body"
   >
-    <SettingsPanel />
-    <EuiSpacer
-      size="s"
-    />
+    <LayerErrors />
+    <LayerSettings />
+    <SourceSettings />
     <EuiPanel
       grow={true}
       hasShadow={false}
