@@ -47,17 +47,25 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
     super();
 
     // The state's isDealying is used to prevent component updating whether the time is not over yet.
-    this.state = { isDelaying: true };
+    this.state = {
+      isDelaying: true,
+      filteredSections: [],
+      filteredOptions: [],
+
+    };
     this.delayID = null;
   }
 
   static getDerivedStateFromProps(props) {
+    /*
+      `filteredSections` contains a set of sections with it's options inside
+      while `filteredOptions` contains extracted options as a flat array.
+    */
     const filteredSections = Object.values(props.settings).map(setting => setting.map(option => option.ariaName));
     const filteredOptions = [].concat(...filteredSections);
     return {
       filteredSections,
-      filteredOptions,
-      query: props.query.text
+      filteredOptions
     };
   }
 
@@ -69,7 +77,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
       When it is reset and delaying is over as well as no new string came,
       it's ready to be rendered.
     */
-    const needsReset = nextState.query !== this.state.query;
+    const needsReset = nextProps.query.text !== this.props.query.text;
     this.resetDelayOffTiming(needsReset);
     return !nextState.isDelaying && !needsReset;
   };
@@ -92,7 +100,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
   };
 
   render() {
-    if (this.state.query === '') {
+    if (this.props.query.text === '') {
       return null;
     }
     return (
@@ -104,7 +112,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
               There {optionLenght, plural, one {is # option} other {are # options}}
               in {sectionLenght, plural, one {# section} other {# sections}}"
             values={{
-              query: this.state.query,
+              query: this.props.query.text,
               sectionLenght: this.state.filteredSections.length,
               optionLenght: this.state.filteredOptions.length
             }}
