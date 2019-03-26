@@ -44,7 +44,6 @@ import '../storage';
 import '../style_compile';
 import '../timefilter';
 import '../timepicker';
-import '../tooltip';
 import '../url';
 import '../watch_multi';
 import '../saved_objects/ui/saved_object_save_as_checkbox';

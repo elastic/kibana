@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import '../../../../directives/check_box';
 import '../../../../directives/sortable_column';
+import '../../../../directives/tooltip';
 import template from './watch_table.html';
 import 'plugins/watcher/components/watch_state_icon';
 
