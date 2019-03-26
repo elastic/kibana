@@ -3,7 +3,6 @@
 ++++
 <titleabbrev>6.7.0</titleabbrev>
 ++++
-coming[6.7.0]
 
 Each release of {kib} brings new features and product improvements. 
 Here are the highlights of the feature and user experience changes in 6.7.0.
@@ -129,7 +128,7 @@ image::images/highlights-6.7.0-logs.png[Logs app]
 This release introduces *Uptime*, which enables you to easily navigate the 
 status of your active application checks powered by 
 https://www.elastic.co/products/beats/heartbeat[Heartbeat]. See the 
-Uptime documentation for details.
+<<xpack-uptime, Uptime documentation>> for details.
 
 
 [role="screenshot"]
