@@ -810,7 +810,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       this.setState(stateUpdate);
 
-      if (selectedCells !== null || influencersFilterQuery !== undefined) {
+      if (selectedCells !== null) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -1274,7 +1274,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   <SelectInterval />
                 </EuiFormRow>
               </EuiFlexItem>
-              {anomalyChartRecords.length > 0 && (
+              {(anomalyChartRecords.length > 0 && selectedCells !== null) && (
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <EuiFormRow label="&#8203;">
                     <CheckboxShowCharts />

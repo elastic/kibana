@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { renderTemplate } from '../string_utils';
 
 describe('ML - string utils', () => {

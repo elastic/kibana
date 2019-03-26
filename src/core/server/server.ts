@@ -19,28 +19,35 @@
 
 import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
-import { ElasticsearchModule } from './elasticsearch';
-import { HttpConfig, HttpModule, HttpServiceSetup } from './http';
-import { LegacyCompatModule } from './legacy';
+import { ElasticsearchService } from './elasticsearch';
+import { HttpConfig, HttpService, HttpServiceSetup, Router } from './http';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import { PluginsModule } from './plugins';
+import { PluginsService } from './plugins';
 
 export class Server {
-  private readonly elasticsearch: ElasticsearchModule;
-  private readonly http: HttpModule;
-  private readonly plugins: PluginsModule;
-  private readonly legacy: LegacyCompatModule;
+  private readonly elasticsearch: ElasticsearchService;
+  private readonly http: HttpService;
+  private readonly plugins: PluginsService;
+  private readonly legacy: LegacyService;
   private readonly log: Logger;
 
-  constructor(configService: ConfigService, logger: LoggerFactory, private readonly env: Env) {
+  constructor(
+    private readonly configService: ConfigService,
+    logger: LoggerFactory,
+    private readonly env: Env
+  ) {
     this.log = logger.get('server');
 
-    this.http = new HttpModule(configService.atPath('server', HttpConfig), logger);
+    this.http = new HttpService(configService.atPath('server', HttpConfig), logger);
+    const router = new Router('/core');
+    router.get({ path: '/', validate: false }, async (req, res) => res.ok({ version: '0.0.1' }));
+    this.http.registerRouter(router);
 
     const core = { env, configService, logger };
-    this.plugins = new PluginsModule(core);
-    this.legacy = new LegacyCompatModule(core);
-    this.elasticsearch = new ElasticsearchModule(core);
+    this.plugins = new PluginsService(core);
+    this.legacy = new LegacyService(core);
+    this.elasticsearch = new ElasticsearchService(core);
   }
 
   public async setup() {
@@ -51,18 +58,21 @@ export class Server {
     // 2. When the process is run as dev cluster master in which case cluster manager
     // will fork a dedicated process where http service will be set up instead.
     let httpSetup: HttpServiceSetup | undefined;
-    const httpConfig = await this.http.config$.pipe(first()).toPromise();
+    const httpConfig = await this.configService
+      .atPath('server', HttpConfig)
+      .pipe(first())
+      .toPromise();
     if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpSetup = await this.http.service.setup();
+      httpSetup = await this.http.setup();
     }
 
-    const elasticsearchServiceSetup = await this.elasticsearch.service.setup();
+    const elasticsearchServiceSetup = await this.elasticsearch.setup();
 
-    const pluginsSetup = await this.plugins.service.setup({
+    const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
     });
 
-    await this.legacy.service.setup({
+    await this.legacy.setup({
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       plugins: pluginsSetup,
@@ -72,9 +82,9 @@ export class Server {
   public async stop() {
     this.log.debug('stopping server');
 
-    await this.legacy.service.stop();
-    await this.plugins.service.stop();
-    await this.elasticsearch.service.stop();
-    await this.http.service.stop();
+    await this.legacy.stop();
+    await this.plugins.stop();
+    await this.elasticsearch.stop();
+    await this.http.stop();
   }
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
