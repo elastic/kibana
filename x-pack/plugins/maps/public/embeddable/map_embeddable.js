@@ -27,11 +27,22 @@ import { getInspectorAdapters } from '../store/non_serializable_instances';
 
 export class MapEmbeddable extends Embeddable {
 
-  constructor({ savedMap, editUrl, indexPatterns = [] }) {
+  constructor({
+    onEmbeddableStateChanged,
+    embeddableConfig,
+    savedMap,
+    editUrl,
+    indexPatterns = []
+  }) {
     super({ title: savedMap.title, editUrl, indexPatterns });
 
+    this._onEmbeddableStateChanged = onEmbeddableStateChanged;
+    this._embeddableConfig = embeddableConfig;
     this._savedMap = savedMap;
     this._store = createMapStore();
+    this._unsubscribeFromStore = this._store.subscribe(() => {
+      this._handleStoreChanges();
+    });
   }
 
   getInspectorAdapters() {
@@ -73,8 +84,14 @@ export class MapEmbeddable extends Embeddable {
    */
   render(domNode, containerState) {
     this._store.dispatch(setReadOnly(true));
-    // todo get center and zoom from embeddable UI state
-    if (this._savedMap.mapStateJSON) {
+
+    if (this._embeddableConfig.mapState) {
+      this._store.dispatch(setGotoWithCenter({
+        lat: this._embeddableConfig.mapState.center.lat,
+        lon: this._embeddableConfig.mapState.center.lon,
+        zoom: this._embeddableConfig.mapState.zoom,
+      }));
+    } else if (this._savedMap.mapStateJSON) {
       const mapState = JSON.parse(this._savedMap.mapStateJSON);
       this._store.dispatch(setGotoWithCenter({
         lat: mapState.center.lat,
@@ -98,6 +115,9 @@ export class MapEmbeddable extends Embeddable {
   }
 
   destroy() {
+    if (this._unsubscribeFromStore) {
+      this._unsubscribeFromStore();
+    }
     this._savedMap.destroy();
     if (this._domNode) {
       unmountComponentAtNode(this._domNode);
@@ -110,5 +130,13 @@ export class MapEmbeddable extends Embeddable {
       timeRange: this._prevTimeRange,
       filters: this._prevFilters
     });
+  }
+
+  _handleStoreChanges() {
+    /*this._onEmbeddableStateChanged({
+      customization: {
+        test: 5
+      }
+    });*/
   }
 }

@@ -216,6 +216,8 @@ export class VisualizeEmbeddable extends Embeddable {
 
   private uiStateChangeHandler = () => {
     this.customization = this.uiState.toJSON();
-    this.onEmbeddableStateChanged(this.getEmbeddableState());
+    const embeddableState = this.getEmbeddableState();
+    console.log('embeddableState', embeddableState);
+    this.onEmbeddableStateChanged(embeddableState);
   };
 }
