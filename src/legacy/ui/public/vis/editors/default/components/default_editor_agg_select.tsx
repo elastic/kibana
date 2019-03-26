@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get } from 'lodash';
+import { get, isFunction } from 'lodash';
 import React from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -35,6 +35,7 @@ interface DefaultEditorAggSelectProps {
   isSubAggregation: boolean;
   isSelectInvalid: boolean;
   setTouched: () => void;
+  setValidity: (isValid: boolean) => void;
 }
 
 function DefaultEditorAggSelect({
@@ -46,6 +47,7 @@ function DefaultEditorAggSelect({
   isSelectInvalid,
   isSubAggregation,
   setTouched,
+  setValidity,
 }: DefaultEditorAggSelectProps) {
   const isAggTypeDefined = value && Boolean(value.title);
   const selectedOptions: ComboBoxGroupedOption[] = isAggTypeDefined
@@ -77,6 +79,10 @@ function DefaultEditorAggSelect({
       />
     </EuiLink>
   );
+
+  if (isFunction(setValidity)) {
+    setValidity(isAggTypeDefined);
+  }
 
   return (
     <EuiFormRow

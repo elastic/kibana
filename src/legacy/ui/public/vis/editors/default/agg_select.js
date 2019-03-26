@@ -31,6 +31,7 @@ uiModules
     ['aggTypeOptions', { watchDepth: 'collection' }],
     ['setValue', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isSubAggregation',
     'aggHelpLink',
@@ -51,6 +52,7 @@ uiModules
             agg-type-options="aggTypeOptions"
             is-select-invalid="isSelectInvalid"
             set-touched="setTouched"
+            set-validity="setValidity"
           ></vis-agg-select-react-wrapper>`;
       },
       link: {
@@ -60,19 +62,10 @@ uiModules
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
-          $scope.$watch('agg.type', (value, oldValue) => {
+          $scope.$watch('agg.type', (value) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
-
-            // Set value to trigger $validators calling
-            ngModelCtrl.$setViewValue(value);
-
-            // We skip the first time the listener is called
-            if (value !== oldValue) {
-              // We should set isSelectInvalid here in case the form is reseted
-              $scope.isSelectInvalid = !value;
-            }
 
             $scope.aggHelpLink = null;
             if (has($scope, 'agg.type.name')) {
@@ -93,12 +86,11 @@ uiModules
             $scope.isSelectInvalid = !$scope.paramValue;
           };
 
-          ngModelCtrl.$validators.required = (modelValue) => {
-            // The field will be marked as invalid when the value is empty and the field is untouched.
-            $scope.isSelectInvalid = ngModelCtrl.$touched && !modelValue;
-
-            // Since aggType is required field, the model and the form should become invalid when the aggregation field is set to empty.
-            return !!modelValue;
+          $scope.setValidity = (isValid) => {
+            // The field will be marked as invalid when the value is empty and the field is touched.
+            $scope.isSelectInvalid = ngModelCtrl.$touched ? !isValid : false;
+            // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
+            ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };
         }
       }
