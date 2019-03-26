@@ -19,7 +19,7 @@ interface FilterBarProps {
 const SEARCH_THRESHOLD = 2;
 
 export const FilterBar = ({
-  filterBar: { names, ports, ids, schemes },
+  filterBar: { names, ports, ids, urls, schemes },
   updateQuery,
 }: FilterBarProps) => {
   // TODO: add a factory function + type for these filter options
@@ -50,12 +50,7 @@ export const FilterBar = ({
         defaultMessage: 'ID',
       }),
       multiSelect: false,
-      options: ids
-        ? ids.map(({ key }: MonitorKey) => ({
-            value: key,
-            view: key,
-          }))
-        : [],
+      options: ids ? ids.map((id: string) => ({ value: id, view: id })) : [],
       searchThreshold: SEARCH_THRESHOLD,
     },
     {
@@ -77,7 +72,7 @@ export const FilterBar = ({
         defaultMessage: 'URL',
       }),
       multiSelect: false,
-      options: ids ? ids.map(({ url }: MonitorKey) => ({ value: url, view: url })) : [],
+      options: urls ? urls.map((url: string) => ({ value: url, view: url })) : [],
       searchThreshold: SEARCH_THRESHOLD,
     },
     {

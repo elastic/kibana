@@ -10,10 +10,8 @@ export const getFilterBarQueryString = `
 query FilterBar($dateRangeStart: String!, $dateRangeEnd: String!) {
   filterBar: getFilterBar(dateRangeStart: $dateRangeStart, dateRangeEnd: $dateRangeEnd) {
     ports
-      ids {
-        key
-        url
-      }
+      ids
+      urls
       names
       schemes
     }

@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, flatten } from 'lodash';
+import { flatten, get, set } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import {
   ErrorListItem,
   FilterBar,
   LatestMonitor,
   MonitorChart,
-  MonitorKey,
   MonitorPageTitle,
   MonitorSeriesPoint,
   Ping,
+  Url,
 } from '../../../../common/graphql/types';
 import { dropLatestBucket, getFilteredQuery, getFilteredQueryAndStatusFilter } from '../../helper';
 import { DatabaseAdapter } from '../database';
@@ -237,7 +237,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const monitors = await this.getMonitors(request, null, null, JSON.stringify(filter));
 
     return monitors.reduce((acc: { [key: string]: LatestMonitor }, monitor: LatestMonitor) => {
-      acc[monitor.id.key] = monitor;
+      const id: string = get(monitor, 'ping.monitor.id');
+      acc[id] = get(monitor, 'ping.monitor');
       return acc;
     }, {});
   }
@@ -329,12 +330,13 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       )
       .map(
         (bucket): LatestMonitor => {
-          const key: string = get(bucket, 'key.id');
-          const url: string | null = get(bucket, 'key.url', null);
+          const id: string = get(bucket, 'key.id');
+          const url: Url = get(bucket, 'key.url');
           const upSeries: MonitorSeriesPoint[] = [];
           const downSeries: MonitorSeriesPoint[] = [];
           const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);
           const ping: Ping = get(bucket, 'latest.hits.hits[0]._source');
+          const name = get(ping, 'monitor.name', null);
           const timestamp: string = get(bucket, 'latest.hits.hits[0]._source.@timestamp');
           histogramBuckets.forEach(histogramBucket => {
             const status = get(histogramBucket, 'status.buckets', []);
@@ -348,7 +350,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
             downSeries.push({ x: histogramBucket.key, y: down ? down.doc_count : null });
           });
           return {
-            id: { key, url },
+            id,
+            url,
+            name,
             ping: {
               ...ping,
               timestamp,
@@ -395,21 +399,25 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       },
     };
     const result = await this.database.search(request, params);
-    const ids: MonitorKey[] = [];
+    const ids: string[] = [];
+    const urls: string[] = [];
     const ports = new Set<number>();
     const types = new Set<string>();
     const names = new Set<string>();
 
     const hits = get(result, 'hits.hits', []);
     hits.forEach((hit: any) => {
-      const key: string = get(hit, '_source.monitor.id');
+      const id: string = get(hit, '_source.monitor.id');
       const url: string | null = get(hit, '_source.url.full', null);
       const port: number | undefined = get(hit, '_source.url.port', undefined);
       const type: string | undefined = get(hit, '_source.monitor.type', undefined);
       const name: string | null = get(hit, '_source.monitor.name', null);
 
-      if (key) {
-        ids.push({ key, url });
+      if (id) {
+        ids.push(id);
+      }
+      if (url) {
+        urls.push(url);
       }
       if (port) {
         ports.add(port);
@@ -424,6 +432,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     return {
       ids,
+      urls,
       ports: Array.from(ports),
       schemes: Array.from(types),
       names: Array.from(names),
@@ -501,8 +510,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         }
       )
     );
-    const latestmonitors = await this.getLatestMonitors(request, monitorIds);
-
+    const latestMonitors = await this.getLatestMonitors(request, monitorIds);
     const errorsList: ErrorListItem[] = [];
     buckets.forEach(
       ({
@@ -519,9 +527,11 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
           const errorMessage = get(source, 'error.message', null);
           const statusCode = get(source, 'http.response.status_code', null);
           const timestamp = get(source, '@timestamp', null);
+          const latest = latestMonitors[monitorId];
+
           errorsList.push({
             latestMessage: errorMessage,
-            latestMonitor: latestmonitors[monitorId],
+            latestMonitor: latest,
             monitorId,
             type: errorType,
             count,

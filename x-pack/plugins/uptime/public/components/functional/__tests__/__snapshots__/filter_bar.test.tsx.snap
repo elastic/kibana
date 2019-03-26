@@ -37,44 +37,104 @@ exports[`FilterBar component renders the component without errors 1`] = `
             "name": "ID",
             "options": Array [
               Object {
-                "value": "auto-tcp-0X81440A68E839814C",
-                "view": "auto-tcp-0X81440A68E839814C",
+                "value": Object {
+                  "key": "auto-tcp-0X81440A68E839814C",
+                  "url": "tcp://localhost:9200",
+                },
+                "view": Object {
+                  "key": "auto-tcp-0X81440A68E839814C",
+                  "url": "tcp://localhost:9200",
+                },
               },
               Object {
-                "value": "auto-http-0X3675F89EF0612091",
-                "view": "auto-http-0X3675F89EF0612091",
+                "value": Object {
+                  "key": "auto-http-0X3675F89EF0612091",
+                  "url": "http://localhost:12349/",
+                },
+                "view": Object {
+                  "key": "auto-http-0X3675F89EF0612091",
+                  "url": "http://localhost:12349/",
+                },
               },
               Object {
-                "value": "auto-http-0X970CBD2F2102BFA8",
-                "view": "auto-http-0X970CBD2F2102BFA8",
+                "value": Object {
+                  "key": "auto-http-0X970CBD2F2102BFA8",
+                  "url": "http://www.google.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0X970CBD2F2102BFA8",
+                  "url": "http://www.google.com/",
+                },
               },
               Object {
-                "value": "auto-http-0X131221E73F825974",
-                "view": "auto-http-0X131221E73F825974",
+                "value": Object {
+                  "key": "auto-http-0X131221E73F825974",
+                  "url": "https://www.google.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0X131221E73F825974",
+                  "url": "https://www.google.com/",
+                },
               },
               Object {
-                "value": "auto-http-0X9CB71300ABD5A2A8",
-                "view": "auto-http-0X9CB71300ABD5A2A8",
+                "value": Object {
+                  "key": "auto-http-0X9CB71300ABD5A2A8",
+                  "url": "https://www.github.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0X9CB71300ABD5A2A8",
+                  "url": "https://www.github.com/",
+                },
               },
               Object {
-                "value": "auto-http-0XD9AE729FC1C1E04A",
-                "view": "auto-http-0XD9AE729FC1C1E04A",
+                "value": Object {
+                  "key": "auto-http-0XD9AE729FC1C1E04A",
+                  "url": "http://www.reddit.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0XD9AE729FC1C1E04A",
+                  "url": "http://www.reddit.com/",
+                },
               },
               Object {
-                "value": "auto-http-0XDD2D4E60FD4A61C3",
-                "view": "auto-http-0XDD2D4E60FD4A61C3",
+                "value": Object {
+                  "key": "auto-http-0XDD2D4E60FD4A61C3",
+                  "url": "https://www.elastic.co",
+                },
+                "view": Object {
+                  "key": "auto-http-0XDD2D4E60FD4A61C3",
+                  "url": "https://www.elastic.co",
+                },
               },
               Object {
-                "value": "auto-http-0XA8096548ECEB85B7",
-                "view": "auto-http-0XA8096548ECEB85B7",
+                "value": Object {
+                  "key": "auto-http-0XA8096548ECEB85B7",
+                  "url": "http://www.example.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0XA8096548ECEB85B7",
+                  "url": "http://www.example.com/",
+                },
               },
               Object {
-                "value": "auto-http-0XC9CDA429418EDC2B",
-                "view": "auto-http-0XC9CDA429418EDC2B",
+                "value": Object {
+                  "key": "auto-http-0XC9CDA429418EDC2B",
+                  "url": "https://www.wikipedia.org/",
+                },
+                "view": Object {
+                  "key": "auto-http-0XC9CDA429418EDC2B",
+                  "url": "https://www.wikipedia.org/",
+                },
               },
               Object {
-                "value": "auto-http-0XE3B163481423197D",
-                "view": "auto-http-0XE3B163481423197D",
+                "value": Object {
+                  "key": "auto-http-0XE3B163481423197D",
+                  "url": "https://news.google.com/",
+                },
+                "view": Object {
+                  "key": "auto-http-0XE3B163481423197D",
+                  "url": "https://news.google.com/",
+                },
               },
             ],
             "searchThreshold": 2,
@@ -92,48 +152,7 @@ exports[`FilterBar component renders the component without errors 1`] = `
             "field": "url.full",
             "multiSelect": false,
             "name": "URL",
-            "options": Array [
-              Object {
-                "value": "tcp://localhost:9200",
-                "view": "tcp://localhost:9200",
-              },
-              Object {
-                "value": "http://localhost:12349/",
-                "view": "http://localhost:12349/",
-              },
-              Object {
-                "value": "http://www.google.com/",
-                "view": "http://www.google.com/",
-              },
-              Object {
-                "value": "https://www.google.com/",
-                "view": "https://www.google.com/",
-              },
-              Object {
-                "value": "https://www.github.com/",
-                "view": "https://www.github.com/",
-              },
-              Object {
-                "value": "http://www.reddit.com/",
-                "view": "http://www.reddit.com/",
-              },
-              Object {
-                "value": "https://www.elastic.co",
-                "view": "https://www.elastic.co",
-              },
-              Object {
-                "value": "http://www.example.com/",
-                "view": "http://www.example.com/",
-              },
-              Object {
-                "value": "https://www.wikipedia.org/",
-                "view": "https://www.wikipedia.org/",
-              },
-              Object {
-                "value": "https://news.google.com/",
-                "view": "https://news.google.com/",
-              },
-            ],
+            "options": Array [],
             "searchThreshold": 2,
             "type": "field_value_selection",
           },

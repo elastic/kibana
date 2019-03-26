@@ -8,7 +8,8 @@ import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
   type FilterBar {
-    ids: [MonitorKey!]
+    ids: [String!]
+    urls: [String!]
     names: [String!]
     ports: [Int!]
     schemes: [String!]
@@ -61,11 +62,6 @@ export const monitorsSchema = gql`
     durationMaxValue: Int!
   }
 
-  type MonitorKey {
-    key: String!
-    url: String
-  }
-
   type MonitorSeriesPoint {
     x: UnsignedInteger
     y: Int
@@ -92,9 +88,11 @@ export const monitorsSchema = gql`
   "Represents the latest recorded information about a monitor."
   type LatestMonitor {
     "The ID of the monitor represented by this data."
-    id: MonitorKey!
+    id: String!
     "The Name of the monitor"
-    name: String!
+    name: String
+    "The URL of the monitor"
+    url: URL!
     "Information from the latest document."
     ping: Ping
     "Buckets of recent up count status data."
@@ -109,8 +107,8 @@ export const monitorsSchema = gql`
 
   type ErrorListItem {
     latestMessage: String
-    monitorId: String
-    latestMonitor: LatestMonitor
+    monitorId: String!
+    latestMonitor: LatestMonitor!
     type: String!
     count: Int
     statusCode: String

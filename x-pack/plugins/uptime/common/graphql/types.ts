@@ -310,19 +310,17 @@ export interface LatestMonitorsResult {
 /** Represents the latest recorded information about a monitor. */
 export interface LatestMonitor {
   /** The ID of the monitor represented by this data. */
-  id: MonitorKey;
+  id: string;
+  /** The Name of the monitor */
+  name?: string | null;
+  /** The URL of the monitor */
+  url: Url;
   /** Information from the latest document. */
   ping?: Ping | null;
   /** Buckets of recent up count status data. */
   upSeries?: (MonitorSeriesPoint | null)[] | null;
   /** Buckets of recent down count status data. */
   downSeries?: (MonitorSeriesPoint | null)[] | null;
-}
-
-export interface MonitorKey {
-  key: string;
-
-  url?: string | null;
 }
 
 export interface MonitorSeriesPoint {
@@ -394,7 +392,9 @@ export interface StatusData {
 }
 
 export interface FilterBar {
-  ids?: MonitorKey[] | null;
+  ids?: string[] | null;
+
+  urls?: string[] | null;
 
   names?: string[] | null;
 
@@ -408,9 +408,9 @@ export interface FilterBar {
 export interface ErrorListItem {
   latestMessage?: string | null;
 
-  monitorId?: string | null;
+  monitorId: string;
 
-  latestMonitor?: LatestMonitor | null;
+  latestMonitor: LatestMonitor;
 
   type: string;
 

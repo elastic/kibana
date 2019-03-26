@@ -12,7 +12,7 @@ import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorListItem } from '../../../common/graphql/types';
-import { MonitorNameID } from './monitor_name_id';
+import { MonitorName } from './monitor_name';
 
 interface ErrorListProps {
   loading: boolean;
@@ -38,12 +38,14 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
             }),
           },
           {
-            field: 'monitorId',
-            name: i18n.translate('xpack.uptime.errorList.monitorIdColumnLabel', {
-              defaultMessage: 'Monitor ID',
+            field: 'ping.monitor.name',
+            name: i18n.translate('xpack.uptime.monitorList.nameLabel', {
+              defaultMessage: 'Monitor Name',
+              description: 'The non-unique logical name for a monitor.',
             }),
-            render: MonitorNameID,
-            width: '25%',
+            render: (key: string, item: ErrorListItem) => {
+              return <MonitorName id={item.latestMonitor.id} name={item.latestMonitor.name} />;
+            },
           },
           {
             field: 'count',

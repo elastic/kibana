@@ -21,6 +21,7 @@ query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: Stri
     timestamp
     latestMonitor {
       name
+      id
     }
   }
 }
