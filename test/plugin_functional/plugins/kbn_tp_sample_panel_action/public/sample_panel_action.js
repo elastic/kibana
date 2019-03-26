@@ -34,7 +34,7 @@ class SamplePanelAction extends ContextMenuAction {
     });
   }
   onClick({ embeddable }) {
-    getNewPlatform().setup.core.overlays.openFlyout(
+    getNewPlatform().start.core.overlays.openFlyout(
       <React.Fragment>
         <EuiFlyoutHeader>
           <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
