@@ -54,7 +54,6 @@ To extract the default messages from your plugin run the following command:
 
 ["source","shell"]
 -----------
-node ../../kibana/scripts/i18n_extract --include-config ./.i18nrc.json --output-dir ./translations
 node scripts/i18n_extract --output-dir ./translations --include-config ../kibana-extra/myPlugin/.i18nrc.json
 -----------
 
