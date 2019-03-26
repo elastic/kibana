@@ -26,6 +26,7 @@ exports[`rendering render matches snapshot 1`] = `
               fill={true}
               iconSide="left"
               onClick={[Function]}
+              size="m"
               type="button"
             >
               <FormattedMessage

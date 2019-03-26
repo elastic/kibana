@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../../login_attempt';

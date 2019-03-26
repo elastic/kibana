@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export const mockCreatePluginStartContext = jest.fn();
+export const mockCreatePluginSetupContext = jest.fn();
 jest.mock('./plugin_context', () => ({
-  createPluginStartContext: mockCreatePluginStartContext,
+  createPluginSetupContext: mockCreatePluginSetupContext,
 }));

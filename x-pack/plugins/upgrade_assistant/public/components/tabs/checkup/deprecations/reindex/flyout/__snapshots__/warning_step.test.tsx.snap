@@ -142,6 +142,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
           fill={true}
           iconSide="left"
           onClick={[MockFunction]}
+          size="m"
           type="button"
         >
           <FormattedMessage
