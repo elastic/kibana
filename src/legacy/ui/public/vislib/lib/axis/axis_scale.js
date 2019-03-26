@@ -179,7 +179,11 @@ export function VislibAxisScaleProvider() {
       let scaleType = scaleTypeArg || 'linear';
       if (scaleType === 'square root') scaleType = 'sqrt';
 
-      if (this.axisConfig.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
+      if (this.axisConfig.isTimeDomain()) {
+        // TODO somehow specify correct timezone here
+        // console.log(this.axisConfig.get('labels.timezone'));
+        return d3.time.scale.utc(); // allow time scale
+      }
       if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();
       if (typeof d3.scale[scaleType] !== 'function') {
         return this.throwCustomError(`Axis.getScaleType: ${scaleType} is not a function`);

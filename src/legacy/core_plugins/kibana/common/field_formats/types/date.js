@@ -52,7 +52,7 @@ export function createDateFormat(FieldFormat) {
             return '-';
           }
 
-          const date = moment(val);
+          const date = moment(val).tz(this._timeZone);
           if (date.isValid()) {
             return date.format(pattern);
           } else {

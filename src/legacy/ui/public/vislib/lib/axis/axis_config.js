@@ -20,6 +20,7 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import { SCALE_MODES } from './scale_modes';
+import { getFormat } from '../../../visualize/loader/pipeline_helpers/utilities';
 
 export function VislibLibAxisConfigProvider() {
 
@@ -116,6 +117,10 @@ export function VislibLibAxisConfigProvider() {
         if (!this._values.labels.axisFormatter) {
           this._values.labels.axisFormatter = this.data.data.xAxisFormatter || this.data.get('xAxisFormatter');
         }
+      }
+
+      if (this.isTimeDomain()) {
+        this._values.labels.timezone = getFormat(this.data.get('xAxisFormat')).param('timezone');
       }
 
       if (this.get('type') === 'value') {
