@@ -26,7 +26,7 @@ interface Props extends RouteComponentProps {
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
-export const RepositoryTableUi: React.FunctionComponent<Props> = ({
+const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
   reload,
   openRepositoryDetails,
@@ -85,8 +85,8 @@ export const RepositoryTableUi: React.FunctionComponent<Props> = ({
           ),
           icon: 'pencil',
           type: 'icon',
-          onClick: () => {
-            /* placeholder */
+          onClick: ({ name }: Repository) => {
+            history.push(`${BASE_PATH}/${section}/edit/${name}`);
           },
         },
         {

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { useAppDependencies } from '../../../../index';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
@@ -17,6 +18,7 @@ import {
   SectionError,
   SectionLoading,
 } from '../../../../components';
+import { BASE_PATH, Section } from '../../../../constants';
 import { TypeDetails } from './type_details';
 
 import {
@@ -32,12 +34,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-interface Props {
+interface Props extends RouteComponentProps {
   repositoryName: Repository['name'];
   onClose: () => void;
 }
 
-export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryName, onClose }) => {
+const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
+  repositoryName,
+  onClose,
+  history,
+}) => {
   const {
     core: {
       i18n,
@@ -46,6 +52,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
+  const section = 'repositories' as Section;
   const { error, loading, data: repository } = useRequest({
     path: `repositories/${repositoryName}`,
     method: 'get',
@@ -182,7 +189,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => {
-                    /* placeholder */
+                    history.push(`${BASE_PATH}/${section}/edit/${repositoryName}`);
                   }}
                   fill
                   color="primary"
@@ -222,3 +229,5 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({ repositoryNa
     </EuiFlyout>
   );
 };
+
+export const RepositoryDetails = withRouter(RepositoryDetailsUi);

@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
+import { RepositoryType } from './types';
 
 const PLUGIN_NAME = 'Snapshot and Restore';
 
@@ -29,3 +29,16 @@ export enum REPOSITORY_TYPES {
   azure = 'azure',
   gcs = 'gcs',
 }
+
+export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
+  REPOSITORY_TYPES.fs,
+  REPOSITORY_TYPES.url,
+  REPOSITORY_TYPES.source,
+];
+
+export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
+  'repository-s3': REPOSITORY_TYPES.s3,
+  'repository-hdfs': REPOSITORY_TYPES.hdfs,
+  'repository-azure': REPOSITORY_TYPES.azure,
+  'repository-gcs': REPOSITORY_TYPES.gcs,
+};

@@ -6,6 +6,7 @@
 
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
+  // @ts-ignore
   export const EuiCodeEditor: React.SFC<any>;
 }
 
@@ -59,6 +60,7 @@ export const DefaultDetails: React.FunctionComponent<Props> = ({
           $blockScrolling: Infinity,
         }}
         showGutter={false}
+        minLines={6}
         aria-label={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryDetails.genericSettingsDescription"

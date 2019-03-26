@@ -1,0 +1,122 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+import React, { useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import { Repository } from '../../../../common/types';
+import { RepositoryForm, SectionError, SectionLoading } from '../../components';
+import { BASE_PATH, getHomeBreadcrumb, getRepositoryAddBreadcrumb, Section } from '../../constants';
+import { useAppDependencies } from '../../index';
+import { useRequest } from '../../services/http';
+
+import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+interface MatchParams {
+  name: string;
+}
+
+interface Props extends RouteComponentProps<MatchParams> {}
+
+export const RepositoryEdit: React.FunctionComponent<Props> = ({
+  match: {
+    params: { name },
+  },
+  history,
+}) => {
+  const {
+    core: { i18n, chrome },
+    plugins: { management },
+  } = useAppDependencies();
+  const { FormattedMessage } = i18n;
+  const section = 'repositories' as Section;
+  const { error, loading, data: repository } = useRequest({
+    path: `repositories/${name}`,
+    method: 'get',
+  });
+
+  useEffect(() => {
+    chrome.breadcrumbs.set([
+      management.constants.BREADCRUMB,
+      getHomeBreadcrumb(i18n.translate),
+      getRepositoryAddBreadcrumb(i18n.translate),
+    ]);
+  }, []);
+
+  const onSave = (newRepository: Repository) => {
+    return;
+  };
+
+  const onCancel = () => {
+    history.push(`${BASE_PATH}/${section}/${name}`);
+  };
+
+  const renderLoading = () => {
+    return (
+      <SectionLoading>
+        <FormattedMessage
+          id="xpack.snapshotRestore.editRepository.loadingRepository"
+          defaultMessage="Loading repository details..."
+        />
+      </SectionLoading>
+    );
+  };
+
+  const renderError = () => {
+    const notFound = error.status === 404;
+    const errorObject = notFound
+      ? {
+          data: {
+            error: i18n.translate('xpack.snapshotRestore.editRepository.errorRepositoryNotFound', {
+              defaultMessage: `The repository '{name}' does not exist.`,
+              values: {
+                name,
+              },
+            }),
+          },
+        }
+      : error;
+    return (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.errorLoadingRepositoryTitle"
+            defaultMessage="Error loading repository details"
+          />
+        }
+        error={errorObject}
+      />
+    );
+  };
+
+  const renderContent = () => {
+    if (loading) {
+      return renderLoading();
+    }
+    if (error) {
+      return renderError();
+    }
+
+    return <RepositoryForm repository={repository} onSave={onSave} onCancel={onCancel} />;
+  };
+  return (
+    <EuiPageBody>
+      <EuiPageContent>
+        <EuiTitle size="l">
+          <h1>
+            <FormattedMessage
+              id="xpack.snapshotRestore.editRepository.title"
+              defaultMessage="Edit repository '{name}'"
+              values={{
+                name,
+              }}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        {renderContent()}
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};

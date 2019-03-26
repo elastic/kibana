@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useEffect } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import { Repository } from '../../../../common/types';
 import { RepositoryForm } from '../../components';
-import { getHomeBreadcrumb, getRepositoryAddBreadcrumb } from '../../constants';
+import { BASE_PATH, getHomeBreadcrumb, getRepositoryAddBreadcrumb, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-export const RepositoryAdd: React.FunctionComponent = () => {
+export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
     core: { i18n, chrome },
     plugins: { management },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
+  const section = 'repositories' as Section;
 
   useEffect(() => {
     chrome.breadcrumbs.set([
@@ -24,6 +27,20 @@ export const RepositoryAdd: React.FunctionComponent = () => {
       getRepositoryAddBreadcrumb(i18n.translate),
     ]);
   }, []);
+
+  const onSave = (newRepository: Repository) => {
+    return;
+  };
+
+  const onCancel = () => {
+    history.push(`${BASE_PATH}/${section}`);
+  };
+
+  const emptyRepository = {
+    name: '',
+    type: '',
+    settings: {},
+  };
 
   return (
     <EuiPageBody>
@@ -36,8 +53,8 @@ export const RepositoryAdd: React.FunctionComponent = () => {
             />
           </h1>
         </EuiTitle>
-        <EuiSpacer size="m" />
-        <RepositoryForm />
+        <EuiSpacer size="l" />
+        <RepositoryForm repository={emptyRepository} onSave={onSave} onCancel={onCancel} />
       </EuiPageContent>
     </EuiPageBody>
   );

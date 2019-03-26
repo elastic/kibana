@@ -11,6 +11,7 @@ export type S3RepositoryType = 's3';
 export type HDFSRepositoryType = 'hdfs';
 export type AzureRepositoryType = 'azure';
 export type GCSRepositoryType = 'gcs';
+export type CustomRepositoryType = string;
 
 export type RepositoryType =
   | FSRepositoryType
@@ -19,7 +20,8 @@ export type RepositoryType =
   | S3RepositoryType
   | HDFSRepositoryType
   | AzureRepositoryType
-  | GCSRepositoryType;
+  | GCSRepositoryType
+  | CustomRepositoryType;
 
 export interface FSRepository {
   name: string;
@@ -98,6 +100,14 @@ export interface GCSRepository {
   };
 }
 
+export interface CustomRepository {
+  name: string;
+  type: CustomRepositoryType;
+  settings: {
+    [key: string]: any;
+  };
+}
+
 export interface SourceRepository<T> {
   name: string;
   type: SourceRepositoryType;
@@ -125,4 +135,5 @@ export type Repository<T = null> =
   | HDFSRepository
   | AzureRepository
   | GCSRepository
-  | SourceRepository<T>;
+  | SourceRepository<T>
+  | CustomRepository;

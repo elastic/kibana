@@ -8,7 +8,7 @@ import React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 
 import { BASE_PATH } from './constants';
-import { RepositoryAdd, SnapshotRestoreHome } from './sections';
+import { RepositoryAdd, RepositoryEdit, SnapshotRestoreHome } from './sections';
 
 export const App = () => {
   return (
@@ -16,6 +16,7 @@ export const App = () => {
       <Switch>
         <Redirect exact from={`${BASE_PATH}`} to={`${BASE_PATH}/repositories`} />
         <Route exact path={`${BASE_PATH}/repositories/add`} component={RepositoryAdd} />
+        <Route exact path={`${BASE_PATH}/repositories/edit/:name`} component={RepositoryEdit} />
         <Route exact path={`${BASE_PATH}/:section/:name?`} component={SnapshotRestoreHome} />
       </Switch>
     </div>
