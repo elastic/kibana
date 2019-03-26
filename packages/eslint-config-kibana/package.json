@@ -15,15 +15,15 @@
   },
   "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
-    "babel-eslint": "^9.0.0",
-    "eslint": "^5.6.0",
-    "eslint-plugin-babel": "^5.2.0",
-    "eslint-plugin-jsx-a11y": "^6.1.2",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^21.22.1",
-    "eslint-plugin-mocha": "^5.2.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.14.1",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jest": "^22.3.0",
+    "eslint-plugin-mocha": "^5.3.0",
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "eslint-plugin-prefer-object-spread": "^1.2.1",
-    "eslint-plugin-react": "^7.11.1"
+    "eslint-plugin-react": "^7.12.4"
   }
 }

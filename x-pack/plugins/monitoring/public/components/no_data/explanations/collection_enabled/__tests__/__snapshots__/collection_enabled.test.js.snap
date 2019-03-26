@@ -113,7 +113,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
   }
   property="xpack.monitoring.collection.enabled"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -157,7 +157,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
     size="half"
   >

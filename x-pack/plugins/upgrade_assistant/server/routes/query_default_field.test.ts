@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockAddDefaultField } from './query_default_field.test.mocks';
+
 import { Server } from 'hapi';
-
-jest.mock('../lib/es_version_precheck');
-
-const mockAddDefaultField = jest.fn();
-jest.mock('../lib/query_default_field', () => ({
-  addDefaultField: mockAddDefaultField,
-}));
 
 import { registerQueryDefaultFieldRoutes } from './query_default_field';
 
