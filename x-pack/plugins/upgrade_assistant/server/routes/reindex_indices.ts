@@ -74,7 +74,12 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        server.log
+      );
 
       try {
         if (!(await reindexService.hasRequiredPrivileges(indexName))) {
@@ -118,7 +123,12 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        server.log
+      );
 
       try {
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
@@ -157,7 +167,12 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const callCluster = callWithRequest.bind(null, request) as CallCluster;
       const reindexActions = reindexActionsFactory(client, callCluster);
-      const reindexService = reindexServiceFactory(callCluster, xpackInfo, reindexActions);
+      const reindexService = reindexServiceFactory(
+        callCluster,
+        xpackInfo,
+        reindexActions,
+        server.log
+      );
 
       try {
         await reindexService.cancelReindexing(indexName);

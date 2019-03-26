@@ -6,7 +6,7 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment, { Moment } from 'moment';
+import moment, { Moment } from 'moment-timezone';
 import React from 'react';
 import styled from 'styled-components';
 

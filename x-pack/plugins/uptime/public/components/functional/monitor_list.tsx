@@ -82,7 +82,7 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
               defaultMessage: 'Host',
             }),
             render: (host: string, monitor: any) => (
-              <Link to={`/monitor/${monitor.key.id}`}>{host}</Link>
+              <Link to={`/monitor/${monitor.key.id}`}>{host || monitor.key.id}</Link>
             ),
           },
           {

@@ -49,6 +49,16 @@ run(
       );
     }
 
+    if (typeof path === 'boolean' || typeof includeConfig === 'boolean') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --path and --include-config require a value`
+      );
+    }
+
+    if (typeof fix !== 'boolean') {
+      throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
+    }
+
     const config = await mergeConfigs(includeConfig);
     const defaultMessages = await extractDefaultMessages({ path, config });
 

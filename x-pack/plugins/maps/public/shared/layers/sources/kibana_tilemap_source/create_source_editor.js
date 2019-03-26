@@ -12,12 +12,7 @@ import {
 } from '@elastic/eui';
 
 import { getKibanaTileMap } from '../../../../meta';
-
-const NO_TILEMAP_LAYER_MSG =
-  'No tilemap layer is available.' +
-  ' Ask your system administrator to set "map.tilemap.url" in kibana.yml.';
-
-
+import { i18n } from '@kbn/i18n';
 
 export class CreateSourceEditor extends Component {
 
@@ -56,8 +51,15 @@ export class CreateSourceEditor extends Component {
 
     return (
       <EuiFormRow
-        label="Tilemap url"
-        helpText={this.state.url ? null : NO_TILEMAP_LAYER_MSG}
+        label={
+          i18n.translate('xpack.maps.source.kbnTMS.kbnTMS.urlLabel', {
+            defaultMessage: 'Tilemap url'
+          })
+        }
+        helpText={this.state.url ? null : i18n.translate('xpack.maps.source.kbnTMS.noLayerAvailableHelptext', {
+          defaultMessage: 'No tilemap layer is available. Ask your system administrator to set "map.tilemap.url" in kibana.yml.'
+        })
+        }
       >
         <EuiFieldText
           readOnly

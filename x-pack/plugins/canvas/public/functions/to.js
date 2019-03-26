@@ -5,6 +5,7 @@
  */
 
 import { castProvider } from '@kbn/interpreter/common';
+import { registries } from '@kbn/interpreter/public';
 
 export const to = () => ({
   name: 'to',
@@ -19,11 +20,11 @@ export const to = () => ({
       multi: true,
     },
   },
-  fn: (context, args, { types }) => {
+  fn: (context, args) => {
     if (!args.type) {
       throw new Error('Must specify a casting type');
     }
 
-    return castProvider(types)(context, args.type);
+    return castProvider(registries.types.toJS())(context, args.type);
   },
 });

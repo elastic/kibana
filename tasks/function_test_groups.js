@@ -39,7 +39,7 @@ const TEST_TAGS = [
   'ciGroup12'
 ];
 
-export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = {}) {
+export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
   return {
     // include a run task for each test group
     ...TEST_TAGS.reduce((acc, tag) => ({
@@ -50,7 +50,6 @@ export function getFunctionalTestGroupRunConfigs({ esFrom, kibanaInstallDir } = 
           'scripts/functional_tests',
           '--include-tag', tag,
           '--config', 'test/functional/config.js',
-          '--esFrom', esFrom,
           '--bail',
           '--debug',
           '--kibana-install-dir', kibanaInstallDir,

@@ -10,12 +10,18 @@ import { GIS_API_PATH, EMS_FILE } from '../../../../../common/constants';
 import { emsServiceSettings } from '../../../../kibana_services';
 import { getEmsVectorFilesMeta } from '../../../../meta';
 import { EMSFileCreateSourceEditor } from './create_source_editor';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 export class EMSFileSource extends AbstractVectorSource {
 
   static type = EMS_FILE;
-  static title = 'Vector shapes';
-  static description = 'Vector shapes of administrative boundaries from Elastic Maps Service';
+  static title =  i18n.translate('xpack.maps.source.emsFileTitle', {
+    defaultMessage: 'Vector shapes'
+  });
+  static description = i18n.translate('xpack.maps.source.emsFileDescription', {
+    defaultMessage: 'Vector shapes of administrative boundaries from Elastic Maps Service'
+  });
   static icon = 'emsApp';
 
   static createDescriptor(id) {
@@ -42,7 +48,12 @@ export class EMSFileSource extends AbstractVectorSource {
     const emsFiles = await getEmsVectorFilesMeta();
     const meta = emsFiles.find((source => source.id === this._descriptor.id));
     if (!meta) {
-      throw new Error(`Unable to find EMS vector shapes for id: ${this._descriptor.id}`);
+      throw new Error(i18n.translate('xpack.maps.source.emsFile.unableToFindIdErrorMessage', {
+        defaultMessage: `Unable to find EMS vector shapes for id: {id}`,
+        values: {
+          id: this._descriptor.id
+        }
+      }));
     }
     return meta;
   }
@@ -63,8 +74,16 @@ export class EMSFileSource extends AbstractVectorSource {
   async getImmutableProperties() {
     const emsLink = await emsServiceSettings.getEMSHotLink({ id: this._descriptor.id });
     return [
-      { label: 'Data source', value: EMSFileSource.title },
-      { label: 'Layer', value: this._descriptor.id, link: emsLink }
+      {
+        label: getDataSourceLabel(),
+        value: EMSFileSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.emsFile.layerLabel', {
+          defaultMessage: `Layer`,
+        }),
+        value: this._descriptor.id,
+        link: emsLink }
     ];
   }
 

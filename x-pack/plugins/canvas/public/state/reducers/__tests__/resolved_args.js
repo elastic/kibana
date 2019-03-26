@@ -119,7 +119,7 @@ describe('resolved args reducer', () => {
 
   describe('clear', () => {
     it('removed resolved value at path', () => {
-      const action = actionCreator(actions.clear)({
+      const action = actionCreator(actions.clearValue)({
         path: 'element-0.1',
       });
 
@@ -135,7 +135,7 @@ describe('resolved args reducer', () => {
     });
 
     it('deeply removes resolved values', () => {
-      const action = actionCreator(actions.clear)({
+      const action = actionCreator(actions.clearValue)({
         path: 'element-0',
       });
 

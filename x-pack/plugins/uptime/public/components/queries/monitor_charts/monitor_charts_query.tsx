@@ -184,6 +184,7 @@ export class MonitorChartsQuery extends React.Component<Props, MonitorChartsStat
                           }
                         )}
                         data={downSeries}
+                        curve="curveBasis"
                         color={danger}
                       />
                     </EuiSeriesChart>

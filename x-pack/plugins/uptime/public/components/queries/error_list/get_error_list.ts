@@ -16,6 +16,7 @@ query ErrorList($dateRangeStart: String!, $dateRangeEnd: String!, $filters: Stri
     latestMessage
     monitorId
     type
+    monitorType
     count
     statusCode
     timestamp

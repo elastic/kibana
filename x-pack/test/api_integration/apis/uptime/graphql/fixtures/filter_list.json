@@ -13,6 +13,6 @@
       "http@https://www.wikipedia.org/",
       "tcp-tcp@localhost:9200"
     ],
-    "scheme": ["http", "https", "tcp"]
+    "type": ["http", "tcp"]
   }
 }

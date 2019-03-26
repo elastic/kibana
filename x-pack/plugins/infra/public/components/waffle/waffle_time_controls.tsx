@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiDatePicker, EuiFormControlLayout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment, { Moment } from 'moment';
+import moment, { Moment } from 'moment-timezone';
 import React from 'react';
 
 interface WaffleTimeControlsProps {

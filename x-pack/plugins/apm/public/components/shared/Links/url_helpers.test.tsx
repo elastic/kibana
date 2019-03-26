@@ -8,7 +8,13 @@ import { Location } from 'history';
 import url from 'url';
 // @ts-ignore
 import { toJson } from '../testHelpers';
-import { fromQuery, getKibanaHref, toQuery } from './url_helpers';
+import {
+  fromQuery,
+  getKibanaHref,
+  legacyDecodeURIComponent,
+  legacyEncodeURIComponent,
+  toQuery
+} from './url_helpers';
 
 describe('toQuery', () => {
   it('should parse string to object', () => {
@@ -73,4 +79,65 @@ describe('getKibanaHref', () => {
 function getUrlQuery(href?: string) {
   const hash = url.parse(href!).hash!.slice(1);
   return url.parse(hash, true).query;
+}
+
+describe('legacyEncodeURIComponent', () => {
+  it('should encode a string with forward slashes', () => {
+    expect(legacyEncodeURIComponent('a/b/c')).toBe('a~2Fb~2Fc');
+  });
+
+  it('should encode a string with tilde', () => {
+    expect(legacyEncodeURIComponent('a~b~c')).toBe('a~7Eb~7Ec');
+  });
+
+  it('should encode a string with spaces', () => {
+    expect(legacyEncodeURIComponent('a b c')).toBe('a~20b~20c');
+  });
+});
+
+describe('legacyDecodeURIComponent', () => {
+  ['a/b/c', 'a~b~c', 'GET /', 'foo ~ bar /'].map(input => {
+    it(`should encode and decode ${input}`, () => {
+      const converted = legacyDecodeURIComponent(
+        legacyEncodeURIComponent(input)
+      );
+      expect(converted).toBe(input);
+    });
+  });
+
+  describe('when Angular decodes forward slashes in a url', () => {
+    it('should decode value correctly', () => {
+      const transactionName = 'GET a/b/c/';
+      const encodedTransactionName = legacyEncodeURIComponent(transactionName);
+      const parsedUrl = emulateAngular(
+        `/transaction/${encodedTransactionName}`
+      );
+      const decodedTransactionName = legacyDecodeURIComponent(
+        parsedUrl.split('/')[2]
+      );
+
+      expect(decodedTransactionName).toBe(transactionName);
+    });
+
+    it('should decode value incorrectly when using vanilla encodeURIComponent', () => {
+      const transactionName = 'GET a/b/c/';
+      const encodedTransactionName = encodeURIComponent(transactionName);
+      const parsedUrl = emulateAngular(
+        `/transaction/${encodedTransactionName}`
+      );
+      const decodedTransactionName = decodeURIComponent(
+        parsedUrl.split('/')[2]
+      );
+
+      expect(decodedTransactionName).not.toBe(transactionName);
+    });
+  });
+});
+
+// Angular decodes forward slashes in path params
+function emulateAngular(input: string) {
+  return input
+    .split('/')
+    .map(pathParam => pathParam.replace(/%2F/g, '/'))
+    .join('/');
 }

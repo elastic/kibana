@@ -23,6 +23,21 @@ const EMPTY_FEATURE_COLLECTION = {
   features: []
 };
 
+
+const CLOSED_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], 'Polygon'],
+  ['==', ['geometry-type'], 'MultiPolygon']
+];
+
+const ALL_SHAPE_MB_FILTER = [
+  'any',
+  ['==', ['geometry-type'], 'Polygon'],
+  ['==', ['geometry-type'], 'MultiPolygon'],
+  ['==', ['geometry-type'], 'LineString'],
+  ['==', ['geometry-type'], 'MultiLineString']
+];
+
 export class VectorLayer extends AbstractLayer {
 
   static type = 'VECTOR';
@@ -233,28 +248,31 @@ export class VectorLayer extends AbstractLayer {
     try {
       const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
       if (canSkip) {
+        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
         return {
-          shouldJoin: false,
-          join: join
+          dataHasChanged: false,
+          join: join,
+          propertiesMap: propertiesMap
         };
       }
       startLoading(sourceDataId, requestToken, dataFilters);
       const leftSourceName = await this.getSourceName();
       const {
-        rawData,
         propertiesMap
       } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
-      stopLoading(sourceDataId, requestToken, rawData);
+      stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
-        shouldJoin: true,
+        dataHasChanged: true,
         join: join,
         propertiesMap: propertiesMap,
       };
     } catch(e) {
       onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       return {
-        shouldJoin: false,
-        join: join
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: null
       };
     }
   }
@@ -317,13 +335,19 @@ export class VectorLayer extends AbstractLayer {
   }
 
   _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
-    if (!sourceResult.refreshed && !joinState.shouldJoin) {
+    if (!sourceResult.refreshed && !joinState.dataHasChanged) {
+      //no data changes in both the source data or the join data
       return false;
     }
     if (!sourceResult.featureCollection || !joinState.propertiesMap) {
+      //no data available in source or join (ie. request is pending or data errored)
       return false;
     }
 
+    //all other cases, perform the join
+    //- source data changed but join data has not
+    //- join data changed but source data has not
+    //- both source and join data changed
     const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
       sourceResult.featureCollection,
       joinState.propertiesMap);
@@ -337,7 +361,6 @@ export class VectorLayer extends AbstractLayer {
     const hasJoined = joinStates.map(joinState => {
       return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
     });
-
     return hasJoined.some(shouldRefresh => shouldRefresh === true);
   }
 
@@ -431,13 +454,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(fillLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(fillLayerId, CLOSED_SHAPE_MB_FILTER);
     }
     if (!mbMap.getLayer(lineLayerId)) {
       mbMap.addLayer({
@@ -446,13 +463,7 @@ export class VectorLayer extends AbstractLayer {
         source: sourceId,
         paint: {}
       });
-      mbMap.setFilter(lineLayerId, [
-        'any',
-        ['==', ['geometry-type'], 'Polygon'],
-        ['==', ['geometry-type'], 'MultiPolygon'],
-        ['==', ['geometry-type'], 'LineString'],
-        ['==', ['geometry-type'], 'MultiLineString']
-      ]);
+      mbMap.setFilter(lineLayerId, ALL_SHAPE_MB_FILTER);
     }
     this._style.setMBPaintProperties({
       alpha: this.getAlpha(),
@@ -464,6 +475,7 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayoutProperty(lineLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(lineLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
     mbMap.setLayerZoomRange(fillLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._addTooltipListeners(mbMap, lineLayerId);
     this._addTooltipListeners(mbMap, fillLayerId);
   }
 
@@ -558,7 +570,18 @@ export class VectorLayer extends AbstractLayer {
         return;
       }
 
-      const features = mbMap.queryRenderedFeatures(e.point)
+      const PADDING = 2;//in pixels
+      const mbBbox = [
+        {
+          x: e.point.x - PADDING,
+          y: e.point.y - PADDING
+        },
+        {
+          x: e.point.x + PADDING,
+          y: e.point.y + PADDING
+        }
+      ];
+      const features = mbMap.queryRenderedFeatures(mbBbox)
         .filter(feature => {
           return feature.layer.source === this.getId();
         });

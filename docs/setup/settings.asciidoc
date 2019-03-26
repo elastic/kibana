@@ -121,8 +121,10 @@ queries.
 
 `kibana.defaultAppId:`:: *Default: "discover"* The default application to load.
 
-`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to store saved searches, visualizations and
-dashboards. Kibana creates a new index if the index doesn’t already exist.
+`kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
+store saved searches, visualizations and dashboards. Kibana creates a new index
+if the index doesn’t already exist. If you configure a custom index, the name must 
+be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana stores log output.
 
@@ -133,7 +135,9 @@ error messages.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage information and all requests. Supported on Elastic Cloud Enterprise.
 
-`logging.timezone`:: *Default: UTC* Set to the canonical timezone id (e.g. `US/Pacific`) to log events using that timezone.  A list of timezones can be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
+`logging.timezone`:: *Default: UTC* Set to the canonical timezone id
+(for example, `America/Los_Angeles`) to log events using that timezone. A list of timezones can
+be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 `map.includeElasticMapsService:`:: *Default: true* Turns on or off whether layers from the Elastic Maps Service should be included in the vector and tile layer option list.
 By turning this off, only the layers that are configured here will be included.

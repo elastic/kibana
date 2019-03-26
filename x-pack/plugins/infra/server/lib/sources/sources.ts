@@ -14,10 +14,12 @@ import { InfraFrameworkRequest, internalInfraFrameworkRequest } from '../adapter
 import { defaultSourceConfiguration } from './defaults';
 import { infraSourceConfigurationSavedObjectType } from './saved_object_mappings';
 import {
-  InfraSavedSourceConfigurationRuntimeType,
+  InfraSavedSourceConfiguration,
   InfraSourceConfiguration,
-  PartialInfraSourceConfiguration,
-  PartialInfraSourceConfigurationRuntimeType,
+  InfraStaticSourceConfiguration,
+  pickSavedSourceConfiguration,
+  SourceConfigurationSavedObjectRuntimeType,
+  StaticSourceConfigurationRuntimeType,
 } from './types';
 
 export class InfraSources {
@@ -71,7 +73,7 @@ export class InfraSources {
   public async createSourceConfiguration(
     request: InfraFrameworkRequest,
     sourceId: string,
-    source: PartialInfraSourceConfiguration
+    source: InfraSavedSourceConfiguration
   ) {
     const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
 
@@ -85,7 +87,7 @@ export class InfraSources {
         .getScopedSavedObjectsClient(request[internalInfraFrameworkRequest])
         .create(
           infraSourceConfigurationSavedObjectType,
-          { ...newSourceConfiguration },
+          pickSavedSourceConfiguration(newSourceConfiguration),
           { id: sourceId }
         )
     );
@@ -125,7 +127,7 @@ export class InfraSources {
         .update(
           infraSourceConfigurationSavedObjectType,
           sourceId,
-          { ...updatedConfigurationAttributes },
+          pickSavedSourceConfiguration(updatedConfigurationAttributes),
           {
             version,
           }
@@ -146,7 +148,7 @@ export class InfraSources {
     const staticSourceConfiguration = runtimeTypes
       .type({
         sources: runtimeTypes.type({
-          default: PartialInfraSourceConfigurationRuntimeType,
+          default: StaticSourceConfigurationRuntimeType,
         }),
       })
       .decode(staticConfiguration)
@@ -184,7 +186,7 @@ export class InfraSources {
 
 const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
-  ...others: PartialInfraSourceConfiguration[]
+  ...others: InfraStaticSourceConfiguration[]
 ) =>
   others.reduce<InfraSourceConfiguration>(
     (previousSourceConfiguration, currentSourceConfiguration) => ({
@@ -199,7 +201,7 @@ const mergeSourceConfiguration = (
   );
 
 const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
-  InfraSavedSourceConfigurationRuntimeType.decode(savedObject)
+  SourceConfigurationSavedObjectRuntimeType.decode(savedObject)
     .map(savedSourceConfiguration => ({
       id: savedSourceConfiguration.id,
       version: savedSourceConfiguration.version,

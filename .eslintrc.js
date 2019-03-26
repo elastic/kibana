@@ -41,10 +41,6 @@ module.exports = {
         forceNode: true,
       },
     },
-
-    react: {
-      version: '16.3',
-    },
   },
 
   rules: {

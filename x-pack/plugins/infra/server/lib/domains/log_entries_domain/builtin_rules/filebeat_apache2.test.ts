@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { getBuiltinRules } from '.';
 import { compileFormattingRules } from '../message';
-import { filebeatApache2Rules } from './filebeat_apache2';
 
-const { format } = compileFormattingRules(filebeatApache2Rules);
+const { format } = compileFormattingRules(getBuiltinRules([]));
+
 describe('Filebeat Rules', () => {
   test('Apache2 Access', () => {
     const event = {

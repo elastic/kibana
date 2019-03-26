@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { ValidatedRange } from '../../../../../components/validated_range';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_MIN_SIZE, DEFAULT_MAX_SIZE } from '../../../vector_style_defaults';
 
 export function SizeRangeSelector({ minSize, maxSize, onChange }) {
@@ -35,7 +36,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiFormRow
-          label="Min size"
+          label={
+            i18n.translate('xpack.maps.styles.vector.size.minLabel', {
+              defaultMessage: 'Min size'
+            })
+          }
           compressed
         >
           <ValidatedRange
@@ -50,7 +55,11 @@ export function SizeRangeSelector({ minSize, maxSize, onChange }) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
-          label="Max size"
+          label={
+            i18n.translate('xpack.maps.styles.vector.size.maxLabel', {
+              defaultMessage: 'Max size'
+            })
+          }
           compressed
         >
           <ValidatedRange

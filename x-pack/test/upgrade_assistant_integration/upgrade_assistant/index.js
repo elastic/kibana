@@ -8,6 +8,7 @@ export default function ({ loadTestFile }) {
   describe('upgrade assistant', function () {
     this.tags('ciGroup5');
 
+    loadTestFile(require.resolve('./query_default_field'));
     loadTestFile(require.resolve('./reindexing'));
   });
 }

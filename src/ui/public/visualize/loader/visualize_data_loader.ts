@@ -80,6 +80,12 @@ export class VisualizeDataLoader {
         typeof this.vis.params.showMetricsAtAllLevels !== 'undefined'
           ? !this.vis.params.showMetricsAtAllLevels
           : !this.vis.isHierarchical();
+
+      const filters = params.filters || [];
+      const savedFilters = params.searchSource.getField('filter') || [];
+
+      const query = params.query || params.searchSource.getField('query');
+
       // searchSource is only there for courier request handler
       const requestHandlerResponse = await this.requestHandler({
         partialRows: this.vis.type.requiresPartialRows || this.vis.params.showPartialRows,
@@ -87,9 +93,8 @@ export class VisualizeDataLoader {
         metricsAtAllLevels: this.vis.isHierarchical(),
         visParams: this.vis.params,
         ...params,
-        filters: params.filters
-          ? params.filters.filter(filter => !filter.meta.disabled)
-          : undefined,
+        query,
+        filters: filters.concat(savedFilters).filter(f => !f.meta.disabled),
       });
 
       // No need to call the response handler when there have been no data nor has been there changes

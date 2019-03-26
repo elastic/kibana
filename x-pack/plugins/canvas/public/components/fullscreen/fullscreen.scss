@@ -5,6 +5,11 @@ body.canvas-isFullscreen {
     left: 0;
   }
 
+  // hide global loading indicator
+  .kbnLoadingIndicator {
+    display: none;
+  }
+
   // set the background color
   .canvasLayout {
     background: #000; // This hex is OK, we always want it black

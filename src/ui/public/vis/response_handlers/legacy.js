@@ -40,6 +40,7 @@ const LegacyResponseHandlerProvider = function () {
 
         if (splitColumn) {
           const splitAgg = splitColumn.aggConfig;
+          const splitColumnFormatter = splitAgg.fieldFormatter('text');
           const splitMap = {};
           let splitIndex = 0;
 
@@ -52,7 +53,7 @@ const LegacyResponseHandlerProvider = function () {
               const tableGroup = {
                 $parent: converted,
                 aggConfig: splitAgg,
-                title: `${splitValue}: ${splitAgg.makeLabel()}`,
+                title: `${splitColumnFormatter(splitValue)}: ${splitAgg.makeLabel()}`,
                 key: splitValue,
                 tables: []
               };

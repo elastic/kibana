@@ -59,6 +59,40 @@
   }
 }
 
+
+{
+  "type": "doc",
+  "value": {
+    "index": "geo_shapes",
+    "type": "doc",
+    "id": "4",
+    "source": {
+      "geometry": {
+        "type": "linestring",
+        "coordinates": [
+          [
+            40,
+            5
+          ],
+          [
+            35,
+            -5
+          ],
+          [
+            45,
+            -5
+          ],
+          [
+            40,
+            5
+          ]
+        ]
+      },
+      "name": "tango"
+    }
+  }
+}
+
 {
   "type": "doc",
   "value": {

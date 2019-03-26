@@ -74,12 +74,14 @@ describe('DeprecationList', () => {
         "delete": false,
         "details": undefined,
         "index": "0",
+        "needsDefaultFields": false,
         "reindex": false,
       },
       Object {
         "delete": false,
         "details": undefined,
         "index": "1",
+        "needsDefaultFields": false,
         "reindex": false,
       },
     ]

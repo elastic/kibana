@@ -10,7 +10,6 @@ import { StyleTabs } from './style_tabs';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { SettingsPanel } from './settings_panel';
-
 import {
   EuiButtonIcon,
   EuiFlexItem,
@@ -25,6 +24,9 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class LayerPanel extends React.Component {
 
@@ -41,7 +43,7 @@ export class LayerPanel extends React.Component {
     return null;
   }
 
-  state = {}
+  state = {};
 
   componentDidMount() {
     this._isMounted = true;
@@ -133,11 +135,19 @@ export class LayerPanel extends React.Component {
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label="Fit to bounds"
+                aria-label={
+                  i18n.translate('xpack.maps.layerPanel.fitToBoundsAriaLabel', {
+                    defaultMessage: 'Fit to bounds'
+                  })
+                }
                 iconType={selectedLayer.getLayerTypeIconName()}
                 onClick={this.props.fitToBounds}
               >
-                Fit
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+                  defaultMessage="Fit"
+                />
+
               </EuiButtonIcon>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -150,7 +160,11 @@ export class LayerPanel extends React.Component {
           <div className="mapLayerPanel__sourceDetails">
             <EuiAccordion
               id="accordion1"
-              buttonContent="Source details"
+              buttonContent={
+                i18n.translate('xpack.maps.layerPanel.sourceDetailsLabel', {
+                  defaultMessage: 'Source details'
+                })
+              }
             >
               <EuiText color="subdued" size="s">
                 <EuiSpacer size="xs" />
