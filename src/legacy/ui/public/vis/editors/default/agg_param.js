@@ -76,11 +76,13 @@ uiModules
             return true;
           };
 
-          $scope.$watch('agg.params[aggParam.name]', (value) => {
-            // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
-            // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
-            $scope.paramValue = value;
-          }, true);
+          if (attr.editorComponent) {
+            $scope.$watch('agg.params[aggParam.name]', (value) => {
+              // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
+              // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
+              $scope.paramValue = value;
+            }, true);
+          }
 
           $scope.onChange = (value) => {
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)

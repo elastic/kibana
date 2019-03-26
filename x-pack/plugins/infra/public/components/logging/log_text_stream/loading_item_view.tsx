@@ -115,19 +115,11 @@ interface ProgressEntryProps {
 class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   public render() {
     const { alignment, children, className, color, isLoading } = this.props;
-    const progressProps = {};
     // NOTE: styled-components seems to make all props in EuiProgress required, so this
     // style attribute hacking replaces styled-components here for now until that can be fixed
     // see: https://github.com/elastic/eui/issues/1655
     const alignmentStyle =
       alignment === 'top' ? { top: 0, bottom: 'initial' } : { top: 'initial', bottom: 0 };
-
-    if (isLoading) {
-      // @ts-ignore
-      progressProps.max = 1;
-      // @ts-ignore
-      progressProps.value = 1;
-    }
 
     return (
       <ProgressEntryWrapper className={className}>
@@ -136,7 +128,7 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
           color={color}
           size="xs"
           position="absolute"
-          {...progressProps}
+          {...(!isLoading ? { max: 1, value: 1 } : {})}
         />
         {children}
       </ProgressEntryWrapper>
