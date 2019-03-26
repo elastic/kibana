@@ -5,11 +5,11 @@
  */
 
 import { createUiMetricUri } from '../../../../../common/ui_metric';
-import { UA_APP_NAME } from '../../../common';
+import { UIM_APP_NAME } from '../../../common';
 import { getHttp } from './http_provider';
 
-export function trackUserAction(actionType) {
-  const uiMetricUri = createUiMetricUri(UA_APP_NAME, actionType);
+export function trackUiMetric(actionType) {
+  const uiMetricUri = createUiMetricUri(UIM_APP_NAME, actionType);
   getHttp().post(uiMetricUri);
 }
 
@@ -20,7 +20,7 @@ export function trackUserAction(actionType) {
 export function trackUserRequest(request, actionType) {
   // Only track successful actions.
   return request.then(response => {
-    trackUserAction(actionType);
+    trackUiMetric(actionType);
     // We return the response immediately without waiting for the tracking request to resolve,
     // to avoid adding additional latency.
     return response;

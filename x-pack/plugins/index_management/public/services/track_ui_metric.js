@@ -5,10 +5,10 @@
  */
 
 import { createUiMetricUri } from '../../../../common/ui_metric';
-import { UA_APP_NAME } from '../../common/constants';
+import { UIM_APP_NAME } from '../../common/constants';
 import { getHttpClient } from './api';
 
-export function trackUserAction(actionType) {
-  const uiMetricUri = createUiMetricUri(UA_APP_NAME, actionType);
+export function trackUiMetric(metricType) {
+  const uiMetricUri = createUiMetricUri(UIM_APP_NAME, metricType);
   getHttpClient().post(uiMetricUri);
 }

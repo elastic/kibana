@@ -9,11 +9,11 @@ import { get } from 'lodash';
 import { createUiMetricUri } from '../../../../common/ui_metric';
 
 import {
-  UA_APP_NAME,
-  UA_CONFIG_COLD_PHASE,
-  UA_CONFIG_WARM_PHASE,
-  UA_CONFIG_SET_PRIORITY,
-  UA_CONFIG_FREEZE_INDEX,
+  UIM_APP_NAME,
+  UIM_CONFIG_COLD_PHASE,
+  UIM_CONFIG_WARM_PHASE,
+  UIM_CONFIG_SET_PRIORITY,
+  UIM_CONFIG_FREEZE_INDEX,
 } from '../../common/constants';
 
 import {
@@ -31,21 +31,21 @@ import {
 
 import { getHttpClient } from './api';
 
-export function trackUserAction(actionType, httpClient = getHttpClient()) {
-  const uiMetricUri = createUiMetricUri(UA_APP_NAME, actionType);
+export function trackUiMetric(metricType, httpClient = getHttpClient()) {
+  const uiMetricUri = createUiMetricUri(UIM_APP_NAME, metricType);
   httpClient.post(uiMetricUri);
 }
 
-export function getUserActionsForPhases(phases) {
-  const possibleUserActions = [{
-    action: UA_CONFIG_COLD_PHASE,
-    isExecuted: () => Boolean(phases[PHASE_COLD]),
+export function getUiMetricsForPhases(phases) {
+  const phaseUiMetrics = [{
+    metric: UIM_CONFIG_COLD_PHASE,
+    isTracked: () => Boolean(phases[PHASE_COLD]),
   }, {
-    action: UA_CONFIG_WARM_PHASE,
-    isExecuted: () => Boolean(phases[PHASE_WARM]),
+    metric: UIM_CONFIG_WARM_PHASE,
+    isTracked: () => Boolean(phases[PHASE_WARM]),
   }, {
-    action: UA_CONFIG_SET_PRIORITY,
-    isExecuted: () => {
+    metric: UIM_CONFIG_SET_PRIORITY,
+    isTracked: () => {
       const phaseToDefaultIndexPriorityMap = {
         [PHASE_HOT]: defaultHotPhase[PHASE_INDEX_PRIORITY],
         [PHASE_WARM]: defaultWarmPhase[PHASE_INDEX_PRIORITY],
@@ -60,16 +60,16 @@ export function getUserActionsForPhases(phases) {
       });
     },
   }, {
-    action: UA_CONFIG_FREEZE_INDEX,
-    isExecuted: () => phases[PHASE_COLD] && get(phases[PHASE_COLD], 'actions.freeze'),
+    metric: UIM_CONFIG_FREEZE_INDEX,
+    isTracked: () => phases[PHASE_COLD] && get(phases[PHASE_COLD], 'actions.freeze'),
   }];
 
-  const executedUserActions = possibleUserActions.reduce((executed, { action, isExecuted }) => {
-    if (isExecuted()) {
-      executed.push(action);
+  const trackedUiMetrics = phaseUiMetrics.reduce((tracked, { metric, isTracked }) => {
+    if (isTracked()) {
+      tracked.push(metric);
     }
-    return executed;
+    return tracked;
   }, []);
 
-  return executedUserActions;
+  return trackedUiMetrics;
 }
