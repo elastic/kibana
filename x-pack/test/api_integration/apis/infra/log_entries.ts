@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { ascending, pairs } from 'd3-array';
-import expect from 'expect.js';
 import gql from 'graphql-tag';
 
 import { InfraTimeKey } from '../../../../plugins/infra/public/graphql/types';
@@ -244,7 +244,7 @@ const logEntriesTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default logEntriesTests;
 
 const isSorted = <Value>(comparator: (first: Value, second: Value) => number) => (

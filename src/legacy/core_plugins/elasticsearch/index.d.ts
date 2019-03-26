@@ -364,7 +364,7 @@ export interface CallClusterWithRequest {
   <T = any>(
     request: Request,
     endpoint: string,
-    clientParams: any,
+    clientParams?: any,
     options?: CallClusterOptions
   ): Promise<T>;
   /* eslint-enable */
@@ -517,7 +517,7 @@ export interface CallCluster {
   >;
 
   // Catch-all definition
-  <T = any>(endpoint: string, clientParams: any, options?: CallClusterOptions): Promise<T>;
+  <T = any>(endpoint: string, clientParams?: any, options?: CallClusterOptions): Promise<T>;
   /* eslint-enable */
 }
 

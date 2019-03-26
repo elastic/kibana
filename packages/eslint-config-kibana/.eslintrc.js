@@ -33,6 +33,7 @@ module.exports = {
     './typescript.js',
     './jest.js',
   ],
+  plugins: ['@kbn/eslint-plugin-eslint'],
 
   overrides: [
     /**
@@ -41,7 +42,7 @@ module.exports = {
     {
       files: [
         '.eslintrc.js',
-        'packages/eslint-plugin-kibana-custom/**/*',
+        'packages/kbn-eslint-plugin-eslint/**/*',
         'packages/kbn-config-schema/**/*',
         'packages/kbn-pm/**/*',
         'packages/kbn-es/**/*',
@@ -75,19 +76,27 @@ module.exports = {
      */
     {
       files: ['**/*.{js,ts,tsx}'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: APACHE_2_0_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [ELASTIC_LICENSE_HEADER],
           },
+        ],
+        '@kbn/eslint/module_migration': [
+          'error',
+          [
+            {
+              from: 'expect.js',
+              to: '@kbn/expect',
+            },
+          ],
         ],
       },
     },
@@ -97,15 +106,14 @@ module.exports = {
      */
     {
       files: ['x-pack/**/*.{js,ts,tsx}'],
-      plugins: ['@kbn/eslint-plugin-license-header'],
       rules: {
-        '@kbn/license-header/require-license-header': [
+        '@kbn/eslint/require-license-header': [
           'error',
           {
             license: ELASTIC_LICENSE_HEADER,
           },
         ],
-        '@kbn/license-header/disallow-license-headers': [
+        '@kbn/eslint/disallow-license-headers': [
           'error',
           {
             licenses: [APACHE_2_0_LICENSE_HEADER],

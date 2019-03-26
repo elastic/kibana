@@ -24,7 +24,7 @@ declare module 'formsy-react' {
     showRequired(): boolean;
   }
 
-  // eslint-disable-next-line @elastic/kibana-custom/no-default-export
+  // eslint-disable-next-line @kbn/eslint/no-default-export
   export default Formsy;
   export type FormData<FormShape = any> = { [fieldName in keyof FormShape]: string };
   export type FieldValue = string | null | undefined;

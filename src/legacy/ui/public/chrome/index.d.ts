@@ -49,7 +49,7 @@ declare interface Chrome extends ChromeNavLinks {
 
 declare const chrome: Chrome;
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default chrome;
 export { Breadcrumb } from './api/breadcrumbs';
 export { NavLink } from './api/nav';

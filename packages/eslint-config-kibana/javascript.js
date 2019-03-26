@@ -200,7 +200,7 @@ module.exports = {
     {
       files: ['x-pack/test/functional/apps/**/*.js', 'x-pack/plugins/apm/**/*.js'],
       rules: {
-        'kibana-custom/no-default-export': 'off',
+        '@kbn/eslint/no-default-export': 'off',
         'import/no-named-as-default': 'off',
       },
     },
@@ -268,6 +268,7 @@ module.exports = {
         'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
         'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__}/**/*.js',
         'x-pack/**/*.test.js',
+        'x-pack/test_utils/**/*',
         'x-pack/gulpfile.js',
         'x-pack/plugins/apm/public/utils/testHelpers.js',
       ],

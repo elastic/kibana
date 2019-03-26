@@ -11,5 +11,5 @@ export const schemas = [...typeDefs];
 
 // this default export is used to feed the combined types to the gql-gen tool
 // which generates the corresponding typescript types
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default buildSchemaFromTypeDefinitions(schemas);

@@ -6,5 +6,5 @@
 
 import { createTestConfig } from '../common/config';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default createTestConfig('security_and_spaces', { license: 'trial' });

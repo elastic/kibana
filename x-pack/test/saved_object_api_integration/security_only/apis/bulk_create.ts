@@ -8,7 +8,7 @@ import { AUTHENTICATION } from '../../common/lib/authentication';
 import { TestInvoker } from '../../common/lib/types';
 import { bulkCreateTestSuiteFactory } from '../../common/suites/bulk_create';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');

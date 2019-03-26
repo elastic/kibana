@@ -111,7 +111,7 @@ If yarn doesn't find the module it may not have types.  For example, our `rison_
 
 1. Contribute types into the DefinitelyTyped repo itself, or
 2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
-3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method. For example, the `expect.js` module will require this line. We don't have type definitions installed for this library. Installing these types would conflict with the jest typedefs for expect, and since they aren't API compatible with each other, it's not possible to make both test frameworks happy. Since we are moving from mocha => jest, we don't see this is a big issue.
+3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method.
 
 ### TypeScripting react files
 

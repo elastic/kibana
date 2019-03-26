@@ -6,6 +6,6 @@
 
 declare module 'graphql-fields' {
   function graphqlFields(info: any, obj?: any): any;
-  // eslint-disable-next-line @elastic/kibana-custom/no-default-export
+  // eslint-disable-next-line @kbn/eslint/no-default-export
   export default graphqlFields;
 }

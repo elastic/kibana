@@ -78,7 +78,7 @@ const animationProps = ({ isSelected, animation }) => {
   };
 };
 
-const layoutProps = ({ updateCount, setUpdateCount, page, elements: pageElements }) => {
+const layoutProps = ({ forceUpdate, page, elements: pageElements }) => {
   const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;
   const elementLookup = new Map(pageElements.map(element => [element.id, element]));
   const recurseGroupTree = shapeId => {
@@ -125,8 +125,7 @@ const layoutProps = ({ updateCount, setUpdateCount, page, elements: pageElements
     selectedPrimaryShapes,
     commit: (...args) => {
       aeroelastic.commit(page.id, ...args);
-      // TODO: remove this, it's a hack to force react to rerender
-      setUpdateCount(updateCount + 1);
+      forceUpdate();
     },
   };
 };
@@ -148,7 +147,8 @@ export const WorkpadPage = compose(
     mapDispatchToProps
   ),
   withProps(animationProps),
-  withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
+  withState('_forceUpdate', 'forceUpdate'), // TODO: phase out this solution
+  withState('canvasOrigin', 'saveCanvasOrigin'),
   withProps(layoutProps), // Updates states; needs to have both local and global
   withHandlers(groupHandlerCreators),
   withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state

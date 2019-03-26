@@ -7,7 +7,7 @@
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default function({ loadTestFile, getService }: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');

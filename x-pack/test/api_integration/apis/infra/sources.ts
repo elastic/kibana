@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
@@ -339,7 +339,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line @kbn/eslint/no-default-export
 export default sourcesTests;
 
 const createSourceMutation = gql`

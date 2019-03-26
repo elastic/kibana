@@ -27,7 +27,6 @@ module.exports = {
         'jsx-a11y',
         'prefer-arrow',
         'prefer-object-spread',
-        '@elastic/kibana-custom'
       ],
 
       settings: {
@@ -198,7 +197,7 @@ module.exports = {
           'jsx-a11y/scope': 'error',
           'jsx-a11y/tabindex-no-positive': 'error',
           'jsx-a11y/label-has-associated-control': 'error',
-          '@elastic/kibana-custom/no-default-export': 'error',
+          '@kbn/eslint/no-default-export': 'error',
         },
         eslintConfigPrettierTypescriptEslintRules,
       )
