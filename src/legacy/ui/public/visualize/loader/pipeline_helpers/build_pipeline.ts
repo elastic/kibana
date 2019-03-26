@@ -239,13 +239,30 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
   tagcloud: (visState, schemas) => {
     const { scale, orientation, minFontSize, maxFontSize, showLabel } = visState.params;
     const { metric, bucket } = buildVisConfig.tagcloud(schemas);
-    let expr = `tagcloud scale='${scale}' orientation='${orientation}' 
-      minFontSize=${minFontSize} minFontSize=${maxFontSize} 
-      showLabel=${showLabel} metric=${metric.accessor}`;
+    let expr = `tagcloud metric=${metric.accessor}`;
+
+    if (scale) {
+      expr += `scale='${scale}' `;
+    }
+    if (orientation) {
+      expr += `orientation='${orientation}' `;
+    }
+    if (minFontSize) {
+      expr += `minFontSize=${minFontSize} `;
+    }
+    if (maxFontSize) {
+      expr += `maxFontSize=${maxFontSize} `;
+    }
+    if (showLabel) {
+      expr += `showLabel=${showLabel} `;
+    }
 
     if (bucket) {
-      expr += ` bucket=${bucket.accessor} bucketFormat=${bucket.format.id} 
-        ${prepareJson('bucketFormatParams', bucket.format.params)}`;
+      expr += ` bucket=${bucket.accessor} `;
+      if (bucket.format) {
+        expr += `bucketFormat=${bucket.format.id} `;
+        expr += prepareJson('bucketFormatParams', bucket.format.params);
+      }
     }
     return expr;
   },
@@ -254,8 +271,7 @@ export const buildPipelineVisFunction: BuildPipelineVisFunction = {
       ...visState.params,
       ...buildVisConfig.region_map(schemas),
     };
-    return `
-    }regionmap ${prepareJson('visConfig', visConfig)}`;
+    return `regionmap ${prepareJson('visConfig', visConfig)}`;
   },
   tile_map: (visState, schemas) => {
     const visConfig = {
