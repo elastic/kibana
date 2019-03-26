@@ -19,7 +19,11 @@
 
 import { cloneDeep, get, omit, has } from 'lodash';
 
-function migrateIndexPattern(doc) {
+const executeMigrations = (fns, doc) => {
+  return fns.reduce((newDoc, migrateFn) => migrateFn(newDoc), doc);
+};
+
+const migrateIndexPattern = doc => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {
     return;
@@ -55,10 +59,10 @@ function migrateIndexPattern(doc) {
     });
   }
   doc.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(searchSource);
-}
+};
 
 // [TSVB] Migrate percentile-rank aggregation (value -> values)
-function migratePercentileRankAggregation (doc) {
+const migratePercentileRankAggregation = doc => {
   const visStateJSON = get(doc, 'attributes.visState');
   let visState;
 
@@ -181,11 +185,9 @@ export const migrations = {
         throw new Error(`Failure attempting to migrate saved object '${doc.attributes.title}' - ${e}`);
       }
     },
-    '7.1.0': (doc) => {
-      return [
-        migratePercentileRankAggregation
-      ].reduce((newDoc, migrateFn) => migrateFn(newDoc), doc);
-    }
+    '7.1.0': doc => executeMigrations([
+      migratePercentileRankAggregation
+    ], doc)
   },
   dashboard: {
     '7.0.0': (doc) => {
