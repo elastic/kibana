@@ -75,42 +75,49 @@ type Literal = LitAtomic | LitDate;
 
 type ComparisonArg = Literal | ColumnOperation;
 
-export interface Eq {
+export type BooleanOperator = 'and' | 'or' | '>' | '>=' | '<' | '<=' | '=' | '<>';
+
+export interface GenericBoolean {
+  operation: BooleanOperator;
+  argument: any[];
+}
+
+export interface Eq extends GenericBoolean {
   operation: '=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Ne {
+export interface Ne extends GenericBoolean {
   operation: '<>';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Gt {
+export interface Gt extends GenericBoolean {
   operation: '>';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Gte {
+export interface Gte extends GenericBoolean {
   operation: '>=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Lt {
+export interface Lt extends GenericBoolean {
   operation: '<';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Lte {
+export interface Lte extends GenericBoolean {
   operation: '<=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface And {
+export interface And extends GenericBoolean {
   operation: 'and';
   argument: BooleanOperation[];
 }
 
-export interface Or {
+export interface Or extends GenericBoolean {
   operation: 'or';
   argument: BooleanOperation[];
 }

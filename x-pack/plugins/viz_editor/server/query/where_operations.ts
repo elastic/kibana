@@ -8,7 +8,20 @@
  * Logic to convert our query shape into an Elastic search filter clause.
  *********************************************************************************************/
 
-import { And, BooleanOperation, Eq, Gt, Gte, isEmpty, Lt, Lte, Ne, Or, Query } from '../../common';
+import {
+  And,
+  BooleanOperation,
+  BooleanOperator,
+  Eq,
+  Gt,
+  Gte,
+  isEmpty,
+  Lt,
+  Lte,
+  Ne,
+  Or,
+  Query,
+} from '../../common';
 
 /**
  * A function that converts a where operation to an ES boolean operation
@@ -18,7 +31,7 @@ type WhereDefinition = (op: any) => any;
 /**
  * A map of where operation -> transform function
  */
-const whereOperations: { [operation: string]: WhereDefinition } = {
+const whereOperations: { [operation in BooleanOperator]: WhereDefinition } = {
   or(op: Or) {
     return {
       bool: {
@@ -121,7 +134,7 @@ function isLiteral(operation: string) {
  * possible. We will likely allow more flexible comparisons
  * in the future, but for now are restricted.
  */
-function parseComparison([a, b, ...etc]: any[]) {
+function parseComparison([a, b, ...etc]: [any, any]) {
   if (!isEmpty(etc)) {
     throw new Error(`A boolean condition currently cannot support more than two values.`);
   }
@@ -137,7 +150,7 @@ function parseComparison([a, b, ...etc]: any[]) {
     throw new Error(`A boolean condition requires one value to be specified.`);
   }
 
-  return op1 === 'column' ? [arg1, arg2] : [arg2, arg1];
+  return op1 === 'column' ? [a.argument.field, arg2] : [b.argument.field, arg1];
 }
 
 /**
