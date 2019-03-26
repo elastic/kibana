@@ -160,12 +160,13 @@ Kibana 7.0 will only use the Node.js distribution included in the package.
 [[breaking_70_plugin_changes]]
 === Plugin changes
 
+//tag::notable-breaking-changes[]
 [float]
 ==== Optimization step deferred until server start
 *Details:* Prior versions of Kibana would run the optimization step after each plugin installation.  This is now run on server start when necessary.
 
 *Impact:* Users can trigger a standalone optimization after all plugins have been installed with `bin/kibana --optimize` or let the server manage it on startup.
-
+// end::notable-breaking-changes[]
 
 [float]
 [[breaking_70_security_changes]]
