@@ -226,6 +226,7 @@ export const RemoteClusterList = injectI18n(
           justifyContent="flexStart"
           alignItems="center"
           gutterSize="s"
+          data-test-subj="remoteClustersTableLoading"
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="m" />
