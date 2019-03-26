@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { startsWith } from 'lodash';
+import { FetchOptions } from 'apollo-link-http';
+import { isString, startsWith } from 'lodash';
+import hash from 'object-hash';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
 
@@ -36,7 +38,7 @@ export async function callApi<T = void>(
   fetchOptions: KFetchOptions,
   options?: KFetchKibanaOptions
 ): Promise<T> {
-  const cacheKey = JSON.stringify(fetchOptions);
+  const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {
     return cacheResponse;
@@ -52,12 +54,23 @@ export async function callApi<T = void>(
   return res;
 }
 
+// only cache items that has a time range with `start` and `end` params,
+// and where `end` is not a timestamp in the future
 function isCachable(fetchOptions: KFetchOptions) {
-  const end = fetchOptions.query && fetchOptions.query.end;
+  if (
+    !(fetchOptions.query && fetchOptions.query.start && fetchOptions.query.end)
+  ) {
+    return false;
+  }
 
-  // do not cache items where the `end` param is in the future
   return (
-    end === undefined ||
-    (typeof end === 'string' && new Date(end).getTime() < Date.now())
+    isString(fetchOptions.query.end) &&
+    new Date(fetchOptions.query.end).getTime() < Date.now()
   );
+}
+
+// order the options object to make sure that two objects with the same arguments, produce produce the
+// same cache key regardless of the order of properties
+function getCacheKey(options: FetchOptions) {
+  return hash(options);
 }

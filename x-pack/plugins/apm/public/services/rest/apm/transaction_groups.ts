@@ -75,7 +75,7 @@ export async function loadTransactionDetailsCharts({
 
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
-      transactionName as string
+      transactionName
     )}/charts`,
     query: {
       start,

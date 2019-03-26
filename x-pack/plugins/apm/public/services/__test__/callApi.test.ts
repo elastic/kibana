@@ -61,40 +61,110 @@ describe('callApi', () => {
   });
 
   describe('cache', () => {
-    it('should return cached response for subsequent calls with identical arguments', async () => {
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
-
-      expect(kfetchSpy).toHaveBeenCalledTimes(1);
+    let nowSpy: jest.Mock;
+    beforeEach(() => {
+      nowSpy = mockNow('2019');
     });
 
-    it('should not return cached response for subsequent calls if arguments change', async () => {
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar1' } });
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar2' } });
-      await callApi({ pathname: `/api/kibana`, query: { foo: 'bar3' } });
-
-      expect(kfetchSpy).toHaveBeenCalledTimes(3);
-    });
-
-    it('should not return cached response if calls contain `end` param in the future', async () => {
-      const nowSpy = mockNow('2019-01-10');
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-11' } });
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-11' } });
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-11' } });
-
-      expect(kfetchSpy).toHaveBeenCalledTimes(3);
+    beforeEach(() => {
       nowSpy.mockRestore();
     });
 
-    it('should return cached response if calls contain `end` param in the past', async () => {
-      const nowSpy = mockNow('2019-01-10');
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-09' } });
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-09' } });
-      await callApi({ pathname: `/api/kibana`, query: { end: '2019-01-09' } });
+    describe('when the call does not contain start/end params', () => {
+      it('should not return cached response for identical calls', async () => {
+        await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
+        await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
+        await callApi({ pathname: `/api/kibana`, query: { foo: 'bar' } });
 
-      expect(kfetchSpy).toHaveBeenCalledTimes(1);
-      nowSpy.mockRestore();
+        expect(kfetchSpy).toHaveBeenCalledTimes(3);
+      });
+    });
+
+    describe('when the call contains start/end params', () => {
+      it('should return cached response for identical calls', async () => {
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011' }
+        });
+
+        expect(kfetchSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not return cached response for subsequent calls if arguments change', async () => {
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011', foo: 'bar1' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011', foo: 'bar2' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2010', end: '2011', foo: 'bar3' }
+        });
+
+        expect(kfetchSpy).toHaveBeenCalledTimes(3);
+      });
+
+      it('should not return cached response if `end` is a future timestamp', async () => {
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { end: '2030' }
+        });
+
+        expect(kfetchSpy).toHaveBeenCalledTimes(3);
+      });
+
+      it('should return cached response if calls contain `end` param in the past', async () => {
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2009', end: '2010' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2009', end: '2010' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2009', end: '2010' }
+        });
+
+        expect(kfetchSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should return cached response even if order of properties change', async () => {
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { end: '2010', start: '2009' }
+        });
+        await callApi({
+          pathname: `/api/kibana`,
+          query: { start: '2009', end: '2010' }
+        });
+        await callApi({
+          query: { start: '2009', end: '2010' },
+          pathname: `/api/kibana`
+        });
+
+        expect(kfetchSpy).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
