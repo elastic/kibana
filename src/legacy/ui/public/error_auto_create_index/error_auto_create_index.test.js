@@ -79,7 +79,9 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
         matcher: '*',
         response: {
           body: {
-            code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            attributes: {
+              code: 'ES_AUTO_CREATE_INDEX_ERROR',
+            },
           },
           status: 503,
         },
