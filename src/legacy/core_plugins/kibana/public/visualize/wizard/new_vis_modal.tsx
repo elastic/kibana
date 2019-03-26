@@ -65,6 +65,17 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
       return null;
     }
 
+    const visNewVisDialogAriaLabel = {
+      whatIsThatModal: i18n.translate('kbn.visualize.newVisWizard.helpText', {
+        defaultMessage:
+          'Start creating your visualization by selecting a type for that visualization.',
+      }),
+      actions: i18n.translate(
+        'kbn.visualize.newVisWizard.popoverOpeningAnnouncement.screenReaderLabel',
+        { defaultMessage: 'Hit escape to close this modal. Hit Tab key to go further.' }
+      ),
+    };
+
     const selectionModal =
       this.state.showSearchVisModal && this.state.visType ? (
         <EuiModal onClose={this.onCloseModal} className="visNewVisSearchDialog">
@@ -74,14 +85,9 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         <EuiModal
           onClose={this.onCloseModal}
           className="visNewVisDialog"
-          aria-label={i18n.translate(
-            'kbn.visualize.newVisWizard.popoverOpeningAnnouncement.screenReaderLabel',
-            {
-              defaultMessage:
-                'Start creating your visualization by selecting a type for that visualization. Hit escape to close this modal. Hit Tab key to go further.',
-            }
-          )}
-          aria-describedby="Start creating your visualization by selecting a type for that visualization."
+          aria-label={`${visNewVisDialogAriaLabel.whatIsThatModal} ${
+            visNewVisDialogAriaLabel.actions
+          }`}
           role="menu"
         >
           <TypeSelection
