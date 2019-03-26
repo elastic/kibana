@@ -7,7 +7,7 @@
 
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 
 // Mock callWithRequest with the ability to simulate returning different

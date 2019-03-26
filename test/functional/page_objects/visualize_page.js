@@ -19,7 +19,7 @@
 
 import { VisualizeConstants } from '../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
 import Bluebird from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function VisualizePageProvider({ getService, getPageObjects, updateBaselines }) {
   const browser = getService('browser');
@@ -499,7 +499,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setCustomLabel(label, index = 1) {
-      const customLabel = await find.byCssSelector(`#visEditorStringInput${index}customLabel`);
+      const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
 
