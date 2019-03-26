@@ -53,8 +53,7 @@
     "types": [
       "node",
       "jest",
-      "react",
-      "@kbn/test/types/expect.js"
+      "react"
     ]
   },
   "include": [

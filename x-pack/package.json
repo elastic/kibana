@@ -27,6 +27,7 @@
   "devDependencies": {
     "@kbn/dev-utils": "1.0.0",
     "@kbn/es": "1.0.0",
+    "@kbn/expect": "1.0.0",
     "@kbn/plugin-helpers": "9.0.2",
     "@kbn/test": "1.0.0",
     "@storybook/addon-actions": "^4.1.7",
@@ -90,7 +91,6 @@
     "enzyme-adapter-utils": "^1.10.0",
     "enzyme-to-json": "^3.3.4",
     "execa": "^1.0.0",
-    "expect.js": "0.3.1",
     "fancy-log": "^1.3.2",
     "fetch-mock": "7.3.0",
     "graphql-code-generator": "^0.13.0",

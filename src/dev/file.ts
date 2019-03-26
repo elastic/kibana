@@ -54,6 +54,10 @@ export class File {
     );
   }
 
+  public isTypescriptAmbient() {
+    return this.path.endsWith('.d.ts');
+  }
+
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
   }
