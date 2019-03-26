@@ -55,15 +55,9 @@ module.exports = (_baseConfig, _env, config) => {
     test: /\.tsx?$/,
     use: [
       {
-        loader: 'ts-loader',
+        loader: 'babel-loader',
         options: {
-          transpileOnly: true,
-          experimentalWatchApi: true,
-          onlyCompileBundledFiles: true,
-          configFile: require.resolve('../../../../tsconfig.json'),
-          compilerOptions: {
-            sourceMap: true,
-          },
+          presets: [require.resolve('@babel/preset-react')],
         },
       },
       require.resolve('react-docgen-typescript-loader'),
