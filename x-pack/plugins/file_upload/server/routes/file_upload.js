@@ -6,7 +6,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
-import { importDataProvider } from '../models/file_data_visualizer';
+import { importDataProvider } from '../models/import_data';
 import { MAX_BYTES } from '../../common/constants/file_import';
 import { updateTelemetry } from '../telemetry/telemetry';
 

@@ -20,6 +20,12 @@ export interface TelemetrySavedObject {
   attributes: Telemetry;
 }
 
+export function getInternalRepository(server: Server): any {
+  const { getSavedObjectsRepository } = server.savedObjects;
+  const callWithInternalUser = callWithInternalUserFactory(server);
+  return getSavedObjectsRepository(callWithInternalUser);
+}
+
 export function initTelemetry(): Telemetry {
   return {
     filesUploadedTotalCount: 0,
