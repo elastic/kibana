@@ -34,12 +34,12 @@ app.directive('sortableColumn', function (i18n) {
       getAriaLabel() {
         const isAscending = this.isSortedAscending();
         if(isAscending) {
-          return i18n('common.ui.sortableColumn.sortAscendingAriaLabel', {
+          return i18n('xpack.watcher.sortableColumn.sortAscendingAriaLabel', {
             defaultMessage: 'Sort {field} ascending',
             values: { field: this.field },
           });
         }
-        return i18n('common.ui.sortableColumn.sortDescendingAriaLabel', {
+        return i18n('xpack.watcher.sortableColumn.sortDescendingAriaLabel', {
           defaultMessage: 'Sort {field} descending',
           values: { field: this.field },
         });
