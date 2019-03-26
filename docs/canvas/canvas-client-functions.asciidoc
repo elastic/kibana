@@ -1,7 +1,7 @@
 [[canvas-client-functions]]
 === Canvas client functions
 
-beta[]These functions must execute in a browser. They are only available
+These functions must execute in a browser. They are only available
 from within the Canvas application, not via the Canvas HTTP API. These functions must 
 execute in the browser because they use browser specific APIs, such as location, 
 or interact with the workpad to read filters.

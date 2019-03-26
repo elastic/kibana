@@ -52,100 +52,104 @@ const getRootElementId = (lookup, id) => {
     : element.id;
 };
 
+const animationProps = ({ isSelected, animation }) => {
+  function getClassName() {
+    if (animation) {
+      return animation.name;
+    }
+    return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
+  }
+
+  function getAnimationStyle() {
+    if (!animation) {
+      return {};
+    }
+    return {
+      animationDirection: animation.direction,
+      // TODO: Make this configurable
+      animationDuration: '1s',
+    };
+  }
+
+  return {
+    className: getClassName(),
+    animationStyle: getAnimationStyle(),
+  };
+};
+
+const layoutProps = ({ forceUpdate, page, elements: pageElements }) => {
+  const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(page.id).currentScene;
+  const elementLookup = new Map(pageElements.map(element => [element.id, element]));
+  const recurseGroupTree = shapeId => {
+    return [
+      shapeId,
+      ...flatten(
+        shapes
+          .filter(s => s.parent === shapeId && s.type !== 'annotation')
+          .map(s => s.id)
+          .map(recurseGroupTree)
+      ),
+    ];
+  };
+
+  const selectedPrimaryShapeObjects = selectedPrimaryShapes
+    .map(id => shapes.find(s => s.id === id))
+    .filter(shape => shape);
+
+  const selectedPersistentPrimaryShapes = flatten(
+    selectedPrimaryShapeObjects.map(shape =>
+      shape.subtype === 'adHocGroup'
+        ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
+        : [shape.id]
+    )
+  );
+  const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
+  const selectedElements = [];
+  const elements = shapes.map(shape => {
+    let element = null;
+    if (elementLookup.has(shape.id)) {
+      element = elementLookup.get(shape.id);
+      if (selectedElementIds.indexOf(shape.id) > -1) {
+        selectedElements.push({ ...element, id: shape.id });
+      }
+    }
+    // instead of just combining `element` with `shape`, we make property transfer explicit
+    return element ? { ...shape, filter: element.filter } : shape;
+  });
+  return {
+    elements,
+    cursor,
+    selectedElementIds,
+    selectedElements,
+    selectedPrimaryShapes,
+    commit: (...args) => {
+      aeroelastic.commit(page.id, ...args);
+      forceUpdate();
+    },
+  };
+};
+
+const groupHandlerCreators = {
+  groupElements: ({ commit }) => () =>
+    commit('actionEvent', {
+      event: 'group',
+    }),
+  ungroupElements: ({ commit }) => () =>
+    commit('actionEvent', {
+      event: 'ungroup',
+    }),
+};
+
 export const WorkpadPage = compose(
   connect(
     mapStateToProps,
     mapDispatchToProps
   ),
-  withProps(({ isSelected, animation }) => {
-    function getClassName() {
-      if (animation) {
-        return animation.name;
-      }
-      return isSelected ? 'canvasPage--isActive' : 'canvasPage--isInactive';
-    }
-
-    function getAnimationStyle() {
-      if (!animation) {
-        return {};
-      }
-      return {
-        animationDirection: animation.direction,
-        // TODO: Make this configurable
-        animationDuration: '1s',
-      };
-    }
-
-    return {
-      className: getClassName(),
-      animationStyle: getAnimationStyle(),
-    };
-  }),
-  withState('updateCount', 'setUpdateCount', 0), // TODO: remove this, see setUpdateCount below
-  withProps(({ updateCount, setUpdateCount, page, elements: pageElements }) => {
-    const { shapes, selectedPrimaryShapes = [], cursor } = aeroelastic.getStore(
-      page.id
-    ).currentScene;
-    const elementLookup = new Map(pageElements.map(element => [element.id, element]));
-    const recurseGroupTree = shapeId => {
-      return [
-        shapeId,
-        ...flatten(
-          shapes
-            .filter(s => s.parent === shapeId && s.type !== 'annotation')
-            .map(s => s.id)
-            .map(recurseGroupTree)
-        ),
-      ];
-    };
-
-    const selectedPrimaryShapeObjects = selectedPrimaryShapes
-      .map(id => shapes.find(s => s.id === id))
-      .filter(shape => shape);
-
-    const selectedPersistentPrimaryShapes = flatten(
-      selectedPrimaryShapeObjects.map(shape =>
-        shape.subtype === 'adHocGroup'
-          ? shapes.filter(s => s.parent === shape.id && s.type !== 'annotation').map(s => s.id)
-          : [shape.id]
-      )
-    );
-    const selectedElementIds = flatten(selectedPersistentPrimaryShapes.map(recurseGroupTree));
-    const selectedElements = [];
-    const elements = shapes.map(shape => {
-      let element = null;
-      if (elementLookup.has(shape.id)) {
-        element = elementLookup.get(shape.id);
-        if (selectedElementIds.indexOf(shape.id) > -1) {
-          selectedElements.push({ ...element, id: shape.id });
-        }
-      }
-      // instead of just combining `element` with `shape`, we make property transfer explicit
-      return element ? { ...shape, filter: element.filter } : shape;
-    });
-    return {
-      elements,
-      cursor,
-      selectedElementIds,
-      selectedElements,
-      selectedPrimaryShapes,
-      commit: (...args) => {
-        aeroelastic.commit(page.id, ...args);
-        // TODO: remove this, it's a hack to force react to rerender
-        setUpdateCount(updateCount + 1);
-      },
-    };
-  }), // Updates states; needs to have both local and global
-  withHandlers({
-    groupElements: ({ commit }) => () =>
-      commit('actionEvent', {
-        event: 'group',
-      }),
-    ungroupElements: ({ commit }) => () =>
-      commit('actionEvent', {
-        event: 'ungroup',
-      }),
-  }),
+  withProps(animationProps),
+  withState('_forceUpdate', 'forceUpdate'), // TODO: phase out this solution
+  withState('canvasOrigin', 'saveCanvasOrigin'),
+  withProps(layoutProps), // Updates states; needs to have both local and global
+  withHandlers(groupHandlerCreators),
   withHandlers(eventHandlers) // Captures user intent, needs to have reconciled state
 )(Component);
 

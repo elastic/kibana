@@ -122,7 +122,8 @@ which is proxied through the Kibana server.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
 store saved searches, visualizations and dashboards. Kibana creates a new index
-if the index doesn’t already exist.
+if the index doesn’t already exist. If you configure a custom index, the name must 
+be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana
 stores log output.
@@ -134,7 +135,7 @@ suppress all logging output other than error messages.
 suppress all logging output.
 
 `logging.timezone`:: *Default: UTC* Set to the canonical timezone id
-(e.g. `US/Pacific`) to log events using that timezone. A list of timezones can
+(for example, `America/Los_Angeles`) to log events using that timezone. A list of timezones can
 be referenced at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones.
 
 [[logging-verbose]]`logging.verbose:`:: *Default: false* Set the value of this
