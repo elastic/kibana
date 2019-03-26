@@ -7,6 +7,7 @@
 export default function ({ loadTestFile }) {
   describe('Logs', () => {
     loadTestFile(require.resolve('./node_detail'));
+    loadTestFile(require.resolve('./index_detail'));
     loadTestFile(require.resolve('./cluster'));
   });
 }

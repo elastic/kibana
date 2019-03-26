@@ -9,7 +9,7 @@ import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
 
-async function handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
+async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
     enabled: false,
     logs: []
@@ -25,6 +25,7 @@ async function handleResponse(response, req, filebeatIndexPattern, { clusterUuid
       return {
         timestamp: get(source, 'event.created'),
         component: get(source, 'elasticsearch.component'),
+        node: get(source, 'elasticsearch.node.name'),
         index: get(source, 'elasticsearch.index.name'),
         level: get(source, 'log.level'),
         type,
@@ -33,13 +34,13 @@ async function handleResponse(response, req, filebeatIndexPattern, { clusterUuid
     });
   }
   else {
-    result.reason = await detectReason(req, filebeatIndexPattern, { start, end, clusterUuid, nodeUuid });
+    result.reason = await detectReason(req, filebeatIndexPattern, opts);
   }
 
   return result;
 }
 
-export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
+export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
   const metric = { timestampField: 'event.created' };
@@ -53,6 +54,9 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
   if (nodeUuid) {
     filter.push({ term: { 'elasticsearch.node.id': nodeUuid } });
   }
+  if (indexUuid) {
+    filter.push({ term: { 'elasticsearch.index.name': indexUuid } });
+  }
 
   const params = {
     index: filebeatIndexPattern,
@@ -64,6 +68,7 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
       'hits.hits._source.event.dataset',
       'hits.hits._source.elasticsearch.component',
       'hits.hits._source.elasticsearch.index.name',
+      'hits.hits._source.elasticsearch.node.name',
     ],
     ignoreUnavailable: true,
     body: {
@@ -78,5 +83,9 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end });
+  const result = await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end });
+  return {
+    ...result,
+    limit: params.size,
+  };
 }

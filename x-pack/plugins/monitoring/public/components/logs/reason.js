@@ -16,14 +16,14 @@ export const Reason = ({ reason }) => {
   let title;
   let message;
 
-  if (!reason.indexPatternExists) {
+  if (false === reason.indexPatternExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternTitle', {
       defaultMessage: 'No filebeat indices found.'
     });
     message = (
       <FormattedMessage
         id="xpack.monitoring.logs.reason.noIndexPatternMessage"
-        defaultMessage="Follow {link} to set it up."
+        defaultMessage="Follow {link} to set it up. Please be sure to configure your Elasticsearch output to your monitoring cluster."
         values={{
           link: (
             <EuiLink href="https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-installation.html">
@@ -36,7 +36,18 @@ export const Reason = ({ reason }) => {
       />
     );
   }
-  else if (!reason.typeExists) {
+  else if (false === reason.indexPatternInTimeRangeExists) {
+    title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternInTimePeriodTitle', {
+      defaultMessage: 'No filebeat indices found in the selected time period.'
+    });
+    message = (
+      <FormattedMessage
+        id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
+        defaultMessage="Please adjust your time period as necessary"
+      />
+    );
+  }
+  else if (false === reason.typeExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noTypeTitle', {
       defaultMessage: 'We found filebeat indices but none for elasticsearch.'
     });
@@ -56,7 +67,7 @@ export const Reason = ({ reason }) => {
       />
     );
   }
-  else if (!reason.clusterExists) {
+  else if (false === reason.clusterExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noClusterTitle', {
       defaultMessage: 'We did not find any logs for this cluster.'
     });
@@ -67,7 +78,7 @@ export const Reason = ({ reason }) => {
       />
     );
   }
-  else if (!reason.nodeExists) {
+  else if (false === reason.nodeExists) {
     title = i18n.translate('xpack.monitoring.logs.reason.noNodeTitle', {
       defaultMessage: 'We did not find any logs for this node.'
     });
@@ -75,6 +86,18 @@ export const Reason = ({ reason }) => {
       <FormattedMessage
         id="xpack.monitoring.logs.reason.noNodeMessage"
         defaultMessage="Ensure you have a filebeat instance reading from this node."
+      />
+    );
+  }
+  else if (false === reason.indexExists) {
+    title = i18n.translate('xpack.monitoring.logs.reason.noIndexTitle', {
+      defaultMessage: 'We did not find any logs for this index.'
+    });
+    message = (
+      <FormattedMessage
+        id="xpack.monitoring.logs.reason.noIndexMessage"
+        defaultMessage="Ensure you have a filebeat instance reading from all nodes in your cluster,
+        or perhaps there are no logs for this index."
       />
     );
   }

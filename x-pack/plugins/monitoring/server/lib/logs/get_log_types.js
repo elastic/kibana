@@ -37,8 +37,8 @@ async function handleResponse(response, req, filebeatIndexPattern, { start, end 
   return result;
 }
 
-export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, nodeUuid, start, end }) {
-  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
+export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
+  checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogTypes');
 
   const metric = { timestampField: 'event.created' };
   const filter = [
@@ -50,6 +50,9 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
   }
   if (nodeUuid) {
     filter.push({ term: { 'elasticsearch.node.id': nodeUuid } });
+  }
+  if (indexUuid) {
+    filter.push({ term: { 'elasticsearch.index.name': indexUuid } });
   }
 
   const params = {

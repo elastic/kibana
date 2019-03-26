@@ -17,6 +17,23 @@ exports[`Logs should render with a no cluster found reason 1`] = `
 </EuiCallOut>
 `;
 
+exports[`Logs should render with a no index found reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title="We did not find any logs for this index."
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Ensure you have a filebeat instance reading from all nodes in your cluster, or perhaps there are no logs for this index."
+      id="xpack.monitoring.logs.reason.noIndexMessage"
+      values={Object {}}
+    />
+  </p>
+</EuiCallOut>
+`;
+
 exports[`Logs should render with a no index pattern found reason 1`] = `
 <EuiCallOut
   color="warning"
@@ -26,7 +43,7 @@ exports[`Logs should render with a no index pattern found reason 1`] = `
 >
   <p>
     <FormattedMessage
-      defaultMessage="Follow {link} to set it up."
+      defaultMessage="Follow {link} to set it up. Please be sure to configure your Elasticsearch output to your monitoring cluster."
       id="xpack.monitoring.logs.reason.noIndexPatternMessage"
       values={
         Object {

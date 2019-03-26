@@ -12,10 +12,13 @@
   },
   "logs": {
     "enabled": false,
+    "limit": 10,
     "reason": {
       "clusterExists": false,
       "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
       "nodeExists": false,
+      "indexExists": null,
       "typeExists": false
     },
     "logs": []

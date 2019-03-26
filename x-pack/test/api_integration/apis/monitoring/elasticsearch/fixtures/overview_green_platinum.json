@@ -5751,10 +5751,13 @@
   ],
   "logs": {
     "enabled": false,
+    "limit": 10,
     "reason": {
       "clusterExists": false,
       "indexPatternExists": false,
-      "nodeExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "nodeExists": null,
+      "indexExists": null,
       "typeExists": false
     },
     "logs": []

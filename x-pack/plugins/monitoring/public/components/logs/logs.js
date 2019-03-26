@@ -19,47 +19,96 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
 
+const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
+  defaultMessage: 'Timestamp'
+});
+
+const columnLevelTitle = i18n.translate('xpack.monitoring.logs.listing.levelTitle', {
+  defaultMessage: 'Level'
+});
+
+const columnTypeTitle = i18n.translate('xpack.monitoring.logs.listing.typeTitle', {
+  defaultMessage: 'Type'
+});
+
+const columnMessageTitle = i18n.translate('xpack.monitoring.logs.listing.messageTitle', {
+  defaultMessage: 'Message'
+});
+
+const columnComponentTitle = i18n.translate('xpack.monitoring.logs.listing.componentTitle', {
+  defaultMessage: 'Component'
+});
+
+const columnNodeTitle = i18n.translate('xpack.monitoring.logs.listing.nodeTitle', {
+  defaultMessage: 'Node'
+});
+
 const columns = [
   {
     field: 'timestamp',
-    name: i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
-      defaultMessage: 'Timestamp'
-    }),
+    name: columnTimestampTitle,
     width: '12%',
     render: timestamp => formatDateTimeLocal(timestamp),
   },
   {
     field: 'level',
-    name: i18n.translate('xpack.monitoring.logs.listing.levelTitle', {
-      defaultMessage: 'Level'
-    }),
+    name: columnLevelTitle,
     width: '5%',
   },
   {
     field: 'type',
-    name: i18n.translate('xpack.monitoring.logs.listing.typeTitle', {
-      defaultMessage: 'Type'
-    }),
+    name: columnTypeTitle,
     width: '10%',
     render: type => capitalize(type),
   },
   {
     field: 'message',
-    name: i18n.translate('xpack.monitoring.logs.listing.messageTitle', {
-      defaultMessage: 'Message'
-    }),
+    name: columnMessageTitle,
     width: '55%'
   },
   {
     field: 'component',
-    name: i18n.translate('xpack.monitoring.logs.listing.componentTitle', {
-      defaultMessage: 'Component'
-    }),
+    name: columnComponentTitle,
     width: '18%'
   },
 ];
 
-function getLogsUiLink(clusterUuid, nodeId) {
+const clusterColumns = [
+  {
+    field: 'timestamp',
+    name: columnTimestampTitle,
+    width: '12%',
+    render: timestamp => formatDateTimeLocal(timestamp),
+  },
+  {
+    field: 'level',
+    name: columnLevelTitle,
+    width: '5%',
+  },
+  {
+    field: 'type',
+    name: columnTypeTitle,
+    width: '10%',
+    render: type => capitalize(type),
+  },
+  {
+    field: 'message',
+    name: columnMessageTitle,
+    width: '45%'
+  },
+  {
+    field: 'component',
+    name: columnComponentTitle,
+    width: '15%'
+  },
+  {
+    field: 'node',
+    name: columnNodeTitle,
+    width: '13%'
+  },
+];
+
+function getLogsUiLink(clusterUuid, nodeId, indexUuid) {
   const base = `${chrome.getBasePath()}/app/infra#/link-to/logs`;
 
   const params = [];
@@ -68,6 +117,9 @@ function getLogsUiLink(clusterUuid, nodeId) {
   }
   if (nodeId) {
     params.push(`elasticsearch.node.id:${nodeId}`);
+  }
+  if (indexUuid) {
+    params.push(`elasticsearch.index.name:${indexUuid}`);
   }
 
   if (params.length === 0) {
@@ -79,7 +131,7 @@ function getLogsUiLink(clusterUuid, nodeId) {
 
 export class Logs extends PureComponent {
   renderLogs() {
-    const { logs: { enabled, logs } } = this.props;
+    const { logs: { enabled, logs }, nodeId, indexUuid } = this.props;
     if (!enabled) {
       return null;
     }
@@ -87,7 +139,7 @@ export class Logs extends PureComponent {
     return (
       <EuiBasicTable
         items={logs || []}
-        columns={columns}
+        columns={nodeId || indexUuid ? columns : clusterColumns}
       />
     );
   }
@@ -102,7 +154,7 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
-    const { logs: { enabled }, nodeId, clusterUuid } = this.props;
+    const { logs: { enabled }, nodeId, clusterUuid, indexUuid } = this.props;
 
     if (!enabled) {
       return null;
@@ -122,7 +174,7 @@ export class Logs extends PureComponent {
             defaultMessage="Visit the {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={getLogsUiLink(clusterUuid, nodeId)}>
+                <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}>
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Logs UI'
                   })}
@@ -136,6 +188,35 @@ export class Logs extends PureComponent {
   }
 
   render() {
+    const { nodeId, indexUuid, logs: { limit } } = this.props;
+
+    let description;
+
+    if (nodeId) {
+      description = i18n.translate('xpack.monitoring.logs.listing.nodePageDescription', {
+        defaultMessage: 'Showing the most recent logs for this node, up to {limit} total logs',
+        values: {
+          limit,
+        }
+      });
+    }
+    else if (indexUuid) {
+      description = i18n.translate('xpack.monitoring.logs.listing.indexPageDescription', {
+        defaultMessage: 'Showing the most recent logs for this index, up to {limit} total logs',
+        values: {
+          limit,
+        }
+      });
+    }
+    else {
+      description = i18n.translate('xpack.monitoring.logs.listing.clusterPageDescription', {
+        defaultMessage: 'Showing the most recent logs for this cluster, up to {limit} total logs',
+        values: {
+          limit,
+        }
+      });
+    }
+
     return (
       <div>
         <EuiTitle>
@@ -147,9 +228,7 @@ export class Logs extends PureComponent {
         </EuiTitle>
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.monitoring.logs.listing.pageDescription', {
-              defaultMessage: 'Showing the most recent logs, up to 10 total logs'
-            })}
+            {description}
           </p>
         </EuiText>
         <EuiSpacer size="m"/>

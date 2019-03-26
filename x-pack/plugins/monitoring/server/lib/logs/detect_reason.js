@@ -8,15 +8,16 @@ import { createTimeFilter } from '../create_query';
 import { get } from 'lodash';
 
 
-async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, clusterUuid, nodeUuid }) {
+async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, clusterUuid, nodeUuid, indexUuid }) {
   const metric = { timestampField: '@timestamp' };
   const filter = [
     createTimeFilter({ start, end, metric })
   ];
 
-  const typeFilter = { term: { 'service.type': 'elasticsearch2' } };
+  const typeFilter = { term: { 'service.type': 'elasticsearch' } };
   const clusterFilter = { term: { 'elasticsearch.cluster.uuid': clusterUuid } };
   const nodeFilter = { term: { 'elasticsearch.node.id': nodeUuid } };
+  const indexFilter = { term: { 'elasticsearch.index.name': indexUuid } };
 
   const indexPatternExistsQuery = {
     query: {
@@ -62,12 +63,27 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     },
   };
 
+  const indexExistsQuery = {
+    query: {
+      bool: {
+        filter: [
+          ...filter,
+          typeFilter,
+          clusterFilter,
+          indexFilter
+        ]
+      }
+    },
+  };
+
   const defaultParams = {
     size: 0,
     terminate_after: 1,
   };
 
   const body = [
+    { index: filebeatIndexPattern },
+    { ...defaultParams },
     { index: filebeatIndexPattern },
     { ...defaultParams, ...indexPatternExistsQuery },
     { index: filebeatIndexPattern },
@@ -88,24 +104,35 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     ]);
   }
 
+  if (indexUuid) {
+    body.push(...[
+      { index: filebeatIndexPattern },
+      { ...defaultParams, ...indexExistsQuery },
+    ]);
+  }
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const {
     responses: [
       indexPatternExistsResponse,
+      indexPatternExistsInTimeRangeResponse,
       typeExistsResponse,
       clusterExistsResponse,
-      nodeExistsResponse
+      nodeExistsResponse,
+      indexExistsResponse
     ]
   } = await callWithRequest(req, 'msearch', { body });
 
   return {
     indexPatternExists: get(indexPatternExistsResponse, 'hits.total.value', 0) > 0,
+    indexPatternInTimeRangeExists: get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
     typeExists: get(typeExistsResponse, 'hits.total.value', 0) > 0,
-    clusterExists: get(clusterExistsResponse, 'hits.total.value', 0) > 0,
-    nodeExists: get(nodeExistsResponse, 'hits.total.value', 0) > 0,
+    clusterExists: clusterUuid ? get(clusterExistsResponse, 'hits.total.value', 0) > 0 : null,
+    nodeExists: nodeUuid ? get(nodeExistsResponse, 'hits.total.value', 0) > 0 : null,
+    indexExists: indexUuid ? get(indexExistsResponse, 'hits.total.value', 0) > 0 : null,
   };
 }
 
-export async function detectReason(req, filebeatIndexPattern, { start, end }) {
-  return await doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end });
+export async function detectReason(req, filebeatIndexPattern, opts) {
+  return await doesFilebeatIndexExist(req, filebeatIndexPattern, opts);
 }

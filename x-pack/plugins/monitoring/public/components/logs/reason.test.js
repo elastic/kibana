@@ -28,4 +28,16 @@ describe('Logs', () => {
     const component = shallow(<Reason reason={{ indexPatternExists: true, typeExists: true, clusterExists: true, nodeExists: false  }}/>);
     expect(component).toMatchSnapshot();
   });
+
+  it('should render with a no index found reason', () => {
+    const component = shallow(<Reason reason={{
+      indexPatternExists: true,
+      typeExists: true,
+      clusterExists: true,
+      nodeExists: null,
+      indexExists: false
+    }}
+    />);
+    expect(component).toMatchSnapshot();
+  });
 });
