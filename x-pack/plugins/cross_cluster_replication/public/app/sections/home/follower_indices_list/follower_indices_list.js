@@ -131,7 +131,7 @@ export class FollowerIndicesList extends PureComponent {
   }
 
   renderContent(isEmpty) {
-    const { apiError, isAuthorized } = this.props;
+    const { apiError, isAuthorized, apiStatus } = this.props;
 
     if (!isAuthorized) {
       return (
@@ -166,6 +166,10 @@ export class FollowerIndicesList extends PureComponent {
 
     if (isEmpty) {
       return this.renderEmpty();
+    }
+
+    if (apiStatus === API_STATUS.LOADING) {
+      return this.renderLoading();
     }
 
     return this.renderList();
@@ -206,7 +210,19 @@ export class FollowerIndicesList extends PureComponent {
             />
           </EuiButton>
         }
+        data-test-subj="ccrFollowerIndexEmptyPrompt"
       />
+    );
+  }
+
+  renderLoading() {
+    return (
+      <SectionLoading dataTestSubj="ccrFollowerIndexLoading">
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
+          defaultMessage="Loading follower indices..."
+        />
+      </SectionLoading>
     );
   }
 
@@ -214,21 +230,9 @@ export class FollowerIndicesList extends PureComponent {
     const {
       selectFollowerIndex,
       followerIndices,
-      apiStatus,
     } = this.props;
 
     const { isDetailPanelOpen } = this.state;
-
-    if (apiStatus === API_STATUS.LOADING) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
-            defaultMessage="Loading follower indices..."
-          />
-        </SectionLoading>
-      );
-    }
 
     return (
       <Fragment>

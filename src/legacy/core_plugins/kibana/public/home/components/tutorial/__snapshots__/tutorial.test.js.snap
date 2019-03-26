@@ -68,16 +68,9 @@ exports[`isCloudEnabled is false should render ON_PREM instructions with instruc
         className="eui-textCenter"
       >
         <EuiFlexGroup
-          alignItems="stretch"
-          component="div"
-          direction="row"
-          gutterSize="l"
           justifyContent="center"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <EuiButtonGroup

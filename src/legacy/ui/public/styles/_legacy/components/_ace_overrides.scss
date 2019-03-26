@@ -32,8 +32,7 @@
     }
 
     .ace_indent-guide {
-      background: none;
-      border-right: 1px solid $euiColorMediumShade;
+      background: linear-gradient(to left, $euiColorMediumShade 0%, $euiColorMediumShade 1px, transparent 1px, transparent 100%);
     }
 
     .ace_search {

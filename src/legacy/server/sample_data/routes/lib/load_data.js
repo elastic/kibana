@@ -24,19 +24,15 @@ import zlib from 'zlib';
 const BULK_INSERT_SIZE = 500;
 
 export function loadData(path, bulkInsert) {
-  return new Promise(function (resolve, reject) {
+  return new Promise((resolve, reject) => {
     let count = 0;
     let docs = [];
     let isPaused = false;
 
-    const readStream = fs.createReadStream(path, {
-      // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
-      highWaterMark: 1024 * 4
-    });
-    const lineStream = readline.createInterface({
-      input: readStream.pipe(zlib.Unzip()) // eslint-disable-line new-cap
-    });
-
+    // pause does not stop lines already in buffer. Use smaller buffer size to avoid bulk inserting to many records
+    const readStream = fs.createReadStream(path, { highWaterMark: 1024 * 4 });
+    // eslint-disable-next-line new-cap
+    const lineStream = readline.createInterface({ input: readStream.pipe(zlib.Unzip()) });
     const onClose = async () => {
       if (docs.length > 0) {
         try {
@@ -50,13 +46,13 @@ export function loadData(path, bulkInsert) {
     };
     lineStream.on('close', onClose);
 
-    function closeWithError(err) {
+    const closeWithError = err => {
       lineStream.removeListener('close', onClose);
       lineStream.close();
       reject(err);
-    }
+    };
 
-    lineStream.on('line', async (line) => {
+    lineStream.on('line', async line => {
       if (line.length === 0 || line.charAt(0) === '#') {
         return;
       }
@@ -65,7 +61,11 @@ export function loadData(path, bulkInsert) {
       try {
         doc = JSON.parse(line);
       } catch (err) {
-        closeWithError(new Error(`Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`));
+        closeWithError(
+          new Error(
+            `Unable to parse line as JSON document, line: """${line}""", Error: ${err.message}`
+          )
+        );
         return;
       }
 

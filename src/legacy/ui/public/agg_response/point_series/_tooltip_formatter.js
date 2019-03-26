@@ -34,21 +34,24 @@ export function PointSeriesTooltipFormatter($compile, $rootScope) {
 
       const details = $tooltipScope.details = [];
 
+      const currentSeries = data.series && data.series.find(serie => serie.rawId === datum.seriesId);
       const addDetail = (label, value) => details.push({ label, value });
 
-      datum.extraMetrics.forEach(metric => {
-        addDetail(metric.label, metric.value);
-      });
+      if (datum.extraMetrics) {
+        datum.extraMetrics.forEach(metric => {
+          addDetail(metric.label, metric.value);
+        });
+      }
 
       if (datum.x) {
         addDetail(data.xAxisLabel, data.xAxisFormatter(datum.x));
       }
       if (datum.y) {
         const value = datum.yScale ? datum.yScale * datum.y : datum.y;
-        addDetail(data.yAxisLabel, data.yAxisFormatter(value));
+        addDetail(currentSeries.label, currentSeries.yAxisFormatter(value));
       }
       if (datum.z) {
-        addDetail(data.zAxisLabel, data.zAxisFormatter(datum.z));
+        addDetail(currentSeries.zLabel, currentSeries.zAxisFormatter(datum.z));
       }
       if (datum.series && datum.parent) {
         const dimension = datum.parent;

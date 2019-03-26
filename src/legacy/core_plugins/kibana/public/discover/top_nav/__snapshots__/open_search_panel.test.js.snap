@@ -49,16 +49,9 @@ exports[`render 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -67,6 +60,7 @@ exports[`render 1`] = `
           href="#/management/kibana/objects?_a=(tab:search)"
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

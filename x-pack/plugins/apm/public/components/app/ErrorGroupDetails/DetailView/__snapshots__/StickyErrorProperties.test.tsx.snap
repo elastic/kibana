@@ -33,36 +33,6 @@ exports[`StickyErrorProperties should render StickyProperties 1`] = `
         "fieldName": "transaction.id",
         "label": "Transaction sample ID",
         "val": <TransactionLink
-          error={
-            Object {
-              "@timestamp": "myTimestamp",
-              "error": Object {
-                "exception": Array [
-                  Object {
-                    "handled": true,
-                  },
-                ],
-              },
-              "http": Object {
-                "request": Object {
-                  "method": "GET",
-                },
-              },
-              "service": Object {
-                "name": "myService",
-              },
-              "transaction": Object {
-                "id": "myTransactionId",
-                "sampled": true,
-              },
-              "url": Object {
-                "full": "myUrl",
-              },
-              "user": Object {
-                "id": "myUserId",
-              },
-            }
-          }
           transaction={
             Object {
               "http": Object {

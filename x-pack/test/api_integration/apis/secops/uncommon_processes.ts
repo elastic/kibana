@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { uncommonProcessesQuery } from '../../../../plugins/secops/public/containers/uncommon_processes/index.gql_query';
 import { GetUncommonProcessesQuery } from '../../../../plugins/secops/public/graphql/types';

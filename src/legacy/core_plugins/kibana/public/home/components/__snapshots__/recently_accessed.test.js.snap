@@ -28,30 +28,16 @@ exports[`render 1`] = `
   />
   <EuiFlexGroup
     alignItems="flexEnd"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
     wrap={true}
   >
     <EuiFlexItem
       className="homRecentlyAccessed__flexItem"
-      component="div"
       grow={false}
     >
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
+      <EuiFlexGroup>
         <EuiFlexItem
           className="homRecentlyAccessed__item"
-          component="div"
           grow={false}
           style={
             Object {
@@ -77,7 +63,6 @@ exports[`render 1`] = `
         </EuiFlexItem>
         <EuiFlexItem
           className="homRecentlyAccessed__separator"
-          component="div"
           grow={false}
         >
           <EuiText
@@ -92,7 +77,6 @@ exports[`render 1`] = `
         </EuiFlexItem>
         <EuiFlexItem
           className="homRecentlyAccessed__item"
-          component="div"
           grow={false}
           style={
             Object {
@@ -119,7 +103,6 @@ exports[`render 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     />
   </EuiFlexGroup>

@@ -12,25 +12,16 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
   <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -86,25 +77,16 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
   <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -456,25 +438,16 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
   <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -823,25 +796,16 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
   <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"
@@ -889,25 +853,16 @@ exports[`DetailDrawer component shows vertex title 1`] = `
   <EuiFlyoutHeader>
     <EuiFlexGroup
       alignItems="baseline"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiIcon
           className="lspvDetailDrawerIcon"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="m"
           textTransform="none"

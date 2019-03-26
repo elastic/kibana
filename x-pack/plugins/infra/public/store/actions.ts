@@ -13,4 +13,4 @@ export {
   waffleOptionsActions,
   flyoutOptionsActions,
 } from './local';
-export { logEntriesActions, logSummaryActions } from './remote';
+export { logEntriesActions } from './remote';
