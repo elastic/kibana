@@ -74,10 +74,10 @@ module.exports = {
           //  the configuration we need in order to get it working there.
           //  Im thinking about disabling the rule on those files with
           //  in-file comments.
-          '@typescript-eslint/camelcase': ['error', {
-            'properties': 'never',
-            'ignoreDestructuring': true
-          }],
+          // '@typescript-eslint/camelcase': ['error', {
+          //   'properties': 'never',
+          //   'ignoreDestructuring': true
+          // }],
           '@typescript-eslint/class-name-casing': 'error',
           // TODO: disable this rule until a PR with more options to configure
           //       get merged and we can then reproduce the old behaviour
