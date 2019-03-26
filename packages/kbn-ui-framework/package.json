@@ -26,8 +26,8 @@
     "uuid": "3.0.1"
   },
   "peerDependencies": {
-    "enzyme": "3.2.0",
-    "enzyme-adapter-react-16": "^1.1.1"
+    "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.9.0"
   },
   "devDependencies": {
     "@elastic/eui": "0.0.23",

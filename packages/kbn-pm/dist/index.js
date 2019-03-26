@@ -4212,7 +4212,7 @@ const log = exports.log = {
    * @param  ...args
    */
   write(...args) {
-    // eslint-disable no-console
+    // eslint-disable-next-line no-console
     console.log(...args);
   }
 };
