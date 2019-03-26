@@ -75,7 +75,7 @@ export const SuggestionComponent: SFC<Props> = props => {
           // @ts-ignore
           dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
         /> */}
-        <div>{props.suggestion.description}</div>
+        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
       </div>
     </div>
   );

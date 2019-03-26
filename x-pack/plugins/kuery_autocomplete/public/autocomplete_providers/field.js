@@ -3,23 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React from 'react';
 import { escape, flatten } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from 'ui/index_patterns/static_utils';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 const type = 'field';
 
 function getDescription(fieldName) {
-  return '<p>' +
-    i18n.translate('xpack.kueryAutocomplete.filterResultsDescription', {
-      defaultMessage: 'Filter results that contain {fieldName}',
-      values: { fieldName: `<span className="kbnSuggestionItem__callout">${escape(fieldName)}</span>` }
-    }) +
-    '</p>';
+  // return '<p>' +
+  //   i18n.translate('xpack.kueryAutocomplete.filterResultsDescription', {
+  //     defaultMessage: 'Filter results that contain {fieldName}',
+  //     values: { fieldName: `<span className="kbnSuggestionItem__callout">${escape(fieldName)}</span>` }
+  //   }) +
+  //   '</p>';
+  return (
+    <p>
+      <FormattedMessage
+        id="xpack.kueryAutocomplete.filterResultsDescription"
+        defaultMessage="Filter results that contain {fieldName}"
+        values={{ fieldName: <span className="kbnSuggestionItem__callout">{escape(fieldName)}</span> }}
+      />
+    </p>
+  );
 }
 
 export function getSuggestionsProvider({ indexPatterns }) {
