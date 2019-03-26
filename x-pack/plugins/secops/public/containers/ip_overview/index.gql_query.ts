@@ -19,6 +19,20 @@ export const ipOverviewQuery = gql`
         source {
           firstSeen
           lastSeen
+          host {
+            architecture
+            id
+            ip
+            mac
+            name
+            os {
+              family
+              name
+              platform
+              version
+            }
+            type
+          }
           geo {
             continent_name
             city_name
@@ -35,6 +49,20 @@ export const ipOverviewQuery = gql`
         destination {
           firstSeen
           lastSeen
+          host {
+            architecture
+            id
+            ip
+            mac
+            name
+            os {
+              family
+              name
+              platform
+              version
+            }
+            type
+          }
           geo {
             continent_name
             city_name

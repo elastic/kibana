@@ -6,6 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const LAST_BEAT = i18n.translate('xpack.secops.network.ipDetails.ipOverview.lastBeatTitle', {
+  defaultMessage: 'Last Beat',
+});
+
 export const LOCATION = i18n.translate('xpack.secops.network.ipDetails.ipOverview.locationTitle', {
   defaultMessage: 'Location',
 });
@@ -21,12 +25,25 @@ export const LAST_SEEN = i18n.translate('xpack.secops.network.ipDetails.ipOvervi
   defaultMessage: 'Last Seen',
 });
 
-export const EXTERNAL_LINKS = i18n.translate(
-  'xpack.secops.network.ipDetails.ipOverview.externalLinksTitle',
+export const HOST_ID = i18n.translate('xpack.secops.network.ipDetails.ipOverview.hostIdTitle', {
+  defaultMessage: 'Host ID',
+});
+
+export const HOST_NAME = i18n.translate('xpack.secops.network.ipDetails.ipOverview.hostNameTitle', {
+  defaultMessage: 'Host Name',
+});
+
+export const WHOIS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.whoIsTitle', {
+  defaultMessage: 'WhoIs',
+});
+
+export const IP_INFORMATION = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.ipInformationTitle',
   {
-    defaultMessage: 'External Links',
+    defaultMessage: 'IP Analysis',
   }
 );
+
 export const AS_SOURCE = i18n.translate(
   'xpack.secops.network.ipDetails.ipOverview.asSourceDropDownOptionLabel',
   {

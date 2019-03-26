@@ -7,7 +7,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
@@ -20,6 +19,7 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
+import { PageContent, PageContentBody } from '../styles';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -29,14 +29,6 @@ const basePath = chrome.getBasePath();
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
 }
-
-const CustomPageContent = styled.div`
-  margin-top: 106px;
-`;
-
-const CustomPageContentBody = styled.div`
-  padding: 12px;
-`;
 
 type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
@@ -52,8 +44,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-            <CustomPageContent data-test-subj="pageContent">
-              <CustomPageContentBody data-test-subj="pane1ScrollContainer">
+            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
+              <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
                   {({ poll, to, from, setQuery }) => (
                     <IpOverviewQuery
@@ -77,8 +69,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     </IpOverviewQuery>
                   )}
                 </GlobalTime>
-              </CustomPageContentBody>
-            </CustomPageContent>
+              </PageContentBody>
+            </PageContent>
           </>
         ) : (
           <EmptyPage

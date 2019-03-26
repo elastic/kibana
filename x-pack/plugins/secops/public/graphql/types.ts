@@ -1476,7 +1476,39 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
+    host?: Host | null;
+
     geo?: Geo | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture?: string | null;
+
+    id?: string | null;
+
+    ip?: (string | null)[] | null;
+
+    mac?: (string | null)[] | null;
+
+    name?: string | null;
+
+    os?: Os | null;
+
+    type?: string | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsEcsFields';
+
+    family?: string | null;
+
+    name?: string | null;
+
+    platform?: string | null;
+
+    version?: string | null;
   };
 
   export type Geo = {
@@ -1512,7 +1544,39 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
+    host?: _Host | null;
+
     geo?: _Geo | null;
+  };
+
+  export type _Host = {
+    __typename?: 'HostEcsFields';
+
+    architecture?: string | null;
+
+    id?: string | null;
+
+    ip?: (string | null)[] | null;
+
+    mac?: (string | null)[] | null;
+
+    name?: string | null;
+
+    os?: _Os | null;
+
+    type?: string | null;
+  };
+
+  export type _Os = {
+    __typename?: 'OsEcsFields';
+
+    family?: string | null;
+
+    name?: string | null;
+
+    platform?: string | null;
+
+    version?: string | null;
   };
 
   export type _Geo = {

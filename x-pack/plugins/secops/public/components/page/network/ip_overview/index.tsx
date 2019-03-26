@@ -12,15 +12,18 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiText,
-  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { IpOverviewData, IpOverviewType } from '../../../../graphql/types';
+import { IpOverviewData, IpOverviewType, Overview } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
+import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
 
 import { SelectType } from './select_type';
 import * as i18n from './translations';
@@ -51,52 +54,97 @@ type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps
 class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {
     const { ip, data, loading, flowType } = this.props;
+
+    // TODO: Set as most recent or or from queryParam?
+    const typeData: Overview = data[flowType]!;
+
+    const fieldTitleMapping: Readonly<Array<{}>> = [
+      {
+        'geo.city_name': i18n.LOCATION,
+        'geo.country_name': i18n.LOCATION,
+      },
+      {
+        firstSeen: i18n.FIRST_SEEN,
+        lastSeen: i18n.LAST_SEEN,
+      },
+      {
+        'host.id': i18n.HOST_ID,
+        'host.name': i18n.HOST_NAME,
+      },
+      {
+        whois: i18n.WHOIS,
+        ip_information: i18n.IP_INFORMATION,
+      },
+    ];
+
     return (
-      <EuiFlexGroup direction="column">
-        <EuiHorizontalRule margin="xs" />
+      <>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h1>{ip}</h1>
-              </EuiText>
-            </EuiFlexItem>
-            <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
-              <SelectType
-                id={`${IpOverviewId}-select-type`}
-                selectedType={flowType}
-                onChangeType={this.onChangeType}
-                isLoading={loading}
-              />
-            </SelectTypeItem>
-          </EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiDescriptionList type="column" align="center" compressed>
-              <EuiDescriptionListTitle>{i18n.LAST_SEEN}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {data[flowType] && data[flowType]!.firstSeen}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
+            <EuiText>
+              <h1>{ip}</h1>
+            </EuiText>
           </EuiFlexItem>
+          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-type`}>
+            <SelectType
+              id={`${IpOverviewId}-select-type`}
+              selectedType={flowType}
+              onChangeType={this.onChangeType}
+              isLoading={loading}
+            />
+          </SelectTypeItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiText>
+          {i18n.LAST_BEAT}:{' '}
+          {typeData && typeData.lastSeen != null ? (
+            <EuiToolTip position="bottom" content={typeData.lastSeen}>
+              <FormattedRelative value={new Date(typeData.lastSeen)} />
+            </EuiToolTip>
+          ) : (
+            getEmptyTagValue()
+          )}
+        </EuiText>
+
+        <EuiSpacer size="s" />
         <EuiHorizontalRule margin="xs" />
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false} style={{ maxWidth: '400px' }}>
-            <EuiDescriptionList type="column" align="center" compressed>
-              <EuiDescriptionListTitle>{i18n.LAST_SEEN}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                {data[flowType] && data[flowType]!.lastSeen}
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-          </EuiFlexItem>
-          <EuiFlexItem />
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          {fieldTitleMapping.map(listDescriptor => this.getDescriptList(listDescriptor, typeData))}
         </EuiFlexGroup>
-        <EuiTitle size="s">
-          <h4>External Links:</h4>
-        </EuiTitle>
-      </EuiFlexGroup>
+      </>
     );
   }
+
+  private getDescriptListItem = (field: string, title: string, data: Overview) => {
+    const fieldValue = getOrEmptyTag(field, data);
+    return (
+      <>
+        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+        <EuiDescriptionListDescription>{fieldValue}</EuiDescriptionListDescription>
+        <EuiSpacer size="s" />
+      </>
+    );
+  };
+
+  private getDescriptList = (
+    fieldTitleMapping: Readonly<Record<string, string>>,
+    data: Overview
+  ) => {
+    return (
+      <EuiFlexItem>
+        {Object.entries(fieldTitleMapping).map(([field, title], index) => (
+          <EuiDescriptionList key={index}>
+            {this.getDescriptListItem(field, title, data)}
+          </EuiDescriptionList>
+        ))}
+      </EuiFlexItem>
+    );
+  };
+
   private onChangeType = (flowType: IpOverviewType) => {
     this.props.updateIpOverviewFlowType({ flowType });
   };
