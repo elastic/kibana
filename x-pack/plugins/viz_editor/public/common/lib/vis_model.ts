@@ -97,7 +97,7 @@ export function initialState(): VisModel<any, any> {
         indexPattern: 'index-pattern:aaa',
         select: {
           q1_0: { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
-          q1_1: { operation: 'sum', argument: 'bytes' },
+          q1_1: { operation: 'sum', argument: { field: 'bytes' } },
         },
       },
     },

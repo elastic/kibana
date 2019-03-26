@@ -12,9 +12,13 @@ export interface Aliasable {
   alias?: string;
 }
 
-export interface Column extends Aliasable {
-  operation: 'col';
-  argument: string;
+export interface Field {
+  field: string;
+}
+
+export interface ColumnOperation extends Aliasable {
+  operation: 'column';
+  argument: Field;
 }
 
 export interface DateHistogramOperation extends Aliasable {
@@ -27,12 +31,12 @@ export interface DateHistogramOperation extends Aliasable {
 
 export interface SumOperation extends Aliasable {
   operation: 'sum';
-  argument: string;
+  argument: Field;
 }
 
 export interface AvgOperation extends Aliasable {
   operation: 'avg';
-  argument: string;
+  argument: Field;
 }
 
 export interface CountOperation extends Aliasable {
@@ -40,7 +44,7 @@ export interface CountOperation extends Aliasable {
 }
 
 export type SelectOperation =
-  | Column
+  | ColumnOperation
   | DateHistogramOperation
   | SumOperation
   | CountOperation
@@ -62,7 +66,7 @@ export interface LitDate {
 
 type Literal = LitAtomic | LitDate;
 
-type ComparisonArg = Literal | Column;
+type ComparisonArg = Literal | ColumnOperation;
 
 export interface Eq {
   operation: '=';
