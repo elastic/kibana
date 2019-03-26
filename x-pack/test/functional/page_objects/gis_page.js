@@ -55,7 +55,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       log.debug('Wait for layers to load');
       const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
-        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+        await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
 
@@ -170,6 +170,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
       await this.waitForLayersToLoad();
+      // there is no way to wait for canvas been reloaded
+      await PageObjects.common.sleep(5000);
     }
 
     async getView() {
