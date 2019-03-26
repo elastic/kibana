@@ -16,22 +16,44 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { openFlyout } from 'ui/flyout';
+
 import {
   ContextMenuAction,
   ContextMenuActionsRegistryProvider,
+  PanelActionAPI,
 } from 'ui/embeddable';
 
-class SamplePanelLink extends ContextMenuAction {
+class SamplePanelAction extends ContextMenuAction {
   constructor() {
     super({
-      displayName: 'Sample Panel Link',
-      id: 'samplePanelLink',
+      displayName: 'Sample Panel Action',
+      id: 'samplePanelAction',
       parentPanelId: 'mainMenu',
     });
   }
-  getHref() {
-    return 'https://example.com/kibana/test';
-  }
+  public onClick = ({ embeddable }: PanelActionAPI) => {
+    if (!embeddable) {
+      return;
+    }
+    openFlyout(
+      <React.Fragment>
+        <EuiFlyoutHeader>
+          <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
+            <h1>{embeddable.metadata.title}</h1>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
+        </EuiFlyoutBody>
+      </React.Fragment>,
+      {
+        'data-test-subj': 'samplePanelActionFlyout',
+      }
+    );
+  };
 }
 
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());
+ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());
