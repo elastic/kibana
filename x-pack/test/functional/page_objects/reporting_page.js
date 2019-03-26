@@ -126,7 +126,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
 
     async clearToastNotifications() {
       const toasts = await testSubjects.findAll('toastCloseButton');
-      await Promise.all(toasts.map(t => t.click()));
+      await Promise.all(toasts.map(async t => await t.click()));
     }
 
     async getQueueReportError() {
@@ -134,7 +134,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async getGenerateReportButton() {
-      return await retry.try(() => testSubjects.find('generateReportButton'));
+      return await retry.try(async () => await testSubjects.find('generateReportButton'));
     }
 
     async checkUsePrintLayout() {
@@ -146,16 +146,20 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
     }
 
     async clickGenerateReportButton() {
-      await retry.try(() => testSubjects.click('generateReportButton'));
+      await testSubjects.click('generateReportButton');
     }
 
     async checkForReportingToasts() {
       log.debug('Reporting:checkForReportingToasts');
       const isToastPresent = await testSubjects.exists('completeReportSuccess', {
-        timeout: 60000
+        allowHidden: true,
+        timeout: 90000
       });
       // Close toast so it doesn't obscure the UI.
-      await testSubjects.click('completeReportSuccess toastCloseButton');
+      if (isToastPresent) {
+        await testSubjects.click('completeReportSuccess toastCloseButton');
+      }
+
       return isToastPresent;
     }
 

@@ -317,10 +317,6 @@ export function estimateBucketSpanFactory(callWithRequest, server) {
       throw new Error('Invalid formConfig: Missing fields.');
     }
 
-    if (typeof formConfig.filters === 'undefined') {
-      throw new Error('Invalid formConfig: Missing filters.');
-    }
-
     if (typeof formConfig.query === 'undefined') {
       throw new Error('Invalid formConfig: Missing query.');
     }

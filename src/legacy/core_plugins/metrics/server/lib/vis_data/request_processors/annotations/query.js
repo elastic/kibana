@@ -34,9 +34,9 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
     const timerange = {
       range: {
         [timeField]: {
-          gte: from.valueOf(),
-          lte: to.valueOf() - bucketSize * 1000,
-          format: 'epoch_millis',
+          gte: from.toISOString(),
+          lte: to.subtract(bucketSize, 'seconds').toISOString(),
+          format: 'strict_date_optional_time',
         },
       },
     };

@@ -392,3 +392,33 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "dashboard:19906970-2e40-11e9-85cb-6965aae20f13",
+    "index": ".kibana",
+    "source": {
+      "dashboard": {
+        "description": "",
+        "hits": 0,
+        "kibanaSavedObjectMeta": {
+          "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"}}"
+        },
+        "optionsJSON": "{\"darkTheme\":false,\"useMargins\":true,\"hidePanelTitles\":false}",
+        "panelsJSON": "[{\"embeddableConfig\":{},\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":20,\"i\":\"1\"},\"id\":\"1649cc70-f736-11e8-8ce0-9723965e01e3\",\"panelIndex\":\"1\",\"type\":\"map\",\"version\":\"7.0.0-alpha1\"},{\"embeddableConfig\":{},\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":20,\"i\":\"2\"},\"id\":\"88845ec0-03ae-11e9-83d4-5b39b6575325\",\"panelIndex\":\"2\",\"type\":\"map\",\"version\":\"7.0.0-alpha1\"}]",
+        "refreshInterval": {
+          "pause": true,
+          "value": 1000
+        },
+        "timeFrom": "2015-09-20T00:00:00.000Z",
+        "timeRestore": true,
+        "timeTo": "2015-09-20T01:00:00.000Z",
+        "title": "map embeddable example",
+        "version": 1
+      },
+      "type": "dashboard",
+      "updated_at": "2018-04-11T21:57:52.253Z"
+    }
+  }
+}

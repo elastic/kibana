@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { columns } from '../columns';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyTable, testTable } from './fixtures/test_tables';

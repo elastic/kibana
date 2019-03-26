@@ -11,14 +11,11 @@ coming[8.0.0]
 
 See also <<release-highlights>> and <<release-notes>>.
 
-[float]
-=== `DATA_PATH` environment variable is no longer used
-*Details:* Previous versions of Kibana would read this to set the default `path.data`
+////
+The following section is re-used in the Installation and Upgrade Guide
+[[breaking_80_notable]]
+=== Notable breaking changes
+////
+// tag::notable-breaking-changes[]
 
-*Impact:* `kibana.yml` now supports environment variable interpolation and should be used instead.
-
-[float]
-=== `CONFIG_PATH` environment variable has been replaced with `KIBANA_PATH_CONF`
-*Details:* Previous versions of Kibana would use `CONFIG_PATH` as a path to `kibana.yml`
-
-*Impact:* `KIBANA_PATH_CONF` should be used instead, pointing to a configuration folder
+// end::notable-breaking-changes[]

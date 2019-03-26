@@ -80,16 +80,6 @@ export const pagesReducer = handleActions(
       return setPageIndex(workpadState, payload);
     },
 
-    [actions.gotoPage]: (workpadState, { payload }) => {
-      const newState = setPageIndex(workpadState, payload);
-
-      // changes to the page require navigation
-      const router = routerProvider();
-      router.navigateTo('loadWorkpad', { id: newState.id, page: newState.page + 1 });
-
-      return newState;
-    },
-
     [actions.movePage]: (workpadState, { payload }) => {
       const { id, position } = payload;
       const pageIndex = getPageIndexById(workpadState, id);

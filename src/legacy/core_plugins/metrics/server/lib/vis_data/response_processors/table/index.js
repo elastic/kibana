@@ -21,11 +21,12 @@
 import stdMetric from './std_metric';
 import stdSibling from './std_sibling';
 import seriesAgg from './series_agg';
+import percentile from './percentile';
 import { math } from './math';
 import { dropLastBucketFn } from './drop_last_bucket';
 
 export default [
-  // percentile,
+  percentile,
   stdMetric,
   stdSibling,
   math,

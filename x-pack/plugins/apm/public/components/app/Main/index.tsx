@@ -12,8 +12,7 @@ import { px, topNavHeight, unit, units } from '../../../style/variables';
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
-// @ts-ignore
-import ScrollToTopOnPathChange from './ScrollToTopOnPathChange';
+import { ScrollToTopOnPathChange } from './ScrollToTopOnPathChange';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 
 const MainContainer = styled.div`

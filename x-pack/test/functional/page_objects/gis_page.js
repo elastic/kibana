@@ -258,37 +258,29 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText(`layerErrorMessage`);
     }
 
-    async openInspectorView(viewId) {
-      await inspector.open();
-      log.debug(`Open Inspector view ${viewId}`);
-      await testSubjects.click('inspectorViewChooser');
-      await testSubjects.click(viewId);
-    }
-
     async openInspectorMapView() {
-      await this.openInspectorView('inspectorViewChooserMap');
-    }
-
-    async openInspectorRequestsView() {
-      await this.openInspectorView('inspectorViewChooserRequests');
+      await inspector.openInspectorView('inspectorViewChooserMap');
     }
 
     // Method should only be used when multiple requests are expected
     // RequestSelector will only display inspectorRequestChooser when there is more than one request
     async openInspectorRequest(requestName) {
-      await this.openInspectorView('inspectorViewChooserRequests');
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       log.debug(`Open Inspector request ${requestName}`);
       await testSubjects.click('inspectorRequestChooser');
       await testSubjects.click(`inspectorRequestChooser${requestName}`);
     }
 
     async doesInspectorHaveRequests() {
-      await this.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       return await testSubjects.exists('inspectorNoRequestsMessage');
     }
 
     async getMapboxStyle() {
       log.debug('getMapboxStyle');
+      await inspector.open();
       await this.openInspectorMapView();
       await testSubjects.click('mapboxStyleTab');
       const mapboxStyleContainer = await testSubjects.find('mapboxStyleContainer');

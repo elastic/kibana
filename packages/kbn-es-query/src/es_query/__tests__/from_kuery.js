@@ -19,7 +19,7 @@
 
 import { buildQueryFromKuery } from '../from_kuery';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 
 describe('build query', function () {

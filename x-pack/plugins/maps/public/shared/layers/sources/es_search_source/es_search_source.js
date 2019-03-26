@@ -13,14 +13,20 @@ import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 const DEFAULT_LIMIT = 2048;
 
 export class ESSearchSource extends AbstractESSource {
 
   static type = ES_SEARCH;
-  static title = 'Documents';
-  static description = 'Geospatial data from a Kibana index pattern';
+  static title = i18n.translate('xpack.maps.source.esSearchTitle', {
+    defaultMessage: 'Documents'
+  });
+  static description = i18n.translate('xpack.maps.source.esSearchDescription', {
+    defaultMessage: 'Geospatial data from a Kibana index pattern'
+  });
 
   static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
@@ -96,14 +102,32 @@ export class ESSearchSource extends AbstractESSource {
     }
 
     return [
-      { label: 'Data source', value: ESSearchSource.title },
-      { label: 'Index pattern', value: indexPatternTitle },
-      { label: 'Geospatial field', value: this._descriptor.geoField },
-      { label: 'Geospatial field type', value: geoFieldType },
+      {
+        label: getDataSourceLabel(),
+        value: ESSearchSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
+          defaultMessage: `Index pattern`,
+        }),
+        value: indexPatternTitle
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
+          defaultMessage: 'Geospatial field',
+        }),
+        value: this._descriptor.geoField
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esSearch.geoFieldTypeLabel', {
+          defaultMessage: 'Geospatial field type',
+        }),
+        value: geoFieldType
+      },
     ];
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters) {
     const searchSource = await this._makeSearchSource(searchFilters, this._descriptor.limit);
     // Setting "fields" instead of "source: { includes: []}"
     // because SearchSource automatically adds the following by default
@@ -143,7 +167,7 @@ export class ESSearchSource extends AbstractESSource {
     return this._descriptor.tooltipProperties.length > 0;
   }
 
-  async filterAndFormatProperties(properties) {
+  async filterAndFormatPropertiesToHtml(properties) {
     const filteredProperties = {};
     this._descriptor.tooltipProperties.forEach(propertyName => {
       filteredProperties[propertyName] = _.get(properties, propertyName, '-');
@@ -162,8 +186,9 @@ export class ESSearchSource extends AbstractESSource {
       if (!field) {
         return;
       }
-
-      filteredProperties[propertyName] = field.format.convert(filteredProperties[propertyName]);
+      const htmlConverter = field.format.getConverterFor('html');
+      filteredProperties[propertyName] = (htmlConverter) ? htmlConverter(filteredProperties[propertyName]) :
+        field.format.convert(filteredProperties[propertyName]);
     });
 
     return filteredProperties;

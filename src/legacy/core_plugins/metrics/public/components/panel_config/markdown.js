@@ -279,11 +279,12 @@ class MarkdownPanelConfigUi extends Component {
           <EuiTab
             isSelected={selectedTab === 'markdown'}
             onClick={() => this.switchTab('markdown')}
+            data-test-subj="markdown-subtab"
           >
             Markdown
           </EuiTab>
           <EuiTab
-            data-test-subj="markdownDataBtn"
+            data-test-subj="data-subtab"
             isSelected={selectedTab === 'data'}
             onClick={() => this.switchTab('data')}
           >
@@ -295,6 +296,7 @@ class MarkdownPanelConfigUi extends Component {
           <EuiTab
             isSelected={selectedTab === 'options'}
             onClick={() => this.switchTab('options')}
+            data-test-subj="options-subtab"
           >
             <FormattedMessage
               id="tsvb.markdown.optionsTab.panelOptionsButtonLabel"

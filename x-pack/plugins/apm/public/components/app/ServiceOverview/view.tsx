@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel } from '@elastic/eui';
 import React, { Component } from 'react';
 import { RRRRenderResponse } from 'react-redux-request';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -42,7 +43,7 @@ export class ServiceOverview extends Component<Props, State> {
     // to make it easier to test -- mapStateToProps uses the RRR selector so the data
     // is the same either way
     return (
-      <div>
+      <EuiPanel>
         <ServiceListRequest
           urlParams={urlParams}
           render={() => (
@@ -56,7 +57,7 @@ export class ServiceOverview extends Component<Props, State> {
             />
           )}
         />
-      </div>
+      </EuiPanel>
     );
   }
 }

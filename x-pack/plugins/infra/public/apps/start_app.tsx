@@ -21,6 +21,7 @@ import { I18nContext } from 'ui/i18n';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
 import { createStore } from '../store';
+import { ApolloClientContext } from '../utils/apollo_context';
 
 export async function startApp(libs: InfraFrontendLibs) {
   const history = createHashHistory();
@@ -37,14 +38,16 @@ export async function startApp(libs: InfraFrontendLibs) {
         <ConstateProvider devtools>
           <ReduxStoreProvider store={store}>
             <ApolloProvider client={libs.apolloClient}>
-              <ThemeProvider
-                theme={() => ({
-                  eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
-                  darkMode: libs.framework.darkMode,
-                })}
-              >
-                <PageRouter history={history} />
-              </ThemeProvider>
+              <ApolloClientContext.Provider value={libs.apolloClient}>
+                <ThemeProvider
+                  theme={() => ({
+                    eui: libs.framework.darkMode ? euiDarkVars : euiLightVars,
+                    darkMode: libs.framework.darkMode,
+                  })}
+                >
+                  <PageRouter history={history} />
+                </ThemeProvider>
+              </ApolloClientContext.Provider>
             </ApolloProvider>
           </ReduxStoreProvider>
         </ConstateProvider>

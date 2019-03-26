@@ -159,7 +159,6 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
     </EuiTextColor>
   </Component>
   <EuiHorizontalRule
-    margin="l"
     size="half"
   >
     <hr
@@ -245,27 +244,20 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
       </p>
     </div>
   </EuiText>
-  <EuiSpacer
-    size="l"
-  >
+  <EuiSpacer>
     <div
       className="euiSpacer euiSpacer--l"
     />
   </EuiSpacer>
   <EuiFlexGroup
     alignItems="center"
-    component="div"
-    direction="row"
     gutterSize="s"
     justifyContent="spaceAround"
-    responsive={true}
-    wrap={false}
   >
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <div
@@ -277,6 +269,7 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             fill={true}
             iconSide="left"
             onClick={[Function]}
+            size="m"
             type="button"
           >
             <button

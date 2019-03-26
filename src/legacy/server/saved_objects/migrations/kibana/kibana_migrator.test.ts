@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { KbnServer, KibanaMigrator } from './kibana_migrator';
 
 describe('KibanaMigrator', () => {
@@ -67,16 +66,16 @@ describe('KibanaMigrator', () => {
 
     it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
-      const clusterStub = sinon.stub();
-      const waitUntilReady = sinon.spy(async () => undefined);
-
-      clusterStub.throws(new Error('Doh!'));
+      const clusterStub = jest.fn<any, any>(() => {
+        throw new Error('Doh!');
+      });
+      const waitUntilReady = jest.fn(async () => undefined);
 
       kbnServer.server.plugins.elasticsearch = {
         waitUntilReady,
         getCluster() {
-          sinon.assert.calledOnce(kbnServer.ready as any);
-          sinon.assert.calledOnce(waitUntilReady);
+          expect(kbnServer.ready as any).toHaveBeenCalledTimes(1);
+          expect(waitUntilReady).toHaveBeenCalledTimes(1);
 
           return {
             callWithInternalUser: clusterStub,
@@ -90,10 +89,10 @@ describe('KibanaMigrator', () => {
 });
 
 function mockKbnServer({ configValues }: { configValues?: any } = {}) {
-  const callCluster = sinon.stub();
+  const callCluster = jest.fn();
   const kbnServer: KbnServer = {
     version: '8.2.3',
-    ready: sinon.spy(async () => undefined),
+    ready: jest.fn(async () => undefined),
     uiExports: {
       savedObjectValidations: {},
       savedObjectMigrations: {},

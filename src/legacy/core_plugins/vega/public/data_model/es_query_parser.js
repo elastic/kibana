@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import moment from 'moment';
 import { i18n }  from '@kbn/i18n';
 
 const TIMEFILTER = '%timefilter%';
@@ -268,9 +269,9 @@ export class EsQueryParser {
    * @return {object}
    */
   _createRangeFilter(obj) {
-    obj.gte = this._getTimeBound(obj, 'min');
-    obj.lte = this._getTimeBound(obj, 'max');
-    obj.format = 'epoch_millis';
+    obj.gte = moment(this._getTimeBound(obj, 'min')).toISOString();
+    obj.lte = moment(this._getTimeBound(obj, 'max')).toISOString();
+    obj.format = 'strict_date_optional_time';
     delete obj[TIMEFILTER];
     delete obj.shift;
     delete obj.unit;

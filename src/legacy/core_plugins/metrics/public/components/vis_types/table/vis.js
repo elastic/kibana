@@ -20,12 +20,15 @@
 import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { fieldFormats } from 'ui/registry/field_formats';
 import tickFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const DateFormat = fieldFormats.getType('date');
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -41,23 +44,34 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
+const getPercentileLabel = (metric, item) => {
+  const { value } = _.last(metric.percentiles);
+  const label = calculateLabel(metric, item.metrics);
+  return `${label}, ${value || 0}`;
+};
+
 class TableVis extends Component {
 
   constructor(props) {
     super(props);
-    this.renderRow = this.renderRow.bind(this);
+    this.dateFormatter = new DateFormat({}, this.props.getConfig);
   }
 
-  renderRow(row) {
+  get visibleSeries() {
+    return _
+      .get(this.props, 'model.series', [])
+      .filter(series => !series.hidden);
+  }
+
+  renderRow = row => {
     const { model } = this.props;
-    const rowId = row.key;
-    let rowDisplay = rowId;
+    let rowDisplay = model.pivot_type === 'date' ? this.dateFormatter.convert(row.key) : row.key;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = (<a href={url}>{rowDisplay}</a>);
     }
     const columns = row.series.filter(item => item).map(item => {
-      const column = model.series.find(c => c.id === item.id);
+      const column = this.visibleSeries.find(c => c.id === item.id);
       if (!column) return null;
       const formatter = tickFormatter(column.formatter, column.value_template, this.props.getConfig);
       const value = formatter(item.last);
@@ -66,36 +80,39 @@ class TableVis extends Component {
         const trendIcon = item.slope > 0 ? 'sortUp' : 'sortDown';
         trend = (
           <span>
-            &nbsp; <EuiIcon type={trendIcon} color="subdued" />
+            &nbsp; <EuiIcon type={trendIcon} color="subdued"/>
           </span>
         );
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
-          <span>{ value }</span>
+        <td key={`${row.key}-${item.id}`} data-test-subj="tvbTableVis__value" className="eui-textRight" style={style}>
+          <span>{value}</span>
           {trend}
         </td>
       );
     });
     return (
-      <tr key={rowId}>
+      <tr key={row.key}>
         <td>{rowDisplay}</td>
         {columns}
       </tr>
     );
-  }
+  };
 
   renderHeader() {
     const { model, uiState, onUiState } = this.props;
     const stateKey = `${model.type}.sort`;
     const sort = uiState.get(stateKey, {
       column: '_default_',
-      order: 'asc'
+      order: 'asc',
     });
-    const columns  = model.series.map(item => {
+
+    const columns = this.visibleSeries.map(item => {
       const metric = _.last(item.metrics);
-      const label = item.label || calculateLabel(metric, item.metrics);
+      const label = metric.type === 'percentile' ?
+        getPercentileLabel(metric, item) :
+        item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
@@ -115,7 +132,7 @@ class TableVis extends Component {
           sortIcon = 'empty';
         }
         sortComponent = (
-          <EuiIcon type={sortIcon} />
+          <EuiIcon type={sortIcon}/>
         );
       }
       let headerContent = (
@@ -152,7 +169,7 @@ class TableVis extends Component {
       sortIcon = 'empty';
     }
     const sortComponent = (
-      <EuiIcon type={sortIcon} />
+      <EuiIcon type={sortIcon}/>
     );
     const handleSortClick = () => {
       let order;
@@ -166,7 +183,7 @@ class TableVis extends Component {
     return (
       <tr>
         <th className="eui-textLeft" scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
-        { columns }
+        {columns}
       </tr>
     );
   }
@@ -191,14 +208,14 @@ class TableVis extends Component {
       rows = (
         <tr>
           <td
-            colSpan={model.series.length + 1}
+            colSpan={this.visibleSeries.length + 1}
           >
             {message}
           </td>
         </tr>
       );
     }
-    return(
+    return (
       <div className="tvbVis" data-test-subj="tableView">
         <table className="table">
           <thead>
@@ -215,7 +232,7 @@ class TableVis extends Component {
 }
 
 TableVis.defaultProps = {
-  sort: {}
+  sort: {},
 };
 
 TableVis.propTypes = {
@@ -226,7 +243,7 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  getConfig: PropTypes.func
+  getConfig: PropTypes.func,
 };
 
 export default TableVis;

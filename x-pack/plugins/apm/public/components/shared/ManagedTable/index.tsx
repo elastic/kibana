@@ -36,7 +36,7 @@ interface Props<T> {
   hidePerPageOptions?: boolean;
   initialSort?: {
     field: keyof T;
-    direction: 'asc' | 'desc';
+    direction: string;
   };
   noItemsMessage?: React.ReactNode;
 }

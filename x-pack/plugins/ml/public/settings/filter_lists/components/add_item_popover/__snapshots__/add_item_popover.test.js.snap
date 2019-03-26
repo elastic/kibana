@@ -42,6 +42,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiTextArea
           fullWidth={false}
@@ -65,16 +66,9 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
       size="s"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -83,6 +77,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -139,6 +134,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiTextArea
           fullWidth={false}
@@ -162,16 +158,9 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
       size="s"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -180,6 +169,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -236,6 +226,7 @@ exports[`AddItemPopover renders the popover 1`] = `
             values={Object {}}
           />
         }
+        labelType="label"
       >
         <EuiTextArea
           fullWidth={false}
@@ -259,16 +250,9 @@ exports[`AddItemPopover renders the popover 1`] = `
       size="s"
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -277,6 +261,7 @@ exports[`AddItemPopover renders the popover 1`] = `
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

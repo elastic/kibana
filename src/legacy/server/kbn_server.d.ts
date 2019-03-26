@@ -19,6 +19,10 @@
 
 import { Server } from 'hapi';
 
+import { ConfigService } from '../../core/server/config';
+import { ElasticsearchServiceSetup } from '../../core/server/elasticsearch';
+import { HttpServerInfo } from '../../core/server/http/';
+import { PluginsServiceSetup } from '../../core/server/plugins/plugins_service';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -27,6 +31,7 @@ import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
+  has(key: string): boolean;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -43,6 +48,7 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
   }
 
   interface Request {
@@ -53,8 +59,21 @@ declare module 'hapi' {
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-
+type Unpromise<T> = T extends Promise<infer U> ? U : T;
 export default class KbnServer {
+  public readonly newPlatform: {
+    start: {
+      core: {
+        elasticsearch: ElasticsearchServiceSetup;
+      };
+      plugins: PluginsServiceSetup;
+    };
+    stop: null;
+    params: {
+      serverOptions: HttpServerInfo;
+      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+    };
+  };
   public server: Server;
   public inject: Server['inject'];
 
