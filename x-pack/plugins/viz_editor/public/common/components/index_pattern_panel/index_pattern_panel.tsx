@@ -4,18 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiIcon,
-  // @ts-ignore
-  EuiSuperSelect,
-  ICON_TYPES,
-} from '@elastic/eui';
+import { EuiComboBox, EuiIcon, ICON_TYPES } from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
 import zipObject from 'lodash-es/zipObject';
 import React, { useEffect, useState } from 'react';
 import chrome from 'ui/chrome';
-import { IndexPatterns } from '../../lib';
+import { IndexPatternField, IndexPatterns } from '../../lib';
 import { getIndexPatterns } from '../../lib/index_patterns';
 
 interface Props {
@@ -32,6 +27,10 @@ function initialState(): State {
   return {
     selectedIndexPatternId: settingsClient.get('defaultIndex') || '',
   };
+}
+
+function fieldSortFn(fieldA: IndexPatternField, fieldB: IndexPatternField) {
+  return fieldA.name < fieldB.name ? -1 : 1;
 }
 
 export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
@@ -70,27 +69,28 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
-    text: title,
+  const indexPatternsAsSelections = Object.values(indexPatterns).map(({ id, title }) => ({
+    label: title,
     value: id,
-    inputDisplay: title,
   }));
 
   return (
     <>
-      <EuiSuperSelect
-        options={indexPatternNames}
-        valueOfSelected={state.selectedIndexPatternId}
-        onChange={(value: string) => {
+      <EuiComboBox
+        options={indexPatternsAsSelections}
+        singleSelection={{ asPlainText: true }}
+        selectedOptions={[{ label: indexPattern.title, value: state.selectedIndexPatternId }]}
+        isClearable={false}
+        onChange={([{ value }]) => {
           setState({
             ...state,
-            selectedIndexPatternId: value,
+            selectedIndexPatternId: value as string,
           });
         }}
       />
 
       <div className="indexPatternPanel">
-        {indexPattern.fields.map(field => (
+        {indexPattern.fields.sort(fieldSortFn).map(field => (
           <button
             type="button"
             key={field.name}
