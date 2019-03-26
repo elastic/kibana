@@ -10,7 +10,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { EuiButton, EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { DefinePivot, PivotState } from './define_pivot';
+import { DefinePivot, DefinePivotExposedState, getDefaultPivotState } from './define_pivot';
 
 const DefinePivotBlur = () => <p>This is not the current step.</p>;
 
@@ -59,15 +59,19 @@ interface Props {
 
 export const Wizard: SFC<Props> = ({ indexPattern }) => {
   const [step, setStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
-  const [pivotValid, setPivotValid] = useState(false);
+  const [pivotState, setPivot] = useState(getDefaultPivotState());
 
-  function definePivotHandler(config: PivotState) {
-    setPivotValid(config.valid);
+  function definePivotHandler(config: DefinePivotExposedState) {
+    setPivot(config);
   }
 
   const pivot =
     step === WIZARD_STEPS.DEFINE_PIVOT ? (
-      <DefinePivot indexPattern={indexPattern} onChange={definePivotHandler} />
+      <DefinePivot
+        indexPattern={indexPattern}
+        onChange={definePivotHandler}
+        overrides={pivotState}
+      />
     ) : (
       <DefinePivotBlur />
     );
@@ -81,7 +85,10 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
         <Fragment>
           {pivot}
           {step === WIZARD_STEPS.DEFINE_PIVOT && (
-            <WizardNav next={() => setStep(WIZARD_STEPS.JOB_DETAILS)} nextActive={pivotValid} />
+            <WizardNav
+              next={() => setStep(WIZARD_STEPS.JOB_DETAILS)}
+              nextActive={pivotState.valid}
+            />
           )}
         </Fragment>
       ),

@@ -36,38 +36,53 @@ import {
   SimpleQuery,
 } from './common';
 
-export interface PivotState {
+export interface DefinePivotExposedState {
   aggList: Label[];
   groupBy: Label[];
-  query: SimpleQuery;
+  search: string;
   valid: boolean;
 }
 
-interface Props {
-  indexPattern: StaticIndexPattern;
-  onChange(s: PivotState): void;
+const defaultSearch = '*';
+const emptySearch = '';
+
+export function getDefaultPivotState() {
+  return {
+    aggList: [],
+    groupBy: [],
+    search: defaultSearch,
+    valid: false,
+  } as DefinePivotExposedState;
 }
 
-export const DefinePivot: SFC<Props> = ({ indexPattern, onChange }) => {
+interface Props {
+  overrides?: DefinePivotExposedState;
+  indexPattern: StaticIndexPattern;
+  onChange(s: DefinePivotExposedState): void;
+}
+
+export const DefinePivot: SFC<Props> = React.memo(({ overrides = {}, indexPattern, onChange }) => {
+  const defaults = { ...getDefaultPivotState(), ...overrides };
+
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
 
   // The search filter
-  const [search, setSearch] = useState('*');
+  const [search, setSearch] = useState(defaults.search);
 
   const addToSearch = (newSearch: string) => {
-    const currentDisplaySearch = search === '*' ? '' : search;
+    const currentDisplaySearch = search === defaultSearch ? emptySearch : search;
     setSearch(`${currentDisplaySearch} ${newSearch}`.trim());
   };
 
   const searchHandler = (d: ChangeEvent<HTMLInputElement>) => {
-    const newSearch = d.currentTarget.value === '' ? '*' : d.currentTarget.value;
+    const newSearch = d.currentTarget.value === emptySearch ? defaultSearch : d.currentTarget.value;
     setSearch(newSearch);
   };
 
   // The list of selected group by fields
-  const [groupBy, setGroupBy] = useState([] as Label[]);
+  const [groupBy, setGroupBy] = useState(defaults.groupBy as Label[]);
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
@@ -81,7 +96,7 @@ export const DefinePivot: SFC<Props> = ({ indexPattern, onChange }) => {
   };
 
   // The list of selected aggregations
-  const [aggList, setAggList] = useState([] as Label[]);
+  const [aggList, setAggList] = useState(defaults.aggList as Label[]);
 
   const addAggregation = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
@@ -136,9 +151,9 @@ export const DefinePivot: SFC<Props> = ({ indexPattern, onChange }) => {
   useEffect(
     () => {
       const valid = pivotGroupBy.length > 0 && aggList.length > 0;
-      onChange({ query: pivotQuery, groupBy: pivotGroupBy, aggList, valid });
+      onChange({ groupBy: pivotGroupBy, aggList, search, valid });
     },
-    [pivotQuery, pivotGroupBy, aggList]
+    [pivotGroupBy, aggList, search]
   );
 
   const displaySearch = search === '*' ? '' : search;
@@ -201,4 +216,4 @@ export const DefinePivot: SFC<Props> = ({ indexPattern, onChange }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
