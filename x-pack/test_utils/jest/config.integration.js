@@ -12,6 +12,9 @@ export default {
   testMatch: [
     `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.js`,
     `**/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.ts`,
+    // Tests within `__jest__` directories should be treated as regular unit tests.
+    `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.js`,
+    `!**/__jest__/${RESERVED_DIR_JEST_INTEGRATION_TESTS}/**/*.test.ts`,
   ],
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes(RESERVED_DIR_JEST_INTEGRATION_TESTS)
