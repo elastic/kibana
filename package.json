@@ -90,8 +90,7 @@
       "**/@types/*/**",
       "**/grunt-*",
       "**/grunt-*/**",
-      "x-pack/typescript",
-      "kbn_tp_*/**"
+      "x-pack/typescript"
     ]
   },
   "dependencies": {
