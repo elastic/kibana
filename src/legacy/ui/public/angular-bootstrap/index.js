@@ -21,18 +21,10 @@ uiModules.get('kibana', [
  * License: MIT
  */
 angular.module('ui.bootstrap', [
-  'ui.bootstrap.tpls',
-  'ui.bootstrap.transition',
   'ui.bootstrap.bindHtml',
   'ui.bootstrap.modal',
   'ui.bootstrap.tooltip',
-]);
-
-angular.module('ui.bootstrap.tpls', [
-  'template/modal/backdrop.html',
-  'template/modal/window.html',
-  'template/tooltip/tooltip-html-unsafe-popup.html',
-  'template/tooltip/tooltip-popup.html',
+  'ui.bootstrap.timepicker',
 ]);
 
 import './bindHtml/bindHtml';

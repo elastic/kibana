@@ -30,7 +30,9 @@ require('./src/directives/sense_history');
 require('./src/directives/sense_settings');
 require('./src/directives/sense_help');
 require('./src/directives/sense_welcome');
-require('./src/directives/console_menu_directive');
+
+// React components with Angular directive
+require('./src/console_menu');
 
 
 uiRoutes.when('/dev_tools/console', {
