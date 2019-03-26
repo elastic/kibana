@@ -5,54 +5,65 @@
  */
 
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { compose, shouldUpdate } from 'recompose';
+import { connectAdvanced } from 'react-redux';
+import { compose, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
-const mapStateToProps = (state, { element }) => ({
-  resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
-  selectedPage: getSelectedPage(state),
-});
+function selectorFactory(dispatch) {
+  let result = {};
+  const createHandlers = createHandlersWithDispatch(dispatch);
 
-const mapDispatchToProps = (dispatch, { element }) => ({
-  createHandlers: pageId => createHandlersWithDispatch(element, pageId, dispatch),
-});
+  return (nextState, nextOwnProps) => {
+    const { element, ...restOwnProps } = nextOwnProps;
+    const { transformMatrix, width, height } = element;
 
-const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { resolvedArg, selectedPage } = stateProps;
-  const { element, ...restProps } = ownProps;
-  const { id, transformMatrix, width, height, expression, filter } = element;
+    const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
+    const selectedPage = getSelectedPage(nextState);
 
-  return {
-    selectedPage,
-    ...restProps, // pass through unused props
-    id, //pass through useful parts of the element object
-    transformMatrix,
-    width,
-    height,
-    expression,
-    filter,
-    state: getState(resolvedArg),
-    error: getError(resolvedArg),
-    renderable: getValue(resolvedArg),
-    createHandlers: dispatchProps.createHandlers,
+    // build interim props object
+    const nextResult = {
+      ...restOwnProps,
+      // state and state-derived props
+      selectedPage,
+      state: getState(resolvedArg),
+      error: getError(resolvedArg),
+      renderable: getValue(resolvedArg),
+      // pass along the handlers creation function
+      createHandlers,
+      // required parts of the element object
+      transformMatrix,
+      width,
+      height,
+      // pass along only the useful parts of the element object
+      element: {
+        id: element.id,
+        filter: element.filter,
+        expression: element.expression,
+      },
+    };
+
+    // update props only if something actually changed
+    if (!isEqual(result, nextResult)) {
+      result = nextResult;
+    }
+
+    return result;
   };
-};
+}
 
 export const ElementWrapper = compose(
-  connect(
-    mapStateToProps,
-    mapDispatchToProps,
-    mergeProps,
-    {
-      areOwnPropsEqual: isEqual,
-    }
-  ),
-  shouldUpdate((props, nextProps) => !isEqual(props, nextProps))
+  connectAdvanced(selectorFactory),
+  mapProps(props => {
+    // create handlers object
+    const { element, createHandlers, ...restProps } = props;
+    const handlers = createHandlers(element, props.selectedPage);
+    // this removes element and createHandlers from passed props
+    return { ...restProps, handlers };
+  })
 )(Component);
 
 ElementWrapper.propTypes = {

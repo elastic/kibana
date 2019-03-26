@@ -10,8 +10,7 @@ import { Positionable } from '../positionable';
 import { ElementContent } from '../element_content';
 
 export const ElementWrapper = props => {
-  const { renderable, transformMatrix, width, height, state, selectedPage, createHandlers } = props;
-  const handlers = createHandlers(selectedPage);
+  const { renderable, transformMatrix, width, height, state, handlers } = props;
 
   return (
     <Positionable transformMatrix={transformMatrix} width={width} height={height}>
@@ -21,10 +20,12 @@ export const ElementWrapper = props => {
 };
 
 ElementWrapper.propTypes = {
-  renderable: PropTypes.object,
+  // positionable props (from element object)
   transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  createHandlers: PropTypes.func.isRequired,
+  // ElementContent pass-through props
+  renderable: PropTypes.object,
   state: PropTypes.string,
+  handlers: PropTypes.object.isRequired,
 };

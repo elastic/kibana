@@ -6,29 +6,34 @@
 
 import { setFilter } from '../../../state/actions/elements';
 
-export function createHandlers(element, pageId, dispatch) {
+export const createHandlers = dispatch => {
   let isComplete = false;
   let completeFn = () => {};
 
-  return {
-    setFilter(text) {
-      dispatch(setFilter(text, element.id, pageId, true));
-    },
+  return (element, pageId) => {
+    // TODO: reset isComplete when expression changes
+    return {
+      setFilter(text) {
+        dispatch(setFilter(text, element.id, pageId, true));
+      },
 
-    getFilter() {
-      return element.filter;
-    },
+      getFilter() {
+        return element.filter;
+      },
 
-    onComplete(fn) {
-      completeFn = fn;
-    },
+      onComplete(fn) {
+        completeFn = fn;
+      },
 
-    done() {
-      if (isComplete) {
-        return;
-      } // don't emit if the element is already done
-      isComplete = true;
-      completeFn();
-    },
+      done() {
+        // don't emit if the element is already done
+        if (isComplete) {
+          return;
+        }
+
+        isComplete = true;
+        completeFn();
+      },
+    };
   };
-}
+};
