@@ -6,13 +6,14 @@
 
 import crypto from 'crypto';
 import { Root } from 'joi';
+import { Legacy } from 'kibana';
 import { resolve } from 'path';
+import { SavedObject } from 'src/legacy/server/saved_objects';
 import mappings from './mappings.json';
 import { CONFIG_KEY_NAME, SecretService } from './server';
 
 export const secretService = (kibana: any) => {
   return new kibana.Plugin({
-    id: 'SecretService',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     configPrefix: 'xpack.secret_service',
     uiExports: {
@@ -34,10 +35,10 @@ export const secretService = (kibana: any) => {
       }).default();
     },
 
-    async init(server: any) {
+    async init(server: Legacy.Server) {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
 
-      let encryptionKey = server.config().get(CONFIG_KEY_NAME);
+      let encryptionKey = server.config().get<string>(CONFIG_KEY_NAME);
 
       if (!encryptionKey) {
         encryptionKey = crypto.randomBytes(128).toString('hex');
@@ -52,14 +53,29 @@ export const secretService = (kibana: any) => {
       const service = new SecretService(repository, 'secret', encryptionKey);
 
       // validate key used
-      const valid = await service.validateKey();
+      // const valid = await service.validateKey();
 
-      if (!valid) {
-        throw new Error(
-          `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
-        );
-      }
+      // if (!valid) {
+      //  throw new Error(
+      //    `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
+      //  );
+      // }
+
       server.expose('secretService', service);
+      server.expose('savedObjectAttributeCrypto', {
+        registerType: <T extends SavedObject>({ type, attributes }: T) => {
+          warn(`A plugin adds  ${type} ${JSON.stringify(attributes)} as encrypted attributes`);
+        },
+        get: <T extends SavedObject>(id: string, type: string): Promise<T> => {
+          // ensure type is valid
+          return Promise.resolve({
+            id,
+            type,
+            attributes: {},
+            references: [],
+          });
+        },
+      });
     },
   });
 };
