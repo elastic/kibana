@@ -118,7 +118,7 @@ export interface OrderByOperation {
 }
 
 export interface Query {
-  index: string;
+  indexPattern: string;
 
   // What columns / aggregations are we selecting
   select: SelectOperation[];

@@ -129,7 +129,7 @@ function parseComparison([a, b, ...etc]: any[]) {
   const { operation: op1, argument: arg1 } = a;
   const { operation: op2, argument: arg2 } = b;
 
-  if (op1 !== 'col' && op2 !== 'col') {
+  if (op1 !== 'column' && op2 !== 'column') {
     throw new Error(`A boolean condition requires one column to be specified.`);
   }
 
@@ -137,7 +137,7 @@ function parseComparison([a, b, ...etc]: any[]) {
     throw new Error(`A boolean condition requires one value to be specified.`);
   }
 
-  return op1 === 'col' ? [arg1, arg2] : [arg2, arg1];
+  return op1 === 'column' ? [arg1, arg2] : [arg2, arg1];
 }
 
 /**

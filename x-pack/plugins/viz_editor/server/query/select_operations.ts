@@ -14,7 +14,7 @@ import {
   AvgOperation,
   chunkBy,
   ChunkResult,
-  Column,
+  ColumnOperation,
   CountOperation,
   DateHistogramOperation,
   isEmpty,
@@ -40,11 +40,11 @@ export interface SelectDefinition {
  */
 export const selectOperations: { [operation: string]: SelectDefinition } = {
   col: {
-    getName(op: Column) {
-      return op.alias || op.argument;
+    getName(op: ColumnOperation) {
+      return op.alias || op.argument.field;
     },
     toNestedQuery(query: Query, ops: SelectOperation[], getSubAggs: () => any) {
-      const cols = ops as Column[];
+      const cols = ops as ColumnOperation[];
       return {
         aggregations: {
           groupby: {
@@ -212,7 +212,7 @@ function buildAggregations(query: Query, esQuery: any) {
  * Convert the specified query into an Elasticsearch query that has no aggregations
  */
 function buildRaw(query: Query, esQuery: any) {
-  const cols = query.select as Column[];
+  const cols = query.select as ColumnOperation[];
   return {
     ...esQuery,
     docvalue_fields: cols.map(({ argument }) => ({ field: argument })),
