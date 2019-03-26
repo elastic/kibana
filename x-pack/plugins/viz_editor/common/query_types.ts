@@ -15,6 +15,10 @@ export interface Aliasable {
   alias?: string;
 }
 
+export interface GenericOperation extends Aliasable {
+  argument: Field;
+}
+
 export interface Field {
   field: string;
 }

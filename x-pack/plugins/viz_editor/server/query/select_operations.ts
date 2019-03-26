@@ -17,6 +17,7 @@ import {
   ColumnOperation,
   CountOperation,
   DateHistogramOperation,
+  GenericOperation,
   isEmpty,
   OperationName,
   partition,
@@ -119,14 +120,14 @@ export const selectOperations: { [operation in OperationName]: SelectDefinition 
  */
 function defineBasicAgg(aggName: string) {
   return {
-    getName(op: { alias?: string; argument: string }) {
-      return op.alias || `${aggName}_${op.argument}`;
+    getName(op: GenericOperation) {
+      return op.alias || `${aggName}_${op.argument.field}`;
     },
-    toEsAgg(op: { alias: string; argument: string }) {
+    toEsAgg(op: GenericOperation) {
       return {
-        [op.alias]: {
+        [op.alias!]: {
           [aggName]: {
-            field: op.argument,
+            field: op.argument.field,
           },
         },
       };

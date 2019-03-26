@@ -6,11 +6,22 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { DateHistogramOperation, SelectOperation, SumOperation } from '../../../../common';
+import {
+  DateHistogramOperation,
+  OperationName,
+  SelectOperation,
+  SumOperation,
+} from '../../../../common';
+
+type ColumnOperations = {
+  [operation in OperationName]: {
+    summarize: (op: any) => JSX.Element;
+  }
+};
 
 // TODO: This will be part of the query AST helper library or whatever, and
 // can probably be systematized better than this...
-export const columnOperations: any = {
+export const columnOperations: ColumnOperations = {
   date_histogram: {
     summarize(op: DateHistogramOperation) {
       return (
@@ -35,6 +46,21 @@ export const columnOperations: any = {
           </div>
         </div>
       );
+    },
+  },
+  count: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  column: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  avg: {
+    summarize(op) {
+      return <></>;
     },
   },
 };
