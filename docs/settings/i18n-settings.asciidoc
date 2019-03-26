@@ -1,19 +1,20 @@
 [role="xpack"]
 [[i18n-settings-kb]]
-=== Internationalization Settings in Kibana
+=== i18n settings in Kibana
 ++++
 <titleabbrev>i18n Settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to have kibana in English locale.
+You do not need to configure any settings to have kibana in English.
 
 [float]
 [[general-i18n-settings-kb]]
 ==== General i18n Settings
 
 `i18n.locale`::
-Set to `en` (default) for english localization. +
+Kibana currently supports the following locales:
 +
-Current available translations are `en` for English locale and `zh-CN` for Chinese locale.
+- English - `en` (default)
+- Chinese - `zh-CN`
 
 
