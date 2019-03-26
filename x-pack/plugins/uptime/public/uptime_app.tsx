@@ -31,6 +31,7 @@ import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
+import { UptimeContext } from './uptime_context';
 
 interface UptimeAppColors {
   danger: string;
@@ -156,80 +157,82 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       <I18nContext>
         <Router basename={routerBasename}>
           <ApolloProvider client={client}>
-            <EuiPage className="app-wrapper-panel ">
-              <div>
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle>
-                      <h2>{this.state.headingText}</h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {
-                      // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
-                      <EuiSuperDatePicker
-                        start={this.state.dateRangeStart}
-                        end={this.state.dateRangeEnd}
-                        isPaused={this.state.autorefreshIsPaused}
-                        refreshInterval={this.state.autorefreshInterval}
-                        onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
-                          this.setState(
-                            { dateRangeStart: start, dateRangeEnd: end },
-                            this.persistState
-                          );
-                          this.refreshApp();
-                        }}
+            <UptimeContext.Provider value={{ ...this.state }}>
+              <EuiPage className="app-wrapper-panel ">
+                <div>
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle>
+                        <h2>{this.state.headingText}</h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {
                         // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
-                        onRefresh={() => this.refreshApp()}
-                        onRefreshChange={({
-                          isPaused,
-                          refreshInterval,
-                        }: SuperDateRangePickerRefreshChangedEvent) => {
-                          const autorefreshInterval =
-                            refreshInterval === undefined
-                              ? this.state.autorefreshInterval
-                              : refreshInterval;
-                          this.setState(
-                            { autorefreshIsPaused: isPaused, autorefreshInterval },
-                            this.persistState
-                          );
-                        }}
-                      />
-                    }
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <Switch>
-                  <Route
-                    exact
-                    path="/"
-                    render={props => (
-                      <OverviewPage
-                        basePath={basePath}
-                        {...props}
-                        {...this.props}
-                        {...this.state}
-                        refreshApp={this.refreshApp}
-                        setHeadingText={this.setHeadingText}
-                      />
-                    )}
-                  />
-                  <Route
-                    path="/monitor/:id"
-                    render={props => (
-                      <MonitorPage
-                        {...props}
-                        {...this.props}
-                        {...this.state}
-                        refreshApp={this.refreshApp}
-                        setHeadingText={this.setHeadingText}
-                        query={this.props.client.query}
-                      />
-                    )}
-                  />
-                </Switch>
-              </div>
-            </EuiPage>
+                        <EuiSuperDatePicker
+                          start={this.state.dateRangeStart}
+                          end={this.state.dateRangeEnd}
+                          isPaused={this.state.autorefreshIsPaused}
+                          refreshInterval={this.state.autorefreshInterval}
+                          onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
+                            this.setState(
+                              { dateRangeStart: start, dateRangeEnd: end },
+                              this.persistState
+                            );
+                            this.refreshApp();
+                          }}
+                          // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
+                          onRefresh={() => this.refreshApp()}
+                          onRefreshChange={({
+                            isPaused,
+                            refreshInterval,
+                          }: SuperDateRangePickerRefreshChangedEvent) => {
+                            const autorefreshInterval =
+                              refreshInterval === undefined
+                                ? this.state.autorefreshInterval
+                                : refreshInterval;
+                            this.setState(
+                              { autorefreshIsPaused: isPaused, autorefreshInterval },
+                              this.persistState
+                            );
+                          }}
+                        />
+                      }
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  <Switch>
+                    <Route
+                      exact
+                      path="/"
+                      render={props => (
+                        <OverviewPage
+                          basePath={basePath}
+                          {...props}
+                          {...this.props}
+                          {...this.state}
+                          refreshApp={this.refreshApp}
+                          setHeadingText={this.setHeadingText}
+                        />
+                      )}
+                    />
+                    <Route
+                      path="/monitor/:id"
+                      render={props => (
+                        <MonitorPage
+                          {...props}
+                          {...this.props}
+                          {...this.state}
+                          refreshApp={this.refreshApp}
+                          setHeadingText={this.setHeadingText}
+                          query={this.props.client.query}
+                        />
+                      )}
+                    />
+                  </Switch>
+                </div>
+              </EuiPage>
+            </UptimeContext.Provider>
           </ApolloProvider>
         </Router>
       </I18nContext>
