@@ -534,7 +534,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async getField() {
       const field = await retry.try(
-        async () => await find.byCssSelector('.ng-valid-field-select [data-test-subj="comboBoxInput"] > span'));
+        async () => await find.byCssSelector('.ng-valid [data-test-subj="comboBoxInput"] > span'));
       return await field.getVisibleText();
     }
 
