@@ -18,7 +18,6 @@
  */
 
 import expect from '@kbn/expect';
-import { get } from 'lodash';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -35,9 +34,24 @@ export default function ({ getService }) {
         index: '.kibana',
         q: 'type:user-action',
       }).then(response => {
-        const doc = get(response, 'hits.hits[0]');
-        expect(get(doc, '_source.user-action.count')).to.be(1);
-        expect(doc._id).to.be('user-action:myApp:myAction');
+        const ids = response.hits.hits.map(({ _id }) => _id);
+        expect(ids.includes('user-action:myApp:myAction'));
+      });
+    });
+
+    it('supports comma-delimited action types', async () => {
+      await supertest
+        .post('/api/user_action/myApp/myAction1,myAction2')
+        .set('kbn-xsrf', 'kibana')
+        .expect(200);
+
+      return es.search({
+        index: '.kibana',
+        q: 'type:user-action',
+      }).then(response => {
+        const ids = response.hits.hits.map(({ _id }) => _id);
+        expect(ids.includes('user-action:myApp:myAction1'));
+        expect(ids.includes('user-action:myApp:myAction2'));
       });
     });
   });
