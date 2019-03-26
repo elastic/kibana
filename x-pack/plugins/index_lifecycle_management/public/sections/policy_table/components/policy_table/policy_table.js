@@ -463,7 +463,7 @@ export class PolicyTableUi extends Component {
                           <h1>
                             <FormattedMessage
                               id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                              defaultMessage="Index lifecycle policies"
+                              defaultMessage="Index Lifecycle Policies"
                             />
                           </h1>
                         </EuiTitle>

@@ -366,7 +366,7 @@ export class IndexTableUi extends Component {
               <h1>
                 <FormattedMessage
                   id="xpack.idxMgmt.indexTable.sectionHeading"
-                  defaultMessage="Index management"
+                  defaultMessage="Index Management"
                 />
               </h1>
             </EuiTitle>
