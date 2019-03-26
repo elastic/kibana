@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
+import { errors } from 'elasticsearch';
 import { requestFixture } from '../../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../../login_attempt';
 import { TokenAuthenticationProvider } from '../token';
@@ -325,6 +326,58 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.user).to.be.eql(undefined);
       expect(authenticationResult.state).to.be.eql(undefined);
       expect(authenticationResult.error).to.be.eql(authenticationError);
+    });
+
+    it('redirects non-AJAX requests to /login and clears session if token refresh fails with 400 error', async () => {
+      const request = requestFixture({ path: '/some-path' });
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .rejects({ body: { error: { reason: 'token expired' } } });
+
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .rejects(new errors.BadRequest('failed to refresh token'));
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledOnce(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirectURL).to.be('/base-path/login?next=%2Fsome-path');
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(null);
+      expect(authenticationResult.error).to.be.eql(undefined);
+    });
+
+    it('does not redirect AJAX requests if token refresh fails with 400 error', async () => {
+      const request = requestFixture({ headers: { 'kbn-xsrf': 'xsrf' }, path: '/some-path' });
+
+      callWithRequest
+        .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
+        .rejects({ body: { error: { reason: 'token expired' } } });
+
+      const authenticationError = new errors.BadRequest('failed to refresh token');
+      callWithInternalUser
+        .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
+        .rejects(authenticationError);
+
+      const accessToken = 'foo';
+      const refreshToken = 'bar';
+      const authenticationResult = await provider.authenticate(request, { accessToken, refreshToken });
+
+      sinon.assert.calledOnce(callWithRequest);
+      sinon.assert.calledOnce(callWithInternalUser);
+
+      expect(request.headers).to.not.have.property('authorization');
+      expect(authenticationResult.failed()).to.be(true);
+      expect(authenticationResult.error).to.be(authenticationError);
+      expect(authenticationResult.user).to.be.eql(undefined);
+      expect(authenticationResult.state).to.be.eql(undefined);
     });
 
     it('fails if new access token is rejected after successful refresh', async () => {
