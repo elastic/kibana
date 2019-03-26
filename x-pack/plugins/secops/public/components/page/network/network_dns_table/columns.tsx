@@ -5,7 +5,6 @@
  */
 
 import numeral from '@elastic/numeral';
-import { isNil } from 'lodash/fp';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
@@ -32,7 +31,7 @@ export const getNetworkDnsColumns = (
     hideForMobile: false,
     sortable: true,
     render: (dnsName: string | null | undefined) => {
-      if (!isNil(dnsName)) {
+      if (dnsName != null) {
         const id = escapeDataProviderId(`networkDns-table--name-${dnsName}`);
         return (
           <DraggableWrapper
@@ -70,7 +69,7 @@ export const getNetworkDnsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: (queryCount: number | null | undefined) => {
-      if (!isNil(queryCount)) {
+      if (queryCount != null) {
         return numeral(queryCount).format('0');
       } else {
         return getEmptyTagValue();
@@ -84,7 +83,7 @@ export const getNetworkDnsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: (uniqueDomains: number | null | undefined) => {
-      if (!isNil(uniqueDomains)) {
+      if (uniqueDomains != null) {
         return numeral(uniqueDomains).format('0');
       } else {
         return getEmptyTagValue();
@@ -98,7 +97,7 @@ export const getNetworkDnsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: (dnsBytesIn: number | null | undefined) => {
-      if (!isNil(dnsBytesIn)) {
+      if (dnsBytesIn != null) {
         return numeral(dnsBytesIn).format('0.000b');
       } else {
         return getEmptyTagValue();
@@ -112,7 +111,7 @@ export const getNetworkDnsColumns = (
     truncateText: false,
     hideForMobile: false,
     render: (dnsBytesOut: number | null | undefined) => {
-      if (!isNil(dnsBytesOut)) {
+      if (dnsBytesOut != null) {
         return numeral(dnsBytesOut).format('0.000b');
       } else {
         return getEmptyTagValue();

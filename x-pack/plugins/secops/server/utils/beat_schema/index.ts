@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, has, isArray, isEmpty, isNil, isNumber, isString, memoize, pick } from 'lodash/fp';
+import { get, has, isArray, isEmpty, isNumber, isString, memoize, pick } from 'lodash/fp';
 
 import {
   auditbeatSchema,
@@ -20,7 +20,7 @@ export * from './type';
 export { baseCategoryFields };
 export const convertSchemaToAssociativeArray = (schema: Schema): OutputSchema =>
   schema.reduce((accumulator: OutputSchema, item: Partial<SchemaItem>) => {
-    if (!isNil(item.fields) && !isEmpty(item.fields)) {
+    if (item.fields != null && !isEmpty(item.fields)) {
       return {
         ...accumulator,
         ...convertFieldsToAssociativeArray(item),

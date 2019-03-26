@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 import { ColumnHeader } from '../column_headers/column_header';
 
 export interface ColumnRenderer {
-  isInstance: (columnName: string, data: Ecs) => boolean;
+  isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
   renderColumn: (
     {
       columnName,
       eventId,
-      value,
+      values,
       field,
       width,
     }: {
       columnName: string;
       eventId: string;
-      value: string | number | object | undefined | null;
+      values: string[] | null | undefined;
       field: ColumnHeader;
       width?: string;
     }

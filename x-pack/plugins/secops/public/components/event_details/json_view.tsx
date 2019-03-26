@@ -42,4 +42,4 @@ export const JsonView = pure<Props>(({ data }) => (
 ));
 
 export const buildJsonView = (data: DetailItem[]) =>
-  data.reduce((accumulator, item) => set(item.field, item.value, accumulator), {});
+  data.reduce((accumulator, item) => set(item.field, item.originalValue, accumulator), {});

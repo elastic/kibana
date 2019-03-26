@@ -15,7 +15,12 @@ import { createSourcesResolvers } from '../sources';
 import { SourcesResolversDeps } from '../sources/resolvers';
 import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolvers.test';
 
-import { mockEventsData, mockEventsFields } from './events.mock';
+import {
+  mockEventsData,
+  mockEventsFields,
+  mockTimelineData,
+  mockTimelineDetailsData,
+} from './events.mock';
 import { createEventsResolvers, EventsResolversDeps } from './resolvers';
 
 const mockGetFields = jest.fn();
@@ -29,13 +34,23 @@ mockGetEvents.mockResolvedValue({
   Events: {
     ...mockEventsData.Events,
   },
-  EventDetails: {
-    data: [],
+});
+const mockGetTimeline = jest.fn();
+mockGetTimeline.mockResolvedValue({
+  Timeline: {
+    ...mockTimelineData.Timeline,
+  },
+});
+const mockGetTimelineDetails = jest.fn();
+mockGetTimelineDetails.mockResolvedValue({
+  TimelineDetails: {
+    ...mockTimelineDetailsData.TimelineDetails,
   },
 });
 const mockEventsAdapter: EventsAdapter = {
   getEvents: mockGetEvents,
-  getEventDetails: mockGetEvents,
+  getTimelineDetails: mockGetTimelineDetails,
+  getTimelineData: mockGetTimeline,
 };
 
 const mockEventsLibs: EventsResolversDeps = {
@@ -66,6 +81,7 @@ const context = { req };
 
 describe('Test Source Resolvers', () => {
   test('Make sure that getEvents have been called', async () => {
+    context.req.payload.operationName = 'events';
     const source = await createSourcesResolvers(mockSrcLibs).Query.source(
       {},
       { id: 'default' },
@@ -97,9 +113,60 @@ describe('Test Source Resolvers', () => {
       Events: {
         ...mockEventsData.Events,
       },
-      EventDetails: {
-        data: [],
-      },
     });
+  });
+
+  test('Make sure that getTimelineData have been called', async () => {
+    context.req.payload.operationName = 'timeline';
+    const source = await createSourcesResolvers(mockSrcLibs).Query.source(
+      {},
+      { id: 'default' },
+      context,
+      {} as GraphQLResolveInfo
+    );
+    const data = await createEventsResolvers(mockEventsLibs).Source.Timeline(
+      source as Source,
+      {
+        timerange: {
+          interval: '12h',
+          to: 1514782800000,
+          from: 1546318799999,
+        },
+        pagination: {
+          limit: 2,
+          cursor: null,
+        },
+        sortField: {
+          sortFieldId: 'timestamp',
+          direction: Direction.desc,
+        },
+        fieldRequested: ['@timestamp', 'host.name'],
+      },
+      context,
+      {} as GraphQLResolveInfo
+    );
+    expect(mockEventsAdapter.getTimelineData).toHaveBeenCalled();
+    expect(data).toEqual({ Timeline: { ...mockTimelineData.Timeline } });
+  });
+
+  test('Make sure that getTimelineDetails have been called', async () => {
+    context.req.payload.operationName = 'details';
+    const source = await createSourcesResolvers(mockSrcLibs).Query.source(
+      {},
+      { id: 'default' },
+      context,
+      {} as GraphQLResolveInfo
+    );
+    const data = await createEventsResolvers(mockEventsLibs).Source.TimelineDetails(
+      source as Source,
+      {
+        indexName: 'filebeat-7.0.0-iot-2019.06',
+        eventId: 'QRhG1WgBqd-n62SwZYDT',
+      },
+      context,
+      {} as GraphQLResolveInfo
+    );
+    expect(mockEventsAdapter.getTimelineDetails).toHaveBeenCalled();
+    expect(data).toEqual({ TimelineDetails: { ...mockTimelineDetailsData.TimelineDetails } });
   });
 });

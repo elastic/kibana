@@ -6,32 +6,33 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep, get } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
-import { Ecs } from '../../../../graphql/types';
-import { mockEcsData } from '../../../../mock';
+import { TimelineNonEcsData } from '../../../../graphql/types';
+import { mockTimelineData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
 import { getEmptyValue } from '../../../empty_value';
 import { defaultHeaders } from '../column_headers/default_headers';
 
 import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
+import { deleteItemIdx, findItem, getValues } from './helpers';
 
 describe('get_column_renderer', () => {
-  let nonSuricata: Ecs;
-
+  let nonSuricata: TimelineNonEcsData[];
+  const _id = mockTimelineData[0]._id;
   beforeEach(() => {
-    nonSuricata = cloneDeep(mockEcsData[0]);
+    nonSuricata = cloneDeep(mockTimelineData[0].data);
   });
 
   test('renders correctly against snapshot', () => {
-    const columnName = 'event.id';
+    const columnName = 'event.severity';
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      eventId: nonSuricata._id,
-      value: get(columnName, nonSuricata),
+      eventId: _id,
+      values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
     });
 
@@ -44,8 +45,8 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      eventId: nonSuricata._id,
-      value: get(columnName, nonSuricata),
+      eventId: _id,
+      values: getValues(columnName, nonSuricata),
       field: defaultHeaders[1],
     });
     const wrapper = mount(
@@ -57,13 +58,14 @@ describe('get_column_renderer', () => {
   });
 
   test('should render empty value when dealing with an empty value of user', () => {
-    delete nonSuricata.user;
     const columnName = 'user.name';
+    const idx = findItem(nonSuricata, columnName);
+    nonSuricata = deleteItemIdx(nonSuricata, idx);
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      eventId: nonSuricata._id,
-      value: get(columnName, nonSuricata),
+      eventId: _id,
+      values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
     });
     const wrapper = mount(<span>{column}</span>);
@@ -75,8 +77,8 @@ describe('get_column_renderer', () => {
     const columnRenderer = getColumnRenderer(columnName, columnRenderers, nonSuricata);
     const column = columnRenderer.renderColumn({
       columnName,
-      eventId: nonSuricata._id,
-      value: get(columnName, nonSuricata),
+      eventId: _id,
+      values: getValues(columnName, nonSuricata),
       field: defaultHeaders[7],
     });
     const wrapper = mount(<span>{column}</span>);

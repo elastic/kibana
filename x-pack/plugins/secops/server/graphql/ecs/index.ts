@@ -5,3 +5,4 @@
  */
 
 export { ecsSchema } from './schema.gql';
+export { createScalarToStringArrayValueResolvers } from './resolvers';

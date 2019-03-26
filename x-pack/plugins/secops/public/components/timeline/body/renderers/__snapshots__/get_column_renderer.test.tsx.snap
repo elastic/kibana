@@ -8,16 +8,16 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
         "and": Array [],
         "enabled": true,
         "excluded": false,
-        "id": "id-timeline-column-event_id-for-event-1",
+        "id": "id-timeline-column-event_severity-for-event-1-event_severity-3",
         "kqlQuery": "",
-        "name": "event.id: 1",
+        "name": "event.severity: 3",
         "queryMatch": Object {
           "field": "event.severity",
-          "value": 1,
+          "value": "3",
         },
       }
     }
-    key="timeline-draggable-column-event.id-for-event-1"
+    key="timeline-draggable-column-event.severity-for-event-1-event.severity--3"
     render={[Function]}
   />
 </span>

@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../containers/source';
-import { Ecs } from '../../../graphql/types';
+import { TimelineItem } from '../../../graphql/types';
 import { Note } from '../../../lib/note';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
@@ -36,7 +36,7 @@ interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
-  data: Ecs[];
+  data: TimelineItem[];
   getNotesByIds: (noteIds: string[]) => Note[];
   height: number;
   id: string;

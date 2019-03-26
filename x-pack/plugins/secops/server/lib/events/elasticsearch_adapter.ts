@@ -4,10 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, isArray, isEmpty, isNil, isNumber, isString, last, merge } from 'lodash/fp';
+import {
+  cloneDeep,
+  get,
+  getOr,
+  has,
+  isEmpty,
+  isNumber,
+  isString,
+  last,
+  merge,
+  uniq,
+} from 'lodash/fp';
 import { isObject } from 'util';
 
-import { DetailItem, EcsEdges, EventDetailsData, EventsData, KpiItem } from '../../graphql/types';
+import {
+  DetailItem,
+  EcsEdges,
+  EventsData,
+  KpiItem,
+  TimelineData,
+  TimelineDetailsData,
+  TimelineEdges,
+} from '../../graphql/types';
 import {
   getDocumentation,
   getIndexAlias,
@@ -26,7 +45,7 @@ import {
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildQuery } from './query.dsl';
-import { EventHit, EventsAdapter, RequestDetailsOptions } from './types';
+import { EventHit, EventsAdapter, EventsRequestOptions, RequestDetailsOptions } from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -54,21 +73,37 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     const hasNextPage = eventsEdges.length === limit + 1;
     const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
     const lastCursor = get('cursor', last(edges));
-    return {
-      kpiEventType,
-      edges,
-      totalCount,
-      pageInfo: {
-        hasNextPage,
-        endCursor: lastCursor,
-      },
-    };
+    return { kpiEventType, edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
   }
 
-  public async getEventDetails(
+  public async getTimelineData(
+    request: FrameworkRequest,
+    options: EventsRequestOptions
+  ): Promise<TimelineData> {
+    const queryOptions = cloneDeep(options);
+    queryOptions.fields = uniq([...queryOptions.fieldRequested, ...queryOptions.fields]);
+    delete queryOptions.fieldRequested;
+    const response = await this.framework.callWithRequest<EventHit, TermAggregation>(
+      request,
+      'search',
+      buildQuery(queryOptions)
+    );
+    const { limit } = options.pagination;
+    const totalCount = getOr(0, 'hits.total.value', response);
+    const hits = response.hits.hits;
+    const timelineEdges: TimelineEdges[] = hits.map(hit =>
+      formatTimelineData(options.fieldRequested, options.fields, hit, eventFieldsMap)
+    );
+    const hasNextPage = timelineEdges.length === limit + 1;
+    const edges = hasNextPage ? timelineEdges.splice(0, limit) : timelineEdges;
+    const lastCursor = get('cursor', last(edges));
+    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
+  }
+
+  public async getTimelineDetails(
     request: FrameworkRequest,
     options: RequestDetailsOptions
-  ): Promise<EventDetailsData> {
+  ): Promise<TimelineDetailsData> {
     const [mapResponse, searchResponse] = await Promise.all([
       this.framework.callWithRequest(request, 'indices.getMapping', {
         allowNoIndices: true,
@@ -123,10 +158,83 @@ export const formatEventsData = (
     }
   );
 
+export const formatTimelineData = (
+  dataFields: ReadonlyArray<string>,
+  ecsFields: ReadonlyArray<string>,
+  hit: EventHit,
+  fieldMap: Readonly<Record<string, string>>
+) =>
+  uniq([...ecsFields, ...dataFields]).reduce<TimelineEdges>(
+    (flattenedFields, fieldName) => {
+      flattenedFields.node._id = hit._id;
+      flattenedFields.node._index = hit._index;
+      flattenedFields.node.ecs._id = hit._id;
+      flattenedFields.node.ecs._index = hit._index;
+      if (hit.sort && hit.sort.length > 1) {
+        flattenedFields.cursor.value = hit.sort[0];
+        flattenedFields.cursor.tiebreaker = hit.sort[1];
+      }
+      return mergeTimelineFieldsWithHit(
+        fieldName,
+        flattenedFields,
+        fieldMap,
+        hit,
+        dataFields,
+        ecsFields
+      );
+    },
+    {
+      node: { ecs: { _id: '' }, data: [], _id: '', _index: '' },
+      cursor: {
+        value: '',
+        tiebreaker: null,
+      },
+    }
+  );
+
+const mergeTimelineFieldsWithHit = <T>(
+  fieldName: string,
+  flattenedFields: T,
+  fieldMap: Readonly<Record<string, string>>,
+  hit: { _source: {} },
+  dataFields: ReadonlyArray<string>,
+  ecsFields: ReadonlyArray<string>
+) => {
+  if (fieldMap[fieldName] != null) {
+    const esField = fieldMap[fieldName];
+    if (has(esField, hit._source)) {
+      const objectWithProperty = {
+        node: {
+          ...get('node', flattenedFields),
+          data: dataFields.includes(fieldName)
+            ? [
+                ...get('node.data', flattenedFields),
+                { field: fieldName, value: get(esField, hit._source) },
+              ]
+            : get('node.data', flattenedFields),
+          ecs: ecsFields.includes(fieldName)
+            ? {
+                ...get('node.ecs', flattenedFields),
+                ...fieldName
+                  .split('.')
+                  .reduceRight((obj, next) => ({ [next]: obj }), get(esField, hit._source)),
+              }
+            : get('node.ecs', flattenedFields),
+        },
+      };
+      return merge(flattenedFields, objectWithProperty);
+    } else {
+      return flattenedFields;
+    }
+  } else {
+    return flattenedFields;
+  }
+};
+
 const getDataFromHits = (sources: EventSource, category?: string, path?: string): DetailItem[] =>
   Object.keys(sources).reduce<DetailItem[]>((accumulator, source) => {
     const item = get(source, sources);
-    if (isArray(item) || isString(item) || isNumber(item)) {
+    if (Array.isArray(item) || isString(item) || isNumber(item)) {
       const field = path ? `${path}.${source}` : source;
       category = field.split('.')[0];
       if (isEmpty(category) && baseCategoryFields.includes(category)) {
@@ -137,7 +245,8 @@ const getDataFromHits = (sources: EventSource, category?: string, path?: string)
         {
           category,
           field,
-          value: item,
+          values: item,
+          originalValue: item,
         } as DetailItem,
       ];
     } else if (isObject(item)) {
@@ -160,7 +269,7 @@ const getSchemaFromData = (
         const item = get(property, properties);
         const field = path ? `${path}.${property}` : property;
         const dataFilterItem = data.filter(dataItem => dataItem.field === field);
-        if (isNil(item.properties) && dataFilterItem.length === 1) {
+        if (item.properties == null && dataFilterItem.length === 1) {
           const dataItem = dataFilterItem[0];
           const dataFromMapping = {
             type: get([property, 'type'], properties),
@@ -174,7 +283,7 @@ const getSchemaFromData = (
                 : dataFromMapping),
             },
           ];
-        } else if (!isNil(item.properties)) {
+        } else if (item.properties != null) {
           return [...accumulator, ...getSchemaFromData(item.properties, data, index, field)];
         }
         return accumulator;

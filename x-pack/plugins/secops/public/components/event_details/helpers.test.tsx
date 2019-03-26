@@ -94,7 +94,7 @@ describe('helpers', () => {
       expect(
         getItems(mockDetailItemData, mockDetailItemDataId).find(
           x => x.field === 'cloud.instance.id'
-        )!.valueAsString
+        )!.values[0].valueAsString
       ).toEqual('5412578377715150143');
     });
 
@@ -102,7 +102,7 @@ describe('helpers', () => {
       expect(
         getItems(mockDetailItemData, mockDetailItemDataId).find(
           x => x.field === 'cloud.instance.id'
-        )!.value.key
+        )!.values[0].value.key
       ).toMatch(/^event-field-browser-value-for-cloud.instance.id-\S+$/);
     });
 
@@ -127,7 +127,7 @@ describe('helpers', () => {
         test(`it should render a tooltip for the ${field.field} (${field.type}) field`, () => {
           const wrapper = mount(
             <TestProviders>
-              <>{field.value}</>
+              <>{field.values[0].value}</>
             </TestProviders>
           );
 
@@ -141,7 +141,7 @@ describe('helpers', () => {
         }) field`, () => {
           const wrapper = mount(
             <TestProviders>
-              <>{field.value}</>
+              <>{field.values[0].value}</>
             </TestProviders>
           );
 

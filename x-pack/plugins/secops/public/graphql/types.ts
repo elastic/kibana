@@ -15,7 +15,9 @@
 
 export type Date = any;
 
-export type DetailItemValue = any;
+export type ToStringArray = any;
+
+export type EsValue = any;
 
 // ====================================================
 // Types
@@ -40,7 +42,9 @@ export interface Source {
   /** Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Events: EventsData;
 
-  EventDetails: EventDetailsData;
+  Timeline: TimelineData;
+
+  TimelineDetails: TimelineDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -254,7 +258,7 @@ export interface EventsData {
 }
 
 export interface KpiItem {
-  value: string;
+  value?: string | null;
 
   count: number;
 }
@@ -665,7 +669,37 @@ export interface FileFields {
   ctime?: Date | null;
 }
 
-export interface EventDetailsData {
+export interface TimelineData {
+  edges: TimelineEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TimelineEdges {
+  node: TimelineItem;
+
+  cursor: CursorType;
+}
+
+export interface TimelineItem {
+  _id: string;
+
+  _index?: string | null;
+
+  data: TimelineNonEcsData[];
+
+  ecs: Ecs;
+}
+
+export interface TimelineNonEcsData {
+  field: string;
+
+  value?: ToStringArray | null;
+}
+
+export interface TimelineDetailsData {
   data?: DetailItem[] | null;
 }
 
@@ -680,7 +714,9 @@ export interface DetailItem {
 
   type: string;
 
-  value: DetailItemValue;
+  values?: ToStringArray | null;
+
+  originalValue?: EsValue | null;
 }
 
 export interface HostsData {
@@ -892,7 +928,18 @@ export interface EventsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface EventDetailsSourceArgs {
+export interface TimelineSourceArgs {
+  pagination: PaginationInput;
+
+  sortField: SortField;
+
+  fieldRequested: string[];
+
+  timerange?: TimerangeInput | null;
+
+  filterQuery?: string | null;
+}
+export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
@@ -1528,7 +1575,7 @@ export namespace GetKpiEventsQuery {
   export type KpiEventType = {
     __typename?: 'KpiItem';
 
-    value: string;
+    value?: string | null;
 
     count: number;
   };
@@ -1848,7 +1895,7 @@ export namespace SourceQuery {
   };
 }
 
-export namespace GetEventDetailsQuery {
+export namespace GetTimelineDetailsQuery {
   export type Variables = {
     sourceId: string;
     eventId: string;
@@ -1866,11 +1913,11 @@ export namespace GetEventDetailsQuery {
 
     id: string;
 
-    EventDetails: EventDetails;
+    TimelineDetails: TimelineDetails;
   };
 
-  export type EventDetails = {
-    __typename?: 'EventDetailsData';
+  export type TimelineDetails = {
+    __typename?: 'TimelineDetailsData';
 
     data?: Data[] | null;
   };
@@ -1888,13 +1935,16 @@ export namespace GetEventDetailsQuery {
 
     type: string;
 
-    value: DetailItemValue;
+    values?: ToStringArray | null;
+
+    originalValue?: EsValue | null;
   };
 }
 
 export namespace GetTimelineQuery {
   export type Variables = {
     sourceId: string;
+    fieldRequested: string[];
     pagination: PaginationInput;
     sortField: SortField;
     filterQuery?: string | null;
@@ -1911,11 +1961,11 @@ export namespace GetTimelineQuery {
 
     id: string;
 
-    Events: Events;
+    Timeline: Timeline;
   };
 
-  export type Events = {
-    __typename?: 'EventsData';
+  export type Timeline = {
+    __typename?: 'TimelineData';
 
     totalCount: number;
 
@@ -1941,12 +1991,32 @@ export namespace GetTimelineQuery {
   };
 
   export type Edges = {
-    __typename?: 'EcsEdges';
+    __typename?: 'TimelineEdges';
 
     node: Node;
   };
 
   export type Node = {
+    __typename?: 'TimelineItem';
+
+    _id: string;
+
+    _index?: string | null;
+
+    data: Data[];
+
+    ecs: Ecs;
+  };
+
+  export type Data = {
+    __typename?: 'TimelineNonEcsData';
+
+    field: string;
+
+    value?: ToStringArray | null;
+  };
+
+  export type Ecs = {
     __typename?: 'ECS';
 
     _id: string;
@@ -2015,12 +2085,12 @@ export namespace GetTimelineQuery {
 
     session?: string | null;
 
-    data?: Data | null;
+    data?: _Data | null;
 
     summary?: Summary | null;
   };
 
-  export type Data = {
+  export type _Data = {
     __typename?: 'AuditdData';
 
     acct?: string | null;

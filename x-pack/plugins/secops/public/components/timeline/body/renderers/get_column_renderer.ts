@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 
 import { ColumnRenderer } from '.';
 
@@ -15,10 +15,10 @@ const unhandledColumnRenderer = (): never => {
 export const getColumnRenderer = (
   columnName: string,
   columnRenderers: ColumnRenderer[],
-  ecs: Ecs
+  data: TimelineNonEcsData[]
 ): ColumnRenderer => {
   const renderer = columnRenderers.find(columnRenderer =>
-    columnRenderer.isInstance(columnName, ecs)
+    columnRenderer.isInstance(columnName, data)
   );
   return renderer != null ? renderer : unhandledColumnRenderer();
 };

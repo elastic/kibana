@@ -7,17 +7,18 @@
 import gql from 'graphql-tag';
 
 export const timelineDetailsQuery = gql`
-  query GetEventDetailsQuery($sourceId: ID!, $eventId: String!, $indexName: String!) {
+  query GetTimelineDetailsQuery($sourceId: ID!, $eventId: String!, $indexName: String!) {
     source(id: $sourceId) {
       id
-      EventDetails(eventId: $eventId, indexName: $indexName) {
+      TimelineDetails(eventId: $eventId, indexName: $indexName) {
         data {
           category
           description
           example
           field
           type
-          value
+          values
+          originalValue
         }
       }
     }

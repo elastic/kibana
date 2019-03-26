@@ -12,7 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { eventsQuery } from '../../containers/events/index.gql_query';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { Direction } from '../../graphql/types';
-import { mockEcsData } from '../../mock';
+import { defaultHeaders, mockTimelineData } from '../../mock';
 import { mockIndexPattern } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { flyoutHeaderHeight } from '../flyout';
@@ -32,14 +32,7 @@ describe('Timeline', () => {
   const indexPattern = mockIndexPattern;
 
   const mocks = [
-    {
-      request: { query: eventsQuery },
-      result: {
-        data: {
-          events: mockEcsData,
-        },
-      },
-    },
+    { request: { query: eventsQuery }, result: { data: { events: mockTimelineData } } },
   ];
 
   describe('rendering', () => {
@@ -47,6 +40,7 @@ describe('Timeline', () => {
       const wrapper = shallow(
         <Timeline
           browserFields={mockBrowserFields}
+          columns={defaultHeaders}
           id="foo"
           dataProviders={mockDataProviders}
           flyoutHeight={testFlyoutHeight}
@@ -75,6 +69,7 @@ describe('Timeline', () => {
           <MockedProvider mocks={mocks}>
             <Timeline
               browserFields={mockBrowserFields}
+              columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               flyoutHeight={testFlyoutHeight}
@@ -106,6 +101,7 @@ describe('Timeline', () => {
           <MockedProvider mocks={mocks}>
             <Timeline
               browserFields={mockBrowserFields}
+              columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               flyoutHeight={testFlyoutHeight}
@@ -137,6 +133,7 @@ describe('Timeline', () => {
           <MockedProvider mocks={mocks}>
             <Timeline
               browserFields={mockBrowserFields}
+              columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
               flyoutHeight={testFlyoutHeight}
@@ -173,6 +170,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -211,6 +209,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -257,6 +256,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -307,6 +307,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -358,6 +359,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -401,6 +403,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -448,6 +451,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 flyoutHeight={testFlyoutHeight}
@@ -499,6 +503,7 @@ describe('Timeline', () => {
             <MockedProvider mocks={mocks}>
               <Timeline
                 browserFields={mockBrowserFields}
+                columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
                 flyoutHeight={testFlyoutHeight}

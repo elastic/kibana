@@ -15,12 +15,18 @@ import { dateSchema } from '../scalar_date';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 
-import { getEventsQueryMock, mockEventsData } from './events.mock';
+import {
+  getEventsQueryMock,
+  mockEventsData,
+  mockTimelineData,
+  mockTimelineDetailsData,
+} from './events.mock';
 import { eventsSchema } from './schema.gql';
 
-const testCaseSource = {
-  id: 'Test case to query Events',
-  query: `
+const cases = [
+  {
+    id: 'Test case to query Events',
+    query: `
     query GetEventsQuery(
       $timerange: TimerangeInput!
       $pagination: PaginationInput!
@@ -94,40 +100,190 @@ const testCaseSource = {
       }
     }
 	`,
-  variables: {
-    timerange: {
-      interval: '12h',
-      to: 1514782800000,
-      from: 1546318799999,
+    variables: {
+      timerange: {
+        interval: '12h',
+        to: 1514782800000,
+        from: 1546318799999,
+      },
+      pagination: {
+        limit: 2,
+        cursor: null,
+      },
+      sortField: {
+        sortFieldId: '@timestamp',
+        direction: 'desc',
+      },
     },
-    pagination: {
-      limit: 2,
-      cursor: null,
+    context: {
+      req: {
+        payload: {
+          operationName: 'events',
+        },
+      },
     },
-    sortField: {
-      sortFieldId: '@timestamp',
-      direction: 'desc',
-    },
-  },
-  context: {
-    req: {
-      payload: {
-        operationName: 'test',
+    expected: {
+      data: {
+        source: {
+          ...mockEventsData,
+        },
       },
     },
   },
-  expected: {
-    data: {
-      source: {
-        ...mockEventsData,
+  {
+    id: 'Test case to query Timeline',
+    query: `
+    query GetTimelineQuery(
+      $timerange: TimerangeInput!
+      $pagination: PaginationInput!
+      $sortField: SortField!
+      $filterQuery: String
+      $fieldRequested: [String!]!
+    ) {
+      source(id: "default") {
+        Timeline(
+          timerange: $timerange
+          pagination: $pagination
+          sortField: $sortField
+          filterQuery: $filterQuery
+          fieldRequested: $fieldRequested
+        ) {
+          totalCount
+          pageInfo {
+            endCursor {
+              value
+              tiebreaker
+            }
+            hasNextPage
+          }
+          edges {
+            cursor{
+              value
+              tiebreaker
+            }
+            node {
+              _id
+              _index
+              data {
+                field
+                value
+              }
+              ecs {
+                timestamp
+                _id
+                _index
+                event {
+                  type
+                  severity
+                  module
+                  category
+                  id
+                }
+                host {
+                  name
+                  ip
+                }
+                source {
+                  ip
+                  port
+                }
+                destination {
+                  ip
+                  port
+                }
+                geo {
+                  region_name
+                  country_iso_code
+                }
+                suricata {
+                  eve {
+                    proto
+                    flow_id
+                    alert {
+                      signature
+                      signature_id
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+	`,
+    variables: {
+      timerange: {
+        interval: '12h',
+        to: 1514782800000,
+        from: 1546318799999,
+      },
+      pagination: {
+        limit: 2,
+        cursor: null,
+      },
+      sortField: {
+        sortFieldId: '@timestamp',
+        direction: 'desc',
+      },
+      fieldRequested: ['@timestamp', 'host.name'],
+    },
+    context: {
+      req: {
+        payload: {
+          operationName: 'timeline',
+        },
+      },
+    },
+    expected: {
+      data: {
+        source: {
+          ...mockTimelineData,
+        },
       },
     },
   },
-};
+  {
+    id: 'Test case to query Timeline Details',
+    query: `
+      query GetTimelineDetailsQuery($eventId: String!, $indexName: String!) {
+        source(id: "default") {
+          TimelineDetails(eventId: $eventId, indexName: $indexName) {
+            data {
+              category
+              description
+              example
+              field
+              type
+              values
+              originalValue
+            }
+          }
+        }
+      }
+    `,
+    variables: {
+      eventId: 'QRhG1WgBqd-n62SwZYDT',
+      indexName: 'filebeat-7.0.0-iot-2019.06',
+    },
+    context: {
+      req: {
+        payload: {
+          operationName: 'details',
+        },
+      },
+    },
+    expected: {
+      data: {
+        source: {
+          ...mockTimelineDetailsData,
+        },
+      },
+    },
+  },
+];
 
 describe('Test Source Schema', () => {
-  // Array of case types
-  const cases = [testCaseSource];
   const typeDefs = [
     rootSchema,
     sharedSchema,

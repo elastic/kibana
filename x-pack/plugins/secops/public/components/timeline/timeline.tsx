@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
+import { getOr, isEmpty } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -17,6 +17,8 @@ import { Direction } from '../../graphql/types';
 import { timelineModel } from '../../store';
 import { AutoSizer } from '../auto_sizer';
 
+import { ColumnHeader } from './body/column_headers/column_header';
+import { defaultHeaders } from './body/column_headers/default_headers';
 import { Sort } from './body/sort';
 import { StatefulBody } from './body/stateful_body';
 import { DataProvider } from './data_providers/data_provider';
@@ -46,6 +48,7 @@ const TimelineContainer = styled(EuiFlexGroup)`
 
 interface Props {
   browserFields: BrowserFields;
+  columns: ColumnHeader[];
   dataProviders: DataProvider[];
   flyoutHeaderHeight: number;
   flyoutHeight: number;
@@ -69,6 +72,7 @@ interface Props {
 export const Timeline = pure<Props>(
   ({
     browserFields,
+    columns,
     dataProviders,
     flyoutHeaderHeight,
     flyoutHeight,
@@ -93,6 +97,7 @@ export const Timeline = pure<Props>(
       kqlQueryExpression,
       kqlMode
     );
+    const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return (
       <AutoSizer detectAnyWindowResize={true} content>
         {({ measureRef, content: { height: timelineHeaderHeight = 0, width = 0 } }) => (
@@ -119,6 +124,7 @@ export const Timeline = pure<Props>(
 
             {combinedQueries != null ? (
               <TimelineQuery
+                fields={columnsHeader.map(c => c.id)}
                 sourceId="default"
                 limit={itemsPerPage}
                 filterQuery={combinedQueries.filterQuery}
