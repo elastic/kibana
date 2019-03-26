@@ -34,7 +34,7 @@ export class App extends Component {
     registerRouter(router);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     trackUserAction(UA_APP_LOAD);
   }
 
