@@ -21,7 +21,7 @@ const conjunctions = {
   and: '<p>' +
     i18n.translate('xpack.kueryAutocomplete.andOperatorDescription', {
       defaultMessage: 'Requires {bothArguments} to be true',
-      values: { bothArguments: `<span class="kbnSuggestionItem__callout">${bothArgumentsText}</span>` },
+      values: { bothArguments: `<span className="kbnSuggestionItem__callout">${bothArgumentsText}</span>` },
       description: 'Full text: "Requires both arguments to be true". See ' +
         'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText for "both arguments" part.'
     }) +
@@ -29,7 +29,7 @@ const conjunctions = {
   or: '<p>' +
     i18n.translate('xpack.kueryAutocomplete.orOperatorDescription', {
       defaultMessage: 'Requires {oneOrMoreArguments} to be true',
-      values: { oneOrMoreArguments: `<span class="kbnSuggestionItem__callout">${oneOrMoreArgumentsText}</span>` },
+      values: { oneOrMoreArguments: `<span className="kbnSuggestionItem__callout">${oneOrMoreArgumentsText}</span>` },
       description: 'Full text: "Requires one or more arguments to be true". See ' +
       'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText for "one or more arguments" part.'
     }) +
