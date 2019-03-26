@@ -145,6 +145,22 @@ export class LayerTocActions extends Component {
       }),
       items: [
         {
+          name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
+            defaultMessage: 'Clone layer',
+          }),
+          icon: (
+            <EuiIcon
+              type="copy"
+              size="m"
+            />
+          ),
+          'data-test-subj': 'cloneLayerButton',
+          onClick: () => {
+            this._closePopover();
+            this.props.cloneLayer();
+          }
+        },
+        {
           name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
             defaultMessage: 'Fit to data',
           }),

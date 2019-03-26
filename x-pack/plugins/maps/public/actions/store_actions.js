@@ -119,6 +119,20 @@ export function replaceLayerList(newLayerList) {
   };
 }
 
+export function cloneLayer(layerId) {
+  return async (dispatch, getState) => {
+    const layer = getLayerList(getState()).find(layer => {
+      return layerId === layer.getId();
+    });
+    if (!layer) {
+      return;
+    }
+
+    const clonedDescriptor = await layer.cloneDescriptor();
+    dispatch(addLayer(clonedDescriptor));
+  };
+}
+
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
