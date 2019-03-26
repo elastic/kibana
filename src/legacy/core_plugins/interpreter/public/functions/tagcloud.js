@@ -37,7 +37,7 @@ export const tagcloud = () => ({
     },
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
+    const visConfig = JSON.parse(args.visConfig);
 
     return {
       type: 'render',
@@ -45,7 +45,7 @@ export const tagcloud = () => ({
       value: {
         visData: context,
         visType: 'tagcloud',
-        visConfig: visConfigParams,
+        visConfig,
         params: {
           listenOnChange: true,
         }

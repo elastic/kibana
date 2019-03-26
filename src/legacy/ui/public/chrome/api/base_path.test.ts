@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { basePathServiceMock } from '../../../../../core/public/mocks';
 import { __newPlatformInit__, initChromeBasePathApi } from './base_path';
 
 function initChrome() {
@@ -25,11 +26,7 @@ function initChrome() {
   return chrome;
 }
 
-const newPlatformBasePath = {
-  get: jest.fn().mockReturnValue('get'),
-  addToPath: jest.fn().mockReturnValue('addToPath'),
-  removeFromPath: jest.fn().mockReturnValue('removeFromPath'),
-};
+const newPlatformBasePath = basePathServiceMock.createSetupContract();
 __newPlatformInit__(newPlatformBasePath);
 
 beforeEach(() => {

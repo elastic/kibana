@@ -38,7 +38,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -57,7 +57,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -76,7 +76,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -95,7 +95,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -114,7 +114,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -133,7 +133,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -152,7 +152,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -171,7 +171,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -190,7 +190,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -218,7 +218,7 @@ export const getSavedObjects = () => [
       ],
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -237,7 +237,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -256,7 +256,7 @@ export const getSavedObjects = () => [
       "description": "",
       "version": 1,
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"index\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\",\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
       }
     }
   },
@@ -298,7 +298,7 @@ export const getSavedObjects = () => [
         "value": 900000
       },
       "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"query\":{\"language\":\"lucene\",\"query\":\"\"},\"filter\":[]}"
+        "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
       }
     }
   }

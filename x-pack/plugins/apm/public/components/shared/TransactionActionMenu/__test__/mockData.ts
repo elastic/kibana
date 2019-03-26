@@ -5,9 +5,11 @@
  */
 
 import { Location } from 'history';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 
 export const transaction: Transaction = {
+  '@metadata': 'whatever',
+  observer: 'whatever',
   agent: {
     name: 'java',
     version: '7.0.0'
