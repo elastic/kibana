@@ -54,13 +54,16 @@ const fieldTitleMapping: Readonly<CardItems[]> = [
         description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
         value: null,
       },
+    ],
+  },
+  {
+    fields: [
       {
         key: 'uniqueDestinationPrivateIps',
         description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
         value: null,
       },
     ],
-    description: i18n.UNIQUE_PRIVATE_IPS,
   },
 ];
 
