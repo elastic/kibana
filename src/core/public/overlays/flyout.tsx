@@ -25,19 +25,11 @@ import { Subject } from 'rxjs';
 
 import { EuiFlyout } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import { I18nContext } from 'ui/i18n';
+import { getOrCreateContainerElement } from './dom_utils';
+
+import { I18nStart } from '../i18n';
 
 const CONTAINER_ID = 'flyout-container';
-
-function getOrCreateContainerElement() {
-  let container = document.getElementById(CONTAINER_ID);
-  if (!container) {
-    container = document.createElement('div');
-    container.id = CONTAINER_ID;
-    document.body.appendChild(container);
-  }
-  return container;
-}
 
 /**
  * A FlyoutSession describes the session of one opened flyout panel. It offers
@@ -91,6 +83,7 @@ class FlyoutService {
    * @return {FlyoutSession} The session instance for the opened flyout panel.
    */
   public openFlyout = (
+    i18n: I18nStart,
     flyoutChildren: React.ReactNode,
     flyoutProps: {
       closeButtonAriaLabel?: string;
@@ -101,15 +94,15 @@ class FlyoutService {
     if (this.activeSession) {
       this.activeSession.close();
     }
-    const container = getOrCreateContainerElement();
+    const container = getOrCreateContainerElement(CONTAINER_ID);
     const session = (this.activeSession = new FlyoutSession(() => this.activeSession));
 
     ReactDOM.render(
-      <I18nContext>
+      <i18n.Context>
         <EuiFlyout {...flyoutProps} onClose={() => session.close()}>
           {flyoutChildren}
         </EuiFlyout>
-      </I18nContext>,
+      </i18n.Context>,
       container
     );
 

@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import { FlyoutService } from './flyout';
-
-import { I18nStart } from '../i18n';
-
-interface Deps {
-  i18n: I18nStart;
-}
-
-export class OverlayService {
-  private flyoutService: FlyoutService = new FlyoutService();
-
-  public start({ i18n }: Deps) {
-    return {
-      openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
-    };
+export function getOrCreateContainerElement(id: string) {
+  let container = document.getElementById(id);
+  if (!container) {
+    container = document.createElement('div');
+    container.id = id;
+    document.body.appendChild(container);
   }
+  return container;
 }
-
-export type OverlayStart = ReturnType<OverlayService['start']>;

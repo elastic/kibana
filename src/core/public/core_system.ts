@@ -116,7 +116,7 @@ export class CoreSystem {
       const injectedMetadata = this.injectedMetadata.start();
       const fatalErrors = this.fatalErrors.start({ i18n });
       const http = this.http.start({ fatalErrors });
-      const overlay = this.overlay.start();
+      const overlay = this.overlay.start({ i18n });
       const basePath = this.basePath.start({ injectedMetadata });
       const uiSettings = this.uiSettings.start({
         notifications,
