@@ -17,5 +17,10 @@
  * under the License.
  */
 
-require('../../setup_node_env');
-module.exports = require('./ts_transform.ts');
+export const settingsGet = jest.fn();
+
+jest.doMock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: settingsGet,
+  }),
+}));
