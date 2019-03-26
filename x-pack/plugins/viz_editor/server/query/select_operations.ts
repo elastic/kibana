@@ -215,7 +215,7 @@ function buildRaw(query: Query, esQuery: any) {
   const cols = query.select as ColumnOperation[];
   return {
     ...esQuery,
-    docvalue_fields: cols.map(({ argument }) => ({ field: argument })),
+    docvalue_fields: cols.map(({ argument: { field } }) => ({ field })),
   };
 }
 
