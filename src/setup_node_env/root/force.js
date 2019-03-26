@@ -17,20 +17,9 @@
  * under the License.
  */
 
-function samplePanelAction(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      contextMenuActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
-}
-
-module.exports = function (kibana) {
-  return [
-    samplePanelAction(kibana),
-  ];
+module.exports = function (argv) {
+  var rootIndex = argv.indexOf('--allow-root');
+  var force = rootIndex >= 0;
+  if (force) argv.splice(rootIndex, 1);
+  return force;
 };
-

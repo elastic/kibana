@@ -23,37 +23,37 @@ import { openFlyout } from 'ui/flyout';
 import {
   ContextMenuAction,
   ContextMenuActionsRegistryProvider,
+  PanelActionAPI,
 } from 'ui/embeddable';
 
 class SamplePanelAction extends ContextMenuAction {
   constructor() {
-    super(
+    super({
+      displayName: 'Sample Panel Action',
+      id: 'samplePanelAction',
+      parentPanelId: 'mainMenu',
+    });
+  }
+  public onClick = ({ embeddable }: PanelActionAPI) => {
+    if (!embeddable) {
+      return;
+    }
+    openFlyout(
+      <React.Fragment>
+        <EuiFlyoutHeader>
+          <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
+            <h1>{embeddable.metadata.title}</h1>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
+        </EuiFlyoutBody>
+      </React.Fragment>,
       {
-        displayName: 'Sample Panel Action',
-        id: 'samplePanelAction',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        onClick({ embeddable }) {
-          openFlyout(
-            <React.Fragment>
-              <EuiFlyoutHeader>
-                <EuiTitle size="s" data-test-subj="samplePanelActionTitle">
-                  <h1>{embeddable.metadata.title}</h1>
-                </EuiTitle>
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody>
-                <h1 data-test-subj="samplePanelActionBody">This is a sample action</h1>
-              </EuiFlyoutBody>
-            </React.Fragment>,
-            {
-              'data-test-subj': 'samplePanelActionFlyout',
-            },
-          );
-        }
+        'data-test-subj': 'samplePanelActionFlyout',
       }
     );
-  }
+  };
 }
 
 ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());

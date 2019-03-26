@@ -16,26 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  ContextMenuAction,
-  ContextMenuActionsRegistryProvider,
-} from 'ui/embeddable';
 
-class SamplePanelLink extends ContextMenuAction {
-  constructor() {
-    super(
-      {
-        displayName: 'Sample Panel Link',
-        id: 'samplePanelLink',
-        parentPanelId: 'mainMenu',
-      },
-      {
-        getHref() {
-          return 'https://example.com/kibana/test';
-        }
-      }
-    );
-  }
+var force = require('./force')(process.argv);
+
+var uid = process.getuid && process.getuid();
+var isRoot = require('./is_root')(uid);
+
+if(isRoot && !force) {
+  console.error('Kibana should not be run as root.  Use --allow-root to continue.');
+  process.exit(1);
 }
-
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());

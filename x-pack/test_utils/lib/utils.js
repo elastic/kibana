@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
 
-export function wrapError(error) {
-  return boomify(error, { statusCode: error.status });
-}
+export const nextTick = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));

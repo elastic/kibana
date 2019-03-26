@@ -261,6 +261,7 @@ export class AutoFollowPatternTable extends PureComponent {
           cellProps={(item, column) => ({
             'data-test-subj': `ccrAutoFollowPatternListTableCell-${column.field}`
           })}
+          data-test-subj="ccrAutoFollowPatternListTable"
         />
         {this.renderLoading()}
       </Fragment>
