@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { searchRequestQueue } from '../search_request_queue';

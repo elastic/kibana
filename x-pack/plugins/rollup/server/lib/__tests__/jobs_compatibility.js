@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { areJobsCompatible, mergeJobConfigurations } from '../jobs_compatibility';
 import { jobs } from './fixtures';
 
