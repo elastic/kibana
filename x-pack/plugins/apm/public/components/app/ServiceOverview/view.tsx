@@ -19,12 +19,11 @@ interface Props {
 
 export function ServiceOverview({ urlParams }: Props) {
   const { start, end, kuery } = urlParams;
-  const { data: agentStatus = true } = useFetcher(loadAgentStatus, []);
-  const { data: serviceListData } = useFetcher(loadServiceList, {
-    start,
-    end,
-    kuery
-  });
+  const { data: agentStatus = true } = useFetcher(() => loadAgentStatus(), []);
+  const { data: serviceListData } = useFetcher(
+    () => loadServiceList({ start, end, kuery }),
+    [start, end, kuery]
+  );
 
   return (
     <EuiPanel>

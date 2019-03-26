@@ -32,13 +32,11 @@ interface ServiceMetricsProps {
 
 export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
-  const { data: errorDistributionData } = useFetcher(loadErrorDistribution, {
-    serviceName,
-    start,
-    end,
-    errorGroupId,
-    kuery
-  });
+  const { data: errorDistributionData } = useFetcher(
+    () =>
+      loadErrorDistribution({ serviceName, start, end, errorGroupId, kuery }),
+    [serviceName, start, end, errorGroupId, kuery]
+  );
 
   const { data: transactionOverviewChartsData } = useTransactionOverviewCharts(
     urlParams

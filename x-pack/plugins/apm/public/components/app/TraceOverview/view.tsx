@@ -17,11 +17,10 @@ interface Props {
 
 export function TraceOverview(props: Props) {
   const { start, end, kuery } = props.urlParams;
-  const { status, data = [] } = useFetcher(loadTraceList, {
-    start,
-    end,
-    kuery
-  });
+  const { status, data = [] } = useFetcher(
+    () => loadTraceList({ start, end, kuery }),
+    [start, end, kuery]
+  );
 
   return (
     <EuiPanel>

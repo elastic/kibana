@@ -57,15 +57,16 @@ export function useServiceMetricCharts(urlParams: IUrlParams) {
   } = urlParams;
 
   const { data = INITIAL_DATA, error, status } = useFetcher(
-    loadMetricsChartDataForService,
-    {
-      serviceName,
-      transactionName,
-      transactionType,
-      start,
-      end,
-      kuery
-    }
+    () =>
+      loadMetricsChartDataForService({
+        serviceName,
+        transactionName,
+        transactionType,
+        start,
+        end,
+        kuery
+      }),
+    [serviceName, transactionName, transactionType, start, end, kuery]
   );
 
   const memoizedData = useMemo(

@@ -21,7 +21,7 @@ const initialLicense = {
 export const LicenseContext = React.createContext(initialLicense);
 
 export const LicenseCheck: React.FC = ({ children }) => {
-  const { data = initialLicense, status } = useFetcher(loadLicense, {});
+  const { data = initialLicense, status } = useFetcher(() => loadLicense(), []);
   const hasValidLicense = data.license.is_active;
 
   // if license is invalid show an error message

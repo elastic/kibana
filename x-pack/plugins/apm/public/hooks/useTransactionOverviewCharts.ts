@@ -20,13 +20,17 @@ export function useTransactionOverviewCharts(urlParams: IUrlParams) {
     kuery
   } = urlParams;
 
-  const { data, error, status } = useFetcher(loadTransactionOverviewCharts, {
-    serviceName,
-    start,
-    end,
-    transactionType,
-    kuery
-  });
+  const { data, error, status } = useFetcher(
+    () =>
+      loadTransactionOverviewCharts({
+        serviceName,
+        start,
+        end,
+        transactionType,
+        kuery
+      }),
+    [serviceName, start, end, transactionType, kuery]
+  );
 
   const memoizedData = useMemo(() => getTransactionCharts(urlParams, data), [
     data

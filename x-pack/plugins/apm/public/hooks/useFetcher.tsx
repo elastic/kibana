@@ -5,7 +5,7 @@
  */
 
 import { useContext, useEffect, useState } from 'react';
-import { FetchStatusContext } from '../components/app/Main/FetchStatus';
+import { GlobalFetchContext } from '../components/app/Main/GlobalFetchIndicator';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -16,18 +16,16 @@ export enum FETCH_STATUS {
 // use this in request methods to signal to `useFetch` that all arguments are not yet available
 export class MissingArgumentsError extends Error {}
 
-export function useFetcher<Opts, Response>(
-  fn: (fnOptions: Opts) => Promise<Response>,
-  fnOptions: Opts
+export function useFetcher<Response>(
+  fn: () => Promise<Response>,
+  useEffectKey: Array<string | boolean | number | undefined>
 ) {
-  const { dispatchStatus } = useContext(FetchStatusContext);
+  const { dispatchStatus } = useContext(GlobalFetchContext);
   const [result, setResult] = useState<{
     data?: Response;
     status?: FETCH_STATUS;
     error?: Error;
   }>({});
-
-  const useEffectKey = [...Object.keys(fnOptions), ...Object.values(fnOptions)];
 
   useEffect(() => {
     let didCancel = false;
@@ -46,8 +44,9 @@ export function useFetcher<Opts, Response>(
       }
     });
 
-    fn(fnOptions)
-      .then(data => {
+    async function doFetch() {
+      const data = await fn();
+      try {
         didFinish = true;
         if (!didCancel) {
           dispatchStatus({ name: fn.name, isLoading: false });
@@ -57,8 +56,7 @@ export function useFetcher<Opts, Response>(
             error: undefined
           });
         }
-      })
-      .catch(e => {
+      } catch (e) {
         didFinish = true;
         if (e instanceof MissingArgumentsError) {
           return;
@@ -71,7 +69,10 @@ export function useFetcher<Opts, Response>(
             error: e
           });
         }
-      });
+      }
+    }
+
+    doFetch();
 
     return () => {
       dispatchStatus({ name: fn.name, isLoading: false });

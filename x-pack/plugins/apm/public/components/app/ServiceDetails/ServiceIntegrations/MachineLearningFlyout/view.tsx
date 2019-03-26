@@ -58,10 +58,10 @@ export function MachineLearningFlyoutView({
   serviceTransactionTypes,
   transactionType
 }: Props) {
-  const { data = INITIAL_DATA, status } = useFetcher(getMLJob, {
-    serviceName,
-    transactionType
-  });
+  const { data = INITIAL_DATA, status } = useFetcher(
+    () => getMLJob({ serviceName, transactionType }),
+    [serviceName, transactionType]
+  );
 
   if (status === FETCH_STATUS.LOADING) {
     return null;

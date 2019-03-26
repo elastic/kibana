@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { px, topNavHeight, unit, units } from '../../../style/variables';
 // @ts-ignore
 import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
-import { FetchStatus } from './FetchStatus';
+import { GlobalFetchIndicator } from './GlobalFetchIndicator';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
 import { ScrollToTopOnPathChange } from './ScrollToTopOnPathChange';
@@ -24,7 +24,7 @@ const MainContainer = styled.div`
 
 export function Main() {
   return (
-    <FetchStatus>
+    <GlobalFetchIndicator>
       <MainContainer>
         <UpdateBreadcrumbs />
         <Route component={ConnectRouterToRedux} />
@@ -37,6 +37,6 @@ export function Main() {
           </Switch>
         </LicenseCheck>
       </MainContainer>
-    </FetchStatus>
+    </GlobalFetchIndicator>
   );
 }

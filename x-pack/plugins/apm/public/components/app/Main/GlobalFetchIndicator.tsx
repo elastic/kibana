@@ -6,7 +6,7 @@
 import { EuiDelayHide, EuiPortal, EuiProgress } from '@elastic/eui';
 import React, { Fragment, useMemo, useReducer } from 'react';
 
-export const FetchStatusContext = React.createContext({
+export const GlobalFetchContext = React.createContext({
   statuses: {},
   dispatchStatus: (action: Action) => undefined as void
 });
@@ -25,10 +25,14 @@ function reducer(statuses: State, action: Action) {
 }
 
 function getIsAnyLoading(statuses: State) {
-  return Object.entries(statuses).some(([name, isLoading]) => isLoading);
+  return Object.values(statuses).some(isLoading => isLoading);
 }
 
-export function FetchStatus({ children }: { children: React.ReactNode }) {
+export function GlobalFetchIndicator({
+  children
+}: {
+  children: React.ReactNode;
+}) {
   const [statuses, dispatchStatus] = useReducer(reducer, {});
   const isLoading = useMemo(() => getIsAnyLoading(statuses), [statuses]);
 
@@ -44,7 +48,7 @@ export function FetchStatus({ children }: { children: React.ReactNode }) {
         )}
       />
 
-      <FetchStatusContext.Provider
+      <GlobalFetchContext.Provider
         value={{ statuses, dispatchStatus }}
         children={children}
       />

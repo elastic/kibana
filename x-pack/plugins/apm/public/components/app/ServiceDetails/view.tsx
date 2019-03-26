@@ -22,12 +22,10 @@ interface Props {
 
 export function ServiceDetailsView({ urlParams, location }: Props) {
   const { serviceName, start, end, kuery } = urlParams;
-  const { data: serviceDetailsData } = useFetcher(loadServiceDetails, {
-    serviceName,
-    start,
-    end,
-    kuery
-  });
+  const { data: serviceDetailsData } = useFetcher(
+    () => loadServiceDetails({ serviceName, start, end, kuery }),
+    [serviceName, start, end, kuery]
+  );
 
   if (!serviceDetailsData) {
     return null;
