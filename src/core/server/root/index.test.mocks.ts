@@ -29,5 +29,5 @@ jest.doMock('../config/config_service', () => ({
   ConfigService: jest.fn(() => configService),
 }));
 
-export const mockServer = { start: jest.fn(), stop: jest.fn() };
+export const mockServer = { setup: jest.fn(), stop: jest.fn() };
 jest.mock('../server', () => ({ Server: jest.fn(() => mockServer) }));
