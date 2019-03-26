@@ -1,0 +1,30 @@
+{
+  "id": "sample_dataset_weblogs",
+  "title": "Kibana Sample Data Web Logs",
+  "description": "Find anomalies in Kibana Sample Data for Web Logs",
+  "type": "Sample Dataset",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "kibana_sample_data_flights",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term":  { "_index": "kibana_sample_data_flights" } }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "mean_delay_by_dest_weather",
+      "file": "mean_delay_by_dest_weather.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-mean_delay_by_dest_weather",
+      "file": "datafeed_mean_delay_by_dest_weather.json",
+      "job_id": "mean_delay_by_dest_weather"
+    }
+  ],
+  "kibana": {
+}
+}
