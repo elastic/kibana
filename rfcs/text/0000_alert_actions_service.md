@@ -5,16 +5,16 @@
 # Summary
 
 An actions service for registering *action instances* for a specific
-*action type* for a given *connector*.
+*action type* for a given *handler*.
 
 # Basic example
 
 An example of a preconfigured `instance` of a `actionType` with a specific
-`connectorType` (i.e. slack).
+`handler` (i.e. slack).
 
 ```JS
 server.actions.fire({
-  action: 'send message to slack',
+  action: 'send message to slack', // instance
   actionType: 'send message',
   params: {
     message: 'This is a test message from kibana actions service',
@@ -37,7 +37,7 @@ particular service (i.e email, slack)
 This proposal defines one method to allow an alert task to be decoupled from the
 action(s) that the user wants the alert task to execute when the alert is
 *triggered*. The `action` is a preconfigured saved `instance` of a `actionType`
-for a specific `connectorType`
+for a specific `handler`
 
 ## Executing Actions
 
@@ -53,6 +53,8 @@ server.actions.fire({
     title: 'custom title',
     // destination: '<slack url>' // optional
   },
+  // optionally handler params could be added here
+  // handlerParams: {...}
 })
 ```
 
@@ -63,18 +65,18 @@ below for details how to create them
 
 Instances are saved in the Kibana index and are used in order to `fire` an action with parameters. The
 `params` required are specific to the `actionType`. Changing the `actionType` also
-changes what `connectorTypes` are available for it.
+changes what `handlers` are available for it.
 
 
 ```JS
 server.actions.instance({
   name: 'send message to slack',
   actionType: 'notification',
-  connectorType: 'slack',
+  handler: 'slack',
   params: {
     destination: '<slack url>',
   },
-  connectorParams: {
+  handlerParams: {
     channel: '#bot-playground',
   },
 });
@@ -82,27 +84,27 @@ server.actions.instance({
 
 *Note: instances are saved objects that are space aware*
 
-## The Connectors
+## The Handler
 
-The `connector` is what defines what happens when an action is *fired*. This
+The `handler` is what defines what happens when an action is *fired*. This
 will define the particular integration such as slack, email, etc.
 
 ```JS
-server.actions.registerConnector({
+server.actions.registerHandler({
   actionType: 'notification',
-  connectorType: 'slack',
-  connectorParams: {
+  type: 'slack',
+  params: {
     { name: 'channel', type: 'string' },
   },
-  async handler({ params, connectorParams }) {
+  async handler({ actionParams, params }) {
     try {
       const body = JSON.stringify({
-        ...connectorParams,
+        ...params,
         username: 'webhookbot',
-        text: params.message,
+        text: actionParams.message,
         icon_emoji: ':ghost:',
       });
-      const result = new url.URL(params.destination);
+      const result = new url.URL(actionParams.destination);
       await fetch(result.toString(), {
         method: 'POST',
         body,
@@ -118,7 +120,7 @@ server.actions.registerConnector({
 
 Registering action types is the way that these actions are exposed to the
 alerts. Included in the definition are the required parameters that the alert
-should provide and those that are handed off to the *connectors* to fit into
+should provide and those that are handed off to the *handlers* to fit into
 whatever service integration they provide.
 
 ```JS
@@ -149,20 +151,20 @@ $ curl -X GET localhost:5601/api/actions
 
 # Drawbacks
 
-The relationship between **action types** and **connectors** is a bit complex as
+The relationship between **action types** and **handlers** is a bit complex as
 well as the supported parameter meta types.
 
 Another downside to this design is that an alert must be changed in order to support
 **action types**. So as new action types are added to meet users needs are
 discovered alerts will require changes to support the new types. This increases
 the code complexity of each alert and time to market for new integrations. And
-increased risk of alerts for specific applications not having options to perform
-the same actions that other applications support. Also differences in UI and
-customizability for the action connectors may vary per application.
+increased risk of alerts for specific applications not supporting particular
+actions. Also differences in UI and customizability for the action handlers may
+vary per application.
 
 This might lead to a poor user experience when a user tries to set up an alert
-in APM and APM does not yet support calling `webhooks` as it's alert only
-supports `notifications`. Or APM might allow a user to configure a template for
+in APM and APM does not yet support calling `webhooks` as it's alerts only
+support `notifications`. Or APM might allow a user to configure a template for
 an email message but Uptime does not.
 
 # Alternatives
@@ -191,9 +193,9 @@ operations and used from front-end apps.
 # How we teach this
 
 A common pattern in Kibana is that of a service which provides a `registry`
-that is completely pluggable by any consumers. New action types and connectors
+that is completely pluggable by any consumers. New action types and handlers
 can be added or reused by any plugin. This is similar to the way the task
-manager is pluggable. Plugins will provide additional types and connectors. And
+manager is pluggable. Plugins will provide additional types and handlers. And
 users would then be able to create any number of instances.
 
 `fire` The actual execution of the action directly with the necessary parameters
@@ -205,7 +207,7 @@ necessary to `fire` an action.
 `action types` A type of action that can be invoked by an alert or task with an
 action service context.
 
-`connectors` Code that performs the actual action connecting to an external
+`handler` Code that handles the actual action connecting to an external
 service in the most likely case.
 
 There should be a readme and/or acceptable generated documentation for these
