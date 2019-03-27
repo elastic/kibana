@@ -61,7 +61,9 @@ export function TransactionTabs({
   const agentName = transaction.agent.name;
 
   return (
-    <HeightRetainer>
+    <HeightRetainer
+      key={`${transaction.trace.id}:${transaction.transaction.id}`}
+    >
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
