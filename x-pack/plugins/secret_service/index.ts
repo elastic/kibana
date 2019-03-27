@@ -56,10 +56,10 @@ export const secretService = (kibana: any) => {
 
       const service = new SecretService(repository, 'secret', encryptionKey);
 
-      // server.savedObjects.addScopedSavedObjectsClientWrapperFactory(
-      //   0,
-      //   SavedObjectAttributeCryptoClientWrapperFactoryProvider(info)
-      // );
+      server.savedObjects.addScopedSavedObjectsClientWrapperFactory(
+        0,
+        SavedObjectAttributeCryptoClientWrapperFactoryProvider(info)
+      );
 
       server.expose('secretService', service);
       server.expose('savedObjectAttributeCrypto', {

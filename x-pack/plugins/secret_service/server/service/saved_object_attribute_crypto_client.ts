@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as ErrorFunctions from 'src/legacy/server/saved_objects/service/lib/errors';
 import {
   BaseOptions,
   BulkCreateObject,
@@ -21,7 +20,7 @@ export class SavedObjectAttributeCryptoClient implements SavedObjectsClient {
     private readonly baseClient: SavedObjectsClient,
     private readonly request: any,
     private readonly info: (message: string) => void,
-    public readonly errors: any = ErrorFunctions
+    public readonly errors: any = baseClient.errors
   ) {}
 
   public get(id: string, type: string, options?: BaseOptions) {

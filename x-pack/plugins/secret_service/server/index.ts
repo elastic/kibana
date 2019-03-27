@@ -5,3 +5,6 @@
  */
 
 export { CONFIG_KEY_NAME, SecretService } from './service/secret_service';
+export {
+  SavedObjectAttributeCryptoClientWrapperFactoryProvider,
+} from './service/saved_object_attribute_crypto_client_wrapper_factory_provider';
