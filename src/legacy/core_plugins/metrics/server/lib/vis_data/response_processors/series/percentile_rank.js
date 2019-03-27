@@ -23,7 +23,7 @@ import getLastMetric from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export default function percentile(resp, panel, series, meta) {
+export default function percentileRank(resp, panel, series, meta) {
   return next => results => {
     const metric = getLastMetric(series);
 
