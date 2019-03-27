@@ -72,10 +72,6 @@ export interface Source {
   EventDetails: EventDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
-
-  IpOverview?: IpOverviewData | null;
-
-  KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -84,6 +80,8 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
+
+  KpiNetwork?: KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -377,25 +375,9 @@ export interface EventEcsFields {
 }
 
 export interface GeoEcsFields {
-  continent_name?: string | null;
-
-  city_name?: string | null;
-
-  country_name?: string | null;
-
   country_iso_code?: string | null;
 
-  location?: Location | null;
-
-  region_iso_code?: string | null;
-
   region_name?: string | null;
-}
-
-export interface Location {
-  lon?: number | null;
-
-  lat?: number | null;
 }
 
 export interface NetworkEcsField {
@@ -662,34 +644,6 @@ export interface HostItem {
   lastBeat?: Date | null;
 }
 
-export interface IpOverviewData {
-  source?: Overview | null;
-
-  destination?: Overview | null;
-}
-
-export interface Overview {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  domains?: string[] | null;
-
-  host?: HostEcsFields | null;
-
-  geo?: GeoEcsFields | null;
-}
-
-export interface KpiNetworkData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  activeAgents?: number | null;
-
-  uniquePrivateIps?: number | null;
-}
-
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -789,6 +743,18 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface KpiNetworkData {
+  networkEvents?: number | null;
+
+  uniqueFlowId?: number | null;
+
+  activeAgents?: number | null;
+
+  uniqueSourcePrivateIps?: number | null;
+
+  uniqueDestinationPrivateIps?: number | null;
+}
+
 // ====================================================
 // InputTypes
 // ====================================================
@@ -867,22 +833,6 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface IpOverviewSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  ip: string;
-}
-export interface KpiNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-}
 export interface NetworkTopNFlowSourceArgs {
   direction: NetworkTopNFlowDirection;
 
@@ -915,6 +865,13 @@ export interface UncommonProcessesSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
+
+  filterQuery?: string | null;
+}
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
 
   filterQuery?: string | null;
 }
@@ -972,11 +929,6 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export enum IpOverviewType {
-  destination = 'destination',
-  source = 'source',
-}
-
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -1027,10 +979,6 @@ export namespace SourceResolvers {
     EventDetails?: EventDetailsResolver<EventDetailsData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
-
-    IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
-
-    KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     NetworkTopNFlow?: NetworkTopNFlowResolver<NetworkTopNFlowData, TypeParent, Context>;
 
@@ -1039,6 +987,8 @@ export namespace SourceResolvers {
     UncommonProcesses?: UncommonProcessesResolver<UncommonProcessesData, TypeParent, Context>;
     /** Just a simple example to get the app name */
     whoAmI?: WhoAmIResolver<SayMyName | null, TypeParent, Context>;
+
+    KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = Source, Context = SecOpsContext> = Resolver<
@@ -1112,34 +1062,6 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type IpOverviewResolver<
-    R = IpOverviewData | null,
-    Parent = Source,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context, IpOverviewArgs>;
-  export interface IpOverviewArgs {
-    id?: string | null;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: string | null;
-
-    ip: string;
-  }
-
-  export type KpiNetworkResolver<
-    R = KpiNetworkData | null,
-    Parent = Source,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context, KpiNetworkArgs>;
-  export interface KpiNetworkArgs {
-    id?: string | null;
-
-    timerange: TimerangeInput;
-
-    filterQuery?: string | null;
-  }
-
   export type NetworkTopNFlowResolver<
     R = NetworkTopNFlowData,
     Parent = Source,
@@ -1198,6 +1120,18 @@ export namespace SourceResolvers {
     Parent = Source,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
+  export type KpiNetworkResolver<
+    R = KpiNetworkData | null,
+    Parent = Source,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context, KpiNetworkArgs>;
+  export interface KpiNetworkArgs {
+    id?: string | null;
+
+    timerange: TimerangeInput;
+
+    filterQuery?: string | null;
+  }
 }
 /** A set of configuration options for a security data source */
 export namespace SourceConfigurationResolvers {
@@ -2162,47 +2096,12 @@ export namespace EventEcsFieldsResolvers {
 
 export namespace GeoEcsFieldsResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = GeoEcsFields> {
-    continent_name?: ContinentNameResolver<string | null, TypeParent, Context>;
-
-    city_name?: CityNameResolver<string | null, TypeParent, Context>;
-
-    country_name?: CountryNameResolver<string | null, TypeParent, Context>;
-
     country_iso_code?: CountryIsoCodeResolver<string | null, TypeParent, Context>;
-
-    location?: LocationResolver<Location | null, TypeParent, Context>;
-
-    region_iso_code?: RegionIsoCodeResolver<string | null, TypeParent, Context>;
 
     region_name?: RegionNameResolver<string | null, TypeParent, Context>;
   }
 
-  export type ContinentNameResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type CityNameResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type CountryNameResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
   export type CountryIsoCodeResolver<
-    R = string | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type LocationResolver<
-    R = Location | null,
-    Parent = GeoEcsFields,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type RegionIsoCodeResolver<
     R = string | null,
     Parent = GeoEcsFields,
     Context = SecOpsContext
@@ -2212,25 +2111,6 @@ export namespace GeoEcsFieldsResolvers {
     Parent = GeoEcsFields,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace LocationResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = Location> {
-    lon?: LonResolver<number | null, TypeParent, Context>;
-
-    lat?: LatResolver<number | null, TypeParent, Context>;
-  }
-
-  export type LonResolver<R = number | null, Parent = Location, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type LatResolver<R = number | null, Parent = Location, Context = SecOpsContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
 }
 
 export namespace NetworkEcsFieldResolvers {
@@ -3111,98 +2991,6 @@ export namespace HostItemResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
-export namespace IpOverviewDataResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = IpOverviewData> {
-    source?: SourceResolver<Overview | null, TypeParent, Context>;
-
-    destination?: DestinationResolver<Overview | null, TypeParent, Context>;
-  }
-
-  export type SourceResolver<
-    R = Overview | null,
-    Parent = IpOverviewData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type DestinationResolver<
-    R = Overview | null,
-    Parent = IpOverviewData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace OverviewResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = Overview> {
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
-
-    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
-
-    domains?: DomainsResolver<string[] | null, TypeParent, Context>;
-
-    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
-
-    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
-  }
-
-  export type FirstSeenResolver<
-    R = Date | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type LastSeenResolver<
-    R = Date | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type DomainsResolver<
-    R = string[] | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type HostResolver<
-    R = HostEcsFields | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type GeoResolver<
-    R = GeoEcsFields | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace KpiNetworkDataResolvers {
-  export interface Resolvers<Context = SecOpsContext, TypeParent = KpiNetworkData> {
-    networkEvents?: NetworkEventsResolver<number | null, TypeParent, Context>;
-
-    uniqueFlowId?: UniqueFlowIdResolver<number | null, TypeParent, Context>;
-
-    activeAgents?: ActiveAgentsResolver<number | null, TypeParent, Context>;
-
-    uniquePrivateIps?: UniquePrivateIpsResolver<number | null, TypeParent, Context>;
-  }
-
-  export type NetworkEventsResolver<
-    R = number | null,
-    Parent = KpiNetworkData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type UniqueFlowIdResolver<
-    R = number | null,
-    Parent = KpiNetworkData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type ActiveAgentsResolver<
-    R = number | null,
-    Parent = KpiNetworkData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-  export type UniquePrivateIpsResolver<
-    R = number | null,
-    Parent = KpiNetworkData,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
-}
-
 export namespace NetworkTopNFlowDataResolvers {
   export interface Resolvers<Context = SecOpsContext, TypeParent = NetworkTopNFlowData> {
     edges?: EdgesResolver<NetworkTopNFlowEdges[], TypeParent, Context>;
@@ -3523,4 +3311,48 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace KpiNetworkDataResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = KpiNetworkData> {
+    networkEvents?: NetworkEventsResolver<number | null, TypeParent, Context>;
+
+    uniqueFlowId?: UniqueFlowIdResolver<number | null, TypeParent, Context>;
+
+    activeAgents?: ActiveAgentsResolver<number | null, TypeParent, Context>;
+
+    uniqueSourcePrivateIps?: UniqueSourcePrivateIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationPrivateIps?: UniqueDestinationPrivateIpsResolver<
+      number | null,
+      TypeParent,
+      Context
+    >;
+  }
+
+  export type NetworkEventsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueFlowIdResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type ActiveAgentsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueSourcePrivateIpsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type UniqueDestinationPrivateIpsResolver<
+    R = number | null,
+    Parent = KpiNetworkData,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
