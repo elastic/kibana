@@ -78,7 +78,6 @@ import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_value
  *  @return {Promise<Array<FieldInfo>>}
  */
 export function readFieldCapsResponse(fieldCapsResponse) {
-  console.log(JSON.stringify(fieldCapsResponse));
   const capsByNameThenType = fieldCapsResponse.fields;
   return Object.keys(capsByNameThenType).map(fieldName => {
     const capsByType = capsByNameThenType[fieldName];
