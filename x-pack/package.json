@@ -139,7 +139,7 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.3.4",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.5.0",
+    "@elastic/eui": "9.6.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",
