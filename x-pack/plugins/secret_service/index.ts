@@ -7,10 +7,13 @@
 import crypto from 'crypto';
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
-import { resolve } from 'path';
 import { SavedObject } from 'src/legacy/server/saved_objects';
 import mappings from './mappings.json';
-import { CONFIG_KEY_NAME, SecretService } from './server';
+import {
+  CONFIG_KEY_NAME,
+  SavedObjectAttributeCryptoClientWrapperFactoryProvider,
+  SecretService,
+} from './server';
 
 export const secretService = (kibana: any) => {
   return new kibana.Plugin({
@@ -37,6 +40,7 @@ export const secretService = (kibana: any) => {
 
     async init(server: Legacy.Server) {
       const warn = (message: string | any) => server.log(['secret-service', 'warning'], message);
+      const info = (message: string | any) => server.log(['secret-service', 'info'], message);
 
       let encryptionKey = server.config().get<string>(CONFIG_KEY_NAME);
 
@@ -52,29 +56,25 @@ export const secretService = (kibana: any) => {
 
       const service = new SecretService(repository, 'secret', encryptionKey);
 
-      // validate key used
-      // const valid = await service.validateKey();
-
-      // if (!valid) {
-      //  throw new Error(
-      //    `Config key '${CONFIG_KEY_NAME}' is not valid, please ensure your kibana keystore is setup properly!`
-      //  );
-      // }
+      // server.savedObjects.addScopedSavedObjectsClientWrapperFactory(
+      //   0,
+      //   SavedObjectAttributeCryptoClientWrapperFactoryProvider(info)
+      // );
 
       server.expose('secretService', service);
       server.expose('savedObjectAttributeCrypto', {
         registerType: <T extends SavedObject>({ type, attributes }: T) => {
           warn(`A plugin adds  ${type} ${JSON.stringify(attributes)} as encrypted attributes`);
         },
-        get: <T extends SavedObject>(id: string, type: string): Promise<T> => {
-          // ensure type is valid
-          return Promise.resolve({
-            id,
-            type,
-            attributes: {},
-            references: [],
-          });
-        },
+        // get: <T extends SavedObject>(id: string, type: string): Promise<T> => {
+        //   // ensure type is valid
+        //   return Promise.resolve({
+        //     id,
+        //     type,
+        //     attributes: {},
+        //     references: [],
+        //   });
+        // },
       });
     },
   });
