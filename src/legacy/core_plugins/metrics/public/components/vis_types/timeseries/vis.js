@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { MarkdownSimple } from 'ui/markdown';
+import { htmlIdGenerator } from '@elastic/eui';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
@@ -29,10 +30,6 @@ import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-
-function hasSeparateAxis(row) {
-  return row.separate_axis;
-}
 
 class TimeseriesVisualization extends Component {
 
@@ -104,7 +101,10 @@ class TimeseriesVisualization extends Component {
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const tickFormatter = createTickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
 
+    const yAxisIdGenerator = htmlIdGenerator('yaxis');
+
     const mainAxis = {
+      id: yAxisIdGenerator('main'),
       position: model.axis_position,
       tickFormatter,
       axisFormatter: _.get(firstSeries, 'formatter', 'number'),
@@ -121,35 +121,33 @@ class TimeseriesVisualization extends Component {
     }
 
     const yaxes = [mainAxis];
+    let axisCount = 1;
 
+    seriesModel.forEach(seriesGroup => {
+      const seriesData = series.filter(r => _.startsWith(r.id, seriesGroup.id));
+      const seriesGroupTickFormatter = createTickFormatter(seriesGroup.formatter, seriesGroup.value_template, this.props.getConfig);
 
-    seriesModel.forEach(s => {
-      series
-        .filter(r => _.startsWith(r.id, s.id))
-        .forEach(r => r.tickFormatter = createTickFormatter(s.formatter, s.value_template, this.props.getConfig));
+      seriesData.forEach(seriesDataRow => {
+        seriesDataRow.tickFormatter = seriesGroupTickFormatter;
 
-      if (s.hide_in_legend) {
-        series
-          .filter(r => _.startsWith(r.id, s.id))
-          .forEach(r => delete r.label);
-      }
-      if (s.stacked !== 'none') {
-        series
-          .filter(r => _.startsWith(r.id, s.id))
-          .forEach(row => {
-            row.data = row.data.map(point => {
-              if (!point[1]) return [point[0], 0];
-              return point;
-            });
+        if (seriesGroup.hide_in_legend) {
+          delete seriesDataRow.label;
+        }
+
+        if (seriesGroup.stacked !== 'none') {
+          seriesDataRow.data = seriesDataRow.data.map(point => {
+            if (!point[1]) return [point[0], 0];
+            return point;
           });
-      }
-      if (s.stacked === 'percent') {
-        s.separate_axis = true;
-        s.axisFormatter = 'percent';
-        s.axis_min = 0;
-        s.axis_max = 1;
-        s.axis_position = model.axis_position;
-        const seriesData = series.filter(r => _.startsWith(r.id, s.id));
+        }
+      });
+
+      if (seriesGroup.stacked === 'percent') {
+        seriesGroup.separate_axis = true;
+        seriesGroup.axisFormatter = 'percent';
+        seriesGroup.axis_min = 0;
+        seriesGroup.axis_max = 1;
+        seriesGroup.axis_position = model.axis_position;
         const first = seriesData[0];
         if (first) {
           first.data.forEach((row, index) => {
@@ -162,43 +160,32 @@ class TimeseriesVisualization extends Component {
           });
         }
       }
+
+      if (seriesGroup.separate_axis) {
+        axisCount++;
+
+        const yaxis = {
+          id: yAxisIdGenerator(),
+          alignTicksWithAxis: 1,
+          position: seriesGroup.axis_position,
+          tickFormatter: seriesGroupTickFormatter,
+          axisFormatter: seriesGroup.axis_formatter,
+          axisFormatterTemplate: seriesGroup.value_template
+        };
+
+        if (seriesGroup.axis_min != null) yaxis.min = seriesGroup.axis_min;
+        if (seriesGroup.axis_max != null) yaxis.max = seriesGroup.axis_max;
+
+        yaxes.push(yaxis);
+
+        // Assign axis and formatter to each series
+        seriesData.forEach(r => {
+          r.yaxis = axisCount;
+        });
+      }
     });
 
     const interval = this.getInterval();
-
-    let axisCount = 1;
-    if (seriesModel.some(hasSeparateAxis)) {
-      seriesModel.forEach((row) => {
-        if (row.separate_axis) {
-          axisCount++;
-
-          const tickFormatter = createTickFormatter(row.formatter, row.value_template, this.props.getConfig);
-
-          const yaxis = {
-            alignTicksWithAxis: 1,
-            position: row.axis_position,
-            tickFormatter,
-            axisFormatter: row.axis_formatter,
-            axisFormatterTemplate: row.value_template
-          };
-
-
-
-          if (row.axis_min != null) yaxis.min = row.axis_min;
-          if (row.axis_max != null) yaxis.max = row.axis_max;
-
-          yaxes.push(yaxis);
-
-          // Assign axis and formatter to each series
-          series
-            .filter(r => _.startsWith(r.id, row.id))
-            .forEach(r => {
-              r.yaxis = axisCount;
-            });
-        }
-      });
-    }
-
     const panelBackgroundColor = model.background_color;
     const style = { backgroundColor: panelBackgroundColor };
 
