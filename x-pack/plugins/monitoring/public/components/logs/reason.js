@@ -36,7 +36,7 @@ export const Reason = ({ reason }) => {
       />
     );
   }
-  else if (false === reason.indexPatternInTimeRangeExists) {
+  else if (false === reason.indexPatternInTimeRangeExists || (false === reason.typeExists && reason.typeExistsAtAnyTime)) {
     title = i18n.translate('xpack.monitoring.logs.reason.noIndexPatternInTimePeriodTitle', {
       defaultMessage: 'No filebeat indices found in the selected time period.'
     });

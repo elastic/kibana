@@ -27,6 +27,16 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     },
   };
 
+  const typeExistsAtAnyTimeQuery = {
+    query: {
+      bool: {
+        filter: [
+          typeFilter,
+        ]
+      }
+    },
+  };
+
   const typeExistsQuery = {
     query: {
       bool: {
@@ -87,6 +97,8 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     { index: filebeatIndexPattern },
     { ...defaultParams, ...indexPatternExistsQuery },
     { index: filebeatIndexPattern },
+    { ...defaultParams, ...typeExistsAtAnyTimeQuery },
+    { index: filebeatIndexPattern },
     { ...defaultParams, ...typeExistsQuery },
   ];
 
@@ -116,6 +128,7 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
     responses: [
       indexPatternExistsResponse,
       indexPatternExistsInTimeRangeResponse,
+      typeExistsAtAnyTimeResponse,
       typeExistsResponse,
       clusterExistsResponse,
       nodeExistsResponse,
@@ -126,6 +139,7 @@ async function doesFilebeatIndexExist(req, filebeatIndexPattern, { start, end, c
   return {
     indexPatternExists: get(indexPatternExistsResponse, 'hits.total.value', 0) > 0,
     indexPatternInTimeRangeExists: get(indexPatternExistsInTimeRangeResponse, 'hits.total.value', 0) > 0,
+    typeExistsAtAnyTime: get(typeExistsAtAnyTimeResponse, 'hits.total.value', 0) > 0,
     typeExists: get(typeExistsResponse, 'hits.total.value', 0) > 0,
     clusterExists: clusterUuid ? get(clusterExistsResponse, 'hits.total.value', 0) > 0 : null,
     nodeExists: nodeUuid ? get(nodeExistsResponse, 'hits.total.value', 0) > 0 : null,
