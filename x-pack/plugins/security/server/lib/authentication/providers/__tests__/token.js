@@ -176,26 +176,6 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.notHandled()).to.be(true);
     });
 
-    it('fails if state contains invalid credentials.', async () => {
-      const request = requestFixture();
-      const accessToken = 'foo';
-      const authorization = `Bearer ${accessToken}`;
-
-      const authenticationError = new Error('Forbidden');
-      callWithRequest
-        .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
-        .returns(Promise.reject(authenticationError));
-
-      const authenticationResult = await provider.authenticate(request, { accessToken });
-
-      expect(request.headers).to.not.have.property('authorization');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(undefined);
-      expect(authenticationResult.state).to.be.eql(undefined);
-      expect(authenticationResult.error).to.be.eql(authenticationError);
-      sinon.assert.calledOnce(callWithRequest);
-    });
-
     it('authenticates only via `authorization` header even if state is available.', async () => {
       const accessToken = 'foo';
       const authorization = `Bearer ${accessToken}`;
@@ -263,14 +243,14 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be.eql(authenticationError);
     });
 
-    it('fails when header contains a rejected token', async () => {
+    it('fails if authentication with token from header fails with unknown error', async () => {
       const authorization = `Bearer foo`;
       const request = requestFixture({ headers: { authorization } });
 
-      const authenticationError = new Error('Forbidden');
+      const authenticationError = new errors.InternalServerError('something went wrong');
       callWithRequest
         .withArgs(request, 'shield.authenticate')
-        .returns(Promise.reject(authenticationError));
+        .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request);
 
@@ -282,14 +262,14 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be.eql(authenticationError);
     });
 
-    it('fails when session contains a rejected token', async () => {
+    it('fails if authentication with token from state fails with unknown error.', async () => {
       const accessToken = 'foo';
       const request = requestFixture();
 
-      const authenticationError = new Error('Forbidden');
+      const authenticationError = new errors.InternalServerError('something went wrong');
       callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.reject(authenticationError));
+        .withArgs(sinon.match({ headers: { authorization: `Bearer ${accessToken}` } }), 'shield.authenticate')
+        .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, { accessToken });
 
@@ -302,17 +282,17 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.error).to.be.eql(authenticationError);
     });
 
-    it('fails if token refresh is rejected', async () => {
+    it('fails if token refresh is rejected with unknown error', async () => {
       const request = requestFixture();
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer foo' } }), 'shield.authenticate')
         .rejects({ statusCode: 401 });
 
-      const authenticationError = new Error('failed to refresh token');
+      const refreshError =  new errors.InternalServerError('failed to refresh token');
       callWithInternalUser
         .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
-        .returns(Promise.reject(authenticationError));
+        .rejects(refreshError);
 
       const accessToken = 'foo';
       const refreshToken = 'bar';
@@ -325,7 +305,7 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.failed()).to.be(true);
       expect(authenticationResult.user).to.be.eql(undefined);
       expect(authenticationResult.state).to.be.eql(undefined);
-      expect(authenticationResult.error).to.be.eql(authenticationError);
+      expect(authenticationResult.error).to.be.eql(refreshError);
     });
 
     it('redirects non-AJAX requests to /login and clears session if token document is missing', async () => {
@@ -420,10 +400,10 @@ describe('TokenAuthenticationProvider', () => {
         .withArgs('shield.getAccessToken', { body: { grant_type: 'refresh_token', refresh_token: 'bar' } })
         .returns(Promise.resolve({ access_token: 'newfoo', refresh_token: 'newbar' }));
 
-      const authenticationError = new Error('Some error');
+      const authenticationError = new errors.AuthenticationException('Some error');
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization: 'Bearer newfoo' } }), 'shield.authenticate')
-        .returns(Promise.reject(authenticationError));
+        .rejects(authenticationError);
 
       const accessToken = 'foo';
       const refreshToken = 'bar';

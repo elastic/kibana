@@ -264,7 +264,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
     });
 
-    it('fails if token from the state is expired and refresh attempt failed too.', async () => {
+    it('fails if token from the state is expired and refresh attempt failed with unknown reason too.', async () => {
       const request = requestFixture();
 
       callWithRequest
@@ -422,7 +422,7 @@ describe('SAMLAuthenticationProvider', () => {
     it('fails if token from `authorization` header is rejected.', async () => {
       const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
 
-      const failureReason = new Error('Token is not valid!');
+      const failureReason = { statusCode: 401 };
       callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
 
       const authenticationResult = await provider.authenticate(request);
@@ -435,7 +435,7 @@ describe('SAMLAuthenticationProvider', () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Bearer some-invalid-token' } });
 
-      const failureReason = new Error('Token is not valid!');
+      const failureReason = { statusCode: 401 };
       callWithRequest.withArgs(request, 'shield.authenticate').rejects(failureReason);
 
       callWithRequest
