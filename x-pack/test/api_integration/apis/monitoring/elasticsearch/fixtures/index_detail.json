@@ -16,6 +16,7 @@
       "clusterExists": false,
       "indexPatternExists": false,
       "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
       "nodeExists": null,
       "indexExists": false,
       "typeExists": false

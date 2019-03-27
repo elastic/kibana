@@ -68,7 +68,8 @@
         "indexPatternInTimeRangeExists": false,
         "nodeExists": null,
         "indexExists": null,
-        "typeExists": false
+        "typeExists": false,
+        "typeExistsAtAnyTime": false
       },
       "types": []
     }
