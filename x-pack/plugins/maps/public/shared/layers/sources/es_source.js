@@ -37,6 +37,10 @@ export class AbstractESSource extends AbstractVectorSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  supportsElasticsearchFilters() {
+    return true;
+  }
+
   destroy() {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
   }
@@ -136,7 +140,7 @@ export class AbstractESSource extends AbstractVectorSource {
     }
   }
 
-  async _makeSearchSource({ buffer, query, timeFilters, filters }, limit) {
+  async _makeSearchSource(searchFilters, limit) {
     const indexPattern = await this._getIndexPattern();
     const geoField = await this._getGeoField();
     const isTimeAware = await this.isTimeAware();
@@ -144,22 +148,30 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', () => {
-      const allFilters = [...filters];
-      if (this.isFilterByMapBounds() && buffer) {//buffer can be empty
-        allFilters.push(createExtentFilter(buffer, geoField.name, geoField.type));
+      const allFilters = [...searchFilters.filters];
+      if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
+        allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
       }
       if (isTimeAware) {
-        allFilters.push(timefilter.createFilter(indexPattern, timeFilters));
+        allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
       }
       return allFilters;
     });
-    searchSource.setField('query', query);
+    searchSource.setField('query', searchFilters.query);
+
+    if (searchFilters.layerQuery) {
+      const layerSearchSource = new SearchSource();
+      layerSearchSource.setField('index', indexPattern);
+      layerSearchSource.setField('query', searchFilters.layerQuery);
+      searchSource.setParent(layerSearchSource);
+    }
+
     return searchSource;
   }
 
-  async getBoundsForFilters({ query, timeFilters, filters }) {
+  async getBoundsForFilters({ layerQuery, query, timeFilters, filters }) {
 
-    const searchSource = await this._makeSearchSource({ query, timeFilters, filters }, 0);
+    const searchSource = await this._makeSearchSource({ layerQuery, query, timeFilters, filters }, 0);
     const geoField = await this._getGeoField();
     const indexPattern = await this._getIndexPattern();
 

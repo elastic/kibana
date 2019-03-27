@@ -22,7 +22,6 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-
 // @ts-ignore types for 4.0 not available yet
 import { Builder, By, Key, logging, until } from 'selenium-webdriver';
 // @ts-ignore types not available

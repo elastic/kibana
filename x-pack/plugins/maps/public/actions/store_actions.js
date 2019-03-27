@@ -481,6 +481,19 @@ export function updateLayerAlpha(id, alpha) {
   };
 }
 
+export function setLayerQuery(id, query) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'query',
+      newValue: query,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
