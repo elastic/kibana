@@ -12,7 +12,6 @@ To set advanced options:
 . Enter a new value for the option.
 . Click the *Save* button.
 
-[float]
 [[kibana-settings-reference]]
 
 WARNING: Modifying the following settings can significantly affect Kibana's performance and cause problems that are
