@@ -332,9 +332,11 @@ image::images/tutorial-visualize-md-1.png[]
 Write the following text in the field:
 
 [source,markdown]
+----
 # This is a tutorial dashboard! 
 The Markdown widget uses **markdown** syntax.
 > Blockquotes in Markdown use the > character.
+----
 
 Click the green *Apply changes* button to display the rendered Markdown in the preview pane:
 
