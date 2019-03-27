@@ -6,11 +6,22 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { DateHistogramOperation, QueryColumn, SumOperation } from '../../lib';
+import {
+  DateHistogramOperation,
+  SelectOperation,
+  SelectOperator,
+  SumOperation,
+} from '../../../../common';
+
+type ColumnOperations = {
+  [operation in SelectOperator]: {
+    summarize: (op: any) => JSX.Element;
+  }
+};
 
 // TODO: This will be part of the query AST helper library or whatever, and
 // can probably be systematized better than this...
-export const columnOperations: any = {
+export const columnOperations: ColumnOperations = {
   date_histogram: {
     summarize(op: DateHistogramOperation) {
       return (
@@ -18,7 +29,7 @@ export const columnOperations: any = {
           <EuiIcon type="calendar" className="configPanel-summary-icon" />
           <div className="configPanel-summary-text">
             <strong className="configPanel-summary-title">Date histogram of</strong>
-            <span className="configPanel-summary-subtitle">{op.arg.field}</span>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
           </div>
         </div>
       );
@@ -31,24 +42,44 @@ export const columnOperations: any = {
           <EuiIcon type="number" className="configPanel-summary-icon" />
           <div className="configPanel-summary-text">
             <strong className="configPanel-summary-title">Sum of</strong>
-            <span className="configPanel-summary-subtitle">{op.arg}</span>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
           </div>
         </div>
       );
     },
   },
+  count: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  column: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  avg: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  terms: {
+    summarize(op) {
+      return <></>;
+    },
+  },
 };
 
 // TODO: Make this not a total hack
-export function columnSummary(column?: QueryColumn) {
+export function columnSummary(column?: SelectOperation) {
   if (!column) {
     return <div>Column Not Found</div>;
   }
 
-  const colOp = columnOperations[column.op];
+  const colOp = columnOperations[column.operation];
 
   if (!colOp) {
-    return <div>Unsupported operation {column.op}</div>;
+    return <div>Unsupported operation {column.operation}</div>;
   }
 
   return colOp.summarize(column);

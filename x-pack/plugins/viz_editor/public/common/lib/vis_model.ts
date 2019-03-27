@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SelectOperation } from '../../common';
+import { SelectOperation } from '../../../common';
 
 export interface IndexPatternField {
   name: string;
@@ -22,6 +22,7 @@ export interface IndexPattern {
 }
 
 export interface VisModelQuery {
+  indexPattern: string;
   select: {
     [id: string]: SelectOperation;
   };
@@ -95,8 +96,8 @@ export function initialState(): VisModel<any, any> {
       q1: {
         indexPattern: 'index-pattern:aaa',
         select: {
-          q1_0: { op: 'date_histogram', arg: { field: '@timestamp', interval: '30s' } },
-          q1_1: { op: 'sum', arg: 'bytes' },
+          q1_0: { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
+          q1_1: { operation: 'sum', argument: { field: 'bytes' } },
         },
       },
     },

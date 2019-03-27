@@ -8,43 +8,61 @@
 // Select clause
 // ----------------------------------------
 
+export type SelectOperator = 'column' | 'count' | 'date_histogram' | 'sum' | 'avg' | 'terms';
+
 export interface Aliasable {
+  operation: SelectOperator;
   alias?: string;
 }
 
-export interface Column extends Aliasable {
-  operation: 'col';
-  argument: string;
+export interface Field {
+  field: string;
 }
 
-export interface DateHistogramOperation extends Aliasable {
+export type FieldOperation = Aliasable & {
+  argument: Field;
+};
+
+export interface ColumnOperation extends FieldOperation {
+  operation: 'column';
+  // argument: Field;
+}
+
+export interface DateHistogramOperation extends FieldOperation {
   operation: 'date_histogram';
-  argument: {
-    field: string;
+  argument: Field & {
     interval: string;
   };
 }
 
-export interface SumOperation extends Aliasable {
+export interface SumOperation extends FieldOperation {
   operation: 'sum';
-  argument: string;
+  // argument: Field;
 }
 
-export interface AvgOperation extends Aliasable {
+export interface AvgOperation extends FieldOperation {
   operation: 'avg';
-  argument: string;
+  argument: Field;
 }
 
 export interface CountOperation extends Aliasable {
   operation: 'count';
 }
 
+export interface TermsOperation extends FieldOperation {
+  operation: 'terms';
+  argument: Field & {
+    count: number;
+  };
+}
+
 export type SelectOperation =
-  | Column
+  | ColumnOperation
   | DateHistogramOperation
   | SumOperation
   | CountOperation
-  | AvgOperation;
+  | AvgOperation
+  | TermsOperation;
 
 // ----------------------------------------
 // Where clause
@@ -62,36 +80,38 @@ export interface LitDate {
 
 type Literal = LitAtomic | LitDate;
 
-type ComparisonArg = Literal | Column;
+type ComparisonArg = Literal | ColumnOperation;
+
+export type BooleanOperator = 'and' | 'or' | '>' | '>=' | '<' | '<=' | '=' | '<>';
 
 export interface Eq {
   operation: '=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Ne {
   operation: '<>';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Gt {
   operation: '>';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Gte {
   operation: '>=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Lt {
   operation: '<';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface Lte {
   operation: '<=';
-  argument: ComparisonArg[];
+  argument: [ComparisonArg, ComparisonArg];
 }
 
 export interface And {
@@ -114,7 +134,7 @@ export interface OrderByOperation {
 }
 
 export interface Query {
-  index: string;
+  indexPattern: string;
 
   // What columns / aggregations are we selecting
   select: SelectOperation[];
