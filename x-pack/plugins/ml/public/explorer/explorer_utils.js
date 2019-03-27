@@ -204,6 +204,7 @@ export function getViewBySwimlaneOptions({
   currentSwimlaneViewByFieldName,
   filterActive,
   filteredFields,
+  isAndOperator,
   selectedCells,
   selectedJobs
 }) {
@@ -289,9 +290,15 @@ export function getViewBySwimlaneOptions({
   }
 
   // filter View by options to relevant filter fields
-  if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
+  // If it's an AND filter only show job Id view by as the rest will have no results
+  if (filterActive === true && isAndOperator === true) {
+    viewBySwimlaneOptions = [VIEW_BY_JOB_LABEL];
+  } else if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
     const filteredOptions = viewBySwimlaneOptions.filter(option => {
-      return (filteredFields.includes(option) || option === 'job ID' || (selectedCells && selectedCells.viewByFieldName === option));
+      return (
+        filteredFields.includes(option) ||
+        option === VIEW_BY_JOB_LABEL ||
+        (selectedCells && selectedCells.viewByFieldName === option));
     });
     // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
     if (filteredOptions.length > 1) {
