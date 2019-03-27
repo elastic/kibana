@@ -57,6 +57,17 @@ an individual dashboard.
 image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
 
 [float]
+=== Responsive dashboards
+
+As part of the many enhancements to {kib} dashboards in 7.0, they are also 
+now responsive. If you want to view and interact with {kib} 
+on the go, you can pull it up on your phone with this new responsive layout.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-responsive.png[Responsive dashboard]
+
+
+[float]
 === New look for timepicker and filters
 
 The timepicker and filters have a new look and feel.
