@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
-import { AggList } from '../../components/aggregation_list/list';
+import { AggListForm } from '../../components/aggregation_list';
 import { GroupByList } from '../../components/group_by_list/list';
 import { PivotPreview } from './pivot_preview';
 import { SourceIndexPreview } from './source_index_preview';
@@ -185,7 +185,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(
 
             <EuiFormRow label="Aggregations">
               <Fragment>
-                <AggList
+                <AggListForm
                   list={aggList}
                   optionsData={aggOptionsData}
                   deleteHandler={deleteAggregation}

@@ -17,10 +17,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { AggList } from '../../components/aggregation_list/list';
+import { AggListSummary } from '../../components/aggregation_list';
 import { GroupByList } from '../../components/group_by_list/list';
 import { PivotPreview } from './pivot_preview';
-import { SourceIndexPreview } from './source_index_preview';
 
 import { Dictionary } from '../../../../common/types/common';
 import {
@@ -101,15 +100,13 @@ export const DefinePivotSummary: SFC<Props> = ({ indexPattern, search, groupBy, 
           </EuiFormRow>
 
           <EuiFormRow label="Aggregations">
-            <AggList list={aggList} optionsData={aggOptionsData} />
+            <AggListSummary list={aggList} optionsData={aggOptionsData} />
           </EuiFormRow>
         </EuiForm>
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiText>
-          <SourceIndexPreview indexPattern={indexPattern} query={pivotQuery} />
-
           <PivotPreview
             aggs={pivotAggs}
             groupBy={pivotGroupBy}

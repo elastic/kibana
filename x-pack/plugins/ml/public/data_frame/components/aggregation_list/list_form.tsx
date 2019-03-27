@@ -29,7 +29,7 @@ interface ListProps {
   deleteHandler?(l: string): void;
 }
 
-export const AggList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
+export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
   <EuiListGroup flush={true}>
     {list.map((l: string) => (
       <EuiListGroupItem

@@ -8,7 +8,9 @@ import React, { Fragment, SFC, useState } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { EuiButton, EuiSteps, EuiStepStatus } from '@elastic/eui';
+import { EuiSteps, EuiStepStatus } from '@elastic/eui';
+
+import { WizardNav } from '../../components/wizard_nav';
 
 import {
   DefinePivotExposedState,
@@ -24,37 +26,10 @@ const JobCreate = () => <p>Job Create is the current step.</p>;
 const JobCreateBlur = () => <p>Job Create is not the current step.</p>;
 
 const WIZARD_STEPS = {
-  DEFINE_PIVOT: 'define_pivot',
-  JOB_DETAILS: 'job_details',
-  JOB_CREATE: 'job_create',
+  DEFINE_PIVOT: 0,
+  JOB_DETAILS: 1,
+  JOB_CREATE: 2,
 };
-
-interface StepsNavProps {
-  previousActive?: boolean;
-  nextActive?: boolean;
-  previous?(): void;
-  next?(): void;
-}
-
-const WizardNav: SFC<StepsNavProps> = ({
-  previous,
-  previousActive = true,
-  next,
-  nextActive = true,
-}) => (
-  <Fragment>
-    {previous && (
-      <EuiButton disabled={!previousActive} onClick={previous} iconType="arrowLeft" size="s">
-        Previous
-      </EuiButton>
-    )}
-    {next && (
-      <EuiButton disabled={!nextActive} onClick={next} iconType="arrowRight" size="s">
-        Next
-      </EuiButton>
-    )}
-  </Fragment>
-);
 
 interface Props {
   indexPattern: StaticIndexPattern;
