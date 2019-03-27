@@ -24,7 +24,7 @@
     "time_format": "epoch_ms"
   },
   "custom_settings": {
-    "created_by": "ml-module-auditd-hosts",
+    "created_by": "ml-module-auditbeat-process-hosts",
     "custom_urls": [
       {
         "url_name": "Process rate",
