@@ -20,7 +20,11 @@
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { AggType } from 'ui/agg_types';
 
-type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
+// NOTE: we cannot export the interface with export { InterfaceName }
+// as there is currently a bug on babel typescript transform plugin for it
+// https://github.com/babel/babel/issues/7641
+//
+export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   label: string;
   value?: AggType;
   options?: EuiComboBoxOptionProps[];
@@ -75,4 +79,4 @@ function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelNam
   return groupedOptions;
 }
 
-export { groupAggregationsBy, ComboBoxGroupedOption };
+export { groupAggregationsBy };
