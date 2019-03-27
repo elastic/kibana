@@ -2982,7 +2982,7 @@
     "tsvb.percentile.shadeLabel": "阴影（0 到 1）：",
     "tsvb.percentileRank.aggregationLabel": "聚合",
     "tsvb.percentileRank.fieldLabel": "字段",
-    "tsvb.percentileRank.valueLabel": "值",
+    "tsvb.multivalueRow.valueLabel": "值",
     "tsvb.positiveOnly.aggregationLabel": "聚合",
     "tsvb.positiveOnly.metricLabel": "指标",
     "tsvb.replaceVars.errors.markdownErrorDescription": "请确认您仅在使用 Markdown、已知变量和内置 Handlebar 表达式",

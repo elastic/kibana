@@ -19,7 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { assign, last } from 'lodash';
+import { assign } from 'lodash';
 import AggSelect from '../agg_select';
 import FieldSelect from '../field_select';
 import AggRow from '../agg_row';
@@ -44,10 +44,7 @@ export const PercentileRankAgg = props => {
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
-
   const isTablePanel = panel.type === 'table';
-  const percentileRankValueRows = model.values;
-
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
 
@@ -104,7 +101,8 @@ export const PercentileRankAgg = props => {
       <PercentileRankValues
         disableAdd={isTablePanel}
         disableDelete={isTablePanel}
-        model={isTablePanel ? [last(percentileRankValueRows)] : percentileRankValueRows}
+        showOnlyLastRow={isTablePanel}
+        model={model.values}
         onChange={handlePercentileRankValuesChange}
       />
     </AggRow>

@@ -18,6 +18,7 @@
  */
 import PropTypes from 'prop-types';
 import React from 'react';
+import { last } from 'lodash';
 
 import {
   EuiFlexGroup,
@@ -26,7 +27,7 @@ import { MultiValueRow } from './multi_value_row';
 
 export const PercentileRankValues = props => {
   const model = props.model || [];
-  const { onChange, disableAdd, disableDelete } = props;
+  const { onChange, disableAdd, disableDelete, showOnlyLastRow } = props;
 
   const onChangeValue = ({ value, id }) => {
     model[id] = value;
@@ -35,27 +36,42 @@ export const PercentileRankValues = props => {
   };
 
   const onDeleteValue = ({ id }) => onChange(
-    model.filter((item, currentIndex) => id !== currentIndex)
+    model.filter((item, currentIndex) => id !== currentIndex),
   );
   const onAddValue = () => onChange([...model, '']);
 
+  const renderRow = ({ rowModel, disableDelete, disableAdd }) => (
+    <MultiValueRow
+      key={`percentileRankValue__item${rowModel.id}`}
+      onAdd={onAddValue}
+      onChange={onChangeValue}
+      onDelete={onDeleteValue}
+      disableDelete={disableDelete}
+      disableAdd={disableAdd}
+      model={rowModel}
+    />);
+
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-      {model.map((value, id, array) => {
+      { showOnlyLastRow && renderRow({
+        rowModel: {
+          id: model.length - 1,
+          value: last(model),
+        },
+        disableAdd: true,
+        disableDelete: true
+      })}
+
+      {!showOnlyLastRow && model.map((value, id, array) => {
         const rowModel = {
           id,
           value,
         };
-
-        return (<MultiValueRow
-          key={`percentileRankValue__item${id}`}
-          onAdd={onAddValue}
-          onChange={onChangeValue}
-          onDelete={onDeleteValue}
-          disableDelete={disableDelete || array.length < 2}
-          disableAdd={disableAdd}
-          model={rowModel}
-        />);
+        return renderRow({
+          rowModel,
+          disableAdd,
+          disableDelete: disableDelete || array.length < 2,
+        });
       })}
     </EuiFlexGroup>
   );
@@ -66,4 +82,5 @@ PercentileRankValues.propTypes = {
   onChange: PropTypes.func,
   disableDelete: PropTypes.bool,
   disableAdd: PropTypes.bool,
+  showOnlyLastRow: PropTypes.bool,
 };
