@@ -94,3 +94,16 @@ test('Repository url parsing with port', () => {
     org: 'elastic',
   });
 });
+
+test('Normalize repository index name', () => {
+  const indexName1 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/Kibana');
+  const indexName2 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana');
+
+  expect(indexName1 === indexName2).toBeFalsy();
+  expect(indexName1).toEqual('github.com-elastic-kibana-e2b881a9');
+  expect(indexName2).toEqual('github.com-elastic-kibana-7bf00473');
+
+  const indexName3 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic-kibana/code');
+  const indexName4 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana-code');
+  expect(indexName3 === indexName4).toBeFalsy();
+});
