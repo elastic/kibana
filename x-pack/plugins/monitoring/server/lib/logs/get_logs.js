@@ -23,7 +23,7 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
       const type = get(source, 'event.dataset').split('.')[1];
 
       return {
-        timestamp: get(source, 'event.created'),
+        timestamp: get(source, '@timestamp'),
         component: get(source, 'elasticsearch.component'),
         node: get(source, 'elasticsearch.node.name'),
         index: get(source, 'elasticsearch.index.name'),
@@ -43,7 +43,7 @@ async function handleResponse(response, req, filebeatIndexPattern, opts) {
 export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end }) {
   checkParam(filebeatIndexPattern, 'filebeatIndexPattern in logs/getLogs');
 
-  const metric = { timestampField: 'event.created' };
+  const metric = { timestampField: '@timestamp' };
   const filter = [
     { term: { 'service.type': 'elasticsearch' } },
     createTimeFilter({ start, end, metric })
@@ -64,7 +64,7 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
     filterPath: [
       'hits.hits._source.message',
       'hits.hits._source.log.level',
-      'hits.hits._source.event.created',
+      'hits.hits._source.@timestamp',
       'hits.hits._source.event.dataset',
       'hits.hits._source.elasticsearch.component',
       'hits.hits._source.elasticsearch.index.name',
@@ -72,7 +72,7 @@ export async function getLogs(config, req, filebeatIndexPattern, { clusterUuid, 
     ],
     ignoreUnavailable: true,
     body: {
-      sort: { 'event.created': { order: 'desc' } },
+      sort: { '@timestamp': { order: 'desc' } },
       query: {
         bool: {
           filter,
