@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-'use strict';
-
 import { editor as Editor, languages, Range as EditorRange } from 'monaco-editor';
-import { monaco } from '../monaco';
-
 // @ts-ignore
 import { createCancelablePromise } from 'monaco-editor/esm/vs/base/common/async';
 // @ts-ignore
@@ -16,12 +12,12 @@ import { getOccurrencesAtPosition } from 'monaco-editor/esm/vs/editor/contrib/wo
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import DocumentHighlight = languages.DocumentHighlight;
 import { Hover, MarkedString, Range } from 'vscode-languageserver-types';
 import { ServerNotInitialized } from '../../../common/lsp_error_codes';
 import { HoverButtons } from '../../components/hover/hover_buttons';
 import { HoverState, HoverWidget, HoverWidgetProps } from '../../components/hover/hover_widget';
 import { ContentWidget } from '../content_widget';
+import { monaco } from '../monaco';
 import { Operation } from '../operation';
 import { HoverComputer } from './hover_computer';
 
@@ -184,7 +180,7 @@ export class ContentHoverWidget extends ContentWidget {
     const pos = new monaco.Position(range.startLineNumber, range.startColumn);
     return createCancelablePromise((token: any) =>
       getOccurrencesAtPosition(this.editor.getModel(), pos, token).then(
-        (data: DocumentHighlight[]) => {
+        (data: languages.DocumentHighlight[]) => {
           if (data) {
             if (this.isVisible) {
               const decorations = data.map(h => ({

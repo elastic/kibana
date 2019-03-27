@@ -5,7 +5,6 @@
  */
 
 import { editor, IRange, Uri } from 'monaco-editor';
-import ICodeEditor = editor.ICodeEditor;
 // @ts-ignore
 import { StandaloneCodeEditorServiceImpl } from 'monaco-editor/esm/vs/editor/standalone/browser/standaloneCodeServiceImpl.js';
 import { kfetch } from 'ui/kfetch';
@@ -46,7 +45,11 @@ export class EditorService extends StandaloneCodeEditorServiceImpl {
     }
   }
   private helper?: MonacoHelper;
-  public async openCodeEditor(input: IResourceInput, source: ICodeEditor, sideBySide?: boolean) {
+  public async openCodeEditor(
+    input: IResourceInput,
+    source: editor.ICodeEditor,
+    sideBySide?: boolean
+  ) {
     const { scheme, authority, path } = input.resource;
     if (scheme === 'symbol') {
       await EditorService.handleSymbolUri(authority);
