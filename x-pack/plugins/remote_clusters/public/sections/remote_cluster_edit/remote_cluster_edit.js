@@ -22,8 +22,17 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
+import { UIM_EDIT_START } from '../../../common';
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { buildListBreadcrumb, editBreadcrumb, extractQueryParams, getRouter, getRouterLinkProps, redirect } from '../../services';
+import {
+  buildListBreadcrumb,
+  editBreadcrumb,
+  extractQueryParams,
+  getRouter,
+  getRouterLinkProps,
+  redirect,
+  trackUiMetric,
+} from '../../services';
 import { RemoteClusterPageTitle, RemoteClusterForm, ConfiguredByNodeWarning } from '../components';
 
 const disabledFields = {
@@ -70,6 +79,7 @@ export const RemoteClusterEdit = injectI18n(
       const { startEditingCluster } = this.props;
       const { clusterName } = this.state;
       startEditingCluster(clusterName);
+      trackUiMetric(UIM_EDIT_START);
     }
 
     componentWillUnmount() {
