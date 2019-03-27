@@ -114,8 +114,6 @@ Show the plays along the X-axis.
 . Give the axis a custom label, `Play Name`.
 . Click  *Apply changes* image:images/apply-changes-button.png[].
 
-[role="screenshot"]
-image::images/0[]
 
 Hovering over a bar shows a tooltip with the number of speaking parts for
 that play.
