@@ -34,6 +34,7 @@ See also <<release-highlights>> and <<release-notes>>.
 
 //tag::notable-breaking-changes[]
 [float]
+[[breaking-changes-7.0-saved-objects]]
 ==== Saved object structure change
 *Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
 
