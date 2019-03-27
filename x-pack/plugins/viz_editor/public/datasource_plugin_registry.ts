@@ -18,6 +18,7 @@ export interface DatasourcePlugin<S extends VisModel = VisModel> {
   name: string;
   toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
   DataPanel: React.ComponentType<PanelComponentProps<S>>;
+  icon: string;
 }
 
 const datasourceMap: { [key: string]: DatasourcePlugin } = {

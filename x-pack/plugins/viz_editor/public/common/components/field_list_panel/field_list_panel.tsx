@@ -12,62 +12,23 @@ import {
 } from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
-import React, { useEffect, useState } from 'react';
-import { Datasources } from '../../lib';
-
-interface State {
-  selectedDatasourceId: string;
-}
+import React from 'react';
+import { Datasource } from '../../lib';
 
 interface Props {
-  datasources: Datasources | null;
+  datasource: Datasource | null;
 }
 
-function initialState(): State {
-  return {
-    selectedDatasourceId: '',
-  };
-}
-
-export function FieldListPanel({ datasources }: Props) {
-  const [state, setState] = useState(() => initialState());
-
-  useEffect(
-    () => {
-      if (Object.keys(datasources || {}).length === 1) {
-        setState({ selectedDatasourceId: Object.values(datasources || {})[0].id });
-      }
-    },
-    [datasources]
-  );
-
-  if (!datasources) {
+export function FieldListPanel({ datasource }: Props) {
+  if (!datasource) {
     return <div />;
   }
 
-  const currentDatasource = datasources[state.selectedDatasourceId];
-  const indexPatternNames = Object.values(datasources).map(({ id, title }) => ({
-    text: title,
-    value: id,
-    inputDisplay: title,
-  }));
-
   return (
     <>
-      <EuiSuperSelect
-        options={indexPatternNames}
-        valueOfSelected={state.selectedDatasourceId}
-        onChange={(value: string) => {
-          setState({
-            ...state,
-            selectedDatasourceId: value,
-          });
-        }}
-      />
-
-      {currentDatasource && (
+      {datasource && (
         <div className="fieldListPanel">
-          {currentDatasource.fields.map(field => (
+          {datasource.fields.map(field => (
             <button
               type="button"
               key={field.name}

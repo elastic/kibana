@@ -9,19 +9,11 @@ import { EuiButton, EuiSuperSelect, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { FieldListPanel } from '../public/common/components/field_list_panel';
-import { Datasource, updatePrivateState, VisModel } from '../public/common/lib';
+import { Datasource, VisModel } from '../public/common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
 
-interface EssqlPrivateState {
-  sql: string;
-}
-type EssqlVisModel = VisModel<'essql', EssqlPrivateState>;
-
-const updateEssqlState = updatePrivateState<'essql', EssqlPrivateState>('essql');
-const updateSql = (visModel: EssqlVisModel, sql: string) => updateEssqlState(visModel, { sql });
-
-function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<EssqlVisModel>) {
-  const [text, updateText] = useState(visModel.private.essql.sql);
+function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>) {
+  const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.sql : '');
 
   const updateDatasource = async () => {
     const resultColumns: Array<{ name: string; type: string }> = await kfetch({
@@ -41,10 +33,10 @@ function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<EssqlVisM
         aggregatable: false,
         searchable: false,
       })),
+      meta: { sql: text },
     };
 
-    const updatedVisModel = { ...visModel, datasources: { source: newDatasource } };
-    onChangeVisModel(updateSql(updatedVisModel, text));
+    onChangeVisModel({ ...visModel, datasource: newDatasource });
   };
 
   return (
@@ -57,19 +49,20 @@ function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<EssqlVisM
         onChange={({ target: { value } }) => updateText(value)}
       />
       <EuiButton onClick={updateDatasource}>Apply</EuiButton>
-      <FieldListPanel datasources={visModel.datasources} />
+      <FieldListPanel datasource={visModel.datasource} />
     </>
   );
 }
 
-function toExpression(viewState: EssqlVisModel) {
+function toExpression(viewState: VisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
-  return `essql query='${viewState.private.essql.sql}'`;
+  return `essql query='${viewState.datasource ? viewState.datasource.meta.sql : ''}'`;
 }
 
-export const config: DatasourcePlugin<EssqlVisModel> = {
+export const config: DatasourcePlugin<VisModel> = {
   name: 'essql',
   toExpression,
-  DataPanel: dataPanel,
+  DataPanel,
+  icon: 'sqlApp',
 };

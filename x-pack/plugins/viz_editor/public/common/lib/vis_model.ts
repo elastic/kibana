@@ -13,21 +13,18 @@ export interface Field {
   searchable: boolean;
 }
 
-export interface Datasource {
+export interface Datasource<M = any> {
   id: string;
   title: string;
   timeFieldName?: string;
   fields: Field[];
   fieldFormatMap?: string;
+  meta?: M;
 }
 
 export interface Axis {
   title: string;
   columns: string[];
-}
-
-export interface Datasources {
-  [id: string]: Datasource;
 }
 
 /**
@@ -36,10 +33,8 @@ export interface Datasources {
  * are defined here, anything else is in the private property and scoped by plugin
  */
 export interface VisModel<K extends string = any, T = any> {
-  datasources: Datasources | null;
-  queries: {
-    [id: string]: Query;
-  };
+  datasource: Datasource | null;
+  queries: { [id: string]: Query };
   datasourcePlugin: string;
   editorPlugin: string;
   title: string;
@@ -85,10 +80,9 @@ export function getColumnIdByIndex(
 // Generate our dummy-data
 export function initialState(): VisModel<any, any> {
   return {
-    datasources: null,
+    datasource: null,
     queries: {
       q1: {
-        datsourceId: 'index-pattern:aaa',
         select: [
           { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
           { operation: 'sum', argument: 'bytes' },

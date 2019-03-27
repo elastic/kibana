@@ -7,51 +7,58 @@
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
 import zipObject from 'lodash-es/zipObject';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { IndexPattern } from 'ui/index_patterns';
 import { FieldListPanel } from '../public/common/components/field_list_panel';
 import { VisModel } from '../public/common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
 import { getIndexPatterns } from './index_patterns';
 
-type IndexPatternVisModel = VisModel<'indexPattern', {}>;
-
-function dataPanel({ visModel, onChangeVisModel }: PanelComponentProps<IndexPatternVisModel>) {
-  const indexPatterns = visModel.datasources;
-  useEffect(
-    () => {
-      if (indexPatterns) {
+function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>) {
+  const [indexPatterns, setIndexPatterns] = useState({} as { [id: string]: IndexPattern });
+  const selectedIndexPattern = visModel.datasource;
+  useEffect(() => {
+    getIndexPatterns().then(loadedIndexPatterns => {
+      if (!loadedIndexPatterns) {
         return;
       }
 
-      getIndexPatterns().then(loadedIndexPatterns => {
-        if (!loadedIndexPatterns) {
-          return;
-        }
+      setIndexPatterns(zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns));
+    });
+  }, []);
 
-        onChangeVisModel({
-          ...visModel,
-          datasources: zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns),
-        });
-      });
-    },
-    [indexPatterns]
-  );
+  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
+    text: title,
+    value: id,
+    inputDisplay: title,
+  }));
 
   return (
     <>
-      <FieldListPanel datasources={visModel.datasources} />
+      <EuiSuperSelect
+        options={indexPatternNames}
+        valueOfSelected={selectedIndexPattern ? selectedIndexPattern.id : ''}
+        onChange={(value: string) => {
+          onChangeVisModel({
+            ...visModel,
+            datasource: indexPatterns[value],
+          });
+        }}
+      />
+      <FieldListPanel datasource={visModel.datasource} />
     </>
   );
 }
 
-function toExpression(viewState: IndexPatternVisModel) {
+function toExpression(viewState: VisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
   return `sample_data`;
   // return `our_fancy_query_function args='${JSON.stringify(viewState.queries)}'`;
 }
 
-export const config: DatasourcePlugin<IndexPatternVisModel> = {
+export const config: DatasourcePlugin<VisModel> = {
   name: 'index_pattern',
   toExpression,
-  DataPanel: dataPanel,
+  DataPanel,
+  icon: 'indexPatternApp',
 };

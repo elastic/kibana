@@ -114,8 +114,6 @@ export interface OrderByOperation {
 }
 
 export interface Query {
-  datsourceId: string;
-
   // What columns / aggregations are we selecting
   select: SelectOperation[];
 

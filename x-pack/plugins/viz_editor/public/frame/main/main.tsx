@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButtonToggle,
   // @ts-ignore
   EuiCodeEditor,
   EuiFlexGroup,
@@ -98,17 +99,20 @@ export function Main(props: MainProps) {
   return (
     <EuiPage>
       <EuiPageSideBar>
-        Switch datasource:
-        <EuiSuperSelect
-          options={datasourceRegistry
-            .getAll()
-            .map(({ name }) => ({ value: name, inputDisplay: name }))}
-          valueOfSelected={state.visModel.datasourcePlugin}
-          onChange={(value: string) => {
-            // TODO this should also clear the references to all of the datasources
-            onChangeVisModel({ ...state.visModel, datasourcePlugin: value, datasources: null });
-          }}
-        />
+        {datasourceRegistry.getAll().map(({ name, icon }) => (
+          <EuiButtonToggle
+            key={name}
+            label={name}
+            iconType={icon as any}
+            onChange={() => {
+              // TODO this should also clear the references to all of the datasources
+              onChangeVisModel({ ...state.visModel, datasourcePlugin: name, datasource: null });
+            }}
+            isSelected={name === state.visModel.datasourcePlugin}
+            isEmpty
+            isIconOnly
+          />
+        ))}
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
