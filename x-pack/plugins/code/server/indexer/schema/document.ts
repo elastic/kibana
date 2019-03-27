@@ -177,7 +177,7 @@ export const DocumentSchema = {
             type: 'integer',
           },
           checkpoint: {
-            type: 'text',
+            type: 'object',
           },
         },
       },

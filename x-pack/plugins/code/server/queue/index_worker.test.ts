@@ -265,7 +265,11 @@ test('Index job continue if revision matches and checkpoint found', async () => 
           timestamp: new Date(),
           revision: 'abcdefg',
           indexProgress: {
-            checkpoint: 'abcdefg - foo/bar.js',
+            checkpoint: {
+              repoUri: 'github.com/elastic/kibana',
+              filePath: 'foo/bar.js',
+              revision: 'abcdefg',
+            },
           },
         },
       },

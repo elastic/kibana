@@ -267,7 +267,7 @@ describe('lsp_indexer', () => {
 
     const indexer = new LspIndexer(
       'github.com/Microsoft/TypeScript-Node-Starter',
-      '4779cb7',
+      '46971a8',
       lspservice,
       serverOptions,
       esClient as EsClient,
@@ -275,7 +275,12 @@ describe('lsp_indexer', () => {
     );
 
     // Apply a checkpoint in here.
-    await indexer.start(undefined, '4779cb7 - src/public/js/main.ts');
+    await indexer.start(undefined, {
+      repoUri: '',
+      filePath: 'src/public/js/main.ts',
+      revision: '46971a8',
+      localRepoPath: '',
+    });
 
     // Expect EsClient deleteByQuery called 0 times for repository cleaning while
     // dealing with repository checkpoint.

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexProgress, IndexStats, RepositoryUri } from '../../model';
+import { IndexProgress, IndexRequest, IndexStats, RepositoryUri } from '../../model';
 
 export type ProgressReporter = (progress: IndexProgress) => void;
 
 export interface Indexer {
-  start(ProgressReporter?: ProgressReporter, checkpoint?: string): Promise<IndexStats>;
+  start(ProgressReporter?: ProgressReporter, checkpointReq?: IndexRequest): Promise<IndexStats>;
   cancel(): void;
 }
 

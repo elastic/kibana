@@ -8,6 +8,7 @@ import moment from 'moment';
 
 import {
   IndexProgress,
+  IndexRequest,
   IndexStats,
   IndexWorkerProgress,
   IndexWorkerResult,
@@ -51,7 +52,7 @@ export class IndexWorker extends AbstractWorker {
     const workerProgress = (await this.objectClient.getRepositoryLspIndexStatus(
       uri
     )) as IndexWorkerProgress;
-    let checkpoint: string | undefined;
+    let checkpointReq: IndexRequest | undefined;
     if (workerProgress) {
       // There exist an ongoing index process
       const {
@@ -61,10 +62,9 @@ export class IndexWorker extends AbstractWorker {
         progress,
       } = workerProgress;
 
-      checkpoint = currentIndexProgress && currentIndexProgress.checkpoint;
-
+      checkpointReq = currentIndexProgress && currentIndexProgress.checkpoint;
       if (
-        !checkpoint &&
+        !checkpointReq &&
         progress > WorkerReservedProgress.INIT &&
         progress < WorkerReservedProgress.COMPLETED &&
         currentUri === uri &&
@@ -95,7 +95,7 @@ export class IndexWorker extends AbstractWorker {
           this.cancellationService.registerIndexJobToken(uri, cancellationToken);
         }
         const progressReporter = this.getProgressReporter(uri, revision, index, indexerNumber);
-        return indexer.start(progressReporter, checkpoint);
+        return indexer.start(progressReporter, checkpointReq);
       }
     );
     const stats: IndexStats[] = await Promise.all(indexPromises);
@@ -134,7 +134,7 @@ export class IndexWorker extends AbstractWorker {
       p = {
         ...p,
         indexProgress: {
-          checkpoint: '',
+          checkpoint: null,
         },
       };
     }

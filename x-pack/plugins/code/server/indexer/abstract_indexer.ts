@@ -29,13 +29,13 @@ export abstract class AbstractIndexer implements Indexer {
     this.indexCreator = new IndexCreator(client);
   }
 
-  public async start(progressReporter?: ProgressReporter, checkpoint?: string) {
+  public async start(progressReporter?: ProgressReporter, checkpointReq?: IndexRequest) {
     this.log.info(
       `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
     );
     this.cancelled = false;
 
-    if (!checkpoint) {
+    if (!checkpointReq) {
       // Prepare the ES index
       const res = await this.prepareIndex();
       if (!res) {
@@ -71,12 +71,12 @@ export abstract class AbstractIndexer implements Indexer {
       }
 
       // If checkpoint is not undefined and not empty
-      if (checkpoint) {
-        const cp = this.encodeCheckpoint(req);
+      if (checkpointReq) {
         // Assume for the same revision, everything we iterate the repository,
         // the order of the files is definite.
-        if (cp === checkpoint) {
-          this.log.info(`The index checkpoint ${checkpoint} has been found.`);
+        // @ts-ignore
+        if (req.filePath === checkpointReq.filePath && req.revision === checkpointReq.revision) {
+          this.log.info(`The index checkpoint has been found ${JSON.stringify(checkpointReq)}.`);
           meetCheckpoint = true;
         }
 
@@ -108,7 +108,7 @@ export abstract class AbstractIndexer implements Indexer {
           success: successCount,
           fail: failCount,
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
-          checkpoint: this.encodeCheckpoint(req),
+          checkpoint: req,
         };
         if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
           progressReporter(progress);
@@ -125,11 +125,6 @@ export abstract class AbstractIndexer implements Indexer {
 
   protected isCancelled(): boolean {
     return this.cancelled;
-  }
-
-  protected encodeCheckpoint(req: IndexRequest): string {
-    // This is the abstract implementation. You should override this.
-    return req.repoUri;
   }
 
   protected async cleanIndex(): Promise<void> {
