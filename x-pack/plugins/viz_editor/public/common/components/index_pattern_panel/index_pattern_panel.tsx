@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiIcon,
-  // @ts-ignore
-  EuiSuperSelect,
-  ICON_TYPES,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFieldSearch, EuiIcon, ICON_TYPES } from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
+import { i18n } from '@kbn/i18n';
 import zipObject from 'lodash-es/zipObject';
 import React, { useEffect, useState } from 'react';
 import chrome from 'ui/chrome';
-import { IndexPatterns } from '../../lib';
+import { IndexPatternField, IndexPatterns } from '../../lib';
 import { getIndexPatterns } from '../../lib/index_patterns';
 
 interface Props {
@@ -25,17 +21,27 @@ interface Props {
 
 interface State {
   selectedIndexPatternId: string;
+  fieldsFilter: string;
 }
 
 function initialState(): State {
   const settingsClient = chrome.getUiSettingsClient();
   return {
     selectedIndexPatternId: settingsClient.get('defaultIndex') || '',
+    fieldsFilter: '',
   };
+}
+
+function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
+  return fieldA.name < fieldB.name ? -1 : 1;
 }
 
 export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
   const [state, setState] = useState(() => initialState());
+
+  function filterFields(field: IndexPatternField) {
+    return field.name.includes(state.fieldsFilter);
+  }
 
   useEffect(
     () => {
@@ -53,6 +59,7 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
         );
 
         setState({
+          ...state,
           selectedIndexPatternId: state.selectedIndexPatternId || loadedIndexPatterns[0].id,
         });
       });
@@ -70,35 +77,54 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     return <div>TODO... index pattern chooser...</div>;
   }
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
-    text: title,
+  const indexPatternsAsSelections = Object.values(indexPatterns).map(({ id, title }) => ({
+    label: title,
     value: id,
-    inputDisplay: title,
   }));
 
   return (
     <>
-      <EuiSuperSelect
-        options={indexPatternNames}
-        valueOfSelected={state.selectedIndexPatternId}
-        onChange={(value: string) => {
+      <EuiComboBox
+        options={indexPatternsAsSelections}
+        singleSelection={{ asPlainText: true }}
+        selectedOptions={[{ label: indexPattern.title, value: state.selectedIndexPatternId }]}
+        isClearable={false}
+        onChange={([{ value }]) => {
           setState({
             ...state,
-            selectedIndexPatternId: value,
+            selectedIndexPatternId: value as string,
           });
         }}
       />
 
       <div className="indexPatternPanel">
-        {indexPattern.fields.map(field => (
-          <button
-            type="button"
-            key={field.name}
-            className={`indexPatternPanel-field indexPatternPanel-field-btn-${field.type}`}
-          >
-            {fieldIcon(field)} <span className="indexPatternPanel-field-name">{field.name}</span>
-          </button>
-        ))}
+        <EuiFieldSearch
+          placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
+            defaultMessage: 'Search fields',
+            description: 'Search the list of fields in the index pattern for the provided text',
+          })}
+          value={state.fieldsFilter}
+          onChange={e => {
+            setState({
+              ...state,
+              fieldsFilter: e.target.value,
+            });
+          }}
+          aria-label="Search fields"
+        />
+
+        {indexPattern.fields
+          .filter(filterFields)
+          .sort(sortFields)
+          .map(field => (
+            <button
+              type="button"
+              key={field.name}
+              className={`indexPatternPanel-field indexPatternPanel-field-btn-${field.type}`}
+            >
+              {fieldIcon(field)} <span className="indexPatternPanel-field-name">{field.name}</span>
+            </button>
+          ))}
       </div>
     </>
   );
