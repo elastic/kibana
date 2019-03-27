@@ -1,13 +1,10 @@
 [[release-highlights]]
 = {kib} Release Highlights
-++++
-<titleabbrev>Release Highlights</titleabbrev>
-++++
 
 [partintro]
 --
-This section summarizes the most important changes in each release. For the 
-full list, see <<release-notes>> and <<breaking-changes>>. 
+This section summarizes the most important changes in each release.
+For the full list, see <<breaking-changes>> and <<release-notes>>.
 
 * <<release-highlights-8.0.0>>
 
