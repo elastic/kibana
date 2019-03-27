@@ -10,6 +10,7 @@ module.exports = {
     'mocha',
     'babel',
     'react',
+    'react-hooks',
     'import',
     'no-unsanitized',
     'prefer-object-spread',
@@ -127,6 +128,8 @@ module.exports = {
       arrow: true,
     }],
     'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
+    'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
+    'react-hooks/exhaustive-deps': 'warn', // Checks effect dependencies
     'jsx-a11y/accessible-emoji': 'error',
     'jsx-a11y/alt-text': 'error',
     'jsx-a11y/anchor-has-content': 'error',
