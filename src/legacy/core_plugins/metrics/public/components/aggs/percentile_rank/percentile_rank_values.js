@@ -16,70 +16,47 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import PropTypes from 'prop-types';
 import React from 'react';
-import { get } from 'lodash';
 
 import {
-  htmlIdGenerator,
-  EuiFieldNumber,
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { MultiValueRow } from './multi_value_row';
 
 export const PercentileRankValues = props => {
   const model = props.model || [];
   const { onChange, disableAdd, disableDelete } = props;
-  const htmlId = htmlIdGenerator();
 
-  const renderRows = (value, index) => {
-    const onChangeValue = (event) => {
-      model[index] = get(event, 'target.value');
-      onChange(model);
-    };
+  const onChangeValue = ({ value, id }) => {
+    model[id] = value;
 
-    const onDeleteValue = () => onChange(model.filter((item, currentIndex) => index !== currentIndex));
-    const onAddValue = () => onChange([...model, '']);
-
-    return (
-      <div className="tvbAggRow__percentileRankValue" key={`percentileRankValue__item${index}`}>
-        <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiFormLabel htmlFor={htmlId('value')}>
-              <FormattedMessage
-                id="tsvb.percentileRank.valueLabel"
-                defaultMessage="Value:"
-              />
-            </EuiFormLabel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFieldNumber
-              value={value === '' ? '' : Number(value)}
-              placeholder={0}
-              onChange={onChangeValue}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AddDeleteButtons
-              onAdd={onAddValue}
-              onDelete={onDeleteValue}
-              disableDelete={disableDelete || model.length < 2}
-              disableAdd={disableAdd}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer/>
-      </div>);
+    onChange(model);
   };
+
+  const onDeleteValue = ({ id }) => onChange(
+    model.filter((item, currentIndex) => id !== currentIndex)
+  );
+  const onAddValue = () => onChange([...model, '']);
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-      {model.map(renderRows)}
+      {model.map((value, id, array) => {
+        const rowModel = {
+          id,
+          value,
+        };
+
+        return (<MultiValueRow
+          key={`percentileRankValue__item${id}`}
+          onAdd={onAddValue}
+          onChange={onChangeValue}
+          onDelete={onDeleteValue}
+          disableDelete={disableDelete || array.length < 2}
+          disableAdd={disableAdd}
+          model={rowModel}
+        />);
+      })}
     </EuiFlexGroup>
   );
 };
