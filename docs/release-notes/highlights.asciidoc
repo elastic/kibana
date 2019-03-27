@@ -1,5 +1,5 @@
 [[release-highlights]]
-= {kib} Release Highlights
+= Release Highlights
 
 [partintro]
 --
