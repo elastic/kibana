@@ -204,6 +204,7 @@ export function getViewBySwimlaneOptions({
   currentSwimlaneViewByFieldName,
   filterActive,
   filteredFields,
+  selectedCells,
   selectedJobs
 }) {
   const selectedJobIds = selectedJobs.map(d => d.id);
@@ -290,7 +291,7 @@ export function getViewBySwimlaneOptions({
   // filter View by options to relevant filter fields
   if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
     const filteredOptions = viewBySwimlaneOptions.filter(option => {
-      return (filteredFields.includes(option) || option === 'job ID');
+      return (filteredFields.includes(option) || option === 'job ID' || (selectedCells && selectedCells.viewByFieldName === option));
     });
     // only replace viewBySwimlaneOptions with filteredOptions if we found a relevant matching field
     if (filteredOptions.length > 1) {

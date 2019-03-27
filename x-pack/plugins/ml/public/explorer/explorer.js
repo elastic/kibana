@@ -710,7 +710,8 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         currentSwimlaneViewByFieldName: swimlaneViewByFieldName,
         filterActive,
         filteredFields,
-        selectedJobs
+        selectedJobs,
+        selectedCells
       });
 
       Object.assign(stateUpdate, viewBySwimlaneOptions);
@@ -753,12 +754,14 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       // do a sanity check against selectedCells. It can happen that a previously
       // selected lane loaded via URL/AppState is not available anymore.
+      // If filter is active - selectedCell may not be available due to swimlane view by change to filter fieldName
+      // Ok to keep cellSelection in this case
       let clearSelection = false;
       if (
         selectedCells !== null &&
         selectedCells.type === SWIMLANE_TYPE.VIEW_BY
       ) {
-        clearSelection = !selectedCells.lanes.some((lane) => {
+        clearSelection = (filterActive === false) && !selectedCells.lanes.some((lane) => {
           return viewBySwimlaneData.points.some((point) => {
             return (
               point.laneLabel === lane &&
