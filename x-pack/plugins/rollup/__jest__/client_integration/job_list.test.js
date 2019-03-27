@@ -122,7 +122,12 @@ describe('<JobList />', () => {
 
       button.simulate('click');
 
-      expect(getRouter().history.location.search).toEqual(`?job=${button.text()}`);
+      const {
+        jobs: [{
+          config: { id: jobId },
+        }],
+      } = loadJobsMock;
+      expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
     });
 
     test('should open the detail panel whenever a job id is added to the query params', () => {
