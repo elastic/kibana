@@ -7,12 +7,14 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { API_BASE_PATH } from '../../../../../common/constants';
 import { Repository } from '../../../../../common/types';
+
+import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH, Section } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { useRequest } from '../../../services/http';
 
-import { SectionError, SectionLoading } from '../../../components';
 import { RepositoryDetails } from './repository_details';
 import { RepositoryTable } from './repository_table';
 
@@ -32,12 +34,15 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
   const section = 'repositories' as Section;
   const {
     core: {
+      chrome,
+      http,
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
   const { error, loading, data: repositories, request: reload } = useRequest({
-    path: 'repositories',
+    path: chrome.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
+    httpClient: http.getClient(),
   });
   const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
     undefined

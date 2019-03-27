@@ -26,10 +26,13 @@ import {
 
 interface Props {
   repository: Repository;
-  onChange: (repository: Repository) => void;
+  onSettingsChange: (repository: Repository['settings']) => void;
 }
 
-export const DefaultSettings: React.FunctionComponent<Props> = ({ repository }) => {
+export const DefaultSettings: React.FunctionComponent<Props> = ({
+  repository,
+  onSettingsChange,
+}) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -66,6 +69,7 @@ export const DefaultSettings: React.FunctionComponent<Props> = ({ repository }) 
           />
         }
         fullWidth
+        describedByIds={['defaultRepositoryConfigurationDescription']}
       >
         <EuiCodeEditor
           mode="json"
@@ -91,6 +95,11 @@ export const DefaultSettings: React.FunctionComponent<Props> = ({ repository }) 
               }}
             />
           }
+          onChange={(value: string) => {
+            onSettingsChange({
+              ...JSON.parse(value.trim()),
+            });
+          }}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>

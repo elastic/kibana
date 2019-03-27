@@ -30,7 +30,8 @@ export class Plugin {
       url: `#${CLIENT_BASE_PATH}`,
     });
 
-    const unmountReactApp = (elem: Element | undefined | null): void => {
+    const unmountReactApp = (): void => {
+      const elem = document.getElementById(REACT_ROOT_ID);
       if (elem) {
         unmountComponentAtNode(elem);
       }
@@ -39,15 +40,36 @@ export class Plugin {
     // Register react root
     routing.registerAngularRoute(`${CLIENT_BASE_PATH}/:section?/:subsection?/:view?/:id?`, {
       template,
+      controllerAs: 'snapshotRestoreController',
       controller: ($scope: any, $route: any, $http: ng.IHttpService, $q: any) => {
-        let elem: Element | null | undefined;
-
         // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
         // e.g. to check license status per request.
         http.setClient($http);
 
+        // Angular Lifecycle
+        const appRoute = $route.current;
+        const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
+          const currentRoute = $route.current;
+          const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
+
+          // When we navigate within SR, prevent Angular from re-matching the route and rebuild the app
+          if (isNavigationInApp) {
+            $route.current = appRoute;
+          } else {
+            // Any clean up when user leaves SR
+          }
+
+          $scope.$on('$destroy', () => {
+            if (stopListeningForLocationChange) {
+              stopListeningForLocationChange();
+            }
+            unmountReactApp();
+          });
+        });
+
         $scope.$$postDigest(() => {
-          elem = document.getElementById(REACT_ROOT_ID);
+          unmountReactApp();
+          const elem = document.getElementById(REACT_ROOT_ID);
           if (elem) {
             renderReact(
               elem,
@@ -55,27 +77,6 @@ export class Plugin {
               { management } as AppPlugins
             );
           }
-
-          // Angular Lifecycle
-          const appRoute = $route.current;
-          const stopListeningForLocationChange = $scope.$on('$locationChangeSuccess', () => {
-            const currentRoute = $route.current;
-            const isNavigationInApp = currentRoute.$$route.template === appRoute.$$route.template;
-
-            // When we navigate within SR, prevent Angular from re-matching the route and rebuild the app
-            if (isNavigationInApp) {
-              $route.current = appRoute;
-            } else {
-              // Any clean up when user leaves SR
-            }
-
-            $scope.$on('$destroy', () => {
-              if (stopListeningForLocationChange) {
-                stopListeningForLocationChange();
-              }
-              unmountReactApp(elem);
-            });
-          });
         });
       },
     });

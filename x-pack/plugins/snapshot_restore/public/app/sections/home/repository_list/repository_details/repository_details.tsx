@@ -10,7 +10,7 @@ import { useAppDependencies } from '../../../../index';
 import { getRepositoryTypeDocUrl } from '../../../../services/documentation';
 import { useRequest } from '../../../../services/http';
 
-import { REPOSITORY_TYPES } from '../../../../../../common/constants';
+import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
@@ -46,6 +46,8 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 }) => {
   const {
     core: {
+      chrome,
+      http,
       i18n,
       documentation: { esDocBasePath, esPluginDocBasePath },
     },
@@ -54,8 +56,9 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
   const { error, loading, data: repository } = useRequest({
-    path: `repositories/${repositoryName}`,
+    path: chrome.addBasePath(`${API_BASE_PATH}repositories/${repositoryName}`),
     method: 'get',
+    httpClient: http.getClient(),
   });
 
   const renderBody = () => {

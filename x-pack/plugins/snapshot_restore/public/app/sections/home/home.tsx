@@ -64,6 +64,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<Props> = ({
     history.push(`${BASE_PATH}/${newSection}`);
   };
 
+  // Set breadcrumb
   useEffect(() => {
     chrome.breadcrumbs.set([management.constants.BREADCRUMB, getHomeBreadcrumb(i18n.translate)]);
   }, []);

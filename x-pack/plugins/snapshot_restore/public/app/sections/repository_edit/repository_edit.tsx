@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+
+import { API_BASE_PATH, REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository } from '../../../../common/types';
+
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, getHomeBreadcrumb, getRepositoryAddBreadcrumb, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { useRequest } from '../../services/http';
+import { sendRequest } from '../../services/http';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
 
@@ -26,16 +29,26 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   history,
 }) => {
   const {
-    core: { i18n, chrome },
+    core: { i18n, chrome, http },
     plugins: { management },
   } = useAppDependencies();
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
-  const { error, loading, data: repository } = useRequest({
-    path: `repositories/${name}`,
-    method: 'get',
+
+  // Load repository information states
+  const [loadingRepository, setLoadingRepository] = useState<boolean>(true);
+  const [repositoryError, setRepositoryError] = useState<null | any>(null);
+  const [repository, setRepository] = useState<Repository>({
+    name: '',
+    type: REPOSITORY_TYPES.fs,
+    settings: {},
   });
 
+  // Saving repository states
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<null | any>(null);
+
+  // Set breadcrumb
   useEffect(() => {
     chrome.breadcrumbs.set([
       management.constants.BREADCRUMB,
@@ -44,8 +57,38 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
     ]);
   }, []);
 
-  const onSave = (newRepository: Repository) => {
-    return;
+  // Load repository information
+  useEffect(() => {
+    sendRequest({
+      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${name}`),
+      method: 'get',
+      httpClient: http.getClient(),
+    }).then(({ data, error }) => {
+      if (error) {
+        setRepositoryError(error);
+      } else {
+        setRepository(data);
+      }
+      setLoadingRepository(false);
+    });
+  }, []);
+
+  // Save repository
+  const onSave = async (editedRepository: Repository) => {
+    setSaveError(false);
+    setIsSaving(true);
+    const { error } = await sendRequest({
+      path: chrome.addBasePath(`${API_BASE_PATH}repositories/${name}`),
+      method: 'put',
+      body: editedRepository,
+      httpClient: http.getClient(),
+    });
+    setIsSaving(false);
+    if (error) {
+      setSaveError(error);
+    } else {
+      history.push(`${BASE_PATH}/${section}/${name}`);
+    }
   };
 
   const onCancel = () => {
@@ -64,7 +107,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = repositoryError.status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -76,7 +119,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
             }),
           },
         }
-      : error;
+      : repositoryError;
     return (
       <SectionError
         title={
@@ -90,16 +133,40 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
     );
   };
 
+  const renderSaveError = () => {
+    return (
+      <SectionError
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.editRepository.errorSavingRepositoryTitle"
+            defaultMessage="Error saving repository details"
+          />
+        }
+        error={saveError}
+      />
+    );
+  };
+
   const renderContent = () => {
-    if (loading) {
+    if (loadingRepository) {
       return renderLoading();
     }
-    if (error) {
+    if (repositoryError) {
       return renderError();
     }
 
-    return <RepositoryForm repository={repository} onSave={onSave} onCancel={onCancel} />;
+    return (
+      <RepositoryForm
+        repository={repository}
+        isEditing={true}
+        isSaving={isSaving}
+        saveError={saveError ? renderSaveError() : null}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
   };
+
   return (
     <EuiPageBody>
       <EuiPageContent>

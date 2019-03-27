@@ -4,24 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState } from 'react';
-import { API_BASE_PATH } from '../../../../common/constants';
-import { useAppDependencies } from '../../index';
 
-export const useRequest = ({
-  path,
-  method,
-  body,
-  interval,
-}: {
+interface SendRequest {
   path: string;
   method: string;
   body?: any;
-  interval?: number;
-}) => {
-  const {
-    core: { http, chrome },
-  } = useAppDependencies();
+  httpClient: any;
+}
 
+interface SendRequestResponse {
+  data: any;
+  error: Error;
+}
+
+export const sendRequest = async ({
+  path,
+  method,
+  body,
+  httpClient,
+}: SendRequest): Promise<Partial<SendRequestResponse>> => {
+  try {
+    const response = await httpClient[method](path, body);
+
+    if (!response.data) {
+      throw new Error(response.statusText);
+    }
+
+    return {
+      data: response.data,
+    };
+  } catch (e) {
+    return {
+      error: e,
+    };
+  }
+};
+
+interface UseRequest extends SendRequest {
+  interval?: number;
+}
+
+export const useRequest = ({ path, method, body, httpClient, interval }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>([]);
@@ -29,16 +52,16 @@ export const useRequest = ({
   const request = async () => {
     setError(null);
     setLoading(true);
-    try {
-      const response = await http
-        .getClient()
-        [method](chrome.addBasePath(`${API_BASE_PATH}${path}`), body);
-      if (!response.data) {
-        throw new Error(response.statusText);
-      }
-      setData(response.data);
-    } catch (e) {
-      setError(e);
+    const { data: responseData, error: responseError } = await sendRequest({
+      path,
+      method,
+      body,
+      httpClient,
+    });
+    if (responseError) {
+      setError(responseError);
+    } else {
+      setData(responseData);
     }
     setLoading(false);
   };

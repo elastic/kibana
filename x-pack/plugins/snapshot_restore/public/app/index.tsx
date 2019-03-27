@@ -50,6 +50,5 @@ export const renderReact = async (
   core: AppCore,
   plugins: AppPlugins
 ): Promise<void> => {
-  unmountComponentAtNode(elem);
   render(<ReactApp core={core} plugins={plugins} />, elem);
 };
