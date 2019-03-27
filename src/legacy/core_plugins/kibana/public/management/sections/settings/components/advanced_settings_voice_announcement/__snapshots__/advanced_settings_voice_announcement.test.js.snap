@@ -8,7 +8,7 @@ exports[`Advanced Settings: Voice Announcement should render announcement 1`] = 
   >
     <FormattedMessage
       defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
-      id="kbn.settings.advancedSettings.voiceAnnouncement.screenReaderMessage"
+      id="kbn.settings.advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
       values={
         Object {
           "optionLenght": 1,
@@ -29,7 +29,7 @@ exports[`Advanced Settings: Voice Announcement should render nothing 1`] = `
   >
     <FormattedMessage
       defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
-      id="kbn.settings.advancedSettings.voiceAnnouncement.screenReaderMessage"
+      id="kbn.settings.advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
       values={
         Object {
           "optionLenght": 1,
