@@ -30,7 +30,7 @@ jest.mock('ui/i18n', () => ({ I18nContext: ({ children }) => children }));
 
 jest.mock('ui/new_platform', () => ({
   getNewPlatform: () => ({
-    setup: {
+    start: {
       core: {
         overlay: {
           openFlyout: jest.fn(),
