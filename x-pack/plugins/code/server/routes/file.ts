@@ -184,7 +184,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       const uri = req.params.uri;
       try {
         const repository = await gitOperations.openRepo(uri);
-        const references = await repository.getReferences(Reference.TYPE.OID);
+        const references = await repository.getReferences(Reference.TYPE.DIRECT);
         const results: ReferenceInfo[] = await Promise.all(references.map(referenceInfo));
         return results;
       } catch (e) {
