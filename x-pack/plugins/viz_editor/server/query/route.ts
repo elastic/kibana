@@ -27,7 +27,7 @@ export function route(server: Legacy.Server) {
       const query = req.payload as Query;
       const esQuery = toEsQuery(query);
       const result = await callWithRequest(req, 'search', {
-        index: query.index,
+        index: query.indexPattern,
         body: esQuery,
       });
 

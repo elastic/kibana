@@ -8,40 +8,39 @@
 // Select clause
 // ----------------------------------------
 
-export type OperationName = 'column' | 'count' | 'date_histogram' | 'sum' | 'avg';
+export type SelectOperator = 'column' | 'count' | 'date_histogram' | 'sum' | 'avg' | 'terms';
 
 export interface Aliasable {
-  operation: OperationName;
+  operation: SelectOperator;
   alias?: string;
-}
-
-export interface GenericOperation extends Aliasable {
-  argument: Field;
 }
 
 export interface Field {
   field: string;
 }
 
-export interface ColumnOperation extends Aliasable {
-  operation: 'column';
+export type FieldOperation = Aliasable & {
   argument: Field;
+};
+
+export interface ColumnOperation extends FieldOperation {
+  operation: 'column';
+  // argument: Field;
 }
 
-export interface DateHistogramOperation extends Aliasable {
+export interface DateHistogramOperation extends FieldOperation {
   operation: 'date_histogram';
-  argument: {
-    field: string;
+  argument: Field & {
     interval: string;
   };
 }
 
-export interface SumOperation extends Aliasable {
+export interface SumOperation extends FieldOperation {
   operation: 'sum';
-  argument: Field;
+  // argument: Field;
 }
 
-export interface AvgOperation extends Aliasable {
+export interface AvgOperation extends FieldOperation {
   operation: 'avg';
   argument: Field;
 }
@@ -50,12 +49,20 @@ export interface CountOperation extends Aliasable {
   operation: 'count';
 }
 
+export interface TermsOperation extends FieldOperation {
+  operation: 'terms';
+  argument: Field & {
+    count: number;
+  };
+}
+
 export type SelectOperation =
   | ColumnOperation
   | DateHistogramOperation
   | SumOperation
   | CountOperation
-  | AvgOperation;
+  | AvgOperation
+  | TermsOperation;
 
 // ----------------------------------------
 // Where clause
@@ -77,47 +84,42 @@ type ComparisonArg = Literal | ColumnOperation;
 
 export type BooleanOperator = 'and' | 'or' | '>' | '>=' | '<' | '<=' | '=' | '<>';
 
-export interface GenericBoolean {
-  operation: BooleanOperator;
-  argument: any[];
-}
-
-export interface Eq extends GenericBoolean {
+export interface Eq {
   operation: '=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Ne extends GenericBoolean {
+export interface Ne {
   operation: '<>';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Gt extends GenericBoolean {
+export interface Gt {
   operation: '>';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Gte extends GenericBoolean {
+export interface Gte {
   operation: '>=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Lt extends GenericBoolean {
+export interface Lt {
   operation: '<';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface Lte extends GenericBoolean {
+export interface Lte {
   operation: '<=';
   argument: [ComparisonArg, ComparisonArg];
 }
 
-export interface And extends GenericBoolean {
+export interface And {
   operation: 'and';
   argument: BooleanOperation[];
 }
 
-export interface Or extends GenericBoolean {
+export interface Or {
   operation: 'or';
   argument: BooleanOperation[];
 }

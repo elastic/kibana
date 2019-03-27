@@ -8,13 +8,13 @@ import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import {
   DateHistogramOperation,
-  OperationName,
   SelectOperation,
+  SelectOperator,
   SumOperation,
 } from '../../../../common';
 
 type ColumnOperations = {
-  [operation in OperationName]: {
+  [operation in SelectOperator]: {
     summarize: (op: any) => JSX.Element;
   }
 };
@@ -59,6 +59,11 @@ export const columnOperations: ColumnOperations = {
     },
   },
   avg: {
+    summarize(op) {
+      return <></>;
+    },
+  },
+  terms: {
     summarize(op) {
       return <></>;
     },

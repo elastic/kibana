@@ -113,6 +113,46 @@ describe('viz-editor/query/to_es_query', () => {
     });
   });
 
+  test('performs grouped aggregations with terms', () => {
+    expect(
+      toEsQuery({
+        indexPattern: 'a',
+        select: [
+          { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
+          { operation: 'terms', argument: { field: 'dc', count: 5 } },
+          { operation: 'count' },
+        ],
+        size: 123,
+      })
+    ).toMatchObject({
+      aggregations: {
+        groupby: {
+          composite: {
+            sources: [
+              { dc: { terms: { field: 'datacenter', missing_bucket: true, order: 'asc' } } },
+            ],
+            size: 123,
+          },
+          aggregations: {
+            dc: {
+              terms: {
+                field: 'dc',
+                count: 5,
+              },
+              aggregations: {
+                count: {
+                  value_count: {
+                    field: '_id',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('performs date_histograms', () => {
     expect(
       toEsQuery({

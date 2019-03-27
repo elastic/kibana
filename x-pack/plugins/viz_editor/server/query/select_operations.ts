@@ -17,12 +17,13 @@ import {
   ColumnOperation,
   CountOperation,
   DateHistogramOperation,
-  GenericOperation,
+  FieldOperation,
   isEmpty,
-  OperationName,
   partition,
   Query,
   SelectOperation,
+  SelectOperator,
+  TermsOperation,
 } from '../../common';
 
 /**
@@ -40,7 +41,7 @@ export interface SelectDefinition {
  * SelectDefinition, used to convert our definitions into the equivalent
  * Elasticsearch DSL.
  */
-export const selectOperations: { [operation in OperationName]: SelectDefinition } = {
+export const selectOperations: { [operation in SelectOperator]: SelectDefinition } = {
   column: {
     getName(op: ColumnOperation) {
       return op.alias || op.argument.field;
@@ -109,6 +110,24 @@ export const selectOperations: { [operation in OperationName]: SelectDefinition 
     },
   },
 
+  terms: {
+    getName(op: TermsOperation) {
+      return op.alias || op.argument.field;
+    },
+    toNestedQuery(query: Query, ops: SelectOperation[], getSubAggs: () => any) {
+      const op = ops[0] as TermsOperation;
+
+      return {
+        aggregations: {
+          [op.alias!]: {
+            terms: op.argument,
+            ...getSubAggs(),
+          },
+        },
+      };
+    },
+  },
+
   avg: defineBasicAgg('avg'),
   sum: defineBasicAgg('sum'),
 };
@@ -120,10 +139,10 @@ export const selectOperations: { [operation in OperationName]: SelectDefinition 
  */
 function defineBasicAgg(aggName: string) {
   return {
-    getName(op: GenericOperation) {
+    getName(op: FieldOperation) {
       return op.alias || `${aggName}_${op.argument.field}`;
     },
-    toEsAgg(op: GenericOperation) {
+    toEsAgg(op: FieldOperation) {
       return {
         [op.alias!]: {
           [aggName]: {
