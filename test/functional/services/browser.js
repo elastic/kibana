@@ -22,11 +22,11 @@ import { cloneDeep } from 'lodash';
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-
 export async function BrowserProvider({ getService }) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   class BrowserService {
+
     /**
      * Keyboard events
      */
@@ -121,8 +121,8 @@ export async function BrowserProvider({ getService }) {
     async dragAndDrop(from, to) {
       let _from;
       let _to;
-      const _fromOffset = from.offset ? { x: from.offset.x || 0, y: from.offset.y || 0 } : { x: 0, y: 0 };
-      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
+      const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
+      const _toOffset = (to.offset) ? { x: to.offset.x || 0,  y: to.offset.y || 0 } : { x: 0, y: 0 };
 
       if (from.location instanceof WebElementWrapper) {
         _from = from.location._webElement;
@@ -230,9 +230,9 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-      // See: https://github.com/w3c/webdriver/issues/406
-      // See: https://w3c.github.io/webdriver/#endpoints
+      //The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+      //See: https://github.com/w3c/webdriver/issues/406
+      //See: https://w3c.github.io/webdriver/#endpoints
       if (driver.executor_.w3c === true) {
         return [];
       } else {
@@ -358,5 +358,5 @@ export async function BrowserProvider({ getService }) {
     }
   }
 
-  return new BrowserService();
+  return  new BrowserService();
 }
