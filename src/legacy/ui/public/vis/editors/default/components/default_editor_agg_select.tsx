@@ -17,7 +17,7 @@
  * under the License.
  */
 import { get, isFunction } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -80,9 +80,14 @@ function DefaultEditorAggSelect({
     </EuiLink>
   );
 
-  if (isFunction(setValidity)) {
-    setValidity(isAggTypeDefined);
-  }
+  useEffect(
+    () => {
+      if (isFunction(setValidity)) {
+        setValidity(isAggTypeDefined);
+      }
+    },
+    [isAggTypeDefined]
+  );
 
   return (
     <EuiFormRow
