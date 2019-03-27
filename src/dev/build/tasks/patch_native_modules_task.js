@@ -63,7 +63,7 @@ async function patchNodeGit(config, log, build, platform) {
   const arch = platform.getNodeArch().split('-')[1];
   const { downloadUrl, packageName } = binaryInfo(plat, arch);
 
-  const downloadPath =   build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
+  const downloadPath = build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
   const extractDir = await downloadAndExtractTarball(downloadUrl, downloadPath, log, 3);
 
   const destination = build.resolvePathForPlatform(platform, 'node_modules/nodegit/build/Release');
@@ -83,7 +83,9 @@ export const PatchNativeModulesTask = {
   description: 'Patching platform-specific native modules directories',
   async run(config, log, build) {
     await Promise.all(config.getTargetPlatforms().map(async platform => {
-      await patchNodeGit(config, log, build, platform);
+      if (!build.isOss()) {
+        await patchNodeGit(config, log, build, platform);
+      }
     }));
   }
 };
