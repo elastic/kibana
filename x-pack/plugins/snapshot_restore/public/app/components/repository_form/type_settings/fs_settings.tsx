@@ -21,7 +21,7 @@ import {
 
 interface Props {
   repository: FSRepository;
-  onSettingsChange: (repository: Repository['settings']) => void;
+  onSettingsChange: (settings: Repository['settings']) => void;
 }
 
 export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSettingsChange }) => {

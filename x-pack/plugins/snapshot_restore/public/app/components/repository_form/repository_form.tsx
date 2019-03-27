@@ -213,6 +213,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
               onRepositoryChange({
                 ...repository,
                 type: e.target.value,
+                settings: {},
               });
             }}
             fullWidth
@@ -279,7 +280,6 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                 onRepositoryChange({
                   ...repository,
                   settings: {
-                    ...repository.settings,
                     delegate_type: e.target.value,
                   },
                 });

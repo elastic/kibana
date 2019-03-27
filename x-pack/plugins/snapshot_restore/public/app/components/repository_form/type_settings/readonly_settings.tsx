@@ -20,7 +20,7 @@ import {
 
 interface Props {
   repository: ReadonlyRepository;
-  onSettingsChange: (repository: Repository['settings']) => void;
+  onSettingsChange: (settings: Repository['settings']) => void;
 }
 
 export const ReadonlySettings: React.FunctionComponent<Props> = ({
@@ -78,7 +78,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             />
           </Fragment>
         }
-        idAria="fsRepositoryURLDescription"
+        idAria="readonlyRepositoryURLDescription"
         fullWidth
       >
         <EuiFormRow
@@ -89,7 +89,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['fsRepositoryURLDescription']}
+          describedByIds={['readonlyRepositoryURLDescription']}
         >
           <EuiFieldText
             defaultValue={url || ''}

@@ -5,8 +5,11 @@
  */
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
+
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
+
+import { booleanizeSettings } from '../../lib';
 
 export function registerRepositoriesRoutes(router: Router) {
   router.get('repository_types', getTypesHandler);
@@ -30,7 +33,7 @@ export const getAllHandler: RouterRouteHandler = async (
   const repositories: Repository[] = repositoryNames.map(name => {
     return {
       name,
-      ...repositoriesByName[name],
+      ...booleanizeSettings(repositoriesByName[name]),
     };
   });
   const repositoryVerification = await Promise.all([
@@ -79,7 +82,7 @@ export const getOneHandler: RouterRouteHandler = async (
     return {
       repository: {
         name,
-        ...repositoryByName[name],
+        ...booleanizeSettings(repositoryByName[name]),
       },
       verification: verificationResults.error
         ? verificationResults

@@ -36,7 +36,7 @@ export const RepositoryTypeName: React.FunctionComponent<Props> = ({ type, deleg
       defaultMessage: 'AWS S3',
     }),
     [REPOSITORY_TYPES.hdfs]: i18n.translate('xpack.snapshotRestore.repositoryType.hdfsTypeName', {
-      defaultMessage: 'HDFS File System',
+      defaultMessage: 'Hadoop HDFS',
     }),
     [REPOSITORY_TYPES.azure]: i18n.translate('xpack.snapshotRestore.repositoryType.azureTypeName', {
       defaultMessage: 'Azure',

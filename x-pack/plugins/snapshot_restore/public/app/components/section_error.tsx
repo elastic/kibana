@@ -12,8 +12,8 @@ interface Props {
   error: {
     data: {
       error: string;
-      cause: string[];
-      message: string;
+      cause?: string[];
+      message?: string;
     };
   };
 }
