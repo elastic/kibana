@@ -12,11 +12,7 @@ Object {
       "maxFontSize": 72,
       "metric": Object {
         "accessor": 0,
-        "aggType": "count",
-        "format": Object {
-          "id": "number",
-        },
-        "params": Object {},
+        "format": Object {},
       },
       "minFontSize": 18,
       "orientation": "single",

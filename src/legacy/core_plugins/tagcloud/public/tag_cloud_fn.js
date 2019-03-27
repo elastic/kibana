@@ -85,7 +85,7 @@ export const tagcloud = () => ({
     const metricAccessor = Number.isInteger(args.metric) ?
       args.metric :
       context.columns.find(c => c.id === args.metric);
-    if (!metricAccessor) {
+    if (metricAccessor === undefined) {
       throw new Error('invalid column name');
     }
 
@@ -105,7 +105,7 @@ export const tagcloud = () => ({
       const bucketAccessor = Number.isInteger(args.bucket) ?
         args.bucket :
         context.columns.find(c => c.id === args.bucket);
-      if (!bucketAccessor) {
+      if (bucketAccessor === undefined) {
         throw new Error('invalid column name');
       }
 

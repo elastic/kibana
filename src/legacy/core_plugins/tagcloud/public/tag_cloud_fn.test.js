@@ -33,18 +33,12 @@ describe('interpreter/functions#tagcloud', () => {
     minFontSize: 18,
     maxFontSize: 72,
     showLabel: true,
-    metric: {
-      accessor: 0,
-      format: {
-        id: 'number',
-      },
-      params: {},
-      aggType: 'count',
-    },
+    metric: 0,
+    format: 'number'
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(context, visConfig);
     expect(actual).toMatchSnapshot();
   });
 });
