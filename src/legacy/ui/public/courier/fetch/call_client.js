@@ -37,7 +37,6 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     // get the actual list of requests that we will be fetching
     const requestsToFetch = searchRequests.filter(isRequest);
-
     let requestsToFetchCount = requestsToFetch.length;
 
     if (requestsToFetchCount === 0) {
