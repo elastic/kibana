@@ -39,6 +39,7 @@
     flex-shrink: 0;
   }
   div[role="tabpanel"] {
+    @include euiScrollBar;
     width: 100%;
     flex-grow: 1;
     flex-shrink: 1;
