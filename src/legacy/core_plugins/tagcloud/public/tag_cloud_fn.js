@@ -68,6 +68,13 @@ export const tagcloud = () => ({
     }
   },
   fn(context, args) {
+    const metricAccessor = Number.isInteger(args.metric) ?
+      args.metric :
+      context.columns.find(c => c.id === args.metric);
+    if (!metricAccessor) {
+      throw new Error('invalid column name');
+    }
+
     const visConfig = {
       scale: args.scale,
       orientation: args.orientation,
@@ -75,12 +82,19 @@ export const tagcloud = () => ({
       maxFontSize: args.maxFontSize,
       showLabel: args.showLabel,
       metric: {
-        accessor: args.metric,
+        accessor: metricAccessor,
         format: {},
       },
     };
 
     if (args.bucket !== undefined) {
+      const bucketAccessor = Number.isInteger(args.bucket) ?
+        args.bucket :
+        context.columns.find(c => c.id === args.bucket);
+      if (!bucketAccessor) {
+        throw new Error('invalid column name');
+      }
+
       visConfig.bucket = {
         accessor: args.bucket,
         format: {
