@@ -33,6 +33,7 @@ import {
   MockInjectedMetadataService,
   MockLegacyPlatformService,
   MockNotificationsService,
+  MockOverlayService,
   MockUiSettingsService,
   NotificationServiceConstructor,
   OverlayServiceConstructor,
