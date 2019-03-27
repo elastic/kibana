@@ -107,7 +107,7 @@ export class AdvancedSettingsVoiceAnnouncement extends Component {
       <EuiScreenReaderOnly>
         <div role="region" aria-live="polite">
           <FormattedMessage
-            id="kbn.settings.advancedSettings.voiceAnnouncement.screenReaderMessage"
+            id="kbn.settings.advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
             defaultMessage="You searched for {query}.
               There {optionLenght, plural, one {is # option} other {are # options}}
               in {sectionLenght, plural, one {# section} other {# sections}}"
