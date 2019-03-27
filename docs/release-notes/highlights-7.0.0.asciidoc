@@ -60,7 +60,7 @@ image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
 [float]
 === Responsive dashboards
 
-experimental[]As part of the enhancements to {kib} dashboards in 7.0, we've also made the design
+experimental[] As part of the enhancements to {kib} dashboards in 7.0, we've also made the design
 more responsive. If you’ve ever wanted to view and interact with {kib} on the go, 
 feel free to pull it up on your phone and test out this new experimental responsive layout.
 
