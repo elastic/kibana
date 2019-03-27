@@ -6,6 +6,7 @@
 
 import { VisModel } from './common/lib';
 
+import { config as csvPlugin } from '../csv_datasource_plugin';
 import { config as essqlPlugin } from '../essql_datasource_plugin';
 import { config as indexpatternPlugin } from '../indexpattern_datasource_plugin';
 
@@ -24,6 +25,7 @@ export interface DatasourcePlugin<S extends VisModel = VisModel> {
 const datasourceMap: { [key: string]: DatasourcePlugin } = {
   index_pattern: indexpatternPlugin,
   essql: essqlPlugin,
+  csv: csvPlugin,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
