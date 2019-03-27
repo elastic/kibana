@@ -52,13 +52,15 @@ GET /myIndex/_mappings
 {
   "myIndex": {
     "mappings": {
-      "properties": {
-        "field1": { "type": "text" },
-        "field2": { "type": "float" },
-        "nestedfield": {
-          "properties": {
-            "field3": { "type": "keyword" },
-            "field4": { "type": "long" },
+      "_doc": {
+        "properties": {
+          "field1": { "type": "text" },
+          "field2": { "type": "float" },
+          "nestedfield": {
+            "properties": {
+              "field3": { "type": "keyword" },
+              "field4": { "type": "long" },
+            }
           }
         }
       }
