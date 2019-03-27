@@ -20,7 +20,7 @@
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { AggType } from 'ui/agg_types';
 
-type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
+export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   value?: AggType;
   options?: ComboBoxGroupedOption[];
 };
@@ -76,4 +76,4 @@ function sortByLabel(a: { label: string }, b: { label: string }) {
   return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 
-export { groupAggregationsBy, ComboBoxGroupedOption };
+export { groupAggregationsBy };
