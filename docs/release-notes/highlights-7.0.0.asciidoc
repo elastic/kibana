@@ -16,8 +16,6 @@ Release Notes>> for a list of bug fixes and other changes.
 
 // tag::notable-highlights[]
 
-// end::notable-highlights[]
-
 [float]
 === Fresh, sleek design
 
@@ -35,10 +33,12 @@ image::images/highlights-7.0.0-design.png[Fresh, sleek Kibana design]
 [float]
 === {kib} Query Language on by default
 
-In 6.3, {kib} introduced the <<kuery-query, Kibana Query Language (KQL)>>, and in 7.0.0, 
+In 6.3, {kib} introduced the
+{kibana-ref}/kuery-query.html[Kibana Query Language (KQL)], and in 7.0.0, 
 KQL is the default.  KQL offers a simplified query syntax and support for 
 scripted fields. If you have a https://www.elastic.co/subscriptions[Basic license or above], KQL also provides 
-autocomplete. If you prefer the <<lucene-query, Lucene query syntax>>, you have the option 
+autocomplete. If you prefer the
+{kibana-ref}/lucene-query.html[Lucene query syntax], you have the option 
 to turn off KQL.
 
 [role="screenshot"]
@@ -48,13 +48,15 @@ image::images/highlights-7.0.0-kql.png[Kibana Query Language]
 === {kib} dark theme
 
 {kib} now supports a dark theme across the entire application. This setting is saved 
-at the <<xpack-spaces, Spaces>> level. To try out this theme, go to *Management > 
-Advanced settings*, flip the dark mode switch, and reload your page. Because 
-theming is related to Spaces, you can no longer set a dark or light theme on 
-an individual dashboard.
+at the {kibana-ref}/xpack-spaces.html[Spaces] level. To try out this theme, go
+to *Management > Advanced settings*, flip the dark mode switch, and reload your
+page. Because theming is related to Spaces, you can no longer set a dark or
+light theme on an individual dashboard.
 
 [role="screenshot"]
 image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
+
+// end::notable-highlights[]
 
 [float]
 === Responsive dashboards
