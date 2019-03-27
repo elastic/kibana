@@ -3,8 +3,8 @@
 
 [partintro]
 --
-This section summarizes the most important changes in each release.
-For the full list, see <<breaking-changes>> and <<release-notes>>.
+This section summarizes the most important changes in each release. For the 
+full list, see <<release-notes>> and <<breaking-changes>>. 
 
 * <<release-highlights-8.0.0>>
 
