@@ -31,22 +31,6 @@ describe('Flyout', () => {
         const session = new FlyoutService().openFlyout(i18nMock, <span>Flyout content</span>);
         expect(typeof session.close).toBe('function');
       });
-
-      // it('should emit the "closed" event if another inspector opens', () => {
-      //   const session = Inspector.open({});
-      //   const spy = jest.fn();
-      //   session.on('closed', spy);
-      //   Inspector.open({});
-      //   expect(spy).toHaveBeenCalled();
-      // });
-
-      // it('should emit the "closed" event if you call close', () => {
-      //   const session = Inspector.open({});
-      //   const spy = jest.fn();
-      //   session.on('closed', spy);
-      //   session.close();
-      //   expect(spy).toHaveBeenCalled();
-      // });
     });
   });
 });
