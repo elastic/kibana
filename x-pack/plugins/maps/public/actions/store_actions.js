@@ -69,6 +69,12 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
   };
 }
 
+function getLayerById(layerId, state) {
+  return getLayerList(state).find(layer => {
+    return layerId === layer.getId();
+  });
+}
+
 async function syncDataForAllLayers(getState, dispatch, dataFilters) {
   const state = getState();
   const layerList = getLayerList(state);
@@ -121,9 +127,7 @@ export function replaceLayerList(newLayerList) {
 
 export function cloneLayer(layerId) {
   return async (dispatch, getState) => {
-    const layer = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
@@ -175,9 +179,7 @@ export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
     //e.g. if a layer was invisible at start-up, it won't have any data loaded
-    const layer = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
@@ -350,9 +352,7 @@ export function clearMouseCoordinates() {
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
@@ -445,9 +445,7 @@ export function updateSourceProp(layerId, propName, value) {
 
 export function syncDataForLayer(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
@@ -519,9 +517,7 @@ export function removeSelectedLayer() {
 
 export function removeLayer(layerId) {
   return (dispatch, getState) => {
-    const layerGettingRemoved = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layerGettingRemoved = getLayerById(layerId, getState());
     if (!layerGettingRemoved) {
       return;
     }
@@ -573,9 +569,7 @@ export function triggerRefreshTimer() {
 
 export function clearMissingStyleProperties(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (!targetLayer) {
       return;
     }
