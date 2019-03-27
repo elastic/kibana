@@ -25,20 +25,23 @@ export const registerUserActionRoute = (server: Server) => {
    * Increment a count on an object representing a specific user action.
    */
   server.route({
-    path: '/api/user_action/{appName}/{actionType}',
+    path: '/api/user_action/{appName}/{actionTypes}',
     method: 'POST',
     handler: async (request: any) => {
-      const { appName, actionType } = request.params;
+      const { appName, actionTypes } = request.params;
 
       try {
         const { getSavedObjectsRepository } = server.savedObjects;
         const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
         const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-        const savedObjectId = `${appName}:${actionType}`;
 
-        // This object is created if it doesn't already exist.
-        await internalRepository.incrementCounter('user-action', savedObjectId, 'count');
+        const incrementRequests = actionTypes.split(',').map((actionType: string) => {
+          const savedObjectId = `${appName}:${actionType}`;
+          // This object is created if it doesn't already exist.
+          return internalRepository.incrementCounter('user-action', savedObjectId, 'count');
+        });
 
+        await Promise.all(incrementRequests);
         return {};
       } catch (error) {
         return new Boom('Something went wrong', { statusCode: error.status });

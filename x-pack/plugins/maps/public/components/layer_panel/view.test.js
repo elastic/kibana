@@ -22,9 +22,21 @@ jest.mock('./flyout_footer', () => ({
   }
 }));
 
-jest.mock('./settings_panel', () => ({
-  SettingsPanel: () => {
-    return (<div>mockSettingsPanel</div>);
+jest.mock('./layer_errors', () => ({
+  LayerErrors: () => {
+    return (<div>mockLayerErrors</div>);
+  }
+}));
+
+jest.mock('./layer_settings', () => ({
+  LayerSettings: () => {
+    return (<div>mockLayerSettings</div>);
+  }
+}));
+
+jest.mock('./source_settings', () => ({
+  SourceSettings: () => {
+    return (<div>mockSourceSettings</div>);
   }
 }));
 
@@ -42,7 +54,7 @@ const mockLayer = {
     ];
   },
   isJoinable: () => { return true; },
-  getLayerTypeIconName: () => { return 'vector'; }
+  getLayerTypeIconName: () => { return 'vector'; },
 };
 
 const defaultProps = {

@@ -87,146 +87,90 @@ module.exports =
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _cli__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "run", function() { return _cli__WEBPACK_IMPORTED_MODULE_0__["run"]; });
+
+/* harmony import */ var _production__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(367);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["buildProductionProjects"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
+
+/* harmony import */ var _utils_workspaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(131);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return _utils_workspaces__WEBPACK_IMPORTED_MODULE_2__["copyWorkspacePackages"]; });
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
-var _cli = __webpack_require__(1);
-
-Object.defineProperty(exports, 'run', {
-  enumerable: true,
-  get: function () {
-    return _cli.run;
-  }
-});
-
-var _production = __webpack_require__(367);
-
-Object.defineProperty(exports, 'buildProductionProjects', {
-  enumerable: true,
-  get: function () {
-    return _production.buildProductionProjects;
-  }
-});
-Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
-  enumerable: true,
-  get: function () {
-    return _production.prepareExternalProjectDependencies;
-  }
-});
-
-var _workspaces = __webpack_require__(131);
-
-Object.defineProperty(exports, 'copyWorkspacePackages', {
-  enumerable: true,
-  get: function () {
-    return _workspaces.copyWorkspacePackages;
-  }
-});
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "run", function() { return run; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(14);
+/* harmony import */ var dedent__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(dedent__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var getopts__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(15);
+/* harmony import */ var getopts__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(getopts__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _commands__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(17);
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(357);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(33);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.run = undefined;
 
-let run = exports.run = (() => {
-    var _ref = _asyncToGenerator(function* (argv) {
-        // We can simplify this setup (and remove this extra handling) once Yarn
-        // starts forwarding the `--` directly to this script, see
-        // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
-        if (argv.includes('--')) {
-            _log.log.write(_chalk2.default.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
-            process.exit(1);
-        }
-        const options = (0, _getopts2.default)(argv, {
-            alias: {
-                e: 'exclude',
-                h: 'help',
-                i: 'include'
-            },
-            boolean: ['prefer-offline', 'frozen-lockfile']
-        });
-        const args = options._;
-        if (options.help || args.length === 0) {
-            help();
-            return;
-        }
-        // This `rootPath` is relative to `./dist/` as that's the location of the
-        // built version of this tool.
-        const rootPath = (0, _path.resolve)(__dirname, '../../../');
-        const commandName = args[0];
-        const extraArgs = args.slice(1);
-        const commandOptions = { options, extraArgs, rootPath };
-        const command = _commands.commands[commandName];
-        if (command === undefined) {
-            _log.log.write(_chalk2.default.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
-            process.exit(1);
-        }
-        yield (0, _run.runCommand)(command, commandOptions);
-    });
 
-    return function run(_x) {
-        return _ref.apply(this, arguments);
-    };
-})();
 
-var _chalk = __webpack_require__(2);
 
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _dedent = __webpack_require__(14);
-
-var _dedent2 = _interopRequireDefault(_dedent);
-
-var _getopts = __webpack_require__(15);
-
-var _getopts2 = _interopRequireDefault(_getopts);
-
-var _path = __webpack_require__(16);
-
-var _commands = __webpack_require__(17);
-
-var _run = __webpack_require__(357);
-
-var _log = __webpack_require__(33);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 
 function help() {
-    const availableCommands = Object.keys(_commands.commands).map(commandName => _commands.commands[commandName]).map(command => `${command.name} - ${command.description}`);
-    _log.log.write(_dedent2.default`
+  const availableCommands = Object.keys(_commands__WEBPACK_IMPORTED_MODULE_4__["commands"]).map(commandName => _commands__WEBPACK_IMPORTED_MODULE_4__["commands"][commandName]).map(command => `${command.name} - ${command.description}`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].write(dedent__WEBPACK_IMPORTED_MODULE_1___default.a`
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
@@ -243,6 +187,50 @@ function help() {
        --oss                  Do not include the x-pack when running command.
        --skip-kibana-plugins  Filter all plugins in ./plugins and ../kibana-extra when running command.
   `);
+}
+
+async function run(argv) {
+  // We can simplify this setup (and remove this extra handling) once Yarn
+  // starts forwarding the `--` directly to this script, see
+  // https://github.com/yarnpkg/yarn/blob/b2d3e1a8fe45ef376b716d597cc79b38702a9320/src/cli/index.js#L174-L182
+  if (argv.includes('--')) {
+    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`Using "--" is not allowed, as it doesn't work with 'yarn kbn'.`));
+    process.exit(1);
+  }
+
+  const options = getopts__WEBPACK_IMPORTED_MODULE_2___default()(argv, {
+    alias: {
+      e: 'exclude',
+      h: 'help',
+      i: 'include'
+    },
+    boolean: ['prefer-offline', 'frozen-lockfile']
+  });
+  const args = options._;
+
+  if (options.help || args.length === 0) {
+    help();
+    return;
+  } // This `rootPath` is relative to `./dist/` as that's the location of the
+  // built version of this tool.
+
+
+  const rootPath = Object(path__WEBPACK_IMPORTED_MODULE_3__["resolve"])(__dirname, '../../../');
+  const commandName = args[0];
+  const extraArgs = args.slice(1);
+  const commandOptions = {
+    options,
+    extraArgs,
+    rootPath
+  };
+  const command = _commands__WEBPACK_IMPORTED_MODULE_4__["commands"][commandName];
+
+  if (command === undefined) {
+    _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`[${commandName}] is not a valid command, see 'kbn --help'`));
+    process.exit(1);
+  }
+
+  await Object(_run__WEBPACK_IMPORTED_MODULE_5__["runCommand"])(command, commandOptions);
 }
 
 /***/ }),
@@ -2452,24 +2440,15 @@ module.exports = require("path");
 
 /***/ }),
 /* 17 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.commands = undefined;
-
-var _bootstrap = __webpack_require__(18);
-
-var _clean = __webpack_require__(133);
-
-var _run = __webpack_require__(155);
-
-var _watch = __webpack_require__(156);
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "commands", function() { return commands; });
+/* harmony import */ var _bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18);
+/* harmony import */ var _clean__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(133);
+/* harmony import */ var _run__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(155);
+/* harmony import */ var _watch__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(156);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -2488,117 +2467,137 @@ var _watch = __webpack_require__(156);
  * specific language governing permissions and limitations
  * under the License.
  */
-const commands = exports.commands = {
-  bootstrap: _bootstrap.BootstrapCommand,
-  clean: _clean.CleanCommand,
-  run: _run.RunCommand,
-  watch: _watch.WatchCommand
+
+
+
+
+const commands = {
+  bootstrap: _bootstrap__WEBPACK_IMPORTED_MODULE_0__["BootstrapCommand"],
+  clean: _clean__WEBPACK_IMPORTED_MODULE_1__["CleanCommand"],
+  run: _run__WEBPACK_IMPORTED_MODULE_2__["RunCommand"],
+  watch: _watch__WEBPACK_IMPORTED_MODULE_3__["WatchCommand"]
 };
 
 /***/ }),
 /* 18 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "BootstrapCommand", function() { return BootstrapCommand; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(19);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(33);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(34);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(35);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.BootstrapCommand = undefined;
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _link_project_executables = __webpack_require__(19);
-
-var _log = __webpack_require__(33);
-
-var _parallelize = __webpack_require__(34);
-
-var _projects = __webpack_require__(35);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 
-const BootstrapCommand = exports.BootstrapCommand = {
-    description: 'Install dependencies and crosslink projects',
-    name: 'bootstrap',
-    run(projects, projectGraph, { options }) {
-        return _asyncToGenerator(function* () {
-            const batchedProjectsByWorkspace = (0, _projects.topologicallyBatchProjects)(projects, projectGraph, {
-                batchByWorkspace: true
-            });
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-            const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
-            _log.log.write(_chalk2.default.bold('\nRunning installs in topological order:'));
-            for (const batch of batchedProjectsByWorkspace) {
-                for (const project of batch) {
-                    if (project.isWorkspaceProject) {
-                        _log.log.write(`Skipping workspace project: ${project.name}`);
-                        continue;
-                    }
-                    if (project.hasDependencies()) {
-                        yield project.installDependencies({ extraArgs });
-                    }
-                }
-            }
-            _log.log.write(_chalk2.default.bold('\nInstalls completed, linking package executables:\n'));
-            yield (0, _link_project_executables.linkProjectExecutables)(projects, projectGraph);
-            /**
-             * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
-             * in the list of projects. We do this because some projects need to be
-             * transpiled before they can be used. Ideally we shouldn't do this unless we
-             * have to, as it will slow down the bootstrapping process.
-             */
-            _log.log.write(_chalk2.default.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
-            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
-                var _ref = _asyncToGenerator(function* (pkg) {
-                    if (pkg.hasScript('kbn:bootstrap')) {
-                        yield pkg.runScriptStreaming('kbn:bootstrap');
-                    }
-                });
 
-                return function (_x) {
-                    return _ref.apply(this, arguments);
-                };
-            })());
-            _log.log.write(_chalk2.default.green.bold('\nBootstrapping completed!\n'));
-        })();
+const BootstrapCommand = {
+  description: 'Install dependencies and crosslink projects',
+  name: 'bootstrap',
+
+  async run(projects, projectGraph, {
+    options
+  }) {
+    const batchedProjectsByWorkspace = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph, {
+      batchByWorkspace: true
+    });
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(projects, projectGraph);
+    const extraArgs = [...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []), ...(options['prefer-offline'] === true ? ['--prefer-offline'] : [])];
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nRunning installs in topological order:'));
+
+    for (const batch of batchedProjectsByWorkspace) {
+      for (const project of batch) {
+        if (project.isWorkspaceProject) {
+          _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(`Skipping workspace project: ${project.name}`);
+          continue;
+        }
+
+        if (project.hasDependencies()) {
+          await project.installDependencies({
+            extraArgs
+          });
+        }
+      }
     }
+
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nInstalls completed, linking package executables:\n'));
+    await Object(_utils_link_project_executables__WEBPACK_IMPORTED_MODULE_1__["linkProjectExecutables"])(projects, projectGraph);
+    /**
+     * At the end of the bootstrapping process we call all `kbn:bootstrap` scripts
+     * in the list of projects. We do this because some projects need to be
+     * transpiled before they can be used. Ideally we shouldn't do this unless we
+     * have to, as it will slow down the bootstrapping process.
+     */
+
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold('\nLinking executables completed, running `kbn:bootstrap` scripts\n'));
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_3__["parallelizeBatches"])(batchedProjects, async pkg => {
+      if (pkg.hasScript('kbn:bootstrap')) {
+        await pkg.runScriptStreaming('kbn:bootstrap');
+      }
+    });
+    _utils_log__WEBPACK_IMPORTED_MODULE_2__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green.bold('\nBootstrapping completed!\n'));
+  }
+
 };
 
 /***/ }),
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "linkProjectExecutables", function() { return linkProjectExecutables; });
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(20);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(33);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.linkProjectExecutables = undefined;
+
+
 
 /**
  * Yarn does not link the executables from dependencies that are installed
@@ -2608,130 +2607,122 @@ exports.linkProjectExecutables = undefined;
  * dependencies, and manually linking their executables if defined. The logic
  * for linking was mostly adapted from lerna: https://github.com/lerna/lerna/blob/1d7eb9eeff65d5a7de64dea73613b1bf6bfa8d57/src/PackageUtilities.js#L348
  */
-let linkProjectExecutables = exports.linkProjectExecutables = (() => {
-    var _ref = _asyncToGenerator(function* (projectsByName, projectGraph) {
-        for (const [projectName, projectDeps] of projectGraph) {
-            const project = projectsByName.get(projectName);
-            const binsDir = (0, _path.resolve)(project.nodeModulesLocation, '.bin');
-            for (const projectDep of projectDeps) {
-                const executables = projectDep.getExecutables();
-                for (const name of Object.keys(executables)) {
-                    const srcPath = executables[name];
-                    // existing logic from lerna -- ensure that the bin we are going to
-                    // point to exists or ignore it
-                    if (!(yield (0, _fs.isFile)(srcPath))) {
-                        continue;
-                    }
-                    const dest = (0, _path.resolve)(binsDir, name);
-                    // Get relative project path with normalized path separators.
-                    const projectRelativePath = (0, _path.relative)(project.path, srcPath).split(_path.sep).join('/');
-                    _log.log.write(_chalk2.default`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
-                    yield (0, _fs.mkdirp)((0, _path.dirname)(dest));
-                    yield (0, _fs.createSymlink)(srcPath, dest, 'exec');
-                    yield (0, _fs.chmod)(dest, '755');
-                }
-            }
+async function linkProjectExecutables(projectsByName, projectGraph) {
+  for (const [projectName, projectDeps] of projectGraph) {
+    const project = projectsByName.get(projectName);
+    const binsDir = Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(project.nodeModulesLocation, '.bin');
+
+    for (const projectDep of projectDeps) {
+      const executables = projectDep.getExecutables();
+
+      for (const name of Object.keys(executables)) {
+        const srcPath = executables[name]; // existing logic from lerna -- ensure that the bin we are going to
+        // point to exists or ignore it
+
+        if (!(await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["isFile"])(srcPath))) {
+          continue;
         }
-    });
 
-    return function linkProjectExecutables(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
+        const dest = Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(binsDir, name); // Get relative project path with normalized path separators.
 
-var _path = __webpack_require__(16);
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _fs = __webpack_require__(20);
-
-var _log = __webpack_require__(33);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
+        const projectRelativePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["relative"])(project.path, srcPath).split(path__WEBPACK_IMPORTED_MODULE_0__["sep"]).join('/');
+        _log__WEBPACK_IMPORTED_MODULE_3__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_1___default.a`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
+        await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["mkdirp"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["dirname"])(dest));
+        await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["createSymlink"])(srcPath, dest, 'exec');
+        await Object(_fs__WEBPACK_IMPORTED_MODULE_2__["chmod"])(dest, '755');
+      }
+    }
+  }
+}
 
 /***/ }),
 /* 20 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "unlink", function() { return unlink; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyDirectory", function() { return copyDirectory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chmod", function() { return chmod; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "readFile", function() { return readFile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mkdirp", function() { return mkdirp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDirectory", function() { return isDirectory; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFile", function() { return isFile; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createSymlink", function() { return createSymlink; });
+/* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(21);
+/* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cmd_shim__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var mkdirp__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(31);
+/* harmony import */ var mkdirp__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(mkdirp__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(32);
+/* harmony import */ var ncp__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(ncp__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_5__);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.createSymlink = exports.isFile = exports.isDirectory = exports.mkdirp = exports.readFile = exports.chmod = exports.copyDirectory = exports.unlink = undefined;
 
-let statTest = (() => {
-    var _ref = _asyncToGenerator(function* (path, block) {
-        try {
-            return block((yield stat(path)));
-        } catch (e) {
-            if (e.code === 'ENOENT') {
-                return false;
-            }
-            throw e;
-        }
-    });
 
-    return function statTest(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
+
+
+const stat = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.stat);
+const readFile = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.readFile);
+const symlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.symlink);
+const chmod = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.chmod);
+const cmdShim = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(cmd_shim__WEBPACK_IMPORTED_MODULE_0___default.a);
+const mkdirp = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(mkdirp__WEBPACK_IMPORTED_MODULE_2___default.a);
+const unlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.unlink);
+const copyDirectory = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(ncp__WEBPACK_IMPORTED_MODULE_3__["ncp"]);
+
+
+async function statTest(path, block) {
+  try {
+    return block((await stat(path)));
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      return false;
+    }
+
+    throw e;
+  }
+}
 /**
  * Test if a path points to a directory.
  * @param path
  */
 
 
-let isDirectory = exports.isDirectory = (() => {
-    var _ref2 = _asyncToGenerator(function* (path) {
-        return yield statTest(path, function (stats) {
-            return stats.isDirectory();
-        });
-    });
-
-    return function isDirectory(_x3) {
-        return _ref2.apply(this, arguments);
-    };
-})();
+async function isDirectory(path) {
+  return await statTest(path, stats => stats.isDirectory());
+}
 /**
  * Test if a path points to a regular file.
  * @param path
  */
 
-
-let isFile = exports.isFile = (() => {
-    var _ref3 = _asyncToGenerator(function* (path) {
-        return yield statTest(path, function (stats) {
-            return stats.isFile();
-        });
-    });
-
-    return function isFile(_x4) {
-        return _ref3.apply(this, arguments);
-    };
-})();
+async function isFile(path) {
+  return await statTest(path, stats => stats.isFile());
+}
 /**
  * Create a symlink at dest that points to src. Adapted from
  * https://github.com/lerna/lerna/blob/2f1b87d9e2295f587e4ac74269f714271d8ed428/src/FileSystemUtilities.js#L103.
@@ -2743,96 +2734,32 @@ let isFile = exports.isFile = (() => {
  *  for executable files on windows.
  */
 
+async function createSymlink(src, dest, type) {
+  if (process.platform === 'win32') {
+    if (type === 'exec') {
+      await cmdShim(src, dest);
+    } else {
+      await forceCreate(src, dest, type);
+    }
+  } else {
+    const posixType = type === 'exec' ? 'file' : type;
+    const relativeSource = Object(path__WEBPACK_IMPORTED_MODULE_4__["relative"])(Object(path__WEBPACK_IMPORTED_MODULE_4__["dirname"])(dest), src);
+    await forceCreate(relativeSource, dest, posixType);
+  }
+}
 
-let createSymlink = exports.createSymlink = (() => {
-    var _ref4 = _asyncToGenerator(function* (src, dest, type) {
-        if (process.platform === 'win32') {
-            if (type === 'exec') {
-                yield cmdShim(src, dest);
-            } else {
-                yield forceCreate(src, dest, type);
-            }
-        } else {
-            const posixType = type === 'exec' ? 'file' : type;
-            const relativeSource = (0, _path.relative)((0, _path.dirname)(dest), src);
-            yield forceCreate(relativeSource, dest, posixType);
-        }
-    });
+async function forceCreate(src, dest, type) {
+  try {
+    // If something exists at `dest` we need to remove it first.
+    await unlink(dest);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
 
-    return function createSymlink(_x5, _x6, _x7) {
-        return _ref4.apply(this, arguments);
-    };
-})();
-
-let forceCreate = (() => {
-    var _ref5 = _asyncToGenerator(function* (src, dest, type) {
-        try {
-            // If something exists at `dest` we need to remove it first.
-            yield unlink(dest);
-        } catch (error) {
-            if (error.code !== 'ENOENT') {
-                throw error;
-            }
-        }
-        yield symlink(src, dest, type);
-    });
-
-    return function forceCreate(_x8, _x9, _x10) {
-        return _ref5.apply(this, arguments);
-    };
-})();
-
-var _cmdShim = __webpack_require__(21);
-
-var _cmdShim2 = _interopRequireDefault(_cmdShim);
-
-var _fs = __webpack_require__(23);
-
-var _fs2 = _interopRequireDefault(_fs);
-
-var _mkdirp = __webpack_require__(31);
-
-var _mkdirp2 = _interopRequireDefault(_mkdirp);
-
-var _ncp = __webpack_require__(32);
-
-var _path = __webpack_require__(16);
-
-var _util = __webpack_require__(29);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
-
-const stat = (0, _util.promisify)(_fs2.default.stat);
-const readFile = (0, _util.promisify)(_fs2.default.readFile);
-const symlink = (0, _util.promisify)(_fs2.default.symlink);
-const chmod = (0, _util.promisify)(_fs2.default.chmod);
-const cmdShim = (0, _util.promisify)(_cmdShim2.default);
-const mkdirp = (0, _util.promisify)(_mkdirp2.default);
-const unlink = exports.unlink = (0, _util.promisify)(_fs2.default.unlink);
-const copyDirectory = exports.copyDirectory = (0, _util.promisify)(_ncp.ncp);
-exports.chmod = chmod;
-exports.readFile = readFile;
-exports.mkdirp = mkdirp;
+  await symlink(src, dest, type);
+}
 
 /***/ }),
 /* 21 */
@@ -4179,14 +4106,11 @@ function ncp (source, dest, options, callback) {
 
 /***/ }),
 /* 33 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "log", function() { return log; });
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -4205,7 +4129,7 @@ Object.defineProperty(exports, "__esModule", {
  * specific language governing permissions and limitations
  * under the License.
  */
-const log = exports.log = {
+const log = {
   /**
    * Log something to the console. Ideally we would use a real logger in
    * kbn-pm, but that's a pretty big change for now.
@@ -4215,19 +4139,17 @@ const log = exports.log = {
     // tslint:disable no-console
     console.log(...args);
   }
+
 };
 
 /***/ }),
 /* 34 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parallelizeBatches", function() { return parallelizeBatches; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parallelize", function() { return parallelize; });
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -4246,252 +4168,258 @@ Object.defineProperty(exports, "__esModule", {
  * specific language governing permissions and limitations
  * under the License.
  */
-let parallelizeBatches = exports.parallelizeBatches = (() => {
-    var _ref = _asyncToGenerator(function* (batches, fn) {
-        for (const batch of batches) {
-            // We need to make sure the entire batch has completed before we can move on
-            // to the next batch
-            yield parallelize(batch, fn);
+async function parallelizeBatches(batches, fn) {
+  for (const batch of batches) {
+    // We need to make sure the entire batch has completed before we can move on
+    // to the next batch
+    await parallelize(batch, fn);
+  }
+}
+async function parallelize(items, fn, concurrency = 4) {
+  if (items.length === 0) {
+    return;
+  }
+
+  return new Promise((resolve, reject) => {
+    let activePromises = 0;
+    const values = items.slice(0);
+
+    async function scheduleItem(item) {
+      activePromises++;
+
+      try {
+        await fn(item);
+        activePromises--;
+
+        if (values.length > 0) {
+          // We have more work to do, so we schedule the next promise
+          scheduleItem(values.shift());
+        } else if (activePromises === 0) {
+          // We have no more values left, and all items have completed, so we've
+          // completed all the work.
+          resolve();
         }
-    });
+      } catch (error) {
+        reject(error);
+      }
+    }
 
-    return function parallelizeBatches(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
-
-let parallelize = exports.parallelize = (() => {
-    var _ref2 = _asyncToGenerator(function* (items, fn, concurrency = 4) {
-        if (items.length === 0) {
-            return;
-        }
-        return new Promise(function (resolve, reject) {
-            let scheduleItem = (() => {
-                var _ref3 = _asyncToGenerator(function* (item) {
-                    activePromises++;
-                    try {
-                        yield fn(item);
-                        activePromises--;
-                        if (values.length > 0) {
-                            // We have more work to do, so we schedule the next promise
-                            scheduleItem(values.shift());
-                        } else if (activePromises === 0) {
-                            // We have no more values left, and all items have completed, so we've
-                            // completed all the work.
-                            resolve();
-                        }
-                    } catch (error) {
-                        reject(error);
-                    }
-                });
-
-                return function scheduleItem(_x5) {
-                    return _ref3.apply(this, arguments);
-                };
-            })();
-
-            let activePromises = 0;
-            const values = items.slice(0);
-
-            values.splice(0, concurrency).map(scheduleItem);
-        });
-    });
-
-    return function parallelize(_x3, _x4) {
-        return _ref2.apply(this, arguments);
-    };
-})();
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+    values.splice(0, concurrency).map(scheduleItem);
+  });
+}
 
 /***/ }),
 /* 35 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getProjects", function() { return getProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProjectGraph", function() { return buildProjectGraph; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "topologicallyBatchProjects", function() { return topologicallyBatchProjects; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "includeTransitiveProjects", function() { return includeTransitiveProjects; });
+/* harmony import */ var glob__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(36);
+/* harmony import */ var glob__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(glob__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(52);
+/* harmony import */ var _project__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(53);
+/* harmony import */ var _workspaces__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(131);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.getProjects = undefined;
 
-let getProjects = exports.getProjects = (() => {
-    var _ref = _asyncToGenerator(function* (rootPath, projectsPathsPatterns, { include = [], exclude = [] } = {}) {
-        const projects = new Map();
-        const workspaceProjectsPaths = yield (0, _workspaces.workspacePackagePaths)(rootPath);
-        for (const pattern of projectsPathsPatterns) {
-            const pathsToProcess = yield packagesFromGlobPattern({ pattern, rootPath });
-            for (const filePath of pathsToProcess) {
-                const projectConfigPath = normalize(filePath);
-                const projectDir = _path2.default.dirname(projectConfigPath);
-                const project = yield _project.Project.fromPath(projectDir);
-                if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
-                    project.isWorkspaceProject = true;
-                }
-                const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
-                if (excludeProject) {
-                    continue;
-                }
-                if (projects.has(project.name)) {
-                    throw new _errors.CliError(`There are multiple projects with the same name [${project.name}]`, {
-                        name: project.name,
-                        paths: [project.path, projects.get(project.name).path]
-                    });
-                }
-                projects.set(project.name, project);
-            }
-        }
-        return projects;
+
+
+
+const glob = Object(util__WEBPACK_IMPORTED_MODULE_2__["promisify"])(glob__WEBPACK_IMPORTED_MODULE_0___default.a);
+async function getProjects(rootPath, projectsPathsPatterns, {
+  include = [],
+  exclude = []
+} = {}) {
+  const projects = new Map();
+  const workspaceProjectsPaths = await Object(_workspaces__WEBPACK_IMPORTED_MODULE_5__["workspacePackagePaths"])(rootPath);
+
+  for (const pattern of projectsPathsPatterns) {
+    const pathsToProcess = await packagesFromGlobPattern({
+      pattern,
+      rootPath
     });
 
-    return function getProjects(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
+    for (const filePath of pathsToProcess) {
+      const projectConfigPath = normalize(filePath);
+      const projectDir = path__WEBPACK_IMPORTED_MODULE_1___default.a.dirname(projectConfigPath);
+      const project = await _project__WEBPACK_IMPORTED_MODULE_4__["Project"].fromPath(projectDir);
 
-exports.buildProjectGraph = buildProjectGraph;
-exports.topologicallyBatchProjects = topologicallyBatchProjects;
-exports.includeTransitiveProjects = includeTransitiveProjects;
+      if (workspaceProjectsPaths.indexOf(filePath) >= 0) {
+        project.isWorkspaceProject = true;
+      }
 
-var _glob = __webpack_require__(36);
+      const excludeProject = exclude.includes(project.name) || include.length > 0 && !include.includes(project.name);
 
-var _glob2 = _interopRequireDefault(_glob);
+      if (excludeProject) {
+        continue;
+      }
 
-var _path = __webpack_require__(16);
+      if (projects.has(project.name)) {
+        throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`There are multiple projects with the same name [${project.name}]`, {
+          name: project.name,
+          paths: [project.path, projects.get(project.name).path]
+        });
+      }
 
-var _path2 = _interopRequireDefault(_path);
+      projects.set(project.name, project);
+    }
+  }
 
-var _util = __webpack_require__(29);
-
-var _errors = __webpack_require__(52);
-
-var _project = __webpack_require__(53);
-
-var _workspaces = __webpack_require__(131);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
-
-const glob = (0, _util.promisify)(_glob2.default);
-
-function packagesFromGlobPattern({ pattern, rootPath }) {
-    const globOptions = {
-        cwd: rootPath,
-        // Should throw in case of unusual errors when reading the file system
-        strict: true,
-        // Always returns absolute paths for matched files
-        absolute: true,
-        // Do not match ** against multiple filenames
-        // (This is only specified because we currently don't have a need for it.)
-        noglobstar: true
-    };
-    return glob(_path2.default.join(pattern, 'package.json'), globOptions);
+  return projects;
 }
-// https://github.com/isaacs/node-glob/blob/master/common.js#L104
+
+function packagesFromGlobPattern({
+  pattern,
+  rootPath
+}) {
+  const globOptions = {
+    cwd: rootPath,
+    // Should throw in case of unusual errors when reading the file system
+    strict: true,
+    // Always returns absolute paths for matched files
+    absolute: true,
+    // Do not match ** against multiple filenames
+    // (This is only specified because we currently don't have a need for it.)
+    noglobstar: true
+  };
+  return glob(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(pattern, 'package.json'), globOptions);
+} // https://github.com/isaacs/node-glob/blob/master/common.js#L104
 // glob always returns "\\" as "/" in windows, so everyone
 // gets normalized because we can't have nice things.
+
+
 function normalize(dir) {
-    return _path2.default.normalize(dir);
+  return path__WEBPACK_IMPORTED_MODULE_1___default.a.normalize(dir);
 }
+
 function buildProjectGraph(projects) {
-    const projectGraph = new Map();
-    for (const project of projects.values()) {
-        const projectDeps = [];
-        const dependencies = project.allDependencies;
-        for (const depName of Object.keys(dependencies)) {
-            if (projects.has(depName)) {
-                const dep = projects.get(depName);
-                const dependentProjectIsInWorkspace = project.isWorkspaceProject || project.json.name === 'kibana';
-                project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
-                projectDeps.push(dep);
-            }
-        }
-        projectGraph.set(project.name, projectDeps);
+  const projectGraph = new Map();
+
+  for (const project of projects.values()) {
+    const projectDeps = [];
+    const dependencies = project.allDependencies;
+
+    for (const depName of Object.keys(dependencies)) {
+      if (projects.has(depName)) {
+        const dep = projects.get(depName);
+        const dependentProjectIsInWorkspace = project.isWorkspaceProject || project.json.name === 'kibana';
+        project.ensureValidProjectDependency(dep, dependentProjectIsInWorkspace);
+        projectDeps.push(dep);
+      }
     }
-    return projectGraph;
+
+    projectGraph.set(project.name, projectDeps);
+  }
+
+  return projectGraph;
 }
-function topologicallyBatchProjects(projectsToBatch, projectGraph, { batchByWorkspace = false } = {}) {
-    // We're going to be chopping stuff out of this list, so copy it.
-    const projectsLeftToBatch = new Set(projectsToBatch.keys());
-    const batches = [];
-    if (batchByWorkspace) {
-        const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
-        if (!workspaceRootProject) {
-            throw new _errors.CliError(`There was no yarn workspace root found.`);
-        }
-        // Push in the workspace root first.
-        batches.push([workspaceRootProject]);
-        projectsLeftToBatch.delete(workspaceRootProject.name);
-        // In the next batch, push in all workspace projects.
-        const workspaceBatch = [];
-        for (const projectName of projectsLeftToBatch) {
-            const project = projectsToBatch.get(projectName);
-            if (project.isWorkspaceProject) {
-                workspaceBatch.push(project);
-                projectsLeftToBatch.delete(projectName);
-            }
-        }
-        batches.push(workspaceBatch);
+function topologicallyBatchProjects(projectsToBatch, projectGraph, {
+  batchByWorkspace = false
+} = {}) {
+  // We're going to be chopping stuff out of this list, so copy it.
+  const projectsLeftToBatch = new Set(projectsToBatch.keys());
+  const batches = [];
+
+  if (batchByWorkspace) {
+    const workspaceRootProject = Array.from(projectsToBatch.values()).find(p => p.isWorkspaceRoot);
+
+    if (!workspaceRootProject) {
+      throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`There was no yarn workspace root found.`);
+    } // Push in the workspace root first.
+
+
+    batches.push([workspaceRootProject]);
+    projectsLeftToBatch.delete(workspaceRootProject.name); // In the next batch, push in all workspace projects.
+
+    const workspaceBatch = [];
+
+    for (const projectName of projectsLeftToBatch) {
+      const project = projectsToBatch.get(projectName);
+
+      if (project.isWorkspaceProject) {
+        workspaceBatch.push(project);
+        projectsLeftToBatch.delete(projectName);
+      }
     }
-    while (projectsLeftToBatch.size > 0) {
-        // Get all projects that have no remaining dependencies within the repo
-        // that haven't yet been picked.
-        const batch = [];
-        for (const projectName of projectsLeftToBatch) {
-            const projectDeps = projectGraph.get(projectName);
-            const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
-            if (!needsDependenciesBatched) {
-                batch.push(projectsToBatch.get(projectName));
-            }
-        }
-        // If we weren't able to find a project with no remaining dependencies,
-        // then we've encountered a cycle in the dependency graph.
-        const hasCycles = batch.length === 0;
-        if (hasCycles) {
-            const cycleProjectNames = [...projectsLeftToBatch];
-            const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
-            throw new _errors.CliError(message);
-        }
-        batches.push(batch);
-        batch.forEach(project => projectsLeftToBatch.delete(project.name));
+
+    batches.push(workspaceBatch);
+  }
+
+  while (projectsLeftToBatch.size > 0) {
+    // Get all projects that have no remaining dependencies within the repo
+    // that haven't yet been picked.
+    const batch = [];
+
+    for (const projectName of projectsLeftToBatch) {
+      const projectDeps = projectGraph.get(projectName);
+      const needsDependenciesBatched = projectDeps.some(dep => projectsLeftToBatch.has(dep.name));
+
+      if (!needsDependenciesBatched) {
+        batch.push(projectsToBatch.get(projectName));
+      }
+    } // If we weren't able to find a project with no remaining dependencies,
+    // then we've encountered a cycle in the dependency graph.
+
+
+    const hasCycles = batch.length === 0;
+
+    if (hasCycles) {
+      const cycleProjectNames = [...projectsLeftToBatch];
+      const message = 'Encountered a cycle in the dependency graph. Projects in cycle are:\n' + cycleProjectNames.join(', ');
+      throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](message);
     }
-    return batches;
+
+    batches.push(batch);
+    batch.forEach(project => projectsLeftToBatch.delete(project.name));
+  }
+
+  return batches;
 }
-function includeTransitiveProjects(subsetOfProjects, allProjects, { onlyProductionDependencies = false } = {}) {
-    const dependentProjects = new Map();
-    // the current list of packages we are expanding using breadth-first-search
-    const toProcess = [...subsetOfProjects];
-    while (toProcess.length > 0) {
-        const project = toProcess.shift();
-        const dependencies = onlyProductionDependencies ? project.productionDependencies : project.allDependencies;
-        Object.keys(dependencies).forEach(dep => {
-            if (allProjects.has(dep)) {
-                toProcess.push(allProjects.get(dep));
-            }
-        });
-        dependentProjects.set(project.name, project);
-    }
-    return dependentProjects;
+function includeTransitiveProjects(subsetOfProjects, allProjects, {
+  onlyProductionDependencies = false
+} = {}) {
+  const dependentProjects = new Map(); // the current list of packages we are expanding using breadth-first-search
+
+  const toProcess = [...subsetOfProjects];
+
+  while (toProcess.length > 0) {
+    const project = toProcess.shift();
+    const dependencies = onlyProductionDependencies ? project.productionDependencies : project.allDependencies;
+    Object.keys(dependencies).forEach(dep => {
+      if (allProjects.has(dep)) {
+        toProcess.push(allProjects.get(dep));
+      }
+    });
+    dependentProjects.set(project.name, project);
+  }
+
+  return dependentProjects;
 }
 
 /***/ }),
@@ -7854,14 +7782,11 @@ function onceStrict (fn) {
 
 /***/ }),
 /* 52 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CliError", function() { return CliError; });
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -7881,207 +7806,33 @@ Object.defineProperty(exports, "__esModule", {
  * under the License.
  */
 class CliError extends Error {
-    constructor(message, meta = {}) {
-        super(message);
-        this.meta = meta;
-    }
+  constructor(message, meta = {}) {
+    super(message);
+    this.meta = meta;
+  }
+
 }
-exports.CliError = CliError;
 
 /***/ }),
 /* 53 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return Project; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(52);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(33);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(54);
+/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(92);
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Project = undefined;
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
-                                                                                                                                                                                                                                                                   * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                   * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                   * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                   * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                   * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                   * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                   * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                   * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                   * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                   * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                   * under the License.
-                                                                                                                                                                                                                                                                   */
-
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _path = __webpack_require__(16);
-
-var _util = __webpack_require__(29);
-
-var _errors = __webpack_require__(52);
-
-var _log = __webpack_require__(33);
-
-var _package_json = __webpack_require__(54);
-
-var _scripts = __webpack_require__(92);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-class Project {
-    constructor(packageJson, projectPath) {
-        this.isWorkspaceRoot = false;
-        this.isWorkspaceProject = false;
-        this.json = Object.freeze(packageJson);
-        this.path = projectPath;
-        this.packageJsonLocation = (0, _path.resolve)(this.path, 'package.json');
-        this.nodeModulesLocation = (0, _path.resolve)(this.path, 'node_modules');
-        this.targetLocation = (0, _path.resolve)(this.path, 'target');
-        this.productionDependencies = this.json.dependencies || {};
-        this.devDependencies = this.json.devDependencies || {};
-        this.allDependencies = _extends({}, this.devDependencies, this.productionDependencies);
-        this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
-        this.scripts = this.json.scripts || {};
-    }
-    static fromPath(path) {
-        return _asyncToGenerator(function* () {
-            const pkgJson = yield (0, _package_json.readPackageJson)(path);
-            return new Project(pkgJson, path);
-        })();
-    }
-    get name() {
-        return this.json.name;
-    }
-    ensureValidProjectDependency(project, dependentProjectIsInWorkspace) {
-        const versionInPackageJson = this.allDependencies[project.name];
-        let expectedVersionInPackageJson;
-        if (dependentProjectIsInWorkspace) {
-            expectedVersionInPackageJson = project.json.version;
-        } else {
-            const relativePathToProject = normalizePath((0, _path.relative)(this.path, project.path));
-            expectedVersionInPackageJson = `link:${relativePathToProject}`;
-        }
-        // No issues!
-        if (versionInPackageJson === expectedVersionInPackageJson) {
-            return;
-        }
-        let problemMsg;
-        if ((0, _package_json.isLinkDependency)(versionInPackageJson) && dependentProjectIsInWorkspace) {
-            problemMsg = `but should be using a workspace`;
-        } else if ((0, _package_json.isLinkDependency)(versionInPackageJson)) {
-            problemMsg = `using 'link:', but the path is wrong`;
-        } else {
-            problemMsg = `but it's not using the local package`;
-        }
-        throw new _errors.CliError(`[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`, {
-            actual: `"${project.name}": "${versionInPackageJson}"`,
-            expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
-            package: `${this.name} (${this.packageJsonLocation})`
-        });
-    }
-    getBuildConfig() {
-        return this.json.kibana && this.json.kibana.build || {};
-    }
-    /**
-     * Returns the directory that should be copied into the Kibana build artifact.
-     * This config can be specified to only include the project's build artifacts
-     * instead of everything located in the project directory.
-     */
-    getIntermediateBuildDirectory() {
-        return (0, _path.resolve)(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
-    }
-    getCleanConfig() {
-        return this.json.kibana && this.json.kibana.clean || {};
-    }
-    hasScript(name) {
-        return name in this.scripts;
-    }
-    getExecutables() {
-        const raw = this.json.bin;
-        if (!raw) {
-            return {};
-        }
-        if (typeof raw === 'string') {
-            return {
-                [this.name]: (0, _path.resolve)(this.path, raw)
-            };
-        }
-        if (typeof raw === 'object') {
-            const binsConfig = {};
-            for (const binName of Object.keys(raw)) {
-                binsConfig[binName] = (0, _path.resolve)(this.path, raw[binName]);
-            }
-            return binsConfig;
-        }
-        throw new _errors.CliError(`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
-            binConfig: (0, _util.inspect)(raw),
-            package: `${this.name} (${this.packageJsonLocation})`
-        });
-    }
-    runScript(scriptName, args = []) {
-        var _this = this;
-
-        return _asyncToGenerator(function* () {
-            _log.log.write(_chalk2.default.bold(`\n\nRunning script [${_chalk2.default.green(scriptName)}] in [${_chalk2.default.green(_this.name)}]:\n`));
-            return (0, _scripts.runScriptInPackage)(scriptName, args, _this);
-        })();
-    }
-    runScriptStreaming(scriptName, args = []) {
-        return (0, _scripts.runScriptInPackageStreaming)(scriptName, args, this);
-    }
-    hasDependencies() {
-        return Object.keys(this.allDependencies).length > 0;
-    }
-    installDependencies({ extraArgs }) {
-        var _this2 = this;
-
-        return _asyncToGenerator(function* () {
-            _log.log.write(_chalk2.default.bold(`\n\nInstalling dependencies in [${_chalk2.default.green(_this2.name)}]:\n`));
-            return (0, _scripts.installInDir)(_this2.path, extraArgs);
-        })();
-    }
-}
-exports.Project = Project; // We normalize all path separators to `/` in generated files
-
-function normalizePath(path) {
-    return path.replace(/[\\\/]+/g, '/');
-}
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.isLinkDependency = undefined;
-exports.readPackageJson = readPackageJson;
-exports.writePackageJson = writePackageJson;
-
-var _readPkg = __webpack_require__(55);
-
-var _readPkg2 = _interopRequireDefault(_readPkg);
-
-var _writePkg = __webpack_require__(82);
-
-var _writePkg2 = _interopRequireDefault(_writePkg);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -8101,13 +7852,210 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
+
+
+
+
+
+
+
+class Project {
+  static async fromPath(path) {
+    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path);
+    return new Project(pkgJson, path);
+  }
+
+  constructor(packageJson, projectPath) {
+    _defineProperty(this, "json", void 0);
+
+    _defineProperty(this, "packageJsonLocation", void 0);
+
+    _defineProperty(this, "nodeModulesLocation", void 0);
+
+    _defineProperty(this, "targetLocation", void 0);
+
+    _defineProperty(this, "path", void 0);
+
+    _defineProperty(this, "allDependencies", void 0);
+
+    _defineProperty(this, "productionDependencies", void 0);
+
+    _defineProperty(this, "devDependencies", void 0);
+
+    _defineProperty(this, "scripts", void 0);
+
+    _defineProperty(this, "isWorkspaceRoot", false);
+
+    _defineProperty(this, "isWorkspaceProject", false);
+
+    this.json = Object.freeze(packageJson);
+    this.path = projectPath;
+    this.packageJsonLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'package.json');
+    this.nodeModulesLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'node_modules');
+    this.targetLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'target');
+    this.productionDependencies = this.json.dependencies || {};
+    this.devDependencies = this.json.devDependencies || {};
+    this.allDependencies = _objectSpread({}, this.devDependencies, this.productionDependencies);
+    this.isWorkspaceRoot = this.json.hasOwnProperty('workspaces');
+    this.scripts = this.json.scripts || {};
+  }
+
+  get name() {
+    return this.json.name;
+  }
+
+  ensureValidProjectDependency(project, dependentProjectIsInWorkspace) {
+    const versionInPackageJson = this.allDependencies[project.name];
+    let expectedVersionInPackageJson;
+
+    if (dependentProjectIsInWorkspace) {
+      expectedVersionInPackageJson = project.json.version;
+    } else {
+      const relativePathToProject = normalizePath(Object(path__WEBPACK_IMPORTED_MODULE_1__["relative"])(this.path, project.path));
+      expectedVersionInPackageJson = `link:${relativePathToProject}`;
+    } // No issues!
+
+
+    if (versionInPackageJson === expectedVersionInPackageJson) {
+      return;
+    }
+
+    let problemMsg;
+
+    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson) && dependentProjectIsInWorkspace) {
+      problemMsg = `but should be using a workspace`;
+    } else if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson)) {
+      problemMsg = `using 'link:', but the path is wrong`;
+    } else {
+      problemMsg = `but it's not using the local package`;
+    }
+
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`, {
+      actual: `"${project.name}": "${versionInPackageJson}"`,
+      expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
+      package: `${this.name} (${this.packageJsonLocation})`
+    });
+  }
+
+  getBuildConfig() {
+    return this.json.kibana && this.json.kibana.build || {};
+  }
+  /**
+   * Returns the directory that should be copied into the Kibana build artifact.
+   * This config can be specified to only include the project's build artifacts
+   * instead of everything located in the project directory.
+   */
+
+
+  getIntermediateBuildDirectory() {
+    return Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+  }
+
+  getCleanConfig() {
+    return this.json.kibana && this.json.kibana.clean || {};
+  }
+
+  hasScript(name) {
+    return name in this.scripts;
+  }
+
+  getExecutables() {
+    const raw = this.json.bin;
+
+    if (!raw) {
+      return {};
+    }
+
+    if (typeof raw === 'string') {
+      return {
+        [this.name]: Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, raw)
+      };
+    }
+
+    if (typeof raw === 'object') {
+      const binsConfig = {};
+
+      for (const binName of Object.keys(raw)) {
+        binsConfig[binName] = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, raw[binName]);
+      }
+
+      return binsConfig;
+    }
+
+    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
+      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_2__["inspect"])(raw),
+      package: `${this.name} (${this.packageJsonLocation})`
+    });
+  }
+
+  async runScript(scriptName, args = []) {
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nRunning script [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(scriptName)}] in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackage"])(scriptName, args, this);
+  }
+
+  runScriptStreaming(scriptName, args = []) {
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackageStreaming"])(scriptName, args, this);
+  }
+
+  hasDependencies() {
+    return Object.keys(this.allDependencies).length > 0;
+  }
+
+  async installDependencies({
+    extraArgs
+  }) {
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nInstalling dependencies in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, extraArgs);
+  }
+
+} // We normalize all path separators to `/` in generated files
+
+function normalizePath(path) {
+  return path.replace(/[\\\/]+/g, '/');
+}
+
+/***/ }),
+/* 54 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "readPackageJson", function() { return readPackageJson; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "writePackageJson", function() { return writePackageJson; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isLinkDependency", function() { return isLinkDependency; });
+/* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
+/* harmony import */ var read_pkg__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(read_pkg__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var write_pkg__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(82);
+/* harmony import */ var write_pkg__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(write_pkg__WEBPACK_IMPORTED_MODULE_1__);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
 function readPackageJson(dir) {
-    return (0, _readPkg2.default)(dir, { normalize: false });
+  return read_pkg__WEBPACK_IMPORTED_MODULE_0___default()(dir, {
+    normalize: false
+  });
 }
 function writePackageJson(path, json) {
-    return (0, _writePkg2.default)(path, json);
+  return write_pkg__WEBPACK_IMPORTED_MODULE_1___default()(path, json);
 }
-const isLinkDependency = exports.isLinkDependency = depVersion => depVersion.startsWith('link:');
+const isLinkDependency = depVersion => depVersion.startsWith('link:');
 
 /***/ }),
 /* 55 */
@@ -13496,165 +13444,141 @@ module.exports = str => {
 
 /***/ }),
 /* 92 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "installInDir", function() { return installInDir; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackage", function() { return runScriptInPackage; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackageStreaming", function() { return runScriptInPackageStreaming; });
+/* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(93);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.runScriptInPackage = exports.installInDir = undefined;
 
 /**
  * Install all dependencies in the given directory
  */
-let installInDir = exports.installInDir = (() => {
-    var _ref = _asyncToGenerator(function* (directory, extraArgs = []) {
-        const options = ['install', '--non-interactive', ...extraArgs];
-        // We pass the mutex flag to ensure only one instance of yarn runs at any
-        // given time (e.g. to avoid conflicts).
-        yield (0, _child_process.spawn)('yarn', options, {
-            cwd: directory
-        });
-    });
+async function installInDir(directory, extraArgs = []) {
+  const options = ['install', '--non-interactive', ...extraArgs]; // We pass the mutex flag to ensure only one instance of yarn runs at any
+  // given time (e.g. to avoid conflicts).
 
-    return function installInDir(_x) {
-        return _ref.apply(this, arguments);
-    };
-})();
+  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', options, {
+    cwd: directory
+  });
+}
 /**
  * Run script in the given directory
  */
 
-
-let runScriptInPackage = exports.runScriptInPackage = (() => {
-    var _ref2 = _asyncToGenerator(function* (script, args, pkg) {
-        const execOpts = {
-            cwd: pkg.path
-        };
-        yield (0, _child_process.spawn)('yarn', ['run', script, ...args], execOpts);
-    });
-
-    return function runScriptInPackage(_x2, _x3, _x4) {
-        return _ref2.apply(this, arguments);
-    };
-})();
+async function runScriptInPackage(script, args, pkg) {
+  const execOpts = {
+    cwd: pkg.path
+  };
+  await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['run', script, ...args], execOpts);
+}
 /**
  * Run script in the given directory
  */
-
-
-exports.runScriptInPackageStreaming = runScriptInPackageStreaming;
-
-var _child_process = __webpack_require__(93);
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
 
 function runScriptInPackageStreaming(script, args, pkg) {
-    const execOpts = {
-        cwd: pkg.path
-    };
-    return (0, _child_process.spawnStreaming)('yarn', ['run', script, ...args], execOpts, {
-        prefix: pkg.name
-    });
+  const execOpts = {
+    cwd: pkg.path
+  };
+  return Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawnStreaming"])('yarn', ['run', script, ...args], execOpts, {
+    prefix: pkg.name
+  });
 }
 
 /***/ }),
 /* 93 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "spawn", function() { return spawn; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "spawnStreaming", function() { return spawnStreaming; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(94);
+/* harmony import */ var execa__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(execa__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(122);
+/* harmony import */ var log_symbols__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(log_symbols__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var strong_log_transformer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(123);
+/* harmony import */ var strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(strong_log_transformer__WEBPACK_IMPORTED_MODULE_3__);
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; /*
-                                                                                                                                                                                                                                                                   * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                   * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                   * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                   * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                   * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                   * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                   * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                   *
-                                                                                                                                                                                                                                                                   * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                   * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                   * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                   * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                   * under the License.
-                                                                                                                                                                                                                                                                   */
 
 
-exports.spawn = spawn;
-exports.spawnStreaming = spawnStreaming;
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _execa = __webpack_require__(94);
-
-var _execa2 = _interopRequireDefault(_execa);
-
-var _logSymbols = __webpack_require__(122);
-
-var _logSymbols2 = _interopRequireDefault(_logSymbols);
-
-var _strongLogTransformer = __webpack_require__(123);
-
-var _strongLogTransformer2 = _interopRequireDefault(_strongLogTransformer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function generateColors() {
-    const colorWheel = [_chalk2.default.cyan, _chalk2.default.magenta, _chalk2.default.blue, _chalk2.default.yellow, _chalk2.default.green];
-    const count = colorWheel.length;
-    let children = 0;
-    return () => colorWheel[children++ % count];
+  const colorWheel = [chalk__WEBPACK_IMPORTED_MODULE_0___default.a.cyan, chalk__WEBPACK_IMPORTED_MODULE_0___default.a.magenta, chalk__WEBPACK_IMPORTED_MODULE_0___default.a.blue, chalk__WEBPACK_IMPORTED_MODULE_0___default.a.yellow, chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green];
+  const count = colorWheel.length;
+  let children = 0;
+  return () => colorWheel[children++ % count];
 }
+
 function spawn(command, args, opts) {
-    return (0, _execa2.default)(command, args, _extends({}, opts, {
-        stdio: 'inherit'
-    }));
+  return execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({}, opts, {
+    stdio: 'inherit'
+  }));
 }
 const nextColor = generateColors();
-function spawnStreaming(command, args, opts, { prefix }) {
-    const spawned = (0, _execa2.default)(command, args, _extends({}, opts, {
-        stdio: ['ignore', 'pipe', 'pipe']
-    }));
-    const color = nextColor();
-    const prefixedStdout = (0, _strongLogTransformer2.default)({ tag: `${color.bold(prefix)}:` });
-    const prefixedStderr = (0, _strongLogTransformer2.default)({
-        mergeMultiline: true,
-        tag: `${_logSymbols2.default.error} ${color.bold(prefix)}:`
-    });
-    spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
-    spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
-    return spawned;
+function spawnStreaming(command, args, opts, {
+  prefix
+}) {
+  const spawned = execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({}, opts, {
+    stdio: ['ignore', 'pipe', 'pipe']
+  }));
+  const color = nextColor();
+  const prefixedStdout = strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default()({
+    tag: `${color.bold(prefix)}:`
+  });
+  const prefixedStderr = strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default()({
+    mergeMultiline: true,
+    tag: `${log_symbols__WEBPACK_IMPORTED_MODULE_2___default.a.error} ${color.bold(prefix)}:`
+  });
+  spawned.stdout.pipe(prefixedStdout).pipe(process.stdout);
+  spawned.stderr.pipe(prefixedStderr).pipe(process.stderr);
+  return spawned;
 }
 
 /***/ }),
@@ -17429,306 +17353,290 @@ module.exports = {"name":"strong-log-transformer","version":"2.1.0","description
 
 /***/ }),
 /* 131 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "workspacePackagePaths", function() { return workspacePackagePaths; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return copyWorkspacePackages; });
+/* harmony import */ var glob__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(36);
+/* harmony import */ var glob__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(glob__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(132);
+/* harmony import */ var _fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(54);
+/* harmony import */ var _projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.copyWorkspacePackages = exports.workspacePackagePaths = undefined;
-
-let workspacePackagePaths = exports.workspacePackagePaths = (() => {
-    var _ref = _asyncToGenerator(function* (rootPath) {
-        const rootPkgJson = yield (0, _package_json.readPackageJson)(_path2.default.join(rootPath, 'package.json'));
-        if (!rootPkgJson.workspaces) {
-            return [];
-        }
-        const workspacesPathsPatterns = rootPkgJson.workspaces.packages;
-        let workspaceProjectsPaths = [];
-        for (const pattern of workspacesPathsPatterns) {
-            workspaceProjectsPaths = workspaceProjectsPaths.concat((yield packagesFromGlobPattern({ pattern, rootPath })));
-        }
-        // Filter out exclude glob patterns
-        for (const pattern of workspacesPathsPatterns) {
-            if (pattern.startsWith('!')) {
-                const pathToRemove = _path2.default.join(rootPath, pattern.slice(1), 'package.json');
-                workspaceProjectsPaths = workspaceProjectsPaths.filter(function (p) {
-                    return p !== pathToRemove;
-                });
-            }
-        }
-        return workspaceProjectsPaths;
-    });
-
-    return function workspacePackagePaths(_x) {
-        return _ref.apply(this, arguments);
-    };
-})();
-
-let copyWorkspacePackages = exports.copyWorkspacePackages = (() => {
-    var _ref2 = _asyncToGenerator(function* (rootPath) {
-        const workspaceProjects = yield getWorkspaceProjects(rootPath);
-        for (const project of workspaceProjects.values()) {
-            const dest = _path2.default.resolve(rootPath, 'node_modules', project.name);
-            // Remove the symlink
-            yield (0, _fs.unlink)(dest);
-            // Copy in the package
-            yield (0, _fs.copyDirectory)(project.path, dest);
-        }
-    });
-
-    return function copyWorkspacePackages(_x2) {
-        return _ref2.apply(this, arguments);
-    };
-})();
-
-let getWorkspaceProjects = (() => {
-    var _ref3 = _asyncToGenerator(function* (rootPath) {
-        const projectPaths = (0, _config.getProjectPaths)(rootPath, {});
-        const projects = yield (0, _projects.getProjects)(rootPath, projectPaths);
-        for (const [key, project] of projects.entries()) {
-            if (!project.isWorkspaceProject) {
-                projects.delete(key);
-            }
-        }
-        return projects;
-    });
-
-    return function getWorkspaceProjects(_x3) {
-        return _ref3.apply(this, arguments);
-    };
-})();
-
-var _glob = __webpack_require__(36);
-
-var _glob2 = _interopRequireDefault(_glob);
-
-var _path = __webpack_require__(16);
-
-var _path2 = _interopRequireDefault(_path);
-
-var _util = __webpack_require__(29);
-
-var _config = __webpack_require__(132);
-
-var _fs = __webpack_require__(20);
-
-var _package_json = __webpack_require__(54);
-
-var _projects = __webpack_require__(35);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 
-const glob = (0, _util.promisify)(_glob2.default);
 
-function packagesFromGlobPattern({ pattern, rootPath }) {
-    const globOptions = {
-        cwd: rootPath,
-        // Should throw in case of unusual errors when reading the file system
-        strict: true,
-        // Always returns absolute paths for matched files
-        absolute: true,
-        // Do not match ** against multiple filenames
-        // (This is only specified because we currently don't have a need for it.)
-        noglobstar: true
-    };
-    return glob(_path2.default.join(pattern, 'package.json'), globOptions);
+
+
+const glob = Object(util__WEBPACK_IMPORTED_MODULE_2__["promisify"])(glob__WEBPACK_IMPORTED_MODULE_0___default.a);
+async function workspacePackagePaths(rootPath) {
+  const rootPkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(rootPath, 'package.json'));
+
+  if (!rootPkgJson.workspaces) {
+    return [];
+  }
+
+  const workspacesPathsPatterns = rootPkgJson.workspaces.packages;
+  let workspaceProjectsPaths = [];
+
+  for (const pattern of workspacesPathsPatterns) {
+    workspaceProjectsPaths = workspaceProjectsPaths.concat((await packagesFromGlobPattern({
+      pattern,
+      rootPath
+    })));
+  } // Filter out exclude glob patterns
+
+
+  for (const pattern of workspacesPathsPatterns) {
+    if (pattern.startsWith('!')) {
+      const pathToRemove = path__WEBPACK_IMPORTED_MODULE_1___default.a.join(rootPath, pattern.slice(1), 'package.json');
+      workspaceProjectsPaths = workspaceProjectsPaths.filter(p => p !== pathToRemove);
+    }
+  }
+
+  return workspaceProjectsPaths;
+}
+async function copyWorkspacePackages(rootPath) {
+  const workspaceProjects = await getWorkspaceProjects(rootPath);
+
+  for (const project of workspaceProjects.values()) {
+    const dest = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(rootPath, 'node_modules', project.name); // Remove the symlink
+
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["unlink"])(dest); // Copy in the package
+
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["copyDirectory"])(project.path, dest);
+  }
+}
+
+async function getWorkspaceProjects(rootPath) {
+  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(rootPath, {});
+  const projects = await Object(_projects__WEBPACK_IMPORTED_MODULE_6__["getProjects"])(rootPath, projectPaths);
+
+  for (const [key, project] of projects.entries()) {
+    if (!project.isWorkspaceProject) {
+      projects.delete(key);
+    }
+  }
+
+  return projects;
+}
+
+function packagesFromGlobPattern({
+  pattern,
+  rootPath
+}) {
+  const globOptions = {
+    cwd: rootPath,
+    // Should throw in case of unusual errors when reading the file system
+    strict: true,
+    // Always returns absolute paths for matched files
+    absolute: true,
+    // Do not match ** against multiple filenames
+    // (This is only specified because we currently don't have a need for it.)
+    noglobstar: true
+  };
+  return glob(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(pattern, 'package.json'), globOptions);
 }
 
 /***/ }),
 /* 132 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getProjectPaths", function() { return getProjectPaths; });
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.getProjectPaths = getProjectPaths;
-
-var _path = __webpack_require__(16);
 
 /**
  * Returns all the paths where plugins are located
  */
 function getProjectPaths(rootPath, options) {
-    const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
-    const ossOnly = Boolean(options.oss);
-    const projectPaths = [rootPath, (0, _path.resolve)(rootPath, 'packages/*')];
-    // This is needed in order to install the dependencies for the declared
-    // plugin functional used in the selenium functional tests.
-    // As we are now using the webpack dll for the client vendors dependencies
-    // when we run the plugin functional tests against the distributable
-    // dependencies used by such plugins like @eui, react and react-dom can't
-    // be loaded from the dll as the context is different from the one declared
-    // into the webpack dll reference plugin.
-    // In anyway, have a plugin declaring their own dependencies is the
-    // correct and the expect behavior.
-    projectPaths.push((0, _path.resolve)(rootPath, 'test/plugin_functional/plugins/*'));
-    projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
-    if (!ossOnly) {
-        projectPaths.push((0, _path.resolve)(rootPath, 'x-pack'));
-        projectPaths.push((0, _path.resolve)(rootPath, 'x-pack/plugins/*'));
-    }
-    if (!skipKibanaPlugins) {
-        projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*'));
-        projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/packages/*'));
-        projectPaths.push((0, _path.resolve)(rootPath, '../kibana-extra/*/plugins/*'));
-        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*'));
-        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/packages/*'));
-        projectPaths.push((0, _path.resolve)(rootPath, 'plugins/*/plugins/*'));
-    }
-    return projectPaths;
-} /*
-   * Licensed to Elasticsearch B.V. under one or more contributor
-   * license agreements. See the NOTICE file distributed with
-   * this work for additional information regarding copyright
-   * ownership. Elasticsearch B.V. licenses this file to you under
-   * the Apache License, Version 2.0 (the "License"); you may
-   * not use this file except in compliance with the License.
-   * You may obtain a copy of the License at
-   *
-   *    http://www.apache.org/licenses/LICENSE-2.0
-   *
-   * Unless required by applicable law or agreed to in writing,
-   * software distributed under the License is distributed on an
-   * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-   * KIND, either express or implied.  See the License for the
-   * specific language governing permissions and limitations
-   * under the License.
-   */
+  const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
+  const ossOnly = Boolean(options.oss);
+  const projectPaths = [rootPath, Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'packages/*')]; // This is needed in order to install the dependencies for the declared
+  // plugin functional used in the selenium functional tests.
+  // As we are now using the webpack dll for the client vendors dependencies
+  // when we run the plugin functional tests against the distributable
+  // dependencies used by such plugins like @eui, react and react-dom can't
+  // be loaded from the dll as the context is different from the one declared
+  // into the webpack dll reference plugin.
+  // In anyway, have a plugin declaring their own dependencies is the
+  // correct and the expect behavior.
+
+  projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/plugin_functional/plugins/*'));
+  projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'test/interpreter_functional/plugins/*'));
+
+  if (!ossOnly) {
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'x-pack/plugins/*'));
+  }
+
+  if (!skipKibanaPlugins) {
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*/packages/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, '../kibana-extra/*/plugins/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*/packages/*'));
+    projectPaths.push(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'plugins/*/plugins/*'));
+  }
+
+  return projectPaths;
+}
 
 /***/ }),
 /* 133 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "CleanCommand", function() { return CleanCommand; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(134);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(148);
+/* harmony import */ var ora__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(ora__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.CleanCommand = undefined;
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _del = __webpack_require__(134);
-
-var _del2 = _interopRequireDefault(_del);
-
-var _ora = __webpack_require__(148);
-
-var _ora2 = _interopRequireDefault(_ora);
-
-var _path = __webpack_require__(16);
-
-var _fs = __webpack_require__(20);
-
-var _log = __webpack_require__(33);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 
-const CleanCommand = exports.CleanCommand = {
-    description: 'Remove the node_modules and target directories from all projects.',
-    name: 'clean',
-    run(projects) {
-        return _asyncToGenerator(function* () {
-            const toDelete = [];
-            for (const project of projects.values()) {
-                if (yield (0, _fs.isDirectory)(project.nodeModulesLocation)) {
-                    toDelete.push({
-                        cwd: project.path,
-                        pattern: (0, _path.relative)(project.path, project.nodeModulesLocation)
-                    });
-                }
-                if (yield (0, _fs.isDirectory)(project.targetLocation)) {
-                    toDelete.push({
-                        cwd: project.path,
-                        pattern: (0, _path.relative)(project.path, project.targetLocation)
-                    });
-                }
-                const { extraPatterns } = project.getCleanConfig();
-                if (extraPatterns) {
-                    toDelete.push({
-                        cwd: project.path,
-                        pattern: extraPatterns
-                    });
-                }
-            }
-            if (toDelete.length === 0) {
-                _log.log.write(_chalk2.default.bold.green('\n\nNothing to delete'));
-            } else {
-                _log.log.write(_chalk2.default.bold.red('\n\nDeleting:\n'));
-                /**
-                 * In order to avoid patterns like `/build` in packages from accidentally
-                 * impacting files outside the package we use `process.chdir()` to change
-                 * the cwd to the package and execute `del()` without the `force` option
-                 * so it will check that each file being deleted is within the package.
-                 *
-                 * `del()` does support a `cwd` option, but it's only for resolving the
-                 * patterns and does not impact the cwd check.
-                 */
-                const originalCwd = process.cwd();
-                try {
-                    for (const _ref of toDelete) {
-                        const { pattern, cwd } = _ref;
 
-                        process.chdir(cwd);
-                        const promise = (0, _del2.default)(pattern);
-                        _ora2.default.promise(promise, (0, _path.relative)(originalCwd, (0, _path.join)(cwd, String(pattern))));
-                        yield promise;
-                    }
-                } finally {
-                    process.chdir(originalCwd);
-                }
-            }
-        })();
+
+const CleanCommand = {
+  description: 'Remove the node_modules and target directories from all projects.',
+  name: 'clean',
+
+  async run(projects) {
+    const toDelete = [];
+
+    for (const project of projects.values()) {
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(project.nodeModulesLocation)) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.nodeModulesLocation)
+        });
+      }
+
+      if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(project.targetLocation)) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(project.path, project.targetLocation)
+        });
+      }
+
+      const {
+        extraPatterns
+      } = project.getCleanConfig();
+
+      if (extraPatterns) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: extraPatterns
+        });
+      }
     }
+
+    if (toDelete.length === 0) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold.green('\n\nNothing to delete'));
+    } else {
+      _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold.red('\n\nDeleting:\n'));
+      /**
+       * In order to avoid patterns like `/build` in packages from accidentally
+       * impacting files outside the package we use `process.chdir()` to change
+       * the cwd to the package and execute `del()` without the `force` option
+       * so it will check that each file being deleted is within the package.
+       *
+       * `del()` does support a `cwd` option, but it's only for resolving the
+       * patterns and does not impact the cwd check.
+       */
+
+      const originalCwd = process.cwd();
+
+      try {
+        for (const _ref of toDelete) {
+          const {
+            pattern,
+            cwd
+          } = _ref;
+          process.chdir(cwd);
+          const promise = del__WEBPACK_IMPORTED_MODULE_1___default()(pattern);
+          ora__WEBPACK_IMPORTED_MODULE_2___default.a.promise(promise, Object(path__WEBPACK_IMPORTED_MODULE_3__["relative"])(originalCwd, Object(path__WEBPACK_IMPORTED_MODULE_3__["join"])(cwd, String(pattern))));
+          await promise;
+        }
+      } finally {
+        process.chdir(originalCwd);
+      }
+    }
+  }
+
 };
 
 /***/ }),
@@ -19288,202 +19196,16 @@ module.exports = {"dots":{"interval":80,"frames":["⠋","⠙","⠹","⠸","⠼",
 
 /***/ }),
 /* 155 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.RunCommand = undefined;
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _log = __webpack_require__(33);
-
-var _parallelize = __webpack_require__(34);
-
-var _projects = __webpack_require__(35);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
-
-const RunCommand = exports.RunCommand = {
-    description: 'Run script defined in package.json in each package that contains that script.',
-    name: 'run',
-    run(projects, projectGraph, { extraArgs }) {
-        return _asyncToGenerator(function* () {
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-            if (extraArgs.length === 0) {
-                _log.log.write(_chalk2.default.red.bold('\nNo script specified'));
-                process.exit(1);
-            }
-            const scriptName = extraArgs[0];
-            const scriptArgs = extraArgs.slice(1);
-            _log.log.write(_chalk2.default.bold(`\nRunning script [${_chalk2.default.green(scriptName)}] in batched topological order\n`));
-            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
-                var _ref = _asyncToGenerator(function* (pkg) {
-                    if (pkg.hasScript(scriptName)) {
-                        yield pkg.runScriptStreaming(scriptName, scriptArgs);
-                    }
-                });
-
-                return function (_x) {
-                    return _ref.apply(this, arguments);
-                };
-            })());
-        })();
-    }
-};
-
-/***/ }),
-/* 156 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.WatchCommand = undefined;
-
-var _chalk = __webpack_require__(2);
-
-var _chalk2 = _interopRequireDefault(_chalk);
-
-var _log = __webpack_require__(33);
-
-var _parallelize = __webpack_require__(34);
-
-var _projects = __webpack_require__(35);
-
-var _watch = __webpack_require__(157);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
-
-/**
- * Name of the script in the package/project package.json file to run during `kbn watch`.
- */
-const watchScriptName = 'kbn:watch';
-/**
- * Name of the Kibana project.
- */
-const kibanaProjectName = 'kibana';
-/**
- * Command that traverses through list of available projects/packages that have `kbn:watch` script in their
- * package.json files, groups them into topology aware batches and then processes theses batches one by one
- * running `kbn:watch` scripts in parallel within the same batch.
- *
- * Command internally relies on the fact that most of the build systems that are triggered by `kbn:watch`
- * will emit special "marker" once build/watch process is ready that we can use as completion condition for
- * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
- * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
- */
-const WatchCommand = exports.WatchCommand = {
-    description: 'Runs `kbn:watch` script for every project.',
-    name: 'watch',
-    run(projects, projectGraph) {
-        return _asyncToGenerator(function* () {
-            const projectsToWatch = new Map();
-            for (const project of projects.values()) {
-                // We can't watch project that doesn't have `kbn:watch` script.
-                if (project.hasScript(watchScriptName)) {
-                    projectsToWatch.set(project.name, project);
-                }
-            }
-            if (projectsToWatch.size === 0) {
-                _log.log.write(_chalk2.default.red(`\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`));
-                return;
-            }
-            const projectNames = Array.from(projectsToWatch.keys());
-            _log.log.write(_chalk2.default.bold(_chalk2.default.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`)));
-            // Kibana should always be run the last, so we don't rely on automatic
-            // topological batching and push it to the last one-entry batch manually.
-            const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
-            const batchedProjects = (0, _projects.topologicallyBatchProjects)(projectsToWatch, projectGraph);
-            if (shouldWatchKibanaProject) {
-                batchedProjects.push([projects.get(kibanaProjectName)]);
-            }
-            yield (0, _parallelize.parallelizeBatches)(batchedProjects, (() => {
-                var _ref = _asyncToGenerator(function* (pkg) {
-                    const completionHint = yield (0, _watch.waitUntilWatchIsReady)(pkg.runScriptStreaming(watchScriptName).stdout);
-                    _log.log.write(_chalk2.default.bold(`[${_chalk2.default.green(pkg.name)}] Initial build completed (${completionHint}).`));
-                });
-
-                return function (_x) {
-                    return _ref.apply(this, arguments);
-                };
-            })());
-        })();
-    }
-};
-
-/***/ }),
-/* 157 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.waitUntilWatchIsReady = waitUntilWatchIsReady;
-
-var _rxjs = __webpack_require__(158);
-
-var Rx = _interopRequireWildcard(_rxjs);
-
-var _operators = __webpack_require__(257);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-/**
- * Number of milliseconds we wait before we fall back to the default watch handler.
- */
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "RunCommand", function() { return RunCommand; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(33);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(34);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(35);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -19502,27 +19224,198 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
  * specific language governing permissions and limitations
  * under the License.
  */
+
+
+
+
+const RunCommand = {
+  description: 'Run script defined in package.json in each package that contains that script.',
+  name: 'run',
+
+  async run(projects, projectGraph, {
+    extraArgs
+  }) {
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projects, projectGraph);
+
+    if (extraArgs.length === 0) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red.bold('\nNo script specified'));
+      process.exit(1);
+    }
+
+    const scriptName = extraArgs[0];
+    const scriptArgs = extraArgs.slice(1);
+    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\nRunning script [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(scriptName)}] in batched topological order\n`));
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
+      if (pkg.hasScript(scriptName)) {
+        await pkg.runScriptStreaming(scriptName, scriptArgs);
+      }
+    });
+  }
+
+};
+
+/***/ }),
+/* 156 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WatchCommand", function() { return WatchCommand; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(33);
+/* harmony import */ var _utils_parallelize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(34);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(35);
+/* harmony import */ var _utils_watch__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(157);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+
+
+
+
+/**
+ * Name of the script in the package/project package.json file to run during `kbn watch`.
+ */
+const watchScriptName = 'kbn:watch';
+/**
+ * Name of the Kibana project.
+ */
+
+const kibanaProjectName = 'kibana';
+/**
+ * Command that traverses through list of available projects/packages that have `kbn:watch` script in their
+ * package.json files, groups them into topology aware batches and then processes theses batches one by one
+ * running `kbn:watch` scripts in parallel within the same batch.
+ *
+ * Command internally relies on the fact that most of the build systems that are triggered by `kbn:watch`
+ * will emit special "marker" once build/watch process is ready that we can use as completion condition for
+ * the `kbn:watch` script and eventually for the entire batch. Currently we support completion "markers" for
+ * `webpack` and `tsc` only, for the rest we rely on predefined timeouts.
+ */
+
+const WatchCommand = {
+  description: 'Runs `kbn:watch` script for every project.',
+  name: 'watch',
+
+  async run(projects, projectGraph) {
+    const projectsToWatch = new Map();
+
+    for (const project of projects.values()) {
+      // We can't watch project that doesn't have `kbn:watch` script.
+      if (project.hasScript(watchScriptName)) {
+        projectsToWatch.set(project.name, project);
+      }
+    }
+
+    if (projectsToWatch.size === 0) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`\nThere are no projects to watch found. Make sure that projects define 'kbn:watch' script in 'package.json'.\n`));
+      return;
+    }
+
+    const projectNames = Array.from(projectsToWatch.keys());
+    _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(`Running ${watchScriptName} scripts for [${projectNames.join(', ')}].`))); // Kibana should always be run the last, so we don't rely on automatic
+    // topological batching and push it to the last one-entry batch manually.
+
+    const shouldWatchKibanaProject = projectsToWatch.delete(kibanaProjectName);
+    const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_3__["topologicallyBatchProjects"])(projectsToWatch, projectGraph);
+
+    if (shouldWatchKibanaProject) {
+      batchedProjects.push([projects.get(kibanaProjectName)]);
+    }
+
+    await Object(_utils_parallelize__WEBPACK_IMPORTED_MODULE_2__["parallelizeBatches"])(batchedProjects, async pkg => {
+      const completionHint = await Object(_utils_watch__WEBPACK_IMPORTED_MODULE_4__["waitUntilWatchIsReady"])(pkg.runScriptStreaming(watchScriptName).stdout);
+      _utils_log__WEBPACK_IMPORTED_MODULE_1__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`[${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(pkg.name)}] Initial build completed (${completionHint}).`));
+    });
+  }
+
+};
+
+/***/ }),
+/* 157 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "waitUntilWatchIsReady", function() { return waitUntilWatchIsReady; });
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(158);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(257);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+/**
+ * Number of milliseconds we wait before we fall back to the default watch handler.
+ */
+
 const defaultHandlerDelay = 3000;
 /**
  * If default watch handler is used, then it's the number of milliseconds we wait for
  * any build output before we consider watch task ready.
  */
+
 const defaultHandlerReadinessTimeout = 2000;
-function getWatchHandlers(buildOutput$, { handlerDelay = defaultHandlerDelay, handlerReadinessTimeout = defaultHandlerReadinessTimeout }) {
-  const typescriptHandler = buildOutput$.pipe((0, _operators.first)(data => data.includes('$ tsc')), (0, _operators.map)(() => buildOutput$.pipe((0, _operators.first)(data => data.includes('Compilation complete.')), (0, _operators.mapTo)('tsc'))));
-  const webpackHandler = buildOutput$.pipe((0, _operators.first)(data => data.includes('$ webpack')), (0, _operators.map)(() => buildOutput$.pipe((0, _operators.first)(data => data.includes('Chunk Names')), (0, _operators.mapTo)('webpack'))));
-  const defaultHandler = Rx.of(undefined).pipe((0, _operators.delay)(handlerReadinessTimeout), (0, _operators.map)(() => buildOutput$.pipe((0, _operators.timeout)(handlerDelay), (0, _operators.catchError)(() => Rx.of('timeout')))));
+/**
+ * Describes configurable watch options.
+ */
+
+function getWatchHandlers(buildOutput$, {
+  handlerDelay = defaultHandlerDelay,
+  handlerReadinessTimeout = defaultHandlerReadinessTimeout
+}) {
+  const typescriptHandler = buildOutput$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["first"])(data => data.includes('$ tsc')), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["map"])(() => buildOutput$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["first"])(data => data.includes('Compilation complete.')), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["mapTo"])('tsc'))));
+  const webpackHandler = buildOutput$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["first"])(data => data.includes('$ webpack')), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["map"])(() => buildOutput$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["first"])(data => data.includes('Chunk Names')), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["mapTo"])('webpack'))));
+  const defaultHandler = rxjs__WEBPACK_IMPORTED_MODULE_0__["of"](undefined).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["delay"])(handlerReadinessTimeout), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["map"])(() => buildOutput$.pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["timeout"])(handlerDelay), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["catchError"])(() => rxjs__WEBPACK_IMPORTED_MODULE_0__["of"]('timeout')))));
   return [typescriptHandler, webpackHandler, defaultHandler];
 }
+
 function waitUntilWatchIsReady(stream, opts = {}) {
-  const buildOutput$ = new Rx.Subject();
+  const buildOutput$ = new rxjs__WEBPACK_IMPORTED_MODULE_0__["Subject"]();
+
   const onDataListener = data => buildOutput$.next(data.toString('utf-8'));
+
   const onEndListener = () => buildOutput$.complete();
+
   const onErrorListener = e => buildOutput$.error(e);
+
   stream.once('end', onEndListener);
   stream.once('error', onErrorListener);
   stream.on('data', onDataListener);
-  return Rx.race(getWatchHandlers(buildOutput$, opts)).pipe((0, _operators.mergeMap)(whenReady => whenReady), (0, _operators.finalize)(() => {
+  return rxjs__WEBPACK_IMPORTED_MODULE_0__["race"](getWatchHandlers(buildOutput$, opts)).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["mergeMap"])(whenReady => whenReady), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__["finalize"])(() => {
     stream.removeListener('data', onDataListener);
     stream.removeListener('end', onEndListener);
     stream.removeListener('error', onErrorListener);
@@ -31110,108 +31003,96 @@ function zipAll(project) {
 
 /***/ }),
 /* 357 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runCommand", function() { return runCommand; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(358);
+/* harmony import */ var indent_string__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(indent_string__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var wrap_ansi__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(359);
+/* harmony import */ var wrap_ansi__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(wrap_ansi__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(132);
+/* harmony import */ var _utils_errors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(52);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
+/* harmony import */ var _utils_projects_tree__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(366);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.runCommand = undefined;
 
-let runCommand = exports.runCommand = (() => {
-    var _ref = _asyncToGenerator(function* (command, config) {
-        try {
-            _log.log.write(_chalk2.default.bold(`Running [${_chalk2.default.green(command.name)}] command from [${_chalk2.default.yellow(config.rootPath)}]:\n`));
-            const projectPaths = (0, _config.getProjectPaths)(config.rootPath, config.options);
-            const projects = yield (0, _projects.getProjects)(config.rootPath, projectPaths, {
-                exclude: toArray(config.options.exclude),
-                include: toArray(config.options.include)
-            });
-            if (projects.size === 0) {
-                _log.log.write(_chalk2.default.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
-                return process.exit(1);
-            }
-            const projectGraph = (0, _projects.buildProjectGraph)(projects);
-            _log.log.write(_chalk2.default.bold(`Found [${_chalk2.default.green(projects.size.toString())}] projects:\n`));
-            _log.log.write((0, _projects_tree.renderProjectsTree)(config.rootPath, projects));
-            yield command.run(projects, projectGraph, config);
-        } catch (e) {
-            _log.log.write(_chalk2.default.bold.red(`\n[${command.name}] failed:\n`));
-            if (e instanceof _errors.CliError) {
-                const msg = _chalk2.default.red(`CliError: ${e.message}\n`);
-                _log.log.write((0, _wrapAnsi2.default)(msg, 80));
-                const keys = Object.keys(e.meta);
-                if (keys.length > 0) {
-                    const metaOutput = keys.map(function (key) {
-                        const value = e.meta[key];
-                        return `${key}: ${value}`;
-                    });
-                    _log.log.write('Additional debugging info:\n');
-                    _log.log.write((0, _indentString2.default)(metaOutput.join('\n'), 3));
-                }
-            } else {
-                _log.log.write(e.stack);
-            }
-            process.exit(1);
-        }
+
+
+
+
+
+async function runCommand(command, config) {
+  try {
+    _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`Running [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(command.name)}] command from [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.yellow(config.rootPath)}]:\n`));
+    const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(config.rootPath, config.options);
+    const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_6__["getProjects"])(config.rootPath, projectPaths, {
+      exclude: toArray(config.options.exclude),
+      include: toArray(config.options.include)
     });
 
-    return function runCommand(_x, _x2) {
-        return _ref.apply(this, arguments);
-    };
-})();
+    if (projects.size === 0) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`));
+      return process.exit(1);
+    }
 
-var _chalk = __webpack_require__(2);
+    const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_6__["buildProjectGraph"])(projects);
+    _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`Found [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(projects.size.toString())}] projects:\n`));
+    _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(Object(_utils_projects_tree__WEBPACK_IMPORTED_MODULE_7__["renderProjectsTree"])(config.rootPath, projects));
+    await command.run(projects, projectGraph, config);
+  } catch (e) {
+    _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold.red(`\n[${command.name}] failed:\n`));
 
-var _chalk2 = _interopRequireDefault(_chalk);
+    if (e instanceof _utils_errors__WEBPACK_IMPORTED_MODULE_4__["CliError"]) {
+      const msg = chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`CliError: ${e.message}\n`);
+      _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(wrap_ansi__WEBPACK_IMPORTED_MODULE_2___default()(msg, 80));
+      const keys = Object.keys(e.meta);
 
-var _indentString = __webpack_require__(358);
+      if (keys.length > 0) {
+        const metaOutput = keys.map(key => {
+          const value = e.meta[key];
+          return `${key}: ${value}`;
+        });
+        _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write('Additional debugging info:\n');
+        _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(indent_string__WEBPACK_IMPORTED_MODULE_1___default()(metaOutput.join('\n'), 3));
+      }
+    } else {
+      _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(e.stack);
+    }
 
-var _indentString2 = _interopRequireDefault(_indentString);
-
-var _wrapAnsi = __webpack_require__(359);
-
-var _wrapAnsi2 = _interopRequireDefault(_wrapAnsi);
-
-var _config = __webpack_require__(132);
-
-var _errors = __webpack_require__(52);
-
-var _log = __webpack_require__(33);
-
-var _projects = __webpack_require__(35);
-
-var _projects_tree = __webpack_require__(366);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
-
+    process.exit(1);
+  }
+}
 
 function toArray(value) {
-    if (value == null) {
-        return [];
-    }
-    return Array.isArray(value) ? value : [value];
+  if (value == null) {
+    return [];
+  }
+
+  return Array.isArray(value) ? value : [value];
 }
 
 /***/ }),
@@ -31602,25 +31483,168 @@ module.exports = () => {
 
 /***/ }),
 /* 366 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderProjectsTree", function() { return renderProjectsTree; });
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.renderProjectsTree = renderProjectsTree;
+const projectKey = Symbol('__project');
+function renderProjectsTree(rootPath, projects) {
+  const projectsTree = buildProjectsTree(rootPath, projects);
+  return treeToString(createTreeStructure(projectsTree));
+}
 
-var _chalk = __webpack_require__(2);
+function treeToString(tree) {
+  return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
+}
 
-var _chalk2 = _interopRequireDefault(_chalk);
+function childrenToStrings(tree, treePrefix) {
+  if (tree === undefined) {
+    return [];
+  }
 
-var _path = __webpack_require__(16);
+  let strings = [];
+  tree.forEach((node, index) => {
+    const isLastNode = tree.length - 1 === index;
+    const nodePrefix = isLastNode ? '└── ' : '├── ';
+    const childPrefix = isLastNode ? '    ' : '│   ';
+    const childrenPrefix = treePrefix + childPrefix;
+    strings.push(`${treePrefix}${nodePrefix}${node.name}`);
+    strings = strings.concat(childrenToStrings(node.children, childrenPrefix));
+  });
+  return strings;
+}
 
-var _path2 = _interopRequireDefault(_path);
+function createTreeStructure(tree) {
+  let name;
+  const children = [];
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  for (const [dir, project] of tree.entries()) {
+    // This is a leaf node (aka a project)
+    if (typeof project === 'string') {
+      name = chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(project);
+      continue;
+    } // If there's only one project and the key indicates it's a leaf node, we
+    // know that we're at a package folder that contains a package.json, so we
+    // "inline it" so we don't get unnecessary levels, i.e. we'll just see
+    // `foo` instead of `foo -> foo`.
+
+
+    if (project.size === 1 && project.has(projectKey)) {
+      const projectName = project.get(projectKey);
+      children.push({
+        children: [],
+        name: dirOrProjectName(dir, projectName)
+      });
+      continue;
+    }
+
+    const subtree = createTreeStructure(project); // If the name is specified, we know there's a package at the "root" of the
+    // subtree itself.
+
+    if (subtree.name !== undefined) {
+      const projectName = subtree.name;
+      children.push({
+        children: subtree.children,
+        name: dirOrProjectName(dir, projectName)
+      });
+      continue;
+    } // Special-case whenever we have one child, so we don't get unnecessary
+    // folders in the output. E.g. instead of `foo -> bar -> baz` we get
+    // `foo/bar/baz` instead.
+
+
+    if (subtree.children && subtree.children.length === 1) {
+      const child = subtree.children[0];
+      const newName = chalk__WEBPACK_IMPORTED_MODULE_0___default.a.dim(path__WEBPACK_IMPORTED_MODULE_1___default.a.join(dir.toString(), child.name));
+      children.push({
+        children: child.children,
+        name: newName
+      });
+      continue;
+    }
+
+    children.push({
+      children: subtree.children,
+      name: chalk__WEBPACK_IMPORTED_MODULE_0___default.a.dim(dir.toString())
+    });
+  }
+
+  return {
+    name,
+    children
+  };
+}
+
+function dirOrProjectName(dir, projectName) {
+  return dir === projectName ? chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(dir) : chalk__WEBPACK_IMPORTED_MODULE_0___default.a`{dim ${dir.toString()} ({reset.green ${projectName}})}`;
+}
+
+function buildProjectsTree(rootPath, projects) {
+  const tree = new Map();
+
+  for (const project of projects.values()) {
+    if (rootPath === project.path) {
+      tree.set(projectKey, project.name);
+    } else {
+      const relativeProjectPath = path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(rootPath, project.path);
+      addProjectToTree(tree, relativeProjectPath.split(path__WEBPACK_IMPORTED_MODULE_1___default.a.sep), project);
+    }
+  }
+
+  return tree;
+}
+
+function addProjectToTree(tree, pathParts, project) {
+  if (pathParts.length === 0) {
+    tree.set(projectKey, project.name);
+  } else {
+    const [currentDir, ...rest] = pathParts;
+
+    if (!tree.has(currentDir)) {
+      tree.set(currentDir, new Map());
+    }
+
+    const subtree = tree.get(currentDir);
+    addProjectToTree(subtree, rest, project);
+  }
+}
+
+/***/ }),
+/* 367 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _build_production_projects__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(368);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return _build_production_projects__WEBPACK_IMPORTED_MODULE_0__["buildProductionProjects"]; });
+
+/* harmony import */ var _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(547);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _prepare_project_dependencies__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -31640,173 +31664,74 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * specific language governing permissions and limitations
  * under the License.
  */
-const projectKey = Symbol('__project');
-function renderProjectsTree(rootPath, projects) {
-    const projectsTree = buildProjectsTree(rootPath, projects);
-    return treeToString(createTreeStructure(projectsTree));
-}
-function treeToString(tree) {
-    return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
-}
-function childrenToStrings(tree, treePrefix) {
-    if (tree === undefined) {
-        return [];
-    }
-    let strings = [];
-    tree.forEach((node, index) => {
-        const isLastNode = tree.length - 1 === index;
-        const nodePrefix = isLastNode ? '└── ' : '├── ';
-        const childPrefix = isLastNode ? '    ' : '│   ';
-        const childrenPrefix = treePrefix + childPrefix;
-        strings.push(`${treePrefix}${nodePrefix}${node.name}`);
-        strings = strings.concat(childrenToStrings(node.children, childrenPrefix));
-    });
-    return strings;
-}
-function createTreeStructure(tree) {
-    let name;
-    const children = [];
-    for (const [dir, project] of tree.entries()) {
-        // This is a leaf node (aka a project)
-        if (typeof project === 'string') {
-            name = _chalk2.default.green(project);
-            continue;
-        }
-        // If there's only one project and the key indicates it's a leaf node, we
-        // know that we're at a package folder that contains a package.json, so we
-        // "inline it" so we don't get unnecessary levels, i.e. we'll just see
-        // `foo` instead of `foo -> foo`.
-        if (project.size === 1 && project.has(projectKey)) {
-            const projectName = project.get(projectKey);
-            children.push({
-                children: [],
-                name: dirOrProjectName(dir, projectName)
-            });
-            continue;
-        }
-        const subtree = createTreeStructure(project);
-        // If the name is specified, we know there's a package at the "root" of the
-        // subtree itself.
-        if (subtree.name !== undefined) {
-            const projectName = subtree.name;
-            children.push({
-                children: subtree.children,
-                name: dirOrProjectName(dir, projectName)
-            });
-            continue;
-        }
-        // Special-case whenever we have one child, so we don't get unnecessary
-        // folders in the output. E.g. instead of `foo -> bar -> baz` we get
-        // `foo/bar/baz` instead.
-        if (subtree.children && subtree.children.length === 1) {
-            const child = subtree.children[0];
-            const newName = _chalk2.default.dim(_path2.default.join(dir.toString(), child.name));
-            children.push({
-                children: child.children,
-                name: newName
-            });
-            continue;
-        }
-        children.push({
-            children: subtree.children,
-            name: _chalk2.default.dim(dir.toString())
-        });
-    }
-    return { name, children };
-}
-function dirOrProjectName(dir, projectName) {
-    return dir === projectName ? _chalk2.default.green(dir) : _chalk2.default`{dim ${dir.toString()} ({reset.green ${projectName}})}`;
-}
-function buildProjectsTree(rootPath, projects) {
-    const tree = new Map();
-    for (const project of projects.values()) {
-        if (rootPath === project.path) {
-            tree.set(projectKey, project.name);
-        } else {
-            const relativeProjectPath = _path2.default.relative(rootPath, project.path);
-            addProjectToTree(tree, relativeProjectPath.split(_path2.default.sep), project);
-        }
-    }
-    return tree;
-}
-function addProjectToTree(tree, pathParts, project) {
-    if (pathParts.length === 0) {
-        tree.set(projectKey, project.name);
-    } else {
-        const [currentDir, ...rest] = pathParts;
-        if (!tree.has(currentDir)) {
-            tree.set(currentDir, new Map());
-        }
-        const subtree = tree.get(currentDir);
-        addProjectToTree(subtree, rest, project);
-    }
-}
-
-/***/ }),
-/* 367 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _build_production_projects = __webpack_require__(368);
-
-Object.defineProperty(exports, 'buildProductionProjects', {
-  enumerable: true,
-  get: function () {
-    return _build_production_projects.buildProductionProjects;
-  }
-});
-
-var _prepare_project_dependencies = __webpack_require__(547);
-
-Object.defineProperty(exports, 'prepareExternalProjectDependencies', {
-  enumerable: true,
-  get: function () {
-    return _prepare_project_dependencies.prepareExternalProjectDependencies;
-  }
-});
 
 /***/ }),
 /* 368 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "buildProductionProjects", function() { return buildProductionProjects; });
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(369);
+/* harmony import */ var cpy__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cpy__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(134);
+/* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(del__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(132);
+/* harmony import */ var _utils_fs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(20);
+/* harmony import */ var _utils_log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(54);
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(35);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.buildProductionProjects = undefined;
 
-let buildProductionProjects = exports.buildProductionProjects = (() => {
-    var _ref = _asyncToGenerator(function* ({ kibanaRoot, buildRoots }) {
-        const projects = yield getProductionProjects(kibanaRoot);
-        const projectGraph = (0, _projects.buildProjectGraph)(projects);
-        const batchedProjects = (0, _projects.topologicallyBatchProjects)(projects, projectGraph);
-        const projectNames = [...projects.values()].map(function (project) {
-            return project.name;
-        });
-        _log.log.write(`Preparing production build for [${projectNames.join(', ')}]`);
-        for (const batch of batchedProjects) {
-            for (const project of batch) {
-                yield deleteTarget(project);
-                yield buildProject(project);
-                for (const buildRoot of buildRoots) {
-                    yield copyToBuild(project, kibanaRoot, buildRoot);
-                }
-            }
-        }
-    });
 
-    return function buildProductionProjects(_x) {
-        return _ref.apply(this, arguments);
-    };
-})();
+
+
+
+
+async function buildProductionProjects({
+  kibanaRoot,
+  buildRoots
+}) {
+  const projects = await getProductionProjects(kibanaRoot);
+  const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
+  const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
+  const projectNames = [...projects.values()].map(project => project.name);
+  _utils_log__WEBPACK_IMPORTED_MODULE_5__["log"].write(`Preparing production build for [${projectNames.join(', ')}]`);
+
+  for (const batch of batchedProjects) {
+    for (const project of batch) {
+      await deleteTarget(project);
+      await buildProject(project);
+
+      for (const buildRoot of buildRoots) {
+        await copyToBuild(project, kibanaRoot, buildRoot);
+      }
+    }
+  }
+}
 /**
  * Returns the subset of projects that should be built into the production
  * bundle. As we copy these into Kibana's `node_modules` during the build step,
@@ -31814,48 +31739,32 @@ let buildProductionProjects = exports.buildProductionProjects = (() => {
  * we only include Kibana's transitive _production_ dependencies.
  */
 
+async function getProductionProjects(rootPath) {
+  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(rootPath, {});
+  const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
+  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])([projects.get('kibana')], projects, {
+    onlyProductionDependencies: true
+  }); // We remove Kibana, as we're already building Kibana
 
-let getProductionProjects = (() => {
-    var _ref2 = _asyncToGenerator(function* (rootPath) {
-        const projectPaths = (0, _config.getProjectPaths)(rootPath, {});
-        const projects = yield (0, _projects.getProjects)(rootPath, projectPaths);
-        const productionProjects = (0, _projects.includeTransitiveProjects)([projects.get('kibana')], projects, {
-            onlyProductionDependencies: true
-        });
-        // We remove Kibana, as we're already building Kibana
-        productionProjects.delete('kibana');
-        return productionProjects;
+  productionProjects.delete('kibana');
+  return productionProjects;
+}
+
+async function deleteTarget(project) {
+  const targetDir = project.targetLocation;
+
+  if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isDirectory"])(targetDir)) {
+    await del__WEBPACK_IMPORTED_MODULE_1___default()(targetDir, {
+      force: true
     });
+  }
+}
 
-    return function getProductionProjects(_x2) {
-        return _ref2.apply(this, arguments);
-    };
-})();
-
-let deleteTarget = (() => {
-    var _ref3 = _asyncToGenerator(function* (project) {
-        const targetDir = project.targetLocation;
-        if (yield (0, _fs.isDirectory)(targetDir)) {
-            yield (0, _del2.default)(targetDir, { force: true });
-        }
-    });
-
-    return function deleteTarget(_x3) {
-        return _ref3.apply(this, arguments);
-    };
-})();
-
-let buildProject = (() => {
-    var _ref4 = _asyncToGenerator(function* (project) {
-        if (project.hasScript('build')) {
-            yield project.runScript('build');
-        }
-    });
-
-    return function buildProject(_x4) {
-        return _ref4.apply(this, arguments);
-    };
-})();
+async function buildProject(project) {
+  if (project.hasScript('build')) {
+    await project.runScript('build');
+  }
+}
 /**
  * Copy all the project's files from its "intermediate build directory" and
  * into the build. The intermediate directory can either be the root of the
@@ -31869,73 +31778,26 @@ let buildProject = (() => {
  */
 
 
-let copyToBuild = (() => {
-    var _ref5 = _asyncToGenerator(function* (project, kibanaRoot, buildRoot) {
-        // We want the package to have the same relative location within the build
-        const relativeProjectPath = (0, _path.relative)(kibanaRoot, project.path);
-        const buildProjectPath = (0, _path.resolve)(buildRoot, relativeProjectPath);
-        yield (0, _cpy2.default)(['**/*', '!node_modules/**'], buildProjectPath, {
-            cwd: project.getIntermediateBuildDirectory(),
-            dot: true,
-            nodir: true,
-            parents: true
-        });
-        // If a project is using an intermediate build directory, we special-case our
-        // handling of `package.json`, as the project build process might have copied
-        // (a potentially modified) `package.json` into the intermediate build
-        // directory already. If so, we want to use that `package.json` as the basis
-        // for creating the production-ready `package.json`. If it's not present in
-        // the intermediate build, we fall back to using the project's already defined
-        // `package.json`.
-        const packageJson = (yield (0, _fs.isFile)((0, _path.join)(buildProjectPath, 'package.json'))) ? yield (0, _package_json.readPackageJson)(buildProjectPath) : project.json;
-        yield (0, _package_json.writePackageJson)(buildProjectPath, packageJson);
-    });
+async function copyToBuild(project, kibanaRoot, buildRoot) {
+  // We want the package to have the same relative location within the build
+  const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
+  const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
+  await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*', '!node_modules/**'], buildProjectPath, {
+    cwd: project.getIntermediateBuildDirectory(),
+    dot: true,
+    nodir: true,
+    parents: true
+  }); // If a project is using an intermediate build directory, we special-case our
+  // handling of `package.json`, as the project build process might have copied
+  // (a potentially modified) `package.json` into the intermediate build
+  // directory already. If so, we want to use that `package.json` as the basis
+  // for creating the production-ready `package.json`. If it's not present in
+  // the intermediate build, we fall back to using the project's already defined
+  // `package.json`.
 
-    return function copyToBuild(_x5, _x6, _x7) {
-        return _ref5.apply(this, arguments);
-    };
-})();
-
-var _cpy = __webpack_require__(369);
-
-var _cpy2 = _interopRequireDefault(_cpy);
-
-var _del = __webpack_require__(134);
-
-var _del2 = _interopRequireDefault(_del);
-
-var _path = __webpack_require__(16);
-
-var _config = __webpack_require__(132);
-
-var _fs = __webpack_require__(20);
-
-var _log = __webpack_require__(33);
-
-var _package_json = __webpack_require__(54);
-
-var _projects = __webpack_require__(35);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
+  const packageJson = (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_4__["isFile"])(Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(buildProjectPath, 'package.json'))) ? await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(buildProjectPath) : project.json;
+  await Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_6__["writePackageJson"])(buildProjectPath, packageJson);
+}
 
 /***/ }),
 /* 369 */
@@ -55219,67 +55081,31 @@ module.exports = CpyError;
 
 /***/ }),
 /* 547 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.prepareExternalProjectDependencies = undefined;
-
-/**
- * This prepares the dependencies for an _external_ project.
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return prepareExternalProjectDependencies; });
+/* harmony import */ var _utils_package_json__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
+/* harmony import */ var _utils_project__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(53);
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
-let prepareExternalProjectDependencies = exports.prepareExternalProjectDependencies = (() => {
-    var _ref = _asyncToGenerator(function* (projectPath) {
-        const project = yield _project.Project.fromPath(projectPath);
-        if (!project.hasDependencies()) {
-            return;
-        }
-        const deps = project.allDependencies;
-        for (const depName of Object.keys(deps)) {
-            const depVersion = deps[depName];
-            // Kibana currently only supports `link:` dependencies on Kibana's own
-            // packages, as these are packaged into the `node_modules` folder when
-            // Kibana is built, so we don't need to take any action to enable
-            // `require(...)` to resolve for these packages.
-            if ((0, _package_json.isLinkDependency)(depVersion) && !isKibanaDep(depVersion)) {
-                // For non-Kibana packages we need to set up symlinks during the
-                // installation process, but this is not something we support yet.
-                throw new Error('This plugin is using `link:` dependencies for non-Kibana packages');
-            }
-        }
-    });
-
-    return function prepareExternalProjectDependencies(_x) {
-        return _ref.apply(this, arguments);
-    };
-})();
-
-var _package_json = __webpack_require__(54);
-
-var _project = __webpack_require__(53);
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Licensed to Elasticsearch B.V. under one or more contributor
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * license agreements. See the NOTICE file distributed with
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * this work for additional information regarding copyright
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * ownership. Elasticsearch B.V. licenses this file to you under
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * the Apache License, Version 2.0 (the "License"); you may
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * not use this file except in compliance with the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * You may obtain a copy of the License at
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *    http://www.apache.org/licenses/LICENSE-2.0
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * Unless required by applicable law or agreed to in writing,
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * software distributed under the License is distributed on an
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * KIND, either express or implied.  See the License for the
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * specific language governing permissions and limitations
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            * under the License.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            */
 
 
 /**
@@ -55287,7 +55113,35 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
  * to the Kibana root directory or `../kibana-extra/{plugin}` relative
  * to Kibana itself.
  */
+
 const isKibanaDep = depVersion => depVersion.includes('../../kibana/');
+/**
+ * This prepares the dependencies for an _external_ project.
+ */
+
+
+async function prepareExternalProjectDependencies(projectPath) {
+  const project = await _utils_project__WEBPACK_IMPORTED_MODULE_1__["Project"].fromPath(projectPath);
+
+  if (!project.hasDependencies()) {
+    return;
+  }
+
+  const deps = project.allDependencies;
+
+  for (const depName of Object.keys(deps)) {
+    const depVersion = deps[depName]; // Kibana currently only supports `link:` dependencies on Kibana's own
+    // packages, as these are packaged into the `node_modules` folder when
+    // Kibana is built, so we don't need to take any action to enable
+    // `require(...)` to resolve for these packages.
+
+    if (Object(_utils_package_json__WEBPACK_IMPORTED_MODULE_0__["isLinkDependency"])(depVersion) && !isKibanaDep(depVersion)) {
+      // For non-Kibana packages we need to set up symlinks during the
+      // installation process, but this is not something we support yet.
+      throw new Error('This plugin is using `link:` dependencies for non-Kibana packages');
+    }
+  }
+}
 
 /***/ })
 /******/ ]);
