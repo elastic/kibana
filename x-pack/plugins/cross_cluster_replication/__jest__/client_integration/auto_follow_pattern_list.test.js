@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockAllHttpRequests, nextTick, getRandomString, findTestSubject } from './test_helpers';
+import { initTestBed, registerHttpRequestMockHelpers, nextTick, getRandomString, findTestSubject } from './test_helpers';
 import { AutoFollowPatternList } from '../../public/app/sections/home/auto_follow_pattern_list';
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -29,12 +29,25 @@ describe('<AutoFollowPatternList />', () => {
   let getUserActions;
   let tableCellsValues;
   let rows;
-  let updateHttpMockResponse;
+  let setLoadAutoFollowPatternsResponse;
+  let setDeleteAutoFollowPatternResponse;
+  let setAutoFollowStatsResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    (updateHttpMockResponse = mockAllHttpRequests(server));
+
+    // Register helpers to mock Http Requests
+    ({
+      setLoadAutoFollowPatternsResponse,
+      setDeleteAutoFollowPatternResponse,
+      setAutoFollowStatsResponse
+    } = registerHttpRequestMockHelpers(server));
+
+    // Set "default" mock responses by not providing any arguments
+    setLoadAutoFollowPatternsResponse();
+    setDeleteAutoFollowPatternResponse();
+    setAutoFollowStatsResponse();
   });
 
   describe('on component mount', () => {
@@ -88,7 +101,7 @@ describe('<AutoFollowPatternList />', () => {
     let clickAutoFollowPatternAt;
 
     beforeEach(async () => {
-      updateHttpMockResponse('loadAutoFollowPatterns', { patterns: autoFollowPatterns });
+      setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
       ({
@@ -179,7 +192,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        updateHttpMockResponse('deleteAutoFollowPattern', { itemsDeleted: [autoFollowPattern1.name] });
+        setDeleteAutoFollowPatternResponse({ itemsDeleted: [autoFollowPattern1.name] });
 
         selectAutoFollowPatternAt(0);
         clickBulkDeleteButton();
@@ -301,7 +314,7 @@ describe('<AutoFollowPatternList />', () => {
           leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
           autoFollowException: { type: 'exception', reason: message }
         }];
-        updateHttpMockResponse('autoFollowStats', { recentAutoFollowErrors });
+        setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
         clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(false);
