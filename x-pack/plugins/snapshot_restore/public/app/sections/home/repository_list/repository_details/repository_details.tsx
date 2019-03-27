@@ -15,6 +15,7 @@ import { Repository } from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   RepositoryTypeName,
+  RepositoryVerificationBadge,
   SectionError,
   SectionLoading,
 } from '../../../../components';
@@ -24,15 +25,19 @@ import { TypeDetails } from './type_details';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCodeEditor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+
+import 'brace/theme/textmate';
 
 interface Props extends RouteComponentProps {
   repositoryName: Repository['name'];
@@ -55,7 +60,11 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
 
   const { FormattedMessage } = i18n;
   const section = 'repositories' as Section;
-  const { error, loading, data: repository } = useRequest({
+  const {
+    error,
+    loading,
+    data: { repository, verification },
+  } = useRequest({
     path: chrome.addBasePath(`${API_BASE_PATH}repositories/${repositoryName}`),
     method: 'get',
     httpClient: http.getClient(),
@@ -113,6 +122,9 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
+    if (!repository) {
+      return null;
+    }
     const { type } = repository as Repository;
     return (
       <Fragment>
@@ -147,9 +159,64 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
         </EuiFlexGroup>
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
+        <EuiHorizontalRule />
+        {renderVerification()}
       </Fragment>
     );
   };
+
+  const renderVerification = () => (
+    <Fragment>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.verificationTitle"
+            defaultMessage="Verification status"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <RepositoryVerificationBadge verificationResults={verification || null} />
+      <EuiSpacer size="s" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.verificationDetailsTitle"
+            defaultMessage="Details"
+          />
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {verification ? (
+        <EuiCodeEditor
+          mode="json"
+          theme="textmate"
+          width="100%"
+          isReadOnly
+          value={JSON.stringify(verification.response || verification.error, null, 2)}
+          setOptions={{
+            showLineNumbers: false,
+            tabSize: 2,
+            maxLines: Infinity,
+          }}
+          editorProps={{
+            $blockScrolling: Infinity,
+          }}
+          showGutter={false}
+          minLines={6}
+          aria-label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.verificationDetails"
+              defaultMessage="Verification details repository '{name}'"
+              values={{
+                name,
+              }}
+            />
+          }
+        />
+      ) : null}
+    </Fragment>
+  );
 
   const renderFooter = () => {
     return (

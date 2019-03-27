@@ -41,7 +41,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="URI"
         />
       ),
-      description: uri,
+      description: uri || '',
     },
     {
       title: (
@@ -50,7 +50,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Path"
         />
       ),
-      description: path,
+      description: path || '',
     },
   ];
 

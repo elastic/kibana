@@ -39,7 +39,12 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
-  const { error, loading, data: repositories, request: reload } = useRequest({
+  const {
+    error,
+    loading,
+    data: { repositories, verification },
+    request: reload,
+  } = useRequest({
     path: chrome.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
     httpClient: http.getClient(),
@@ -87,7 +92,7 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
     );
   }
 
-  if (repositories.length === 0) {
+  if (repositories && repositories.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="managementApp"
@@ -132,7 +137,8 @@ export const RepositoryList: React.FunctionComponent<Props> = ({
         <RepositoryDetails repositoryName={currentRepository} onClose={closeRepositoryDetails} />
       ) : null}
       <RepositoryTable
-        repositories={repositories}
+        repositories={repositories || []}
+        verification={verification || {}}
         reload={reload}
         openRepositoryDetails={openRepositoryDetails}
       />

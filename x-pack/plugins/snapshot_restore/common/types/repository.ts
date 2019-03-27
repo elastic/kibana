@@ -137,3 +137,15 @@ export type Repository<T = null> =
   | GCSRepository
   | SourceRepository<T>
   | CustomRepository;
+
+export interface ValidRepositoryVerification {
+  valid: true;
+  response: object;
+}
+
+export interface InvalidRepositoryVerification {
+  valid: false;
+  error: object;
+}
+
+export type RepositoryVerification = ValidRepositoryVerification | InvalidRepositoryVerification;

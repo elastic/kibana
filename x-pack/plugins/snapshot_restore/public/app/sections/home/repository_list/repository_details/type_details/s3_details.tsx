@@ -44,7 +44,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
           defaultMessage="Bucket"
         />
       ),
-      description: bucket,
+      description: bucket || '',
     },
   ];
 

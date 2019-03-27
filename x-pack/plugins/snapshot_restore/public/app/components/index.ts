@@ -6,6 +6,7 @@
 
 export { RepositoryDeleteProvider } from './repository_delete_provider';
 export { RepositoryTypeName } from './repository_type_name';
+export { RepositoryVerificationBadge } from './repository_verification_badge';
 export { RepositoryForm } from './repository_form';
 
 export { SectionError } from './section_error';

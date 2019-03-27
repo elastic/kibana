@@ -6,7 +6,7 @@
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import { wrapCustomError } from '../../../../../server/lib/create_router/error_wrappers';
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
-import { Repository, RepositoryType } from '../../../common/types';
+import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
 
 export function registerRepositoriesRoutes(router: Router) {
   router.get('repository_types', getTypesHandler);
@@ -16,29 +16,83 @@ export function registerRepositoriesRoutes(router: Router) {
   router.put('repositories/{name}', updateHandler);
 }
 
-export const getAllHandler: RouterRouteHandler = async (req, callWithRequest) => {
+export const getAllHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  repositories: Repository[];
+  verification: { [key: string]: RepositoryVerification };
+}> => {
   const repositoriesByName = await callWithRequest('snapshot.getRepository', {
     repository: '_all',
   });
-  const repositories = Object.keys(repositoriesByName).map(name => {
+  const repositoryNames = Object.keys(repositoriesByName);
+  const repositories: Repository[] = repositoryNames.map(name => {
     return {
       name,
       ...repositoriesByName[name],
     };
   });
-  return repositories;
+  const repositoryVerification = await Promise.all([
+    ...repositoryNames.map(name => {
+      return callWithRequest('snapshot.verifyRepository', { repository: name }).catch(e => ({
+        valid: false,
+        error: e.response ? JSON.parse(e.response) : e,
+      }));
+    }),
+  ]);
+  return {
+    repositories,
+    verification: repositoryNames.reduce(
+      (acc: { [key: string]: RepositoryVerification }, name, index) => {
+        const verificationResults = repositoryVerification[index];
+        acc[name] = verificationResults.error
+          ? verificationResults
+          : {
+              valid: true,
+              response: verificationResults,
+            };
+        return acc;
+      },
+      {}
+    ),
+  };
 };
 
-export const getOneHandler: RouterRouteHandler = async (req, callWithRequest) => {
+export const getOneHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  repository: Repository | {};
+  verification: RepositoryVerification | {};
+}> => {
   const { name } = req.params;
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
+  const verificationResults = await callWithRequest('snapshot.verifyRepository', {
+    repository: name,
+  }).catch(e => ({
+    valid: false,
+    error: e.response ? JSON.parse(e.response) : e,
+  }));
+
   if (repositoryByName[name]) {
     return {
-      name,
-      ...repositoryByName[name],
+      repository: {
+        name,
+        ...repositoryByName[name],
+      },
+      verification: verificationResults.error
+        ? verificationResults
+        : {
+            valid: true,
+            response: verificationResults,
+          },
     };
   } else {
-    return {};
+    return {
+      repository: {},
+      verification: {},
+    };
   }
 };
 
@@ -77,7 +131,11 @@ export const createHandler: RouterRouteHandler = async (req, callWithRequest) =>
   }
 
   // Otherwise create new repository
-  return await callWithRequest('snapshot.createRepository', { repository: name, body: rest });
+  return await callWithRequest('snapshot.createRepository', {
+    repository: name,
+    body: rest,
+    verify: false,
+  });
 };
 
 export const updateHandler: RouterRouteHandler = async (req, callWithRequest) => {
@@ -89,5 +147,9 @@ export const updateHandler: RouterRouteHandler = async (req, callWithRequest) =>
   await callWithRequest('snapshot.getRepository', { repository: name });
 
   // Otherwise update repository
-  return await callWithRequest('snapshot.createRepository', { repository: name, body: rest });
+  return await callWithRequest('snapshot.createRepository', {
+    repository: name,
+    body: rest,
+    verify: false,
+  });
 };

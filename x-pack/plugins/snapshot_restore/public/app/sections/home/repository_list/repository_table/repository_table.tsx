@@ -15,19 +15,25 @@ import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository, RepositoryType } from '../../../../../../common/types';
-import { RepositoryDeleteProvider, RepositoryTypeName } from '../../../../components';
+import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
+import {
+  RepositoryDeleteProvider,
+  RepositoryTypeName,
+  RepositoryVerificationBadge,
+} from '../../../../components';
 import { BASE_PATH, Section } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 
 interface Props extends RouteComponentProps {
   repositories: Repository[];
+  verification: { [key: string]: RepositoryVerification };
   reload: () => Promise<void>;
   openRepositoryDetails: (name: Repository['name']) => void;
 }
 
 const RepositoryTableUi: React.FunctionComponent<Props> = ({
   repositories,
+  verification,
   reload,
   openRepositoryDetails,
   history,
@@ -67,6 +73,16 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
           return <RepositoryTypeName type={type} />;
         }
       },
+    },
+    {
+      field: 'name',
+      name: i18n.translate('xpack.snapshotRestore.repositoryList.table.verificationColumnTitle', {
+        defaultMessage: 'Verification',
+      }),
+      truncateText: true,
+      render: (name: Repository['name'], repository: Repository) => (
+        <RepositoryVerificationBadge verificationResults={verification[name] || null} />
+      ),
     },
     {
       name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionsColumnTitle', {

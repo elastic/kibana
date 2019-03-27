@@ -3,21 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-// TODO: Remove once typescript definitions are in EUI
-declare module '@elastic/eui' {
-  // @ts-ignore
-  export const EuiCodeEditor: React.SFC<any>;
-}
-
 import React, { Fragment } from 'react';
 
 import { Repository } from '../../../../../../../common/types';
 import { useAppDependencies } from '../../../../../index';
 
-import 'brace/theme/textmate';
-
 import { EuiCodeEditor, EuiSpacer, EuiTitle } from '@elastic/eui';
+
+import 'brace/theme/textmate';
 
 interface Props {
   repository: Repository;

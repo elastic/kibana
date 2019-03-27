@@ -67,7 +67,7 @@ export const RepositoryEdit: React.FunctionComponent<Props> = ({
       if (error) {
         setRepositoryError(error);
       } else {
-        setRepository(data);
+        setRepository(data.repository);
       }
       setLoadingRepository(false);
     });
