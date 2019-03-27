@@ -113,7 +113,7 @@ function renderLog(log) {
             })}
           >
             <EuiBadge color={getBadgeColorFromLogLevel(level.level)}>
-              {level.count}
+              {formatNumber(level.count, 'int_commas')}
             </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
