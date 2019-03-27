@@ -62,7 +62,7 @@ type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promi
 type Unpromise<T> = T extends Promise<infer U> ? U : T;
 export default class KbnServer {
   public readonly newPlatform: {
-    start: {
+    setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
       };
