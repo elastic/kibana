@@ -7,6 +7,8 @@
 import {
   InfraMetric,
   InfraMetricData,
+  InfraMetricsExplorerMetricInput,
+  InfraMetricsExplorerResponse,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../../graphql/types';
@@ -22,11 +24,26 @@ export interface InfraMetricsRequestOptions {
   metrics: InfraMetric[];
 }
 
+export interface InfraMetricsExplorerRequestOptions {
+  sourceConfiguration: InfraSourceConfiguration;
+  timerange: InfraTimerangeInput;
+  metrics: InfraMetricsExplorerMetricInput[];
+  groupBy?: string | null;
+  filterQuery?: string | null;
+  limit?: number;
+  afterKey?: string | null;
+}
+
 export interface InfraMetricsAdapter {
   getMetrics(
     req: InfraFrameworkRequest,
     options: InfraMetricsRequestOptions
   ): Promise<InfraMetricData[]>;
+
+  getCustomMetrics(
+    req: InfraFrameworkRequest,
+    options: InfraMetricsExplorerRequestOptions
+  ): Promise<InfraMetricsExplorerResponse>;
 }
 
 export enum InfraMetricModelMetricType {
