@@ -35,11 +35,14 @@ export function CallClientProvider(Private, Promise, es, config) {
     const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
     const includeFrozen = config.get('search:includeFrozen');
 
-    if (searchRequests.length === 0) {
+    // get the actual list of requests that we will be fetching
+    const requestsToFetch = searchRequests.filter(isRequest);
+
+    if (requestsToFetch.length === 0) {
       return Promise.resolve([]);
     }
 
-    let searchRequestsCount = searchRequests.length;
+    let requestsToFetchCount = searchRequests.length;
 
     // This is how we'll provide the consumer with search responses. Resolved by
     // respondToSearchRequests.
@@ -92,9 +95,9 @@ export function CallClientProvider(Private, Promise, es, config) {
         ));
       }
 
-      searchRequestsCount--;
+      requestsToFetchCount--;
 
-      if (searchRequestsCount !== 0) {
+      if (requestsToFetchCount !== 0) {
         // We can't resolve early unless all searchRequests have been aborted.
         return;
       }
@@ -119,7 +122,7 @@ export function CallClientProvider(Private, Promise, es, config) {
       });
     });
 
-    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(searchRequests);
+    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
 
     // We're going to create a new async context here, so that the logic within it can execute
     // asynchronously after we've returned a reference to defer.promise.
