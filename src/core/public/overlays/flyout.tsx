@@ -19,15 +19,12 @@
 
 /* tslint:disable max-classes-per-file */
 
-import React from 'react';
-
-import { Subject } from 'rxjs';
-
 import { EuiFlyout } from '@elastic/eui';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { getOrCreateContainerElement } from './dom_utils';
-
+import { Observable, Subject } from 'rxjs';
 import { I18nSetup } from '../i18n';
+import { getOrCreateContainerElement } from './dom_utils';
 
 const CONTAINER_ID = 'flyout-container';
 
@@ -46,12 +43,12 @@ class FlyoutSession {
    * A promise that will be resolved once this flytout session is closed,
    * by the user or by closing it from the outside via valling {@link #close}.
    */
-  public readonly onClose: Promise<void>;
+  public readonly onClose$: Observable<void>;
 
   private closeSubject = new Subject<void>();
 
   constructor(private readonly activeSessionGetter: () => FlyoutSession | null) {
-    this.onClose = this.closeSubject.toPromise();
+    this.onClose$ = this.closeSubject.asObservable();
   }
 
   /**

@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import React from 'react';
+import { finalize } from 'rxjs/operators';
 import { ContextMenuAction } from 'ui/embeddable';
 import { Inspector } from 'ui/inspector';
 
@@ -78,9 +77,11 @@ export function getInspectorPanelAction({
           }
         };
         // In case the inspector gets closed (otherwise), restore the original destroy function
-        session.onClose.then(() => {
-          embeddable.destroy = originalDestroy;
-        });
+        session.onClose$.pipe(
+          finalize(() => {
+            embeddable.destroy = originalDestroy;
+          })
+        );
       },
     }
   );
