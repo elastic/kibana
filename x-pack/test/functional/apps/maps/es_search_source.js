@@ -84,6 +84,31 @@ export default function ({ getPageObjects, getService }) {
       });
     });
 
+    describe('layer query', () => {
+      before(async () => {
+        await PageObjects.maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
+      });
+
+      it('should apply layer query to search request', async () => {
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestStats = await inspector.getTableData();
+        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        await inspector.close();
+        expect(hits).to.equal('2');
+      });
+
+      it('should apply layer query to fit to bounds', async () => {
+        // Set view to other side of world so no matching results
+        await PageObjects.maps.setView(-15, -100, 6);
+        await PageObjects.maps.clickFitToBounds('logstash');
+        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        expect(Math.round(lat)).to.equal(42);
+        expect(Math.round(lon)).to.equal(-102);
+        expect(Math.round(zoom)).to.equal(5);
+      });
+    });
+
     describe('filter by extent', () => {
       it('should handle geo_point filtering with extents that cross antimeridian', async () => {
         await PageObjects.maps.loadSavedMap('antimeridian points example');
