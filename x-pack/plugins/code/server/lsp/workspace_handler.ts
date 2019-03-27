@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Clone, Commit, Error as GitError, Repository, Reset } from '@elastic/nodegit';
+import { Clone, Commit, Error as GitError, Repository, Reset, TreeEntry } from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
@@ -31,7 +31,7 @@ export class WorkspaceHandler {
   private git: GitOperations;
   private revisionMap: { [uri: string]: string } = {};
   private log: Logger;
-  private objectClient: RepositoryObjectClient;
+  private readonly objectClient: RepositoryObjectClient | undefined = undefined;
 
   constructor(
     readonly repoPath: string,
@@ -41,7 +41,9 @@ export class WorkspaceHandler {
   ) {
     this.git = new GitOperations(repoPath);
     this.log = loggerFactory.getLogger(['LSP', 'workspace']);
-    this.objectClient = new RepositoryObjectClient(this.client);
+    if (this.client) {
+      this.objectClient = new RepositoryObjectClient(this.client);
+    }
   }
 
   /**
@@ -54,7 +56,7 @@ export class WorkspaceHandler {
     const tryGetGitStatus = async (retryCount: number) => {
       let gitStatus;
       try {
-        gitStatus = await this.objectClient.getRepositoryGitStatus(repositoryUri);
+        gitStatus = await this.objectClient!.getRepositoryGitStatus(repositoryUri);
       } catch (error) {
         throw Boom.internal(`checkout workspace on an unknown status repository`);
       }
@@ -71,7 +73,9 @@ export class WorkspaceHandler {
         }
       }
     };
-    await tryGetGitStatus(0);
+    if (this.objectClient) {
+      await tryGetGitStatus(0);
+    }
 
     const bareRepo = await this.git.openRepo(repositoryUri);
     const targetCommit = await this.git.getCommit(bareRepo, revision);
@@ -299,6 +303,12 @@ export class WorkspaceHandler {
     if (uri.startsWith('git://')) {
       const { repoUri, file, revision } = parseLspUrl(uri)!;
       const { workspaceRepo, workspaceRevision } = await this.openWorkspace(repoUri, revision);
+      if (file) {
+        const isValidPath = await this.checkFile(workspaceRepo, file);
+        if (!isValidPath) {
+          throw new Error('invalid fle path in requests.');
+        }
+      }
       return {
         workspacePath: workspaceRepo.workdir(),
         filePath: this.fileUrl(path.resolve(workspaceRepo.workdir(), file || '/')),
@@ -333,7 +343,8 @@ export class WorkspaceHandler {
   }
 
   private async workspaceDir(repoUri: string) {
-    const randomStr = await this.objectClient.getRepositoryRandomStr(repoUri);
+    const randomStr =
+      this.objectClient && (await this.objectClient.getRepositoryRandomStr(repoUri));
     const base = path.join(this.workspacePath, repoUri);
     if (randomStr) {
       return path.join(base, `__${randomStr}`);
@@ -381,5 +392,31 @@ export class WorkspaceHandler {
   private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {
     const workspaceRelativePath = path.relative(this.workspacePath, workspaceRepo.workdir());
     this.revisionMap[workspaceRelativePath] = headCommit.sha().substring(0, 7);
+  }
+
+  /**
+   * check whether the file path specify in the request is valid. The file path must:
+   *  1. exists in git repo
+   *  2. is a valid file or dir, can't be a link or submodule
+   *
+   * @param workspaceRepo
+   * @param filePath
+   */
+  private async checkFile(workspaceRepo: Repository, filePath: string) {
+    const headCommit = await workspaceRepo.getHeadCommit();
+    try {
+      const entry = await headCommit.getEntry(filePath);
+      switch (entry.filemode()) {
+        case TreeEntry.FILEMODE.TREE:
+        case TreeEntry.FILEMODE.BLOB:
+        case TreeEntry.FILEMODE.EXECUTABLE:
+          return true;
+        default:
+          return false;
+      }
+    } catch (e) {
+      // filePath may not exists
+      return false;
+    }
   }
 }
