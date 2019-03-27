@@ -781,10 +781,10 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/charts@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.3.0.tgz#8530128b9e875d9f6fc31276f5817f2aeab595e1"
-  integrity sha512-MROxvsIwP2hmiczmM4pGLcT0zV/hOccT8a0puZaLUQtidIA3PE4tZuzDMkmO5kJiidh/sQgcPeGvEpQNiZtJsg==
+"@elastic/charts@^3.4.3":
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.4.3.tgz#4d4cb20589c0bc4902a4e49eeef619098a833bda"
+  integrity sha512-+4PqIFOHHvL2pz3j5WfIxKdmskHa+xXagsZZ4eh2HbB53PIrRD53iehVwPKVR/cOaArO0uJgvQEBzfre1iLW1w==
   dependencies:
     classnames "^2.2.6"
     d3-array "^2.0.3"

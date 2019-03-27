@@ -22,73 +22,67 @@ import React, { Component } from 'react';
 import {
   Axis,
   Chart,
-  getSpecId,
-  LineSeries,
-  ScaleType,
   Position,
   Settings,
   getAxisId,
-  CurveType
 } from '@elastic/charts';
+import { Series } from './series';
 import { GRID_LINE_CONFIG } from '../lib/config';
-import { calculateFillColor } from '../lib/calculate_fill_color';
 
 import '@elastic/charts/dist/style.css';
 
 export class TimeSeries extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+  state = {};
 
-  computeColor(color, fill) {
-    const { fillColor } = calculateFillColor(color, fill);
+  static defaultProps = {
+    legend: true,
+    showGrid: true
+  };
 
-    return fillColor;
-  }
+  static propTypes = {
+    legend: PropTypes.bool,
+    legendPosition: PropTypes.string,
+    axisPosition: PropTypes.string,
+    onFilter: PropTypes.func,
+    series: PropTypes.array,
+    tickFormatter: PropTypes.func,
+    showGrid: PropTypes.bool,
+    xaxisLabel: PropTypes.string,
+    dateFormat: PropTypes.string
+  };
 
   render() {
-    const { min, max, mode } = this.props.yaxes[0];
-    let leftDomain;
-    if (min && max) leftDomain = { min, max };
-
+    const { mode } = this.props.yaxes[0];
     return (
       <Chart renderer="canvas" className="tvbVisTimeSeries" >
         <Settings
           showLegend={this.props.legend}
           legendPosition={this.props.legendPosition}
           onBrushEnd={this.props.onBrush}
+          animateData={false}
         />
-        {
-          this.props.series.map(({ id, label, data, bars, lines, color }) => {
-            const lineCustomSeriesColors = new Map();
-            const lineDataSeriesColorValues = {
-              colorValues: [],
-              specId: getSpecId(label),
-            };
 
-            const { fill } = bars;
-            const { steps } = lines;
-
-            lineCustomSeriesColors.set(lineDataSeriesColorValues, this.computeColor(color, fill));
-
-            return (
-              <LineSeries
-                key={`${id}-${label}`}
-                id={getSpecId(label)}
-                seriesType={bars.show ? 'bar' : 'line'}
-                xScaleType={ScaleType.Time}
-                yScaleType={mode || ScaleType.Linear}
-                xAccessor={0}
-                yAccessors={[1]}
-                data={data}
-                yScaleToDataExtent={false}
-                customSeriesColors={lineCustomSeriesColors}
-                curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
-              />
-            );
-          })
+        { this.props.series.map(series => (
+          <Series
+            key={`${series.id}-${series.label}`}
+            {...series}
+            mode={mode}
+          />))
         }
+
+        { this.props.yaxes.map(({ id, position, tickFormatter, min, max }) => (
+          <Axis
+            key={id}
+            groupId={getAxisId()}
+            id={getAxisId(id)}
+            position={position}
+            domain={{ min, max }}
+            showGridLines={this.props.showGrid}
+            gridLineStyle={GRID_LINE_CONFIG}
+            tickFormat={tickFormatter}
+          />))
+        }
+
         <Axis
           id={getAxisId('bottom')}
           position={Position.Bottom}
@@ -97,31 +91,8 @@ export class TimeSeries extends Component {
           showGridLines={this.props.showGrid}
           gridLineStyle={GRID_LINE_CONFIG}
         />
-        <Axis
-          id={getAxisId('yaxis')}
-          position={this.props.axisPosition}
-          domain={leftDomain}
-          showGridLines={this.props.showGrid}
-          gridLineStyle={GRID_LINE_CONFIG}
-        />
+
       </Chart>
     );
   }
 }
-
-TimeSeries.defaultProps = {
-  legend: true,
-  showGrid: true
-};
-
-TimeSeries.propTypes = {
-  legend: PropTypes.bool,
-  legendPosition: PropTypes.string,
-  axisPosition: PropTypes.string,
-  onFilter: PropTypes.func,
-  series: PropTypes.array,
-  tickFormatter: PropTypes.func,
-  showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string,
-  dateFormat: PropTypes.string
-};

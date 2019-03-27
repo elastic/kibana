@@ -112,8 +112,8 @@ class TimeseriesVisualization extends Component {
     };
 
 
-    if (model.axis_min) mainAxis.min = model.axis_min;
-    if (model.axis_max) mainAxis.max = model.axis_max;
+    if (model.axis_min) mainAxis.min = Number(model.axis_min);
+    if (model.axis_max) mainAxis.max = Number(model.axis_max);
     if (model.axis_scale === 'log') {
       mainAxis.mode = 'log';
       mainAxis.transform = value => value > 0 ? Math.log(value) / Math.LN10 : null;
@@ -173,8 +173,8 @@ class TimeseriesVisualization extends Component {
           axisFormatterTemplate: seriesGroup.value_template
         };
 
-        if (seriesGroup.axis_min != null) yaxis.min = seriesGroup.axis_min;
-        if (seriesGroup.axis_max != null) yaxis.max = seriesGroup.axis_max;
+        if (seriesGroup.axis_min != null) yaxis.min = Number(seriesGroup.axis_min);
+        if (seriesGroup.axis_max != null) yaxis.max = Number(seriesGroup.axis_max);
 
         yaxes.push(yaxis);
 
