@@ -92,7 +92,7 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
  */
 function getSupertest(root: Root, method: HttpMethod, path: string) {
   const testUserCredentials = Buffer.from(`${kibanaTestUser.username}:${kibanaTestUser.password}`);
-  return supertest((root as any).server.http.service.httpServer.server.listener)
+  return supertest((root as any).server.http.httpServer.server.listener)
     [method](path)
     .set('Authorization', `Basic ${testUserCredentials.toString('base64')}`);
 }
@@ -124,7 +124,7 @@ export function createRootWithCorePlugins(settings = {}) {
  * @param root
  */
 export function getKbnServer(root: Root) {
-  return (root as any).server.legacy.service.kbnServer;
+  return (root as any).server.legacy.kbnServer;
 }
 
 export const request: Record<
