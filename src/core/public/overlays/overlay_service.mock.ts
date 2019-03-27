@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { OverlaySetup } from './overlay_service';
+import { OverlayService, OverlaySetup } from './overlay_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<PublicMethodsOf<OverlaySetup>> = {
@@ -25,6 +25,15 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createMock = () => {
+  const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = {
+    setup: jest.fn(),
+  };
+  mocked.setup.mockReturnValue(createSetupContractMock());
+  return mocked;
+};
+
 export const overlayServiceMock = {
+  create: createMock,
   createSetupContract: createSetupContractMock,
 };

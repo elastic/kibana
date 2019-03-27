@@ -25,6 +25,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
+import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
 const MockLegacyPlatformService = legacyPlatformServiceMock.create();
@@ -85,6 +86,12 @@ jest.mock('./chrome', () => ({
   ChromeService: ChromeServiceConstructor,
 }));
 
+const MockOverlayService = overlayServiceMock.create();
+const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
+jest.mock('./overlays', () => ({
+  OverlayService: OverlayServiceConstructor,
+}));
+
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
 
@@ -123,6 +130,7 @@ describe('constructor', () => {
     expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -312,6 +320,11 @@ describe('#setup()', () => {
   it('calls chrome#setup()', () => {
     setupCore();
     expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls overlays#setup()', () => {
+    setupCore();
+    expect(MockOverlayService.setup).toHaveBeenCalledTimes(1);
   });
 });
 

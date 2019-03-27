@@ -16,11 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import React from 'react';
 import { I18nService, I18nSetup } from './i18n_service';
+
+const PassThroughComponet = ({ children }: { children: React.ReactNode }) => children;
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<I18nSetup> = {
-    Context: jest.fn(),
+    // By default mock the Context component so it simply renders all children
+    Context: jest.fn().mockImplementation(PassThroughComponet),
   };
   return setupContract;
 };
