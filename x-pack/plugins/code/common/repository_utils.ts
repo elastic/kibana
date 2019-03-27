@@ -36,9 +36,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[1];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // From uri 'origin/org/name' to 'name'
@@ -46,9 +46,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[2];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // From uri 'origin/org/name' to 'org/name'
@@ -56,9 +56,9 @@ export class RepositoryUtils {
     const segs = repoUri.split('/');
     if (segs && segs.length === 3) {
       return segs[1] + '/' + segs[2];
-    } else {
-      return 'invalid';
     }
+
+    throw new Error('Invalid repository uri.');
   }
 
   // Return the local data path of a given repository.
