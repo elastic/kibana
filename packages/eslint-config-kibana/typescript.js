@@ -147,11 +147,6 @@ module.exports = {
           'quote-props': ['error', 'consistent-as-needed'],
           'radix': 'error',
           'semi': 'error',
-          // TODO: It is not working at all, I'm just thinking about disabling it at all
-          // 'sort-keys': ['error', 'asc', {
-          //   'caseSensitive': false,
-          //   'natural': true
-          // }],
           'space-before-function-paren': ['error', {
             'anonymous': 'never',
             'named': 'never',
