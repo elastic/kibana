@@ -53,14 +53,17 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    // There are no DOM indicators that signal when map pan and zoom actions are complete
+    // Since there are no DOM indicators that signal when map pan and zoom actions are complete,
+    // this method waits until the map view has stabilized, signaling that the panning/zooming is complete.
+    // Pass origView parameter when the new map view determinition is async
+    // so method knows when panning/zooming has started.
     async waitForMapPanAndZoom(origView) {
       await retry.try(async () => {
         log.debug('Waiting for map pan and zoom to complete');
         const prevView = await this.getView();
-        await PageObjects.common.sleep(1500);
+        await PageObjects.common.sleep(1000);
         const currentView = await this.getView();
-        if (_.isEqual(origView, currentView)) {
+        if (origView && _.isEqual(origView, currentView)) {
           throw new Error('Map pan and zoom has not started yet');
         }
         if (!_.isEqual(prevView, currentView)) {
@@ -183,13 +186,12 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async setView(lat, lon, zoom) {
       log.debug(`Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`);
-      const origView = await this.getView();
       await testSubjects.click('toggleSetViewVisibilityButton');
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await this.waitForMapPanAndZoom(origView);
+      await this.waitForMapPanAndZoom();
     }
 
     async getView() {
