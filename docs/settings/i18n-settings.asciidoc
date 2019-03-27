@@ -5,7 +5,7 @@
 <titleabbrev>i18n Settings</titleabbrev>
 ++++
 
-You do not need to configure any settings to have kibana in English.
+You do not need to configure any settings to run Kibana in English.
 
 [float]
 [[general-i18n-settings-kb]]

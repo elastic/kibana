@@ -236,4 +236,4 @@ unauthenticated users to access the Kibana server status API and status page.
 
 `license_management.enabled`:: *Default: true* Set this value to false to disable the License Management user interface.
 
-`i18n.locale`:: *Default: en* Set this value to change Kibana interface language. Valid locales are: `en`, `zh-CN`.
+`i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`.
