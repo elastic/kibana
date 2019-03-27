@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`render file item 1`] = `
-<Component
+<SuggestionComponent
   ariaId="suggestion-1-1"
   innerRef={[Function]}
   onClick={[Function]}
@@ -51,11 +51,11 @@ exports[`render file item 1`] = `
       </div>
     </div>
   </div>
-</Component>
+</SuggestionComponent>
 `;
 
 exports[`render repository item 1`] = `
-<Component
+<SuggestionComponent
   ariaId="suggestion-1-1"
   innerRef={[Function]}
   onClick={[Function]}
@@ -102,11 +102,11 @@ exports[`render repository item 1`] = `
       </div>
     </div>
   </div>
-</Component>
+</SuggestionComponent>
 `;
 
 exports[`render symbol item 1`] = `
-<Component
+<SuggestionComponent
   ariaId="suggestion-1-1"
   innerRef={[Function]}
   onClick={[Function]}
@@ -197,5 +197,5 @@ exports[`render symbol item 1`] = `
       </div>
     </div>
   </div>
-</Component>
+</SuggestionComponent>
 `;

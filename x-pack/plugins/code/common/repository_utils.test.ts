@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FileTreeItemType } from '../model';
 import { RepositoryUtils } from './repository_utils';
 
 test('Repository url parsing', () => {
@@ -106,4 +107,73 @@ test('Normalize repository index name', () => {
   const indexName3 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic-kibana/code');
   const indexName4 = RepositoryUtils.normalizeRepoUriToIndexName('github.com/elastic/kibana-code');
   expect(indexName3 === indexName4).toBeFalsy();
+});
+
+test('Parse repository uri', () => {
+  expect(RepositoryUtils.orgNameFromUri('github.com/elastic/kibana')).toEqual('elastic');
+  expect(RepositoryUtils.repoNameFromUri('github.com/elastic/kibana')).toEqual('kibana');
+  expect(RepositoryUtils.repoFullNameFromUri('github.com/elastic/kibana')).toEqual(
+    'elastic/kibana'
+  );
+
+  // For invalid repository uri
+  expect(() => {
+    RepositoryUtils.orgNameFromUri('foo/bar');
+  }).toThrowError('Invalid repository uri.');
+  expect(() => {
+    RepositoryUtils.repoNameFromUri('foo/bar');
+  }).toThrowError('Invalid repository uri.');
+  expect(() => {
+    RepositoryUtils.repoFullNameFromUri('foo/bar');
+  }).toThrowError('Invalid repository uri.');
+});
+
+test('Repository local path', () => {
+  expect(RepositoryUtils.repositoryLocalPath('/tmp', 'github.com/elastic/kibana')).toEqual(
+    '/tmp/github.com/elastic/kibana'
+  );
+  expect(RepositoryUtils.repositoryLocalPath('tmp', 'github.com/elastic/kibana')).toEqual(
+    'tmp/github.com/elastic/kibana'
+  );
+});
+
+test('Parse location to url', () => {
+  expect(
+    RepositoryUtils.locationToUrl({
+      uri: 'git://github.com/elastic/eui/blob/master/generator-eui/app/component.js',
+      range: {
+        start: {
+          line: 4,
+          character: 17,
+        },
+        end: {
+          line: 27,
+          character: 1,
+        },
+      },
+    })
+  ).toEqual('/github.com/elastic/eui/blob/master/generator-eui/app/component.js!L5:17');
+});
+
+test('Get all files from a repository file tree', () => {
+  expect(
+    RepositoryUtils.getAllFiles({
+      name: 'foo',
+      type: FileTreeItemType.Directory,
+      path: '/foo',
+      children: [
+        {
+          name: 'bar',
+          type: FileTreeItemType.File,
+          path: '/foo/bar',
+        },
+        {
+          name: 'boo',
+          type: FileTreeItemType.File,
+          path: '/foo/boo',
+        },
+      ],
+      childrenCount: 2,
+    })
+  ).toEqual(['/foo/bar', '/foo/boo']);
 });
