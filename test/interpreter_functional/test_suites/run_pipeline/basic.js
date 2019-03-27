@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { expectExpressionProvider } from './helpers';
 
 // this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline

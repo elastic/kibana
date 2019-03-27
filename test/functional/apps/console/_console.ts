@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `

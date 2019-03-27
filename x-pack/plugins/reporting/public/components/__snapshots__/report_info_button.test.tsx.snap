@@ -83,11 +83,15 @@ Array [
         >
           <OutsideEventDetector
             handleEvent={[Function]}
-            onClick={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
           >
             <div
-              onClick={[Function]}
               onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
               onTouchStart={[Function]}
             >
               <FocusLock
@@ -510,11 +514,15 @@ Array [
         >
           <OutsideEventDetector
             handleEvent={[Function]}
-            onClick={[Function]}
+            onMouseDown={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchStart={[Function]}
           >
             <div
-              onClick={[Function]}
               onMouseDown={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
               onTouchStart={[Function]}
             >
               <FocusLock
