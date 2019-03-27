@@ -35,10 +35,18 @@ export const tagcloud = () => ({
     scale: {
       types: ['string'],
       default: 'linear',
+      options: ['linear', 'log', 'square root'],
+      help: i18n.translate('interpreter.functions.tagcloud.scale.help', {
+        defaultMessage: 'Scale to determine font size of a word'
+      }),
     },
     orientation: {
       types: ['string'],
       default: 'single',
+      options: ['single', 'right angled', 'multiple'],
+      help: i18n.translate('interpreter.functions.tagcloud.orientation.help', {
+        defaultMessage: 'Orientation of words inside tagcloud'
+      }),
     },
     minFontSize: {
       types: ['number'],
@@ -54,9 +62,15 @@ export const tagcloud = () => ({
     },
     metric: {
       types: ['string', 'number'],
+      help: i18n.translate('interpreter.functions.tagcloud.metric.help', {
+        defaultMessage: 'Column in your dataset to use as a metric (either column index or column name)'
+      }),
     },
     bucket: {
       types: ['string', 'number'],
+      help: i18n.translate('interpreter.functions.tagcloud.bucket.help', {
+        defaultMessage: 'Column in your dataset to use as a bucket (either column index or column name)'
+      }),
     },
     bucketFormat: {
       types: ['string'],
