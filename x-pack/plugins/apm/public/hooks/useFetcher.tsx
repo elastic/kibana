@@ -45,9 +45,8 @@ export function useFetcher<Response>(
     });
 
     async function doFetch() {
-      const data = await fn();
       try {
-        didFinish = true;
+        const data = await fn();
         if (!didCancel) {
           dispatchStatus({ name: fn.name, isLoading: false });
           setResult({
@@ -57,7 +56,6 @@ export function useFetcher<Response>(
           });
         }
       } catch (e) {
-        didFinish = true;
         if (e instanceof MissingArgumentsError) {
           return;
         }
@@ -70,6 +68,7 @@ export function useFetcher<Response>(
           });
         }
       }
+      didFinish = true;
     }
 
     doFetch();
