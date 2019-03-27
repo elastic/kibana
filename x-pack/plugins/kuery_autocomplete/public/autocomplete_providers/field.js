@@ -14,12 +14,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 const type = 'field';
 
 function getDescription(fieldName) {
-  // return '<p>' +
-  //   i18n.translate('xpack.kueryAutocomplete.filterResultsDescription', {
-  //     defaultMessage: 'Filter results that contain {fieldName}',
-  //     values: { fieldName: `<span className="kbnSuggestionItem__callout">${escape(fieldName)}</span>` }
-  //   }) +
-  //   '</p>';
   return (
     <p>
       <FormattedMessage
