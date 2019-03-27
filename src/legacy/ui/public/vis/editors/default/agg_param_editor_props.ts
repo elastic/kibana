@@ -29,11 +29,8 @@ export interface AggParamEditorProps<T> {
   aggParam: AggParam;
   value: T;
   indexedFields?: any[];
-  setValue(value: T): void;
-}
-
-export interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
   isInvalid: boolean;
+  setValue(value: T): void;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }

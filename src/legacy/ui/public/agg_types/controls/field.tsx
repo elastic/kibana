@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import { AggConfig } from 'ui/vis';
 import { formatListAsProse, parseCommaSeparatedList } from '../../../../utils';
-import { AggParamRequiredEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from '../../vis/editors/default';
 import { ComboBoxGroupedOption } from '../../vis/editors/default/default_editor_utils';
 import { FieldParamType } from '../param_types';
 
@@ -39,7 +39,7 @@ function FieldParamEditor({
   isInvalid,
   setValidity,
   setTouched,
-}: AggParamRequiredEditorProps<FieldParamType>) {
+}: AggParamEditorProps<FieldParamType>) {
   const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
   const selectedOptions: ComboBoxGroupedOption[] = value
     ? [{ label: value.displayName, value }]
