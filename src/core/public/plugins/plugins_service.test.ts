@@ -17,23 +17,21 @@
  * under the License.
  */
 
+import {
+  MockedPluginInitializer,
+  mockLoadPluginBundle,
+  mockPluginInitializerProvider,
+} from './plugins_service.test.mocks';
+
 import { PluginName } from 'src/core/server';
 import { CoreContext } from '../core_system';
-import { Plugin } from './plugin';
-import { loadPluginBundleMock } from './plugin_loader.mock';
-
-type MockedPluginInitializer = jest.Mock<Plugin<unknown, Record<string, unknown>>, any>;
-
-let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
-
-const mockLoadPluginBundle = loadPluginBundleMock.create(
-  (pluginName: string) => mockPluginInitializers.get(pluginName)!
-);
-jest.mock('./plugin_loader', () => ({
-  loadPluginBundle: mockLoadPluginBundle,
-}));
-
 import { PluginsService } from './plugins_service';
+
+export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
+
+mockPluginInitializerProvider.mockImplementation(
+  pluginName => mockPluginInitializers.get(pluginName)!
+);
 
 const mockCoreContext: CoreContext = {};
 let mockDeps: any;

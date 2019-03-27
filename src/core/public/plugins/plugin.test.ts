@@ -16,17 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-const mockPlugin = {
-  setup: jest.fn(),
-  stop: jest.fn(),
-};
-const mockInitializer = jest.fn(() => mockPlugin);
-const mockPluginLoader = jest.fn(() => Promise.resolve(mockInitializer));
-
-jest.mock('./plugin_loader', () => ({
-  loadPluginBundle: mockPluginLoader,
-}));
+import { mockInitializer, mockPlugin, mockPluginLoader } from './plugin.test.mocks';
 
 import { DiscoveredPlugin } from '../../server';
 import { Plugin } from './plugin';

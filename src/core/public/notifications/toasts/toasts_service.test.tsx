@@ -17,12 +17,7 @@
  * under the License.
  */
 
-const mockReactDomRender = jest.fn();
-const mockReactDomUnmount = jest.fn();
-jest.mock('react-dom', () => ({
-  render: mockReactDomRender,
-  unmountComponentAtNode: mockReactDomUnmount,
-}));
+import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
 
 import { of } from 'rxjs';
 import { ToastsService } from './toasts_service';
