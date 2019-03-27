@@ -281,7 +281,7 @@
     "@types/execa": "^0.9.0",
     "@types/fetch-mock": "7.2.1",
     "@types/getopts": "^2.0.0",
-    "@types/glob": "^5.0.35",
+    "@types/glob": "^7.1.1",
     "@types/globby": "^8.0.0",
     "@types/graphql": "^0.13.1",
     "@types/hapi": "^17.0.18",
