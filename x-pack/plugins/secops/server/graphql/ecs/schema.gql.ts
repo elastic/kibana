@@ -252,6 +252,7 @@ export const ecsSchema = gql`
     auditd: AuditdEcsFields
     destination: DestinationEcsFields
     event: EventEcsFields
+    message: String
     geo: GeoEcsFields
     host: HostEcsFields
     network: NetworkEcsField

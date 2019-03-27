@@ -1107,6 +1107,8 @@ export namespace GetEventsQuery {
 
     source?: _Source | null;
 
+    message?: string | null;
+
     destination?: Destination | null;
 
     geo?: Geo | null;
