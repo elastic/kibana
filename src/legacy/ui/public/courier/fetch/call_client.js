@@ -20,7 +20,6 @@
 import { ErrorAllowExplicitIndexProvider } from '../../error_allow_explicit_index';
 import { assignSearchRequestsToSearchStrategies } from '../search_strategy';
 import { IsRequestProvider } from './is_request';
-import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { RequestStatus } from './req_status';
 import { SerializeFetchParamsProvider } from './request/serialize_fetch_params';
 import { i18n } from '@kbn/i18n';
@@ -28,26 +27,19 @@ import { i18n } from '@kbn/i18n';
 export function CallClientProvider(Private, Promise, es, config) {
   const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
-  const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
   const serializeFetchParams = Private(SerializeFetchParamsProvider);
 
   const ABORTED = RequestStatus.ABORTED;
-  const DUPLICATE = RequestStatus.DUPLICATE;
 
   function callClient(searchRequests) {
     const maxConcurrentShardRequests = config.get('courier:maxConcurrentShardRequests');
     const includeFrozen = config.get('search:includeFrozen');
 
-    // merging docs can change status to DUPLICATE, capture new statuses
-    const searchRequestsAndStatuses = mergeDuplicateRequests(searchRequests);
-
-    // get the actual list of requests that we will be fetching
-    const requestsToFetch = searchRequestsAndStatuses.filter(isRequest);
-    let requestsToFetchCount = requestsToFetch.length;
-
-    if (requestsToFetchCount === 0) {
+    if (searchRequests.length === 0) {
       return Promise.resolve([]);
     }
+
+    let searchRequestsCount = searchRequests.length;
 
     // This is how we'll provide the consumer with search responses. Resolved by
     // respondToSearchRequests.
@@ -62,21 +54,17 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     // Respond to each searchRequest with the response or ABORTED.
     const respondToSearchRequests = (responsesInOriginalRequestOrder = []) => {
-      // We map over searchRequestsAndStatuses because if we were originally provided an ABORTED
+      // We map over searchRequests because if we were originally provided an ABORTED
       // request then we'll return that value.
-      return Promise.map(searchRequestsAndStatuses, function (searchRequest, searchRequestIndex) {
+      return Promise.map(searchRequests, function (searchRequest, searchRequestIndex) {
         if (searchRequest.aborted) {
           return ABORTED;
         }
 
-        const status = searchRequestsAndStatuses[searchRequestIndex];
+        const status = searchRequests[searchRequestIndex];
 
         if (status === ABORTED) {
           return ABORTED;
-        }
-
-        if (status === DUPLICATE) {
-          return searchRequest._uniq.resp;
         }
 
         const activeSearchRequestIndex = activeSearchRequests.indexOf(searchRequest);
@@ -96,7 +84,7 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     // handle a request being aborted while being fetched
     const requestWasAborted = Promise.method(function (searchRequest, index) {
-      if (searchRequestsAndStatuses[index] === ABORTED) {
+      if (searchRequests[index] === ABORTED) {
         defer.reject(new Error(
           i18n.translate('common.ui.courier.fetch.requestWasAbortedTwiceErrorMessage', {
             defaultMessage: 'Request was aborted twice?',
@@ -104,9 +92,9 @@ export function CallClientProvider(Private, Promise, es, config) {
         ));
       }
 
-      requestsToFetchCount--;
+      searchRequestsCount--;
 
-      if (requestsToFetchCount !== 0) {
+      if (searchRequestsCount !== 0) {
         // We can't resolve early unless all searchRequests have been aborted.
         return;
       }
@@ -121,7 +109,7 @@ export function CallClientProvider(Private, Promise, es, config) {
     });
 
     // attach abort handlers, close over request index
-    searchRequestsAndStatuses.forEach(function (searchRequest, index) {
+    searchRequests.forEach(function (searchRequest, index) {
       if (!isRequest(searchRequest)) {
         return;
       }
@@ -131,7 +119,7 @@ export function CallClientProvider(Private, Promise, es, config) {
       });
     });
 
-    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(requestsToFetch);
+    const searchStrategiesWithRequests = assignSearchRequestsToSearchStrategies(searchRequests);
 
     // We're going to create a new async context here, so that the logic within it can execute
     // asynchronously after we've returned a reference to defer.promise.
@@ -178,11 +166,11 @@ export function CallClientProvider(Private, Promise, es, config) {
         // Assigning searchRequests to strategies means that the responses come back in a different
         // order than the original searchRequests. So we'll put them back in order so that we can
         // use the order to associate each response with the original request.
-        const responsesInOriginalRequestOrder = new Array(searchRequestsAndStatuses.length);
+        const responsesInOriginalRequestOrder = new Array(searchRequests.length);
         segregatedResponses.forEach((responses, strategyIndex) => {
           responses.forEach((response, responseIndex) => {
             const searchRequest = searchStrategiesWithRequests[strategyIndex].searchRequests[responseIndex];
-            const requestIndex = searchRequestsAndStatuses.indexOf(searchRequest);
+            const requestIndex = searchRequests.indexOf(searchRequest);
             responsesInOriginalRequestOrder[requestIndex] = response;
           });
         });
@@ -204,7 +192,7 @@ export function CallClientProvider(Private, Promise, es, config) {
       // By returning the return value of this catch() without rethrowing the error, we delegate
       // error-handling to the searchRequest instead of the consumer.
       searchRequests.forEach((searchRequest, index) => {
-        if (searchRequestsAndStatuses[index] !== ABORTED) {
+        if (searchRequests[index] !== ABORTED) {
           searchRequest.handleFailure(err);
         }
       });
