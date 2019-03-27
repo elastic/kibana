@@ -30,15 +30,15 @@ import { createPluginInitializerContext, createPluginSetupContext } from './plug
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
-jest.mock(
+jest.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),
   { virtual: true }
 );
-jest.mock(join('plugin-without-initializer-path', 'server'), () => ({}), {
+jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
-jest.mock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
+jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
   virtual: true,
 });
 
