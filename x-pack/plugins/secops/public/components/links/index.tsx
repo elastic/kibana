@@ -34,6 +34,44 @@ export const GoogleLink = pure<{ children?: React.ReactNode; link: string }>(
   )
 );
 
+export const PortOrServiceNameLink = pure<{
+  children?: React.ReactNode;
+  portOrServiceName: number | string;
+}>(({ children, portOrServiceName }) => (
+  <EuiLink
+    data-test-subj="port-or-service-name-link"
+    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${portOrServiceName}`}
+    target="_blank"
+  >
+    {children ? children : portOrServiceName}
+  </EuiLink>
+));
+
+export const Ja3FingerprintLink = pure<{ children?: React.ReactNode; ja3Fingerprint: string }>(
+  ({ children, ja3Fingerprint }) => (
+    <EuiLink
+      data-test-subj="ja3-fingerprint-link"
+      href={`https://sslbl.abuse.ch/ja3-fingerprints/${encodeURI(ja3Fingerprint)}`}
+      target="_blank"
+    >
+      {children ? children : ja3Fingerprint}
+    </EuiLink>
+  )
+);
+
+export const CertificateFingerprintLink = pure<{
+  children?: React.ReactNode;
+  certificateFingerprint: string;
+}>(({ children, certificateFingerprint }) => (
+  <EuiLink
+    data-test-subj="certificate-fingerprint-link"
+    href={`https://sslbl.abuse.ch/ssl-certificates/sha1/${encodeURI(certificateFingerprint)}`}
+    target="_blank"
+  >
+    {children ? children : certificateFingerprint}
+  </EuiLink>
+));
+
 export const TotalVirusLink = pure<{ children?: React.ReactNode; link: string }>(
   ({ children, link }) => (
     <EuiLink href={`https://www.virustotal.com/#/search/${encodeURI(link)}`} target="_blank">

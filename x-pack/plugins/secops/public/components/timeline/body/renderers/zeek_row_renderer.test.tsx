@@ -72,7 +72,7 @@ describe('zeek_row_renderer', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toContain(
-      'some children C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedSource185.176.26.101:44059Destination207.154.238.205:11568'
+      'some children C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
     );
   });
 });

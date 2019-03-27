@@ -1759,6 +1759,10 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "isInstance": [Function],
         "renderRow": [Function],
       },
+      Object {
+        "isInstance": [Function],
+        "renderRow": [Function],
+      },
     ]
   }
   sort={

@@ -13,6 +13,7 @@ import { auditdStartedSessionRowRenderer } from './auditd_started_session_row_re
 import { auditdWasAuthorizedRowRenderer } from './auditd_was_authorized_row_renderer';
 import { ColumnRenderer } from './column_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';
+import { netflowRowRenderer } from './netflow/netflow_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 import { plainRowRenderer } from './plain_row_renderer';
 import { RowRenderer } from './row_renderer';
@@ -39,8 +40,6 @@ export * from './unknown_column_renderer';
 export * from './zeek_row_renderer';
 
 export const rowRenderers: RowRenderer[] = [
-  zeekRowRenderer,
-  suricataRowRenderer,
   auditdExecutedRowRenderer,
   auditdLoggedinRowRenderer,
   auditdWasAuthorizedRowRenderer,
@@ -48,8 +47,10 @@ export const rowRenderers: RowRenderer[] = [
   auditdEndedSessionRowRenderer,
   auditDisposedCredsRowRenderer,
   auditdStartedSessionRowRenderer,
-  plainRowRenderer,
-];
+  netflowRowRenderer,
+  suricataRowRenderer,
+  zeekRowRenderer,
+].concat(plainRowRenderer); // falls-back to the plain row renderer
 
 export const columnRenderers: ColumnRenderer[] = [
   plainColumnRenderer,

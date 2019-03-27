@@ -11,22 +11,16 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import {
-  EventsTable,
-  HostsTable,
-  TypesBar,
-  UncommonProcessTable,
-} from '../../components/page/hosts';
+import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
 import { HostsQuery } from '../../containers/hosts';
-import { KpiEventsQuery } from '../../containers/kpi_events';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
-import { IndexType, KpiItem } from '../../graphql/types';
+import { IndexType } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
 
@@ -39,7 +33,6 @@ const AuthenticationTableManage = manageQuery(AuthenticationTable);
 const HostsTableManage = manageQuery(HostsTable);
 const EventsTableManage = manageQuery(EventsTable);
 const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
-const TypesBarManage = manageQuery(TypesBar);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
@@ -58,26 +51,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
               <GlobalTime>
                 {({ poll, to, from, setQuery }) => (
                   <>
-                    <KpiEventsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      poll={poll}
-                      sourceId="default"
-                      startDate={from}
-                    >
-                      {({ kpiEventType, loading, id, refetch }) => (
-                        <TypesBarManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={kpiEventType!.map((i: KpiItem) => ({
-                            x: i.count,
-                            y: i.value,
-                          }))}
-                        />
-                      )}
-                    </KpiEventsQuery>
                     <HostsQuery
                       endDate={to}
                       filterQuery={filterQuery}

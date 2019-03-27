@@ -12,14 +12,17 @@ import { getMappedFieldName } from '../../../../lib/ecs';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { FormattedIp } from '../../../formatted_ip';
 import { Provider } from '../../data_providers/provider';
 import { ColumnHeader } from '../column_headers/column_header';
 
 import { ColumnRenderer } from '.';
-import { FormattedFieldValue } from './formatted_field';
+import { FormattedFieldValue, IP_FIELD_TYPE } from './formatted_field';
 
 export const dataExistsAtColumn = (columnName: string, data: Ecs): boolean =>
   has(getMappedFieldName(columnName), data);
+
+const contextId = 'plain_column_renderer';
 
 export const plainColumnRenderer: ColumnRenderer = {
   isInstance: (columnName: string, ecs: Ecs) => dataExistsAtColumn(columnName, ecs),
@@ -50,6 +53,21 @@ export const plainColumnRenderer: ColumnRenderer = {
       and: [],
     };
 
+    if (field.type === IP_FIELD_TYPE) {
+      // since ip fields may contain multiple IP addresses, return a FormattedIp here to avoid a "draggable of draggables"
+      return (
+        <FormattedIp
+          eventId={eventId}
+          contextId={contextId}
+          fieldName={field.id}
+          value={!isNumber(value) ? value : String(value)}
+          width={width}
+        />
+      );
+    }
+
+    // note: we use a raw DraggableWrapper here instead of a DefaultDraggable,
+    // because we pass a width to enable text truncation, and we will show empty values
     return (
       <DraggableWrapper
         key={`timeline-draggable-column-${columnName}-for-event-${eventId}`}
@@ -61,9 +79,11 @@ export const plainColumnRenderer: ColumnRenderer = {
             </DragEffects>
           ) : (
             <FormattedFieldValue
-              value={parseValue(value)}
+              eventId={eventId}
+              contextId={contextId}
               fieldName={columnName}
               fieldType={field.type || ''}
+              value={parseValue(value)}
             />
           )
         }
@@ -83,7 +103,7 @@ export const parseQueryValue = (
   } else if (isNumber(value)) {
     return value;
   }
-  return value!.toString();
+  return value.toString();
 };
 
 export const parseValue = (

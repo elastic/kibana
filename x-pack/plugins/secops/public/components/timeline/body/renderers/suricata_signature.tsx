@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { ExternalLinkIcon } from '../../../external_link_icon';
 import { GoogleLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import { getBeginningTokens } from './suricata_links';
+
+export const SURICATA_SIGNATURE_ID_FIELD_NAME = 'suricata.eve.alert.signature_id';
 
 const SignatureFlexItem = styled(EuiFlexItem)`
   min-width: 77px;
@@ -56,7 +59,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
           excluded: false,
           kqlQuery: '',
           queryMatch: {
-            field: 'suricata.eve.alert.signature_id',
+            field: SURICATA_SIGNATURE_ID_FIELD_NAME,
             value: signatureId,
           },
         }}
@@ -66,9 +69,14 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <Badge iconType="number" color="hollow">
-              {signatureId}
-            </Badge>
+            <EuiToolTip
+              data-test-subj="signature-id-tooltip"
+              content={SURICATA_SIGNATURE_ID_FIELD_NAME}
+            >
+              <Badge iconType="number" color="hollow">
+                {signatureId}
+              </Badge>
+            </EuiToolTip>
           )
         }
       />
@@ -80,16 +88,19 @@ export const SuricataSignature = pure<{ id: string; signature: string; signature
   ({ id, signature, signatureId }) => {
     const tokens = getBeginningTokens(signature);
     return (
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
         <DraggableSignatureId id={id} signatureId={signatureId} />
         <Tokens tokens={tokens} />
         <LinkFlexItem grow={false}>
-          <GoogleLink link={signature}>
-            {signature
-              .split(' ')
-              .splice(tokens.length)
-              .join(' ')}
-          </GoogleLink>
+          <div>
+            <GoogleLink link={signature}>
+              {signature
+                .split(' ')
+                .splice(tokens.length)
+                .join(' ')}
+            </GoogleLink>
+            <ExternalLinkIcon />
+          </div>
         </LinkFlexItem>
       </EuiFlexGroup>
     );
