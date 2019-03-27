@@ -212,7 +212,7 @@ exports[`render full suggestions component 1`] = `
                   </div>
                 </div>
               </EuiFlexGroup>
-              <Component
+              <SuggestionComponent
                 ariaId="suggestion-0-0"
                 innerRef={[Function]}
                 key="tokenClass - 0-0 - java.lang.String"
@@ -304,7 +304,7 @@ exports[`render full suggestions component 1`] = `
                     </div>
                   </div>
                 </div>
-              </Component>
+              </SuggestionComponent>
             </div>
             <div
               className="kbnTypeahead__items codeSearch-suggestion__group"
@@ -387,7 +387,7 @@ exports[`render full suggestions component 1`] = `
                   </div>
                 </div>
               </EuiFlexGroup>
-              <Component
+              <SuggestionComponent
                 ariaId="suggestion-1-0"
                 innerRef={[Function]}
                 key=" - 1-0 - src/foo/bar.java"
@@ -432,7 +432,7 @@ exports[`render full suggestions component 1`] = `
                     </div>
                   </div>
                 </div>
-              </Component>
+              </SuggestionComponent>
             </div>
             <div
               className="kbnTypeahead__items codeSearch-suggestion__group"
@@ -517,7 +517,7 @@ exports[`render full suggestions component 1`] = `
                   </div>
                 </div>
               </EuiFlexGroup>
-              <Component
+              <SuggestionComponent
                 ariaId="suggestion-2-0"
                 innerRef={[Function]}
                 key=" - 2-0 - elastic/kibana"
@@ -560,8 +560,8 @@ exports[`render full suggestions component 1`] = `
                     </div>
                   </div>
                 </div>
-              </Component>
-              <Component
+              </SuggestionComponent>
+              <SuggestionComponent
                 ariaId="suggestion-2-1"
                 innerRef={[Function]}
                 key=" - 2-1 - elastic/elasticsearch"
@@ -604,7 +604,7 @@ exports[`render full suggestions component 1`] = `
                     </div>
                   </div>
                 </div>
-              </Component>
+              </SuggestionComponent>
               <div
                 className="codeSearch-suggestion__link"
               >
