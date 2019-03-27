@@ -11,6 +11,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
       iconSide="right"
       iconType="arrowDown"
       onClick={[Function]}
+      size="m"
       type="button"
     >
       View data
@@ -62,6 +63,7 @@ exports[`should render simple button when appLinks is empty 1`] = `
   fill={false}
   href="root/app/kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f"
   iconSide="left"
+  size="m"
   type="button"
 >
   View data

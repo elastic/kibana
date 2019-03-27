@@ -22,6 +22,10 @@ export TEST_BROWSER_HEADLESS=1
 "$(FORCE_COLOR=0 yarn bin)/grunt" "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
-  "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease;
+  # build kbn_tp_sample_panel_action
+  cd test/plugin_functional/plugins/kbn_tp_sample_panel_action;
+  yarn build;
+  cd -;
+  "$(FORCE_COLOR=0 yarn bin)/grunt" run:pluginFunctionalTestsRelease --from=source;
   "$(FORCE_COLOR=0 yarn bin)/grunt" run:interpreterFunctionalTestsRelease;
 fi

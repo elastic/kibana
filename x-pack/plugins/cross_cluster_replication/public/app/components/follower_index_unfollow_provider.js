@@ -92,6 +92,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
             )
           }
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="ccrFollowerIndexUnfollowLeaderConfirmationModal"
         >
           {isSingle ? (
             <Fragment>
