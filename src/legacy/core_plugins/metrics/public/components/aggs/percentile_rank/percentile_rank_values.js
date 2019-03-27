@@ -34,7 +34,6 @@ export const PercentileRankValues = props => {
 
     onChange(model);
   };
-
   const onDeleteValue = ({ id }) => onChange(
     model.filter((item, currentIndex) => id !== currentIndex),
   );
@@ -53,7 +52,7 @@ export const PercentileRankValues = props => {
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-      { showOnlyLastRow && renderRow({
+      {showOnlyLastRow && renderRow({
         rowModel: {
           id: model.length - 1,
           value: last(model),
@@ -62,17 +61,15 @@ export const PercentileRankValues = props => {
         disableDelete: true
       })}
 
-      {!showOnlyLastRow && model.map((value, id, array) => {
-        const rowModel = {
-          id,
-          value,
-        };
-        return renderRow({
-          rowModel,
+      {!showOnlyLastRow && model.map((value, id, array) => (
+        renderRow({
+          rowModel: {
+            id,
+            value,
+          },
           disableAdd,
           disableDelete: disableDelete || array.length < 2,
-        });
-      })}
+        })))}
     </EuiFlexGroup>
   );
 };
