@@ -34,7 +34,7 @@ import {
   OptionsDataElement,
   pivotSupportedAggs,
   SimpleQuery,
-} from './common';
+} from '../../common';
 
 export interface DefinePivotExposedState {
   aggList: Label[];

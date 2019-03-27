@@ -22,7 +22,7 @@ export interface DropDownOption {
   options: DropDownLabel[];
 }
 
-// The internal representation of an aggregatino definition.
+// The internal representation of an aggregation definition.
 type aggName = string;
 type fieldName = string;
 export interface OptionsDataElement {

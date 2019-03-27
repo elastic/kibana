@@ -29,7 +29,7 @@ import {
   OptionsDataElement,
   pivotSupportedAggs,
   SimpleQuery,
-} from './common';
+} from '../../common';
 
 const defaultSearch = '*';
 const emptySearch = '';

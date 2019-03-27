@@ -13,17 +13,22 @@ import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 import { WizardNav } from '../../components/wizard_nav';
 
 import {
-  DefinePivotExposedState,
   DefinePivotForm,
+  DefinePivotSummary,
   getDefaultPivotState,
-} from './define_pivot_form';
-import { DefinePivotSummary } from './define_pivot_summary';
+} from '../../components/define_pivot';
 
-const JobDetails = () => <p>Job Details are the current step.</p>;
-const JobDetailsBlur = () => <p>Job Details are not the current step.</p>;
+import {
+  getDefaultJobCreateState,
+  JobCreateForm,
+  JobCreateSummary,
+} from '../../components/job_create';
 
-const JobCreate = () => <p>Job Create is the current step.</p>;
-const JobCreateBlur = () => <p>Job Create is not the current step.</p>;
+import {
+  getDefaultJobDetailsState,
+  JobDetailsForm,
+  JobDetailsSummary,
+} from '../../components/job_details';
 
 const WIZARD_STEPS = {
   DEFINE_PIVOT: 0,
@@ -36,25 +41,38 @@ interface Props {
 }
 
 export const Wizard: SFC<Props> = ({ indexPattern }) => {
-  const [step, setStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
+  // The current WIZARD_STEP
+  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE_PIVOT);
+
+  // The DEFINE_PIVOT state
   const [pivotState, setPivot] = useState(getDefaultPivotState());
 
-  function definePivotHandler(config: DefinePivotExposedState) {
-    setPivot(config);
-  }
-
   const pivot =
-    step === WIZARD_STEPS.DEFINE_PIVOT ? (
-      <DefinePivotForm
-        indexPattern={indexPattern}
-        onChange={definePivotHandler}
-        overrides={pivotState}
-      />
+    currentStep === WIZARD_STEPS.DEFINE_PIVOT ? (
+      <DefinePivotForm indexPattern={indexPattern} onChange={setPivot} overrides={pivotState} />
     ) : (
       <DefinePivotSummary indexPattern={indexPattern} {...pivotState} />
     );
-  const jobDetails = step === WIZARD_STEPS.JOB_DETAILS ? <JobDetails /> : <JobDetailsBlur />;
-  const jobCreate = step === WIZARD_STEPS.JOB_CREATE ? <JobCreate /> : <JobCreateBlur />;
+
+  // The JOB_DETAILS state
+  const [jobDetailsState, setJobDetails] = useState(getDefaultJobDetailsState());
+
+  const jobDetails =
+    currentStep === WIZARD_STEPS.JOB_DETAILS ? (
+      <JobDetailsForm onChange={setJobDetails} override={jobDetailsState} />
+    ) : (
+      <JobDetailsSummary />
+    );
+
+  // The JOB_CREATE state
+  const [jobCreateState, setJobCreate] = useState(getDefaultJobCreateState());
+
+  const jobCreate =
+    currentStep === WIZARD_STEPS.JOB_CREATE ? (
+      <JobCreateForm onChange={setJobCreate} override={jobCreateState} />
+    ) : (
+      <JobCreateSummary />
+    );
 
   const stepsConfig = [
     {
@@ -62,9 +80,9 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
       children: (
         <Fragment>
           {pivot}
-          {step === WIZARD_STEPS.DEFINE_PIVOT && (
+          {currentStep === WIZARD_STEPS.DEFINE_PIVOT && (
             <WizardNav
-              next={() => setStep(WIZARD_STEPS.JOB_DETAILS)}
+              next={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)}
               nextActive={pivotState.valid}
             />
           )}
@@ -76,27 +94,28 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
       children: (
         <Fragment>
           {jobDetails}
-          {step === WIZARD_STEPS.JOB_DETAILS && (
+          {currentStep === WIZARD_STEPS.JOB_DETAILS && (
             <WizardNav
-              previous={() => setStep(WIZARD_STEPS.DEFINE_PIVOT)}
-              next={() => setStep(WIZARD_STEPS.JOB_CREATE)}
+              previous={() => setCurrentStep(WIZARD_STEPS.DEFINE_PIVOT)}
+              next={() => setCurrentStep(WIZARD_STEPS.JOB_CREATE)}
+              nextActive={jobDetailsState.valid}
             />
           )}
         </Fragment>
       ),
-      status: 'incomplete' as EuiStepStatus,
+      status: currentStep >= WIZARD_STEPS.JOB_DETAILS ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: 'Create',
       children: (
         <Fragment>
           {jobCreate}
-          {step === WIZARD_STEPS.JOB_CREATE && (
-            <WizardNav previous={() => setStep(WIZARD_STEPS.JOB_DETAILS)} />
+          {currentStep === WIZARD_STEPS.JOB_CREATE && (
+            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.JOB_DETAILS)} />
           )}
         </Fragment>
       ),
-      status: 'incomplete' as EuiStepStatus,
+      status: currentStep >= WIZARD_STEPS.JOB_CREATE ? undefined : ('incomplete' as EuiStepStatus),
     },
   ];
 

@@ -12,7 +12,7 @@ import { EuiInMemoryTable, EuiProgress } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
-import { DataFramePreviewRequest, OptionsDataElement, SimpleQuery } from './common';
+import { DataFramePreviewRequest, OptionsDataElement, SimpleQuery } from '../../common';
 
 interface Props {
   aggs: OptionsDataElement[];

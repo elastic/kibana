@@ -16,7 +16,7 @@ import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { SimpleQuery } from './common';
+import { SimpleQuery } from '../../common';
 
 interface Props {
   indexPattern: StaticIndexPattern;
