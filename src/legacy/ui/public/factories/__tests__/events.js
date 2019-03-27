@@ -20,7 +20,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../../private';
 import { EventsProvider } from '../../events';

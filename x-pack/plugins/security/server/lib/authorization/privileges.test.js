@@ -12,7 +12,7 @@ describe('privileges should be tiered', () => {
   const subject = buildPrivilegeMap;
 
   it('should produce an object of the expected form', () => {
-    const getSavedObjectAction = sinon.fake((t: any, a: any) => {
+    const getSavedObjectAction = sinon.fake((t, a) => {
       if (!t || !isString(t)) {
         throw new Error('type is required and must be a string');
       }
