@@ -32,22 +32,6 @@ export class ScopedSavedObjectsClientProvider {
     this._wrapperFactories.add(priority, wrapperFactory);
   }
 
-  build({ exclude }) {
-    const newProvider = new ScopedSavedObjectsClientProvider(this._originalClientFactory);
-
-    newProvider._clientFactory = this._clientFactory;
-
-    const toExclude = [].concat(exclude);
-
-    this._wrapperFactories.toPrioritizedArray().forEach((entry, index) => {
-      if (!toExclude.includes(entry)) {
-        newProvider.add(Number.MAX_VALUE - index, entry);
-      }
-    });
-
-    return newProvider;
-  }
-
   setClientFactory(customClientFactory) {
     if (this._clientFactory !== this._originalClientFactory) {
       throw new Error(`custom client factory is already set, unable to replace the current one`);
@@ -57,12 +41,17 @@ export class ScopedSavedObjectsClientProvider {
   }
 
   getClient(request) {
-    const client = this._clientFactory({ request });
+    const client = this._clientFactory({
+      request,
+    });
 
     return this._wrapperFactories
       .toPrioritizedArray()
       .reduceRight((clientToWrap, wrapperFactory) => {
-        return wrapperFactory({ request, client: clientToWrap });
+        return wrapperFactory({
+          request,
+          client: clientToWrap,
+        });
       }, client);
   }
 }
