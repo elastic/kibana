@@ -721,7 +721,9 @@ export interface KpiNetworkData {
 
   activeAgents?: number | null;
 
-  uniquePrivateIps?: number | null;
+  uniqueSourcePrivateIps?: number | null;
+
+  uniqueDestinationPrivateIps?: number | null;
 }
 
 // ====================================================
@@ -1457,7 +1459,9 @@ export namespace GetKpiNetworkQuery {
 
     activeAgents?: number | null;
 
-    uniquePrivateIps?: number | null;
+    uniqueSourcePrivateIps?: number | null;
+
+    uniqueDestinationPrivateIps?: number | null;
   };
 }
 

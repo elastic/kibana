@@ -18,10 +18,17 @@ export const ACTIVE_AGENTS = i18n.translate('xpack.secops.kpiNetwork.source.acti
   defaultMessage: 'Active Agents',
 });
 
-export const UNIQUE_PRIVATE_IP = i18n.translate(
-  'xpack.secops.kpiNetwork.source.uniquePrivateIpsTitle',
+export const UNIQUE_SOURCE_PRIVATE_IPS = i18n.translate(
+  'xpack.secops.kpiNetwork.source.uniqueSourcePrivateIpsTitle',
   {
-    defaultMessage: 'Unique Private IP',
+    defaultMessage: 'Unique Source IPs',
+  }
+);
+
+export const UNIQUE_DESTINATION_PRIVATE_IPS = i18n.translate(
+  'xpack.secops.kpiNetwork.source.uniqueDestinationPrivateIpsTitle',
+  {
+    defaultMessage: 'Unique Destination IPs',
   }
 );
 

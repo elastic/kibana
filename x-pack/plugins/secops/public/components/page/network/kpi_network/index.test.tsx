@@ -15,7 +15,7 @@ import { createStore, State } from '../../../../store';
 import { KpiNetworkComponent } from '.';
 import { mockData } from './mock';
 
-describe('NetworkTopNFlow Table Component', () => {
+describe('KpiNetwork Component', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state);

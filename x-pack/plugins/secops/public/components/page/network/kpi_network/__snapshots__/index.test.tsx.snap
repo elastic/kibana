@@ -1,27 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NetworkTopNFlow Table Component rendering it renders loading icons 1`] = `
+exports[`KpiNetwork Component rendering it renders loading icons 1`] = `
 <pure(Component)
   data={
     Object {
       "activeAgents": 60015,
       "networkEvents": 16,
+      "uniqueDestinationPrivateIps": 18,
       "uniqueFlowId": 10277307,
-      "uniquePrivateIps": 383,
+      "uniqueSourcePrivateIps": 383,
     }
   }
   loading={true}
 />
 `;
 
-exports[`NetworkTopNFlow Table Component rendering it renders the default widget 1`] = `
+exports[`KpiNetwork Component rendering it renders the default widget 1`] = `
 <pure(Component)
   data={
     Object {
       "activeAgents": 60015,
       "networkEvents": 16,
+      "uniqueDestinationPrivateIps": 18,
       "uniqueFlowId": 10277307,
-      "uniquePrivateIps": 383,
+      "uniqueSourcePrivateIps": 383,
     }
   }
   loading={false}

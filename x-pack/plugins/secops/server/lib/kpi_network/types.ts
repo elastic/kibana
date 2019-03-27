@@ -5,7 +5,7 @@
  */
 import { KpiNetworkData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
-import { SearchHit } from '../types';
+import { MSearchHeader, SearchHit } from '../types';
 
 export interface KpiNetworkAdapter {
   getKpiNetwork(request: FrameworkRequest, options: RequestBasicOptions): Promise<KpiNetworkData>;
@@ -22,12 +22,6 @@ export interface KpiNetworkHit extends SearchHit {
   };
 }
 
-export interface KpiNetworkHeader {
-  index: string[] | string;
-  allowNoIndices?: boolean;
-  ignoreUnavailable?: boolean;
-}
-
 export interface KpiNetworkBody {
   query?: object;
   aggregations?: object;
@@ -35,6 +29,6 @@ export interface KpiNetworkBody {
   track_total_hits?: boolean;
 }
 
-export type KpiNetworkESMSearchBody = KpiNetworkBody | KpiNetworkHeader;
+export type KpiNetworkESMSearchBody = KpiNetworkBody | MSearchHeader;
 
 export type UniquePrivateAttributeQuery = 'source' | 'destination';
