@@ -17,5 +17,19 @@
  * under the License.
  */
 
-require('../../setup_node_env');
-module.exports = require('./ts_transform.ts');
+export const MockClient = jest.fn();
+jest.mock('elasticsearch', () => ({
+  // Jest types don't include `requireActual` right now.
+  ...jest.requireActual('elasticsearch'),
+  Client: MockClient,
+}));
+
+export const MockScopedClusterClient = jest.fn();
+jest.mock('./scoped_cluster_client', () => ({
+  ScopedClusterClient: MockScopedClusterClient,
+}));
+
+export const mockParseElasticsearchClientConfig = jest.fn();
+jest.mock('./elasticsearch_client_config', () => ({
+  parseElasticsearchClientConfig: mockParseElasticsearchClientConfig,
+}));

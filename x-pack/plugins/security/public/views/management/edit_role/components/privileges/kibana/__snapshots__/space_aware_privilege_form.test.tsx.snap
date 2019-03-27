@@ -254,9 +254,7 @@ exports[`<SpaceAwarePrivilegeForm> renders without crashing 1`] = `
   >
     <p>
       <FormattedMessage
-        defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are
-              {read} for all spaces, you can set the privileges to {all}
-              for an individual space."
+        defaultMessage="Grant more privileges on a per space basis. For example, if the privileges are {read} for all spaces, you can set the privileges to {all} for an individual space."
         id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.grantMorePrivilegesTitle"
         values={
           Object {
@@ -410,8 +408,7 @@ exports[`<SpaceAwarePrivilegeForm> with user profile disabling "manageSpaces" re
   </p>
   <p>
     <FormattedMessage
-      defaultMessage="Please ensure your account has all privileges granted by the
-              {kibanaUser} role, and try again."
+      defaultMessage="Please ensure your account has all privileges granted by the {kibanaUser} role, and try again."
       id="xpack.security.management.editRoles.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
       values={
         Object {

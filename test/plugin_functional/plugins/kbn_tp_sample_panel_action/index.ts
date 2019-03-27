@@ -17,23 +17,24 @@
  * under the License.
  */
 
-module.exports = {
-  presets: [
-    require.resolve('@babel/preset-react'),
-    require.resolve('@babel/preset-typescript'),
-  ],
-  plugins: [
-    require.resolve('babel7-plugin-add-module-exports'),
-    // stage 3
-    require.resolve('@babel/plugin-proposal-async-generator-functions'),
-    require.resolve('@babel/plugin-proposal-object-rest-spread'),
+import { resolve } from 'path';
 
-    // the class properties proposal was merged with the private fields proposal
-    // into the "class fields" proposal. Babel doesn't support this combined
-    // proposal yet, which includes private field, so this transform is
-    // TECHNICALLY stage 2, but for all intents and purposes it's stage 3
-    //
-    // See https://github.com/babel/proposals/issues/12 for progress
-    require.resolve('@babel/plugin-proposal-class-properties'),
-  ],
+// TODO: use something better once https://github.com/elastic/kibana/issues/26555 is
+// figured out.
+type KibanaPlugin = any;
+
+function samplePanelAction(kibana: KibanaPlugin) {
+  return new kibana.Plugin({
+    publicDir: resolve(__dirname, './public'),
+    uiExports: {
+      contextMenuActions: [
+        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
+        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
+      ],
+    },
+  });
+}
+
+module.exports = (kibana: KibanaPlugin) => {
+  return [samplePanelAction(kibana)];
 };

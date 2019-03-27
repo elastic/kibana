@@ -17,20 +17,10 @@
  * under the License.
  */
 
-function samplePanelAction(kibana) {
-  return new kibana.Plugin({
-    uiExports: {
-      contextMenuActions: [
-        'plugins/kbn_tp_sample_panel_action/sample_panel_action',
-        'plugins/kbn_tp_sample_panel_action/sample_panel_link',
-      ],
-    },
-  });
-}
+export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
+jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
 
-module.exports = function (kibana) {
-  return [
-    samplePanelAction(kibana),
-  ];
-};
+export const mockDiscover = jest.fn();
+jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
 
+jest.mock('./plugins_system');
