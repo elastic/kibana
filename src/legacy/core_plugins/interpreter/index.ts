@@ -36,7 +36,7 @@ export default function InterpreterPlugin(kibana: any) {
     config: (Joi: any) => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        enableInVisualize: Joi.boolean().default(false),
+        enableInVisualize: Joi.boolean().default(true),
       }).default();
     },
     init,

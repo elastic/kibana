@@ -151,7 +151,7 @@ function VisualizeLoaderProvider(
   interpreterConfig: any,
   Private: IPrivate
 ) {
-  return new VisualizeLoader(savedVisualizations, interpreterConfig.enabledInPipeline, Private);
+  return new VisualizeLoader(savedVisualizations, interpreterConfig.enableInVisualize, Private);
 }
 
 /**
