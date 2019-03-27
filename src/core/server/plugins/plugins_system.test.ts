@@ -17,16 +17,12 @@
  * under the License.
  */
 
-import { CoreContext } from '../core_context';
-
-const mockCreatePluginSetupContext = jest.fn();
-jest.mock('./plugin_context', () => ({
-  createPluginSetupContext: mockCreatePluginSetupContext,
-}));
+import { mockCreatePluginSetupContext } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { Plugin, PluginName } from './plugin';

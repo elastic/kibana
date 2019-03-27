@@ -33,9 +33,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       }
       description={
         <FormattedMessage
-          defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the
-                    default type name, {defaultType}, and will be updated when reindexed. Ensure no application code
-                    or scripts rely on a different type."
+          defaultMessage="Mapping types are no longer supported in 8.x. This index mapping does not use the default type name, {defaultType}, and will be updated when reindexed. Ensure no application code or scripts rely on a different type."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.customTypeNameWarningDetail"
           values={
             Object {
@@ -72,8 +70,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
       }
       description={
         <FormattedMessage
-          defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema.
-                      Historical APM data will not visible until it's reindexed."
+          defaultMessage="Starting in version 7.0.0, APM data will be represented in the Elastic Common Schema. Historical APM data will not visible until it's reindexed."
           id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.apmReindexWarningDetail"
           values={Object {}}
         />
