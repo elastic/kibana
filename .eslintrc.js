@@ -50,6 +50,7 @@ module.exports = {
     '@kbn/eslint/no-restricted-paths': [
       'error',
       {
+        basePath: __dirname,
         zones: [
           {
             target: [

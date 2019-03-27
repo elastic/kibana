@@ -1,5 +1,5 @@
 /* eslint-disable-line @kbn/eslint/require-license-header */
-/* @notice
+/*
  * This product uses import/no-restricted-paths which is available under a
  * "MIT" license.
  *
@@ -40,10 +40,6 @@ function isStaticRequire(node) {
     node.arguments[0].type === 'Literal' &&
     typeof node.arguments[0].value === 'string'
   );
-}
-
-function resolveBasePath(basePath) {
-  return path.isAbsolute(basePath) ? basePath : path.relative(process.cwd(), basePath);
 }
 
 function traverseToTopFolder(src, pattern) {
@@ -93,7 +89,10 @@ module.exports = {
   create(context) {
     const options = context.options[0] || {};
     const zones = options.zones || [];
-    const basePath = options.basePath ? resolveBasePath(options.basePath) : process.cwd();
+    const basePath = options.basePath;
+    if (!basePath || !path.isAbsolute(basePath)) {
+      throw new Error('basePath option must be specified and must be absolute');
+    }
 
     function checkForRestrictedImportPath(importPath, node) {
       const absoluteImportPath = resolve(importPath, context);

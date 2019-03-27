@@ -39,25 +39,18 @@ const ruleTester = new RuleTester({
   },
 });
 
-function resolveAbsolute(relativePath) {
-  return path.join(__dirname, 'files', relativePath);
-}
-
-function resolveRelative(relativePath) {
-  return path.join(path.relative(process.cwd(), __dirname), 'files', relativePath);
-}
-
 ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
   valid: [
     {
       code: 'import a from "../client/a.js"',
-      filename: resolveAbsolute('./no_restricted_paths/server/b.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
-              target: '**/no_restricted_paths/server/**/*',
-              from: '**/no_restricted_paths/other/**/*',
+              target: 'files/no_restricted_paths/server/**/*',
+              from: 'files/no_restricted_paths/other/**/*',
             },
           ],
         },
@@ -65,13 +58,14 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
     {
       code: 'const a = require("../client/a.js")',
-      filename: resolveAbsolute('./no_restricted_paths/server/b.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
-              target: resolveRelative('./no_restricted_paths/server/**/*'),
-              from: resolveRelative('./no_restricted_paths/other/**/*'),
+              target: 'files/no_restricted_paths/server/**/*',
+              from: 'files/no_restricted_paths/other/**/*',
             },
           ],
         },
@@ -79,9 +73,10 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
     {
       code: 'import b from "../server/b.js"',
-      filename: resolveAbsolute('./no_restricted_paths/client/a.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
               target: '**/no_restricted_paths/client/**/*',
@@ -93,16 +88,24 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
 
     // irrelevant function calls
-    { code: 'notrequire("../server/b.js")' },
     {
       code: 'notrequire("../server/b.js")',
-      filename: resolveAbsolute('./no_restricted_paths/client/a.js'),
       options: [
         {
+          basePath: __dirname,
+        },
+      ],
+    },
+    {
+      code: 'notrequire("../server/b.js")',
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
           zones: [
             {
-              target: '**/no_restricted_paths/client/**/*',
-              from: '**/no_restricted_paths/server/**/*',
+              target: 'files/no_restricted_paths/client/**/*',
+              from: 'files/no_restricted_paths/server/**/*',
             },
           ],
         },
@@ -110,22 +113,44 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
 
     // no config
-    { code: 'require("../server/b.js")' },
-    { code: 'import b from "../server/b.js"' },
+    {
+      code: 'require("../server/b.js")',
+      options: [
+        {
+          basePath: __dirname,
+        },
+      ],
+    },
+    {
+      code: 'import b from "../server/b.js"',
+      options: [
+        {
+          basePath: __dirname,
+        },
+      ],
+    },
 
     // builtin (ignore)
-    { code: 'require("os")' },
+    {
+      code: 'require("os")',
+      options: [
+        {
+          basePath: __dirname,
+        },
+      ],
+    },
 
     {
       code: 'const d = require("./deep/d.js")',
-      filename: resolveAbsolute('./no_restricted_paths/server/b.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
               allowSameFolder: true,
-              target: '**/no_restricted_paths/**/*',
-              from: '**/no_restricted_paths/**/*',
+              target: 'files/no_restricted_paths/**/*',
+              from: 'files/no_restricted_paths/**/*',
             },
           ],
         },
@@ -136,13 +161,14 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
   invalid: [
     {
       code: 'import b from "../server/b.js"',
-      filename: resolveAbsolute('./no_restricted_paths/client/a.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
-              target: '**/no_restricted_paths/client/**/*',
-              from: '**/no_restricted_paths/server/**/*',
+              target: 'files/no_restricted_paths/client/**/*',
+              from: 'files/no_restricted_paths/server/**/*',
             },
           ],
         },
@@ -157,17 +183,18 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
     {
       code: 'import a from "../client/a"\nimport c from "./c"',
-      filename: resolveAbsolute('./no_restricted_paths/server/b.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
-              target: '**/no_restricted_paths/server/**/*',
-              from: '**/no_restricted_paths/client/**/*',
+              target: 'files/no_restricted_paths/server/**/*',
+              from: 'files/no_restricted_paths/client/**/*',
             },
             {
-              target: '**/no_restricted_paths/server/**/*',
-              from: '**/no_restricted_paths/server/c.js',
+              target: 'files/no_restricted_paths/server/**/*',
+              from: 'files/no_restricted_paths/server/c.js',
             },
           ],
         },
@@ -187,9 +214,10 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
     {
       code: 'const b = require("../server/b.js")',
-      filename: resolveAbsolute('./no_restricted_paths/client/a.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
               target: '**/no_restricted_paths/client/**/*',
@@ -208,16 +236,16 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
     },
     {
       code: 'const b = require("../server/b.js")',
-      filename: resolveAbsolute('./no_restricted_paths/client/a.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/client/a.js'),
       options: [
         {
+          basePath: path.join(__dirname, 'files', 'no_restricted_paths'),
           zones: [
             {
               target: 'client/**/*',
               from: 'server/**/*',
             },
           ],
-          basePath: resolveRelative('./no_restricted_paths'),
         },
       ],
       errors: [
@@ -231,13 +259,14 @@ ruleTester.run('@kbn/eslint/no-restricted-paths', rule, {
 
     {
       code: 'const d = require("./deep/d.js")',
-      filename: resolveAbsolute('./no_restricted_paths/server/b.js'),
+      filename: path.join(__dirname, './files/no_restricted_paths/server/b.js'),
       options: [
         {
+          basePath: __dirname,
           zones: [
             {
-              target: '**/no_restricted_paths/**/*',
-              from: '**/no_restricted_paths/**/*',
+              target: 'files/no_restricted_paths/**/*',
+              from: 'files/no_restricted_paths/**/*',
             },
           ],
         },
