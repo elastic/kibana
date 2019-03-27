@@ -40,7 +40,7 @@ export function CallClientProvider(Private, Promise, es, config) {
 
     let requestsToFetchCount = requestsToFetch.length;
 
-    if (requestsToFetchCount.length === 0) {
+    if (requestsToFetchCount === 0) {
       return Promise.resolve([]);
     }
 
