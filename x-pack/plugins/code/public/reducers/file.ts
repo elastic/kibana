@@ -15,6 +15,7 @@ import {
   fetchFileFailed,
   FetchFileResponse,
   fetchFileSuccess,
+  fetchMoreCommits,
   fetchRepoBranchesSuccess,
   fetchRepoCommitsSuccess,
   fetchRepoTree,
@@ -159,6 +160,10 @@ export const file = handleActions(
       produce<FileState>(state, draft => {
         draft.commits = action.payload;
         draft.loadingCommits = false;
+      }),
+    [String(fetchMoreCommits)]: (state: FileState, action: any) =>
+      produce<FileState>(state, draft => {
+        draft.loadingCommits = true;
       }),
     [String(fetchRepoBranchesSuccess)]: (state: FileState, action: any) =>
       produce<FileState>(state, (draft: FileState) => {
