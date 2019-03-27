@@ -28,11 +28,10 @@ describe('Authenticator', () => {
     session = sinon.createStubInstance(Session);
 
     config = { get: sinon.stub() };
-    cluster = { callWithRequest: sinon.stub() };
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
-    cluster = sinon.stub({ callWithRequest() {} });
+    cluster = sinon.stub({ callWithRequest() {}, callWithInternalUser() {} });
     sandbox.stub(ClientShield, 'getClient').returns(cluster);
 
     server.config.returns(config);
@@ -355,6 +354,35 @@ describe('Authenticator', () => {
 
       sinon.assert.calledTwice(session.clear);
       sinon.assert.calledWithExactly(session.clear, notSystemAPIRequest);
+    });
+
+    it('clears session if provider requested it via setting state to `null`.', async () => {
+      // Use `token` provider for this test as it's the only one that does what we want.
+      config.get.withArgs('xpack.security.authProviders').returns(['token']);
+      await initAuthenticator(server);
+      authenticate = server.expose.withArgs('authenticate').lastCall.args[1];
+
+      const request = requestFixture({ headers: { xCustomHeader: 'xxx' } });
+
+      session.get.withArgs(request).resolves({
+        state: { accessToken: 'access-xxx', refreshToken: 'refresh-xxx' },
+        provider: 'token'
+      });
+
+      session.clear.resolves();
+
+      cluster.callWithRequest
+        .withArgs(request).rejects({ body: { error: { reason: 'token expired' } } });
+
+      cluster.callWithInternalUser.withArgs('shield.getAccessToken').rejects(
+        Boom.badRequest('refresh token expired')
+      );
+
+      const authenticationResult = await authenticate(request);
+      expect(authenticationResult.redirected()).to.be(true);
+
+      sinon.assert.calledOnce(session.clear);
+      sinon.assert.calledWithExactly(session.clear, request);
     });
 
     it('does not clear session if provider failed to authenticate request with non-401 reason with active session.',

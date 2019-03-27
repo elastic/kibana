@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
-<Component
+<EmptyState
   basePath=""
   intl={
     Object {
@@ -106,7 +106,7 @@ exports[`EmptyState component doesn't render child components when count is fals
     }
   }
 >
-  <Component
+  <EmptyIndex
     basePath=""
   >
     <EuiEmptyPrompt
@@ -249,8 +249,8 @@ exports[`EmptyState component doesn't render child components when count is fals
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </Component>
-</Component>
+  </EmptyIndex>
+</EmptyState>
 `;
 
 exports[`EmptyState component renders child components when count is truthy 1`] = `
@@ -268,7 +268,7 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 `;
 
 exports[`EmptyState component renders empty state with appropriate base path 1`] = `
-<Component
+<EmptyState
   basePath="foo"
   count={0}
   intl={
@@ -375,7 +375,7 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
   }
   loading={false}
 >
-  <Component
+  <EmptyIndex
     basePath="foo"
   >
     <EuiEmptyPrompt
@@ -518,12 +518,12 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </Component>
-</Component>
+  </EmptyIndex>
+</EmptyState>
 `;
 
 exports[`EmptyState component renders message while loading 1`] = `
-<Component
+<EmptyState
   basePath=""
   count={1}
   intl={
@@ -630,7 +630,7 @@ exports[`EmptyState component renders message while loading 1`] = `
   }
   loading={true}
 >
-  <Component>
+  <EmptyStateLoading>
     <EuiEmptyPrompt
       iconColor="subdued"
       title={
@@ -716,12 +716,12 @@ exports[`EmptyState component renders message while loading 1`] = `
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </Component>
-</Component>
+  </EmptyStateLoading>
+</EmptyState>
 `;
 
 exports[`EmptyState component renders the message when an error occurs 1`] = `
-<Component
+<EmptyState
   basePath=""
   count={1}
   error="An error occurred"
@@ -828,7 +828,7 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
     }
   }
 >
-  <Component
+  <EmptyStateError
     errorMessage="An error occurred"
   >
     <EuiEmptyPrompt
@@ -898,6 +898,6 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
         </EuiTextColor>
       </div>
     </EuiEmptyPrompt>
-  </Component>
-</Component>
+  </EmptyStateError>
+</EmptyState>
 `;
