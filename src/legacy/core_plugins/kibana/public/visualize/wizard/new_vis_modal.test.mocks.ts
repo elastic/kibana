@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export { SegmentedSearchRequestProvider } from './segmented_search_request';
+export const settingsGet = jest.fn();
+
+jest.doMock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: settingsGet,
+  }),
+}));
