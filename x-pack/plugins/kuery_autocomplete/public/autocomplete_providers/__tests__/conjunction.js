@@ -35,7 +35,9 @@ describe('Kuery conjunction suggestions', function () {
     expect(suggestions.map(suggestion => suggestion.start)).to.eql([end, end]);
     expect(suggestions.map(suggestion => suggestion.end)).to.eql([end, end]);
   });
-
+  /* the suggestions have been changed from strings containing html to JSX (specifically a <FormattedMessage/> containing the description as an argument)
+    We need to shallow mount each of the suggestions and ensure they have a description
+  */
   it('should have descriptions', function () {
     const text = ' ';
     const suggestions = getSuggestions({ text });
@@ -44,4 +46,5 @@ describe('Kuery conjunction suggestions', function () {
       expect(suggestion.description.length).to.be.greaterThan(0);
     });
   });
+
 });
