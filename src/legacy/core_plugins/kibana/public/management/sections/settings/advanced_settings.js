@@ -173,7 +173,7 @@ export class AdvancedSettings extends Component {
         <EuiSpacer size="m" />
 
         <AdvancedSettingsVoiceAnnouncement
-          query={query}
+          queryText={query.text}
           settings={filteredSettings}
           totalCounts={this.categoryCounts}
         />
