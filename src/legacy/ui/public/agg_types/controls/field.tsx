@@ -18,7 +18,7 @@
  */
 
 import { isFunction } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { EuiCallOut, EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +53,12 @@ function FieldParamEditor({
     }
   };
 
-  setValidity(!!value);
+  useEffect(
+    () => {
+      setValidity(!!value);
+    },
+    [value]
+  );
 
   return (
     <EuiFormRow
