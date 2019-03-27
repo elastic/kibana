@@ -3,10 +3,13 @@
 ++++
 <titleabbrev>7.0.0</titleabbrev>
 ++++
-
 coming[7.0.0]
 
-See also <<breaking-changes-7.0>> and <<release-notes>>.
+Each release of {kib} brings new features and product improvements. 
+Here are the highlights of the feature and user experience changes in 7.0.0.
+
+Refer to the {kib} <<breaking-changes-7.0, Breaking Changes>> and <<release-notes, 
+Release Notes>> for a list of bug fixes and other changes.
 
 //NOTE: The notable-highlights tagged regions are re-used in the
 //Installation and Upgrade Guide
@@ -14,3 +17,100 @@ See also <<breaking-changes-7.0>> and <<release-notes>>.
 // tag::notable-highlights[]
 
 // end::notable-highlights[]
+
+[float]
+=== Fresh, sleek design
+
+Since the introduction of the https://elastic.github.io/eui/#/[Elastic UI framework] in 6.2, 
+{kib} has undergone a major design revamp. This release showcases this mobile-friendly design in its 
+final form. The biggest change is a persistent global header, which 
+displays information related to where you are in {kib}. The side navigation 
+is now collapsed by default, giving applications more horizontal space. 
+Dashboards and applications also got much needed touch-ups, including a new 
+default font.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-design.png[Fresh, sleek Kibana design]
+
+[float]
+=== {kib} Query Language on by default
+
+In 6.3, {kib} introduced the <<kuery-query, Kibana Query Language (KQL)>>, and in 7.0.0, 
+KQL is the default.  KQL offers a simplified query syntax and support for 
+scripted fields. If you have a https://www.elastic.co/subscriptions[Basic license or above], KQL also provides 
+autocomplete. If you prefer the <<lucene-query, Lucene query syntax>>, you have the option 
+to turn off KQL.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-kql.png[Kibana Query Language]
+
+[float]
+=== {kib} dark theme
+
+{kib} now supports a dark theme across the entire application. This setting is saved 
+at the <<xpack-spaces, Spaces>> level. To try out this theme, go to *Management > 
+Advanced settings*, flip the dark mode switch, and reload your page. Because 
+theming is related to Spaces, you can no longer set a dark or light theme on 
+an individual dashboard.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-dark-theme.png[Kibana dark theme]
+
+[float]
+=== Responsive dashboards
+
+As part of the many enhancements to {kib} dashboards in 7.0, they are also 
+now responsive. If you want to view and interact with {kib} 
+on the go, you can pull it up on your phone with this new responsive layout.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-responsive.png[Responsive dashboard]
+
+
+[float]
+=== New look for timepicker and filters
+
+The timepicker and filters have a new look and feel.
+The timepicker now makes it easier to deal with 
+complex date queries, such as mixing relative times with absolute ones. 
+
+[role="screenshot"]
+image::images/highlights-7.0.0-timepicker.png[Kibana timepicker]
+
+Filters are enhanced in two ways.  Each filter now comes with its own menu to 
+clearly label its actions. You can also now work with filters in bulk and 
+apply them from your dashboards and saved searches.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-filters.png[Kibana timepicker]
+
+[float]
+=== Saved objects aware of each other
+
+The <<breaking-changes-7.0-saved-objects,structure of saved objects changed>> so they are now aware of each other.  
+This means you can now export a dashboard,
+including all visualization dependencies, from the Saved objects page. 
+You can also easily move objects from one {kib} instance to another or 
+between Spaces.
+
+[float]
+=== Canvas improvements
+
+Canvas has two notable improvements: an expandable expression editor and 
+additional keyboard shortcuts. 
+
+To maximize or minimize the expression editor, 
+use the expand button image:images/highlights-7.0.0-expand.png[]
+in the top right corner of the editor. To adjust the font size, use the slider 
+at the bottom.
+
+Canvas has additional keyboard shortcuts for moving elements to the front and 
+back and for copying your elements. To discover all shortcuts available in Canvas, 
+click the help icon.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-canvas-kbd.png[]
+
+
+
+
