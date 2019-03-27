@@ -4,161 +4,159 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { IconType } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-import styled from 'styled-components';
 
-import { BrowserFields } from '../../../../containers/source';
-import { Ecs } from '../../../../graphql/types';
-import { DraggableBadge } from '../../../draggables';
+import { BrowserFields } from '../../../../../containers/source';
+import { Ecs } from '../../../../../graphql/types';
+import { DraggableBadge } from '../../../../draggables';
+import { SourceDest } from '../source_dest_ip';
 
-import { PrimarySecondaryUserInfo } from './primary_secondary_user_info';
-import { SourceDest } from './source_dest_ip';
+import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
 
 import * as i18n from './translations';
-
-const Details = styled.div`
-  margin: 10px 0px 10px 10px;
-`;
-
-const TokensFlexItem = styled(EuiFlexItem)`
-  margin-left: 3px;
-`;
 
 interface Props {
   id: string;
   hostName: string | null | undefined;
   userName: string | null | undefined;
-  primary: string | null | undefined;
-  secondary: string | null | undefined;
   processExecutable: string | null | undefined;
+  result: string | null | undefined;
+  primary: string | null | undefined;
+  fileIcon: IconType;
+  contextId: string;
+  text: string;
+  secondary: string | null | undefined;
+  filePath: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
   args: string | null | undefined;
   session: string | null | undefined;
 }
 
-export const AuditdWasAuthorizedLine = pure<Props>(
+export const AuditdGenericFileLine = pure<Props>(
   ({
     id,
+    contextId,
     hostName,
     userName,
+    result,
     primary,
     secondary,
-    processExecutable,
+    filePath,
     processTitle,
+    processExecutable,
     workingDirectory,
     args,
     session,
+    text,
+    fileIcon,
   }) => (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <TokensFlexItem grow={false} component="span">
-        {i18n.SESSION}
-      </TokensFlexItem>
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId="auditd-acquired-creds"
-          eventId={id}
-          field="auditd.session"
-          value={session}
-          iconType="number"
-        />
-      </TokensFlexItem>
-      <TokensFlexItem grow={false} component="span">
-        <PrimarySecondaryUserInfo
-          contextId="auditd-acquired-creds"
-          eventId={id}
-          userName={userName}
-          primary={primary}
-          secondary={secondary}
-        />
-      </TokensFlexItem>
-      {hostName != null && (
+      <SessionUserHostWorkingDir
+        eventId={id}
+        contextId={contextId}
+        hostName={hostName}
+        userName={userName}
+        primary={primary}
+        secondary={secondary}
+        workingDirectory={workingDirectory}
+        session={session}
+      />
+      {(filePath != null || processExecutable != null) && (
         <TokensFlexItem grow={false} component="span">
-          @
+          {text}
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-acquired-creds"
+          contextId={contextId}
           eventId={id}
-          field="host.name"
-          value={hostName}
-        />
-      </TokensFlexItem>
-      {workingDirectory != null && (
-        <TokensFlexItem grow={false} component="span">
-          {i18n.IN}
-        </TokensFlexItem>
-      )}
-      <TokensFlexItem grow={false} component="span">
-        <DraggableBadge
-          contextId="auditd-acquired-creds"
-          eventId={id}
-          field="process.working_directory"
-          value={workingDirectory}
-          iconType="folderOpen"
+          field="file.path"
+          value={filePath}
+          iconType={fileIcon}
         />
       </TokensFlexItem>
       {processExecutable != null && (
         <TokensFlexItem grow={false} component="span">
-          {i18n.WAS_AUTHORIZED_TO_USE}
+          {i18n.USING}
         </TokensFlexItem>
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
-          contextId="auditd-acquired-creds"
+          contextId={contextId}
           eventId={id}
           field="process.executable"
           value={processExecutable}
           iconType="console"
         />
       </TokensFlexItem>
+      <Args eventId={id} args={args} contextId={contextId} processTitle={processTitle} />
+      {result != null && (
+        <TokensFlexItem grow={false} component="span">
+          {i18n.WITH_RESULT}
+        </TokensFlexItem>
+      )}
       <TokensFlexItem grow={false} component="span">
-        {args !== '' && (
-          <DraggableBadge
-            contextId="auditd-acquired-creds"
-            eventId={id}
-            field="process.title"
-            queryValue={processTitle != null ? processTitle : ''}
-            value={args}
-          />
-        )}
+        <DraggableBadge
+          contextId="auditd-loggedin"
+          eventId={id}
+          field="auditd.result"
+          queryValue={result}
+          value={result}
+        />
       </TokensFlexItem>
     </EuiFlexGroup>
   )
 );
 
-export const AuditdWasAuthorizedDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(
-  ({ browserFields, data }) => {
+interface GenericDetailsProps {
+  browserFields: BrowserFields;
+  data: Ecs;
+  contextId: string;
+  text: string;
+  fileIcon: IconType;
+}
+
+export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
+  ({ browserFields, data, contextId, text, fileIcon = 'document' }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session', data);
     const hostName: string | null | undefined = get('host.name', data);
     const userName: string | null | undefined = get('user.name', data);
+    const result: string | null | undefined = get('auditd.result', data);
     const processExecutable: string | null | undefined = get('process.executable', data);
     const processTitle: string | null | undefined = get('process.title', data);
     const workingDirectory: string | null | undefined = get('process.working_directory', data);
+    const filePath: string | null | undefined = get('file.path', data);
     const primary: string | null | undefined = get('auditd.summary.actor.primary', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);
     const args: string = rawArgs != null ? rawArgs.slice(1).join(' ') : '';
+
     if (data.process != null) {
       return (
         <Details>
-          <AuditdWasAuthorizedLine
+          <AuditdGenericFileLine
             id={id}
+            contextId={contextId}
+            text={text}
             hostName={hostName}
             userName={userName}
-            processExecutable={processExecutable}
+            filePath={filePath}
             processTitle={processTitle}
             workingDirectory={workingDirectory}
             args={args}
             session={session}
             primary={primary}
+            processExecutable={processExecutable}
             secondary={secondary}
+            fileIcon={fileIcon}
+            result={result}
           />
           <EuiSpacer size="s" />
           <SourceDest data={data} browserFields={browserFields} />

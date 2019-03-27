@@ -277,6 +277,8 @@ export interface Ecs {
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
+
+  file?: FileFields | null;
 }
 
 export interface AuditdEcsFields {
@@ -571,6 +573,36 @@ export interface Thread {
   id?: number | null;
 
   start?: string | null;
+}
+
+export interface FileFields {
+  path?: string | null;
+
+  target_path?: string | null;
+
+  extension?: string | null;
+
+  type?: string | null;
+
+  device?: string | null;
+
+  inode?: string | null;
+
+  uid?: string | null;
+
+  owner?: string | null;
+
+  gid?: string | null;
+
+  group?: string | null;
+
+  mode?: string | null;
+
+  size?: number | null;
+
+  mtime?: Date | null;
+
+  ctime?: Date | null;
 }
 
 export interface EventDetailsData {
@@ -1850,6 +1882,8 @@ export namespace GetTimelineQuery {
 
     auditd?: Auditd | null;
 
+    file?: File | null;
+
     host?: Host | null;
 
     source?: _Source | null;
@@ -1941,6 +1975,38 @@ export namespace GetTimelineQuery {
     secondary?: string | null;
 
     type?: string | null;
+  };
+
+  export type File = {
+    __typename?: 'FileFields';
+
+    path?: string | null;
+
+    target_path?: string | null;
+
+    extension?: string | null;
+
+    type?: string | null;
+
+    device?: string | null;
+
+    inode?: string | null;
+
+    uid?: string | null;
+
+    owner?: string | null;
+
+    gid?: string | null;
+
+    group?: string | null;
+
+    mode?: string | null;
+
+    size?: number | null;
+
+    mtime?: Date | null;
+
+    ctime?: Date | null;
   };
 
   export type Host = {
