@@ -102,7 +102,7 @@ exports[`Snapshot component renders without errors 1`] = `
       <EuiSpacer
         size="s"
       />
-      <Component
+      <SnapshotHistogram
         dangerColor="#F050F0"
         histogram={
           Array [
