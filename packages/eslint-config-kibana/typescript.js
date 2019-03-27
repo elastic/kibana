@@ -68,14 +68,11 @@ module.exports = {
           '@typescript-eslint/array-type': ['error', 'array-simple'],
           '@typescript-eslint/ban-types': 'error',
           'camelcase': 'off',
-          // TODO: still failing in ~8 different files and it doesn't offer
-          //  the configuration we need in order to get it working there.
-          //  Im thinking about disabling the rule on those files with
-          //  in-file comments.
-          // '@typescript-eslint/camelcase': ['error', {
-          //   'properties': 'never',
-          //   'ignoreDestructuring': true
-          // }],
+          '@typescript-eslint/camelcase': ['error', {
+            'properties': 'never',
+            'ignoreDestructuring': true,
+            'allow': ['^[A-Z0-9_]+$']
+          }],
           '@typescript-eslint/class-name-casing': 'error',
           // TODO: disable this rule until a PR with more options to configure
           //       get merged and we can then reproduce the old behaviour
@@ -93,8 +90,7 @@ module.exports = {
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/no-triple-slash-reference': 'error',
-          // TODO: I'm thinking about not including this one
-          // '@typescript-eslint/no-var-requires': 'error',
+          '@typescript-eslint/no-var-requires': 'error',
           '@typescript-eslint/type-annotation-spacing': 'error',
           '@typescript-eslint/unified-signatures': 'error',
           'arrow-body-style': 'error',
@@ -136,10 +132,6 @@ module.exports = {
           'no-var': 'error',
           'object-curly-spacing': 'error',
           'object-shorthand': 'error',
-          // TODO: Those 2 rules are not working. The first one reports a lot of errors
-          //  in a bunch of a different files. The second one still output errors in a lot
-          //  of cases too. I'm thinking about removing them.
-          // 'one-var': 'error', // can't reproduce tslint behaviour
           'prefer-const': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],

@@ -102,7 +102,7 @@ export const viewReducer: Reducer<ViewState> = (
   switch ((action as ViewActions).type) {
     case ViewActionTypeKeys.MINIMIZE_PANEL:
       return minimizePanel(view);
-    case ViewActionTypeKeys.MAXIMIZE_PANEl:
+    case ViewActionTypeKeys.MAXIMIZE_PANEL:
       return maximizePanel(view, action.payload);
     case ViewActionTypeKeys.SET_VISIBLE_CONTEXT_MENU_PANEL_ID:
       return setVisibleContextMenuPanelId(view, action.payload);
