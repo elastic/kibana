@@ -14,7 +14,11 @@ removes encrypted attributes from being exposed through regular means.
 Registering a type with the `savedObjectAttributeCrypto` plugin
 
 ```JS
-server.plugins.savedObjectAttributeCrypto.registerType('action', ['secretParams']);
+server.plugins.savedObjectAttributeCrypto.registerType({
+  type: 'server-action',
+  encryptedAttributes: ['secretParams'],
+  excludedFromAad: ['temporaryState'], /* list of attributes that might not contain user specified data */
+});
 ```
 
 Retrieve a method that would receive the decrypted attributes.
@@ -41,19 +45,24 @@ wrapper around the client that would encrypt the registered attributes and
 remove any secret attributes on saved objects returned by the wrapped client.
 
 ```JS
-server.plugins.savedObjectAttributeCrypto.registerType('action', ['secretParams']);
+server.plugins.savedObjectAttributeCrypto.registerType({
+  type: 'server-action',
+  encryptedAttributes: ['secretParams'],
+  excludedFromAad: ['temporaryState'], /* list of attributes that might not contain user specified data */
+});
 ```
 
 If the wrapper gets a request to create, or update a registered type.
 
 It would use the following procedure.
 - extract and delete the registered encrypted attributes
+- extract and delete the excluded from aad attributes
 - use the resulting id, type, and attributes as additional authentication data
   encrypt the extracted attributes.
 - add the encrypted attributes back to the saved object and pass it to the
   wrapped client.
 
-The secret attribute would be scrubbed from all get, bulkGet, and find
+The secret attribute(s) would be scrubbed from all get, bulkGet, and find
 operations. Using the following procedure
 
 - Forward call to wrapped client
@@ -127,7 +136,7 @@ the desired decryption contexts.
 `savedObjectAttributeCrypto` as the name of the `thing` where it's seen as a separate
 extension on top of the saved object service.
 
-Provide a readme.md in the plugin directory with examples for how to depend on
+Provide a README.md in the plugin directory with examples for how to depend on
 the plugin and define a type has hidden attributes.
 
 # Unresolved questions
