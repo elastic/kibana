@@ -68,6 +68,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
             name: 'My favorite global object',
           },
           references: [],
+          updated_at: '2017-09-21T18:59:16.270Z',
         },
       ],
     });
@@ -100,7 +101,17 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             title: 'Count of requests',
           },
-          references: [],
+          migrationVersion: {
+            visualization: '7.0.0',
+          },
+          references: [
+            {
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+            },
+          ],
+          updated_at: '2017-09-21T18:51:23.794Z',
         },
       ],
     });
