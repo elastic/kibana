@@ -155,9 +155,9 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       walk.push(commit.id());
       let commits: Commit[];
       if (path) {
-        // magic number 1000: how many commits at the most to iterate in order to find the commits contains the path
-        const results = await walk.fileHistoryWalk(path, 10000);
-        commits = results.slice(0, count).map(result => result.commit);
+        // magic number 10000: how many commits at the most to iterate in order to find the commits contains the path
+        const results = await walk.fileHistoryWalk(path, count, 10000);
+        commits = results.map(result => result.commit);
       } else {
         walk.push(commit.id());
         commits = await walk.getCommits(count);
