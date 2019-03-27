@@ -286,7 +286,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
   isCollectionIntervalUpdating={true}
   property="xpack.monitoring.collection.interval"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -330,7 +330,7 @@ exports[`ExplainCollectionInterval collection interval setting updates should sh
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
     size="half"
   >
@@ -609,7 +609,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
   isCollectionIntervalUpdating={false}
   property="xpack.monitoring.collection.interval"
 >
-  <Component>
+  <WhatIs>
     <EuiTitle
       size="l"
       textTransform="none"
@@ -653,7 +653,7 @@ exports[`ExplainCollectionInterval should explain about xpack.monitoring.collect
         </EuiText>
       </span>
     </EuiTextColor>
-  </Component>
+  </WhatIs>
   <EuiHorizontalRule
     size="half"
   >
