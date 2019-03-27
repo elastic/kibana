@@ -38,11 +38,11 @@ export function CallClientProvider(Private, Promise, es, config) {
     // get the actual list of requests that we will be fetching
     const requestsToFetch = searchRequests.filter(isRequest);
 
-    if (requestsToFetch.length === 0) {
+    let requestsToFetchCount = requestsToFetch.length;
+
+    if (requestsToFetchCount.length === 0) {
       return Promise.resolve([]);
     }
-
-    let requestsToFetchCount = searchRequests.length;
 
     // This is how we'll provide the consumer with search responses. Resolved by
     // respondToSearchRequests.
