@@ -9,16 +9,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
     panelPaddingSize="l"
   >
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiTitle
@@ -44,7 +37,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -52,6 +44,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -18,25 +18,7 @@
  */
 
 import angular from 'angular';
-import { BasePathStart } from '../base_path';
-import { ChromeStart } from '../chrome';
-import { FatalErrorsStart } from '../fatal_errors';
-import { HttpStart } from '../http';
-import { I18nStart } from '../i18n';
-import { InjectedMetadataStart } from '../injected_metadata';
-import { NotificationsStart } from '../notifications';
-import { UiSettingsClient } from '../ui_settings';
-
-interface Deps {
-  i18n: I18nStart;
-  injectedMetadata: InjectedMetadataStart;
-  fatalErrors: FatalErrorsStart;
-  notifications: NotificationsStart;
-  http: HttpStart;
-  basePath: BasePathStart;
-  uiSettings: UiSettingsClient;
-  chrome: ChromeStart;
-}
+import { CoreSetup } from '../';
 
 export interface LegacyPlatformParams {
   targetDomElement: HTMLElement;
@@ -49,12 +31,12 @@ export interface LegacyPlatformParams {
  * the legacy platform by injecting parts of the new platform
  * services into the legacy platform modules, like ui/modules,
  * and then bootstrapping the ui/chrome or ui/test_harness to
- * start either the app or browser tests.
+ * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start(deps: Deps) {
+  public setup(core: CoreSetup) {
     const {
       i18n,
       injectedMetadata,
@@ -64,10 +46,10 @@ export class LegacyPlatformService {
       basePath,
       uiSettings,
       chrome,
-    } = deps;
+    } = core;
     // Inject parts of the new platform into parts of the legacy platform
     // so that legacy APIs/modules can mimic their new platform counterparts
-    require('ui/new_platform').__newPlatformInit__(deps);
+    require('ui/new_platform').__newPlatformInit__(core);
     require('ui/metadata').__newPlatformInit__(injectedMetadata.getLegacyMetadata());
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { kpiNetworkQuery } from '../../../../plugins/secops/public/containers/kpi_network/index.gql_query';
 import { GetKpiNetworkQuery } from '../../../../plugins/secops/public/graphql/types';
 import { KbnTestProvider } from './types';
@@ -38,7 +38,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.networkEvents).to.be(6157);
             expect(kpiNetwork!.uniqueFlowId).to.be(712);
             expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniquePrivateIps).to.equal(17);
+            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
+            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
           });
       });
     });
@@ -68,7 +69,8 @@ const kpiNetworkTests: KbnTestProvider = ({ getService }) => {
             expect(kpiNetwork!.networkEvents).to.be(6157);
             expect(kpiNetwork!.uniqueFlowId).to.be(712);
             expect(kpiNetwork!.activeAgents).to.equal(1);
-            expect(kpiNetwork!.uniquePrivateIps).to.equal(17);
+            expect(kpiNetwork!.uniqueSourcePrivateIps).to.equal(8);
+            expect(kpiNetwork!.uniqueDestinationPrivateIps).to.equal(9);
           });
       });
     });

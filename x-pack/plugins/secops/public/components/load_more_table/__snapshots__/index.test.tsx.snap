@@ -79,15 +79,11 @@ exports[`Load More Table Component rendering it renders the default load more ta
   <styled.div>
     <EuiFlexGroup
       alignItems="flexStart"
-      component="div"
       direction="row"
       gutterSize="none"
       justifyContent="flexStart"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiPopover
@@ -163,21 +159,14 @@ exports[`Load More Table Component rendering it renders the default load more ta
           />
         </EuiPopover>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiFlexGroup
           alignItems="flexStart"
-          component="div"
           direction="row"
           gutterSize="none"
           justifyContent="center"
-          responsive={true}
-          wrap={false}
         >
           <EuiFlexItem
-            component="div"
             grow={false}
           >
             <EuiButton
@@ -187,6 +176,7 @@ exports[`Load More Table Component rendering it renders the default load more ta
               iconSide="left"
               isLoading={false}
               onClick={[Function]}
+              size="m"
               type="button"
             >
               Load More

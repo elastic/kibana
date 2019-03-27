@@ -29,7 +29,6 @@ exports[`Properties renders correctly against snapshot 1`] = `
     gutterSize="s"
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <pure(Component)
@@ -46,7 +45,6 @@ exports[`Properties renders correctly against snapshot 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <pure(Component)
@@ -54,7 +52,6 @@ exports[`Properties renders correctly against snapshot 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiPopover

@@ -8,9 +8,23 @@ export const PLUGIN = {
   ID: 'rollup'
 };
 
-export const UA_APP_NAME = 'rollup-job-wizard';
-export const UA_ROLLUP_JOB_CREATE = 'create';
+export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
-export const USER_ACTIONS = [
-  UA_ROLLUP_JOB_CREATE,
-];
+export {
+  UA_APP_NAME,
+  USER_ACTIONS,
+  UA_APP_LOAD,
+  UA_JOB_CREATE,
+  UA_JOB_DELETE,
+  UA_JOB_DELETE_MANY,
+  UA_JOB_START,
+  UA_JOB_START_MANY,
+  UA_JOB_STOP,
+  UA_JOB_STOP_MANY,
+  UA_SHOW_DETAILS_CLICK,
+  UA_DETAIL_PANEL_SUMMARY_TAB_CLICK,
+  UA_DETAIL_PANEL_TERMS_TAB_CLICK,
+  UA_DETAIL_PANEL_HISTOGRAM_TAB_CLICK,
+  UA_DETAIL_PANEL_METRICS_TAB_CLICK,
+  UA_DETAIL_PANEL_JSON_TAB_CLICK,
+} from './user_action';

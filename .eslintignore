@@ -18,7 +18,6 @@ bower_components
 /src/core/lib/kbn_internal_native_observable
 /packages/*/target
 /packages/eslint-config-kibana
-/packages/eslint-plugin-kibana-custom
 /packages/kbn-es-query/src/kuery/ast/kuery.js
 /packages/kbn-es-query/src/kuery/ast/legacy_kuery.js
 /packages/kbn-pm/dist

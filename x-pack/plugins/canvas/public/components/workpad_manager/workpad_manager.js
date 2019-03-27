@@ -14,7 +14,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
 } from '@elastic/eui';
 import { WorkpadLoader } from '../workpad_loader';
 import { WorkpadTemplates } from '../workpad_templates';
@@ -48,12 +47,6 @@ export const WorkpadManager = ({ onClose }) => {
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiModalHeaderTitle>Canvas workpads</EuiModalHeaderTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label="Beta"
-              tooltipContent="Canvas is still in beta. Please help us improve by reporting issues or bugs in the Kibana repo."
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalHeader>

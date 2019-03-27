@@ -6,12 +6,12 @@
 
 import {
   EuiButtonEmpty,
+  EuiPanel,
   EuiSpacer,
   EuiTab,
   EuiTabs,
   EuiTitle
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { get } from 'lodash';
@@ -27,8 +27,8 @@ import {
 import { STATUS } from 'x-pack/plugins/apm/public/constants';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { borderRadius, px, unit, units } from '../../../../style/variables';
+import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
 import { getCurrentTab } from '../../../shared/PropertiesTable/tabConfig';
@@ -41,22 +41,10 @@ import {
 } from './ErrorTabs';
 import { StickyErrorProperties } from './StickyErrorProperties';
 
-const PaddedContainer = styled.div`
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
-`;
-
-const Container = styled.div`
-  position: relative;
-  border: 1px solid ${theme.euiColorLightShade};
-  border-radius: ${borderRadius};
-  margin-top: ${px(units.plus)};
-`;
-
 const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: ${px(units.plus)} ${px(units.plus)} 0;
   margin-bottom: ${px(unit)};
 `;
 
@@ -80,7 +68,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
   const currentTab = getCurrentTab(tabs, urlParams.detailTab);
 
   return (
-    <Container>
+    <EuiPanel>
       <HeaderContainer>
         <EuiTitle size="s">
           <h3>
@@ -106,9 +94,7 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
         </DiscoverErrorLink>
       </HeaderContainer>
 
-      <PaddedContainer>
-        <StickyErrorProperties error={error} transaction={transaction} />
-      </PaddedContainer>
+      <StickyErrorProperties error={error} transaction={transaction} />
 
       <EuiSpacer />
 
@@ -133,11 +119,9 @@ export function DetailView({ errorGroup, urlParams, location }: Props) {
           );
         })}
       </EuiTabs>
-
-      <PaddedContainer>
-        <TabContent error={error} currentTab={currentTab} />
-      </PaddedContainer>
-    </Container>
+      <EuiSpacer />
+      <TabContent error={error} currentTab={currentTab} />
+    </EuiPanel>
   );
 }
 

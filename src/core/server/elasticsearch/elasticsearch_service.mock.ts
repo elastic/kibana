@@ -19,10 +19,10 @@
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';
-import { ElasticsearchService, ElasticsearchServiceStart } from './elasticsearch_service';
+import { ElasticsearchService, ElasticsearchServiceSetup } from './elasticsearch_service';
 
-const createStartContractMock = () => {
-  const startContract: ElasticsearchServiceStart = {
+const createSetupContractMock = () => {
+  const setupContract: ElasticsearchServiceSetup = {
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
@@ -31,27 +31,21 @@ const createStartContractMock = () => {
     adminClient$: new BehaviorSubject({} as ClusterClient),
     dataClient$: new BehaviorSubject({} as ClusterClient),
   };
-  return startContract;
+  return setupContract;
 };
-
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 
 type ElasticsearchServiceContract = PublicMethodsOf<ElasticsearchService>;
 const createMock = () => {
   const mocked: jest.Mocked<ElasticsearchServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockResolvedValue(createStartContractMock());
+  mocked.setup.mockResolvedValue(createSetupContractMock());
   mocked.stop.mockResolvedValue();
   return mocked;
 };
 
 export const elasticsearchServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

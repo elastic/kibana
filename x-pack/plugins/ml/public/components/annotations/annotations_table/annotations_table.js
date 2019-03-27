@@ -269,6 +269,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             defaultMessage="No annotations created for this job"
           />}
           iconType="iInCircle"
+          role="alert"
         >
           {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
             <p>

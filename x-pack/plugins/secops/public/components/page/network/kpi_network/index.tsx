@@ -4,20 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiCard,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import numeral from '@elastic/numeral';
+import { EuiFlexGroup } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
+import { CardItem, CardItems, CardItemsComponent } from '../../../../components/card_items';
 import { KpiNetworkData } from '../../../../graphql/types';
-import { getEmptyTagValue } from '../../../empty_value';
 
 import * as i18n from './translations';
 
@@ -26,44 +19,68 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-interface CardItemProps {
-  isLoading: boolean;
-  i18nKey: string;
-  data: KpiNetworkData;
-  property: string;
-}
+const fieldTitleMapping: Readonly<CardItems[]> = [
+  {
+    fields: [
+      {
+        key: 'networkEvents',
+        description: i18n.NETWORK_EVENTS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'uniqueFlowId',
+        description: i18n.UNIQUE_ID,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'activeAgents',
+        description: i18n.ACTIVE_AGENTS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'uniqueSourcePrivateIps',
+        description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
+        value: null,
+      },
+    ],
+  },
+  {
+    fields: [
+      {
+        key: 'uniqueDestinationPrivateIps',
+        description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
+        value: null,
+      },
+    ],
+  },
+];
 
-const fieldTitleMapping = (isLoading: boolean, title: number | null | undefined) => {
-  return isLoading ? (
-    <EuiLoadingSpinner size="m" />
-  ) : title != null ? (
-    numeral(title).format('0,0')
-  ) : (
-    getEmptyTagValue()
-  );
-};
-
-const CardItem = pure<CardItemProps>(({ isLoading, i18nKey, data, property }) => {
-  const matrixTitle: number | null | undefined = get(property, data);
-  const matrixDescription: string = get(i18nKey, i18n);
-
+export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
   return (
-    <EuiFlexItem key={matrixDescription}>
-      <EuiCard title={fieldTitleMapping(isLoading, matrixTitle)} description={matrixDescription} />
-    </EuiFlexItem>
+    <EuiFlexGroup>
+      {fieldTitleMapping.map(card => (
+        <CardItemsComponent
+          key={`kpi-network-summary-${card.fields[0].description}`}
+          isLoading={loading}
+          description={card.description}
+          fields={addValueToFields(card.fields, data)}
+        />
+      ))}
+    </EuiFlexGroup>
   );
 });
 
-export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => (
-  <EuiFlexGroup>
-    <CardItem isLoading={loading} i18nKey="NETWORK_EVENTS" data={data} property="networkEvents" />
-    <CardItem isLoading={loading} i18nKey="UNIQUE_ID" data={data} property="uniqueFlowId" />
-    <CardItem isLoading={loading} i18nKey="ACTIVE_AGENTS" data={data} property="activeAgents" />
-    <CardItem
-      isLoading={loading}
-      i18nKey="UNIQUE_PRIVATE_IP"
-      data={data}
-      property="uniquePrivateIps"
-    />
-  </EuiFlexGroup>
-));
+const addValueToFields = (fields: CardItem[], data: KpiNetworkData): CardItem[] =>
+  fields.map(field => ({ ...field, value: get(field.key, data) }));

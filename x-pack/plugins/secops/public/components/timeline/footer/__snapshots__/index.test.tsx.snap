@@ -17,19 +17,14 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
-        component="div"
         data-test-subj="event-count-container"
         grow={false}
       >
         <EuiFlexGroup
           alignItems="center"
-          component="div"
           data-test-subj="events-count"
           direction="row"
           gutterSize="none"
-          justifyContent="flexStart"
-          responsive={true}
-          wrap={false}
         >
           <pure(Component)
             closePopover={[Function]}
@@ -77,7 +72,6 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         data-test-subj="paging-control-container"
         grow={false}
       >
@@ -89,7 +83,6 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
         />
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         data-test-subj="last-updated-container"
         grow={false}
       >

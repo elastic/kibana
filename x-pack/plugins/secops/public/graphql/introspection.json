@@ -4363,7 +4363,15 @@
             "deprecationReason": null
           },
           {
-            "name": "uniquePrivateIps",
+            "name": "uniqueSourcePrivateIps",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "uniqueDestinationPrivateIps",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },

@@ -64,16 +64,9 @@ exports[`ChecklistFlyout renders 1`] = `
   </EuiFlyoutBody>
   <EuiFlyoutFooter>
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="spaceBetween"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -92,7 +85,6 @@ exports[`ChecklistFlyout renders 1`] = `
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -102,6 +94,7 @@ exports[`ChecklistFlyout renders 1`] = `
           iconSide="left"
           isLoading={false}
           onClick={[MockFunction]}
+          size="m"
           type="button"
         >
           <FormattedMessage
