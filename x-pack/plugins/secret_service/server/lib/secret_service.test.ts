@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import * as sinon from 'sinon';
 import { SecretService } from './secret_service';
 describe('The Secret Secret Store', async function TestSecretServiceObject() {
   const savedObjectsRepository = {
@@ -31,7 +32,7 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
   });
 
   it('should hide values using the saved object client', async () => {
-    const hideMe = { message: 'my secret message', anotherSecret: 'this is unhidden' };
+    const hideMe = { message: 'my secret message', nonSecret: 'this is unhidden' };
     let insideJob: any = null;
     savedObjectsRepository.create.mockImplementation(
       (type: string, attributes: any, options?: any) => {
@@ -57,7 +58,7 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
     expect.assertions(3);
     const hideMe = {
       message: 'my secret message',
-      anotherSecret: 'this is unhidden',
+      nonSecret: 'this is unhidden',
       someOtherProp: 'check me',
     };
     let insideJob: any = null;
@@ -85,7 +86,7 @@ describe('The Secret Secret Store', async function TestSecretServiceObject() {
     expect.assertions(1);
     const hideMe = {
       message: 'my secret message',
-      anotherSecret: 'this is unhidden',
+      nonSecret: 'this is unhidden',
       someOtherProp: 'check me',
     };
     let insideJob: any = null;

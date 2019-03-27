@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignores
-import nodeCrypto from '@elastic/node-crypto';
-import { SavedObjectsRepository } from 'src/legacy/server/saved_objects';
+import crypto from 'crypto';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import uuid from 'uuid';
+// @ts-ignore
+import { AuditLogger } from '../../../server/lib/audit_logger';
+import { buildCrypt } from './crypt_keeper';
 
 type SecretId = Promise<string>;
 
@@ -20,11 +22,12 @@ export class SecretService {
   private readonly hideAttributeWithId: (id: string, toEncrypt: any) => SecretId;
 
   constructor(
-    private readonly savedObjectsRepository: SavedObjectsRepository,
+    private readonly savedObjectsRepository: SavedObjectsClient,
     private readonly type: string,
-    private readonly encryptionKey: string
+    encryptionKey: string
   ) {
-    const crypt = nodeCrypto({ encryptionKey: this.encryptionKey });
+    this.type = type;
+    const crypt = buildCrypt(encryptionKey);
 
     this.hideAttribute = async (toEncrypt: any) => {
       return this.hideAttributeWithId(uuid.v4(), toEncrypt);
@@ -32,7 +35,7 @@ export class SecretService {
 
     this.hideAttributeWithId = async (id: string, toEncrypt: any) => {
       // now encrypt
-      const secret = await crypt.encrypt(toEncrypt);
+      const secret = crypt.encrypt(JSON.stringify(toEncrypt), id);
 
       // lastly put the encrypted details into the saved object
       const saved = await this.savedObjectsRepository.create(this.type, { secret }, { id });
@@ -49,7 +52,7 @@ export class SecretService {
 
       // decrypt the details
       try {
-        const unhidden = await crypt.decrypt(toDecrypt);
+        const unhidden = crypt.decrypt(toDecrypt, id);
 
         return {
           ...savedObject,

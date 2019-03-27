@@ -4,18 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import sinon from 'sinon';
 import { secretService } from './';
 import { PluginSpec } from './mocks';
 
 describe('The SecretService', function TestSecretService() {
-  const mockKbn = {
+  const kbn = {
     Plugin: PluginSpec,
   };
-  const subject = secretService(mockKbn);
-
+  const mockKbn = sinon.mock(kbn);
+  const subject = secretService(kbn);
   beforeAll(() => {
     expect(subject).not.toBeNull();
-    mockKbn.Plugin = jest.fn();
+    mockKbn.expects('Plugin').once();
+  });
+  afterAll(() => {
+    mockKbn.verify();
   });
 
   it('should expose itself to other plugins', () => {
@@ -72,7 +76,7 @@ describe('The SecretService', function TestSecretService() {
       plugins: {
         elasticsearch: {
           getCluster: () => {
-            return { callWithInternalUser: jest.fn() };
+            return { callWithInternalUser: sinon.spy() };
           },
         },
       },
