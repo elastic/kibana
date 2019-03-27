@@ -20,7 +20,11 @@
 import { AggParam } from '../../../agg_types';
 import { AggConfig } from '../../agg_config';
 
-interface AggParamEditorProps<T> {
+// NOTE: we cannot export the interface with export { InterfaceName }
+// as there is currently a bug on babel typescript transform plugin for it
+// https://github.com/babel/babel/issues/7641
+//
+export interface AggParamEditorProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
   value: T;
@@ -28,10 +32,8 @@ interface AggParamEditorProps<T> {
   setValue(value: T): void;
 }
 
-interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
+export interface AggParamRequiredEditorProps<T> extends AggParamEditorProps<T> {
   isInvalid: boolean;
   setValidity(isValid: boolean): void;
   setTouched(): void;
 }
-
-export { AggParamEditorProps, AggParamRequiredEditorProps };

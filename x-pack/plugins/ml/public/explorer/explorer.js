@@ -926,7 +926,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    applyFilterFromTable = (fieldName, fieldValue, action) => {
+    applyFilter = (fieldName, fieldValue, action) => {
       let newQueryString = '';
       const { queryString } = this.state;
       const operator = 'and ';
@@ -1107,7 +1107,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   defaultMessage="Top Influencers"
                 />
               </span>
-              <InfluencersList influencers={influencers} />
+              <InfluencersList
+                influencers={influencers}
+                influencerFilter={this.applyFilter}
+              />
             </div>
           )}
 
@@ -1292,7 +1295,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             <AnomaliesTable
               tableData={tableData}
               timefilter={timefilter}
-              influencerFilter={this.applyFilterFromTable}
+              influencerFilter={this.applyFilter}
             />
           </div>
         </div>

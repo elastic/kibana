@@ -16,7 +16,7 @@ import {
   PHASE_SHRINK_ENABLED,
   WARM_PHASE_ON_ROLLOVER,
   PHASE_INDEX_PRIORITY
-} from '../constants';
+} from '../../constants';
 
 export const defaultWarmPhase = {
   [PHASE_ENABLED]: false,
