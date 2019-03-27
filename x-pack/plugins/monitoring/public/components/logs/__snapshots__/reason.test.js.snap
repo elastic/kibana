@@ -104,3 +104,37 @@ exports[`Logs should render with a no type found reason 1`] = `
   </p>
 </EuiCallOut>
 `;
+
+exports[`Logs should render with a time period reason 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title="No filebeat indices found in the selected time period."
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Please adjust your time period as necessary"
+      id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
+      values={Object {}}
+    />
+  </p>
+</EuiCallOut>
+`;
+
+exports[`Logs should render with a time period reason for both scenarios 1`] = `
+<EuiCallOut
+  color="warning"
+  iconType="help"
+  size="m"
+  title="No filebeat indices found in the selected time period."
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="Please adjust your time period as necessary"
+      id="xpack.monitoring.logs.reason.noIndexPatternInTimePeriodMessage"
+      values={Object {}}
+    />
+  </p>
+</EuiCallOut>
+`;

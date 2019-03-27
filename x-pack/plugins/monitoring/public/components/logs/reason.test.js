@@ -29,6 +29,27 @@ describe('Logs', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should render with a time period reason', () => {
+    const reason = {
+      indexPatternExists: true,
+      indexPatternInTimeRangeExists: false,
+    };
+    const component = shallow(<Reason reason={reason}/>);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render with a time period reason for both scenarios', () => {
+    const reason = {
+      indexPatternExists: true,
+      indexPatternInTimeRangeExists: true,
+      clusterExists: true,
+      typeExists: false,
+      typeExistsAtAnyTime: true
+    };
+    const component = shallow(<Reason reason={reason}/>);
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render with a no index found reason', () => {
     const component = shallow(<Reason reason={{
       indexPatternExists: true,
