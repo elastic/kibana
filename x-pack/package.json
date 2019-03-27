@@ -247,6 +247,7 @@
     "react-dom": "^16.8.0",
     "react-dropzone": "^4.2.9",
     "react-fast-compare": "^2.0.4",
+    "react-hooks-testing-library": "^0.3.8",
     "react-markdown-renderer": "^1.4.0",
     "react-portal": "^3.2.0",
     "react-redux": "^5.0.7",

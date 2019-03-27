@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Store } from 'redux';
 // @ts-ignore
 import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-import { mockNow } from 'x-pack/plugins/apm/public/utils/testHelpers';
+import { mockNow, tick } from 'x-pack/plugins/apm/public/utils/testHelpers';
 import { DatePicker, DatePickerComponent } from '../DatePicker';
 
 function mountPicker(initialState = {}) {
@@ -53,8 +53,6 @@ describe('DatePicker', () => {
       });
     });
   });
-
-  const tick = () => new Promise(resolve => setImmediate(resolve, 0));
 
   describe('refresh cycle', () => {
     let nowSpy: jest.Mock;
