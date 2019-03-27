@@ -10,6 +10,8 @@ for the next major version of Elasticsearch.
 
 * <<upgrade-assistant-api-status>>
 * <<upgrade-assistant-api-reindexing>>
+* <<upgrade-assistant-api-default-field>>
 
 include::upgrade-assistant/status.asciidoc[]
 include::upgrade-assistant/reindexing.asciidoc[]
+include::upgrade-assistant/default-field.asciidoc[]
