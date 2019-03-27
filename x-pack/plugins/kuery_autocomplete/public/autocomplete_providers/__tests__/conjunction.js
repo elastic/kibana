@@ -35,16 +35,14 @@ describe('Kuery conjunction suggestions', function () {
     expect(suggestions.map(suggestion => suggestion.start)).to.eql([end, end]);
     expect(suggestions.map(suggestion => suggestion.end)).to.eql([end, end]);
   });
-  /* the suggestions have been changed from strings containing html to JSX (specifically a <FormattedMessage/> containing the description as an argument)
-    We need to shallow mount each of the suggestions and ensure they have a description
-  */
   it('should have descriptions', function () {
     const text = ' ';
     const suggestions = getSuggestions({ text });
-    expect(suggestions.length).to.be(2);
+    expect(typeof suggestions).to.be('object');
+    expect(Object.keys(suggestions).length).to.be(2);
     suggestions.forEach(suggestion => {
-      expect(suggestion.description.length).to.be.greaterThan(0);
+      expect(typeof suggestion).to.be('object');
+      expect(suggestion).to.have.property('description');
     });
   });
-
 });

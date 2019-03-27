@@ -77,7 +77,7 @@ describe('Kuery field suggestions', function () {
     const suggestions = getSuggestions({ prefix, suffix });
     expect(suggestions.length).to.be.greaterThan(0);
     suggestions.forEach(suggestion => {
-      expect(suggestion.description.length).to.be.greaterThan(0);
+      expect(suggestion).to.have.property('description');
     });
   });
 });
