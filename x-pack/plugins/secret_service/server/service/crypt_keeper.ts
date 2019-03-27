@@ -49,7 +49,7 @@ export function buildCrypt(encryptionKey: string) {
       decipher.setAuthTag(tag);
       decipher.setAAD(Buffer.from(hash(aad), 'hex'));
 
-      return JSON.parse(Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8'));
+      return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
     },
   };
 }

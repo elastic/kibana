@@ -9,7 +9,7 @@ import { buildCrypt } from './crypt_keeper';
 
 describe('CryptKeeper', () => {
   describe('Same object', () => {
-    const keeper = buildCrypt({ key: crypto.randomBytes(128) });
+    const keeper = buildCrypt(crypto.randomBytes(128).toString('hex'));
     it('should encrypt things', () => {
       const encrypted = keeper.encrypt(
         { message: 'some super secret data to keep safe' },
@@ -17,7 +17,6 @@ describe('CryptKeeper', () => {
           extra: 'me unique',
         }
       );
-      expect(encrypted).not.toHaveProperty('message');
       expect(encrypted).not.toEqual('some super secret data to keep safe');
     });
 
@@ -28,7 +27,7 @@ describe('CryptKeeper', () => {
           extra: 'me unique',
         }
       );
-      const decrypted = keeper.decrypt(encrypted, { extra: 'me unique' });
+      const decrypted = JSON.parse(keeper.decrypt(encrypted, { extra: 'me unique' }));
       expect(decrypted.message).toBeDefined();
       expect(decrypted.message).toEqual('some super secret data to keep safe');
     });

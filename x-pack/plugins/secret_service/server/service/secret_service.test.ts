@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as sinon from 'sinon';
 import { SecretService } from './secret_service';
 describe('The Secret Secret Store', async function TestSecretServiceObject() {
   const savedObjectsRepository = {

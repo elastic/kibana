@@ -52,12 +52,12 @@ export class SecretService {
 
       // decrypt the details
       try {
-        const unhidden = crypt.decrypt(toDecrypt, id);
+        const unhidden = JSON.parse(await crypt.decrypt(toDecrypt, id));
 
         return {
           ...savedObject,
           attributes: {
-            ...unhidden,
+            ...JSON.parse(unhidden),
           },
         };
       } catch (e) {
