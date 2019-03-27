@@ -41,6 +41,7 @@ export interface PluginsServiceSetup {
 export class PluginsService implements CoreService<PluginsServiceSetup> {
   /** Plugin wrappers in topological order. */
   private readonly plugins: Map<PluginName, Plugin<unknown, Record<string, unknown>>> = new Map();
+  private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {}
 
@@ -83,6 +84,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
           dependencyContracts
         )
       );
+      this.satupPlugins.push(pluginName);
     }
 
     // Expose setup contracts
@@ -91,8 +93,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
 
   public async stop() {
     // Stop plugins in reverse dependency order.
-    for (const plugin of [...this.plugins.values()].reverse()) {
-      plugin.stop();
+    for (const pluginName of this.satupPlugins.reverse()) {
+      this.plugins.get(pluginName)!.stop();
     }
   }
 
