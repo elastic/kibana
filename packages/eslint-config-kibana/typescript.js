@@ -25,7 +25,6 @@ module.exports = {
         'ban',
         'import',
         'jsx-a11y',
-        'prefer-arrow',
         'prefer-object-spread',
       ],
 
@@ -141,7 +140,6 @@ module.exports = {
           //  in a bunch of a different files. The second one still output errors in a lot
           //  of cases too. I'm thinking about removing them.
           // 'one-var': 'error', // can't reproduce tslint behaviour
-          // 'prefer-arrow/prefer-arrow-functions': [ 'error', { "singleReturnOnly": true } ], // can't reproduce tslint behaviour
           'prefer-const': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],

@@ -35,7 +35,6 @@ function memoizeLast<T extends (...args: any[]) => any>(func: T): T {
   let prevCall: MemoizedCall | NeverCalled = neverCalled;
 
   // We need to use a `function` here for proper this passing.
-  // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   const memoizedFunction = function(this: any, ...args: any[]) {
     if (
       prevCall !== neverCalled &&
