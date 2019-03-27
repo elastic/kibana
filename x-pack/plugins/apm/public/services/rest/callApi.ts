@@ -6,6 +6,7 @@
 
 import { FetchOptions } from 'apollo-link-http';
 import { isString, startsWith } from 'lodash';
+import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { kfetch, KFetchOptions } from 'ui/kfetch';
 import { KFetchKibanaOptions } from 'ui/kfetch/kfetch';
@@ -28,10 +29,10 @@ function fetchOptionsWithDebug(fetchOptions: KFetchOptions) {
   };
 }
 
-const cache = new Map();
+const cache = new LRU<string, any>({ max: 100, maxAge: 1000 * 60 * 60 });
 
 export function _clearCache() {
-  cache.clear();
+  cache.reset();
 }
 
 export async function callApi<T = void>(
