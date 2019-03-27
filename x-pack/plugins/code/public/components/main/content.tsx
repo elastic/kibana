@@ -357,9 +357,9 @@ class CodeContent extends React.PureComponent<Props> {
         return (
           <CommitHistoryContainer>
             <InfiniteScroll
-              initialLoad={false}
+              initialLoad={true}
               loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
-              hasMore={!loadingCommits && hasMoreCommits}
+              hasMore={hasMoreCommits}
               useWindow={false}
               loader={<CommitHistoryLoading />}
             >
