@@ -34,6 +34,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   emptyPlugins: resolve(process.cwd(), 'plugins'),
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
+const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
 
 const logger = loggingServiceMock.create();
 beforeEach(() => {
@@ -112,7 +113,11 @@ test('properly iterates through plugin search locations', async () => {
     },
   };
 
-  const env = Env.createDefault(getEnvOptions());
+  const env = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { envName: 'development', pluginPath: [TEST_EXTRA_PLUGIN_PATH] },
+    })
+  );
   const configService = new ConfigService(
     new BehaviorSubject<Config>(new ObjectToConfigAdapter({})),
     env,
@@ -126,12 +131,13 @@ test('properly iterates through plugin search locations', async () => {
   const { plugin$, error$ } = discover(pluginsConfig, { configService, env, logger });
 
   const plugins = await plugin$.pipe(toArray()).toPromise();
-  expect(plugins).toHaveLength(3);
+  expect(plugins).toHaveLength(4);
 
   for (const path of [
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '1'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '3'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '6'),
+    TEST_EXTRA_PLUGIN_PATH,
   ]) {
     const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
     expect(discoveredPlugin).toBeInstanceOf(Plugin);

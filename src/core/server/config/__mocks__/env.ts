@@ -21,9 +21,16 @@
 
 import { EnvOptions } from '../env';
 
+type Optional<T> = T | undefined;
+
+// Prettier changes this syntax to be invalid.
+// tslint:disable prettier
 type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>
+  [P in keyof T]?:
+    T[P] extends Optional<Array<infer R>> ? Optional<R[]> :
+    T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>
 };
+// tslint:enable prettier
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
   return {
@@ -37,6 +44,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       repl: false,
       basePath: false,
       optimize: false,
+      pluginPath: undefined,
       ...(options.cliArgs || {}),
     },
     isDevClusterMaster:

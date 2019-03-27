@@ -40,8 +40,16 @@ export class PluginsConfig {
    */
   public readonly pluginSearchPaths: ReadonlyArray<string>;
 
+  /**
+   * Defines directories where a known plugin exists.
+   */
+  public readonly knownPluginPaths: ReadonlyArray<string>;
+
   constructor(config: PluginsConfigType, env: Env) {
     this.initialize = config.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
+    // Only allow custom pluginPaths in dev.
+    this.knownPluginPaths =
+      env.cliArgs.envName === 'development' ? env.cliArgs.pluginPath || [] : [];
   }
 }

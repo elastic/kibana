@@ -303,6 +303,7 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
   expect(mockDiscover).toHaveBeenCalledWith(
     {
       initialize: true,
+      knownPluginPaths: [],
       pluginSearchPaths: [
         resolve(process.cwd(), 'src', 'plugins'),
         resolve(process.cwd(), 'plugins'),

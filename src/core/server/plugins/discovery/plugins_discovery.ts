@@ -19,7 +19,7 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from } from 'rxjs';
+import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
@@ -46,7 +46,18 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
+  if (config.knownPluginPaths.length) {
+    log.warn(
+      `Explicit plugin paths ${JSON.stringify(
+        config.knownPluginPaths
+      )} are only supported in development. Relative imports will not work in production.`
+    );
+  }
+
+  const discoveryResults$ = merge(
+    from(config.knownPluginPaths),
+    processPluginSearchPaths$(config.pluginSearchPaths, log)
+  ).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
