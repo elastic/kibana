@@ -17,73 +17,26 @@
  * under the License.
  */
 
-import { basePathServiceMock } from './base_path/base_path_service.mock';
-import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
-import { httpServiceMock } from './http/http_service.mock';
-import { i18nServiceMock } from './i18n/i18n_service.mock';
-import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
-import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
-import { notificationServiceMock } from './notifications/notifications_service.mock';
-import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-
-const MockLegacyPlatformService = legacyPlatformServiceMock.create();
-const LegacyPlatformServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockLegacyPlatformService);
-jest.mock('./legacy', () => ({
-  LegacyPlatformService: LegacyPlatformServiceConstructor,
-}));
-
-const MockInjectedMetadataService = injectedMetadataServiceMock.create();
-const InjectedMetadataServiceConstructor = jest
-  .fn()
-  .mockImplementation(() => MockInjectedMetadataService);
-jest.mock('./injected_metadata', () => ({
-  InjectedMetadataService: InjectedMetadataServiceConstructor,
-}));
-
-const MockFatalErrorsService = fatalErrorsServiceMock.create();
-const FatalErrorsServiceConstructor = jest.fn().mockImplementation(() => MockFatalErrorsService);
-jest.mock('./fatal_errors', () => ({
-  FatalErrorsService: FatalErrorsServiceConstructor,
-}));
-
-const MockI18nService = i18nServiceMock.create();
-const I18nServiceConstructor = jest.fn().mockImplementation(() => MockI18nService);
-jest.mock('./i18n', () => ({
-  I18nService: I18nServiceConstructor,
-}));
-
-const MockNotificationsService = notificationServiceMock.create();
-const NotificationServiceConstructor = jest.fn().mockImplementation(() => MockNotificationsService);
-jest.mock('./notifications', () => ({
-  NotificationsService: NotificationServiceConstructor,
-}));
-
-const MockHttpService = httpServiceMock.create();
-const HttpServiceConstructor = jest.fn().mockImplementation(() => MockHttpService);
-jest.mock('./http', () => ({
-  HttpService: HttpServiceConstructor,
-}));
-
-const MockBasePathService = basePathServiceMock.create();
-const BasePathServiceConstructor = jest.fn().mockImplementation(() => MockBasePathService);
-jest.mock('./base_path', () => ({
-  BasePathService: BasePathServiceConstructor,
-}));
-
-const MockUiSettingsService = uiSettingsServiceMock.create();
-const UiSettingsServiceConstructor = jest.fn().mockImplementation(() => MockUiSettingsService);
-jest.mock('./ui_settings', () => ({
-  UiSettingsService: UiSettingsServiceConstructor,
-}));
-
-const MockChromeService = chromeServiceMock.create();
-const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
-jest.mock('./chrome', () => ({
-  ChromeService: ChromeServiceConstructor,
-}));
+import {
+  BasePathServiceConstructor,
+  ChromeServiceConstructor,
+  FatalErrorsServiceConstructor,
+  HttpServiceConstructor,
+  I18nServiceConstructor,
+  InjectedMetadataServiceConstructor,
+  LegacyPlatformServiceConstructor,
+  MockBasePathService,
+  MockChromeService,
+  MockFatalErrorsService,
+  MockHttpService,
+  MockI18nService,
+  MockInjectedMetadataService,
+  MockLegacyPlatformService,
+  MockNotificationsService,
+  MockUiSettingsService,
+  NotificationServiceConstructor,
+  UiSettingsServiceConstructor,
+} from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
 jest.spyOn(CoreSystem.prototype, 'stop');
