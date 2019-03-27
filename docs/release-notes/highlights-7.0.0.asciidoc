@@ -67,33 +67,39 @@ complex date queries, such as mixing relative times with absolute ones.
 image::images/highlights-7.0.0-timepicker.png[Kibana timepicker]
 
 Filters are enhanced in two ways.  Each filter now comes with its own menu to 
-clearly label its actions. In addition, you can work with filters in bulk and 
+clearly label its actions. You can also now work with filters in bulk and 
 apply them from your dashboards and saved searches.
 
 [role="screenshot"]
 image::images/highlights-7.0.0-filters.png[Kibana timepicker]
 
 [float]
-=== Saved objects aware references
+=== Saved objects aware of each other
 
-This release changes the structure of saved objects so that they are reference aware. 
+The <<breaking-changes-7.0-saved-objects,structure of saved objects changed>> so they are now aware of each other.  
 This means you can now export a dashboard,
 including all visualization dependencies, from the Saved objects page. 
 You can also easily move objects from one {kib} instance to another or 
-between Spaces. For details on this change, see 
-<<breaking-changes-7.0, Breaking Changes>>.
+between Spaces.
 
 [float]
-=== Canvas enhancements to editor and shortcuts
+=== Canvas improvements
 
 Canvas has two notable improvements: an expandable expression editor and 
 additional keyboard shortcuts. 
 
 To maximize or minimize the expression editor, 
-use the button in the top right corner. To adjust the font size, use the slider 
+use the expand button image:images/highlights-7.0.0-expand.png[]
+in the top right corner of the editor. To adjust the font size, use the slider 
 at the bottom.
 
 Canvas has additional keyboard shortcuts for moving elements to the front and 
-back and copying your elements. To discover all shortcuts available in Canvas, 
-click the help menu.
+back and for copying your elements. To discover all shortcuts available in Canvas, 
+click the help icon.
+
+[role="screenshot"]
+image::images/highlights-7.0.0-canvas-kbd.png[]
+
+
+
 

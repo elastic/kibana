@@ -39,6 +39,7 @@ The following section is re-used in the Installation and Upgrade Guide
 *Impact:* The '/shorten' API has been removed. Use the '/api/shorten_url' API instead.
 
 [float]
+[[breaking-changes-7.0-saved-objects]]
 ==== Saved object structure change
 *Details:* Saved objects no longer contain ids of other saved objects under `attributes`. They have been moved under `references` with a named reference in `attributes`.
 
