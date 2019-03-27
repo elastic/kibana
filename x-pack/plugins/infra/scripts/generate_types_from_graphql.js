@@ -28,7 +28,6 @@ async function main() {
       config: SERVER_CONFIG_PATH,
       out: OUTPUT_INTROSPECTION_PATH,
       overwrite: true,
-      require: ['ts-node/register'],
       schema: SCHEMA_PATH,
       template: 'graphql-codegen-introspection-template',
     },

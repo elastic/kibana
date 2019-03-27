@@ -24,7 +24,7 @@ jest.mock('../../services/field_format_service', () => ({
 jest.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
 jest.mock('./description_cell', () => () => <div id="mockDescriptorCom">mocked description component</div>);
 jest.mock('./detector_cell', () => () => <div id="mocDetectorCom">mocked detector component</div>);
-jest.mock('./entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
+jest.mock('../entity_cell', () => () => <div id="mocEntityCom">mocked entity component</div>);
 jest.mock('./influencers_cell', () => () => <div id="mocInfluencerCom">mocked influencer component</div>);
 
 const columnData = {

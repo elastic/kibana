@@ -20,9 +20,9 @@
 import { Server } from 'hapi';
 
 import { ConfigService } from '../../core/server/config';
-import { ElasticsearchServiceStart } from '../../core/server/elasticsearch';
+import { ElasticsearchServiceSetup } from '../../core/server/elasticsearch';
 import { HttpServerInfo } from '../../core/server/http/';
-import { PluginsServiceStart } from '../../core/server/plugins/plugins_service';
+import { PluginsServiceSetup } from '../../core/server/plugins/plugins_service';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -64,9 +64,9 @@ export default class KbnServer {
   public readonly newPlatform: {
     start: {
       core: {
-        elasticsearch: ElasticsearchServiceStart;
+        elasticsearch: ElasticsearchServiceSetup;
       };
-      plugins: PluginsServiceStart;
+      plugins: PluginsServiceSetup;
     };
     stop: null;
     params: {

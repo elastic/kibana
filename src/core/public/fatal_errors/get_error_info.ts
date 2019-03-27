@@ -52,7 +52,7 @@ function formatErrorMessage(error: any) {
 }
 
 /**
- * Format the stack trace from a message so that it starts with the message, which
+ * Format the stack trace from a message so that it setups with the message, which
  * some browsers do automatically and some don't
  */
 function formatStack(err: Error) {
