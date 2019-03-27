@@ -58,9 +58,13 @@ function reducer(state: RootState, action: Action): RootState {
 export function Main(props: MainProps) {
   const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
 
-  const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
-    state.visModel.editorPlugin
-  );
+  const {
+    ConfigPanel,
+    DataPanel,
+    WorkspacePanel,
+    toExpression,
+    getSuggestionsForField,
+  } = registry.getByName(state.visModel.editorPlugin);
 
   const onChangeVisModel = (newState: VisModel) => {
     dispatch({ type: 'updateVisModel', newState });
@@ -69,6 +73,7 @@ export function Main(props: MainProps) {
   const panelProps = {
     visModel: state.visModel,
     onChangeVisModel,
+    getSuggestionsForField,
   };
 
   // TODO add a meaningful default expression builder implementation here
@@ -78,7 +83,9 @@ export function Main(props: MainProps) {
 
   const suggestions = registry
     .getAll()
-    .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
+    .flatMap(plugin =>
+      plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
+    );
 
   return (
     <EuiPage>
@@ -121,6 +128,7 @@ export function Main(props: MainProps) {
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />
+
         <h4>Suggestions</h4>
         <EuiListGroup>
           {suggestions.map((suggestion, i) => (

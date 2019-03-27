@@ -4,20 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiComboBox, EuiFieldSearch, EuiIcon, ICON_TYPES } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiFieldSearch, EuiIcon, ICON_TYPES } from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import zipObject from 'lodash-es/zipObject';
 import React, { useEffect, useState } from 'react';
 import chrome from 'ui/chrome';
-import { IndexPatternField, IndexPatterns } from '../../lib';
+import { PanelComponentProps } from '../../../editor_plugin_registry';
+import { IndexPatternField } from '../../lib';
 import { getIndexPatterns } from '../../lib/index_patterns';
-
-interface Props {
-  indexPatterns: IndexPatterns | null;
-  onChangeIndexPatterns: (indexPatterns: IndexPatterns) => void;
-}
 
 interface State {
   selectedIndexPatternId: string;
@@ -36,8 +32,14 @@ function sortFields(fieldA: IndexPatternField, fieldB: IndexPatternField) {
   return fieldA.name < fieldB.name ? -1 : 1;
 }
 
-export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Props) {
+export function IndexPatternPanel({
+  visModel,
+  onChangeVisModel,
+  getSuggestionsForField,
+}: PanelComponentProps) {
   const [state, setState] = useState(() => initialState());
+
+  const { indexPatterns } = visModel;
 
   function filterFields(field: IndexPatternField) {
     return field.name.includes(state.fieldsFilter);
@@ -54,9 +56,10 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
           return;
         }
 
-        onChangeIndexPatterns(
-          zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns)
-        );
+        onChangeVisModel({
+          ...visModel,
+          indexPatterns: zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns),
+        });
 
         setState({
           ...state,
@@ -81,6 +84,20 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
     label: title,
     value: id,
   }));
+
+  function handleFieldClick(field: IndexPatternField) {
+    return () => {
+      if (!getSuggestionsForField) {
+        return;
+      }
+
+      const suggestions = getSuggestionsForField(state.selectedIndexPatternId, field, visModel);
+
+      if (suggestions.length) {
+        onChangeVisModel(suggestions[0].visModel);
+      }
+    };
+  }
 
   return (
     <>
@@ -117,13 +134,20 @@ export function IndexPatternPanel({ indexPatterns, onChangeIndexPatterns }: Prop
           .filter(filterFields)
           .sort(sortFields)
           .map(field => (
-            <button
-              type="button"
+            <div
+              // type="div"
               key={field.name}
               className={`indexPatternPanel-field indexPatternPanel-field-btn-${field.type}`}
             >
               {fieldIcon(field)} <span className="indexPatternPanel-field-name">{field.name}</span>
-            </button>
+              <div>
+                <EuiButton
+                  size="s"
+                  onClick={handleFieldClick(field)}
+                  iconType="plusInCircleFilled"
+                />
+              </div>
+            </div>
           ))}
       </div>
     </>

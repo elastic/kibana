@@ -146,7 +146,7 @@ export const config: EditorPlugin<PieChartVisModel> = {
   toExpression,
   DataPanel: dataPanel,
   ConfigPanel: configPanel,
-  getSuggestions: visModel => [getSuggestion(visModel)],
+  getChartSuggestions: visModel => [getSuggestion(visModel)],
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
 };

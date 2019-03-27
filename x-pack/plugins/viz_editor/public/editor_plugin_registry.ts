@@ -4,16 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UnknownVisModel, VisModel } from '../public/common/lib';
+import { IndexPatternField, UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from '../pie_chart_plugin';
 import { config as vegaChartConfig } from '../vega_chart_plugin';
 import { config as xyChartConfig } from '../xy_chart_plugin';
-
-export interface PanelComponentProps<S extends VisModel = VisModel> {
-  visModel: S;
-  onChangeVisModel: (newState: S) => void;
-}
 
 export interface Suggestion<S extends VisModel = VisModel> {
   pluginName: string;
@@ -24,6 +19,18 @@ export interface Suggestion<S extends VisModel = VisModel> {
   iconType: string;
 }
 
+export type GetSuggestionsType<S extends VisModel> = (
+  indexPatternName: string,
+  field: IndexPatternField,
+  visModel: S
+) => Array<Suggestion<S>>;
+
+export interface PanelComponentProps<S extends VisModel = VisModel> {
+  visModel: S;
+  onChangeVisModel: (newState: S) => void;
+  getSuggestionsForField?: GetSuggestionsType<S>;
+}
+
 /**
  * each editorplugin has to register itself and has to provide these four things:
  * >> an editor panels builder, which gets passed the current state and updater functions
@@ -31,6 +38,7 @@ export interface Suggestion<S extends VisModel = VisModel> {
  * >> a toExpression function which takes the current state and turns it into an expression. should be completely pure
  * >> a toSuggestions function - returns suggestions of how this plugin could render the current state (used to populate a list of suggested configurations in the side bar)
  *    Also contains a score which is used to sort the suggestions from all plugins
+ * >> a getSuggestionsFromField function - returns suggestions for what the plugin could do with a single field
  */
 
 export interface EditorPlugin<S extends VisModel = VisModel> {
@@ -40,8 +48,9 @@ export interface EditorPlugin<S extends VisModel = VisModel> {
   HeaderPanel?: React.ComponentType<PanelComponentProps<S>>;
   WorkspacePanel?: React.ComponentType<PanelComponentProps<S>>;
   toExpression?: (visModel: S, mode: 'view' | 'edit') => string;
-  getSuggestions?: (visModel: S) => Array<Suggestion<S>>;
+  getChartSuggestions?: (visModel: S) => Array<Suggestion<S>>;
   getInitialState: (visModel: UnknownVisModel) => S;
+  getSuggestionsForField?: GetSuggestionsType<S>;
 }
 
 const pluginMap: { [key: string]: EditorPlugin<any> } = {
@@ -56,6 +65,7 @@ export const registry = {
     if (pluginMap[pluginName]) {
       return pluginMap[pluginName];
     }
+
     throw new Error('editor plugin not found');
   },
   register(name: string, config: any) {
