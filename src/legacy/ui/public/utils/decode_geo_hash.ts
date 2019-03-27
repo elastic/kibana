@@ -41,10 +41,10 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
       const mask: number = BITS[j];
       if (isEven) {
         lonErr = lonErr /= 2;
-        refine_interval(lon, cd, mask);
+        refineInterval(lon, cd, mask);
       } else {
         latErr = latErr /= 2;
-        refine_interval(lat, cd, mask);
+        refineInterval(lat, cd, mask);
       }
       isEven = !isEven;
     }
@@ -57,7 +57,7 @@ export function decodeGeoHash(geohash: number[]): Coordinates {
   } as Coordinates;
 }
 
-function refine_interval(interval: number[], cd: number, mask: number) {
+function refineInterval(interval: number[], cd: number, mask: number) {
   if (cd & mask) { /* eslint-disable-line */
     interval[0] = (interval[0] + interval[1]) / 2;
   } else {
