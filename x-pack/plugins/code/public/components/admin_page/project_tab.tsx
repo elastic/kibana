@@ -90,6 +90,7 @@ interface State {
   importLoading: boolean;
   settingModal: { url?: string; uri?: string; show: boolean };
   repoURL: string;
+  isInvalid: boolean;
   sortOption: SortOptionsValue;
 }
 
@@ -109,11 +110,12 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
       settingModal: { show: false },
       repoURL: '',
       sortOption: SortOptionsValue.alphabetical_asc,
+      isInvalid: false,
     };
   }
 
   public closeModal = () => {
-    this.setState({ showImportProjectModal: false, repoURL: '' });
+    this.setState({ showImportProjectModal: false, repoURL: '', isInvalid: false });
   };
 
   public openModal = () => {
@@ -131,13 +133,20 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   public onChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({
       repoURL: e.target.value,
+      isInvalid: isImportRepositoryURLInvalid(e.target.value),
     });
   };
 
   public submitImportProject = () => {
     if (!isImportRepositoryURLInvalid(this.state.repoURL)) {
       this.props.importRepo(this.state.repoURL);
+    } else if (!this.state.isInvalid) {
+      this.setState({ isInvalid: true });
     }
+  };
+
+  public updateIsInvalid = () => {
+    this.setState({ isInvalid: isImportRepositoryURLInvalid(this.state.repoURL) });
   };
 
   public renderImportModal = () => {
@@ -152,19 +161,17 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
               <h3>Repository URL</h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow
-                isInvalid={isImportRepositoryURLInvalid(this.state.repoURL)}
-                error="This field shouldn't be empty."
-              >
+              <EuiFormRow isInvalid={this.state.isInvalid} error="This field shouldn't be empty.">
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
+                  onBlur={this.updateIsInvalid}
                   placeholder="https://github.com/elastic/elasticsearch"
                   aria-label="input project url"
                   data-test-subj="importRepositoryUrlInputBox"
                   isLoading={this.props.importLoading}
                   fullWidth={true}
-                  isInvalid={isImportRepositoryURLInvalid(this.state.repoURL)}
+                  isInvalid={this.state.isInvalid}
                 />
               </EuiFormRow>
             </EuiForm>
