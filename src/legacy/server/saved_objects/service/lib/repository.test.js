@@ -1073,11 +1073,20 @@ describe('SavedObjectsRepository', () => {
       await savedObjectsRepository.find({ type: 'foo', fields: ['title'] });
 
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
-      expect(callAdminCluster).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
-        _source: [
-          'foo.title', 'namespace', 'type', 'title'
-        ]
-      }));
+      expect(callAdminCluster).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          _source: [
+            'foo.title',
+            'namespace',
+            'type',
+            'references',
+            'migrationVersion',
+            'updated_at',
+            'title',
+          ],
+        })
+      );
 
       expect(onBeforeWrite).not.toHaveBeenCalled();
     });
