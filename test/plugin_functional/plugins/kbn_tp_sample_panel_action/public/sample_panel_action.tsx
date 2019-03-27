@@ -23,6 +23,7 @@ import { openFlyout } from 'ui/flyout';
 import {
   ContextMenuAction,
   ContextMenuActionsRegistryProvider,
+  PanelActionAPI,
 } from 'ui/embeddable';
 
 class SamplePanelAction extends ContextMenuAction {
@@ -33,7 +34,10 @@ class SamplePanelAction extends ContextMenuAction {
       parentPanelId: 'mainMenu',
     });
   }
-  onClick({ embeddable }) {
+  public onClick = ({ embeddable }: PanelActionAPI) => {
+    if (!embeddable) {
+      return;
+    }
     openFlyout(
       <React.Fragment>
         <EuiFlyoutHeader>
@@ -47,9 +51,9 @@ class SamplePanelAction extends ContextMenuAction {
       </React.Fragment>,
       {
         'data-test-subj': 'samplePanelActionFlyout',
-      },
+      }
     );
-  }
+  };
 }
 
 ContextMenuActionsRegistryProvider.register(() => new SamplePanelAction());

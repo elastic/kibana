@@ -31,7 +31,7 @@ import { fieldFormats } from '../../../registry/field_formats';
 const config = chrome.getUiSettingsClient();
 
 const defaultFormat = { convert: identity };
-const getConfig = (...args: any[]): any => (config.get as any)(...args);
+const getConfig = (...args: any[]): any => config.get(...args);
 
 const getFieldFormat = (id: string, params: object) => {
   const Format = fieldFormats.byId[id];

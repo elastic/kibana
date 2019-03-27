@@ -16,22 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  ContextMenuAction,
-  ContextMenuActionsRegistryProvider,
-} from 'ui/embeddable';
 
-class SamplePanelLink extends ContextMenuAction {
-  constructor() {
-    super({
-      displayName: 'Sample Panel Link',
-      id: 'samplePanelLink',
-      parentPanelId: 'mainMenu',
-    });
-  }
-  getHref() {
-    return 'https://example.com/kibana/test';
-  }
-}
+export const settingsGet = jest.fn();
 
-ContextMenuActionsRegistryProvider.register(() => new SamplePanelLink());
+jest.doMock('ui/chrome', () => ({
+  getUiSettingsClient: () => ({
+    get: settingsGet,
+  }),
+}));
