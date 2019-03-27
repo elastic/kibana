@@ -102,7 +102,7 @@ export const buildQuery = ({
 }: IpOverviewRequestOptions) => {
   const dslQuery = {
     allowNoIndices: true,
-    index: [packetbeatAlias],
+    index: [logAlias, packetbeatAlias],
     ignoreUnavailable: true,
     body: {
       aggs: {

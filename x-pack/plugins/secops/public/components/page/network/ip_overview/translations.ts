@@ -37,10 +37,10 @@ export const WHOIS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.w
   defaultMessage: 'WhoIs',
 });
 
-export const IP_INFORMATION = i18n.translate(
-  'xpack.secops.network.ipDetails.ipOverview.ipInformationTitle',
+export const IP_REPUTATION = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.ipReputationTitle',
   {
-    defaultMessage: 'IP Analysis',
+    defaultMessage: 'IP Reputation',
   }
 );
 

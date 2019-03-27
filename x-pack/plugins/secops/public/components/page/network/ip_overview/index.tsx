@@ -61,7 +61,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
     const fieldTitleMapping: Readonly<Array<{}>> = [
       {
         'geo.city_name': i18n.LOCATION,
-        'geo.country_name': i18n.LOCATION,
+        'geo.region_name': i18n.LOCATION,
       },
       {
         firstSeen: i18n.FIRST_SEEN,
@@ -73,7 +73,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
       },
       {
         whois: i18n.WHOIS,
-        ip_information: i18n.IP_INFORMATION,
+        ip_information: i18n.IP_REPUTATION,
       },
     ];
 

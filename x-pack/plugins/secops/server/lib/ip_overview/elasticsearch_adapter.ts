@@ -51,7 +51,7 @@ const getIpOverviewAgg = (
 ) => {
   // const sourceTotal = getOr(null, 'aggregations.source.doc_count', response);
   const firstSeen = getOr(null, `aggregations.${type}.firstSeen.value_as_string`, response);
-  const lastSeen = getOr(null, `aggregations.${type}.firstSeen.value_as_string`, response);
+  const lastSeen = getOr(null, `aggregations.${type}.lastSeen.value_as_string`, response);
   const geoFields = getOr(
     null,
     `aggregations.${type}.geo.results.hits.hits[0]._source.${type}.geo`,
