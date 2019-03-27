@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import aggResp from 'fixtures/agg_resp/date_histogram';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterDateHistogram } from '../../../buckets/create_filter/date_histogram';

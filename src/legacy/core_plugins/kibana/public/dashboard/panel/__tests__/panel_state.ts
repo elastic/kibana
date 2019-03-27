@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { PanelState } from '../../selectors';
 import { createPanelState } from '../panel_state';
 
