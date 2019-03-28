@@ -153,8 +153,8 @@ function getSuggestionsForField(indexPatternName: string, field: Field, visModel
 
   if (operationNames[0] === 'terms') {
     firstOperation = {
-      operation: 'terms',
-      argument: { field: field.name, count: 5 },
+      operation: 'column',
+      argument: { field: field.name, size: 5 },
     };
   } else if (operationNames[0] === 'date_histogram') {
     firstOperation = {

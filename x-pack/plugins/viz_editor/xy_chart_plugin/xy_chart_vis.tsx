@@ -48,6 +48,12 @@ function sampleVisFunction() {
           // TODO this should come via the expression
           title: 'A title',
           seriesType: args.displayType,
+          xAxisType:
+            context.columns[0].type === 'string'
+              ? 'ordinal'
+              : context.columns[0].type === 'number'
+              ? 'linear'
+              : 'time',
           data: context.rows.map((row: any) => [
             xColumnType === 'date' ? moment(row[xColumn]).valueOf() : row[xColumn],
             row[yColumn],
@@ -84,7 +90,13 @@ function sampleVisRenderer() {
           {config.seriesType === 'line' ? (
             <LineSeries
               id={getSpecId('lines')}
-              xScaleType={ScaleType.Time}
+              xScaleType={
+                config.xAxisType === 'ordinal'
+                  ? ScaleType.Ordinal
+                  : config.xAxisType === 'linear'
+                  ? ScaleType.Linear
+                  : ScaleType.Time
+              }
               yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}

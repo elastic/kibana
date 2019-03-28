@@ -135,9 +135,11 @@ function getTypeByOp(op: SelectOperation) {
     case 'count':
     case 'sum':
       return 'number';
-    case 'col':
+    case 'column':
       // TODO how do we get this information?
-      return 'number';
+      return 'string';
+    case 'terms':
+      return 'string';
   }
 }
 
