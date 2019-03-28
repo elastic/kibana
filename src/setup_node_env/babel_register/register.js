@@ -27,8 +27,8 @@ if (!process.env.BABEL_CACHE_PATH) {
 
 // paths that @babel/register should ignore
 var ignore = [
-  /\/bower_components\//,
-  /\/kbn-pm\/dist\//,
+  /[\/\\]bower_components[\/\\]/,
+  /[\/\\]kbn-pm[\/\\]dist[\/\\]/,
 
   // TODO: remove this and just transpile plugins at build time, but
   // has tricky edge cases that will probably require better eslint
@@ -39,10 +39,10 @@ var ignore = [
 
   // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
   // is `x-pack` and `b` is not `node_modules`
-  /\/node_modules\/(?!x-pack\/(?!node_modules)([^\/]+))([^\/]+\/[^\/]+)/,
+  /[\/\\]node_modules[\/\\](?!x-pack[\/\\](?!node_modules)([^\/\\]+))([^\/\\]+[\/\\][^\/\\]+)/,
 
   // ignore paths matching `/canvas/canvas_plugin/`
-  /\/canvas\/canvas_plugin\//,
+  /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
 ];
 
 if (global.__BUILT_WITH_BABEL__) {
@@ -60,7 +60,7 @@ if (global.__BUILT_WITH_BABEL__) {
     // ignore any path in the packages, unless it is in the package's
     // root `src` directory, in any test or __tests__ directory, or it
     // ends with .test.js, .test.ts, or .test.tsx
-    /\/packages\/(eslint-|kbn-)[^\/]+\/(?!src\/.*|(.+\/)?(test|__tests__)\/.+|.+\.test\.(js|ts|tsx)$)(.+$)/
+    /[\/\\]packages[\/\\](eslint-|kbn-)[^\/\\]+[\/\\](?!src[\/\\].*|(.+[\/\\])?(test|__tests__)[\/\\].+|.+\.test\.(js|ts|tsx)$)(.+$)/
   );
 }
 
