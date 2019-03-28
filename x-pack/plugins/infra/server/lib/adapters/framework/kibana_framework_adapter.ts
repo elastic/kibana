@@ -81,6 +81,7 @@ export class InfraKibanaBackendFrameworkAdapter implements InfraBackendFramework
 
     this.server.route({
       handler: wrappedHandler,
+      options: route.options,
       method: route.method,
       path: route.path,
     });

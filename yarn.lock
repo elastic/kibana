@@ -5646,13 +5646,6 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
-boom@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/boom/-/boom-3.1.1.tgz#b6424f01ed8d492b2b12ae86047c24e8b6a7c937"
-  integrity sha1-tkJPAe2NSSsrEq6GBHwk6LanyTc=
-  dependencies:
-    hoek "3.x.x"
-
 boom@4.x.x:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/boom/-/boom-4.3.1.tgz#4f8a3005cb4a7e3889f749030fd25b96e01d2e31"
@@ -5667,7 +5660,7 @@ boom@5.x.x:
   dependencies:
     hoek "4.x.x"
 
-boom@7.x.x, boom@^7.1.0, boom@^7.2.0:
+boom@7.2.2, boom@7.x.x, boom@^7.1.0, boom@^7.2.0:
   version "7.2.2"
   resolved "https://registry.yarnpkg.com/boom/-/boom-7.2.2.tgz#ac92101451aa5cea901aed07d881dd32b4f08345"
   integrity sha512-IFUbOa8PS7xqmhIjpeStwT3d09hGkNYQ6aj2iELSTxcVs2u0aKn1NzhkdUQSzsRg1FVkj3uit3I6mXQCBixw+A==
@@ -12867,11 +12860,6 @@ hoek@2.x.x:
   version "2.16.3"
   resolved "https://registry.yarnpkg.com/hoek/-/hoek-2.16.3.tgz#20bb7403d3cea398e91dc4710a8ff1b8274a25ed"
   integrity sha1-ILt0A9POo5jpHcRxCo/xuCdKJe0=
-
-hoek@3.x.x:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/hoek/-/hoek-3.0.4.tgz#268adff66bb6695c69b4789a88b1e0847c3f3123"
-  integrity sha1-Jorf9mu2aVxptHiaiLHghHw/MSM=
 
 hoek@4.2.1, hoek@4.x.x:
   version "4.2.1"

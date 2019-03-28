@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as Boom from 'boom';
+import { boomify } from 'boom';
 import { SearchParams } from 'elasticsearch';
 import * as Joi from 'joi';
 
@@ -100,7 +100,7 @@ export const initAdjacentSearchResultsRoutes = (framework: InfraBackendFramework
           timings,
         };
       } catch (requestError) {
-        throw Boom.boomify(requestError);
+        throw boomify(requestError);
       }
     },
     method: 'POST',

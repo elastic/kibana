@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { InfraWrappableRequest } from '../../lib/adapters/framework';
+
 export interface InfraTimerange {
   field: string;
   from: number;
@@ -11,8 +13,16 @@ export interface InfraTimerange {
   interval: string;
 }
 
+export enum MetricsExplorerAggregation {
+  avg = 'avg',
+  max = 'max',
+  min = 'min',
+  count = 'count',
+  cardinality = 'cardinality',
+}
+
 export interface MetricsExplorerMetric {
-  aggregation: string;
+  aggregation: MetricsExplorerAggregation;
   field?: string | null;
   rate?: boolean;
 }
@@ -21,20 +31,22 @@ export interface MetricsExplorerRequest {
   timerange: InfraTimerange;
   indexPattern: string;
   metrics: MetricsExplorerMetric[];
-  groupBy: string;
-  afterKey: string;
-  limit: number;
+  groupBy?: string;
+  afterKey?: string;
+  limit?: number;
 }
+
+export type MetricsExplorerWrappedRequest = InfraWrappableRequest<MetricsExplorerRequest>;
 
 export interface MetricsExplorerPageInfo {
   total: number;
   afterKey?: string | null;
 }
 
-enum MetricsExplorerColumnType {
-  date,
-  number,
-  string,
+export enum MetricsExplorerColumnType {
+  date = 'date',
+  number = 'number',
+  string = 'string',
 }
 
 export interface MetricsExplorerColumn {
@@ -44,8 +56,7 @@ export interface MetricsExplorerColumn {
 
 export interface MetricsExplorerRow {
   timestamp: number;
-  value: number;
-  [key: string]: string | number;
+  [key: string]: string | number | null | undefined;
 }
 
 export interface MetricsExplorerSeries {
