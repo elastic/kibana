@@ -22,20 +22,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 // tslint:disable-next-line:no-default-export
 export default function({ getPageObjects }: FtrProviderContext) {
-  const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
-
-  async function cleanupMarkdownData(variableName: 'variable' | 'label', checkedValue: string) {
-    await visualBuilder.markdownSwitchSubTab('data');
-    await visualBuilder.setMarkdownDataVariable('', variableName);
-
-    await visualBuilder.markdownSwitchSubTab('markdown');
-    const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
-    rerenderedTable.forEach(row => {
-      variableName === 'label'
-        ? expect(row.key).to.include.string(checkedValue)
-        : expect(row.key).to.not.include.string(checkedValue);
-    });
-  }
+  const { visualBuilder, timePicker } = getPageObjects([
+    'visualBuilder',
+    'timePicker',
+    'visualize',
+  ]);
 
   describe('visual builder', function describeIndexTests() {
     describe('markdown', () => {
@@ -79,52 +70,6 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.enterMarkdown(list);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
-      });
-
-      it('should change label name', async () => {
-        const BASE_LABEL = 'count';
-        const LABEL = 'label';
-        await visualBuilder.markdownSwitchSubTab('data');
-
-        await visualBuilder.setMarkdownDataVariable(LABEL, LABEL);
-
-        await visualBuilder.markdownSwitchSubTab('markdown');
-        const table = await visualBuilder.getMarkdownTableVariables();
-        table.forEach(row => {
-          expect(row.key).to.contain(LABEL);
-        });
-        await cleanupMarkdownData(LABEL, BASE_LABEL);
-      });
-
-      it('should change variable name', async () => {
-        const VARIABLE = 'variable';
-        await visualBuilder.markdownSwitchSubTab('data');
-        await visualBuilder.setMarkdownDataVariable(VARIABLE, VARIABLE);
-        await visualBuilder.markdownSwitchSubTab('markdown');
-        const table = await visualBuilder.getMarkdownTableVariables();
-
-        table.forEach((row, index) => {
-          // exception: last index for variable is always: {{count.label}}
-          index === table.length - 1
-            ? expect(row.key).to.not.include.string(VARIABLE)
-            : expect(row.key).to.include.string(VARIABLE);
-        });
-
-        await cleanupMarkdownData(VARIABLE, VARIABLE);
-      });
-
-      it('should render markdown table', async () => {
-        const TABLE =
-          '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';
-        const DATA = '46';
-
-        await visualBuilder.enterMarkdown(TABLE);
-        const text = await visualBuilder.getMarkdownText();
-        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
-
-        tableValues.forEach(value => {
-          expect(value).to.be.equal(DATA);
-        });
       });
     });
   });

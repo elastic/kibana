@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }) {
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
 
-      it('should apply query to fit to bounds', async () => {
+      it.skip('should apply query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
@@ -98,7 +98,7 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('2');
       });
 
-      it('should apply layer query to fit to bounds', async () => {
+      it.skip('should apply layer query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');

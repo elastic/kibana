@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export { SegmentedSearchRequestProvider } from './segmented_search_request';
+function isValidJson(value: string): boolean {
+  if (!value || value.length === 0) {
+    return true;
+  }
+
+  const trimmedValue = value.trim();
+
+  if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
+    try {
+      JSON.parse(trimmedValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+export { isValidJson };

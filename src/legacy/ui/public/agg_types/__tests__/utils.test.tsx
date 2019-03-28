@@ -17,26 +17,33 @@
  * under the License.
  */
 
-import React from 'react';
+import { isValidJson } from '../utils';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { AggParamEditorProps } from '../../vis/editors/default';
+const input = {
+  valid: '{ "test": "json input" }',
+  invalid: 'strings are not json',
+};
 
-function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
-  return (
-    <EuiFormRow
-      label={aggParam.displayName || aggParam.name}
-      fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
-    >
-      <EuiFieldText
-        value={value || ''}
-        data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
-        onChange={ev => setValue(ev.target.value)}
-        fullWidth={true}
-      />
-    </EuiFormRow>
-  );
-}
+describe('AggType utils', () => {
+  describe('isValidJson', () => {
+    it('should return true when empty string', () => {
+      expect(isValidJson('')).toBe(true);
+    });
 
-export { StringParamEditor };
+    it('should return true when undefine', () => {
+      expect(isValidJson(undefined as any)).toBe(true);
+    });
+
+    it('should return false when invalid string', () => {
+      expect(isValidJson(input.invalid)).toBe(false);
+    });
+
+    it('should return true when valid string', () => {
+      expect(isValidJson(input.valid)).toBe(true);
+    });
+
+    it('should return false if a number', () => {
+      expect(isValidJson('0')).toBe(false);
+    });
+  });
+});
