@@ -57,6 +57,8 @@ describe('callClient', () => {
     return searchRequest;
   };
 
+  beforeEach(ngMock.module('kibana'));
+
   beforeEach(ngMock.module(function stubEs($provide) {
     esRequestDelay = 0;
     esShouldError = false;
@@ -84,8 +86,6 @@ describe('callClient', () => {
       };
     });
   }));
-
-  beforeEach(ngMock.module('kibana'));
 
   beforeEach(ngMock.inject(Private => {
     callClient = Private(CallClientProvider);
