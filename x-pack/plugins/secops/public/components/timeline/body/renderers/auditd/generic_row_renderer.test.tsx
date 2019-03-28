@@ -90,7 +90,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome text/usr/bin/wgetwith resultsuccesswgetDestination93.184.216.34:80'
+        'some children Session246alice@zeek-londonsome text/usr/bin/wgetwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
