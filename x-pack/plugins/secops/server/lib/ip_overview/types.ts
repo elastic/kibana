@@ -22,4 +22,8 @@ export interface IpOverviewHit extends SearchHit {
 export interface GenericBuckets {
   key: string;
   doc_count: number;
+  timestamp: {
+    value: number;
+    value_as_string: string;
+  };
 }

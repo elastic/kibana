@@ -63,16 +63,18 @@ const getIpOverviewAgg = (
     response
   );
   const domains = getOr([], `aggregations.${type}.domains.buckets`, response).map(
-    (d: GenericBuckets) => d.key
+    (b: GenericBuckets) => ({
+      name: b.key,
+      count: b.doc_count,
+      lastSeen: b.timestamp.value_as_string,
+    })
   );
 
   return {
     [type]: {
       firstSeen,
       lastSeen,
-      domains: {
-        ...domains,
-      },
+      domains: [...domains],
       host: {
         ...hostFields,
       },

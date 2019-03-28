@@ -12,10 +12,16 @@ export const ipOverviewSchema = gql`
     source
   }
 
+  type Domain {
+    name: String!
+    count: Float!
+    lastSeen: Date!
+  }
+
   type Overview {
     firstSeen: Date
     lastSeen: Date
-    domains: [String!]
+    domains: [Domain!]!
     host: HostEcsFields!
     geo: GeoEcsFields!
   }

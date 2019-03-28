@@ -13,6 +13,13 @@ export const mockIpOverviewData: { IpOverviewData: IpOverviewData } = {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',
       lastSeen: '2019-02-07T17:19:41.636Z',
+      domains: [
+        {
+          name: 'test.domain',
+          count: 23,
+          lastSeen: '2019-02-07T17:19:41.636Z',
+        },
+      ],
       geo: {},
       host: {
         os: {
@@ -30,6 +37,13 @@ export const mockIpOverviewData: { IpOverviewData: IpOverviewData } = {
     destination: {
       firstSeen: '2019-02-07T17:19:41.648Z',
       lastSeen: '2019-02-07T17:19:41.648Z',
+      domains: [
+        {
+          name: 'test.domain',
+          count: 23,
+          lastSeen: '2019-02-07T17:19:41.636Z',
+        },
+      ],
       geo: {},
       host: {
         os: {

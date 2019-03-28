@@ -19,6 +19,23 @@ export const ipOverviewQuery = gql`
         source {
           firstSeen
           lastSeen
+          domains {
+            name
+            count
+            lastSeen
+          }
+          geo {
+            continent_name
+            city_name
+            country_iso_code
+            country_name
+            location {
+              lat
+              lon
+            }
+            region_iso_code
+            region_name
+          }
           host {
             architecture
             id
@@ -32,23 +49,28 @@ export const ipOverviewQuery = gql`
               version
             }
             type
-          }
-          geo {
-            continent_name
-            city_name
-            country_iso_code
-            country_name
-            location {
-              lat
-              lon
-            }
-            region_iso_code
-            region_name
           }
         }
         destination {
           firstSeen
           lastSeen
+          domains {
+            name
+            count
+            lastSeen
+          }
+          geo {
+            continent_name
+            city_name
+            country_iso_code
+            country_name
+            location {
+              lat
+              lon
+            }
+            region_iso_code
+            region_name
+          }
           host {
             architecture
             id
@@ -62,18 +84,6 @@ export const ipOverviewQuery = gql`
               version
             }
             type
-          }
-          geo {
-            continent_name
-            city_name
-            country_iso_code
-            country_name
-            location {
-              lat
-              lon
-            }
-            region_iso_code
-            region_name
           }
         }
       }

@@ -696,11 +696,19 @@ export interface Overview {
 
   lastSeen?: Date | null;
 
-  domains?: string[] | null;
+  domains: Domain[];
 
   host: HostEcsFields;
 
   geo: GeoEcsFields;
+}
+
+export interface Domain {
+  name: string;
+
+  count: number;
+
+  lastSeen: Date;
 }
 
 export interface KpiNetworkData {
@@ -1543,9 +1551,47 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
-    host: Host;
+    domains: Domains[];
 
     geo: Geo;
+
+    host: Host;
+  };
+
+  export type Domains = {
+    __typename?: 'Domain';
+
+    name: string;
+
+    count: number;
+
+    lastSeen: Date;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: string | null;
+
+    city_name?: string | null;
+
+    country_iso_code?: string | null;
+
+    country_name?: string | null;
+
+    location?: Location | null;
+
+    region_iso_code?: string | null;
+
+    region_name?: string | null;
+  };
+
+  export type Location = {
+    __typename?: 'Location';
+
+    lat?: number | null;
+
+    lon?: number | null;
   };
 
   export type Host = {
@@ -1578,7 +1624,31 @@ export namespace GetIpOverviewQuery {
     version?: string | null;
   };
 
-  export type Geo = {
+  export type Destination = {
+    __typename?: 'Overview';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+
+    domains: _Domains[];
+
+    geo: _Geo;
+
+    host: _Host;
+  };
+
+  export type _Domains = {
+    __typename?: 'Domain';
+
+    name: string;
+
+    count: number;
+
+    lastSeen: Date;
+  };
+
+  export type _Geo = {
     __typename?: 'GeoEcsFields';
 
     continent_name?: string | null;
@@ -1589,31 +1659,19 @@ export namespace GetIpOverviewQuery {
 
     country_name?: string | null;
 
-    location?: Location | null;
+    location?: _Location | null;
 
     region_iso_code?: string | null;
 
     region_name?: string | null;
   };
 
-  export type Location = {
+  export type _Location = {
     __typename?: 'Location';
 
     lat?: number | null;
 
     lon?: number | null;
-  };
-
-  export type Destination = {
-    __typename?: 'Overview';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-
-    host: _Host;
-
-    geo: _Geo;
   };
 
   export type _Host = {
@@ -1644,32 +1702,6 @@ export namespace GetIpOverviewQuery {
     platform?: string | null;
 
     version?: string | null;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: string | null;
-
-    city_name?: string | null;
-
-    country_iso_code?: string | null;
-
-    country_name?: string | null;
-
-    location?: _Location | null;
-
-    region_iso_code?: string | null;
-
-    region_name?: string | null;
-  };
-
-  export type _Location = {
-    __typename?: 'Location';
-
-    lat?: number | null;
-
-    lon?: number | null;
   };
 }
 

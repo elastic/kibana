@@ -6,6 +6,13 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
     data={
       Object {
         "destination": Object {
+          "domains": Array [
+            Object {
+              "count": 23,
+              "lastSeen": "2019-02-07T17:19:41.636Z",
+              "name": "test.domain",
+            },
+          ],
           "firstSeen": "2019-02-07T17:19:41.648Z",
           "geo": Object {},
           "host": Object {
@@ -23,6 +30,13 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
           "lastSeen": "2019-02-07T17:19:41.648Z",
         },
         "source": Object {
+          "domains": Array [
+            Object {
+              "count": 23,
+              "lastSeen": "2019-02-07T17:19:41.636Z",
+              "name": "test.domain",
+            },
+          ],
           "firstSeen": "2019-02-07T17:19:41.636Z",
           "geo": Object {},
           "host": Object {

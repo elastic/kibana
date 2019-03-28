@@ -26,6 +26,7 @@ import { getEmptyTagValue } from '../../../empty_value';
 
 import {
   dateRenderer,
+  domainsRenderer,
   hostIdRenderer,
   hostNameRenderer,
   locationRenderer,
@@ -43,7 +44,7 @@ const SelectTypeItem = styled(EuiFlexItem)`
 
 interface DescriptionList {
   title: string;
-  description: React.ReactElement | string;
+  description: React.ReactElement;
 }
 
 interface OwnProps {
@@ -81,7 +82,10 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
             data
           ),
         },
-        { title: i18n.DOMAINS, description: '' },
+        {
+          title: i18n.DOMAINS,
+          description: typeData ? domainsRenderer(typeData.domains, flowType) : getEmptyTagValue(),
+        },
       ],
       [
         { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },

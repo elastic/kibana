@@ -725,11 +725,19 @@ export interface Overview {
 
   lastSeen?: Date | null;
 
-  domains?: string[] | null;
+  domains: Domain[];
 
   host: HostEcsFields;
 
   geo: GeoEcsFields;
+}
+
+export interface Domain {
+  name: string;
+
+  count: number;
+
+  lastSeen: Date;
 }
 
 export interface KpiNetworkData {
@@ -3381,7 +3389,7 @@ export namespace OverviewResolvers {
 
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
-    domains?: DomainsResolver<string[] | null, TypeParent, Context>;
+    domains?: DomainsResolver<Domain[], TypeParent, Context>;
 
     host?: HostResolver<HostEcsFields, TypeParent, Context>;
 
@@ -3398,17 +3406,43 @@ export namespace OverviewResolvers {
     Parent = Overview,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type DomainsResolver<
-    R = string[] | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
+  export type DomainsResolver<R = Domain[], Parent = Overview, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
   export type HostResolver<
     R = HostEcsFields,
     Parent = Overview,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type GeoResolver<R = GeoEcsFields, Parent = Overview, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace DomainResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = Domain> {
+    name?: NameResolver<string, TypeParent, Context>;
+
+    count?: CountResolver<number, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date, TypeParent, Context>;
+  }
+
+  export type NameResolver<R = string, Parent = Domain, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CountResolver<R = number, Parent = Domain, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type LastSeenResolver<R = Date, Parent = Domain, Context = SecOpsContext> = Resolver<
     R,
     Parent,
     Context
