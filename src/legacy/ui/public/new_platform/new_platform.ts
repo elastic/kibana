@@ -21,7 +21,7 @@ import { CoreSetup } from '../../../../core/public/';
 
 const runtimeContext = {
   setup: {
-    core: null as CoreSetup | null,
+    core: (null as unknown) as CoreSetup,
     plugins: {},
   },
 };
@@ -35,8 +35,8 @@ export function __newPlatformInit__(core: CoreSetup) {
 }
 
 export function getNewPlatform() {
-  if (runtimeContext.start.core === null) {
-    throw new Error('runtimeContext.start.core Not initilized yet');
+  if (runtimeContext.setup.core === null) {
+    throw new Error('runtimeContext is not initialized yet');
   }
   return runtimeContext;
 }
