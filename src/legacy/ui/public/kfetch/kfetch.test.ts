@@ -78,10 +78,17 @@ describe('kfetch', () => {
     });
   });
 
-  it('should return response', async () => {
+  it('should return JSON responses by default', async () => {
     fetchMock.get('*', { foo: 'bar' });
     const res = await kfetch({ pathname: 'my/path' });
     expect(res).toEqual({ foo: 'bar' });
+  });
+
+  it('should not return JSON responses by defaul when `parseJson` is `false`', async () => {
+    fetchMock.get('*', { foo: 'bar' });
+    const raw = await kfetch({ pathname: 'my/path' }, { parseJson: false });
+    const res = await raw.text();
+    expect(res).toEqual('{"foo":"bar"}');
   });
 
   it('should prepend url with basepath by default', async () => {
