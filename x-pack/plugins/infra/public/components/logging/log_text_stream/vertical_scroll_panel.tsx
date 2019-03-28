@@ -8,8 +8,8 @@ import { bisector } from 'd3-array';
 import sortBy from 'lodash/fp/sortBy';
 import throttle from 'lodash/fp/throttle';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { Rect } from './measurable_item_view';
 
 interface VerticalScrollPanelProps<Child> {
@@ -227,7 +227,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 }
 
-const ScrollPanelWrapper = styled.div.attrs<{ scrollbarOffset?: number }>({})`
+const ScrollPanelWrapper = euiStyled.div.attrs<{ scrollbarOffset?: number }>({})`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;

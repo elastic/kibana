@@ -7,9 +7,9 @@
 import { EuiIcon } from '@elastic/eui';
 import { transparentize } from 'polished';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface SuggestionItemProps {
   isSelected?: boolean;
@@ -44,25 +44,25 @@ export class SuggestionItem extends React.Component<SuggestionItemProps> {
   }
 }
 
-const SuggestionItemContainer = styled.div<{
+const SuggestionItemContainer = euiStyled.div<{
   isSelected?: boolean;
 }>`
   display: flex;
   flex-direction: row;
   font-size: ${props => props.theme.eui.euiFontSizeS};
-  height: ${props => props.theme.eui.euiSizeXl};
+  height: ${props => props.theme.eui.euiSizeXL};
   white-space: nowrap;
   background-color: ${props =>
     props.isSelected ? props.theme.eui.euiColorLightestShade : 'transparent'};
 `;
 
-const SuggestionItemField = styled.div`
+const SuggestionItemField = euiStyled.div`
   align-items: center;
   cursor: pointer;
   display: flex;
   flex-direction: row;
-  height: ${props => props.theme.eui.euiSizeXl};
-  padding: ${props => props.theme.eui.euiSizeXs};
+  height: ${props => props.theme.eui.euiSizeXL};
+  padding: ${props => props.theme.eui.euiSizeXS};
 `;
 
 const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: string }>`
@@ -71,7 +71,7 @@ const SuggestionItemIconField = SuggestionItemField.extend<{ suggestionType: str
   color: ${props => getEuiIconColor(props.theme, props.suggestionType)};
   flex: 0 0 auto;
   justify-content: center;
-  width: ${props => props.theme.eui.euiSizeXl};
+  width: ${props => props.theme.eui.euiSizeXL};
 `;
 
 const SuggestionItemTextField = SuggestionItemField.extend`
