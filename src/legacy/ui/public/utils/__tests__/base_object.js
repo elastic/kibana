@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import '../../private';
 
-import { BaseObject } from '../../utils/base_object';
+import { BaseObject } from '../base_object';
 
 describe('Base Object', function () {
   beforeEach(ngMock.module('kibana'));
