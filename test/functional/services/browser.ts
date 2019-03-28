@@ -25,8 +25,6 @@ import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
-import Type = logging.Type;
-import Entry = logging.Entry;
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
@@ -276,8 +274,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
-    public async getLogsFor(type: typeof Type | string): Promise<Entry[]>;
-    public async getLogsFor(...args: any[]): Promise<Entry[]> {
+    public async getLogsFor(type: typeof logging.Type | string): Promise<logging.Entry[]>;
+    public async getLogsFor(...args: any[]): Promise<logging.Entry[]> {
       // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       // See: https://github.com/w3c/webdriver/issues/406
       // See: https://w3c.github.io/webdriver/#endpoints
