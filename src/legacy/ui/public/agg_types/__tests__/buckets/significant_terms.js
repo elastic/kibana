@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
@@ -26,28 +26,29 @@ describe('Significant Terms Agg', function () {
 
     let $rootScope;
 
-    function init({ responseValueAggs = [], aggParams = {} }) {
+    // function init({ responseValueAggs = [], aggParams = {} }) {
+    function init({ aggParams = {} }) {
       ngMock.module('kibana');
       ngMock.inject(function (Private, $controller, _$rootScope_) {
-        const terms = aggTypes.byName.significant_terms;
+        const significantTerms = aggTypes.byName.significant_terms;
         // const orderAggController = terms.params.byName.orderAgg.controller;
 
         $rootScope = _$rootScope_;
         $rootScope.agg = {
           id: 'test',
           params: aggParams,
-          type: terms,
+          type: significantTerms,
           vis: {
             aggs: []
           }
         };
-        $rootScope.responseValueAggs = responseValueAggs;
+        // $rootScope.responseValueAggs = responseValueAggs;
         // $controller(orderAggController, { $scope: $rootScope });
-        $rootScope.$digest();
+        // $rootScope.$digest();
       });
     }
 
-    describe('convert import/export from old format', function () {
+    describe('convert include/exclude from old format', function () {
 
       it('it doesnt do anything with string type', function () {
         init({
