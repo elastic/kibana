@@ -42,3 +42,11 @@
   position: relative;
   top: $euiSizeS;
 }
+
+.codeText__blameMessage {
+  max-width: 10rem;
+}
+
+.codeAvatar {
+  margin: auto $euiSizeS auto 0;
+}
