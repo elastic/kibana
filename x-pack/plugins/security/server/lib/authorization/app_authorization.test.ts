@@ -7,6 +7,8 @@
 import { Server } from 'hapi';
 import { AuthorizationService } from './service';
 
+import { Feature } from 'x-pack/plugins/xpack_main/types';
+import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 import { actionsFactory } from './actions';
 import { initAppAuthorization } from './app_authorization';
 
@@ -20,10 +22,24 @@ const actions = actionsFactory({
   },
 });
 
+const createMockXPackMainPlugin = (): XPackMainPlugin => {
+  const features: Feature[] = [
+    {
+      id: 'foo',
+      name: 'Foo',
+      app: ['foo'],
+      privileges: {},
+    },
+  ];
+  return {
+    getFeatures: () => features,
+  } as XPackMainPlugin;
+};
+
 describe('initAppAuthorization', () => {
   test(`route that doesn't start with "/app/" continues`, async () => {
     const server = new Server();
-    initAppAuthorization(server, {} as AuthorizationService);
+    initAppAuthorization(server, createMockXPackMainPlugin(), {} as AuthorizationService);
     server.route([
       {
         method: 'GET',
@@ -41,21 +57,18 @@ describe('initAppAuthorization', () => {
     expect(statusCode).toBe(200);
   });
 
-  test(`route that starts with "/app/", but "mode.useRbacForRequest()" returns false continues`, async () => {
+  test(`protected route that starts with "/app/", but "mode.useRbacForRequest()" returns false continues`, async () => {
     const server = new Server();
     const mockAuthorizationService: AuthorizationService = {
       mode: {
         useRbacForRequest: jest.fn().mockReturnValue(false),
       },
     } as any;
-    initAppAuthorization(server, mockAuthorizationService);
+    initAppAuthorization(server, createMockXPackMainPlugin(), mockAuthorizationService);
     server.route([
       {
         method: 'GET',
         path: '/app/foo',
-        options: {
-          tags: ['access:foo'],
-        },
         handler: () => {
           return 'foo app response';
         },
@@ -70,7 +83,38 @@ describe('initAppAuthorization', () => {
     expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 
-  test(`route that starts with "/app/", "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
+  test(`unprotected route that starts with "/app/", and "mode.useRbacForRequest()" returns true continues`, async () => {
+    const headers = {
+      authorization: 'foo',
+    };
+    const server = new Server();
+    const mockAuthorizationService: AuthorizationService = {
+      actions,
+      mode: {
+        useRbacForRequest: jest.fn().mockReturnValue(true),
+      },
+    } as any;
+    initAppAuthorization(server, createMockXPackMainPlugin(), mockAuthorizationService);
+    server.route([
+      {
+        method: 'GET',
+        path: '/app/bar',
+        handler: () => {
+          return 'bar app response';
+        },
+      },
+    ]);
+    const { request, result, statusCode } = await server.inject({
+      method: 'GET',
+      url: '/app/bar',
+      headers,
+    });
+    expect(result).toBe('bar app response');
+    expect(statusCode).toBe(200);
+    expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
+  });
+
+  test(`protected route that starts with "/app/", "mode.useRbacForRequest()" returns true and user is authorized continues`, async () => {
     const headers = {
       authorization: 'foo',
     };
@@ -89,7 +133,7 @@ describe('initAppAuthorization', () => {
         useRbacForRequest: jest.fn().mockReturnValue(true),
       },
     } as any;
-    initAppAuthorization(server, mockAuthorizationService);
+    initAppAuthorization(server, createMockXPackMainPlugin(), mockAuthorizationService);
     server.route([
       {
         method: 'GET',
@@ -110,7 +154,7 @@ describe('initAppAuthorization', () => {
     expect(mockAuthorizationService.mode.useRbacForRequest).toHaveBeenCalledWith(request);
   });
 
-  test(`route that starts with "/app/", "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
+  test(`protected route that starts with "/app/", "mode.useRbacForRequest()" returns true and user isn't authorized responds with a 404`, async () => {
     const headers = {
       authorization: 'foo',
     };
@@ -129,7 +173,7 @@ describe('initAppAuthorization', () => {
         useRbacForRequest: jest.fn().mockReturnValue(true),
       },
     } as any;
-    initAppAuthorization(server, mockAuthorizationService);
+    initAppAuthorization(server, createMockXPackMainPlugin(), mockAuthorizationService);
     server.route([
       {
         method: 'GET',
