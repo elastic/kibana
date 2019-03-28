@@ -7,6 +7,7 @@
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import {
+  ColumnOperation,
   DateHistogramOperation,
   SelectOperation,
   SelectOperator,
@@ -50,22 +51,52 @@ export const columnOperations: ColumnOperations = {
   },
   count: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Count</strong>
+          </div>
+        </div>
+      );
     },
   },
   column: {
-    summarize(op) {
-      return <></>;
+    summarize(op: ColumnOperation) {
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="document" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">{op.argument.field}</strong>
+          </div>
+        </div>
+      );
     },
   },
   avg: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Average of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
     },
   },
   terms: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="string" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Unique terms of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
     },
   },
 };

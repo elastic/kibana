@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { EuiButton, EuiTextArea } from '@elastic/eui';
+import React, { useState } from 'react';
+import { kfetch } from 'ui/kfetch';
+import { FieldListPanel } from '../public/common/components/field_list_panel';
+import { Datasource, VisModel } from '../public/common/lib';
+import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
+
+function DataPanel(props: PanelComponentProps<VisModel>) {
+  const { visModel, onChangeVisModel } = props;
+  const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.sql : '');
+
+  const updateDatasource = async () => {
+    const resultColumns: Array<{ name: string; type: string }> = await kfetch({
+      pathname: '/api/viz_editor/sqlfields',
+      method: 'POST',
+      body: JSON.stringify({
+        sql: text,
+      }),
+    });
+
+    const newDatasource: Datasource = {
+      id: 'source',
+      title: 'ESSQL Result',
+      fields: resultColumns.map(({ name, type }) => ({
+        name,
+        type,
+        aggregatable: false,
+        searchable: false,
+      })),
+      meta: { sql: text },
+    };
+
+    onChangeVisModel({ ...visModel, datasource: newDatasource });
+  };
+
+  return (
+    <>
+      <EuiTextArea
+        style={{ height: 400 }}
+        fullWidth
+        placeholder="Enter your ESSQL query here and use the resulting fields to build your viz"
+        value={text}
+        onChange={({ target: { value } }) => updateText(value)}
+      />
+      <EuiButton onClick={updateDatasource}>Apply</EuiButton>
+      <FieldListPanel {...props} />
+    </>
+  );
+}
+
+function toExpression(viewState: VisModel) {
+  if (Object.keys(viewState.queries).length === 0) {
+    return '';
+  }
+  const firstQuery = Object.values(viewState.queries)[0];
+  // TODO prob. do this on an AST object and stringify afterwards
+  // return `sample_data`;
+  return `client_essql keep='${
+    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
+  }' query='${viewState.datasource ? viewState.datasource.meta.sql : ''}'`;
+}
+
+export const config: DatasourcePlugin<VisModel> = {
+  name: 'essql',
+  toExpression,
+  DataPanel,
+  icon: 'sqlApp',
+};

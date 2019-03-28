@@ -25,7 +25,9 @@ export type FieldOperation = Aliasable & {
 
 export interface ColumnOperation extends FieldOperation {
   operation: 'column';
-  // argument: Field;
+  argument: Field & {
+    size?: number;
+  };
 }
 
 export interface DateHistogramOperation extends FieldOperation {
@@ -52,7 +54,7 @@ export interface CountOperation extends Aliasable {
 export interface TermsOperation extends FieldOperation {
   operation: 'terms';
   argument: Field & {
-    count: number;
+    size: number;
   };
 }
 
@@ -134,7 +136,7 @@ export interface OrderByOperation {
 }
 
 export interface Query {
-  indexPattern: string;
+  datasourceRef?: string;
 
   // What columns / aggregations are we selecting
   select: SelectOperation[];

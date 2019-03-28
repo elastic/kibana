@@ -5,8 +5,8 @@
  */
 
 import {
-  // @ts-ignore
-  EuiCodeEditor,
+  EuiButtonToggle,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
@@ -22,12 +22,8 @@ import React, { useReducer } from 'react';
 import { initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
 
-import 'brace/ext/language_tools';
-import 'brace/mode/javascript';
-import 'brace/snippets/javascript';
-import 'brace/theme/github';
-
-import { registry } from '../../editor_plugin_registry';
+import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
+import { registry as editorRegistry } from '../../editor_plugin_registry';
 
 type Action =
   | { type: 'loaded' }
@@ -58,8 +54,15 @@ function reducer(state: RootState, action: Action): RootState {
 export function Main(props: MainProps) {
   const [state, dispatch] = useReducer(reducer, { visModel: initialState(), metadata: {} });
 
-  const { ConfigPanel, DataPanel, WorkspacePanel, toExpression } = registry.getByName(
-    state.visModel.editorPlugin
+  const {
+    ConfigPanel,
+    WorkspacePanel,
+    toExpression: toRenderExpression,
+    getSuggestionsForField,
+  } = editorRegistry.getByName(state.visModel.editorPlugin);
+
+  const { DataPanel, toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
+    state.visModel.datasourcePlugin
   );
 
   const onChangeVisModel = (newState: VisModel) => {
@@ -69,20 +72,47 @@ export function Main(props: MainProps) {
   const panelProps = {
     visModel: state.visModel,
     onChangeVisModel,
+    getSuggestionsForField,
   };
 
   // TODO add a meaningful default expression builder implementation here
-  const expression = toExpression
-    ? toExpression(state.visModel, 'edit')
-    : `esquery { query } | ${state.visModel.editorPlugin}_chart { config }`;
+  const renderExpression = toRenderExpression
+    ? toRenderExpression(state.visModel, 'edit')
+    : `${state.visModel.editorPlugin}_chart { config }`;
 
-  const suggestions = registry
+  const fetchExpression = toDataFetchExpression
+    ? toDataFetchExpression(state.visModel, 'edit')
+    : `${state.visModel.editorPlugin}_chart { config }`;
+
+  const expression = `${fetchExpression} | ${renderExpression}`;
+
+  const suggestions = editorRegistry
     .getAll()
-    .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
+    .flatMap(plugin =>
+      plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
+    );
 
   return (
     <EuiPage>
       <EuiPageSideBar>
+        {datasourceRegistry.getAll().map(({ name, icon }) => (
+          <EuiButtonToggle
+            key={name}
+            label={name}
+            iconType={icon as any}
+            onChange={() => {
+              onChangeVisModel({
+                ...state.visModel,
+                datasourcePlugin: name,
+                datasource: null,
+                queries: {},
+              });
+            }}
+            isSelected={name === state.visModel.datasourcePlugin}
+            isEmpty
+            isIconOnly
+          />
+        ))}
         <DataPanel {...panelProps} />
       </EuiPageSideBar>
       <EuiPageBody className="vzBody">
@@ -100,20 +130,7 @@ export function Main(props: MainProps) {
               </EuiFlexItem>
               <EuiFlexItem>
                 {/* TODO as soon as something changes here, switch to the "expression"-editor */}
-                <EuiCodeEditor
-                  mode="javascript"
-                  theme="github"
-                  width="100%"
-                  height="30px"
-                  value={expression}
-                  setOptions={{
-                    fontSize: '14px',
-                    enableBasicAutocompletion: true,
-                    enableSnippets: true,
-                    enableLiveAutocompletion: true,
-                  }}
-                  aria-label="Code Editor"
-                />
+                <EuiCodeBlock>{expression}</EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>
@@ -121,6 +138,7 @@ export function Main(props: MainProps) {
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />
+
         <h4>Suggestions</h4>
         <EuiListGroup>
           {suggestions.map((suggestion, i) => (

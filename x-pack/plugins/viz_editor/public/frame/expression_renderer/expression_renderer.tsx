@@ -14,6 +14,9 @@ async function runAndRender(
   getInterpreter: any,
   renderersRegistry: any
 ) {
+  if (!expression) {
+    return;
+  }
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
   const response = await interpreter.interpretAst(ast, {}, { getInitialContext: () => ({}) });
@@ -23,6 +26,9 @@ async function runAndRender(
         /* this is just here for compatibility with legacy kibana renderers */
       },
     });
+  } else {
+    // tslint:disable-next-line:no-console
+    console.log('Unexpected result of expression', response);
   }
 }
 

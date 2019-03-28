@@ -10,7 +10,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs a limit without aggregations', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'column', argument: { field: 'datacenter' } }],
         size: 20,
       })
@@ -22,7 +22,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs a limit with aggregations', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'count' }],
         size: 20,
       })
@@ -34,7 +34,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs a basic column selection', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'column', argument: { field: 'datacenter' } },
           { operation: 'column', argument: { field: 'bytes' } },
@@ -48,7 +48,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs basic aggregations', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'count' },
           { operation: 'avg', alias: 'averagebytes', argument: { field: 'bytes' } },
@@ -79,7 +79,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs grouped aggregations', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
           { operation: 'count' },
@@ -116,7 +116,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs grouped aggregations with terms', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
           { operation: 'terms', argument: { field: 'dc', count: 5 } },
@@ -156,7 +156,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs date_histograms', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'date_histogram', argument: { field: 'order_date', interval: 'month' } },
           { operation: 'count', alias: 'records_per_month' },
@@ -184,7 +184,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('supports or clauses', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'count' }],
         where: {
           operation: 'or',
@@ -235,7 +235,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('supports and clauses', () => {
     expect(
       toEsQuery({
-        indexPattern: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'count' }],
         where: {
           operation: 'and',

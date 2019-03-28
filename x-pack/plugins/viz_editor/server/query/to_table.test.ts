@@ -10,7 +10,7 @@ import { toTable } from './to_table';
 describe('viz-editor/query/to_table', () => {
   test('tabularizes raw docs', () => {
     const query: Query = {
-      indexPattern: 'a',
+      datasourceRef: 'a',
       select: [
         { operation: 'column', alias: 'total_price', argument: { field: 'price' } },
         { operation: 'column', argument: { field: 'discount' } },
@@ -42,7 +42,7 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes root aggregations', () => {
     const query: Query = {
-      indexPattern: 'a',
+      datasourceRef: 'a',
       select: [
         { operation: 'sum', alias: 'total_price', argument: { field: 'price' } },
         { operation: 'count', alias: 'num_recs' },
@@ -73,7 +73,7 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes a group by', () => {
     const query: Query = {
-      indexPattern: 'a',
+      datasourceRef: 'a',
       select: [
         { operation: 'column', alias: 'airport', argument: { field: 'air_port' } },
         { operation: 'column', alias: 'destination', argument: { field: 'dest' } },
@@ -131,7 +131,7 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes a date_histogram', () => {
     const query: Query = {
-      indexPattern: 'a',
+      datasourceRef: 'a',
       select: [
         {
           operation: 'date_histogram',

@@ -24,16 +24,14 @@ export function route(server: Legacy.Server) {
     path: `${API_PREFIX}/search`,
     method: 'POST',
     async handler(req) {
-      const query = req.payload as Query;
+      const { query, indexpattern } = req.payload as { query: Query; indexpattern: string };
       const esQuery = toEsQuery(query);
       const result = await callWithRequest(req, 'search', {
-        index: query.indexPattern,
+        index: indexpattern,
         body: esQuery,
       });
 
-      return {
-        rows: toTable(query, result),
-      };
+      return toTable(query, result);
     },
   });
 }

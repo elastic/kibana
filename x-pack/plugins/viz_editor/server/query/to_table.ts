@@ -127,6 +127,22 @@ function rawToTable(select: SelectOperation[], result: any) {
   });
 }
 
+function getTypeByOp(op: SelectOperation) {
+  switch (op.operation) {
+    case 'date_histogram':
+      return 'date';
+    case 'avg':
+    case 'count':
+    case 'sum':
+      return 'number';
+    case 'column':
+      // TODO how do we get this information?
+      return 'string';
+    case 'terms':
+      return 'string';
+  }
+}
+
 /**
  * Convert an Elasticsearch query result to a tabular form, using Query
  * to properly extract and alias the columns.
@@ -137,8 +153,14 @@ export function toTable(query: Query, result: any) {
   if (hasAggregations(sanitized)) {
     const groups = chunkBy(selectionCategory, sanitized.select);
 
-    return flatten(unnestResult(groups, result.aggregations));
+    return {
+      rows: flatten(unnestResult(groups, result.aggregations)),
+      columns: sanitized.select.map(op => ({ id: op.alias!, type: getTypeByOp(op) })),
+    };
   }
 
-  return rawToTable(sanitized.select, result);
+  return {
+    rows: rawToTable(sanitized.select, result),
+    columns: sanitized.select.map(op => ({ id: op.alias!, type: getTypeByOp(op) })),
+  };
 }

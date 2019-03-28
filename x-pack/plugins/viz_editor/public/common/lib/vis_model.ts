@@ -4,25 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SelectOperation } from '../../../common';
+import { Query, SelectOperation } from '../../../common';
 
-export interface IndexPatternField {
+export interface Field {
   name: string;
   type: string;
   aggregatable: boolean;
   searchable: boolean;
 }
 
-export interface IndexPattern {
+export interface Datasource<M = any> {
   id: string;
   title: string;
   timeFieldName?: string;
-  fields: IndexPatternField[];
+  fields: Field[];
   fieldFormatMap?: string;
+  meta?: M;
 }
 
 export interface VisModelQuery {
-  indexPattern: string;
+  datasourceRef: string;
   select: {
     [id: string]: SelectOperation;
   };
@@ -33,20 +34,15 @@ export interface Axis {
   columns: string[];
 }
 
-export interface IndexPatterns {
-  [id: string]: IndexPattern;
-}
-
 /**
  * The complete state of the editor.
  * The basic properties which are shared over all editor plugins
  * are defined here, anything else is in the private property and scoped by plugin
  */
 export interface VisModel<K extends string = any, T = any> {
-  indexPatterns: IndexPatterns | null;
-  queries: {
-    [id: string]: VisModelQuery;
-  };
+  datasource: Datasource | null;
+  queries: { [id: string]: Query };
+  datasourcePlugin: string;
   editorPlugin: string;
   title: string;
   private: { [key in K]: T };
@@ -56,10 +52,10 @@ export interface VisModel<K extends string = any, T = any> {
 export type UnknownVisModel = VisModel<string, unknown>;
 
 export function selectColumn(id: string, model: VisModel) {
-  const [queryId] = id.split('_');
+  const [queryId, columnIndex] = id.split('_');
   const query = model.queries[queryId];
 
-  return query ? query.select[id] : undefined;
+  return query ? query.select[parseInt(columnIndex, 10)] : undefined;
 }
 
 export function updatePrivateState<K extends string, T>(name: K) {
@@ -76,7 +72,7 @@ export function updatePrivateState<K extends string, T>(name: K) {
 
 export function getColumnIdByIndex(
   queries: {
-    [id: string]: VisModelQuery;
+    [id: string]: Query;
   },
   queryIndex: number,
   columnIndex: number
@@ -91,29 +87,11 @@ export function getColumnIdByIndex(
 // Generate our dummy-data
 export function initialState(): VisModel<any, any> {
   return {
-    indexPatterns: null,
-    queries: {
-      q1: {
-        indexPattern: 'index-pattern:aaa',
-        select: {
-          q1_0: { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
-          q1_1: { operation: 'sum', argument: { field: 'bytes' } },
-        },
-      },
-    },
+    datasource: null,
+    queries: {},
     editorPlugin: 'xy_chart',
-    title: 'Sum of bytes over time',
-    private: {
-      xyChart: {
-        xAxis: {
-          title: 'Timestamp per 30 seconds',
-          columns: ['q1_0'],
-        },
-        yAxis: {
-          title: 'Sum of bytes',
-          columns: ['q1_1'],
-        },
-      },
-    },
+    datasourcePlugin: 'index_pattern',
+    title: '',
+    private: {},
   };
 }

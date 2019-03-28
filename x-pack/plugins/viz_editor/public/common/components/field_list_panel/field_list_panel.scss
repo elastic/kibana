@@ -1,4 +1,4 @@
-.indexPatternPanel-field {
+.fieldListPanel-field {
   display: block;
   text-align: left;
   box-sizing: border-box;
@@ -12,10 +12,10 @@
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.indexPatternPanel-field:hover {
+.fieldListPanel-field:hover {
   box-shadow: 0 8px 16px -8px rgba(0,0,0,0.25);
 }
 
-.indexPatternPanel-field-icon {
+.fieldListPanel-field-icon {
   opacity: 0.75;
 }

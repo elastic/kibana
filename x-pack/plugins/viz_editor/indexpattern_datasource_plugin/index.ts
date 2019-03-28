@@ -3,5 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './field_config';
-export * from './vis_model';
+
+export { config } from './indexpattern_datasource_plugin';
+export { registerPipeline } from './indexpattern_datasource_expression';

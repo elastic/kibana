@@ -18,6 +18,7 @@ import {
 } from '@elastic/charts';
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
+import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 
@@ -37,6 +38,7 @@ function sampleVisFunction() {
     context: { types: ['datatable'] },
     fn(context: any, args: any) {
       const xColumn = context.columns[0].id;
+      const xColumnType = context.columns[0].type;
       const yColumn = context.columns[1].id;
 
       return {
@@ -46,7 +48,16 @@ function sampleVisFunction() {
           // TODO this should come via the expression
           title: 'A title',
           seriesType: args.displayType,
-          data: context.rows.map((row: any) => [row[xColumn], row[yColumn]]),
+          xAxisType:
+            context.columns[0].type === 'string'
+              ? 'ordinal'
+              : context.columns[0].type === 'number'
+              ? 'linear'
+              : 'time',
+          data: context.rows.map((row: any) => [
+            xColumnType === 'date' ? moment(row[xColumn]).valueOf() : row[xColumn],
+            row[yColumn],
+          ]),
         },
       };
     },
@@ -79,7 +90,13 @@ function sampleVisRenderer() {
           {config.seriesType === 'line' ? (
             <LineSeries
               id={getSpecId('lines')}
-              xScaleType={ScaleType.Time}
+              xScaleType={
+                config.xAxisType === 'ordinal'
+                  ? ScaleType.Ordinal
+                  : config.xAxisType === 'linear'
+                  ? ScaleType.Linear
+                  : ScaleType.Time
+              }
               yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}
