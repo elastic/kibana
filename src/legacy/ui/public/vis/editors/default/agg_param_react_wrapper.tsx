@@ -21,12 +21,12 @@ import React from 'react';
 
 import { AggParam } from '../../../agg_types';
 import { AggConfig } from '../../agg_config';
-import { AggParamEditorProps, AggParamRequiredEditorProps } from './agg_param_editor_props';
+import { AggParamEditorProps } from './agg_param_editor_props';
 
 interface AggParamReactWrapperProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  paramEditor: React.FunctionComponent<AggParamEditorProps<T> | AggParamRequiredEditorProps<T>>;
+  paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
   value: T;
   isInvalid: boolean;
   onChange(value: T): void;
