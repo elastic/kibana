@@ -18,18 +18,17 @@
  */
 
 import $ from 'jquery';
-import { get, has } from 'lodash';
+import { get } from 'lodash';
 import { aggTypes } from '../../../agg_types';
 import { aggTypeFilters } from '../../../agg_types/filter';
 import { aggTypeFieldFilters } from '../../../agg_types/param_types/filter';
-import { documentationLinks } from '../../../documentation_links/documentation_links';
 import '../../../filters/match_any';
 import { uiModules } from '../../../modules';
 import { editorConfigProviders } from '../config/editor_config_providers';
 import advancedToggleHtml from './advanced_toggle.html';
 import './agg_param';
+import './agg_select';
 import aggParamsTemplate from './agg_params.html';
-import aggSelectHtml from './agg_select.html';
 import { groupAggregationsBy } from './default_editor_utils';
 
 uiModules
@@ -56,6 +55,15 @@ uiModules
           updateAggParamEditor();
           updateEditorConfig('default');
         });
+
+        $scope.groupedAggTypeOptions = groupAggregationsBy($scope.aggTypeOptions, 'subtype');
+        $scope.isSubAggregation = $scope.$index >= 1 && $scope.groupName === 'buckets';
+
+        $scope.onAggTypeChange = (agg, value) => {
+          if (agg.type !== value) {
+            agg.type = value;
+          }
+        };
 
         $scope.onParamChange = (agg, paramName, value) => {
           if(agg.params[paramName] !== value) {
@@ -92,9 +100,6 @@ uiModules
         // controls for the agg, which is why they are first
         addSchemaEditor();
 
-        // allow selection of an aggregation
-        addAggSelector();
-
         function addSchemaEditor() {
           const $schemaEditor = $('<div>').addClass('schemaEditors form-group').appendTo($el);
 
@@ -104,21 +109,12 @@ uiModules
           }
         }
 
-        function addAggSelector() {
-          const $aggSelect = $(aggSelectHtml).appendTo($el);
-          $compile($aggSelect)($scope);
-        }
-
         // params for the selected agg, these are rebuilt every time the agg in $aggSelect changes
         let $aggParamEditors; //  container for agg type param editors
         let $aggParamEditorsScope;
 
         function updateAggParamEditor() {
           updateEditorConfig();
-          $scope.aggHelpLink = null;
-          if (has($scope, 'agg.type.name')) {
-            $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
-          }
 
           if ($aggParamEditors) {
             $aggParamEditors.remove();

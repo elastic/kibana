@@ -104,9 +104,7 @@ export function DashboardAddPanelProvider({ getService, getPageObjects }) {
     }
 
     async waitForListLoading() {
-      await retry.waitFor('dashboard add panel loading to complete', async () => {
-        return !(await testSubjects.exists('savedObjectFinderLoadingIndicator'));
-      });
+      await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
     }
 
     async closeAddPanel() {

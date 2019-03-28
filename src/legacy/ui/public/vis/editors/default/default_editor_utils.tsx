@@ -27,7 +27,7 @@ import { AggType } from 'ui/agg_types';
 export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
   label: string;
   value?: AggType;
-  options?: EuiComboBoxOptionProps[];
+  options?: ComboBoxGroupedOption[];
 };
 
 /**
@@ -39,7 +39,11 @@ export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
  *
  * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an ampry array.
  */
-function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelName = 'title') {
+function groupAggregationsBy(
+  aggs: AggType[],
+  groupBy: string = 'type',
+  labelName = 'title'
+): ComboBoxGroupedOption[] | [] {
   if (!Array.isArray(aggs)) {
     return [];
   }
@@ -60,10 +64,6 @@ function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelNam
     return array;
   }, []);
 
-  function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
-    return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
-  }
-
   groupedOptions.sort(sortByLabel);
 
   groupedOptions.forEach((group: ComboBoxGroupedOption) => {
@@ -73,10 +73,14 @@ function groupAggregationsBy(aggs: AggType[], groupBy: string = 'type', labelNam
   });
 
   if (groupedOptions.length === 1 && !groupedOptions[0].label) {
-    return groupedOptions[0].options;
+    return groupedOptions[0].options || [];
   }
 
   return groupedOptions;
+}
+
+function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
+  return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 
 export { groupAggregationsBy };

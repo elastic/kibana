@@ -432,19 +432,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectAggregation(myString, groupName = 'buckets', childAggregationType = null) {
-      const selector = `
+      const comboBoxElement = await find.byCssSelector(`
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .agg-select
-      `;
+        [data-test-subj="defaultEditorAggSelect"]
+      `);
 
-      await retry.try(async () => {
-        await find.clickByCssSelector(selector);
-        const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-        await input.type(myString);
-        await input.pressKeys(browser.keys.RETURN);
-      });
+      await comboBox.setElement(comboBoxElement, myString);
       await PageObjects.common.sleep(500);
     }
 
@@ -482,13 +477,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // So to modify a metric or aggregation tests need to keep track of the
       // order they are added.
       await this.toggleOpenEditor(index);
-      const aggSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} div [data-test-subj="visEditorAggSelect"] div span[aria-label="Select box activate"]`);
-      // open agg selection list
-      await aggSelect.click();
+
       // select our agg
-      const aggItem = await find.byCssSelector(`[data-test-subj="${agg}"]`);
-      await aggItem.click();
+      const aggSelect = await find
+        .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
+      await comboBox.setElement(aggSelect, agg);
+
       const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
       await comboBox.setElement(fieldSelect, field);
