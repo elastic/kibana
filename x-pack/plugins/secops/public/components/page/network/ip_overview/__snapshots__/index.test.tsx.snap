@@ -6,6 +6,11 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
     data={
       Object {
         "destination": Object {
+          "autonomousSystem": Object {
+            "as_org": "Test Org",
+            "asn": "Test ASN",
+            "ip": "10.10.10.10",
+          },
           "domains": Array [
             Object {
               "count": 23,
@@ -30,6 +35,11 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
           "lastSeen": "2019-02-07T17:19:41.648Z",
         },
         "source": Object {
+          "autonomousSystem": Object {
+            "as_org": "Test Org",
+            "asn": "Test ASN",
+            "ip": "10.10.10.10",
+          },
           "domains": Array [
             Object {
               "count": 23,

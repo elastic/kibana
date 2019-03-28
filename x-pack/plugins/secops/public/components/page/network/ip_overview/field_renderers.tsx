@@ -12,6 +12,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {
+  AutonomousSystem,
   Domain,
   HostEcsFields,
   IpOverviewData,
@@ -40,12 +41,12 @@ export const locationRenderer = (
       {fieldNames.map((fieldName: string, index: number) => {
         const locationValue = getOr(null, fieldName, data);
         return (
-          <>
+          <React.Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
               <DefaultDraggable id={IpOverviewId} field={fieldName} value={locationValue} />
             </EuiFlexItem>
-          </>
+          </React.Fragment>
         );
       })}
     </EuiFlexGroup>
@@ -59,40 +60,69 @@ export const dateRenderer = (fieldName: string, data: Overview): React.ReactElem
   return value ? <PreferenceFormattedDate value={new Date(value)} /> : getEmptyTagValue();
 };
 
+export const autonomousSystemRenderer = (
+  as: AutonomousSystem,
+  flowType: IpOverviewType
+): React.ReactElement => {
+  return as && as.as_org && as.asn ? (
+    <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <DefaultDraggable
+          id={IpOverviewId}
+          field={`${flowType}.autonomous_system.as_org`}
+          value={as.as_org}
+        />{' '}
+        /
+        <DefaultDraggable
+          id={IpOverviewId}
+          field={`${flowType}.autonomous_system.asn`}
+          value={as.asn}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    getEmptyTagValue()
+  );
+};
+
 export const domainsRenderer = (
   domains: Domain[],
   flowType: IpOverviewType
 ): React.ReactElement => {
   return domains.length > 0 ? (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <DefaultDraggable id={IpOverviewId} field={`${flowType}.domain`} value={domains[0].name}>
           {`${domains[0].name}`}
         </DefaultDraggable>
-        ({numeral(domains[0].count).format('0,000')})
       </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>({numeral(domains[0].count).format('0,000')})</EuiFlexItem>
+
       {domains.length > 1 && (
-        <EuiToolTip
-          content={
-            <>
-              {domains.slice(1, 6).map(domain => (
-                <span key={`${IpOverviewId}-${domain.name}`}>
-                  {`${domain.name} | (${numeral(domain.count).format('0,000')}) | `}
-                  <FormattedRelative value={new Date(domain.lastSeen)} />
-                  <br />
-                </span>
-              ))}
-              {domains.slice(1).length > 5 && (
-                <b>
-                  <br />
-                  {i18n.MORE}
-                </b>
-              )}
-            </>
-          }
-        >
-          <MoreDomains type="eye" />
-        </EuiToolTip>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
+              <>
+                {domains.slice(1, 6).map(domain => (
+                  <span key={`${IpOverviewId}-${domain.name}`}>
+                    {`${domain.name} | (${numeral(domain.count).format('0,000')}) | `}
+                    <FormattedRelative value={new Date(domain.lastSeen)} />
+                    <br />
+                  </span>
+                ))}
+                {domains.slice(1).length > 5 && (
+                  <b>
+                    <br />
+                    {i18n.MORE}
+                  </b>
+                )}
+              </>
+            }
+          >
+            <MoreDomains type="eye" />
+          </EuiToolTip>
+        </EuiFlexItem>
       )}
     </EuiFlexGroup>
   ) : (

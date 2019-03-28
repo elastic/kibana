@@ -25,8 +25,8 @@ import { networkActions, networkModel, networkSelectors, State } from '../../../
 import { getEmptyTagValue } from '../../../empty_value';
 
 import {
+  autonomousSystemRenderer,
   dateRenderer,
-  domainsRenderer,
   hostIdRenderer,
   hostNameRenderer,
   locationRenderer,
@@ -83,9 +83,15 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
           ),
         },
         {
-          title: i18n.DOMAINS,
-          description: typeData ? domainsRenderer(typeData.domains, flowType) : getEmptyTagValue(),
+          title: i18n.ASN,
+          description: typeData
+            ? autonomousSystemRenderer(typeData.autonomousSystem, flowType)
+            : getEmptyTagValue(),
         },
+        // {
+        //   title: i18n.DOMAINS,
+        //   description: typeData ? domainsRenderer(typeData.domains, flowType) : getEmptyTagValue(),
+        // },
       ],
       [
         { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },

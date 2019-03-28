@@ -45,6 +45,26 @@ const getAggs = (type: string, ip: string) => {
             },
           },
         },
+        autonomous_system: {
+          filter: {
+            exists: {
+              field: 'autonomous_system',
+            },
+          },
+          aggs: {
+            results: {
+              top_hits: {
+                size: 1,
+                _source: ['autonomous_system'],
+                sort: [
+                  {
+                    '@timestamp': 'desc',
+                  },
+                ],
+              },
+            },
+          },
+        },
         host: {
           filter: {
             exists: {

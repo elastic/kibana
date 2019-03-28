@@ -14,6 +14,10 @@ export const LOCATION = i18n.translate('xpack.secops.network.ipDetails.ipOvervie
   defaultMessage: 'Location',
 });
 
+export const ASN = i18n.translate('xpack.secops.network.ipDetails.ipOverview.asnTitle', {
+  defaultMessage: 'ASN',
+});
+
 export const DOMAINS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.domainsTitle', {
   defaultMessage: 'Domains',
 });

@@ -24,6 +24,11 @@ export const ipOverviewQuery = gql`
             count
             lastSeen
           }
+          autonomousSystem {
+            as_org
+            asn
+            ip
+          }
           geo {
             continent_name
             city_name
@@ -58,6 +63,11 @@ export const ipOverviewQuery = gql`
             name
             count
             lastSeen
+          }
+          autonomousSystem {
+            as_org
+            asn
+            ip
           }
           geo {
             continent_name

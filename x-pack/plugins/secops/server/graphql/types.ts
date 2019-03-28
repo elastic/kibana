@@ -725,11 +725,21 @@ export interface Overview {
 
   lastSeen?: Date | null;
 
+  autonomousSystem: AutonomousSystem;
+
   domains: Domain[];
 
   host: HostEcsFields;
 
   geo: GeoEcsFields;
+}
+
+export interface AutonomousSystem {
+  as_org?: string | null;
+
+  asn?: string | null;
+
+  ip?: string | null;
 }
 
 export interface Domain {
@@ -3389,6 +3399,8 @@ export namespace OverviewResolvers {
 
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
+    autonomousSystem?: AutonomousSystemResolver<AutonomousSystem, TypeParent, Context>;
+
     domains?: DomainsResolver<Domain[], TypeParent, Context>;
 
     host?: HostResolver<HostEcsFields, TypeParent, Context>;
@@ -3403,6 +3415,11 @@ export namespace OverviewResolvers {
   > = Resolver<R, Parent, Context>;
   export type LastSeenResolver<
     R = Date | null,
+    Parent = Overview,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AutonomousSystemResolver<
+    R = AutonomousSystem,
     Parent = Overview,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
@@ -3421,6 +3438,32 @@ export namespace OverviewResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace AutonomousSystemResolvers {
+  export interface Resolvers<Context = SecOpsContext, TypeParent = AutonomousSystem> {
+    as_org?: AsOrgResolver<string | null, TypeParent, Context>;
+
+    asn?: AsnResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<string | null, TypeParent, Context>;
+  }
+
+  export type AsOrgResolver<
+    R = string | null,
+    Parent = AutonomousSystem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type AsnResolver<
+    R = string | null,
+    Parent = AutonomousSystem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
+  export type IpResolver<
+    R = string | null,
+    Parent = AutonomousSystem,
+    Context = SecOpsContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace DomainResolvers {

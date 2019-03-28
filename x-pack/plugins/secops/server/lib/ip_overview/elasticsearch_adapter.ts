@@ -21,27 +21,16 @@ export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
     request: FrameworkRequest,
     options: IpOverviewRequestOptions
   ): Promise<IpOverviewData> {
-    // console.log('ES Query:');
-    // console.log(JSON.stringify(buildQuery(options), null, 2));
-
     const response = await this.framework.callWithRequest<IpOverviewHit, TermAggregation>(
       request,
       'search',
       buildQuery(options)
     );
 
-    // console.log('ES Response:');
-    // console.log(JSON.stringify(response, null, 2));
-
-    const r = {
+    return {
       ...getIpOverviewAgg('source', response),
       ...getIpOverviewAgg('destination', response),
     };
-
-    // console.log('GQL Response:');
-    // console.log(JSON.stringify(r, null, 2));
-
-    return r;
   }
 }
 
@@ -49,9 +38,14 @@ const getIpOverviewAgg = (
   type: string,
   response: DatabaseSearchResponse<IpOverviewHit, TermAggregation>
 ) => {
-  // const sourceTotal = getOr(null, 'aggregations.source.doc_count', response);
   const firstSeen = getOr(null, `aggregations.${type}.firstSeen.value_as_string`, response);
   const lastSeen = getOr(null, `aggregations.${type}.lastSeen.value_as_string`, response);
+
+  const autonomousSystem = getOr(
+    null,
+    `aggregations.${type}.autonomousSystem.results.hits.hits[0]._source.autonomous_system`,
+    response
+  );
   const geoFields = getOr(
     null,
     `aggregations.${type}.geo.results.hits.hits[0]._source.${type}.geo`,
@@ -74,6 +68,9 @@ const getIpOverviewAgg = (
     [type]: {
       firstSeen,
       lastSeen,
+      autonomousSystem: {
+        ...autonomousSystem,
+      },
       domains: [...domains],
       host: {
         ...hostFields,

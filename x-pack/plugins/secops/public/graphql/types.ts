@@ -696,11 +696,21 @@ export interface Overview {
 
   lastSeen?: Date | null;
 
+  autonomousSystem: AutonomousSystem;
+
   domains: Domain[];
 
   host: HostEcsFields;
 
   geo: GeoEcsFields;
+}
+
+export interface AutonomousSystem {
+  as_org?: string | null;
+
+  asn?: string | null;
+
+  ip?: string | null;
 }
 
 export interface Domain {
@@ -1553,6 +1563,8 @@ export namespace GetIpOverviewQuery {
 
     domains: Domains[];
 
+    autonomousSystem: AutonomousSystem;
+
     geo: Geo;
 
     host: Host;
@@ -1566,6 +1578,16 @@ export namespace GetIpOverviewQuery {
     count: number;
 
     lastSeen: Date;
+  };
+
+  export type AutonomousSystem = {
+    __typename?: 'AutonomousSystem';
+
+    as_org?: string | null;
+
+    asn?: string | null;
+
+    ip?: string | null;
   };
 
   export type Geo = {
@@ -1633,6 +1655,8 @@ export namespace GetIpOverviewQuery {
 
     domains: _Domains[];
 
+    autonomousSystem: _AutonomousSystem;
+
     geo: _Geo;
 
     host: _Host;
@@ -1646,6 +1670,16 @@ export namespace GetIpOverviewQuery {
     count: number;
 
     lastSeen: Date;
+  };
+
+  export type _AutonomousSystem = {
+    __typename?: 'AutonomousSystem';
+
+    as_org?: string | null;
+
+    asn?: string | null;
+
+    ip?: string | null;
   };
 
   export type _Geo = {

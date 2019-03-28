@@ -12,6 +12,12 @@ export const ipOverviewSchema = gql`
     source
   }
 
+  type AutonomousSystem {
+    as_org: String
+    asn: String
+    ip: String
+  }
+
   type Domain {
     name: String!
     count: Float!
@@ -21,6 +27,7 @@ export const ipOverviewSchema = gql`
   type Overview {
     firstSeen: Date
     lastSeen: Date
+    autonomousSystem: AutonomousSystem!
     domains: [Domain!]!
     host: HostEcsFields!
     geo: GeoEcsFields!
