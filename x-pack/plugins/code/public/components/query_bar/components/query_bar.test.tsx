@@ -12,7 +12,7 @@ import sinon from 'sinon';
 
 import { SearchScope } from '../../../../model';
 import { AutocompleteSuggestionType } from '../suggestions';
-import props from './props.json';
+import props from './__fixtures__/props.json';
 import { CodeQueryBar } from './query_bar';
 
 // Injest a mock random function to fixiate the output for generating component id.
