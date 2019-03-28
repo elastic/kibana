@@ -54,6 +54,7 @@ import { HeaderBreadcrumbs } from './header_breadcrumbs';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
@@ -88,10 +89,23 @@ function extendRecentlyAccessedHistoryItem(
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
 
+  let titleAndAriaLabel = recentlyAccessed.label;
+  if (navLink) {
+    const objectTypeForAriaAppendix = navLink.title;
+    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.screenReaderLabel', {
+      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
+      values: {
+        recentlyAccessedItemLinklabel: recentlyAccessed.label,
+        pageType: objectTypeForAriaAppendix,
+      },
+    });
+  }
+
   return {
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
+    title: titleAndAriaLabel,
   };
 }
 
@@ -248,9 +262,8 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            // TODO: Add what type of app/saved object to title attr
-            title: `${item.label}`,
-            'aria-label': item.label,
+            title: item.title,
+            'aria-label': item.title,
             href: item.href,
             iconType: item.euiIconType,
           })),
