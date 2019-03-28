@@ -10,8 +10,9 @@ import { ContextMenuAction, ContextMenuActionsRegistryProvider } from 'ui/embedd
 import { PanelActionAPI } from 'ui/embeddable/context_menu_actions/types';
 import { kfetch } from 'ui/kfetch';
 import { toastNotifications } from 'ui/notify';
+import { API_BASE_URL_V1 } from '../../common/constants';
 
-const API_BASE_URL = '/api/reporting/v1/generate/immediate/csv/saved-object/';
+const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object/`;
 
 class GetCsvReportPanelAction extends ContextMenuAction {
   constructor() {
