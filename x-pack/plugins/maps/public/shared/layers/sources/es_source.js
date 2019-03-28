@@ -131,12 +131,12 @@ export class AbstractESSource extends AbstractVectorSource {
   }
 
 
-  async _runEsQuery(layerName, searchSource, requestDescription) {
+  async _runEsQuery(requestName, searchSource, requestDescription) {
     try {
       return await fetchSearchSourceAndRecordWithInspector({
         inspectorAdapters: this._inspectorAdapters,
         searchSource,
-        requestName: layerName,
+        requestName,
         requestId: this._descriptor.id,
         requestDesc: requestDescription
       });
@@ -150,21 +150,20 @@ export class AbstractESSource extends AbstractVectorSource {
 
   async _makeSearchSource(searchFilters, limit) {
     const indexPattern = await this._getIndexPattern();
-    const geoField = await this._getGeoField();
     const isTimeAware = await this.isTimeAware();
+    const allFilters = [...searchFilters.filters];
+    if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
+      const geoField = await this._getGeoField();
+      allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
+    }
+    if (isTimeAware) {
+      allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
+    }
+
     const searchSource = new SearchSource();
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
-    searchSource.setField('filter', () => {
-      const allFilters = [...searchFilters.filters];
-      if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
-        allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
-      }
-      if (isTimeAware) {
-        allFilters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
-      }
-      return allFilters;
-    });
+    searchSource.setField('filter', allFilters);
     searchSource.setField('query', searchFilters.query);
 
     if (searchFilters.layerQuery) {
