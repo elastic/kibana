@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { set } from 'lodash';
 import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 import { MetricsExplorerRequest, MetricsExplorerResponse } from '../types';
 
@@ -56,6 +57,10 @@ export const getGroupings = async (
       },
     },
   };
+
+  if (options.afterKey) {
+    set(params, 'body.aggs.groupings.composite.after', { groupBy: options.afterKey });
+  }
 
   const response = await search<GroupingAggregation>(params);
   if (!response.aggregations) {

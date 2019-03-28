@@ -7,7 +7,6 @@
 import {
   InfraMetric,
   InfraMetricData,
-  InfraMetricsExplorerMetricInput,
   InfraNodeType,
   InfraTimerangeInput,
 } from '../../../graphql/types';
@@ -21,16 +20,6 @@ export interface InfraMetricsRequestOptions {
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
   metrics: InfraMetric[];
-}
-
-export interface InfraMetricsExplorerRequestOptions {
-  sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerangeInput;
-  metrics: InfraMetricsExplorerMetricInput[];
-  groupBy?: string | null;
-  filterQuery?: string | null;
-  limit?: number;
-  afterKey?: string | null;
 }
 
 export interface InfraMetricsAdapter {
