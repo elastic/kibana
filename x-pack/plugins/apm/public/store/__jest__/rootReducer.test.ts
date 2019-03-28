@@ -12,7 +12,6 @@ describe('root reducer', () => {
 
     expect(state).toEqual({
       location: { hash: '', pathname: '', search: '' },
-      reactReduxRequest: {},
       urlParams: {}
     });
   });
