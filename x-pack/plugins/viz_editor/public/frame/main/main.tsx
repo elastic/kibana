@@ -101,8 +101,12 @@ export function Main(props: MainProps) {
             label={name}
             iconType={icon as any}
             onChange={() => {
-              // TODO this should also clear the references to all of the datasources
-              onChangeVisModel({ ...state.visModel, datasourcePlugin: name, datasource: null });
+              onChangeVisModel({
+                ...state.visModel,
+                datasourcePlugin: name,
+                datasource: null,
+                queries: {},
+              });
             }}
             isSelected={name === state.visModel.datasourcePlugin}
             isEmpty
