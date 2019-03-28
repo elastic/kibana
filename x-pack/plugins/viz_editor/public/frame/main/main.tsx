@@ -58,6 +58,7 @@ export function Main(props: MainProps) {
     ConfigPanel,
     WorkspacePanel,
     toExpression: toRenderExpression,
+    getSuggestionsForField,
   } = editorRegistry.getByName(state.visModel.editorPlugin);
 
   const { DataPanel, toExpression: toDataFetchExpression } = datasourceRegistry.getByName(
@@ -71,6 +72,7 @@ export function Main(props: MainProps) {
   const panelProps = {
     visModel: state.visModel,
     onChangeVisModel,
+    getSuggestionsForField,
   };
 
   // TODO add a meaningful default expression builder implementation here
@@ -86,7 +88,9 @@ export function Main(props: MainProps) {
 
   const suggestions = editorRegistry
     .getAll()
-    .flatMap(plugin => (plugin.getSuggestions ? plugin.getSuggestions(state.visModel) : []));
+    .flatMap(plugin =>
+      plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
+    );
 
   return (
     <EuiPage>
@@ -130,6 +134,7 @@ export function Main(props: MainProps) {
       </EuiPageBody>
       <EuiPageSideBar>
         <ConfigPanel {...panelProps} />
+
         <h4>Suggestions</h4>
         <EuiListGroup>
           {suggestions.map((suggestion, i) => (

@@ -50,7 +50,14 @@ export const columnOperations: ColumnOperations = {
   },
   count: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Count</strong>
+          </div>
+        </div>
+      );
     },
   },
   column: {
@@ -60,12 +67,28 @@ export const columnOperations: ColumnOperations = {
   },
   avg: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Average of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
     },
   },
   terms: {
     summarize(op) {
-      return <></>;
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">Unique terms of</strong>
+            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+          </div>
+        </div>
+      );
     },
   },
 };

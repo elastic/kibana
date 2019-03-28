@@ -11,7 +11,8 @@ import { FieldListPanel } from '../public/common/components/field_list_panel';
 import { Datasource, VisModel } from '../public/common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
 
-function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>) {
+function DataPanel(props: PanelComponentProps<VisModel>) {
+  const { visModel, onChangeVisModel } = props;
   const [text, updateText] = useState(visModel.datasource ? visModel.datasource.meta.sql : '');
 
   const updateDatasource = async () => {
@@ -48,7 +49,7 @@ function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>
         onChange={({ target: { value } }) => updateText(value)}
       />
       <EuiButton onClick={updateDatasource}>Apply</EuiButton>
-      <FieldListPanel datasource={visModel.datasource} />
+      <FieldListPanel {...props} />
     </>
   );
 }

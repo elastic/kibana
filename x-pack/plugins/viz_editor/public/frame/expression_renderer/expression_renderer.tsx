@@ -14,6 +14,9 @@ async function runAndRender(
   getInterpreter: any,
   renderersRegistry: any
 ) {
+  if (!expression) {
+    return;
+  }
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
   const response = await interpreter.interpretAst(ast, {}, { getInitialContext: () => ({}) });

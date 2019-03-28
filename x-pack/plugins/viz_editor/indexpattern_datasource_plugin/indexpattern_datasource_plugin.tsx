@@ -14,7 +14,8 @@ import { VisModel } from '../public/common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
 import { getIndexPatterns } from './index_patterns';
 
-function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>) {
+function DataPanel(props: PanelComponentProps<VisModel>) {
+  const { visModel, onChangeVisModel } = props;
   const [indexPatterns, setIndexPatterns] = useState({} as { [id: string]: IndexPattern });
   const selectedIndexPattern = visModel.datasource;
   useEffect(() => {
@@ -45,7 +46,7 @@ function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>
           });
         }}
       />
-      <FieldListPanel datasource={visModel.datasource} />
+      <FieldListPanel {...props} />
     </>
   );
 }

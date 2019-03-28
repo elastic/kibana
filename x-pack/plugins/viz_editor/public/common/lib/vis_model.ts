@@ -88,32 +88,10 @@ export function getColumnIdByIndex(
 export function initialState(): VisModel<any, any> {
   return {
     datasource: null,
-    queries: {
-      q1: {
-        datasourceRef: 'aaa',
-        select: [
-          { operation: 'date_histogram', argument: { field: '@timestamp', interval: '1d' } },
-          { operation: 'sum', argument: { field: 'bytes' } },
-        ],
-      },
-    },
+    queries: {},
     editorPlugin: 'xy_chart',
-    datasourcePlugin: 'essql',
-    title: 'Sum of bytes over time',
-    private: {
-      xyChart: {
-        xAxis: {
-          title: 'Timestamp per day',
-          columns: ['q1_0'],
-        },
-        yAxis: {
-          title: 'Sum of bytes',
-          columns: ['q1_1'],
-        },
-      },
-      essql: {
-        sql: '',
-      },
-    },
+    datasourcePlugin: 'index_pattern',
+    title: '',
+    private: {},
   };
 }

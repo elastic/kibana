@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiButton,
   EuiFieldSearch,
   EuiIcon,
   // @ts-ignore
@@ -15,11 +16,8 @@ import {
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { PanelComponentProps } from '../../../editor_plugin_registry';
 import { Datasource, Field } from '../../lib';
-
-interface Props {
-  datasource: Datasource | null;
-}
 
 interface State {
   fieldsFilter: string;
@@ -35,15 +33,34 @@ function sortFields(fieldA: Field, fieldB: Field) {
   return fieldA.name < fieldB.name ? -1 : 1;
 }
 
-export function FieldListPanel({ datasource }: Props) {
+export function FieldListPanel({
+  visModel,
+  onChangeVisModel,
+  getSuggestionsForField,
+}: PanelComponentProps) {
+  const datasource = visModel.datasource;
   const [state, setState] = useState(() => initialState());
 
   function filterFields(field: Field) {
     return field.name.includes(state.fieldsFilter);
   }
-  if (!datasource) {
+  if (datasource === null) {
     return <div />;
   }
+
+  const handleFieldClick = (field: Field) => {
+    return () => {
+      if (!getSuggestionsForField) {
+        return;
+      }
+
+      const suggestions = getSuggestionsForField(datasource.id, field, visModel);
+
+      if (suggestions.length) {
+        onChangeVisModel(suggestions[0].visModel);
+      }
+    };
+  };
 
   return (
     <>
@@ -68,13 +85,20 @@ export function FieldListPanel({ datasource }: Props) {
             .filter(filterFields)
             .sort(sortFields)
             .map(field => (
-              <button
-                type="button"
+              <div
+                // type="div"
                 key={field.name}
                 className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
               >
                 {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-              </button>
+                <div>
+                  <EuiButton
+                    size="s"
+                    onClick={handleFieldClick(field)}
+                    iconType="plusInCircleFilled"
+                  />
+                </div>
+              </div>
             ))}
         </div>
       )}
