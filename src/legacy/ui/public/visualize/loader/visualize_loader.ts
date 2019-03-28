@@ -32,7 +32,7 @@ import { VisSavedObject, VisualizeLoaderParams } from './types';
 export class VisualizeLoader {
   constructor(
     private readonly savedVisualizations: any,
-    private readonly pipelineDataLoader: any,
+    private readonly pipelineDataLoader: boolean,
     private readonly Private: IPrivate
   ) {}
 
