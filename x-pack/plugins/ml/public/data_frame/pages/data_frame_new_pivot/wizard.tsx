@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useState } from 'react';
+import React, { Fragment, SFC, useRef, useState } from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
@@ -59,9 +59,13 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   const jobDetails =
     currentStep === WIZARD_STEPS.JOB_DETAILS ? (
-      <JobDetailsForm onChange={setJobDetails} override={jobDetailsState} />
+      <JobDetailsForm
+        indexPattern={indexPattern}
+        onChange={setJobDetails}
+        overrides={jobDetailsState}
+      />
     ) : (
-      <JobDetailsSummary />
+      <JobDetailsSummary indexPattern={indexPattern} />
     );
 
   // The JOB_CREATE state
@@ -69,16 +73,29 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   const jobCreate =
     currentStep === WIZARD_STEPS.JOB_CREATE ? (
-      <JobCreateForm onChange={setJobCreate} override={jobCreateState} />
+      <JobCreateForm
+        indexPattern={indexPattern}
+        onChange={setJobCreate}
+        overrides={jobCreateState}
+      />
     ) : (
-      <JobCreateSummary />
+      <JobCreateSummary indexPattern={indexPattern} />
     );
+
+  const definePivotRef = useRef(null);
+
+  function scrollToRef() {
+    if (definePivotRef !== null && definePivotRef.current !== null) {
+      window.scrollTo(0, definePivotRef.current.offsetTop);
+    }
+  }
 
   const stepsConfig = [
     {
       title: 'Define pivot',
       children: (
         <Fragment>
+          <div ref={definePivotRef} />
           {pivot}
           {currentStep === WIZARD_STEPS.DEFINE_PIVOT && (
             <WizardNav
@@ -96,7 +113,10 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
           {jobDetails}
           {currentStep === WIZARD_STEPS.JOB_DETAILS && (
             <WizardNav
-              previous={() => setCurrentStep(WIZARD_STEPS.DEFINE_PIVOT)}
+              previous={() => {
+                setCurrentStep(WIZARD_STEPS.DEFINE_PIVOT);
+                scrollToRef();
+              }}
               next={() => setCurrentStep(WIZARD_STEPS.JOB_CREATE)}
               nextActive={jobDetailsState.valid}
             />
