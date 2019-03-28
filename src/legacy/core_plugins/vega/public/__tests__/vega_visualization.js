@@ -120,7 +120,8 @@ describe('VegaVisualizations', () => {
 
     });
 
-    it('should show vegatooltip on mouseover over a vega graph', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/33818
+    it.skip('should show vegatooltip on mouseover over a vega graph', async () => {
 
       let vegaVis;
       try {
