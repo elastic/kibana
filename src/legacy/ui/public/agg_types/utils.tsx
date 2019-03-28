@@ -17,26 +17,23 @@
  * under the License.
  */
 
-import React from 'react';
+function isValidJson(value: string): boolean {
+  if (!value || value.length === 0) {
+    return true;
+  }
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { AggParamEditorProps } from '../../vis/editors/default';
+  const trimmedValue = value.trim();
 
-function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
-  return (
-    <EuiFormRow
-      label={aggParam.displayName || aggParam.name}
-      fullWidth={true}
-      className="visEditorSidebar__aggParamFormRow"
-    >
-      <EuiFieldText
-        value={value || ''}
-        data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
-        onChange={ev => setValue(ev.target.value)}
-        fullWidth={true}
-      />
-    </EuiFormRow>
-  );
+  if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
+    try {
+      JSON.parse(trimmedValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
 }
 
-export { StringParamEditor };
+export { isValidJson };
