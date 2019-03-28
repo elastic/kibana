@@ -12,6 +12,7 @@ import { escapeQueryValue } from '../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { FormattedFieldValue } from '../timeline/body/renderers/formatted_field';
+import { parseValue } from '../timeline/body/renderers/plain_column_renderer';
 import { Provider } from '../timeline/data_providers/provider';
 
 import * as i18n from './translations';
@@ -105,9 +106,11 @@ export const getItems = (data: DetailItem[], id: string): Item[] =>
               </DragEffects>
             ) : (
               <FormattedFieldValue
-                value={item.value}
+                contextId="event-details"
+                eventId={id}
                 fieldName={item.field}
                 fieldType={item.type}
+                value={parseValue(item.value)}
               />
             )
           }

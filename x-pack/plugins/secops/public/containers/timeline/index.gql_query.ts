@@ -36,6 +36,9 @@ export const timelineQuery = gql`
               category
               id
               dataset
+              duration
+              start
+              end
             }
             auditd {
               result
@@ -82,12 +85,32 @@ export const timelineQuery = gql`
               ip
             }
             source {
+              bytes
               ip
+              packets
               port
+              geo {
+                continent_name
+                country_name
+                country_iso_code
+                city_name
+                region_iso_code
+                region_name
+              }
             }
             destination {
+              bytes
               ip
+              packets
               port
+              geo {
+                continent_name
+                country_name
+                country_iso_code
+                city_name
+                region_iso_code
+                region_name
+              }
             }
             geo {
               region_name
@@ -104,6 +127,11 @@ export const timelineQuery = gql`
               }
             }
             network {
+              bytes
+              community_id
+              direction
+              packets
+              protocol
               transport
             }
             http {
@@ -121,6 +149,23 @@ export const timelineQuery = gql`
                 body {
                   bytes
                   content
+                }
+              }
+            }
+            tls {
+              client_certificate {
+                fingerprint {
+                  sha1
+                }
+              }
+              fingerprints {
+                ja3 {
+                  hash
+                }
+              }
+              server_certificate {
+                fingerprint {
+                  sha1
                 }
               }
             }

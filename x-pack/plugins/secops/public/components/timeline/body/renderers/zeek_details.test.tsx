@@ -31,7 +31,7 @@ describe('ZeekDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedSource185.176.26.101:44059Destination207.154.238.205:11568'
+        'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
       );
     });
 
@@ -42,7 +42,7 @@ describe('ZeekDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'CyIrMA1L1JtLqdIuoldnsSource206.189.35.240:57475Destination67.207.67.3:53'
+        'CyIrMA1L1JtLqdIuoldnsudpSource206.189.35.240:57475Destination67.207.67.3:53'
       );
     });
 
@@ -64,7 +64,7 @@ describe('ZeekDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'noticeDropped:falseScan::Port_Scan8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0sSource8.42.77.171:--'
+        'noticeDropped:falseScan::Port_Scan8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0sSource8.42.77.171'
       );
     });
 

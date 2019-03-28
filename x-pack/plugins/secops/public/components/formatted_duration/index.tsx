@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import * as React from 'react';
+import { pure } from 'recompose';
+
+import { getFormattedDurationString } from './helpers';
+import { FormattedDurationTooltip } from './tooltip';
+
+export const FormattedDuration = pure<{
+  maybeDurationNanoseconds: string | number | object | undefined | null;
+  tooltipTitle?: string;
+}>(({ maybeDurationNanoseconds, tooltipTitle }) => (
+  <FormattedDurationTooltip
+    maybeDurationNanoseconds={maybeDurationNanoseconds}
+    tooltipTitle={tooltipTitle}
+  >
+    <div data-test-subj="formatted-duration">
+      {getFormattedDurationString(maybeDurationNanoseconds)}
+    </div>
+  </FormattedDurationTooltip>
+));

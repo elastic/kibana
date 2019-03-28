@@ -13,10 +13,9 @@ import { pure } from 'recompose';
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
 import { DraggableBadge } from '../../../../draggables';
-import { SourceDest } from '../source_dest_ip';
+import { AuditdNetflow } from '../auditd_netflow';
 
 import { Args, Details, SessionUserHostWorkingDir, TokensFlexItem } from '.';
-
 import * as i18n from './translations';
 
 interface Props {
@@ -135,7 +134,7 @@ export const AuditdGenericDetails = pure<GenericDetailsProps>(
             secondary={secondary}
           />
           <EuiSpacer size="s" />
-          <SourceDest data={data} browserFields={browserFields} />
+          <AuditdNetflow data={data} />
         </Details>
       );
     } else {

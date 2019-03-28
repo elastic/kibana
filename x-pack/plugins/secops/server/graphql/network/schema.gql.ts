@@ -7,6 +7,24 @@
 import gql from 'graphql-tag';
 
 export const networkSchema = gql`
+  enum NetworkDirectionEcs {
+    inbound
+    outbound
+    internal
+    external
+    incoming
+    outgoing
+    listening
+    unknown
+  }
+
+  type TopNFlowNetworkEcsField {
+    bytes: Float
+    packets: Float
+    transport: String
+    direction: [NetworkDirectionEcs!]
+  }
+
   type TopNFlowItem {
     count: Float
     domain: [String!]
@@ -31,7 +49,7 @@ export const networkSchema = gql`
     destination: TopNFlowItem
     client: TopNFlowItem
     server: TopNFlowItem
-    network: NetworkEcsField
+    network: TopNFlowNetworkEcsField
   }
 
   type NetworkTopNFlowEdges {

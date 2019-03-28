@@ -10,7 +10,12 @@ import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 
-import { DraggableSignatureId, SuricataSignature, Tokens } from './suricata_signature';
+import {
+  DraggableSignatureId,
+  SURICATA_SIGNATURE_ID_FIELD_NAME,
+  SuricataSignature,
+  Tokens,
+} from './suricata_signature';
 
 describe('SuricataSignature', () => {
   describe('rendering', () => {
@@ -61,6 +66,21 @@ describe('SuricataSignature', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('signature-123');
+    });
+
+    test('it renders a tooltip for the signature field', () => {
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <DraggableSignatureId id="id-123" signatureId="signature-123" />
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find('[data-test-subj="signature-id-tooltip"]')
+          .first()
+          .props().content
+      ).toEqual(SURICATA_SIGNATURE_ID_FIELD_NAME);
     });
   });
 });

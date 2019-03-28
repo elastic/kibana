@@ -79,10 +79,10 @@ interface State {
   showNotes: boolean;
 }
 
-export const showDescriptionThreshold = 655;
-export const showNotesThreshold = 770;
-export const showHistoryThreshold = 910;
-export const showStreamLiveThreshold = 1040;
+const rightGutter = 60; // px
+export const showDescriptionThreshold = 610;
+export const showHistoryThreshold = 760;
+export const showStreamLiveThreshold = 900;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export class Properties extends React.PureComponent<Props, State> {
@@ -133,43 +133,45 @@ export class Properties extends React.PureComponent<Props, State> {
     } = this.props;
 
     return (
-      <TimelineProperties data-test-subj="timeline-properties">
-        <PropertiesLeft data-test-subj="properties-left">
-          <StarIcon
-            isFavorite={isFavorite}
-            timelineId={timelineId}
-            updateIsFavorite={updateIsFavorite}
-          />
+      <TimelineProperties data-test-subj="timeline-properties" width={width - rightGutter}>
+        <PropertiesLeft alignItems="center" data-test-subj="properties-left" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <StarIcon
+              isFavorite={isFavorite}
+              timelineId={timelineId}
+              updateIsFavorite={updateIsFavorite}
+            />
+          </EuiFlexItem>
 
           <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
 
           {width >= showDescriptionThreshold ? (
-            <Description
-              description={description}
-              timelineId={timelineId}
-              updateDescription={updateDescription}
-            />
-          ) : null}
-        </PropertiesLeft>
-
-        <PropertiesRight alignItems="center" data-test-subj="properties-right" gutterSize="s">
-          {width >= showNotesThreshold ? (
-            <EuiFlexItem grow={false}>
-              <NotesButton
-                animate={true}
-                associateNote={associateNote}
-                getNotesByIds={getNotesByIds}
-                noteIds={noteIds}
-                showNotes={this.state.showNotes}
-                size="l"
-                text={i18n.NOTES}
-                toggleShowNotes={this.onToggleShowNotes}
-                toolTip={i18n.NOTES_TOOL_TIP}
-                updateNote={updateNote}
+            <EuiFlexItem grow={true}>
+              <Description
+                description={description}
+                timelineId={timelineId}
+                updateDescription={updateDescription}
               />
             </EuiFlexItem>
           ) : null}
 
+          <EuiFlexItem grow={false}>
+            <NotesButton
+              animate={true}
+              associateNote={associateNote}
+              getNotesByIds={getNotesByIds}
+              noteIds={noteIds}
+              showNotes={this.state.showNotes}
+              size="l"
+              text={i18n.NOTES}
+              toggleShowNotes={this.onToggleShowNotes}
+              toolTip={i18n.NOTES_TOOL_TIP}
+              updateNote={updateNote}
+            />
+          </EuiFlexItem>
+        </PropertiesLeft>
+
+        <PropertiesRight alignItems="center" data-test-subj="properties-right" gutterSize="s">
           {width >= showHistoryThreshold ? (
             <EuiFlexItem grow={false}>
               <HistoryButton history={history} />
@@ -212,23 +214,6 @@ export class Properties extends React.PureComponent<Props, State> {
                       description={description}
                       timelineId={timelineId}
                       updateDescription={updateDescription}
-                    />
-                  </EuiFormRow>
-                ) : null}
-
-                {width < showNotesThreshold ? (
-                  <EuiFormRow>
-                    <NotesButton
-                      animate={true}
-                      associateNote={associateNote}
-                      getNotesByIds={getNotesByIds}
-                      noteIds={noteIds}
-                      showNotes={this.state.showNotes}
-                      size="l"
-                      text={i18n.NOTES}
-                      toggleShowNotes={this.onToggleShowNotes}
-                      toolTip={i18n.NOTES_TOOL_TIP}
-                      updateNote={updateNote}
                     />
                   </EuiFormRow>
                 ) : null}

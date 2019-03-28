@@ -33,11 +33,16 @@ const HeaderContainer = styled(EuiFlexGroup)<{ width: string }>`
   width: ${({ width }) => width};
 `;
 
+const HeaderFlexItem = styled(EuiFlexItem)<{ width: string }>`
+  width: ${({ width }) => width};
+`;
+
 const HeaderDiv = styled.div<{ isLoading: boolean }>`
   cursor: ${({ isLoading }) => (isLoading ? 'default' : 'pointer')};
   display: flex;
   height: 100%;
   flex-direction: row;
+  overflow: hidden;
 `;
 
 const TruncatableHeaderText = styled(TruncatableText)`
@@ -87,7 +92,7 @@ export class Header extends React.PureComponent<Props> {
     const { header, isLoading, sort, onColumnRemoved, onFilterChange = noop } = this.props;
 
     return (
-      <EuiFlexItem grow={false}>
+      <HeaderFlexItem grow={false} width={`${header.width - CELL_RESIZE_HANDLE_WIDTH}px`}>
         <WithHoverActions
           render={showHoverContent => (
             <>
@@ -130,7 +135,7 @@ export class Header extends React.PureComponent<Props> {
             </>
           )}
         />
-      </EuiFlexItem>
+      </HeaderFlexItem>
     );
   };
 
