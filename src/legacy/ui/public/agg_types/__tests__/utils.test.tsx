@@ -17,26 +17,33 @@
  * under the License.
  */
 
-/**
- * Provides an array of paths for ES source filtering
- *
- * @param {string} type
- * @param {string|array} fields
- * @returns {array}
- */
-export function includedFields(type, fields) {
-  if (!fields || fields.length === 0) return;
+import { isValidJson } from '../utils';
 
-  // convert to an array
-  const sourceFields = typeof fields === 'string' ? [fields] : fields;
-  const sourceType = type || '*';
+const input = {
+  valid: '{ "test": "json input" }',
+  invalid: 'strings are not json',
+};
 
-  return sourceFields
-    .map(f => `${sourceType}.${f}`)
-    .concat('namespace')
-    .concat('type')
-    .concat('references')
-    .concat('migrationVersion')
-    .concat('updated_at')
-    .concat(fields); // v5 compatibility
-}
+describe('AggType utils', () => {
+  describe('isValidJson', () => {
+    it('should return true when empty string', () => {
+      expect(isValidJson('')).toBe(true);
+    });
+
+    it('should return true when undefine', () => {
+      expect(isValidJson(undefined as any)).toBe(true);
+    });
+
+    it('should return false when invalid string', () => {
+      expect(isValidJson(input.invalid)).toBe(false);
+    });
+
+    it('should return true when valid string', () => {
+      expect(isValidJson(input.valid)).toBe(true);
+    });
+
+    it('should return false if a number', () => {
+      expect(isValidJson('0')).toBe(false);
+    });
+  });
+});

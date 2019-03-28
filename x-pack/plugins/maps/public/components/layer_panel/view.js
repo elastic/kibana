@@ -7,6 +7,7 @@
 import React, { Fragment } from 'react';
 
 import { StyleTabs } from './style_tabs';
+import { FilterEditor } from './filter_editor';
 import { JoinEditor } from './join_editor';
 import { FlyoutFooter } from './flyout_footer';
 import { LayerErrors } from './layer_errors';
@@ -87,6 +88,21 @@ export class LayerPanel extends React.Component {
         hasLoadedSourcePropsForLayer: true,
       });
     }
+  }
+
+  _renderFilterSection() {
+    if (!this.props.selectedLayer.supportsElasticsearchFilters()) {
+      return null;
+    }
+
+    return (
+      <Fragment>
+        <EuiPanel>
+          <FilterEditor/>
+        </EuiPanel>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
   }
 
   _renderJoinSection() {
@@ -183,6 +199,8 @@ export class LayerPanel extends React.Component {
           <LayerSettings/>
 
           <SourceSettings/>
+
+          {this._renderFilterSection()}
 
           {this._renderJoinSection()}
 
