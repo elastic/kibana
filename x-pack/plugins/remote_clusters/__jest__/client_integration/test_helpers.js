@@ -6,8 +6,8 @@
 
 import axios from 'axios';
 
-import { registerTestBed, /* findTestSubject */ } from '../../../../test_utils';
-import { remoteClustersStore } from '../../public/store';
+import { registerTestBed, findTestSubject } from '../../../../test_utils';
+import { createRemoteClustersStore } from '../../public/store';
 import { setHttpClient } from '../../public/services/api';
 import { registerRouter } from '../../public/services';
 
@@ -25,48 +25,56 @@ const reactRouter = {
 
 registerRouter(reactRouter);
 
-const initUserActions = ({ /* getMetadataFromEuiTable, find */ }) => (section) => {
+const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
   const userActions = {
-    // Follower indices user actions
-    listRemoteClusters() {
-      // const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
+    // Remote cluster list user actions
+    remoteClusterList() {
+      const { rows } = getMetadataFromEuiTable('remoteClusterListTable');
 
-      // const selectFollowerIndexAt = (index = 0) => {
-      //   const row = rows[index];
-      //   const checkBox = row.reactWrapper.find('input').hostNodes();
-      //   checkBox.simulate('change', { target: { checked: true } });
-      // };
+      const selectRemoteClusterAt = (index = 0) => {
+        const row = rows[index];
+        const checkBox = row.reactWrapper.find('input').hostNodes();
+        checkBox.simulate('change', { target: { checked: true } });
+      };
 
-      // const openContextMenu = () => {
-      //   find('ccrFollowerIndexListContextMenuButton').simulate('click');
-      // };
+      const clickBulkDeleteButton = () => {
+        find('remoteClusterBulkDeleteButton').simulate('click');
+      };
 
-      // const clickContextMenuButtonAt = (index = 0) => {
-      //   const contextMenu = find('followerIndexActionContextMenu');
-      //   contextMenu.find('button').at(index).simulate('click');
-      // };
+      const clickRowActionButtonAt = (index = 0, action = 'delete') => {
+        const indexLastColumn = rows[index].columns.length - 1;
+        const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
 
-      // const openTableRowContextMenuAt = (index = 0) => {
-      //   const actionsColumnIndex = rows[0].columns.length - 1; // Actions are in the last column
-      //   const actionsTableCell = rows[index].columns[actionsColumnIndex];
-      //   const button = actionsTableCell.reactWrapper.find('button');
-      //   if (!button.length) {
-      //     throw new Error(`No button to open context menu were found on Follower index list table row ${index}`);
-      //   }
-      //   button.simulate('click');
-      // };
+        let button;
+        if (action === 'delete') {
+          button = findTestSubject(tableCellActions, 'remoteClusterTableRowRemoveButton');
+        } else if (action === 'edit') {
+          findTestSubject(tableCellActions, 'remoteClusterTableRowEditButton');
+        }
 
-      // const clickFollowerIndexAt = (index = 0) => {
-      //   const followerIndexLink = findTestSubject(rows[index].reactWrapper, 'ccrFollowerIndexListFollowerIndexLink');
-      //   followerIndexLink.simulate('click');
-      // };
+        if (!button) {
+          throw new Error(`Button for action "${action}" not found.`);
+        }
+
+        button.simulate('click');
+      };
+
+      const clickConfirmModalDeleteRemoteCluster = () => {
+        const modal = find('remoteClustersDeleteConfirmModal');
+        findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
+      };
+
+      const clickRemoteClusterAt = (index = 0) => {
+        const remoteClusterLink = findTestSubject(rows[index].reactWrapper, 'remoteClustersTableListClusterLink');
+        remoteClusterLink.simulate('click');
+      };
 
       return {
-        // selectFollowerIndexAt,
-        // openContextMenu,
-        // clickContextMenuButtonAt,
-        // openTableRowContextMenuAt,
-        // clickFollowerIndexAt,
+        selectRemoteClusterAt,
+        clickBulkDeleteButton,
+        clickRowActionButtonAt,
+        clickConfirmModalDeleteRemoteCluster,
+        clickRemoteClusterAt,
       };
     },
   };
@@ -74,10 +82,10 @@ const initUserActions = ({ /* getMetadataFromEuiTable, find */ }) => (section) =
   return userActions[section]();
 };
 
-// export { nextTick, getRandomString, findTestSubject } from '../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject } from '../../../../test_utils';
 
 export const initTestBed = (component, props = {}, options) => {
-  const testBed = registerTestBed(component, {}, remoteClustersStore)(props, options);
+  const testBed = registerTestBed(component, {}, createRemoteClustersStore())(props, options);
   const getUserActions = initUserActions(testBed);
 
   return {
@@ -86,7 +94,7 @@ export const initTestBed = (component, props = {}, options) => {
   };
 };
 
-export const mockAllHttpRequests = server => {
+export const registerHttpRequestMockHelpers = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },
@@ -96,8 +104,11 @@ export const mockAllHttpRequests = server => {
   const setLoadRemoteClustersResponse = (response) => {
     const defaultResponse = [];
 
-    server.respondWith('GET', 'api/remote_clusters',
-      mockResponse(defaultResponse, response));
+    server.respondWith('GET', 'api/remote_clusters', [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response ? response : defaultResponse),
+    ]);
   };
 
   // const setLoadAutoFollowPatternsResponse = (response) => {
@@ -108,13 +119,13 @@ export const mockAllHttpRequests = server => {
   //   );
   // };
 
-  // const setDeleteAutoFollowPatternResponse = (response) => {
-  //   const defaultResponse = { errors: [], itemsDeleted: [] };
+  const setDeleteRemoteClusterResponse = (response) => {
+    const defaultResponse = { success: true };
 
-  //   server.respondWith('DELETE', /api\/cross_cluster_replication\/auto_follow_patterns/,
-  //     mockResponse(defaultResponse, response)
-  //   );
-  // };
+    server.respondWith('DELETE', /api\/remote_clusters/,
+      mockResponse(defaultResponse, response)
+    );
+  };
 
   // const setAutoFollowStatsResponse = (response) => {
   //   const defaultResponse = {
@@ -134,25 +145,8 @@ export const mockAllHttpRequests = server => {
   //   );
   // };
 
-  /**
-   * Set all http request to their default response
-   */
-  setLoadRemoteClustersResponse();
-  // setLoadAutoFollowPatternsResponse();
-  // setAutoFollowStatsResponse();
-
-  /**
-   * Return a method to override any of the http reques
-   */
-  return (requestId, response) => {
-    const mapRequestToHelper = {
-      'loadRemoteClusters': setLoadRemoteClustersResponse,
-    };
-
-    if (!mapRequestToHelper[requestId]) {
-      throw new Error(`Did not find a helper to set http response for request ${requestId}`);
-    }
-
-    return mapRequestToHelper[requestId](response);
+  return {
+    setLoadRemoteClustersResponse,
+    setDeleteRemoteClusterResponse,
   };
 };

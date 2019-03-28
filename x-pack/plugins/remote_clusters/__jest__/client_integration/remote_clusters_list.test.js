@@ -6,10 +6,10 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockAllHttpRequests } from './test_helpers';
+import { initTestBed, registerHttpRequestMockHelpers, nextTick, getRandomString, findTestSubject } from './test_helpers';
 import { RemoteClusterList } from '../../public/sections/remote_cluster_list';
-import { registerRouter } from '../../public/services';
-// import { getFollowerIndexMock } from '../../fixtures/follower_index';
+import { registerRouter, getRouter } from '../../public/services';
+import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/remote_clusters',
@@ -23,27 +23,31 @@ jest.mock('ui/index_patterns', () => {
 
 const testBedOptions = {
   memoryRouter: {
-    wrapRoute: true,
     onRouter: (router) => registerRouter(router)
   }
 };
 
 describe('<RemoteClusterList />', () => {
   let server;
-  // let find;
+  let find;
   let exists;
-  // let component;
-  // let getMetadataFromEuiTable;
-  // let getUserActions;
-  // let tableCellsValues;
-  // let updateHttpMockResponse;
+  let component;
+  let getMetadataFromEuiTable;
+  let getUserActions;
+  let tableCellsValues;
+  let rows;
+  let setLoadRemoteClustersResponse;
+  let setDeleteRemoteClusterResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
 
-    mockAllHttpRequests(server);
-    // (updateHttpMockResponse = mockAllHttpRequests(server));
+    // Register helpers to mock Http Requests
+    ({ setLoadRemoteClustersResponse, setDeleteRemoteClusterResponse } = registerHttpRequestMockHelpers(server));
+
+    // Set "default" mock responses by not providing any arguments
+    setLoadRemoteClustersResponse();
   });
 
   describe('on component mount', () => {
@@ -51,303 +55,249 @@ describe('<RemoteClusterList />', () => {
       ({ exists } = initTestBed(RemoteClusterList, undefined, testBedOptions));
     });
 
-    test('should show a loading indicator on component', async () => {
+    test('should show a "loading remote clusters" indicator', async () => {
       expect(exists('remoteClustersTableLoading')).toBe(true);
     });
   });
 
-  // describe('when there are no follower indices', () => {
-  //   beforeEach(async () => {
-  //     ({ exists, component } = initTestBed(RemoteClusterList));
-
-  //     await nextTick(); // We need to wait next tick for the mock server response to comes in
-  //     component.update();
-  //   });
-
-  //   test('should display an empty prompt', async () => {
-  //     expect(exists('ccrFollowerIndexEmptyPrompt')).toBe(true);
-  //   });
-
-  //   test('should have a button to create a follower index', async () => {
-  //     expect(exists('ccrFollowerIndexEmptyPromptCreateButton')).toBe(true);
-  //   });
-  // });
-
-  // describe('when there are follower indices', async () => {
-  //   // For deterministic tests, we need to make sure that index1 comes before index2
-  //   // in the table list that is rendered. As the table orders alphabetically by index name
-  //   // we prefix the random name to make sure that index1 name comes before index2.
-  //   const index1 = getFollowerIndexMock({ name: `a${getRandomString()}` });
-  //   const index2 = getFollowerIndexMock({ name: `b${getRandomString()}`, status: 'paused' });
-
-  //   const followerIndices = [index1, index2];
-
-  //   let selectFollowerIndexAt;
-  //   let openContextMenu;
-  //   let openTableRowContextMenuAt;
-  //   let clickContextMenuButtonAt;
-  //   let clickFollowerIndexAt;
-
-  //   beforeEach(async () => {
-  //     updateHttpMockResponse('loadFollowerIndices', { indices: followerIndices });
-
-  //     // Mount the component
-  //     ({
-  //       find,
-  //       exists,
-  //       component,
-  //       getMetadataFromEuiTable,
-  //       getUserActions,
-  //     } = initTestBed(RemoteClusterList));
-
-  //     await nextTick(); // Make sure that the Http request is fulfilled
-  //     component.update();
-
-  //     ({
-  //       selectFollowerIndexAt,
-  //       openContextMenu,
-  //       openTableRowContextMenuAt,
-  //       clickContextMenuButtonAt,
-  //       clickFollowerIndexAt,
-  //     } = getUserActions('followerIndicesList'));
-
-  //     // Read the index list table
-  //     ({ tableCellsValues } = getMetadataFromEuiTable('ccrFollowerIndexListTable'));
-  //   });
-
-  //   afterEach(async () => {
-  //     // The <EuiPopover /> updates are not all synchronouse
-  //     // We need to wait for all the updates to ran before unmounting our component
-  //     await nextTick(100);
-  //   });
-
-  //   test('should not display the empty prompt', () => {
-  //     expect(exists('ccrFollowerIndexEmptyPrompt')).toBe(false);
-  //   });
-
-  //   test('should have a button to create a follower index', () => {
-  //     expect(exists('ccrCreateFollowerIndexButton')).toBe(true);
-  //   });
-
-  //   test('should list the follower indices in the table', () => {
-  //     expect(tableCellsValues.length).toEqual(followerIndices.length);
-  //     expect(tableCellsValues).toEqual([
-  //       [ '', // Empty because the first column is the checkbox to select row
-  //         index1.name,
-  //         'Active',
-  //         index1.remoteCluster,
-  //         index1.leaderIndex,
-  //         '' // Empty because the last column is for the "actions" on the resource
-  //       ], [ '',
-  //         index2.name,
-  //         'Paused',
-  //         index2.remoteCluster,
-  //         index2.leaderIndex,
-  //         '' ]
-  //     ]);
-  //   });
-
-  //   describe('action menu', () => {
-  //     test('should be visible when a follower index is selected', () => {
-  //       expect(exists('ccrFollowerIndexListContextMenuButton')).toBe(false);
-
-  //       selectFollowerIndexAt(0);
-
-  //       expect(exists('ccrFollowerIndexListContextMenuButton')).toBe(true);
-  //     });
-
-  //     test('should have a "pause", "edit" and "unfollow" action when the follower index is active', async () => {
-  //       selectFollowerIndexAt(0);
-  //       openContextMenu();
-
-  //       const contextMenu = find('followerIndexActionContextMenu');
-
-  //       expect(contextMenu.length).toBeTruthy();
-  //       const contextMenuButtons = contextMenu.find('button');
-  //       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-
-  //       expect(buttonsLabel).toEqual([
-  //         'Pause replication',
-  //         'Edit follower index',
-  //         'Unfollow leader index'
-  //       ]);
-  //     });
+  describe('when there are no remote clusters', () => {
+    beforeEach(async () => {
+      ({ exists, component } = initTestBed(RemoteClusterList, undefined, testBedOptions));
+
+      await nextTick(); // We need to wait next tick for the mock server response to kick in
+      component.update();
+    });
+
+    test('should display an empty prompt', async () => {
+      expect(exists('remoteClusterListEmptyPrompt')).toBe(true);
+    });
+
+    test('should have a button to create a remote cluster', async () => {
+      expect(exists('remoteClusterEmptyPromptCreateButton')).toBe(true);
+    });
+  });
+
+  describe('when there are follower indices', async () => {
+    // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
+    // in the table list that is rendered. As the table orders alphabetically by index name
+    // we prefix the random name to make sure that remoteCluster1 name comes before remoteCluster2.
+    const remoteCluster1 = getRemoteClusterMock({ name: `a${getRandomString()}` });
+    const remoteCluster2 = getRemoteClusterMock({
+      name: `b${getRandomString()}`,
+      isConnected: false,
+      connectedNodesCount: 0,
+      seeds: ['localhost:9500'],
+      isConfiguredByNode: true
+    });
+
+    const remoteClusters = [remoteCluster1, remoteCluster2];
+
+    let selectRemoteClusterAt;
+    let clickBulkDeleteButton;
+    let clickRowActionButtonAt;
+    let clickConfirmModalDeleteRemoteCluster;
+    let clickRemoteClusterAt;
+
+    beforeEach(async () => {
+      setLoadRemoteClustersResponse(remoteClusters);
+
+      // Mount the component
+      ({
+        component,
+        find,
+        exists,
+        getMetadataFromEuiTable,
+        getUserActions,
+      } = initTestBed(RemoteClusterList, undefined, testBedOptions));
+
+      await nextTick(); // Make sure that the Http request is fulfilled
+      component.update();
+
+      ({
+        selectRemoteClusterAt,
+        clickBulkDeleteButton,
+        clickRowActionButtonAt,
+        clickConfirmModalDeleteRemoteCluster,
+        clickRemoteClusterAt,
+        // clickContextMenuButtonAt,
+        // clickFollowerIndexAt,
+      } = getUserActions('remoteClusterList'));
+
+      // Read the remote clusters list table
+      ({ rows, tableCellsValues } = getMetadataFromEuiTable('remoteClusterListTable'));
+    });
+
+    test('should not display the empty prompt', () => {
+      expect(exists('remoteClusterListEmptyPrompt')).toBe(false);
+    });
+
+    test('should have a button to create a follower index', () => {
+      expect(exists('remoteClusterCreateButton')).toBe(true);
+    });
+
+    test('should list the follower indices in the table', () => {
+      expect(tableCellsValues.length).toEqual(remoteClusters.length);
+      expect(tableCellsValues).toEqual([
+        [ '', // Empty because the first column is the checkbox to select the row
+          remoteCluster1.name,
+          remoteCluster1.seeds.join(', '),
+          'Connected',
+          remoteCluster1.connectedNodesCount.toString(),
+          '' // Empty because the last column is for the "actions" on the resource
+        ], [ '',
+          remoteCluster2.name,
+          remoteCluster2.seeds.join(', '),
+          'Not connected',
+          remoteCluster2.connectedNodesCount.toString(),
+          '' ]
+      ]);
+    });
+
+    describe('bulk delete button', () => {
+      test('should be visible when a remote cluster is selected', () => {
+        expect(exists('remoteClusterBulkDeleteButton')).toBe(false);
+
+        selectRemoteClusterAt(0);
+
+        expect(exists('remoteClusterBulkDeleteButton')).toBe(true);
+      });
 
-  //     test('should have a "resume", "edit" and "unfollow" action when the follower index is active', async () => {
-  //       selectFollowerIndexAt(1); // Select the second follower that is "paused"
-  //       openContextMenu();
+      test('should update the button label if more than 1 remote cluster is selected', () => {
+        selectRemoteClusterAt(0);
 
-  //       const contextMenu = find('followerIndexActionContextMenu');
+        const button = find('remoteClusterBulkDeleteButton');
+        expect(button.text()).toEqual('Remove remote cluster');
 
-  //       const contextMenuButtons = contextMenu.find('button');
-  //       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
-  //       expect(buttonsLabel).toEqual([
-  //         'Resume replication',
-  //         'Edit follower index',
-  //         'Unfollow leader index'
-  //       ]);
-  //     });
+        selectRemoteClusterAt(1);
+        expect(button.text()).toEqual('Remove 2 remote clusters');
+      });
 
-  //     test('should open a confirmation modal when clicking on "pause replication"', () => {
-  //       expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(false);
+      test('should open a confirmation modal when clicking on it', () => {
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
 
-  //       selectFollowerIndexAt(0);
-  //       openContextMenu();
-  //       clickContextMenuButtonAt(0); // first button is the "pause" action
+        selectRemoteClusterAt(0);
+        clickBulkDeleteButton();
 
-  //       expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(true);
-  //     });
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+      });
+    });
 
-  //     test('should open a confirmation modal when clicking on "unfollow leader index"', () => {
-  //       expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(false);
+    describe('table row actions', () => {
+      test('should have a "delete" and an "edit" action button on each row', () => {
+        const indexLastColumn = rows[0].columns.length - 1;
+        const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
 
-  //       selectFollowerIndexAt(0);
-  //       openContextMenu();
-  //       clickContextMenuButtonAt(2); // third button is the "unfollow" action
-
-  //       expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(true);
-  //     });
-  //   });
-
-  //   describe('table row action menu', () => {
-  //     test('should open a context menu when clicking on the button of each row', async () => {
-  //       expect(component.find('.euiContextMenuPanel').length).toBe(0);
-
-  //       openTableRowContextMenuAt(0);
-
-  //       expect(component.find('.euiContextMenuPanel').length).toBe(1);
-  //     });
-
-  //     test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
-  //       openTableRowContextMenuAt(0);
-
-  //       const buttonLabels = component
-  //         .find('.euiContextMenuPanel')
-  //         .find('.euiContextMenuItem')
-  //         .map(button => button.text());
-
-  //       expect(buttonLabels).toEqual([
-  //         'Pause replication',
-  //         'Edit follower index',
-  //         'Unfollow leader index'
-  //       ]);
-  //     });
-
-  //     test('should have the "resume", "edit" and "unfollow" options in the row context menu', async () => {
-  //       // We open the context menu of the second row (index 1) as followerIndices[1].status is "paused"
-  //       openTableRowContextMenuAt(1);
-
-  //       const buttonLabels = component
-  //         .find('.euiContextMenuPanel')
-  //         .find('.euiContextMenuItem')
-  //         .map(button => button.text());
-
-  //       expect(buttonLabels).toEqual([
-  //         'Resume replication',
-  //         'Edit follower index',
-  //         'Unfollow leader index'
-  //       ]);
-  //     });
-
-  //     test('should open a confirmation modal when clicking on "pause replication"', async () => {
-  //       expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(false);
-
-  //       openTableRowContextMenuAt(0);
-  //       find('ccrFollowerIndexListPauseActionButton').simulate('click');
-
-  //       expect(exists('ccrFollowerIndexPauseReplicationConfirmationModal')).toBe(true);
-  //     });
-
-  //     test('should open a confirmation modal when clicking on "resume"', async () => {
-  //       expect(exists('ccrFollowerIndexResumeReplicationConfirmationModal')).toBe(false);
-
-  //       openTableRowContextMenuAt(1); // open the second row context menu, as it is a "paused" follower index
-  //       find('ccrFollowerIndexListResumeActionButton').simulate('click');
-
-  //       expect(exists('ccrFollowerIndexResumeReplicationConfirmationModal')).toBe(true);
-  //     });
-
-  //     test('should open a confirmation modal when clicking on "unfollow leader index"', () => {
-  //       expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(false);
-
-  //       openTableRowContextMenuAt(0);
-  //       find('ccrFollowerIndexListUnfollowActionButton').simulate('click');
-
-  //       expect(exists('ccrFollowerIndexUnfollowLeaderConfirmationModal')).toBe(true);
-  //     });
-  //   });
-
-  //   describe('detail panel', () => {
-  //     test('should open a detail panel when clicking on a follower index', () => {
-  //       expect(exists('ccrFollowerIndexDetailsFlyout')).toBe(false);
-
-  //       clickFollowerIndexAt(0);
-
-  //       expect(exists('ccrFollowerIndexDetailsFlyout')).toBe(true);
-  //     });
-
-  //     test('should set the title the index that has been selected', () => {
-  //       clickFollowerIndexAt(0); // Open the detail panel
-  //       expect(find('followerIndexDetailsFlyoutTitle').text()).toEqual(index1.name);
-  //     });
-
-  //     test('should have a "settings" section', () => {
-  //       clickFollowerIndexAt(0);
-  //       expect(find('ccrFollowerIndexDetailPanelSettingsSection').find('h3').text()).toEqual('Settings');
-  //       expect(exists('ccrFollowerIndexDetailPanelSettingsValues')).toBe(true);
-  //     });
-
-  //     test('should set the correct follower index settings values', () => {
-  //       const mapSettingsToFollowerIndexProp = {
-  //         'Status': 'status',
-  //         'RemoteCluster': 'remoteCluster',
-  //         'LeaderIndex': 'leaderIndex',
-  //         'MaxReadReqOpCount': 'maxReadRequestOperationCount',
-  //         'MaxOutstandingReadReq': 'maxOutstandingReadRequests',
-  //         'MaxReadReqSize': 'maxReadRequestSize',
-  //         'MaxWriteReqOpCount': 'maxWriteRequestOperationCount',
-  //         'MaxWriteReqSize': 'maxWriteRequestSize',
-  //         'MaxOutstandingWriteReq': 'maxOutstandingWriteRequests',
-  //         'MaxWriteBufferCount': 'maxWriteBufferCount',
-  //         'MaxWriteBufferSize': 'maxWriteBufferSize',
-  //         'MaxRetryDelay': 'maxRetryDelay',
-  //         'ReadPollTimeout': 'readPollTimeout'
-  //       };
-
-  //       clickFollowerIndexAt(0);
-
-  //       Object.entries(mapSettingsToFollowerIndexProp).forEach(([setting, prop]) => {
-  //         const wrapper = find(`ccrFollowerIndexDetail${setting}`);
-
-  //         if (!wrapper.length) {
-  //           throw new Error(`Could not find description for setting "${setting}"`);
-  //         }
-
-  //         expect(wrapper.text()).toEqual(index1[prop].toString());
-  //       });
-  //     });
-
-  //     test('should not have settings values for a "paused" follower index', () => {
-  //       clickFollowerIndexAt(1); // the second follower index is paused
-  //       expect(exists('ccrFollowerIndexDetailPanelSettingsValues')).toBe(false);
-  //       expect(find('ccrFollowerIndexDetailPanelSettingsSection').text()).toContain('paused follower index does not have settings');
-  //     });
-
-  //     test('should have a section to render the follower index shards stats', () => {
-  //       clickFollowerIndexAt(0);
-  //       expect(exists('ccrFollowerIndexDetailPanelShardsStatsSection')).toBe(true);
-  //     });
-
-  //     test('should render a EuiCodeEditor for each shards stats', () => {
-  //       clickFollowerIndexAt(0);
-
-  //       const codeEditors = component.find(`EuiCodeEditor`);
-
-  //       expect(codeEditors.length).toBe(index1.shards.length);
-  //       codeEditors.forEach((codeEditor, i) => {
-  //         expect(JSON.parse(codeEditor.props().value)).toEqual(index1.shards[i]);
-  //       });
-  //     });
-  //   });
-  // });
+        const deleteButton = findTestSubject(tableCellActions, 'remoteClusterTableRowRemoveButton');
+        const editButton = findTestSubject(tableCellActions, 'remoteClusterTableRowEditButton');
+
+        expect(deleteButton.length).toBe(1);
+        expect(editButton.length).toBe(1);
+      });
+
+      test('should open a confirmation modal when clicking on "delete" button', async () => {
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
+
+        clickRowActionButtonAt(0, 'delete');
+
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+      });
+    });
+
+    describe('confirmation modal (delete remote cluster)', () => {
+      test('should remove the remote cluster from the table after delete is successful', async () => {
+        // Mock HTTP DELETE request
+        setDeleteRemoteClusterResponse();
+
+        // Make sure that we have our 2 remote clusters in the table
+        expect(rows.length).toBe(2);
+
+        selectRemoteClusterAt(0);
+        clickBulkDeleteButton();
+        clickConfirmModalDeleteRemoteCluster();
+
+        await nextTick(550); // there is a 500ms timeout in the api action
+        component.update();
+
+        ({ rows } = getMetadataFromEuiTable('remoteClusterListTable'));
+
+        expect(rows.length).toBe(1);
+        expect(rows[0].columns[1].value).toEqual(remoteCluster2.name);
+      });
+    });
+
+    describe('detail panel', () => {
+      test('should open a detail panel when clicking on a follower index', () => {
+        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+
+        clickRemoteClusterAt(0);
+
+        expect(exists('remoteClusterDetailFlyout')).toBe(true);
+      });
+
+      test('should set the title to the remote cluster selected', () => {
+        clickRemoteClusterAt(0); // Select remote cluster and open the detail panel
+        expect(find('remoteClusterDetailsFlyoutTitle').text()).toEqual(remoteCluster1.name);
+      });
+
+      test('should have a "Status" section', () => {
+        clickRemoteClusterAt(0);
+        expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
+        expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
+      });
+
+      test('should set the correct remote cluster status values', () => {
+        clickRemoteClusterAt(0);
+
+        expect(find('remoteClusterDetailIsConnected').text()).toEqual('Connected');
+        expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual(remoteCluster1.connectedNodesCount.toString());
+        expect(find('remoteClusterDetailSeeds').text()).toEqual(remoteCluster1.seeds.join(' '));
+        expect(find('remoteClusterDetailSkipUnavailable').text()).toEqual('No');
+        expect(find('remoteClusterDetailMaxConnections').text()).toEqual(remoteCluster1.maxConnectionsPerCluster.toString());
+        expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual(remoteCluster1.initialConnectTimeout);
+      });
+
+      test('should have a "close", "delete" and "edit" button in the footer', () => {
+        clickRemoteClusterAt(0);
+        expect(exists('remoteClusterDetailsPanelCloseButton')).toBe(true);
+        expect(exists('remoteClusterDetailPanelRemoveButton')).toBe(true);
+        expect(exists('remoteClusterDetailPanelEditButton')).toBe(true);
+      });
+
+      test('should close the detail panel when clicking the "close" button', () => {
+        clickRemoteClusterAt(0); // open the detail panel
+        expect(exists('remoteClusterDetailFlyout')).toBe(true);
+
+        find('remoteClusterDetailsPanelCloseButton').simulate('click');
+
+        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+      });
+
+      test('should open a confirmation modal when clicking the "delete" button', () => {
+        clickRemoteClusterAt(0);
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(false);
+
+        find('remoteClusterDetailPanelRemoveButton').simulate('click');
+
+        expect(exists('remoteClustersDeleteConfirmModal')).toBe(true);
+      });
+
+      test('should display a "Remote cluster not found" when providing a wrong cluster name', async () => {
+        expect(exists('remoteClusterDetailFlyout')).toBe(false);
+
+        getRouter().history.replace({ search: `?cluster=wrong-cluster` });
+        component.update();
+
+        expect(exists('remoteClusterDetailFlyout')).toBe(true);
+        expect(exists('remoteClusterDetailClusterNotFound')).toBe(true);
+      });
+
+      test('should display a warning when the cluster is configured by node', () => {
+        clickRemoteClusterAt(0); // the remoteCluster1 has *not* been configured by node
+        expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(false);
+
+        clickRemoteClusterAt(1); // the remoteCluster2 has been configured by node
+        expect(exists('remoteClusterConfiguredByNodeWarning')).toBe(true);
+      });
+    });
+  });
 });

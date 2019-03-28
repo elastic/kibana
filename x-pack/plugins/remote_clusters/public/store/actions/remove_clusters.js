@@ -17,7 +17,6 @@ import {
 } from '../action_types';
 
 import { closeDetailPanel } from './detail_panel';
-import { refreshClusters } from './refresh_clusters';
 import { getDetailPanelClusterName } from '../selectors';
 
 export const removeClusters = (names) => async (dispatch, getState) => {
@@ -75,7 +74,6 @@ export const removeClusters = (names) => async (dispatch, getState) => {
 
   dispatch({
     type: REMOVE_CLUSTERS_FINISH,
+    payload: removalSuccesses,
   });
-
-  dispatch(refreshClusters());
 };
