@@ -67,6 +67,7 @@
     "@types/sinon": "^5.0.1",
     "@types/storybook__addon-actions": "^3.4.2",
     "@types/storybook__addon-info": "^4.1.1",
+    "@types/storybook__addon-knobs": "^4.0.4",
     "@types/storybook__react": "^4.0.1",
     "@types/styled-components": "^4.1.12",
     "@types/supertest": "^2.0.5",
