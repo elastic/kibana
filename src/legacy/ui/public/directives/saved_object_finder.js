@@ -23,6 +23,8 @@ import { keyMap } from '../utils/key_map';
 import { SavedObjectRegistryProvider } from '../saved_objects/saved_object_registry';
 import { uiModules } from '../modules';
 import savedObjectFinderTemplate from '../partials/saved_object_finder.html';
+import './input_focus';
+import './paginate';
 
 const module = uiModules.get('kibana');
 

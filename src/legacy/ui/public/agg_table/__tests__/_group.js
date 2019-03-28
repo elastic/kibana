@@ -19,7 +19,7 @@
 
 import $ from 'jquery';
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { LegacyResponseHandlerProvider } from '../../vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
