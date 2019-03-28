@@ -17,32 +17,48 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import { i18n } from '@kbn/i18n';
 
-export const inputControlVis = () => ({
-  name: 'input_control_vis',
+// eslint-disable-next-line new-cap
+const responseHandler = LegacyResponseHandlerProvider().handler;
+
+export const kibanaTable = () => ({
+  name: 'kibana_table',
   type: 'render',
   context: {
-    types: [],
+    types: [
+      'kibana_datatable'
+    ],
   },
-  help: i18n.translate('interpreter.functions.input_control.help', {
-    defaultMessage: 'Input control visualization'
+  help: i18n.translate('tableVis.function.help', {
+    defaultMessage: 'Table visualization'
   }),
   args: {
     visConfig: {
-      types: ['string'],
+      types: ['string', 'null'],
       default: '"{}"',
-    }
+    },
   },
-  fn(context, args) {
-    const params = JSON.parse(args.visConfig);
+  async fn(context, args) {
+    const visConfigParams = JSON.parse(args.visConfig);
+
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visType: 'input_control_vis',
-        visConfig: params
-      }
+        visData: convertedData,
+        visType: 'table',
+        visConfig: visConfigParams,
+        params: {
+          listenOnChange: true,
+        }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(kibanaTable);

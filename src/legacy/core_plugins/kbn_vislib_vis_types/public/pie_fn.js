@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
-export const tilemap = () => ({
-  name: 'tilemap',
+export const kibanaPie = () => ({
+  name: 'kibana_pie',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.tilemap.help', {
-    defaultMessage: 'Tilemap visualization'
+  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
+    defaultMessage: 'Pie visualization'
   }),
   args: {
     visConfig: {
@@ -37,22 +38,18 @@ export const tilemap = () => ({
       default: '"{}"',
     },
   },
-  fn(context, args) {
+  async fn(context, args) {
+    const responseHandler = vislibSlicesResponseHandler().handler;
     const visConfigParams = JSON.parse(args.visConfig);
-    const { geohash, metric, geocentroid } = visConfigParams.dimensions;
 
-    const convertedData = convertToGeoJson(context, {
-      geohash,
-      metric,
-      geocentroid,
-    });
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visType: 'tile_map',
+        visType: 'pie',
         visConfig: visConfigParams,
         params: {
           listenOnChange: true,
@@ -61,3 +58,5 @@ export const tilemap = () => ({
     };
   },
 });
+
+functionsRegistry.register(kibanaPie);

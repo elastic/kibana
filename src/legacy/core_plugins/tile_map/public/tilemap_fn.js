@@ -17,41 +17,50 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { i18n } from '@kbn/i18n';
 
-export const kibanaMarkdown = () => ({
-  name: 'kibana_markdown',
+export const tilemap = () => ({
+  name: 'tilemap',
   type: 'render',
   context: {
-    types: [],
+    types: [
+      'kibana_datatable'
+    ],
   },
-  help: i18n.translate('interpreter.functions.markdown.help', {
-    defaultMessage: 'Markdown visualization'
+  help: i18n.translate('tileMap.function.help', {
+    defaultMessage: 'Tilemap visualization'
   }),
   args: {
-    expression: {
-      types: ['string'],
-      aliases: [ '_' ],
-      default: '',
-      help: 'markdown',
-    },
     visConfig: {
-      types: ['string'],
+      types: ['string', 'null'],
       default: '"{}"',
-    }
+    },
   },
   fn(context, args) {
-    const params = JSON.parse(args.visConfig);
+    const visConfigParams = JSON.parse(args.visConfig);
+    const { geohash, metric, geocentroid } = visConfigParams.dimensions;
+
+    const convertedData = convertToGeoJson(context, {
+      geohash,
+      metric,
+      geocentroid,
+    });
+
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visType: 'markdown',
-        visConfig: {
-          markdown: args.spec,
-          ...params,
-        },
-      }
+        visData: convertedData,
+        visType: 'tile_map',
+        visConfig: visConfigParams,
+        params: {
+          listenOnChange: true,
+        }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(tilemap);

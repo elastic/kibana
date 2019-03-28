@@ -17,22 +17,19 @@
  * under the License.
  */
 
-import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-// eslint-disable-next-line new-cap
-const responseHandler = LegacyResponseHandlerProvider().handler;
-
-export const kibanaTable = () => ({
-  name: 'kibana_table',
+export const metric = () => ({
+  name: 'kibana_metric',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.table.help', {
-    defaultMessage: 'Table visualization'
+  help: i18n.translate('metricVis.function.help', {
+    defaultMessage: 'Metric visualization'
   }),
   args: {
     visConfig: {
@@ -40,17 +37,15 @@ export const kibanaTable = () => ({
       default: '"{}"',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: convertedData,
-        visType: 'table',
+        visData: context,
+        visType: 'metric',
         visConfig: visConfigParams,
         params: {
           listenOnChange: true,
@@ -59,3 +54,5 @@ export const kibanaTable = () => ({
     };
   },
 });
+
+functionsRegistry.register(metric);

@@ -17,19 +17,19 @@
  * under the License.
  */
 
-import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const kibanaPie = () => ({
-  name: 'kibana_pie',
+export const regionmap = () => ({
+  name: 'regionmap',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.pie.help', {
-    defaultMessage: 'Pie visualization'
+  help: i18n.translate('regionMap.function.help', {
+    defaultMessage: 'Regionmap visualization'
   }),
   args: {
     visConfig: {
@@ -37,18 +37,15 @@ export const kibanaPie = () => ({
       default: '"{}"',
     },
   },
-  async fn(context, args) {
-    const responseHandler = vislibSlicesResponseHandler().handler;
+  fn(context, args) {
     const visConfigParams = JSON.parse(args.visConfig);
-
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: convertedData,
-        visType: 'pie',
+        visData: context,
+        visType: 'region_map',
         visConfig: visConfigParams,
         params: {
           listenOnChange: true,
@@ -57,3 +54,5 @@ export const kibanaPie = () => ({
     };
   },
 });
+
+functionsRegistry.register(regionmap);

@@ -17,39 +17,44 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const metric = () => ({
-  name: 'kibana_metric',
+export const kibanaMarkdown = () => ({
+  name: 'kibana_markdown',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: [],
   },
-  help: i18n.translate('interpreter.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
+  help: i18n.translate('markdownVis.function.help', {
+    defaultMessage: 'Markdown visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+    expression: {
+      types: ['string'],
+      aliases: [ '_' ],
+      default: '',
+      help: 'markdown',
     },
+    visConfig: {
+      types: ['string'],
+      default: '"{}"',
+    }
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-
+    const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'metric',
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        }
-      },
+        visType: 'markdown',
+        visConfig: {
+          markdown: args.spec,
+          ...params,
+        },
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(kibanaMarkdown);

@@ -17,39 +17,35 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const regionmap = () => ({
-  name: 'regionmap',
+export const inputControlVis = () => ({
+  name: 'input_control_vis',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: [],
   },
-  help: i18n.translate('interpreter.functions.regionmap.help', {
-    defaultMessage: 'Regionmap visualization'
+  help: i18n.translate('inputControl.function.help', {
+    defaultMessage: 'Input control visualization'
   }),
   args: {
     visConfig: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: '"{}"',
-    },
+    }
   },
   fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-
+    const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        }
-      },
+        visType: 'input_control_vis',
+        visConfig: params
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(inputControlVis);

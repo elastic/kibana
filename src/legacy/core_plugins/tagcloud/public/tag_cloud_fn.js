@@ -17,20 +17,42 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { i18n } from '@kbn/i18n';
 
-export default function (kibana) {
+export const tagcloud = () => ({
+  name: 'tagcloud',
+  type: 'render',
+  context: {
+    types: [
+      'kibana_datatable'
+    ],
+  },
+  help: i18n.translate('tagCloud.function.help', {
+    defaultMessage: 'Tagcloud visualization'
+  }),
+  args: {
+    visConfig: {
+      types: ['string', 'null'],
+      default: '"{}"',
+    },
+  },
+  fn(context, args) {
+    const visConfigParams = JSON.parse(args.visConfig);
 
-  return new kibana.Plugin({
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visData: context,
+        visType: 'tagcloud',
+        visConfig: visConfigParams,
+        params: {
+          listenOnChange: true,
+        }
+      },
+    };
+  },
+});
 
-    uiExports: {
-      visTypes: [
-        'plugins/metric_vis/metric_vis'
-      ],
-      interpreter: ['plugins/metric_vis/metric_vis_fn'],
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    }
-
-  });
-
-}
+functionsRegistry.register(tagcloud);

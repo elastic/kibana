@@ -17,18 +17,21 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
+import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import chrome from 'ui/chrome';
 
-export const tagcloud = () => ({
-  name: 'tagcloud',
+export const vislib = () => ({
+  name: 'vislib',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.tagcloud.help', {
-    defaultMessage: 'Tagcloud visualization'
+  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
+    defaultMessage: 'Vislib visualization'
   }),
   args: {
     visConfig: {
@@ -36,15 +39,20 @@ export const tagcloud = () => ({
       default: '"{}"',
     },
   },
-  fn(context, args) {
+  async fn(context, args) {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+    const Private = $injector.get('Private');
+    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
     const visConfigParams = JSON.parse(args.visConfig);
+
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'tagcloud',
+        visData: convertedData,
+        visType: args.type,
         visConfig: visConfigParams,
         params: {
           listenOnChange: true,
@@ -53,3 +61,5 @@ export const tagcloud = () => ({
     };
   },
 });
+
+functionsRegistry.register(vislib);

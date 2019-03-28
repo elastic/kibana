@@ -17,15 +17,14 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_request_handler';
-
-
 import chrome from 'ui/chrome';
+import { VegaRequestHandlerProvider } from './vega_request_handler';
 
-export const timelionVis = () => ({
-  name: 'timelion_vis',
+export const vega = () => ({
+  name: 'vega',
   type: 'render',
   context: {
     types: [
@@ -33,45 +32,40 @@ export const timelionVis = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.timelion.help', {
-    defaultMessage: 'Timelion visualization'
+  help: i18n.translate('vega.function.help', {
+    defaultMessage: 'Vega visualization'
   }),
   args: {
-    expression: {
+    spec: {
       types: ['string'],
-      aliases: ['_'],
-      default: '".es(*)"',
+      default: '',
     },
-    interval: {
-      types: ['string', 'null'],
-      default: 'auto',
-    }
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
-    const visParams = { expression: args.expression, interval: args.interval };
-
-    const response = await timelionRequestHandler({
+    const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
-      forceFetch: true,
-      visParams: visParams,
+      visParams: { spec: args.spec },
+      forceFetch: true
     });
-
-    response.visType = 'timelion';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visParams,
-        visType: 'timelion',
         visData: response,
-      },
+        visType: 'vega',
+        visConfig: {
+          spec: args.spec
+        },
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(vega);
