@@ -34,7 +34,7 @@ describe('AuditdLoggedinDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Session14alice@zeek-londonattempted a login via/usr/sbin/sshdwith resultsuccessSource8.42.77.171:--'
+        'Session14alice@zeek-londonattempted a login via/usr/sbin/sshdwith resultsuccessSource8.42.77.171'
       );
     });
 

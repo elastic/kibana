@@ -12,25 +12,24 @@ const fadeInEffect = keyframes`
   to { opacity: 1; }
 `;
 
-export const TimelineProperties = styled.div`
+export const TimelineProperties = styled.div<{ width: number }>`
   align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   user-select: none;
-  min-width: 100%;
+  width: ${({ width }) => `${width}px`};
 `;
 
 export const NameField = styled(EuiFieldText)`
   width: 150px;
-  min-width: 150px;
+  margin-right: 5px;
 `;
 
-export const DescriptionField = styled(EuiFieldText)`
-  margin-left: 5px;
-  min-width: 350px;
-  width: 350px;
+export const DescriptionContainer = styled.div`
   animation: ${fadeInEffect} 0.3s;
+  margin-right: 5px;
+  min-width: 150px;
 `;
 
 export const NotesButtonLabel = styled.div`
@@ -74,14 +73,12 @@ export const StyledStar = styled(EuiIcon)`
   cursor: pointer;
 `;
 
-export const PropertiesLeft = styled.div`
-  align-items: center;
-  display: flex;
-  flex-direction: row;
+export const PropertiesLeft = styled(EuiFlexGroup)`
+  width: 100%;
 `;
 
 export const PropertiesRight = styled(EuiFlexGroup)`
-  margin-left: 15px;
+  margin-left: 5px;
 `;
 
 export const Facet = styled.div`

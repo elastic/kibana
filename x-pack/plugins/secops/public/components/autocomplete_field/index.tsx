@@ -130,6 +130,14 @@ export class AutocompleteField extends React.Component<
           this.submit();
         }
         break;
+      case 'Tab':
+        evt.preventDefault();
+        if (this.state.areSuggestionsVisible && this.props.suggestions.length === 1) {
+          this.applySuggestionAt(0)();
+        } else if (this.state.selectedIndex !== null) {
+          this.applySelectedSuggestion();
+        }
+        break;
       case 'Escape':
         evt.preventDefault();
         evt.stopPropagation();

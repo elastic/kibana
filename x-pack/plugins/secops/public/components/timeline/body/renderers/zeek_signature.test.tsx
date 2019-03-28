@@ -141,6 +141,24 @@ describe('ZeekSignature', () => {
       );
       expect(wrapper.text()).toEqual('->mynote<-');
     });
+
+    describe('#TagTooltip', () => {
+      test('it renders the name of the field in a tooltip', () => {
+        const field = 'zeek.notice';
+        const wrapper = mountWithIntl(
+          <TestProviders>
+            <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
+          </TestProviders>
+        );
+
+        expect(
+          wrapper
+            .find('[data-test-subj="badge-tooltip"]')
+            .first()
+            .props().content
+        ).toEqual(field);
+      });
+    });
   });
 
   describe('#sha1StringRenderer', () => {

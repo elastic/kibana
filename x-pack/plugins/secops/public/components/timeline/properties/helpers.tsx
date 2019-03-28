@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiButton, EuiIcon, EuiModal, EuiOverlayMask, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButton,
+  EuiFieldText,
+  EuiIcon,
+  EuiModal,
+  EuiOverlayMask,
+  EuiToolTip,
+} from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
@@ -16,7 +24,7 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 
 import {
   ButtonContainer,
-  DescriptionField,
+  DescriptionContainer,
   HistoryButtonLabel,
   LabelText,
   NameField,
@@ -64,14 +72,17 @@ export const Description = pure<{
   updateDescription: UpdateDescription;
 }>(({ description, timelineId, updateDescription }) => (
   <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
-    <DescriptionField
-      aria-label={i18n.TIMELINE_DESCRIPTION}
-      data-test-subj="timeline-description"
-      onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
-      placeholder={i18n.DESCRIPTION}
-      spellCheck={true}
-      value={description}
-    />
+    <DescriptionContainer data-test-subj="description-container">
+      <EuiFieldText
+        aria-label={i18n.TIMELINE_DESCRIPTION}
+        data-test-subj="timeline-description"
+        fullWidth={true}
+        onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
+        placeholder={i18n.DESCRIPTION}
+        spellCheck={true}
+        value={description}
+      />
+    </DescriptionContainer>
   </EuiToolTip>
 ));
 

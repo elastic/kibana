@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
@@ -14,6 +14,7 @@ import { Ecs } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
+import { ExternalLinkIcon } from '../../../external_link_icon';
 import { GoogleLink, VirusTotalLink } from '../../../links';
 import { Provider } from '../../../timeline/data_providers/provider';
 
@@ -82,9 +83,11 @@ export const DraggableZeekElement = pure<{
               <Provider dataProvider={dataProvider} />
             </DragEffects>
           ) : (
-            <Badge iconType="tag" color="hollow">
-              {stringRenderer(value)}
-            </Badge>
+            <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+              <Badge iconType="tag" color="hollow">
+                {stringRenderer(value)}
+              </Badge>
+            </EuiToolTip>
           )
         }
       />
@@ -97,13 +100,19 @@ export const Link = pure<{ value: string | null; link?: string | null }>(({ valu
     if (link != null) {
       return (
         <LinkFlexItem grow={false}>
-          <GoogleLink link={link}>{value}</GoogleLink>
+          <div>
+            <GoogleLink link={link}>{value}</GoogleLink>
+            <ExternalLinkIcon />
+          </div>
         </LinkFlexItem>
       );
     } else {
       return (
         <LinkFlexItem grow={false}>
-          <GoogleLink link={value} />
+          <div>
+            <GoogleLink link={value} />
+            <ExternalLinkIcon />
+          </div>
         </LinkFlexItem>
       );
     }
@@ -115,7 +124,10 @@ export const Link = pure<{ value: string | null; link?: string | null }>(({ valu
 export const TotalVirusLinkSha = pure<{ value: string | null }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
-      <VirusTotalLink link={value}>{value}</VirusTotalLink>
+      <div>
+        <VirusTotalLink link={value}>{value}</VirusTotalLink>
+        <ExternalLinkIcon />
+      </div>
     </LinkFlexItem>
   ) : null
 );
@@ -188,7 +200,7 @@ export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   const stateValue: string | null = extractStateValue(state);
   return (
     <>
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
         <DraggableZeekElement id={id} field="zeek.session_id" value={sessionId} />
         <DraggableZeekElement
           id={id}

@@ -3,31 +3,36 @@
 exports[`Properties renders correctly against snapshot 1`] = `
 <styled.div
   data-test-subj="timeline-properties"
+  width={940}
 >
-  <styled.div
+  <Styled(EuiFlexGroup)
+    alignItems="center"
     data-test-subj="properties-left"
+    gutterSize="s"
   >
-    <pure(Component)
-      isFavorite={false}
-      timelineId="abc"
-      updateIsFavorite={[MockFunction]}
-    />
+    <EuiFlexItem
+      grow={false}
+    >
+      <pure(Component)
+        isFavorite={false}
+        timelineId="abc"
+        updateIsFavorite={[MockFunction]}
+      />
+    </EuiFlexItem>
     <pure(Component)
       timelineId="abc"
       title=""
       updateTitle={[MockFunction]}
     />
-    <pure(Component)
-      description=""
-      timelineId="abc"
-      updateDescription={[MockFunction]}
-    />
-  </styled.div>
-  <Styled(EuiFlexGroup)
-    alignItems="center"
-    data-test-subj="properties-right"
-    gutterSize="s"
-  >
+    <EuiFlexItem
+      grow={true}
+    >
+      <pure(Component)
+        description=""
+        timelineId="abc"
+        updateDescription={[MockFunction]}
+      />
+    </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
@@ -44,11 +49,26 @@ exports[`Properties renders correctly against snapshot 1`] = `
         updateNote={[MockFunction]}
       />
     </EuiFlexItem>
+  </Styled(EuiFlexGroup)>
+  <Styled(EuiFlexGroup)
+    alignItems="center"
+    data-test-subj="properties-right"
+    gutterSize="s"
+  >
     <EuiFlexItem
       grow={false}
     >
       <pure(Component)
         history={Array []}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <pure(Component)
+        isLive={false}
+        timelineId="abc"
+        updateIsLive={[MockFunction]}
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -82,18 +102,6 @@ exports[`Properties renders correctly against snapshot 1`] = `
               createTimeline={[MockFunction]}
               onClosePopover={[Function]}
               timelineId="abc"
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            describedByIds={Array []}
-            fullWidth={false}
-            hasEmptyLabelSpace={false}
-            labelType="label"
-          >
-            <pure(Component)
-              isLive={false}
-              timelineId="abc"
-              updateIsLive={[MockFunction]}
             />
           </EuiFormRow>
         </EuiForm>

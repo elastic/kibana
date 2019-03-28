@@ -30,6 +30,17 @@ describe('MarkdownHint', () => {
     );
   });
 
+  test('it renders the heading hint', () => {
+    const wrapper = mount(<MarkdownHint show={true} />);
+
+    expect(
+      wrapper
+        .find('[data-test-subj="heading-hint"]')
+        .first()
+        .text()
+    ).toEqual('# heading');
+  });
+
   test('it renders the bold hint with a bold font-weight', () => {
     const wrapper = mount(<MarkdownHint show={true} />);
 

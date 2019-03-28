@@ -488,7 +488,7 @@ export const updateTimelineDescription = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      description,
+      description: description.endsWith(' ') ? `${description.trim()} ` : description.trim(),
     },
   };
 };
@@ -510,7 +510,7 @@ export const updateTimelineTitle = ({
     ...timelineById,
     [id]: {
       ...timeline,
-      title,
+      title: title.endsWith(' ') ? `${title.trim()} ` : title.trim(),
     },
   };
 };

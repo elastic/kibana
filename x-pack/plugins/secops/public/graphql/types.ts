@@ -43,10 +43,6 @@ export interface Source {
   EventDetails: EventDetailsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
-
-  IpOverview?: IpOverviewData | null;
-
-  KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -55,6 +51,8 @@ export interface Source {
   UncommonProcesses: UncommonProcessesData;
   /** Just a simple example to get the app name */
   whoAmI?: SayMyName | null;
+
+  KpiNetwork?: KpiNetworkData | null;
 }
 /** A set of configuration options for a security data source */
 export interface SourceConfiguration {
@@ -176,11 +174,31 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
+  bytes?: number | null;
+
   ip?: string | null;
 
   port?: number | null;
 
   domain?: string[] | null;
+
+  geo?: GeoEcsFields | null;
+
+  packets?: number | null;
+}
+
+export interface GeoEcsFields {
+  continent_name?: string | null;
+
+  country_name?: string | null;
+
+  country_iso_code?: string | null;
+
+  city_name?: string | null;
+
+  region_iso_code?: string | null;
+
+  region_name?: string | null;
 }
 
 export interface HostEcsFields {
@@ -268,6 +286,8 @@ export interface Ecs {
 
   suricata?: SuricataEcsFields | null;
 
+  tls?: TlsEcsFields | null;
+
   zeek?: ZeekEcsFields | null;
 
   http?: HttpEcsFields | null;
@@ -275,6 +295,8 @@ export interface Ecs {
   url?: UrlEcsFields | null;
 
   timestamp?: Date | null;
+
+  message?: string[] | null;
 
   user?: UserEcsFields | null;
 
@@ -322,11 +344,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
+  bytes?: number | null;
+
   ip?: string | null;
 
   port?: number | null;
 
   domain?: string[] | null;
+
+  geo?: GeoEcsFields | null;
+
+  packets?: number | null;
 }
 
 export interface EventEcsFields {
@@ -340,6 +368,10 @@ export interface EventEcsFields {
 
   severity?: number | null;
 
+  start?: Date | null;
+
+  end?: Date | null;
+
   action?: string | null;
 
   type?: string | null;
@@ -347,36 +379,18 @@ export interface EventEcsFields {
   dataset?: string | null;
 }
 
-export interface GeoEcsFields {
-  continent_name?: string | null;
-
-  city_name?: string | null;
-
-  country_name?: string | null;
-
-  country_iso_code?: string | null;
-
-  location?: Location | null;
-
-  region_iso_code?: string | null;
-
-  region_name?: string | null;
-}
-
-export interface Location {
-  lon?: number | null;
-
-  lat?: number | null;
-}
-
 export interface NetworkEcsField {
   bytes?: number | null;
 
+  community_id?: string | null;
+
+  direction?: string | null;
+
   packets?: number | null;
 
-  transport?: string | null;
+  protocol?: string | null;
 
-  direction?: NetworkDirectionEcs[] | null;
+  transport?: string | null;
 }
 
 export interface SuricataEcsFields {
@@ -395,6 +409,34 @@ export interface SuricataAlertData {
   signature?: string | null;
 
   signature_id?: number | null;
+}
+
+export interface TlsEcsFields {
+  client_certificate?: TlsClientCertificateData | null;
+
+  fingerprints?: TlsFingerprintsData | null;
+
+  server_certificate?: TlsServerCertificateData | null;
+}
+
+export interface TlsClientCertificateData {
+  fingerprint?: FingerprintData | null;
+}
+
+export interface FingerprintData {
+  sha1?: string | null;
+}
+
+export interface TlsFingerprintsData {
+  ja3?: TlsJa3Data | null;
+}
+
+export interface TlsJa3Data {
+  hash?: string | null;
+}
+
+export interface TlsServerCertificateData {
+  fingerprint?: FingerprintData | null;
 }
 
 export interface ZeekEcsFields {
@@ -633,36 +675,6 @@ export interface HostItem {
   lastBeat?: Date | null;
 }
 
-export interface IpOverviewData {
-  source?: Overview | null;
-
-  destination?: Overview | null;
-}
-
-export interface Overview {
-  firstSeen?: Date | null;
-
-  lastSeen?: Date | null;
-
-  domains?: string[] | null;
-
-  host: HostEcsFields;
-
-  geo: GeoEcsFields;
-}
-
-export interface KpiNetworkData {
-  networkEvents?: number | null;
-
-  uniqueFlowId?: number | null;
-
-  activeAgents?: number | null;
-
-  uniqueSourcePrivateIps?: number | null;
-
-  uniqueDestinationPrivateIps?: number | null;
-}
-
 export interface NetworkTopNFlowData {
   edges: NetworkTopNFlowEdges[];
 
@@ -690,7 +702,7 @@ export interface NetworkTopNFlowItem {
 
   server?: TopNFlowItem | null;
 
-  network?: NetworkEcsField | null;
+  network?: TopNFlowNetworkEcsField | null;
 }
 
 export interface TopNFlowItem {
@@ -699,6 +711,16 @@ export interface TopNFlowItem {
   domain?: string[] | null;
 
   ip?: string | null;
+}
+
+export interface TopNFlowNetworkEcsField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
 }
 
 export interface NetworkDnsData {
@@ -760,6 +782,18 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
+}
+
+export interface KpiNetworkData {
+  networkEvents?: number | null;
+
+  uniqueFlowId?: number | null;
+
+  activeAgents?: number | null;
+
+  uniqueSourcePrivateIps?: number | null;
+
+  uniqueDestinationPrivateIps?: number | null;
 }
 
 // ====================================================
@@ -840,22 +874,6 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface IpOverviewSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-
-  ip: string;
-}
-export interface KpiNetworkSourceArgs {
-  id?: string | null;
-
-  timerange: TimerangeInput;
-
-  filterQuery?: string | null;
-}
 export interface NetworkTopNFlowSourceArgs {
   direction: NetworkTopNFlowDirection;
 
@@ -891,6 +909,13 @@ export interface UncommonProcessesSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface KpiNetworkSourceArgs {
+  id?: string | null;
+
+  timerange: TimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface IndexFieldsSourceStatusArgs {
   indexTypes?: IndexType[] | null;
 }
@@ -911,14 +936,6 @@ export enum Direction {
   desc = 'desc',
 }
 
-export enum NetworkDirectionEcs {
-  inbound = 'inbound',
-  outbound = 'outbound',
-  internal = 'internal',
-  external = 'external',
-  unknown = 'unknown',
-}
-
 export enum NetworkTopNFlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
@@ -937,17 +954,23 @@ export enum NetworkTopNFlowType {
   source = 'source',
 }
 
+export enum NetworkDirectionEcs {
+  inbound = 'inbound',
+  outbound = 'outbound',
+  internal = 'internal',
+  external = 'external',
+  incoming = 'incoming',
+  outgoing = 'outgoing',
+  listening = 'listening',
+  unknown = 'unknown',
+}
+
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export enum IpOverviewType {
-  destination = 'destination',
-  source = 'source',
 }
 
 // ====================================================
@@ -1441,173 +1464,6 @@ export namespace GetHostsTableQuery {
   };
 }
 
-export namespace GetIpOverviewQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    ip: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    IpOverview?: IpOverview | null;
-  };
-
-  export type IpOverview = {
-    __typename?: 'IpOverviewData';
-
-    source?: _Source | null;
-
-    destination?: Destination | null;
-  };
-
-  export type _Source = {
-    __typename?: 'Overview';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-
-    host: Host;
-
-    geo: Geo;
-  };
-
-  export type Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: string | null;
-
-    id?: string | null;
-
-    ip?: (string | null)[] | null;
-
-    mac?: (string | null)[] | null;
-
-    name?: string | null;
-
-    os?: Os | null;
-
-    type?: string | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: string | null;
-
-    name?: string | null;
-
-    platform?: string | null;
-
-    version?: string | null;
-  };
-
-  export type Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: string | null;
-
-    city_name?: string | null;
-
-    country_iso_code?: string | null;
-
-    country_name?: string | null;
-
-    location?: Location | null;
-
-    region_iso_code?: string | null;
-
-    region_name?: string | null;
-  };
-
-  export type Location = {
-    __typename?: 'Location';
-
-    lat?: number | null;
-
-    lon?: number | null;
-  };
-
-  export type Destination = {
-    __typename?: 'Overview';
-
-    firstSeen?: Date | null;
-
-    lastSeen?: Date | null;
-
-    host: _Host;
-
-    geo: _Geo;
-  };
-
-  export type _Host = {
-    __typename?: 'HostEcsFields';
-
-    architecture?: string | null;
-
-    id?: string | null;
-
-    ip?: (string | null)[] | null;
-
-    mac?: (string | null)[] | null;
-
-    name?: string | null;
-
-    os?: _Os | null;
-
-    type?: string | null;
-  };
-
-  export type _Os = {
-    __typename?: 'OsEcsFields';
-
-    family?: string | null;
-
-    name?: string | null;
-
-    platform?: string | null;
-
-    version?: string | null;
-  };
-
-  export type _Geo = {
-    __typename?: 'GeoEcsFields';
-
-    continent_name?: string | null;
-
-    city_name?: string | null;
-
-    country_iso_code?: string | null;
-
-    country_name?: string | null;
-
-    location?: _Location | null;
-
-    region_iso_code?: string | null;
-
-    region_name?: string | null;
-  };
-
-  export type _Location = {
-    __typename?: 'Location';
-
-    lat?: number | null;
-
-    lon?: number | null;
-  };
-}
-
 export namespace GetKpiEventsQuery {
   export type Variables = {
     sourceId: string;
@@ -1859,7 +1715,7 @@ export namespace GetNetworkTopNFlowQuery {
   };
 
   export type Network = {
-    __typename?: 'NetworkEcsField';
+    __typename?: 'TopNFlowNetworkEcsField';
 
     bytes?: number | null;
 
@@ -2077,13 +1933,15 @@ export namespace GetTimelineQuery {
 
     destination?: Destination | null;
 
-    geo?: Geo | null;
+    geo?: __Geo | null;
 
     suricata?: Suricata | null;
 
     network?: Network | null;
 
     http?: Http | null;
+
+    tls?: Tls | null;
 
     url?: Url | null;
 
@@ -2108,6 +1966,12 @@ export namespace GetTimelineQuery {
     id?: number | null;
 
     dataset?: string | null;
+
+    duration?: number | null;
+
+    start?: Date | null;
+
+    end?: Date | null;
   };
 
   export type Auditd = {
@@ -2177,20 +2041,64 @@ export namespace GetTimelineQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
+    bytes?: number | null;
+
     ip?: string | null;
 
+    packets?: number | null;
+
     port?: number | null;
+
+    geo?: Geo | null;
+  };
+
+  export type Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: string | null;
+
+    country_name?: string | null;
+
+    country_iso_code?: string | null;
+
+    city_name?: string | null;
+
+    region_iso_code?: string | null;
+
+    region_name?: string | null;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
+    bytes?: number | null;
+
     ip?: string | null;
 
+    packets?: number | null;
+
     port?: number | null;
+
+    geo?: _Geo | null;
   };
 
-  export type Geo = {
+  export type _Geo = {
+    __typename?: 'GeoEcsFields';
+
+    continent_name?: string | null;
+
+    country_name?: string | null;
+
+    country_iso_code?: string | null;
+
+    city_name?: string | null;
+
+    region_iso_code?: string | null;
+
+    region_name?: string | null;
+  };
+
+  export type __Geo = {
     __typename?: 'GeoEcsFields';
 
     region_name?: string | null;
@@ -2224,6 +2132,16 @@ export namespace GetTimelineQuery {
 
   export type Network = {
     __typename?: 'NetworkEcsField';
+
+    bytes?: number | null;
+
+    community_id?: string | null;
+
+    direction?: string | null;
+
+    packets?: number | null;
+
+    protocol?: string | null;
 
     transport?: string | null;
   };
@@ -2270,6 +2188,52 @@ export namespace GetTimelineQuery {
     bytes?: number | null;
 
     content?: string | null;
+  };
+
+  export type Tls = {
+    __typename?: 'TlsEcsFields';
+
+    client_certificate?: ClientCertificate | null;
+
+    fingerprints?: Fingerprints | null;
+
+    server_certificate?: ServerCertificate | null;
+  };
+
+  export type ClientCertificate = {
+    __typename?: 'TlsClientCertificateData';
+
+    fingerprint?: Fingerprint | null;
+  };
+
+  export type Fingerprint = {
+    __typename?: 'FingerprintData';
+
+    sha1?: string | null;
+  };
+
+  export type Fingerprints = {
+    __typename?: 'TlsFingerprintsData';
+
+    ja3?: Ja3 | null;
+  };
+
+  export type Ja3 = {
+    __typename?: 'TlsJa3Data';
+
+    hash?: string | null;
+  };
+
+  export type ServerCertificate = {
+    __typename?: 'TlsServerCertificateData';
+
+    fingerprint?: _Fingerprint | null;
+  };
+
+  export type _Fingerprint = {
+    __typename?: 'FingerprintData';
+
+    sha1?: string | null;
   };
 
   export type Url = {

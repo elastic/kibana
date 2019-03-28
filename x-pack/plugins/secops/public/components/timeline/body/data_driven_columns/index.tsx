@@ -35,6 +35,7 @@ const Cell = styled.div<{
       ? theme.eui.euiColorLightestShade
       : 'inherit'};
   border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  height: 100%;
   overflow: hidden;
   padding: 5px;
   user-select: none;

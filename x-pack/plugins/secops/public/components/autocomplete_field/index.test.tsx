@@ -13,6 +13,8 @@ import * as React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
+import { TestProviders } from '../../mock';
+
 import { AutocompleteField } from '.';
 
 const mockAutoCompleteData: AutocompleteSuggestion[] = [
@@ -269,6 +271,96 @@ describe('Autocomplete', () => {
     const wrapperFixedEuiFieldSearch = wrapper.find('input');
     wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Enter', preventDefault: noop });
     expect(onChange).toHaveBeenCalled();
+  });
+
+  test('OnChange should be called if tab is pressed when a suggested item is selected', () => {
+    const onChange = jest.fn((value: string) => value);
+
+    const wrapper = mount(
+      <AutocompleteField
+        isLoadingSuggestions={false}
+        isValid={false}
+        loadSuggestions={noop}
+        onChange={onChange}
+        onSubmit={noop}
+        placeholder=""
+        suggestions={mockAutoCompleteData}
+        value={''}
+      />
+    );
+    const wrapperAutocompleteField = wrapper.find(AutocompleteField);
+    wrapperAutocompleteField.setState({ selectedIndex: 1 });
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Tab', preventDefault: noop });
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  test('OnChange should NOT be called if tab is pressed when more than one item is suggested, and no selection has been made', () => {
+    const onChange = jest.fn((value: string) => value);
+
+    const wrapper = mount(
+      <AutocompleteField
+        isLoadingSuggestions={false}
+        isValid={false}
+        loadSuggestions={noop}
+        onChange={onChange}
+        onSubmit={noop}
+        placeholder=""
+        suggestions={mockAutoCompleteData}
+        value={''}
+      />
+    );
+
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Tab', preventDefault: noop });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  test('OnChange should be called if tab is pressed when only one item is suggested, even though that item is NOT selected', () => {
+    const onChange = jest.fn((value: string) => value);
+    const onlyOneSuggestion = [mockAutoCompleteData[0]];
+
+    const wrapper = mount(
+      <TestProviders>
+        <AutocompleteField
+          isLoadingSuggestions={false}
+          isValid={false}
+          loadSuggestions={noop}
+          onChange={onChange}
+          onSubmit={noop}
+          placeholder=""
+          suggestions={onlyOneSuggestion}
+          value={''}
+        />
+      </TestProviders>
+    );
+
+    const wrapperAutocompleteField = wrapper.find(AutocompleteField);
+    wrapperAutocompleteField.setState({ areSuggestionsVisible: true });
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Tab', preventDefault: noop });
+    expect(onChange).toHaveBeenCalled();
+  });
+
+  test('OnChange should NOT be called if tab is pressed when 0 items are suggested', () => {
+    const onChange = jest.fn((value: string) => value);
+
+    const wrapper = mount(
+      <AutocompleteField
+        isLoadingSuggestions={false}
+        isValid={false}
+        loadSuggestions={noop}
+        onChange={onChange}
+        onSubmit={noop}
+        placeholder=""
+        suggestions={[]}
+        value={''}
+      />
+    );
+
+    const wrapperFixedEuiFieldSearch = wrapper.find('input');
+    wrapperFixedEuiFieldSearch.simulate('keydown', { key: 'Tab', preventDefault: noop });
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   test('Load more suggestions when arrowdown on the search bar', () => {

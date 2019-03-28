@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { getLinksFromSignature } from './suricata_links';
+import { ExternalLinkIcon } from '../../../external_link_icon';
 
-const Icon = styled(EuiIcon)`
-  margin-left: 10px;
-  margin-right: 3px;
-`;
+import { getLinksFromSignature } from './suricata_links';
 
 const LinkEuiFlexItem = styled(EuiFlexItem)`
   display: inline;
@@ -26,10 +23,10 @@ export const SuricataRefs = pure<{ signatureId: string }>(({ signatureId }) => {
     <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
       {links.map(link => (
         <LinkEuiFlexItem key={link} grow={false}>
-          <Icon type="link" size="s" />
           <EuiLink href={link} color="subdued" target="_blank">
             {link}
           </EuiLink>
+          <ExternalLinkIcon />
         </LinkEuiFlexItem>
       ))}
     </EuiFlexGroup>

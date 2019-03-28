@@ -38,7 +38,7 @@ const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
   align-items: center;
   ${props =>
     props.hasAndItem
-      ? `&:hover {z
+      ? `&:hover {
     transition: background-color 0.7s ease;
     background-color: ${props.theme.eui.euiColorEmptyShade};
   }`
