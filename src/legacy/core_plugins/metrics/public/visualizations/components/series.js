@@ -29,7 +29,16 @@ import {
 } from '@elastic/charts';
 import { calculateFillColor } from '../lib/calculate_fill_color';
 
-export const Series = ({ id, label, data, bars = {}, lines = {}, color, mode, groupId }) => {
+export const Series = ({
+  mode,
+  id,
+  groupId,
+  label,
+  data,
+  bars,
+  lines,
+  color,
+}) => {
   const { fill: barFill, show: isBarSeries } = bars;
   const { fill: lineFill, steps } = lines;
   const Component = isBarSeries ? BarSeries : AreaSeries;
@@ -40,7 +49,10 @@ export const Series = ({ id, label, data, bars = {}, lines = {}, color, mode, gr
     specId,
   };
 
-  customSeriesColors.set(dataSeriesColorValues, calculateFillColor(color, isBarSeries ? barFill : lineFill).fillColor);
+  customSeriesColors.set(
+    dataSeriesColorValues,
+    calculateFillColor(color, isBarSeries ? barFill : lineFill).fillColor
+  );
 
   return (
     <Component
@@ -60,9 +72,15 @@ export const Series = ({ id, label, data, bars = {}, lines = {}, color, mode, gr
 
 Series.defaultProps = {
   mode: ScaleType.Linear,
+  bars: {},
+  lines: {},
 };
 
 Series.propTypes = {
+  hideInLegend: PropTypes.bool,
+  id: PropTypes.string,
+  mode: PropTypes.string,
+  groupId: PropTypes.string,
   label: PropTypes.node,
   data: PropTypes.array,
   bars: PropTypes.object,

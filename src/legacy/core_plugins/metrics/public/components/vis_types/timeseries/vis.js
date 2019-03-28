@@ -67,7 +67,7 @@ class TimeseriesVisualization extends Component {
   }
 
   render() {
-    const { model, visData, dateFormat, onBrush } = this.props;
+    const { model, visData, onBrush } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
     let annotations;
 
@@ -97,7 +97,7 @@ class TimeseriesVisualization extends Component {
         };
       });
     }
-    const seriesModel = model.series.map(s => _.cloneDeep(s));
+    const seriesModel = model.series.map(s => _.cloneDeep(s)).filter(s => !s.hidden);
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
     const tickFormatter = createTickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
 
@@ -109,8 +109,6 @@ class TimeseriesVisualization extends Component {
       groupId: mainAxisGroupId,
       position: model.axis_position,
       tickFormatter,
-      axisFormatter: _.get(firstSeries, 'formatter', 'number'),
-      axisFormatterTemplate: _.get(firstSeries, 'value_template')
     };
 
     if (model.axis_min) mainAxis.min = Number(model.axis_min);
@@ -131,10 +129,7 @@ class TimeseriesVisualization extends Component {
       seriesData.forEach(seriesDataRow => {
         seriesDataRow.tickFormatter = seriesGroupTickFormatter;
         seriesDataRow.groupId = seriesGroup.separate_axis ? seriesGroupId : mainAxisGroupId;
-
-        if (seriesGroup.hide_in_legend) {
-          delete seriesDataRow.label;
-        }
+        seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
 
         if (seriesGroup.stacked !== 'none') {
           seriesDataRow.data = seriesDataRow.data.map(point => {
@@ -167,11 +162,8 @@ class TimeseriesVisualization extends Component {
         const yaxis = {
           id: yAxisIdGenerator(),
           groupId: seriesGroupId,
-          alignTicksWithAxis: 1,
           position: seriesGroup.axis_position,
           tickFormatter: seriesGroupTickFormatter,
-          axisFormatter: seriesGroup.axis_formatter,
-          axisFormatterTemplate: seriesGroup.value_template
         };
 
         if (seriesGroup.axis_min != null) yaxis.min = Number(seriesGroup.axis_min);
@@ -189,18 +181,15 @@ class TimeseriesVisualization extends Component {
     const style = { backgroundColor: model.background_color };
 
     const params = {
-      dateFormat,
-      onBrush,
-      series,
-      annotations,
-      yaxes,
-      tickFormatter,
-      xAxisFormatter: this.xAxisFormatter,
-      axisPosition: model.axis_position,
-      legendPosition: model.legend_position || 'right',
-      legend: Boolean(model.show_legend),
       showGrid: Boolean(model.show_grid),
+      legend: Boolean(model.show_legend),
+      legendPosition: model.legend_position,
       xAxisLabel: this.interval ? getAxisLabelString(this.interval) : '',
+      series,
+      yaxes,
+      annotations,
+      onBrush,
+      xAxisFormatter: this.xAxisFormatter,
     };
 
     return (
@@ -212,11 +201,8 @@ class TimeseriesVisualization extends Component {
 }
 
 TimeseriesVisualization.propTypes = {
-  backgroundColor: PropTypes.string,
-  className: PropTypes.string,
   model: PropTypes.object,
   onBrush: PropTypes.func,
-  onChange: PropTypes.func,
   visData: PropTypes.object,
   dateFormat: PropTypes.string,
   getConfig: PropTypes.func

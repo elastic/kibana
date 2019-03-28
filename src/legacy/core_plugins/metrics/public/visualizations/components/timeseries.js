@@ -33,13 +33,13 @@ import { GRID_LINE_CONFIG } from '../lib/config';
 import '@elastic/charts/dist/style.css';
 
 export const TimeSeries = ({
-  yaxes,
+  showGrid,
   legend,
   legendPosition,
-  showGrid,
-  onBrush,
-  series,
   xAxisLabel,
+  series,
+  yaxes,
+  onBrush,
   xAxisFormatter
 }) => {
   const [mainAxis] = yaxes;
@@ -87,18 +87,18 @@ export const TimeSeries = ({
 };
 
 TimeSeries.defaultProps = {
+  showGrid: true,
   legend: true,
-  showGrid: true
+  legendPosition: 'right'
 };
 
 TimeSeries.propTypes = {
+  showGrid: PropTypes.bool,
   legend: PropTypes.bool,
   legendPosition: PropTypes.string,
-  axisPosition: PropTypes.string,
-  onFilter: PropTypes.func,
+  xAxisLabel: PropTypes.string,
   series: PropTypes.array,
-  tickFormatter: PropTypes.func,
-  showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string,
-  dateFormat: PropTypes.string
+  yaxes: PropTypes.array,
+  onBrush: PropTypes.func,
+  xAxisFormatter: PropTypes.func,
 };
