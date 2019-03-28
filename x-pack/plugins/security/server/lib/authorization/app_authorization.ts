@@ -9,6 +9,23 @@ import { Request, ResponseToolkit, Server } from 'hapi';
 import { flatten } from 'lodash';
 import { XPackMainPlugin } from 'x-pack/plugins/xpack_main/xpack_main';
 import { AuthorizationService } from './service';
+class ProtectedApplications {
+  private applications: Set<string> | null = null;
+  constructor(private readonly xpackMainPlugin: XPackMainPlugin) {}
+
+  public shouldProtect(appId: string) {
+    // Currently, once we get the list of features we essentially "lock" additional
+    // features from being added. This is enforced by the xpackMain plugin. As such,
+    // we wait until we actually need to consume these before getting them
+    if (this.applications == null) {
+      this.applications = new Set(
+        flatten(this.xpackMainPlugin.getFeatures().map(feature => feature.app))
+      );
+    }
+
+    return this.applications.has(appId);
+  }
+}
 
 export function initAppAuthorization(
   server: Server,
@@ -16,6 +33,7 @@ export function initAppAuthorization(
   authorization: AuthorizationService
 ) {
   const { actions, checkPrivilegesDynamicallyWithRequest, mode } = authorization;
+  const protectedApplications = new ProtectedApplications(xpackMainPlugin);
 
   server.ext('onPostAuth', async (request: Request, h: ResponseToolkit) => {
     const { path } = request;
@@ -26,9 +44,7 @@ export function initAppAuthorization(
 
     const appId = path.split('/', 3)[2];
 
-    // we only authorize app routes that are for registered features
-    const registeredApps = flatten(xpackMainPlugin.getFeatures().map(feature => feature.app));
-    if (!registeredApps.includes(appId)) {
+    if (!protectedApplications.shouldProtect(appId)) {
       return h.continue;
     }
 

@@ -205,7 +205,7 @@ export const security = (kibana) => new kibana.Plugin({
     await initAuthenticator(server);
     initAuthenticateApi(server);
     initAPIAuthorization(server, authorization);
-    initAppAuthorization(server, authorization);
+    initAppAuthorization(server, xpackMainPlugin, authorization);
     initUsersApi(server);
     initPublicRolesApi(server);
     initIndicesApi(server);
