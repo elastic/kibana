@@ -312,6 +312,7 @@
     "@types/rimraf": "^2.0.2",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^5.0.1",
+    "@types/storybook__addon-knobs": "^4.0.4",
     "@types/strip-ansi": "^3.0.0",
     "@types/styled-components": "^3.0.1",
     "@types/supertest": "^2.0.5",
