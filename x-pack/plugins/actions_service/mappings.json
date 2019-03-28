@@ -1,0 +1,12 @@
+{
+  "server-action": {
+    "properties": {
+      "name": { "type": "keyword" },
+      "actionType": { "type": "keyword" },
+      "connectorType": { "type": "keyword" },
+      "instanceParams": {
+        "type": "text"
+      }
+    }
+  }
+}
