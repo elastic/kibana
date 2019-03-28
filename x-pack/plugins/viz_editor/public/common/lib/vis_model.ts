@@ -84,7 +84,7 @@ export function initialState(): VisModel<any, any> {
     queries: {
       q1: {
         select: [
-          { operation: 'date_histogram', argument: { field: '@timestamp', interval: '30s' } },
+          { operation: 'date_histogram', argument: { field: '@timestamp', interval: '1d' } },
           { operation: 'sum', argument: 'bytes' },
         ],
       },
@@ -95,7 +95,7 @@ export function initialState(): VisModel<any, any> {
     private: {
       xyChart: {
         xAxis: {
-          title: 'Timestamp per 30 seconds',
+          title: 'Timestamp per day',
           columns: ['q1_0'],
         },
         yAxis: {

@@ -34,6 +34,7 @@ import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { registries, renderersRegistry } from 'plugins/interpreter/registries';
 import { registerPipeline as registerCSVPipeline } from '../csv_datasource_plugin';
+import { registerPipeline as registerIndexpatternPipeline } from '../indexpattern_datasource_plugin';
 import { registerPipeline as registerPiePipeline } from '../pie_chart_plugin';
 import { registerPipeline as registerVegaPipeline } from '../vega_chart_plugin';
 import { registerPipeline as registerXYPipeline } from '../xy_chart_plugin';
@@ -62,3 +63,4 @@ registerXYPipeline(registries);
 registerPiePipeline(registries);
 registerVegaPipeline(registries);
 registerCSVPipeline(registries);
+registerIndexpatternPipeline(registries);

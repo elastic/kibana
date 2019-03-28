@@ -52,8 +52,10 @@ function DataPanel({ visModel, onChangeVisModel }: PanelComponentProps<VisModel>
 
 function toExpression(viewState: VisModel) {
   // TODO prob. do this on an AST object and stringify afterwards
-  return `sample_data`;
-  // return `our_fancy_query_function args='${JSON.stringify(viewState.queries)}'`;
+  // return `sample_data`;
+  return `fancy_query queries='${JSON.stringify(viewState.queries)}' indexpattern='${
+    viewState.datasource ? viewState.datasource.title : ''
+  }'`;
 }
 
 export const config: DatasourcePlugin<VisModel> = {
