@@ -6,8 +6,6 @@
 
 import {
   EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -16,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
+
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -23,12 +22,29 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { IpOverviewData, IpOverviewType, Overview } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
-import { getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
+import { getEmptyTagValue } from '../../../empty_value';
 
+import {
+  dateRenderer,
+  hostIdRenderer,
+  hostNameRenderer,
+  locationRenderer,
+  reputationRenderer,
+  whoisRenderer,
+} from './field_renderers';
 import { SelectType } from './select_type';
 import * as i18n from './translations';
 
 export const IpOverviewId = 'ip-overview';
+
+const SelectTypeItem = styled(EuiFlexItem)`
+  min-width: 180px;
+`;
+
+interface DescriptionList {
+  title: string;
+  description: React.ReactElement | string;
+}
 
 interface OwnProps {
   ip: string;
@@ -54,32 +70,42 @@ type IpOverviewProps = OwnProps & IpOverviewReduxProps & IpOverViewDispatchProps
 class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
   public render() {
     const { ip, data, loading, flowType } = this.props;
-
-    // TODO: Set as most recent or or from queryParam?
     const typeData: Overview = data[flowType]!;
 
-    const fieldTitleMapping: Readonly<Array<{}>> = [
-      {
-        'geo.city_name': i18n.LOCATION,
-        'geo.region_name': i18n.LOCATION,
-      },
-      {
-        firstSeen: i18n.FIRST_SEEN,
-        lastSeen: i18n.LAST_SEEN,
-      },
-      {
-        'host.id': i18n.HOST_ID,
-        'host.name': i18n.HOST_NAME,
-      },
-      {
-        whois: i18n.WHOIS,
-        ip_information: i18n.IP_REPUTATION,
-      },
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      [
+        {
+          title: i18n.LOCATION,
+          description: locationRenderer(
+            [`${flowType}.geo.city_name`, `${flowType}.geo.region_name`],
+            data
+          ),
+        },
+        { title: i18n.DOMAINS, description: '' },
+      ],
+      [
+        { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
+        { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
+      ],
+      [
+        {
+          title: i18n.HOST_ID,
+          description: typeData ? hostIdRenderer(typeData.host, ip) : getEmptyTagValue(),
+        },
+        {
+          title: i18n.HOST_NAME,
+          description: typeData ? hostNameRenderer(typeData.host, ip) : getEmptyTagValue(),
+        },
+      ],
+      [
+        { title: i18n.WHOIS, description: whoisRenderer(ip) },
+        { title: i18n.REPUTATION, description: reputationRenderer(ip) },
+      ],
     ];
 
     return (
       <>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText>
               <h1>{ip}</h1>
@@ -113,34 +139,18 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
         <EuiSpacer size="s" />
 
         <EuiFlexGroup>
-          {fieldTitleMapping.map(listDescriptor => this.getDescriptList(listDescriptor, typeData))}
+          {descriptionLists.map((descriptionList, index) =>
+            this.getDescriptionList(descriptionList, index)
+          )}
         </EuiFlexGroup>
       </>
     );
   }
 
-  private getDescriptListItem = (field: string, title: string, data: Overview) => {
-    const fieldValue = getOrEmptyTag(field, data);
+  private getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
     return (
-      <>
-        <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>{fieldValue}</EuiDescriptionListDescription>
-        <EuiSpacer size="s" />
-      </>
-    );
-  };
-
-  private getDescriptList = (
-    fieldTitleMapping: Readonly<Record<string, string>>,
-    data: Overview
-  ) => {
-    return (
-      <EuiFlexItem>
-        {Object.entries(fieldTitleMapping).map(([field, title], index) => (
-          <EuiDescriptionList key={index}>
-            {this.getDescriptListItem(field, title, data)}
-          </EuiDescriptionList>
-        ))}
+      <EuiFlexItem key={key}>
+        <EuiDescriptionList listItems={descriptionList} />
       </EuiFlexItem>
     );
   };
@@ -162,11 +172,3 @@ export const IpOverview = connect(
     updateIpOverviewFlowType: networkActions.updateIpOverviewFlowType,
   }
 )(IpOverviewComponent);
-
-// const getDraggable = ({ id, field, value }: DefaultDraggableType) => {
-//   return <DefaultDraggable id={id} field={field} name={name} value={value} />;
-// };
-
-const SelectTypeItem = styled(EuiFlexItem)`
-  min-width: 180px;
-`;

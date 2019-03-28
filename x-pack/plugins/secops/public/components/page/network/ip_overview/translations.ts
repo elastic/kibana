@@ -14,6 +14,10 @@ export const LOCATION = i18n.translate('xpack.secops.network.ipDetails.ipOvervie
   defaultMessage: 'Location',
 });
 
+export const DOMAINS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.domainsTitle', {
+  defaultMessage: 'Domains',
+});
+
 export const FIRST_SEEN = i18n.translate(
   'xpack.secops.network.ipDetails.ipOverview.firstSeenTitle',
   {
@@ -37,10 +41,29 @@ export const WHOIS = i18n.translate('xpack.secops.network.ipDetails.ipOverview.w
   defaultMessage: 'WhoIs',
 });
 
-export const IP_REPUTATION = i18n.translate(
+export const VIEW_WHOIS = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.viewWhoisTitle',
+  {
+    defaultMessage: 'View at iana.org',
+  }
+);
+export const VIEW_VIRUS_TOTAL = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.viewVirusTotalTitle.',
+  {
+    defaultMessage: 'View at virustotal.com',
+  }
+);
+export const VIEW_TALOS_INTELLIGENCE = i18n.translate(
+  'xpack.secops.network.ipDetails.ipOverview.viewTalosIntelligenceTitle',
+  {
+    defaultMessage: 'View at talosIntelligence.com',
+  }
+);
+
+export const REPUTATION = i18n.translate(
   'xpack.secops.network.ipDetails.ipOverview.ipReputationTitle',
   {
-    defaultMessage: 'IP Reputation',
+    defaultMessage: 'Reputation',
   }
 );
 

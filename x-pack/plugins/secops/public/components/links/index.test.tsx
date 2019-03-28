@@ -10,7 +10,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 
-import { GoogleLink, HostDetailsLink, IPDetailsLink, TotalVirusLink } from '.';
+import { GoogleLink, HostDetailsLink, IPDetailsLink, VirusTotalLink } from '.';
 
 describe('Custom Links', () => {
   const hostId = '133fd7715f1d47979ce817ba0df10c6e';
@@ -92,22 +92,22 @@ describe('Custom Links', () => {
     });
   });
 
-  describe('TotalVirusLink', () => {
+  describe('VirusTotalLink', () => {
     test('it renders sha passed in as value', () => {
-      const wrapper = mountWithIntl(<TotalVirusLink link={'abc'}>{'Example Link'}</TotalVirusLink>);
+      const wrapper = mountWithIntl(<VirusTotalLink link={'abc'}>{'Example Link'}</VirusTotalLink>);
       expect(wrapper.text()).toEqual('Example Link');
     });
 
     test('it renders sha passed in as link', () => {
       const wrapper = mountWithIntl(
-        <TotalVirusLink link={'abc'}>{'Example Link'} </TotalVirusLink>
+        <VirusTotalLink link={'abc'}>{'Example Link'} </VirusTotalLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abc');
     });
 
     test("it encodes <script>alert('XSS')</script>", () => {
       const wrapper = mountWithIntl(
-        <TotalVirusLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</TotalVirusLink>
+        <VirusTotalLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</VirusTotalLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
         "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C/script%3E"

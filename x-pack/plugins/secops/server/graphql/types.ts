@@ -675,9 +675,9 @@ export interface Overview {
 
   domains?: string[] | null;
 
-  host?: HostEcsFields | null;
+  host: HostEcsFields;
 
-  geo?: GeoEcsFields | null;
+  geo: GeoEcsFields;
 }
 
 export interface KpiNetworkData {
@@ -3140,9 +3140,9 @@ export namespace OverviewResolvers {
 
     domains?: DomainsResolver<string[] | null, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
+    host?: HostResolver<HostEcsFields, TypeParent, Context>;
 
-    geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
+    geo?: GeoResolver<GeoEcsFields, TypeParent, Context>;
   }
 
   export type FirstSeenResolver<
@@ -3161,15 +3161,15 @@ export namespace OverviewResolvers {
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
-    R = HostEcsFields | null,
+    R = HostEcsFields,
     Parent = Overview,
     Context = SecOpsContext
   > = Resolver<R, Parent, Context>;
-  export type GeoResolver<
-    R = GeoEcsFields | null,
-    Parent = Overview,
-    Context = SecOpsContext
-  > = Resolver<R, Parent, Context>;
+  export type GeoResolver<R = GeoEcsFields, Parent = Overview, Context = SecOpsContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
 }
 
 export namespace KpiNetworkDataResolvers {

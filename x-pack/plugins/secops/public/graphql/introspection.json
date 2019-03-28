@@ -3668,7 +3668,11 @@
             "name": "host",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "HostEcsFields", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HostEcsFields", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3676,7 +3680,11 @@
             "name": "geo",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "GeoEcsFields", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "GeoEcsFields", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }

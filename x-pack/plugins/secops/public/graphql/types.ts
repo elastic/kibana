@@ -646,9 +646,9 @@ export interface Overview {
 
   domains?: string[] | null;
 
-  host?: HostEcsFields | null;
+  host: HostEcsFields;
 
-  geo?: GeoEcsFields | null;
+  geo: GeoEcsFields;
 }
 
 export interface KpiNetworkData {
@@ -1478,9 +1478,9 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
-    host?: Host | null;
+    host: Host;
 
-    geo?: Geo | null;
+    geo: Geo;
   };
 
   export type Host = {
@@ -1546,9 +1546,9 @@ export namespace GetIpOverviewQuery {
 
     lastSeen?: Date | null;
 
-    host?: _Host | null;
+    host: _Host;
 
-    geo?: _Geo | null;
+    geo: _Geo;
   };
 
   export type _Host = {
