@@ -90,14 +90,12 @@ function FieldParamEditor({
           color="danger"
           iconType="alert"
         >
-          <p>
-            <FormattedMessage
-              id="common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription"
-              defaultMessage="The {indexPatternTitle} index pattern does not contain any of the following field types:"
-              values={{ indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title }}
-            />{' '}
-            {getFieldTypesString(agg)}
-          </p>
+          <FormattedMessage
+            id="common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription"
+            defaultMessage="The {indexPatternTitle} index pattern does not contain any of the following field types:"
+            values={{ indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title }}
+          />{' '}
+          {getFieldTypesString(agg)}
         </EuiCallOut>
       )}
     </EuiFormRow>
