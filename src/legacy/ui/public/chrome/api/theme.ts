@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-import { Brand, ChromeSetup } from '../../../../../core/public/';
+import { ChromeBrand, ChromeSetup } from '../../../../../core/public/';
 
 let newPlatformChrome: ChromeSetup;
 
@@ -32,18 +32,18 @@ export function __newPlatformInit__(instance: ChromeSetup) {
 }
 
 export function initChromeThemeApi(chrome: { [key: string]: any }) {
-  const brandCache$ = new Rx.BehaviorSubject<Brand>({});
+  const brandCache$ = new Rx.BehaviorSubject<ChromeBrand>({});
   newPlatformChrome.getBrand$().subscribe(brandCache$);
 
   const applicationClassesCache$ = new Rx.BehaviorSubject<string[]>([]);
   newPlatformChrome.getApplicationClasses$().subscribe(applicationClassesCache$);
 
-  chrome.setBrand = (brand: Brand) => {
+  chrome.setBrand = (brand: ChromeBrand) => {
     newPlatformChrome.setBrand(brand);
     return chrome;
   };
 
-  chrome.getBrand = (key: keyof Brand) => {
+  chrome.getBrand = (key: keyof ChromeBrand) => {
     return brandCache$.getValue()[key];
   };
 

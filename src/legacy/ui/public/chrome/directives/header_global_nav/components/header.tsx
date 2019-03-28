@@ -62,11 +62,11 @@ import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { NavControlSide } from '../';
-import { Breadcrumb } from '../../../../../../../core/public/';
+import { ChromeBreadcrumb } from '../../../../../../../core/public/';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;

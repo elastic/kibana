@@ -19,7 +19,7 @@
 
 import { IRootScopeService } from 'angular';
 
-import { ChromeSetup, HelpExtension } from '../../../../../core/public/';
+import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public/';
 
 let newPlatformChrome: ChromeSetup;
 export function __newPlatformInit__(instance: ChromeSetup) {
@@ -31,7 +31,7 @@ export function __newPlatformInit__(instance: ChromeSetup) {
 }
 
 export type HelpExtensionApi = ReturnType<typeof createHelpExtensionApi>['helpExtension'];
-export { HelpExtension };
+export type HelpExtension = ChromeHelpExtension;
 
 function createHelpExtensionApi() {
   /**

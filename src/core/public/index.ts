@@ -18,7 +18,7 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { Brand, Breadcrumb, ChromeSetup, HelpExtension } from './chrome';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
@@ -46,9 +46,9 @@ export {
   I18nSetup,
   // TODO add Chrome
   ChromeSetup,
-  Brand,
-  Breadcrumb,
-  HelpExtension,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
   InjectedMetadataSetup,
   InjectedMetadataParams,
   NotificationsSetup,
