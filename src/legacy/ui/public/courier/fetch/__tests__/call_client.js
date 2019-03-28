@@ -85,6 +85,8 @@ describe('callClient', () => {
     });
   }));
 
+  beforeEach(ngMock.module('kibana'));
+
   beforeEach(ngMock.inject(Private => {
     callClient = Private(CallClientProvider);
     SearchRequest = Private(SearchRequestProvider);
