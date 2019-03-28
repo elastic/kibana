@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { get, isFunction } from 'lodash';
+import { get, has, isFunction } from 'lodash';
 import React, { useEffect } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -24,13 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggType } from 'ui/agg_types';
 import { AggConfig } from 'ui/vis/agg_config';
+import { documentationLinks } from '../../../../documentation_links/documentation_links';
 import { ComboBoxGroupedOption } from '../default_editor_utils';
 
 interface DefaultEditorAggSelectProps {
   agg: AggConfig;
   value: AggType;
   setValue: (aggType: AggType) => void;
-  aggHelpLink: string;
   aggTypeOptions: AggType[];
   isSubAggregation: boolean;
   isSelectInvalid: boolean;
@@ -43,7 +43,6 @@ function DefaultEditorAggSelect({
   value = { title: '' },
   setValue,
   aggTypeOptions = [],
-  aggHelpLink,
   isSelectInvalid,
   isSubAggregation,
   setTouched,
@@ -65,6 +64,12 @@ function DefaultEditorAggSelect({
       defaultMessage="Aggregation"
     />
   );
+
+  let aggHelpLink = null;
+  if (has(agg, 'type.name')) {
+    aggHelpLink = get(documentationLinks, ['aggs', agg.type.name]);
+  }
+
   const helpLink = isAggTypeDefined && aggHelpLink && (
     <EuiLink
       href={aggHelpLink}

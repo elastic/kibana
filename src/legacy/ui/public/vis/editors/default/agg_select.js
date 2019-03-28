@@ -18,11 +18,9 @@
  */
 
 import 'ngreact';
-import { has, get } from 'lodash';
 import { uiModules } from '../../../modules';
 import { DefaultEditorAggSelect } from './components/default_editor_agg_select';
 import { wrapInI18nContext } from 'ui/i18n';
-import { documentationLinks } from '../../../documentation_links/documentation_links';
 
 uiModules
   .get('app/visualize', ['react'])
@@ -66,11 +64,6 @@ uiModules
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
-
-            $scope.aggHelpLink = null;
-            if (has($scope, 'agg.type.name')) {
-              $scope.aggHelpLink = get(documentationLinks, ['aggs', $scope.agg.type.name]);
-            }
           });
 
           $scope.onChange = (value) => {
