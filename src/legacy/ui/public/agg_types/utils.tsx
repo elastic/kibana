@@ -17,18 +17,23 @@
  * under the License.
  */
 
-import { AggParam } from '../../../agg_types';
-import { AggConfig } from '../../agg_config';
+function isValidJson(value: string): boolean {
+  if (!value || value.length === 0) {
+    return true;
+  }
 
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
-export interface AggParamEditorProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
-  value: T;
-  isInvalid: boolean;
-  setValue(value: T): void;
-  setValidity(isValid: boolean): void;
+  const trimmedValue = value.trim();
+
+  if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
+    try {
+      JSON.parse(trimmedValue);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  } else {
+    return false;
+  }
 }
+
+export { isValidJson };
