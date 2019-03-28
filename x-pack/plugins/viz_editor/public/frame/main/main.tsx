@@ -6,8 +6,7 @@
 
 import {
   EuiButtonToggle,
-  // @ts-ignore
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
@@ -18,17 +17,10 @@ import {
   EuiPageContent,
   EuiPageContentBody,
   EuiPageSideBar,
-  // @ts-ignore
-  EuiSuperSelect,
 } from '@elastic/eui';
 import React, { useReducer } from 'react';
 import { initialState, VisModel } from '../../common/lib';
 import { ExpressionRenderer } from '../expression_renderer';
-
-import 'brace/ext/language_tools';
-import 'brace/mode/javascript';
-import 'brace/snippets/javascript';
-import 'brace/theme/github';
 
 import { registry as datasourceRegistry } from '../../datasource_plugin_registry';
 import { registry as editorRegistry } from '../../editor_plugin_registry';
@@ -130,20 +122,7 @@ export function Main(props: MainProps) {
               </EuiFlexItem>
               <EuiFlexItem>
                 {/* TODO as soon as something changes here, switch to the "expression"-editor */}
-                <EuiCodeEditor
-                  mode="javascript"
-                  theme="github"
-                  width="100%"
-                  height="30px"
-                  value={expression}
-                  setOptions={{
-                    fontSize: '14px',
-                    enableBasicAutocompletion: true,
-                    enableSnippets: true,
-                    enableLiveAutocompletion: true,
-                  }}
-                  aria-label="Code Editor"
-                />
+                <EuiCodeBlock>{expression}</EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageContentBody>

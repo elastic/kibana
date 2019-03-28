@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiButton, EuiSuperSelect, EuiTextArea } from '@elastic/eui';
+import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { FieldListPanel } from '../public/common/components/field_list_panel';
