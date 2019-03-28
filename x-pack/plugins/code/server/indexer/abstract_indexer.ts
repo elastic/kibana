@@ -6,8 +6,8 @@
 
 import moment from 'moment';
 
-import { Indexer, IndexProgress, ProgressReporter } from '.';
-import { IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
+import { Indexer, ProgressReporter } from '.';
+import { IndexProgress, IndexRequest, IndexStats, IndexStatsKey, RepositoryUri } from '../../model';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
 import { aggregateIndexStats } from '../utils/index_stats_aggregator';
@@ -29,21 +29,23 @@ export abstract class AbstractIndexer implements Indexer {
     this.indexCreator = new IndexCreator(client);
   }
 
-  public async start(progressReporter?: ProgressReporter) {
+  public async start(progressReporter?: ProgressReporter, checkpointReq?: IndexRequest) {
     this.log.info(
       `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
     );
     this.cancelled = false;
 
-    // Prepare the ES index
-    const res = await this.prepareIndex();
-    if (!res) {
-      this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
-      return new Map<IndexStatsKey, number>();
-    }
+    if (!checkpointReq) {
+      // Prepare the ES index
+      const res = await this.prepareIndex();
+      if (!res) {
+        this.log.error(`Prepare index for ${this.repoUri} error. Skip indexing.`);
+        return new Map<IndexStatsKey, number>();
+      }
 
-    // Clean up the index if necessary
-    await this.cleanIndex();
+      // Clean up the index if necessary
+      await this.cleanIndex();
+    }
 
     // Prepare all the index requests
     let totalCount = 0;
@@ -60,11 +62,28 @@ export abstract class AbstractIndexer implements Indexer {
       throw error;
     }
 
+    let meetCheckpoint = false;
     const reqsIterator = await this.getIndexRequestIterator();
     for await (const req of reqsIterator) {
       if (this.isCancelled()) {
         this.log.info(`Indexer cancelled. Stop right now.`);
         break;
+      }
+
+      // If checkpoint is not undefined and not empty
+      if (checkpointReq) {
+        // Assume for the same revision, everything we iterate the repository,
+        // the order of the files is definite.
+        // @ts-ignore
+        if (req.filePath === checkpointReq.filePath && req.revision === checkpointReq.revision) {
+          this.log.info(`The index checkpoint has been found ${JSON.stringify(checkpointReq)}.`);
+          meetCheckpoint = true;
+        }
+
+        if (!meetCheckpoint) {
+          // If the checkpoint has not been met yet, skip current request.
+          continue;
+        }
       }
 
       try {
@@ -89,6 +108,7 @@ export abstract class AbstractIndexer implements Indexer {
           success: successCount,
           fail: failCount,
           percentage: Math.floor((100 * (successCount + failCount)) / totalCount),
+          checkpoint: req,
         };
         if (moment().diff(prevTimestamp) > this.INDEXER_PROGRESS_UPDATE_INTERVAL_MS) {
           progressReporter(progress);

@@ -42,9 +42,9 @@ export class LspIndexer extends AbstractIndexer {
     this.batchIndexHelper = new BatchIndexHelper(client, log);
   }
 
-  public async start(progressReporter?: ProgressReporter) {
+  public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIndexRequest) {
     try {
-      return await super.start(progressReporter);
+      return await super.start(progressReporter, checkpointReq);
     } finally {
       if (!this.isCancelled()) {
         // Flush all the index request still in the cache for bulk index.

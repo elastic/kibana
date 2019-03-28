@@ -6,7 +6,9 @@
 
 import sinon from 'sinon';
 
+import { WorkerReservedProgress } from '../../model';
 import { IndexerFactory } from '../indexer';
+import { RepositoryLspIndexStatusReservedField } from '../indexer/schema';
 import { CancellationToken, EsClient, Esqueue } from '../lib/esqueue';
 import { Logger } from '../log';
 import { ServerOptions } from '../server_options';
@@ -34,6 +36,24 @@ test('Execute index job.', async () => {
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
   cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
 
+  // Setup EsClient
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryLspIndexStatusReservedField]: {
+          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'abcdefg',
+        },
+      },
+    })
+  );
+  const esClient = {
+    get: emptyAsyncFunc,
+  };
+  esClient.get = getSpy;
+
   // Setup IndexerFactory
   const cancelSpy = sinon.spy();
   const startSpy = sinon.fake.returns(new Map());
@@ -54,7 +74,7 @@ test('Execute index job.', async () => {
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
-    {} as EsClient,
+    esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
     {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce
@@ -70,7 +90,7 @@ test('Execute index job.', async () => {
   });
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
-
+  expect(getSpy.calledOnce).toBeTruthy();
   expect(createSpy.calledOnce).toBeTruthy();
   expect(startSpy.calledOnce).toBeTruthy();
   expect(cancelSpy.notCalled).toBeTruthy();
@@ -87,6 +107,24 @@ test('Execute index job and then cancel.', async () => {
   cancellationService.cancelIndexJob = cancelIndexJobSpy;
   cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
 
+  // Setup EsClient
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryLspIndexStatusReservedField]: {
+          uri: 'github.com/Microsoft/TypeScript-Node-Starter',
+          progress: WorkerReservedProgress.COMPLETED,
+          timestamp: new Date(),
+          revision: 'abcdefg',
+        },
+      },
+    })
+  );
+  const esClient = {
+    get: emptyAsyncFunc,
+  };
+  esClient.get = getSpy;
+
   // Setup IndexerFactory
   const cancelSpy = sinon.spy();
   const startSpy = sinon.fake.returns(new Map());
@@ -107,7 +145,7 @@ test('Execute index job and then cancel.', async () => {
   const indexWorker = new IndexWorker(
     esQueue as Esqueue,
     log,
-    {} as EsClient,
+    esClient as EsClient,
     [(indexerFactory as any) as IndexerFactory],
     {} as ServerOptions,
     (cancellationService as any) as CancellationSerivce
@@ -126,11 +164,165 @@ test('Execute index job and then cancel.', async () => {
   cToken.cancel();
 
   expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
-
+  expect(getSpy.calledOnce).toBeTruthy();
   expect(createSpy.calledOnce).toBeTruthy();
   expect(startSpy.calledOnce).toBeTruthy();
   // Then the the cancel function of the indexer should be called.
   expect(cancelSpy.calledOnce).toBeTruthy();
+});
+
+test('Index job skipped/deduplicated if revision matches', async () => {
+  // Setup CancellationService
+  const cancelIndexJobSpy = sinon.spy();
+  const registerIndexJobTokenSpy = sinon.spy();
+  const cancellationService = {
+    cancelIndexJob: emptyAsyncFunc,
+    registerIndexJobToken: emptyAsyncFunc,
+  };
+  cancellationService.cancelIndexJob = cancelIndexJobSpy;
+  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+
+  // Setup EsClient
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryLspIndexStatusReservedField]: {
+          uri: 'github.com/elastic/kibana',
+          progress: 50,
+          timestamp: new Date(),
+          revision: 'abcdefg',
+          indexProgress: {},
+        },
+      },
+    })
+  );
+  const esClient = {
+    get: emptyAsyncFunc,
+  };
+  esClient.get = getSpy;
+
+  // Setup IndexerFactory
+  const cancelSpy = sinon.spy();
+  const startSpy = sinon.fake.returns(new Map());
+  const indexer = {
+    cancel: emptyAsyncFunc,
+    start: emptyAsyncFunc,
+  };
+  indexer.cancel = cancelSpy;
+  indexer.start = startSpy;
+  const createSpy = sinon.fake.returns(indexer);
+  const indexerFactory = {
+    create: emptyAsyncFunc,
+  };
+  indexerFactory.create = createSpy;
+
+  const cToken = new CancellationToken();
+
+  const indexWorker = new IndexWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    [(indexerFactory as any) as IndexerFactory],
+    {} as ServerOptions,
+    (cancellationService as any) as CancellationSerivce
+  );
+
+  await indexWorker.executeJob({
+    payload: {
+      uri: 'github.com/elastic/kibana',
+      revision: 'abcdefg',
+    },
+    options: {},
+    cancellationToken: cToken,
+    timestamp: 0,
+  });
+
+  expect(getSpy.calledOnce).toBeTruthy();
+  expect(cancelIndexJobSpy.notCalled).toBeTruthy();
+  expect(createSpy.notCalled).toBeTruthy();
+  expect(startSpy.notCalled).toBeTruthy();
+  expect(cancelSpy.notCalled).toBeTruthy();
+});
+
+test('Index job continue if revision matches and checkpoint found', async () => {
+  // Setup CancellationService
+  const cancelIndexJobSpy = sinon.spy();
+  const registerIndexJobTokenSpy = sinon.spy();
+  const cancellationService = {
+    cancelIndexJob: emptyAsyncFunc,
+    registerIndexJobToken: emptyAsyncFunc,
+  };
+  cancellationService.cancelIndexJob = cancelIndexJobSpy;
+  cancellationService.registerIndexJobToken = registerIndexJobTokenSpy;
+
+  // Setup EsClient
+  const getSpy = sinon.fake.returns(
+    Promise.resolve({
+      _source: {
+        [RepositoryLspIndexStatusReservedField]: {
+          uri: 'github.com/elastic/kibana',
+          progress: 50,
+          timestamp: new Date(),
+          revision: 'abcdefg',
+          indexProgress: {
+            checkpoint: {
+              repoUri: 'github.com/elastic/kibana',
+              filePath: 'foo/bar.js',
+              revision: 'abcdefg',
+            },
+          },
+        },
+      },
+    })
+  );
+  const esClient = {
+    get: emptyAsyncFunc,
+  };
+  esClient.get = getSpy;
+
+  // Setup IndexerFactory
+  const cancelSpy = sinon.spy();
+  const startSpy = sinon.fake.returns(new Map());
+  const indexer = {
+    cancel: emptyAsyncFunc,
+    start: emptyAsyncFunc,
+  };
+  indexer.cancel = cancelSpy;
+  indexer.start = startSpy;
+  const createSpy = sinon.fake.returns(indexer);
+  const indexerFactory = {
+    create: emptyAsyncFunc,
+  };
+  indexerFactory.create = createSpy;
+
+  const cToken = new CancellationToken();
+
+  const indexWorker = new IndexWorker(
+    esQueue as Esqueue,
+    log,
+    esClient as EsClient,
+    [(indexerFactory as any) as IndexerFactory],
+    {} as ServerOptions,
+    (cancellationService as any) as CancellationSerivce
+  );
+
+  await indexWorker.executeJob({
+    payload: {
+      uri: 'github.com/elastic/kibana',
+      revision: 'abcdefg',
+    },
+    options: {},
+    cancellationToken: cToken,
+    timestamp: 0,
+  });
+
+  expect(getSpy.calledOnce).toBeTruthy();
+  // the rest of the index worker logic after the checkpoint handling
+  // should be executed.
+  expect(cancelIndexJobSpy.calledOnce).toBeTruthy();
+  expect(createSpy.calledOnce).toBeTruthy();
+  expect(startSpy.calledOnce).toBeTruthy();
+  expect(cancelSpy.notCalled).toBeTruthy();
 });
 
 test('On index job enqueued.', async () => {
