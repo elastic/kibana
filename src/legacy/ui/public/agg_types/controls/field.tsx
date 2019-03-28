@@ -20,7 +20,7 @@
 import { isFunction } from 'lodash';
 import React, { useEffect } from 'react';
 
-import { EuiCallOut, EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
@@ -52,6 +52,35 @@ function FieldParamEditor({
       aggParam.onChange(agg);
     }
   };
+  const errors = [];
+
+  if (!indexedFields.length) {
+    errors.push(
+      <>
+        <FormattedMessage
+          id="common.ui.aggTypes.dateRanges.noCompatibleFieldsLabel"
+          defaultMessage="No compatible fields"
+          values={{
+            indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+            fieldTypes: getFieldTypesString(agg),
+          }}
+        />{' '}
+        <EuiIconTip
+          position="right"
+          type="alert"
+          color="danger"
+          content={i18n.translate('common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription', {
+            defaultMessage:
+              'The {indexPatternTitle} index pattern does not contain any of the following field types: {fieldTypes}',
+            values: {
+              indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+              fieldTypes: getFieldTypesString(agg),
+            },
+          })}
+        />
+      </>
+    );
+  }
 
   useEffect(
     () => {
@@ -65,39 +94,29 @@ function FieldParamEditor({
       label={label}
       isInvalid={isInvalid}
       fullWidth={true}
+      error={errors}
+      helpText={
+        <FormattedMessage
+          id="inputControl.editor.listControl.parentDescription"
+          defaultMessage="Options are based on the index pattern."
+        />
+      }
       className="visEditorSidebar__aggParamFormRow"
     >
-      {indexedFields.length ? (
-        <EuiComboBox
-          placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
-            defaultMessage: 'Select a field…',
-          })}
-          options={indexedFields}
-          selectedOptions={selectedOptions}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          isInvalid={isInvalid}
-          onChange={onChange}
-          data-test-subj="visDefaultEditorField"
-          fullWidth={true}
-          onBlur={setTouched}
-        />
-      ) : (
-        <EuiCallOut
-          title={i18n.translate('common.ui.aggTypes.dateRanges.noCompatibleFieldsLabel', {
-            defaultMessage: 'No compatible fields:',
-          })}
-          color="danger"
-          iconType="alert"
-        >
-          <FormattedMessage
-            id="common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription"
-            defaultMessage="The {indexPatternTitle} index pattern does not contain any of the following field types:"
-            values={{ indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title }}
-          />{' '}
-          {getFieldTypesString(agg)}
-        </EuiCallOut>
-      )}
+      <EuiComboBox
+        placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
+          defaultMessage: 'Select a field…',
+        })}
+        options={indexedFields}
+        selectedOptions={selectedOptions}
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        isInvalid={isInvalid}
+        onChange={onChange}
+        data-test-subj="visDefaultEditorField"
+        fullWidth={true}
+        onBlur={setTouched}
+      />
     </EuiFormRow>
   );
 }
