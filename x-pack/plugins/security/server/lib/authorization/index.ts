@@ -9,6 +9,7 @@ export { Actions } from './actions';
 export { createAuthorizationService } from './service';
 export { disableUICapabilitesFactory } from './disable_ui_capabilities';
 export { initAPIAuthorization } from './api_authorization';
+export { initAppAuthorization } from './app_authorization';
 export { PrivilegeSerializer } from './privilege_serializer';
 // @ts-ignore
 export { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
