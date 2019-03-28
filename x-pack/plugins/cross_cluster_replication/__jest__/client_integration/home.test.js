@@ -53,7 +53,7 @@ describe('<CrossClusterReplicationHome />', () => {
 
     test('should set the correct an app title', () => {
       expect(exists('ccrAppTitle')).toBe(true);
-      expect(find('ccrAppTitle').text()).toEqual('Cross Cluster Replication');
+      expect(find('ccrAppTitle').text()).toEqual('Cross-Cluster Replication');
     });
 
     test('should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"', () => {
