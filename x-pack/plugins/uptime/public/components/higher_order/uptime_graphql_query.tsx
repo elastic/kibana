@@ -6,7 +6,7 @@
 
 import { OperationVariables } from 'apollo-client';
 import { GraphQLError } from 'graphql';
-import React from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { withApollo, WithApolloClient } from 'react-apollo';
 import { formatUptimeGraphQLErrorList } from '../../lib/helper/format_error_list';
 
@@ -19,13 +19,8 @@ export interface UptimeGraphQLQueryProps<T> {
 interface UptimeGraphQLProps {
   implementsCustomErrorState?: boolean;
   registerWatch: (handler: () => void) => void;
+  removeWatch: (handler: () => void) => void;
   variables: OperationVariables;
-}
-
-interface State<T> {
-  loading: boolean;
-  data?: T;
-  errors?: GraphQLError[];
 }
 
 /**
@@ -39,42 +34,30 @@ interface State<T> {
  */
 export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) {
   type Props = UptimeGraphQLProps & WithApolloClient<T> & P;
-  return withApollo(
-    class UptimeGraphQLQuery extends React.Component<Props, State<T>> {
-      constructor(props: Props) {
-        super(props);
-        this.state = {
-          loading: true,
-        };
-      }
 
-      public render() {
-        const { errors } = this.state;
-        if (!this.props.implementsCustomErrorState && errors && errors.length > 0) {
-          return formatUptimeGraphQLErrorList(errors);
-        }
-        return <WrappedComponent {...this.state} {...this.props} />;
-      }
-
-      public componentDidMount() {
-        this.fetch();
-        this.props.registerWatch(this.fetch);
-      }
-
-      private fetch = async () => {
-        const { client, variables } = this.props;
-        this.setState({ loading: true }, () =>
-          client
-            .query<T>({ fetchPolicy: 'network-only', query, variables })
-            .then(({ data, loading, errors }) => {
-              this.setState({
-                data,
-                loading,
-                errors,
-              });
-            })
-        );
+  return withApollo((props: Props) => {
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<T | undefined>(undefined);
+    const [errors, setErrors] = useState<GraphQLError[] | undefined>(undefined);
+    useEffect(() => {
+      const fetch = () => {
+        const { client, variables } = props;
+        setLoading(true);
+        client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(result => {
+          setData(result.data);
+          setLoading(result.loading);
+          setErrors(result.errors);
+        });
       };
+      props.registerWatch(fetch);
+      fetch();
+      return function cleanup() {
+        props.removeWatch(fetch);
+      };
+    }, []);
+    if (!props.implementsCustomErrorState && errors && errors.length > 0) {
+      return <Fragment>{formatUptimeGraphQLErrorList(errors)}</Fragment>;
     }
-  );
+    return <WrappedComponent {...props} loading={loading} data={data} errors={errors} />;
+  });
 }

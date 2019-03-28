@@ -49,6 +49,7 @@ export interface UptimeCommonProps {
   dateRangeEnd: string;
   refreshApp: () => void;
   registerWatch: (client: () => void) => void;
+  removeWatch: (client: () => void) => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   setHeadingText: (text: string) => void;
 }
@@ -213,6 +214,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...this.props}
                         {...this.state}
                         registerWatch={this.addForceRefreshListener}
+                        removeWatch={this.removeForceRefreshListener}
                         refreshApp={this.refreshApp}
                         setHeadingText={this.setHeadingText}
                       />
@@ -226,6 +228,7 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
                         {...this.props}
                         {...this.state}
                         registerWatch={this.addForceRefreshListener}
+                        removeWatch={this.removeForceRefreshListener}
                         refreshApp={this.refreshApp}
                         setHeadingText={this.setHeadingText}
                         query={this.props.client.query}
@@ -260,6 +263,16 @@ class Application extends React.Component<UptimeAppProps, UptimeAppState> {
       ...state,
       refreshListeners: [...state.refreshListeners, newClient],
     }));
+  };
+
+  private removeForceRefreshListener = (toRemove: () => void): void => {
+    const index = this.state.refreshListeners.indexOf(toRemove);
+    if (index) {
+      this.setState(state => ({
+        ...state,
+        refreshListeners: state.refreshListeners.splice(index, 1),
+      }));
+    }
   };
 
   private refreshApp = () => {

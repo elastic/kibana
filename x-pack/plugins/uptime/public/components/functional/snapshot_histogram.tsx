@@ -11,7 +11,6 @@ import React from 'react';
 import { HistogramDataPoint } from '../../../common/graphql/types';
 
 export interface SnapshotHistogramProps {
-  windowWidth: number;
   successColor: string;
   dangerColor: string;
   histogram: HistogramDataPoint[];

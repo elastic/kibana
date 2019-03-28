@@ -29,14 +29,12 @@ interface SnapshotProps {
   dangerColor: string;
   successColor: string;
   snapshot: SnapshotType;
-  windowWidth: number;
 }
 
 export const Snapshot = ({
   dangerColor,
   successColor,
   snapshot: { up, down, total, histogram },
-  windowWidth,
 }: SnapshotProps) => (
   <EuiFlexGroup gutterSize="s">
     <EuiFlexItem grow={4}>
@@ -106,7 +104,6 @@ export const Snapshot = ({
             dangerColor={dangerColor}
             histogram={histogram}
             successColor={successColor}
-            windowWidth={windowWidth}
           />
         )}
         {!histogram && (
