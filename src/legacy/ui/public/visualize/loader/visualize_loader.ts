@@ -148,7 +148,7 @@ export class VisualizeLoader {
 
 function VisualizeLoaderProvider(
   savedVisualizations: any,
-  interpreterConfig: any,
+  interpreterConfig: boolean,
   Private: IPrivate
 ) {
   return new VisualizeLoader(savedVisualizations, interpreterConfig.enableInVisualize, Private);
