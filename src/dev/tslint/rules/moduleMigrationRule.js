@@ -17,21 +17,37 @@
  * under the License.
  */
 
+const path = require('path');
 const Lint = require('tslint');
+
+const KIBANA_ROOT = path.dirname(path.resolve(__dirname, '../../..'));
 
 class ModuleMigrationWalker extends Lint.RuleWalker {
   visitImportDeclaration(node) {
-
     const moduleId = node.moduleSpecifier.text;
     const mapping = this.options.find(
-      mapping => mapping.from === moduleId || mapping.from.startsWith(moduleId + '/')
+      mapping => mapping.from === moduleId || moduleId.startsWith(`${mapping.from}/`)
     );
 
     if (!mapping) {
       return;
     }
 
-    const newSource = moduleId.replace(mapping.from, mapping.to);
+    let newSource;
+
+    // support for toRelative added to migrate away from X-Pack being bundled
+    // within node modules. after that migration, this can be removed.
+    if (mapping.toRelative) {
+      const sourceDirectory = path.dirname(this.getSourceFile().originalFileName);
+      const localModulePath = moduleId.replace(new RegExp(`^${mapping.from}\/`), '');
+      const modulePath = path.resolve(KIBANA_ROOT, mapping.toRelative, localModulePath);
+      const relativePath = path.relative(sourceDirectory, modulePath);
+
+      newSource = relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+    } else {
+      newSource = moduleId.replace(mapping.from, mapping.to);
+    }
+
     const start = node.moduleSpecifier.getStart();
     const width = node.moduleSpecifier.getWidth();
 
