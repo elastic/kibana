@@ -17,18 +17,33 @@
  * under the License.
  */
 
-import { AggParam } from '../../../agg_types';
-import { AggConfig } from '../../agg_config';
+import { isValidJson } from '../utils';
 
-// NOTE: we cannot export the interface with export { InterfaceName }
-// as there is currently a bug on babel typescript transform plugin for it
-// https://github.com/babel/babel/issues/7641
-//
-export interface AggParamEditorProps<T> {
-  agg: AggConfig;
-  aggParam: AggParam;
-  value: T;
-  isInvalid: boolean;
-  setValue(value: T): void;
-  setValidity(isValid: boolean): void;
-}
+const input = {
+  valid: '{ "test": "json input" }',
+  invalid: 'strings are not json',
+};
+
+describe('AggType utils', () => {
+  describe('isValidJson', () => {
+    it('should return true when empty string', () => {
+      expect(isValidJson('')).toBe(true);
+    });
+
+    it('should return true when undefine', () => {
+      expect(isValidJson(undefined as any)).toBe(true);
+    });
+
+    it('should return false when invalid string', () => {
+      expect(isValidJson(input.invalid)).toBe(false);
+    });
+
+    it('should return true when valid string', () => {
+      expect(isValidJson(input.valid)).toBe(true);
+    });
+
+    it('should return false if a number', () => {
+      expect(isValidJson('0')).toBe(false);
+    });
+  });
+});
