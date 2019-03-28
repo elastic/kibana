@@ -45,6 +45,20 @@ function getChecksumType(checksumUrl) {
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
 }
 
+function getPlatform(key) {
+  if (key.includes('-linux-')) {
+    return 'linux';
+  }
+
+  if (key.includes('-windows-')) {
+    return 'win32';
+  }
+
+  if (key.includes('-darwin-')) {
+    return 'darwin';
+  }
+}
+
 exports.Artifact = class Artifact {
   /**
    * Fetch an Artifact from the Artifact API for a license level and version
@@ -64,7 +78,9 @@ exports.Artifact = class Artifact {
 
     if (resp.status === 404) {
       abc.abort();
-      throw createCliError(`Snapshots for ${version} are not available`);
+      throw createCliError(
+        `Snapshots for ${version}/${TEST_ES_SNAPSHOT_VERSION} are not available`
+      );
     }
 
     if (!resp.ok) {
@@ -72,42 +88,68 @@ exports.Artifact = class Artifact {
       throw new Error(`Unable to read artifact info from ${url}: ${resp.statusText}\n  ${json}`);
     }
 
-    const isOss = license === 'oss';
-    const type = process.platform === 'win32' ? 'zip' : 'tar';
-
+    // parse the api response into an array of Artifact objects
     const {
-      project: { packages: artifacts },
+      project: { packages: artifactInfoMap },
     } = JSON.parse(json);
+    const filenames = Object.keys(artifactInfoMap);
+    const hasNoJdkVersions = filenames.some(filename => filename.includes('-no-jdk-'));
+    const artifactSpecs = filenames.map(filename => ({
+      filename,
+      url: artifactInfoMap[filename].url,
+      checksumUrl: artifactInfoMap[filename].sha_url,
+      checksumType: getChecksumType(artifactInfoMap[filename].sha_url),
+      type: artifactInfoMap[filename].type,
+      isOss: filename.includes('-oss-'),
+      platform: getPlatform(filename),
+      jdkRequired: hasNoJdkVersions ? filename.includes('-no-jdk-') : true,
+    }));
 
-    const keys = Object.keys(artifacts);
-    const key = keys.find(key => artifacts[key].type === type && isOss === key.includes('-oss-'));
+    // pick the artifact we are going to use for this license/version combo
+    const reqOss = license === 'oss';
+    const reqPlatform = artifactSpecs.some(a => a.platform !== undefined)
+      ? process.platform
+      : undefined;
+    const reqJdkRequired = hasNoJdkVersions ? false : true;
+    const reqType = process.platform === 'win32' ? 'zip' : 'tar';
 
-    if (!key) {
+    const artifactSpec = artifactSpecs.find(
+      spec =>
+        spec.isOss === reqOss &&
+        spec.type === reqType &&
+        spec.platform === reqPlatform &&
+        spec.jdkRequired === reqJdkRequired
+    );
+
+    if (!artifactSpec) {
       throw new Error(
         `Unable to determine artifact for license [${license}] and version [${version}]\n` +
-          `  options: ${keys.join(',')}`
+          `  options: ${filenames.join(',')}`
       );
     }
 
-    return new Artifact(
-      license,
-      version,
-      key,
-      artifacts[key].url,
-      artifacts[key].sha_url,
-      getChecksumType(artifacts[key].sha_url),
-      log
-    );
+    return new Artifact(artifactSpec, log);
   }
 
-  constructor(license, version, key, url, checksumUrl, checksumType, log) {
-    this.license = license;
-    this.version = version;
-    this.key = key;
-    this.url = url;
-    this.checksumUrl = checksumUrl;
-    this.checksumType = checksumType;
-    this.log = log;
+  constructor(spec, log) {
+    this._spec = spec;
+    this._log = log;
+  }
+
+  getUrl() {
+    return this._spec.url;
+  }
+
+  getChecksumUrl() {
+    return this._spec.checksumUrl;
+  }
+
+  getChecksumType() {
+    return this._spec.checksumType;
+  }
+
+  getFilename() {
+    return this._spec.filename;
   }
 
   /**
@@ -120,18 +162,15 @@ exports.Artifact = class Artifact {
     const cacheMeta = cache.readMeta(dest);
     const tmpPath = `${dest}.tmp`;
 
-    const artifactResp = await this._request(cacheMeta.etag);
+    const artifactResp = await this._download(tmpPath, cacheMeta.etag, cacheMeta.ts);
     if (artifactResp.cached) {
-      this.log.info('etags match, using cache from %s', chalk.bold(cacheMeta.ts));
       return;
     }
 
-    const checksum = await this._saveTemp(artifactResp, tmpPath);
-
-    await this._verifyChecksum(checksum);
+    await this._verifyChecksum(artifactResp.checksum);
 
     // cache the etag for future downloads
-    cache.writeMeta(dest, { etag: artifactResp.headers.get('etag') });
+    cache.writeMeta(dest, { etag: artifactResp.etag });
 
     // rename temp download to the destination location
     fs.renameSync(tmpPath, dest);
@@ -139,12 +178,22 @@ exports.Artifact = class Artifact {
 
   /**
    * Fetch the artifact with an etag
+   * @param {string} tmpPath
    * @param {string} etag
-   * @return {{ cached: true }|IncommingMessage}
+   * @param {string} ts
+   * @return {{ cached: true }|{ checksum: string, etag: string }}
    */
-  async _request(etag) {
+  async _download(tmpPath, etag, ts) {
+    const url = this.getUrl();
+
+    if (etag) {
+      this._log.info('verifying cache of %s', chalk.bold(url));
+    } else {
+      this._log.info('downloading artifact from %s', chalk.bold(url));
+    }
+
     const abc = new AbortController();
-    const resp = await fetch(this.url, {
+    const resp = await fetch(url, {
       signal: abc.signal,
       headers: {
         'If-None-Match': etag,
@@ -152,6 +201,8 @@ exports.Artifact = class Artifact {
     });
 
     if (resp.status === 304) {
+      this._log.info('etags match, reusing cache from %s', chalk.bold(ts));
+
       abc.abort();
       return {
         cached: true,
@@ -163,23 +214,15 @@ exports.Artifact = class Artifact {
       throw new Error(`Unable to download elasticsearch snapshot: ${resp.statusText}`);
     }
 
-    return resp;
-  }
+    if (etag) {
+      this._log.info('cache invalid, redownloading');
+    }
 
-  /**
-   * Download the artifact to a temporary file on the filesystem
-   * @param {IncommingMessage} artifactResp
-   * @param {string} tmpPath
-   * @return {Promise<string>}
-   */
-  async _saveTemp(artifactResp, tmpPath) {
-    this.log.info('downloading artifact from %s', chalk.bold(this.url));
-
-    const hash = createHash(this.checksumType);
+    const hash = createHash(this.getChecksumType());
 
     mkdirp.sync(path.dirname(tmpPath));
     await asyncPipeline(
-      artifactResp.body,
+      resp.body,
       new Transform({
         transform(chunk, encoding, cb) {
           hash.update(chunk, encoding);
@@ -189,7 +232,10 @@ exports.Artifact = class Artifact {
       fs.createWriteStream(tmpPath)
     );
 
-    return hash.digest('hex');
+    return {
+      checksum: hash.digest('hex'),
+      etag: resp.headers.get('etag'),
+    };
   }
 
   /**
@@ -198,10 +244,10 @@ exports.Artifact = class Artifact {
    * @return {Promise<void>}
    */
   async _verifyChecksum(actualChecksum) {
-    this.log.info('downloading artifact checksum from %s', chalk.bold(this.url));
+    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getUrl()));
 
     const abc = new AbortController();
-    const resp = await fetch(this.checksumUrl, {
+    const resp = await fetch(this.getChecksumUrl(), {
       signal: abc.signal,
     });
 
@@ -214,12 +260,12 @@ exports.Artifact = class Artifact {
     const [expectedChecksum] = (await resp.text()).split(' ');
     if (actualChecksum !== expectedChecksum) {
       throw createCliError(
-        `artifact downloaded from ${this.url} does not match expected checksum\n` +
+        `artifact downloaded from ${this.getUrl()} does not match expected checksum\n` +
           `  expected: ${expectedChecksum}\n` +
           `  received: ${actualChecksum}`
       );
     }
 
-    this.log.info('checksum verified');
+    this._log.info('checksum verified');
   }
 };
