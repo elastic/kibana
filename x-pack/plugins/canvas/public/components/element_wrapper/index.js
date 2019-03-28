@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
-import { compose, mapProps } from 'recompose';
+import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
@@ -57,12 +57,20 @@ function selectorFactory(dispatch) {
 
 export const ElementWrapper = compose(
   connectAdvanced(selectorFactory),
+  withPropsOnChange(
+    (props, nextProps) => !isEqual(props.element, nextProps.element),
+    props => {
+      const { element, createHandlers } = props;
+      const handlers = createHandlers(element, props.selectedPage);
+      // this removes element and createHandlers from passed props
+      return { handlers };
+    }
+  ),
   mapProps(props => {
-    // create handlers object
+    // remove elements and createHandlers from props passed to component
+    // eslint-disable-next-line no-unused-vars
     const { element, createHandlers, ...restProps } = props;
-    const handlers = createHandlers(element, props.selectedPage);
-    // this removes element and createHandlers from passed props
-    return { ...restProps, handlers };
+    return restProps;
   })
 )(Component);
 
