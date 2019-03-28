@@ -834,10 +834,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.6.0":
-  version "9.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.6.0.tgz#740107869b1448348e603d4b1992daf3d5004d3a"
-  integrity sha512-/uZdPaf2TwTCT3MJsoz4yOqOVrAWhb3ziZtXIUIL/EWGQoha6Z8+wEhpixW472KVvp8bGJl3uDoTwTzDk3TAKw==
+"@elastic/eui@9.7.0":
+  version "9.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.7.0.tgz#6da25d665936fba713d24bfec3beba8c20a4272b"
+  integrity sha512-2cXEvAxYEfS1i5ZwhSl63rGT6jMQOQHed4RLFnuf0xmZyUjIO9he8EVY9YAH2eFfrRvEVggQltLLEI+JXhiqSA==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
