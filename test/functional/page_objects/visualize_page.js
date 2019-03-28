@@ -527,9 +527,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getField() {
-      const field = await retry.try(
-        async () => await find.byCssSelector('.ng-valid [data-test-subj="comboBoxInput"] > span'));
-      return await field.getVisibleText();
+      return await comboBox.getComboBoxSelectedOptions('visDefaultEditorField');
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
