@@ -31,7 +31,7 @@ export default function ({ getService }) {
             config: { elasticsearch: { hosts: ['localhost:9200'], username: 'foo' } },
           },
         ])
-        .expect(201);
+        .expect(200);
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
         id: `tag:${tagId}`,
