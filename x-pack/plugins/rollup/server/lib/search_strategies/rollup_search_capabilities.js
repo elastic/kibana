@@ -34,6 +34,26 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
       return get(this.dateHistogram, 'time_zone', null);
     }
 
+    get whiteListedMetrics() {
+      return {
+        '*': false,
+        avg: true,
+        max: true,
+        min: true,
+        sum: true,
+        count: true,
+        value_count: true,
+      };
+    }
+
+    get whiteListedGroupByFields() {
+      return {
+        '*': false,
+        everything: true,
+        terms: true,
+      };
+    }
+
     getValidTimeInterval(userIntervalString) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
       const parsedUserInterval = this.parseInterval(userIntervalString);

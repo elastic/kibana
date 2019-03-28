@@ -33,6 +33,25 @@ export class DefaultSearchCapabilities {
     return null;
   }
 
+  get whiteListedMetrics() {
+    return {
+      '*': true,
+    };
+  }
+
+  get whiteListedGroupByFields() {
+    return {
+      '*': true,
+    };
+  }
+
+  get uiRestrictions() {
+    return {
+      whiteListedMetrics: this.whiteListedMetrics,
+      whiteListedGroupByFields: this.whiteListedGroupByFields,
+    };
+  }
+
   get searchTimezone() {
     return getTimezoneFromRequest(this.request);
   }

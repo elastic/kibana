@@ -61,6 +61,7 @@ function StandardAgg(props) {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
+            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
             fullWidth
           />
@@ -95,7 +96,6 @@ function StandardAgg(props) {
       </EuiFlexGroup>
     </AggRow>
   );
-
 }
 
 StandardAgg.propTypes = {
@@ -108,6 +108,7 @@ StandardAgg.propTypes = {
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
+  uiRestrictions: PropTypes.object,
 };
 
 export default StandardAgg;

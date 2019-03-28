@@ -40,7 +40,7 @@ class VisEditor extends Component {
       visFields: props.visFields
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
-    this.visDataSubject = new Rx.Subject();
+    this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
     this.visData$ = this.visDataSubject.asObservable().pipe(share());
   }
 
