@@ -33,16 +33,16 @@ import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
 class TimeseriesVisualization extends Component {
 
-  getInterval = () => {
+  get interval() {
     const { visData, model } = this.props;
 
     return getInterval(visData, model);
   }
 
-  xaxisFormatter = (val) => {
+  xAxisFormatter = (val) => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
     if (!scaledDataFormat || !dateFormat) return val;
-    const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
+    const formatter = createXaxisFormatter(this.interval, scaledDataFormat, dateFormat);
     return formatter(val);
   };
 
@@ -102,15 +102,16 @@ class TimeseriesVisualization extends Component {
     const tickFormatter = createTickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
 
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
-
+    const mainAxisId = yAxisIdGenerator('main');
+    const mainAxisGroupId = yAxisIdGenerator('main_group');
     const mainAxis = {
-      id: yAxisIdGenerator('main'),
+      id: mainAxisId,
+      groupId: mainAxisGroupId,
       position: model.axis_position,
       tickFormatter,
       axisFormatter: _.get(firstSeries, 'formatter', 'number'),
       axisFormatterTemplate: _.get(firstSeries, 'value_template')
     };
-
 
     if (model.axis_min) mainAxis.min = Number(model.axis_min);
     if (model.axis_max) mainAxis.max = Number(model.axis_max);
@@ -121,14 +122,15 @@ class TimeseriesVisualization extends Component {
     }
 
     const yaxes = [mainAxis];
-    let axisCount = 1;
 
     seriesModel.forEach(seriesGroup => {
+      const seriesGroupId = seriesGroup.id;
       const seriesData = series.filter(r => _.startsWith(r.id, seriesGroup.id));
       const seriesGroupTickFormatter = createTickFormatter(seriesGroup.formatter, seriesGroup.value_template, this.props.getConfig);
 
       seriesData.forEach(seriesDataRow => {
         seriesDataRow.tickFormatter = seriesGroupTickFormatter;
+        seriesDataRow.groupId = seriesGroup.separate_axis ? seriesGroupId : mainAxisGroupId;
 
         if (seriesGroup.hide_in_legend) {
           delete seriesDataRow.label;
@@ -162,10 +164,9 @@ class TimeseriesVisualization extends Component {
       }
 
       if (seriesGroup.separate_axis) {
-        axisCount++;
-
         const yaxis = {
           id: yAxisIdGenerator(),
+          groupId: seriesGroupId,
           alignTicksWithAxis: 1,
           position: seriesGroup.axis_position,
           tickFormatter: seriesGroupTickFormatter,
@@ -177,17 +178,15 @@ class TimeseriesVisualization extends Component {
         if (seriesGroup.axis_max != null) yaxis.max = Number(seriesGroup.axis_max);
 
         yaxes.push(yaxis);
-
-        // Assign axis and formatter to each series
-        seriesData.forEach(r => {
-          r.yaxis = axisCount;
-        });
       }
     });
 
-    const interval = this.getInterval();
-    const panelBackgroundColor = model.background_color;
-    const style = { backgroundColor: panelBackgroundColor };
+    // check if each series group has a separate y-axis -> remove the main y-axis
+    if (yaxes.length > seriesModel.length) {
+      yaxes.shift();
+    }
+
+    const style = { backgroundColor: model.background_color };
 
     const params = {
       dateFormat,
@@ -196,25 +195,20 @@ class TimeseriesVisualization extends Component {
       annotations,
       yaxes,
       tickFormatter,
-      xAxisFormatter: this.xaxisFormatter,
+      xAxisFormatter: this.xAxisFormatter,
       axisPosition: model.axis_position,
       legendPosition: model.legend_position || 'right',
       legend: Boolean(model.show_legend),
       showGrid: Boolean(model.show_grid),
+      xAxisLabel: this.interval ? getAxisLabelString(this.interval) : '',
     };
-
-    if (interval) {
-      params.xaxisLabel = getAxisLabelString(interval);
-    }
 
     return (
       <div className="tvbVis" style={style}>
         <TimeSeries {...params}/>
       </div>
     );
-
   }
-
 }
 
 TimeseriesVisualization.propTypes = {

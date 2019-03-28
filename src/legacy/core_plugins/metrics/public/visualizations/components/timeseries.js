@@ -18,81 +18,87 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import {
   Axis,
   Chart,
   Position,
   Settings,
   getAxisId,
+  getGroupId
 } from '@elastic/charts';
 import { Series } from './series';
 import { GRID_LINE_CONFIG } from '../lib/config';
 
 import '@elastic/charts/dist/style.css';
 
-export class TimeSeries extends Component {
-  state = {};
+export const TimeSeries = ({
+  yaxes,
+  legend,
+  legendPosition,
+  showGrid,
+  onBrush,
+  series,
+  xAxisLabel,
+  xAxisFormatter
+}) => {
+  const [mainAxis] = yaxes;
+  const { mode } = mainAxis;
+  return (
+    <Chart renderer="canvas" className="tvbVisTimeSeries" >
+      <Settings
+        showLegend={legend}
+        legendPosition={legendPosition}
+        onBrushEnd={onBrush}
+        animateData={false}
+      />
 
-  static defaultProps = {
-    legend: true,
-    showGrid: true
-  };
+      { series.map(s => (
+        <Series
+          key={`${s.id}-${s.label}`}
+          {...s}
+          mode={mode}
+        />))
+      }
 
-  static propTypes = {
-    legend: PropTypes.bool,
-    legendPosition: PropTypes.string,
-    axisPosition: PropTypes.string,
-    onFilter: PropTypes.func,
-    series: PropTypes.array,
-    tickFormatter: PropTypes.func,
-    showGrid: PropTypes.bool,
-    xaxisLabel: PropTypes.string,
-    dateFormat: PropTypes.string
-  };
-
-  render() {
-    const { mode } = this.props.yaxes[0];
-    return (
-      <Chart renderer="canvas" className="tvbVisTimeSeries" >
-        <Settings
-          showLegend={this.props.legend}
-          legendPosition={this.props.legendPosition}
-          onBrushEnd={this.props.onBrush}
-          animateData={false}
-        />
-
-        { this.props.series.map(series => (
-          <Series
-            key={`${series.id}-${series.label}`}
-            {...series}
-            mode={mode}
-          />))
-        }
-
-        { this.props.yaxes.map(({ id, position, tickFormatter, min, max }) => (
-          <Axis
-            key={id}
-            groupId={getAxisId()}
-            id={getAxisId(id)}
-            position={position}
-            domain={{ min, max }}
-            showGridLines={this.props.showGrid}
-            gridLineStyle={GRID_LINE_CONFIG}
-            tickFormat={tickFormatter}
-          />))
-        }
-
+      { yaxes.map(({ id, groupId, position, tickFormatter, min, max }) => (
         <Axis
-          id={getAxisId('bottom')}
-          position={Position.Bottom}
-          title={this.props.xaxisLabel}
-          tickFormat={this.props.xAxisFormatter}
-          showGridLines={this.props.showGrid}
+          key={id}
+          groupId={getGroupId(groupId)}
+          id={getAxisId(id)}
+          position={position}
+          domain={{ min, max }}
+          showGridLines={showGrid}
           gridLineStyle={GRID_LINE_CONFIG}
-        />
+          tickFormat={tickFormatter}
+        />))
+      }
 
-      </Chart>
-    );
-  }
-}
+      <Axis
+        id={getAxisId('bottom')}
+        position={Position.Bottom}
+        title={xAxisLabel}
+        tickFormat={xAxisFormatter}
+        showGridLines={showGrid}
+        gridLineStyle={GRID_LINE_CONFIG}
+      />
+    </Chart>
+  );
+};
+
+TimeSeries.defaultProps = {
+  legend: true,
+  showGrid: true
+};
+
+TimeSeries.propTypes = {
+  legend: PropTypes.bool,
+  legendPosition: PropTypes.string,
+  axisPosition: PropTypes.string,
+  onFilter: PropTypes.func,
+  series: PropTypes.array,
+  tickFormatter: PropTypes.func,
+  showGrid: PropTypes.bool,
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
+};

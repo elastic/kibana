@@ -21,36 +21,38 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   getSpecId,
+  getGroupId,
   AreaSeries,
+  BarSeries,
   ScaleType,
   CurveType
 } from '@elastic/charts';
 import { calculateFillColor } from '../lib/calculate_fill_color';
 
-export const Series = ({ label, data, bars, lines, color, mode }) => {
-  const specId = getSpecId(label);
-  const lineCustomSeriesColors = new Map();
-  const lineDataSeriesColorValues = {
+export const Series = ({ id, label, data, bars = {}, lines = {}, color, mode, groupId }) => {
+  const { fill: barFill, show: isBarSeries } = bars;
+  const { fill: lineFill, steps } = lines;
+  const Component = isBarSeries ? BarSeries : AreaSeries;
+  const specId = getSpecId(label + id);
+  const customSeriesColors = new Map();
+  const dataSeriesColorValues = {
     colorValues: [],
     specId,
   };
 
-  const { fill } = bars;
-  const { steps } = lines;
-
-  lineCustomSeriesColors.set(lineDataSeriesColorValues, calculateFillColor(color, fill).fillColor);
+  customSeriesColors.set(dataSeriesColorValues, calculateFillColor(color, isBarSeries ? barFill : lineFill).fillColor);
 
   return (
-    <AreaSeries
+    <Component
       id={specId}
-      seriesType={bars.show ? 'bar' : 'area'}
+      groupId={getGroupId(groupId)}
       xScaleType={ScaleType.Time}
       yScaleType={mode}
       xAccessor={0}
       yAccessors={[1]}
       data={data}
       yScaleToDataExtent={false}
-      customSeriesColors={lineCustomSeriesColors}
+      customSeriesColors={customSeriesColors}
       curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
     />
   );
