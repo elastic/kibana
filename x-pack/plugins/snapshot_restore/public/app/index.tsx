@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { createContext, useContext, useReducer } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { render } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 
 import { App } from './app';
