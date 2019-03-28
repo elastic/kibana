@@ -44,7 +44,6 @@ export {
   HttpSetup,
   FatalErrorsSetup,
   I18nSetup,
-  // TODO add Chrome
   ChromeSetup,
   ChromeBreadcrumb,
   ChromeBrand,
