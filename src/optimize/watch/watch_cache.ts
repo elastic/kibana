@@ -95,16 +95,7 @@ export class WatchCache {
     await del(this.statePath, { force: true });
 
     // delete everything in optimize/.cache directory
-    // except ts-node
-    await del(
-      await globby(
-        [
-          normalizePosixPath(this.cachePath),
-          `${normalizePosixPath(`!${this.cachePath}/ts-node/**`)}`,
-        ],
-        { dot: true }
-      )
-    );
+    await del(await globby([normalizePosixPath(this.cachePath)], { dot: true }));
 
     // delete some empty folder that could be left
     // from the previous cache path reset action

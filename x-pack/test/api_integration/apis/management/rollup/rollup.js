@@ -16,6 +16,7 @@ export default function ({ getService }) {
   const {
     createIndexWithMappings,
     getJobPayload,
+    loadJobs,
     createJob,
     deleteJob,
     startJob,
@@ -77,9 +78,7 @@ export default function ({ getService }) {
     describe('crud', () => {
       describe('list', () => {
         it('should return an empty array when there are no jobs', async () => {
-          const { body } = await supertest
-            .get(`${API_BASE_PATH}/jobs`)
-            .expect(200);
+          const { body } = await loadJobs().expect(200);
 
           expect(body).to.eql({ jobs: [] });
         });
@@ -117,7 +116,7 @@ export default function ({ getService }) {
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
-          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          const { body: { jobs } } = await loadJobs();
           const job = jobs.find(job => job.config.id === payload.job.id);
 
           expect(job).not.be(undefined);
@@ -193,7 +192,8 @@ export default function ({ getService }) {
           await createJob(payload);
         });
 
-        it('should delete a job that was created', async () => {
+        it('should delete a job that has been stopped', async () => {
+          await stopJob(jobId);
           const { body } = await deleteJob(jobId).expect(200);
           expect(body).to.eql({ success: true });
         });
@@ -215,7 +215,7 @@ export default function ({ getService }) {
           const payload = getJobPayload(indexName);
           await createJob(payload);
 
-          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          const { body: { jobs } } = await loadJobs();
           job = jobs.find(job => job.config.id === payload.job.id);
         });
 
@@ -228,7 +228,7 @@ export default function ({ getService }) {
 
           // Fetch the job to make sure it has been started
           const jobId = job.config.id;
-          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          const { body: { jobs } } = await loadJobs();
           job = jobs.find(job => job.config.id === jobId);
           expect(job.status.job_state).to.eql('started');
         });
@@ -255,7 +255,7 @@ export default function ({ getService }) {
           expect(body).to.eql({ success: true });
 
           // Fetch the job to make sure it has been stopped
-          const { body: { jobs } } = await supertest.get(`${API_BASE_PATH}/jobs`);
+          const { body: { jobs } } = await loadJobs();
           const job = jobs.find(job => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
         });

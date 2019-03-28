@@ -17,44 +17,7 @@
  * under the License.
  */
 
-function mockClass<T>(
-  module: string,
-  Class: { new (...args: any[]): T },
-  setup: (instance: any, args: any[]) => void
-) {
-  const MockClass = jest.fn(function(this: any, ...args: any[]) {
-    setup(this, args);
-  });
-
-  // define the mock name which is used in some snapshots
-  MockClass.mockName(`Mock${Class.name}`);
-
-  // define the class name for the MockClass which is used in other snapshots
-  Object.defineProperty(MockClass, 'name', {
-    value: `Mock${Class.name}`,
-  });
-
-  jest.mock(module, () => ({
-    [Class.name]: MockClass,
-  }));
-
-  return MockClass;
-}
-
-// Mock the UiSettingsApi class
-import { UiSettingsApi } from './ui_settings_api';
-const MockUiSettingsApi = mockClass('./ui_settings_api', UiSettingsApi, inst => {
-  inst.stop = jest.fn();
-  inst.getLoadingCount$ = jest.fn().mockReturnValue({
-    loadingCountObservable: true,
-  });
-});
-
-// Mock the UiSettingsClient class
-import { UiSettingsClient } from './ui_settings_client';
-const MockUiSettingsClient = mockClass('./ui_settings_client', UiSettingsClient, inst => {
-  inst.stop = jest.fn();
-});
+import { MockUiSettingsApi, MockUiSettingsClient } from './ui_settings_service.test.mocks';
 
 import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
