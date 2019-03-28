@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Shard should show UNASSIGNED non-primary shards 1`] = `
+<div
+  className="shard replica unassigned"
+  data-shard-classification="shard replica unassigned 0"
+  data-shard-tooltip="Unassigned"
+  data-test-subj="shardIcon"
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+>
+  <EuiBadge
+    color="danger"
+    iconSide="left"
+  >
+    0
+  </EuiBadge>
+</div>
+`;
+
+exports[`Shard should show UNASSIGNED primary shards 1`] = `
+<div
+  className="shard primary unassigned emergency master"
+  data-shard-classification="shard primary unassigned emergency master 0"
+  data-shard-tooltip="Unassigned"
+  data-test-subj="shardIcon"
+  onMouseEnter={[Function]}
+  onMouseLeave={[Function]}
+>
+  <EuiBadge
+    color="danger"
+    iconSide="left"
+  >
+    0
+  </EuiBadge>
+</div>
+`;
