@@ -7,6 +7,7 @@
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import {
+  ColumnOperation,
   DateHistogramOperation,
   SelectOperation,
   SelectOperator,
@@ -52,7 +53,7 @@ export const columnOperations: ColumnOperations = {
     summarize(op) {
       return (
         <div className="configPanel-summary">
-          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <EuiIcon type="number" className="configPanel-summary-icon" />
           <div className="configPanel-summary-text">
             <strong className="configPanel-summary-title">Count</strong>
           </div>
@@ -61,15 +62,22 @@ export const columnOperations: ColumnOperations = {
     },
   },
   column: {
-    summarize(op) {
-      return <></>;
+    summarize(op: ColumnOperation) {
+      return (
+        <div className="configPanel-summary">
+          <EuiIcon type="document" className="configPanel-summary-icon" />
+          <div className="configPanel-summary-text">
+            <strong className="configPanel-summary-title">{op.argument.field}</strong>
+          </div>
+        </div>
+      );
     },
   },
   avg: {
     summarize(op) {
       return (
         <div className="configPanel-summary">
-          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <EuiIcon type="number" className="configPanel-summary-icon" />
           <div className="configPanel-summary-text">
             <strong className="configPanel-summary-title">Average of</strong>
             <span className="configPanel-summary-subtitle">{op.argument.field}</span>
@@ -82,7 +90,7 @@ export const columnOperations: ColumnOperations = {
     summarize(op) {
       return (
         <div className="configPanel-summary">
-          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <EuiIcon type="string" className="configPanel-summary-icon" />
           <div className="configPanel-summary-text">
             <strong className="configPanel-summary-title">Unique terms of</strong>
             <span className="configPanel-summary-subtitle">{op.argument.field}</span>

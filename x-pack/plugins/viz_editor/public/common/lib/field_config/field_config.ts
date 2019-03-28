@@ -9,6 +9,10 @@ import { Field } from '../vis_model';
 
 export function getOperationsForField(field: Field): SelectOperator[] {
   // TODO: Make this configuration plugin-oriented
+  if (!field.aggregatable) {
+    return ['column'];
+  }
+
   if (field.type === 'date') {
     return ['date_histogram'];
   }
