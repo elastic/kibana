@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { escape, flatten } from 'lodash';
+import { flatten } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
 import { isFilterable } from 'ui/index_patterns/static_utils';
@@ -19,7 +19,7 @@ function getDescription(fieldName) {
       <FormattedMessage
         id="xpack.kueryAutocomplete.filterResultsDescription"
         defaultMessage="Filter results that contain {fieldName}"
-        values={{ fieldName: <span className="kbnSuggestionItem__callout">{escape(fieldName)}</span> }}
+        values={{ fieldName: <span className="kbnSuggestionItem__callout">{fieldName}</span> }}
       />
     </p>
   );
