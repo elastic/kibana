@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 
 /*
@@ -173,7 +173,7 @@ export default function ({ getService }) {
         'version'
       ];
 
-      expect(actual).to.eql(expected);
+      expect(expected.every(m => actual.includes(m))).to.be.ok();
     });
 
   });

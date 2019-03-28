@@ -10,9 +10,9 @@ import React, { Component } from 'react';
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
 import {
+  APMQueryParams,
   fromQuery,
   history,
-  QueryParams,
   toQuery
 } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
 import { IUrlParams } from '../../../../../../store/urlParams';
@@ -67,6 +67,11 @@ export class Waterfall extends Component<Props> {
   public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
 
+    const errorCount =
+      item.docType === 'transaction'
+        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+        : 0;
+
     return (
       <WaterfallItem
         key={item.id}
@@ -75,6 +80,7 @@ export class Waterfall extends Component<Props> {
         item={item}
         totalDuration={waterfall.duration}
         isSelected={item.id === urlParams.waterfallItemId}
+        errorCount={errorCount}
         onClick={() => this.onOpenFlyout(item)}
       />
     );
@@ -150,7 +156,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: QueryParams) {
+  private setQueryParams(params: APMQueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

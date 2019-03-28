@@ -38,7 +38,10 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./es_search_source'));
       loadTestFile(require.resolve('./es_geo_grid_source'));
       loadTestFile(require.resolve('./joins'));
+      loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./layer_errors'));
+      loadTestFile(require.resolve('./embeddable/dashboard'));
+      loadTestFile(require.resolve('./embeddable/embeddable_state'));
     });
   });
 }

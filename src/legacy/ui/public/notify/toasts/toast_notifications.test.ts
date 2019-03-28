@@ -18,16 +18,14 @@
  */
 
 import sinon from 'sinon';
-import { ToastsStartContract } from '../../../../../core/public/notifications';
+import { ToastsSetup } from '../../../../../core/public/notifications';
 
 import { ToastNotifications } from './toast_notifications';
 
 describe('ToastNotifications', () => {
   describe('interface', () => {
     function setup() {
-      return {
-        toastNotifications: new ToastNotifications(new ToastsStartContract()),
-      };
+      return { toastNotifications: new ToastNotifications(new ToastsSetup()) };
     }
 
     describe('add method', () => {

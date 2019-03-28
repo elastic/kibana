@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FatalErrorsStartContract, FatalErrorsService } from './fatal_errors_service';
+export { FatalErrorsSetup, FatalErrorsService } from './fatal_errors_service';

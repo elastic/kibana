@@ -9,52 +9,51 @@ exports[`LayerControl is rendered 1`] = `
 >
   <EuiFlexItem
     className="mapWidgetControl__header"
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
       responsive={false}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="xs"
           textTransform="none"
         >
           <h2>
-            Layers
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
           color="primary"
+          data-test-subj="addLayerButton"
           flush="right"
           iconSide="left"
           onClick={[Function]}
           size="xs"
           type="button"
         >
-          Add layer
+          <FormattedMessage
+            defaultMessage="Add layer"
+            id="xpack.maps.layerControl.addLayerButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlexItem>
   <EuiFlexItem
     className="mapLayerControl"
-    component="div"
-    grow={true}
   >
     <LayerTOC />
   </EuiFlexItem>
@@ -70,28 +69,25 @@ exports[`LayerControl props isReadOnly 1`] = `
 >
   <EuiFlexItem
     className="mapWidgetControl__header"
-    component="div"
     grow={false}
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="none"
       justifyContent="spaceBetween"
       responsive={false}
-      wrap={false}
     >
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="xs"
           textTransform="none"
         >
           <h2>
-            Layers
+            <FormattedMessage
+              defaultMessage="Layers"
+              id="xpack.maps.layerControl.layersTitle"
+              values={Object {}}
+            />
           </h2>
         </EuiTitle>
       </EuiFlexItem>
@@ -99,8 +95,6 @@ exports[`LayerControl props isReadOnly 1`] = `
   </EuiFlexItem>
   <EuiFlexItem
     className="mapLayerControl"
-    component="div"
-    grow={true}
   >
     <LayerTOC />
   </EuiFlexItem>

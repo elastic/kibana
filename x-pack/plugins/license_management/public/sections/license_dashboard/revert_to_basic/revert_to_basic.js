@@ -16,6 +16,7 @@ import {
   EuiText
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 
 export class RevertToBasic extends React.PureComponent {
   cancel = () => {
@@ -81,7 +82,7 @@ export class RevertToBasic extends React.PureComponent {
           values={{
             platinumLicenseFeaturesLinkText: (
               <EuiLink
-                href="https://www.elastic.co/subscriptions/xpack"
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
                 target="_blank"
               >
                 <FormattedMessage

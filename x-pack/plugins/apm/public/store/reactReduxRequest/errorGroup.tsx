@@ -10,7 +10,6 @@ import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_
 import { loadErrorGroupDetails } from '../../services/rest/apm/error_groups';
 import { IReduxState } from '../rootReducer';
 import { IUrlParams } from '../urlParams';
-// @ts-ignore
 import { createInitialDataSelector } from './helpers';
 
 const ID = 'errorGroupDetails';

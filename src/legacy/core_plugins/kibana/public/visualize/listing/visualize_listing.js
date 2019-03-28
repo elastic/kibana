@@ -20,6 +20,7 @@
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import 'ui/pager_control';
 import 'ui/pager';
+import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
@@ -53,8 +54,13 @@ export function VisualizeListingController($injector, createNewVis) {
     this.showNewVisModal = true;
   };
 
-  this.edit = ({ id }) => {
+  this.editItem = ({ id }) => {
+    // for visualizations the edit and view URLs are the same
     kbnUrl.change(createVisualizeEditUrl(id));
+  };
+
+  this.getViewUrl = ({ id }) => {
+    return chrome.addBasePath(`#${createVisualizeEditUrl(id)}`);
   };
 
   this.closeNewVisModal = () => {

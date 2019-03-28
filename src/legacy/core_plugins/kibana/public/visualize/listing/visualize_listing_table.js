@@ -85,7 +85,7 @@ class VisualizeListingTableUi extends Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={() => this.props.editItem(record)}
+            href={this.props.getViewUrl(record)}
             data-test-subj={`visListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
@@ -219,6 +219,7 @@ VisualizeListingTableUi.propTypes = {
   deleteItems: PropTypes.func.isRequired,
   findItems: PropTypes.func.isRequired,
   createItem: PropTypes.func.isRequired,
+  getViewUrl: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
 };
 

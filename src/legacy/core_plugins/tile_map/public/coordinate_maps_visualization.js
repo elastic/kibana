@@ -22,7 +22,7 @@ import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { TileMapTooltipFormatterProvider } from './editors/_tooltip_formatter';
 
-export function CoordinateMapsVisualizationProvider(Notifier, Private) {
+export function CoordinateMapsVisualizationProvider(Private) {
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
 
   const tooltipFormatter = Private(TileMapTooltipFormatterProvider);
@@ -32,7 +32,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
     constructor(element, vis) {
       super(element, vis);
       this._geohashLayer = null;
-      this._notify = new Notifier({ location: 'Coordinate Map' });
     }
 
     async _makeKibanaMap() {
@@ -144,7 +143,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
       await super._updateParams();
 
-      this._kibanaMap.setDesaturateBaseLayer(this.vis.params.isDesaturated);
+      this._kibanaMap.setDesaturateBaseLayer(this._params.isDesaturated);
 
       //avoid recreating the leaflet layer when there are option-changes that do not effect the representation
       //e.g. tooltip-visibility, legend position, basemap-desaturation, ...

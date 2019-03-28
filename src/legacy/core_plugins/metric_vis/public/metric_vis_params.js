@@ -18,6 +18,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import 'ui/directives/inequality';
 import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');

@@ -8,8 +8,7 @@ import { Location } from 'history';
 import { reducer } from 'react-redux-request';
 import { combineReducers } from 'redux';
 import { StringMap } from '../../typings/common';
-// @ts-ignore
-import location from './location';
+import { locationReducer } from './location';
 import { IUrlParams, urlParamsReducer } from './urlParams';
 
 export interface IReduxState {
@@ -19,7 +18,7 @@ export interface IReduxState {
 }
 
 export const rootReducer = combineReducers({
-  location,
+  location: locationReducer,
   urlParams: urlParamsReducer,
   reactReduxRequest: reducer
 });

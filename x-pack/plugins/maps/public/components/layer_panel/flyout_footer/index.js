@@ -10,16 +10,14 @@ import { updateFlyout, FLYOUT_STATE } from '../../../store/ui';
 import {
   setSelectedLayer,
   removeSelectedLayer,
-  rollbackToTrackedLayerStateForSelectedLayer,
   removeTrackedLayerStateForSelectedLayer
 } from '../../../actions/store_actions';
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    cancelLayerPanel: async () => {
-      await dispatch(updateFlyout(FLYOUT_STATE.NONE));
-      await dispatch(rollbackToTrackedLayerStateForSelectedLayer());
-      await dispatch(setSelectedLayer(null));
+    cancelLayerPanel: () => {
+      dispatch(updateFlyout(FLYOUT_STATE.NONE));
+      dispatch(setSelectedLayer(null));
     },
     saveLayerEdits: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
@@ -29,7 +27,6 @@ const mapDispatchToProps = (dispatch) => {
     removeLayer: () => {
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removeSelectedLayer());
-      dispatch(setSelectedLayer(null));
     }
   };
 };

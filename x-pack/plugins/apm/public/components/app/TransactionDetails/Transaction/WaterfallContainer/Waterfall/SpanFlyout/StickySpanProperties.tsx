@@ -14,7 +14,7 @@ import {
   SPAN_TYPE
 } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { Span } from '../../../../../../../../typings/es_schemas/Span';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
 import { asMillis, asPercent } from '../../../../../../../utils/formatters';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
 

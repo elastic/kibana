@@ -11,19 +11,14 @@ import { globalizeSelectors } from '../utils/typed_redux';
 import {
   flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
-  logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
-  logTextviewSelectors as localLogTextviewSelectors,
   metricTimeSelectors as localMetricTimeSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
   waffleOptionsSelectors as localWaffleOptionsSelectors,
   waffleTimeSelectors as localWaffleTimeSelectors,
 } from './local';
 import { State } from './reducer';
-import {
-  logEntriesSelectors as remoteLogEntriesSelectors,
-  logSummarySelectors as remoteLogSummarySelectors,
-} from './remote';
+import { logEntriesSelectors as remoteLogEntriesSelectors } from './remote';
 
 /**
  * local selectors
@@ -32,9 +27,7 @@ import {
 const selectLocal = (state: State) => state.local;
 
 export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
-export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
-export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
 export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTimeSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
@@ -48,7 +41,6 @@ export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyou
 const selectRemote = (state: State) => state.remote;
 
 export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
-export const logSummarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
 
 /**
  * shared selectors

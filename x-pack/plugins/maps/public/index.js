@@ -14,10 +14,13 @@ import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
 import 'uiExports/inspectorViews';
 import 'uiExports/search';
+import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
+import 'ui/kbn_top_nav';
+import 'ui/query_bar/directive';
 import { uiModules } from 'ui/modules';
 import { DocTitleProvider } from 'ui/doc_title';
 import 'ui/autoload/styles';
@@ -26,7 +29,6 @@ import 'react-vis/dist/style.css';
 
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import 'ui/vis/map/service_settings';
 import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import listingTemplate from './angular/listing_ng_wrapper.html';

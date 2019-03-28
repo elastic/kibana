@@ -6,10 +6,18 @@
 
 import { Pager } from '@elastic/eui';
 
-import { registerTestBed } from '../../../../../__jest__/utils';
+import { registerTestBed } from '../../../../../../../test_utils';
 import { getJobs } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
+
+jest.mock('../../../services', () => {
+  const services = require.requireActual('../../../services');
+  return {
+    ...services,
+    trackUserAction: jest.fn(),
+  };
+});
 
 const defaultProps = {
   jobs: [],
@@ -32,8 +40,8 @@ describe('<JobTable />', () => {
     const totalJobs = 5;
     const jobs = getJobs(totalJobs);
     const openDetailPanel = jest.fn();
-    const { findTestSubject } = initTestBed({ jobs, openDetailPanel });
-    const tableRows = findTestSubject('jobTableRow');
+    const { find } = initTestBed({ jobs, openDetailPanel });
+    const tableRows = find('jobTableRow');
 
     it('should create 1 table row per job', () => {
       expect(tableRows.length).toEqual(totalJobs);
@@ -52,7 +60,7 @@ describe('<JobTable />', () => {
       ];
 
       const tableColumns = expectedColumns.reduce((tableColumns, columnId) => (
-        findTestSubject(`jobTableHeaderCell-${columnId}`).length
+        find(`jobTableHeaderCell-${columnId}`).length
           ? tableColumns.concat(columnId)
           : tableColumns
       ), []);
@@ -61,7 +69,7 @@ describe('<JobTable />', () => {
     });
 
     it('should set the correct job value in each row cell', () => {
-      const fieldNames = [
+      const unformattedFields = [
         'id',
         'indexPattern',
         'rollupIndex',
@@ -72,10 +80,9 @@ describe('<JobTable />', () => {
       const job = jobs[0];
       const getCellText = (field) => row.find(`[data-test-subj="jobTableCell-${field}"]`).hostNodes().text();
 
-      // Simple fields
-      fieldNames.forEach((fieldName) => {
-        const cellText = getCellText(fieldName);
-        expect(cellText).toEqual(job[fieldName]);
+      unformattedFields.forEach((field) => {
+        const cellText = getCellText(field);
+        expect(cellText).toEqual(job[field]);
       });
 
       // Status
@@ -84,16 +91,8 @@ describe('<JobTable />', () => {
       expect(cellStatusText).toEqual('Stopped');
 
       // Groups
-      const expectedJobGroups = ['histogram', 'terms'].reduce((text, field) => {
-        if (job[field].length) {
-          return text
-            ? `${text}, ${field}`
-            : field.replace(/^\w/, char => char.toUpperCase());
-        }
-        return text;
-      }, '');
       const cellGroupsText = getCellText('groups');
-      expect(cellGroupsText).toEqual(expectedJobGroups);
+      expect(cellGroupsText).toEqual('Histogram, terms');
 
       // Metrics
       const expectedJobMetrics = job.metrics.reduce((text, { name }) => (
@@ -116,16 +115,16 @@ describe('<JobTable />', () => {
   });
 
   describe('action menu', () => {
-    let findTestSubject;
-    let testSubjectExists;
+    let find;
+    let exists;
     let selectJob;
     let jobs;
     let tableRows;
 
     beforeEach(() => {
       jobs = getJobs();
-      ({ findTestSubject, testSubjectExists } = initTestBed({ jobs }));
-      tableRows = findTestSubject('jobTableRow');
+      ({ find, exists } = initTestBed({ jobs }));
+      tableRows = find('jobTableRow');
 
       selectJob = (index = 0) => {
         const job = jobs[index];
@@ -136,11 +135,11 @@ describe('<JobTable />', () => {
     });
 
     it('should be visible when a job is selected', () => {
-      expect(testSubjectExists('jobActionMenuButton')).toBeFalsy();
+      expect(exists('jobActionMenuButton')).toBeFalsy();
 
       selectJob();
 
-      expect(testSubjectExists('jobActionMenuButton')).toBeTruthy();
+      expect(exists('jobActionMenuButton')).toBeTruthy();
     });
 
     it('should have a "start" and "delete" action for a job that is stopped', () => {
@@ -149,10 +148,10 @@ describe('<JobTable />', () => {
       job.status = 'stopped';
 
       selectJob(index);
-      const menuButton = findTestSubject('jobActionMenuButton');
+      const menuButton = find('jobActionMenuButton');
       menuButton.simulate('click'); // open the context menu
 
-      const contextMenu = findTestSubject('jobActionContextMenu');
+      const contextMenu = find('jobActionContextMenu');
       expect(contextMenu.length).toBeTruthy();
 
       const contextMenuButtons = contextMenu.find('button');
@@ -166,9 +165,9 @@ describe('<JobTable />', () => {
       job.status = 'started';
 
       selectJob(index);
-      findTestSubject('jobActionMenuButton').simulate('click');
+      find('jobActionMenuButton').simulate('click');
 
-      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
       expect(buttonsLabel).toEqual(['Stop job']);
     });
@@ -181,9 +180,9 @@ describe('<JobTable />', () => {
 
       selectJob(0);
       selectJob(1);
-      findTestSubject('jobActionMenuButton').simulate('click');
+      find('jobActionMenuButton').simulate('click');
 
-      const contextMenuButtons = findTestSubject('jobActionContextMenu').find('button');
+      const contextMenuButtons = find('jobActionContextMenu').find('button');
       const buttonsLabel = contextMenuButtons.map(btn => btn.text());
       expect(buttonsLabel).toEqual(['Start jobs', 'Stop jobs']);
     });

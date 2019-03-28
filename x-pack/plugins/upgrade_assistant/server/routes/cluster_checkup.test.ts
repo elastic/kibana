@@ -16,26 +16,58 @@ import { registerClusterCheckupRoutes } from './cluster_checkup';
 const MigrationApis = require('../lib/es_migration_apis');
 MigrationApis.getUpgradeAssistantStatus = jest.fn();
 
+function register(plugins = {}) {
+  const server = new Server();
+  server.plugins = {
+    elasticsearch: {
+      getCluster: () => ({ callWithRequest: jest.fn() } as any),
+    } as any,
+    ...plugins,
+  } as any;
+  server.config = () => ({ get: () => '' } as any);
+
+  registerClusterCheckupRoutes(server);
+
+  return server;
+}
+
 /**
  * Since these route callbacks are so thin, these serve simply as integration tests
  * to ensure they're wired up to the lib functions correctly. Business logic is tested
  * more thoroughly in the es_migration_apis test.
  */
 describe('cluster checkup API', () => {
-  const server = new Server();
-  server.plugins = {
-    elasticsearch: {
-      getCluster: () => ({ callWithRequest: jest.fn() } as any),
-    } as any,
-    cloud: {
-      isCloudEnabled: false,
-    },
-  } as any;
-  server.config = () => ({ get: () => '' } as any);
+  const spy = jest.spyOn(MigrationApis, 'getUpgradeAssistantStatus');
 
-  registerClusterCheckupRoutes(server);
+  afterEach(() => jest.clearAllMocks());
+
+  describe('with cloud enabled', () => {
+    it('is provided to getUpgradeAssistantStatus', async () => {
+      const server = register({
+        cloud: {
+          config: {
+            isCloudEnabled: true,
+          },
+        },
+      });
+
+      MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
+        cluster: [],
+        indices: [],
+        nodes: [],
+      });
+      await server.inject({
+        method: 'GET',
+        url: '/api/upgrade_assistant/status',
+      });
+
+      expect(spy.mock.calls[0][2]).toBe(true);
+    });
+  });
 
   describe('GET /api/upgrade_assistant/reindex/{indexName}.json', () => {
+    const server = register();
+
     it('returns state', async () => {
       MigrationApis.getUpgradeAssistantStatus.mockResolvedValue({
         cluster: [],
