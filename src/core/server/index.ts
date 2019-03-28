@@ -18,7 +18,8 @@
  */
 
 export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
+export { HttpServiceSetup } from './http';
+export { CallAPIOptions, ClusterClient, ElasticsearchServiceSetup } from './elasticsearch';
 export { Logger, LoggerFactory } from './logging';
 export {
   DiscoveredPlugin,
