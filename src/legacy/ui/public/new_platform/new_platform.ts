@@ -17,25 +17,7 @@
  * under the License.
  */
 
-import { BasePathSetup } from '../../../../core/public/base_path';
-import { ChromeSetup } from '../../../../core/public/chrome';
-import { FatalErrorsSetup } from '../../../../core/public/fatal_errors';
-import { HttpSetup } from '../../../../core/public/http';
-import { I18nSetup } from '../../../../core/public/i18n';
-import { InjectedMetadataSetup } from '../../../../core/public/injected_metadata';
-import { NotificationsSetup } from '../../../../core/public/notifications';
-import { UiSettingsSetup } from '../../../../core/public/ui_settings';
-
-interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
-}
+import { CoreSetup } from '../../../../core/public/';
 
 const runtimeContext = {
   start: {
@@ -53,5 +35,8 @@ export function __newPlatformInit__(core: CoreSetup) {
 }
 
 export function getNewPlatform() {
+  if (runtimeContext.start.core === null) {
+    throw new Error('runtimeContext.start.core Not initilized yet');
+  }
   return runtimeContext;
 }
