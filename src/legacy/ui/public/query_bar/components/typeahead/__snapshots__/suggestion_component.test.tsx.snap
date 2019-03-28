@@ -27,12 +27,9 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
     </div>
     <div
       className="kbnSuggestionItem__description"
-      dangerouslySetInnerHTML={
-        Object {
-          "__html": "This is not a helpful suggestion",
-        }
-      }
-    />
+    >
+      This is not a helpful suggestion
+    </div>
   </div>
 </div>
 `;
@@ -64,12 +61,9 @@ exports[`SuggestionComponent Should make the element active if the selected prop
     </div>
     <div
       className="kbnSuggestionItem__description"
-      dangerouslySetInnerHTML={
-        Object {
-          "__html": "This is not a helpful suggestion",
-        }
-      }
-    />
+    >
+      This is not a helpful suggestion
+    </div>
   </div>
 </div>
 `;
