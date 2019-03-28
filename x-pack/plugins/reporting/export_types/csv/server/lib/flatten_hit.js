@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 
+// FIXME shouldn't this really use a service provided by @kbn-es-query? The logic here can part from Discover
 export function createFlattenHit(fields, metaFields, conflictedTypesFields) {
   const flattenSource = (flat, obj, keyPrefix) => {
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';

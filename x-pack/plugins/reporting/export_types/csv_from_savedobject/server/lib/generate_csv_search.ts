@@ -35,7 +35,15 @@ interface CsvResultFromSearch {
 }
 
 type EndpointCaller = (method: string, params: any) => Promise<any>;
-type FormatsMap = Map<string, any>;
+type FormatsMap = Map<
+  string,
+  {
+    id: string;
+    params: {
+      pattern: string;
+    };
+  }
+>;
 
 interface GenerateCsvParams {
   searchRequest: SearchRequest;
@@ -103,6 +111,13 @@ const getTimebasedParts = (
   return { combinedFilter, includes, timezone };
 };
 
+interface IndexPatternField {
+  scripted: boolean;
+  lang?: string;
+  script?: string;
+  name: string;
+}
+
 export async function generateCsvSearch(
   req: Request,
   server: KbnServer,
@@ -132,6 +147,19 @@ export async function generateCsvSearch(
   const esQueryConfig = await getEsQueryConfig(uiConfig);
   const [sortField, sortOrder] = savedSearchObjectAttr.sort;
 
+  const scriptFields = indexPatternSavedObject.fields
+    .filter((f: IndexPatternField) => f.scripted === true)
+    .reduce((accum: any, curr: IndexPatternField) => {
+      return {
+        ...accum,
+        [curr.name]: {
+          script: {
+            source: curr.script,
+            lang: curr.lang,
+          },
+        },
+      };
+    }, {});
   const searchRequest: SearchRequest = {
     index: indexPatternSavedObject.title,
     body: {
@@ -143,7 +171,7 @@ export async function generateCsvSearch(
         combinedFilter,
         esQueryConfig
       ),
-      script_fields: {},
+      script_fields: scriptFields,
       sort: [{ [sortField]: { order: sortOrder } }],
     },
   };
@@ -152,9 +180,9 @@ export async function generateCsvSearch(
   const callCluster = (...params: any[]) => callWithRequest(req, ...params);
   const config = server.config();
   const [formatsMap, uiSettings] = await Promise.all([
-    fieldFormatServiceFactory(uiConfig).then((fieldFormats: any) =>
-      fieldFormatMapFactory(indexPatternSavedObject, fieldFormats)
-    ),
+    fieldFormatServiceFactory(uiConfig).then((fieldFormats: any) => {
+      return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+    }),
     getUiSettings(uiConfig),
   ]);
 

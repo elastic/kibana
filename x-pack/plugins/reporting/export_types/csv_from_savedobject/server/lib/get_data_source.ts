@@ -42,19 +42,16 @@ export async function getDataSource(
     }
   }
   try {
-    const { attributes: indexPatternAttributes } = await savedObjectsClient.get(
-      'index-pattern',
-      indexPatternId
-    );
-    let fields = '[]';
-    let fieldFormatMap = '{}';
-    if (indexPatternAttributes.fields) {
-      fields = JSON.parse(indexPatternAttributes.fields);
-    }
-    if (indexPatternAttributes.fieldFormatMap) {
-      fieldFormatMap = JSON.parse(indexPatternAttributes.fieldFormatMap);
-    }
-    indexPatternSavedObject = { ...indexPatternAttributes, fields, fieldFormatMap };
+    const { attributes } = await savedObjectsClient.get('index-pattern', indexPatternId);
+    const { fields, title, timeFieldName } = attributes;
+    const parsedFields = fields ? JSON.parse(fields) : [];
+
+    indexPatternSavedObject = {
+      fields: parsedFields,
+      title,
+      timeFieldName,
+      attributes,
+    };
   } catch (err) {
     throw new Error(`Could not get index pattern saved object! ${err}`);
   }
