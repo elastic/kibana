@@ -26,6 +26,7 @@ import * as columnActions from 'ui/doc_table/actions/columns';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
+import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
 import 'ui/filters/moment';
