@@ -50,3 +50,9 @@
 .codeAvatar {
   margin: auto $euiSizeS auto 0;
 }
+
+.codeContainer__progress {
+  width: 40rem;
+  padding: $euiSizeXS;
+  border: $euiBorderThin;
+}
