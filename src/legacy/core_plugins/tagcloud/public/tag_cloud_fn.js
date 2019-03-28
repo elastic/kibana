@@ -17,52 +17,42 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
-import { VegaRequestHandlerProvider } from 'plugins/vega/vega_request_handler';
 
-export const vega = () => ({
-  name: 'vega',
+export const tagcloud = () => ({
+  name: 'tagcloud',
   type: 'render',
   context: {
     types: [
-      'kibana_context',
-      'null',
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.vega.help', {
-    defaultMessage: 'Vega visualization'
+  help: i18n.translate('tagCloud.function.help', {
+    defaultMessage: 'Tagcloud visualization'
   }),
   args: {
-    spec: {
-      types: ['string'],
-      default: '',
+    visConfig: {
+      types: ['string', 'null'],
+      default: '"{}"',
     },
   },
-  async fn(context, args) {
-    const $injector = await chrome.dangerouslyGetActiveInjector();
-    const Private = $injector.get('Private');
-    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
-
-    const response = await vegaRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
-      visParams: { spec: args.spec },
-      forceFetch: true
-    });
+  fn(context, args) {
+    const visConfig = JSON.parse(args.visConfig);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: response,
-        visType: 'vega',
-        visConfig: {
-          spec: args.spec
-        },
-      }
+        visData: context,
+        visType: 'tagcloud',
+        visConfig,
+        params: {
+          listenOnChange: true,
+        }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(tagcloud);

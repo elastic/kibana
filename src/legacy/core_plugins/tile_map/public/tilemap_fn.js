@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 import { i18n } from '@kbn/i18n';
 
-export const kibanaTable = () => ({
-  name: 'kibana_table',
+export const tilemap = () => ({
+  name: 'tilemap',
   type: 'render',
   context: {
     types: [
       'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.table.help', {
-    defaultMessage: 'Table visualization'
+  help: i18n.translate('tileMap.function.help', {
+    defaultMessage: 'Tilemap visualization'
   }),
   args: {
     visConfig: {
@@ -37,18 +38,22 @@ export const kibanaTable = () => ({
       default: '"{}"',
     },
   },
-  async fn(context, args) {
+  fn(context, args) {
     const visConfig = JSON.parse(args.visConfig);
 
-    const responseHandler = legacyResponseHandlerProvider().handler;
-    const convertedData = await responseHandler(context, visConfig.dimensions);
+    const { geohash, metric, geocentroid } = visConfig.dimensions;
+    const convertedData = convertToGeoJson(context, {
+      geohash,
+      metric,
+      geocentroid,
+    });
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
         visData: convertedData,
-        visType: 'table',
+        visType: 'tile_map',
         visConfig,
         params: {
           listenOnChange: true,
@@ -57,3 +62,5 @@ export const kibanaTable = () => ({
     };
   },
 });
+
+functionsRegistry.register(tilemap);

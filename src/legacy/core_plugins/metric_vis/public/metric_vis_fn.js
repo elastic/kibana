@@ -17,5 +17,42 @@
  * under the License.
  */
 
-const context = require.context('../directives', false, /[\/\\](?!\.|_)[^\/\\]+\.js/);
-context.keys().forEach(key => context(key));
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { i18n } from '@kbn/i18n';
+
+export const metric = () => ({
+  name: 'kibana_metric',
+  type: 'render',
+  context: {
+    types: [
+      'kibana_datatable'
+    ],
+  },
+  help: i18n.translate('metricVis.function.help', {
+    defaultMessage: 'Metric visualization'
+  }),
+  args: {
+    visConfig: {
+      types: ['string', 'null'],
+      default: '"{}"',
+    },
+  },
+  fn(context, args) {
+    const visConfig = JSON.parse(args.visConfig);
+
+    return {
+      type: 'render',
+      as: 'visualization',
+      value: {
+        visData: context,
+        visType: 'metric',
+        visConfig,
+        params: {
+          listenOnChange: true,
+        }
+      },
+    };
+  },
+});
+
+functionsRegistry.register(metric);

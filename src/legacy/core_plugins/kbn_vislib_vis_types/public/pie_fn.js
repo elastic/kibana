@@ -17,34 +17,46 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { VislibSlicesResponseHandlerProvider as vislibSlicesResponseHandler } from 'ui/vis/response_handlers/vislib';
 import { i18n } from '@kbn/i18n';
 
-export const kibanaMarkdown = () => ({
-  name: 'kibana_markdown',
+export const kibanaPie = () => ({
+  name: 'kibana_pie',
   type: 'render',
   context: {
-    types: [],
+    types: [
+      'kibana_datatable'
+    ],
   },
-  help: i18n.translate('interpreter.functions.markdown.help', {
-    defaultMessage: 'Markdown visualization'
+  help: i18n.translate('kbnVislibVisTypes.functions.pie.help', {
+    defaultMessage: 'Pie visualization'
   }),
   args: {
     visConfig: {
-      types: ['string'],
+      types: ['string', 'null'],
       default: '"{}"',
-    }
+    },
   },
-  fn(context, args) {
-    const params = JSON.parse(args.visConfig);
+  async fn(context, args) {
+    const visConfig = JSON.parse(args.visConfig);
+
+    const responseHandler = vislibSlicesResponseHandler().handler;
+    const convertedData = await responseHandler(context, visConfig.dimensions);
+
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visType: 'markdown',
-        visConfig: {
-          ...params,
-        },
-      }
+        visData: convertedData,
+        visType: 'pie',
+        visConfig,
+        params: {
+          listenOnChange: true,
+        }
+      },
     };
-  }
+  },
 });
+
+functionsRegistry.register(kibanaPie);

@@ -17,39 +17,19 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { kibanaMarkdown } from './markdown_fn';
 
-export const metric = () => ({
-  name: 'kibana_metric',
-  type: 'render',
-  context: {
-    types: [
-      'kibana_datatable'
-    ],
-  },
-  help: i18n.translate('interpreter.functions.metric.help', {
-    defaultMessage: 'Metric visualization'
-  }),
-  args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
-    },
-  },
-  fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+describe('interpreter/functions#markdown', () => {
+  const fn = functionWrapper(kibanaMarkdown);
+  const visConfig = {
+    fontSize: 12,
+    openLinksInNewTab: true,
+    markdown: '## hello _markdown_',
+  };
 
-    return {
-      type: 'render',
-      as: 'visualization',
-      value: {
-        visData: context,
-        visType: 'metric',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
-    };
-  },
+  it('returns an object with the correct structure', () => {
+    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
+    expect(actual).toMatchSnapshot();
+  });
 });
