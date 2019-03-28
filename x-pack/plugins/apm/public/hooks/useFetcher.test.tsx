@@ -22,18 +22,18 @@ afterAll(() => {
 
 describe('useFetcher', () => {
   describe('when resolving after 500ms', () => {
-    let output: ReturnType<typeof renderHook>;
+    let hook: ReturnType<typeof renderHook>;
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
         await delay(500);
         return 'response from hook';
       }
-      output = renderHook(() => useFetcher(() => fn(), []));
+      hook = renderHook(() => useFetcher(() => fn(), []));
     });
 
     it('should initially be empty', async () => {
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
         status: undefined
@@ -42,9 +42,9 @@ describe('useFetcher', () => {
 
     it('should show loading spinner after 100ms', async () => {
       jest.advanceTimersByTime(100);
-      await output.waitForNextUpdate();
+      await hook.waitForNextUpdate();
 
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
         status: 'loading'
@@ -53,9 +53,9 @@ describe('useFetcher', () => {
 
     it('should show success after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await output.waitForNextUpdate();
+      await hook.waitForNextUpdate();
 
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: 'response from hook',
         error: undefined,
         status: 'success'
@@ -64,18 +64,18 @@ describe('useFetcher', () => {
   });
 
   describe('when throwing after 500ms', () => {
-    let output: ReturnType<typeof renderHook>;
+    let hook: ReturnType<typeof renderHook>;
     beforeEach(() => {
       jest.useFakeTimers();
       async function fn() {
         await delay(500);
         throw new Error('Something went wrong');
       }
-      output = renderHook(() => useFetcher(() => fn(), []));
+      hook = renderHook(() => useFetcher(() => fn(), []));
     });
 
     it('should initially be empty', async () => {
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
         status: undefined
@@ -84,9 +84,9 @@ describe('useFetcher', () => {
 
     it('should show loading spinner after 100ms', async () => {
       jest.advanceTimersByTime(100);
-      await output.waitForNextUpdate();
+      await hook.waitForNextUpdate();
 
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: undefined,
         error: undefined,
         status: 'loading'
@@ -95,12 +95,64 @@ describe('useFetcher', () => {
 
     it('should show error after 1 second', async () => {
       jest.advanceTimersByTime(1000);
-      await output.waitForNextUpdate();
+      await hook.waitForNextUpdate();
 
-      expect(output.result.current).toEqual({
+      expect(hook.result.current).toEqual({
         data: undefined,
         error: expect.any(Error),
         status: 'failure'
+      });
+    });
+  });
+
+  describe('when a hook already has data', () => {
+    it('should show "first response" while loading "second response"', async () => {
+      jest.useFakeTimers();
+      const hook = renderHook(
+        ({ callback, args }) => useFetcher(callback, args),
+        {
+          initialProps: {
+            callback: async () => 'first response',
+            args: ['a']
+          }
+        }
+      );
+      await hook.waitForNextUpdate();
+
+      // assert: first response has loaded and should be rendered
+      expect(hook.result.current).toEqual({
+        data: 'first response',
+        error: undefined,
+        status: 'success'
+      });
+
+      // act: re-render hook with async callback
+      hook.rerender({
+        callback: async () => {
+          await delay(500);
+          return 'second response';
+        },
+        args: ['b']
+      });
+
+      jest.advanceTimersByTime(100);
+      await hook.waitForNextUpdate();
+
+      // assert: while loading new data the previous data should still be rendered
+      expect(hook.result.current).toEqual({
+        data: 'first response',
+        error: undefined,
+        status: 'loading'
+      });
+
+      jest.advanceTimersByTime(500);
+      await hook.waitForNextUpdate();
+
+      // assert: "second response" has loaded and should be rendered
+      expect(hook.result.current).toEqual({
+        data: 'second response',
+        error: undefined,
+        status: 'success'
       });
     });
   });
