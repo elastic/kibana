@@ -56,3 +56,15 @@
   padding: $euiSizeXS;
   border: $euiBorderThin;
 }
+
+.codeContainer__commitMessages {
+  overflow: auto;
+  flex: 1;
+  padding: $euiSizeM;
+
+  .codeHeader__commit {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
