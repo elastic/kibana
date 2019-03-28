@@ -7,19 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
-import styled from 'styled-components';
 import { CloneProgress } from '../../../model';
-
-export const TextProgress = styled.div`
-  font-size: ${theme.euiSizeM};
-  color: #98a2b3;
-`;
-
-export const ProgressContainer = styled.div`
-  width: 40rem;
-  padding: ${theme.paddingSizes.xs};
-  border: ${theme.euiBorderThin};
-`;
 
 interface Props {
   repoName: string;
@@ -62,7 +50,11 @@ export const CloneStatus = (props: Props) => {
       </EuiFlexItem>
       <EuiSpacer size="xl" />
       <EuiFlexItem grow={false}>
-        <TextProgress>{progress}</TextProgress>
+        <div>
+          <EuiText size="m" color="subdued">
+            {progress}
+          </EuiText>
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 640 }}>
         <EuiProgress color="primary" size="s" max={100} value={progressRate} />
