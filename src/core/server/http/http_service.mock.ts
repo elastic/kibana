@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 

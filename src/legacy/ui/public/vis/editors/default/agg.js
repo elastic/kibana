@@ -54,7 +54,7 @@ uiModules
        * @return {[type]} [description]
        */
         $scope.describe = function () {
-          if (!$scope.agg.type.makeLabel) return '';
+          if (!$scope.agg.type || !$scope.agg.type.makeLabel) return '';
           const label = $scope.agg.type.makeLabel($scope.agg);
           return label ? label : '';
         };
