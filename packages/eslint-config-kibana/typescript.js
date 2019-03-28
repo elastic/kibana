@@ -6,7 +6,7 @@
 // As a matter of example in IntelliJ IDEA this would be fixed on 2019.1 release to be launched soon.
 // In order to have it working for now, we should add the extensions `ts,tsx` to the option
 // `eslint.additional.file.extensions` that can be found on Help > Find Action > Registry
-// To read bore about it please visit
+// To read more about it please visit
 // https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000225170-ESLint-and-ts-Typescript-files
 
 const semver = require('semver');
