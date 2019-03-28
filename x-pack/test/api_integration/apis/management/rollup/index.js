@@ -5,8 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  // FLAKY: https://github.com/elastic/kibana/issues/33217
-  describe.skip('rollup', () => {
+  describe('rollup', () => {
     loadTestFile(require.resolve('./rollup'));
     loadTestFile(require.resolve('./index_patterns_extensions'));
     loadTestFile(require.resolve('./rollup_search'));

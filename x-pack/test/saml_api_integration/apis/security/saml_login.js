@@ -333,7 +333,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -390,7 +390,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -417,7 +417,7 @@ export default function ({ getService }) {
 
         expect(apiResponse.body).to.eql({
           error: 'Bad Request',
-          message: 'invalid_grant',
+          message: 'Both access and refresh tokens are expired.',
           statusCode: 400
         });
       });
@@ -500,6 +500,55 @@ export default function ({ getService }) {
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);
+      });
+    });
+
+    describe('API access with missing access token document.', () => {
+      let sessionCookie;
+
+      beforeEach(async () => {
+        const handshakeResponse = await supertest.get('/abc/xyz')
+          .expect(302);
+
+        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0]);
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        const samlAuthenticationResponse = await supertest.post('/api/security/v1/saml')
+          .set('kbn-xsrf', 'xxx')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) }, {})
+          .expect(302);
+
+        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0]);
+      });
+
+      it('should properly set cookie and start new SAML handshake', async function () {
+        // Let's delete tokens from `.security` index directly to simulate the case when
+        // Elasticsearch automatically removes access/refresh token document from the index
+        // after some period of time.
+        const esResponse = await getService('es').deleteByQuery({
+          index: '.security',
+          q: 'doc_type:token',
+          refresh: true,
+        });
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
+
+        const handshakeResponse = await supertest.get('/abc/xyz/handshake?one=two three')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        const cookies = handshakeResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+
+        const handshakeCookie = request.cookie(cookies[0]);
+        expect(handshakeCookie.key).to.be('sid');
+        expect(handshakeCookie.value).to.not.be.empty();
+        expect(handshakeCookie.path).to.be('/');
+        expect(handshakeCookie.httpOnly).to.be(true);
+
+        const redirectURL = url.parse(handshakeResponse.headers.location, true /* parseQueryString */);
+        expect(redirectURL.href.startsWith(`https://elastic.co/sso/saml`)).to.be(true);
+        expect(redirectURL.query.SAMLRequest).to.not.be.empty();
       });
     });
   });

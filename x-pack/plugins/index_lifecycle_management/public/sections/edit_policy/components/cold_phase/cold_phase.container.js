@@ -17,7 +17,7 @@ import {
   PHASE_COLD,
   PHASE_HOT,
   PHASE_ROLLOVER_ENABLED
-} from '../../../../store/constants';
+} from '../../../../constants';
 
 export const ColdPhase = connect(
   (state) => ({
