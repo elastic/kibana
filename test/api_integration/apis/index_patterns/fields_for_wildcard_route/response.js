@@ -58,7 +58,9 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true
+              readFromDocValues: true,
+              parent: 'baz',
+              subType: 'multi',
             },
             {
               type: 'number',
@@ -86,7 +88,7 @@ export default function ({ getService }) {
         .expect(200, {
           fields: [
             {
-              aggregatable: false,
+              aggregatable: true,
               name: '_id',
               readFromDocValues: false,
               searchable: true,
@@ -118,7 +120,9 @@ export default function ({ getService }) {
               searchable: true,
               aggregatable: true,
               name: 'baz.keyword',
-              readFromDocValues: true
+              readFromDocValues: true,
+              parent: 'baz',
+              subType: 'multi',
             },
             {
               aggregatable: false,
