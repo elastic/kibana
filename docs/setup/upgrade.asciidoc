@@ -30,7 +30,7 @@ comprehensive overview of the upgrade process.
 ==== Upgrading from 6.6 or earlier
 {es} can read indices created in the previous major version. If you have indices 
 created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
-See the {ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Stack upgrade guide] 
+See {ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack] 
 for more information.
 
 Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
@@ -41,8 +41,8 @@ can be generally imported into 7.x.
 
 [float]
 ==== Upgrading from 6.7
-6.7 includes an <<upgrade-assistant, Upgrade Assistant>> to help you prepare for your upgrade to 7.0. 
-To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
 
 You can also use the <<upgrade-standard, Standard upgrade>> instructions to do a manual upgrade to 7.0.
 
