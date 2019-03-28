@@ -36,7 +36,7 @@ export const LogsPageContent: React.FunctionComponent<Props> = ({ showFlyout, se
                 reportVisiblePositions,
                 targetPosition,
               }) => (
-                <WithStreamItems>
+                <WithStreamItems initializeOnMount={!isAutoReloading}>
                   {({
                     hasMoreAfterEnd,
                     hasMoreBeforeStart,
