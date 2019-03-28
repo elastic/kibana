@@ -10,8 +10,8 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs a limit without aggregations', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
-        select: [{ operation: 'col', argument: 'datacenter' }],
+        datasourceRef: 'a',
+        select: [{ operation: 'column', argument: { field: 'datacenter' } }],
         size: 20,
       })
     ).toMatchObject({
@@ -21,7 +21,11 @@ describe('viz-editor/query/to_es_query', () => {
 
   test('performs a limit with aggregations', () => {
     expect(
-      toEsQuery({ datsourceId: 'a', select: [{ operation: 'count' }], size: 20 })
+      toEsQuery({
+        datasourceRef: 'a',
+        select: [{ operation: 'count' }],
+        size: 20,
+      })
     ).toMatchObject({
       size: 0,
     });
@@ -30,10 +34,10 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs a basic column selection', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [
-          { operation: 'col', argument: 'datacenter' },
-          { operation: 'col', argument: 'bytes' },
+          { operation: 'column', argument: { field: 'datacenter' } },
+          { operation: 'column', argument: { field: 'bytes' } },
         ],
       })
     ).toMatchObject({
@@ -44,11 +48,11 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs basic aggregations', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'count' },
-          { operation: 'avg', alias: 'averagebytes', argument: 'bytes' },
-          { operation: 'sum', argument: 'request_size' },
+          { operation: 'avg', alias: 'averagebytes', argument: { field: 'bytes' } },
+          { operation: 'sum', argument: { field: 'request_size' } },
         ],
       })
     ).toMatchObject({
@@ -75,11 +79,11 @@ describe('viz-editor/query/to_es_query', () => {
   test('performs grouped aggregations', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [
-          { operation: 'col', alias: 'dc', argument: 'datacenter' },
+          { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
           { operation: 'count' },
-          { operation: 'sum', argument: 'bytes' },
+          { operation: 'sum', argument: { field: 'bytes' } },
         ],
         size: 123,
       })
@@ -109,10 +113,50 @@ describe('viz-editor/query/to_es_query', () => {
     });
   });
 
+  test('performs grouped aggregations with terms', () => {
+    expect(
+      toEsQuery({
+        datasourceRef: 'a',
+        select: [
+          { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
+          { operation: 'terms', argument: { field: 'dc', count: 5 } },
+          { operation: 'count' },
+        ],
+        size: 123,
+      })
+    ).toMatchObject({
+      aggregations: {
+        groupby: {
+          composite: {
+            sources: [
+              { dc: { terms: { field: 'datacenter', missing_bucket: true, order: 'asc' } } },
+            ],
+            size: 123,
+          },
+          aggregations: {
+            dc: {
+              terms: {
+                field: 'dc',
+                count: 5,
+              },
+              aggregations: {
+                count: {
+                  value_count: {
+                    field: '_id',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
   test('performs date_histograms', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [
           { operation: 'date_histogram', argument: { field: 'order_date', interval: 'month' } },
           { operation: 'count', alias: 'records_per_month' },
@@ -140,7 +184,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('supports or clauses', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'count' }],
         where: {
           operation: 'or',
@@ -148,14 +192,14 @@ describe('viz-editor/query/to_es_query', () => {
             {
               operation: '=',
               argument: [
-                { operation: 'col', argument: 'datacenter' },
+                { operation: 'column', argument: { field: 'datacenter' } },
                 { operation: 'lit', argument: 'east-1' },
               ],
             },
             {
               operation: '=',
               argument: [
-                { operation: 'col', argument: 'datacenter' },
+                { operation: 'column', argument: { field: 'datacenter' } },
                 { operation: 'lit', argument: 'central-1' },
               ],
             },
@@ -191,7 +235,7 @@ describe('viz-editor/query/to_es_query', () => {
   test('supports and clauses', () => {
     expect(
       toEsQuery({
-        datsourceId: 'a',
+        datasourceRef: 'a',
         select: [{ operation: 'count' }],
         where: {
           operation: 'and',
@@ -199,14 +243,14 @@ describe('viz-editor/query/to_es_query', () => {
             {
               operation: '>',
               argument: [
-                { operation: 'col', argument: 'bytes' },
+                { operation: 'column', argument: { field: 'bytes' } },
                 { operation: 'lit', argument: 300 },
               ],
             },
             {
               operation: '<=',
               argument: [
-                { operation: 'col', argument: 'requests' },
+                { operation: 'column', argument: { field: 'requests' } },
                 { operation: 'lit', argument: 10 },
               ],
             },

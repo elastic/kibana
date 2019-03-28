@@ -5,6 +5,7 @@
  */
 
 import {
+  EuiFieldSearch,
   EuiIcon,
   // @ts-ignore
   EuiSuperSelect,
@@ -12,14 +13,34 @@ import {
 } from '@elastic/eui';
 // @ts-ignore untyped dependency
 import { palettes } from '@elastic/eui/lib/services';
-import React from 'react';
-import { Datasource } from '../../lib';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
+import { Datasource, Field } from '../../lib';
 
 interface Props {
   datasource: Datasource | null;
 }
 
+interface State {
+  fieldsFilter: string;
+}
+
+function initialState(): State {
+  return {
+    fieldsFilter: '',
+  };
+}
+
+function sortFields(fieldA: Field, fieldB: Field) {
+  return fieldA.name < fieldB.name ? -1 : 1;
+}
+
 export function FieldListPanel({ datasource }: Props) {
+  const [state, setState] = useState(() => initialState());
+
+  function filterFields(field: Field) {
+    return field.name.includes(state.fieldsFilter);
+  }
   if (!datasource) {
     return <div />;
   }
@@ -28,15 +49,33 @@ export function FieldListPanel({ datasource }: Props) {
     <>
       {datasource && (
         <div className="fieldListPanel">
-          {datasource.fields.map(field => (
-            <button
-              type="button"
-              key={field.name}
-              className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
-            >
-              {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-            </button>
-          ))}
+          <EuiFieldSearch
+            placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
+              defaultMessage: 'Search fields',
+              description: 'Search the list of fields in the index pattern for the provided text',
+            })}
+            value={state.fieldsFilter}
+            onChange={e => {
+              setState({
+                ...state,
+                fieldsFilter: e.target.value,
+              });
+            }}
+            aria-label="Search fields"
+          />
+
+          {datasource.fields
+            .filter(filterFields)
+            .sort(sortFields)
+            .map(field => (
+              <button
+                type="button"
+                key={field.name}
+                className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
+              >
+                {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
+              </button>
+            ))}
         </div>
       )}
     </>

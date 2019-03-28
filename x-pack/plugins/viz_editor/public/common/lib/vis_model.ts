@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Query } from '../../../common';
+import { Query, SelectOperation } from '../../../common';
 
 export interface Field {
   name: string;
@@ -20,6 +20,13 @@ export interface Datasource<M = any> {
   fields: Field[];
   fieldFormatMap?: string;
   meta?: M;
+}
+
+export interface VisModelQuery {
+  datasourceRef: string;
+  select: {
+    [id: string]: SelectOperation;
+  };
 }
 
 export interface Axis {
@@ -83,9 +90,10 @@ export function initialState(): VisModel<any, any> {
     datasource: null,
     queries: {
       q1: {
+        datasourceRef: 'aaa',
         select: [
           { operation: 'date_histogram', argument: { field: '@timestamp', interval: '1d' } },
-          { operation: 'sum', argument: 'bytes' },
+          { operation: 'sum', argument: { field: 'bytes' } },
         ],
       },
     },

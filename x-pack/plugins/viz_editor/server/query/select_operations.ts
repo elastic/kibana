@@ -14,13 +14,16 @@ import {
   AvgOperation,
   chunkBy,
   ChunkResult,
-  Column,
+  ColumnOperation,
   CountOperation,
   DateHistogramOperation,
+  FieldOperation,
   isEmpty,
   partition,
   Query,
   SelectOperation,
+  SelectOperator,
+  TermsOperation,
 } from '../../common';
 
 /**
@@ -38,13 +41,13 @@ export interface SelectDefinition {
  * SelectDefinition, used to convert our definitions into the equivalent
  * Elasticsearch DSL.
  */
-export const selectOperations: { [operation: string]: SelectDefinition } = {
-  col: {
-    getName(op: Column) {
-      return op.alias || op.argument;
+export const selectOperations: { [operation in SelectOperator]: SelectDefinition } = {
+  column: {
+    getName(op: ColumnOperation) {
+      return op.alias || op.argument.field;
     },
     toNestedQuery(query: Query, ops: SelectOperation[], getSubAggs: () => any) {
-      const cols = ops as Column[];
+      const cols = ops as ColumnOperation[];
       return {
         aggregations: {
           groupby: {
@@ -53,7 +56,7 @@ export const selectOperations: { [operation: string]: SelectDefinition } = {
               sources: cols.map(col => ({
                 [col.alias!]: {
                   terms: {
-                    field: col.argument,
+                    field: col.argument.field,
                     missing_bucket: true,
                     order: 'asc',
                   },
@@ -107,6 +110,24 @@ export const selectOperations: { [operation: string]: SelectDefinition } = {
     },
   },
 
+  terms: {
+    getName(op: TermsOperation) {
+      return op.alias || op.argument.field;
+    },
+    toNestedQuery(query: Query, ops: SelectOperation[], getSubAggs: () => any) {
+      const op = ops[0] as TermsOperation;
+
+      return {
+        aggregations: {
+          [op.alias!]: {
+            terms: op.argument,
+            ...getSubAggs(),
+          },
+        },
+      };
+    },
+  },
+
   avg: defineBasicAgg('avg'),
   sum: defineBasicAgg('sum'),
 };
@@ -118,14 +139,14 @@ export const selectOperations: { [operation: string]: SelectDefinition } = {
  */
 function defineBasicAgg(aggName: string) {
   return {
-    getName(op: { alias?: string; argument: string }) {
-      return op.alias || `${aggName}_${op.argument}`;
+    getName(op: FieldOperation) {
+      return op.alias || `${aggName}_${op.argument.field}`;
     },
-    toEsAgg(op: { alias: string; argument: string }) {
+    toEsAgg(op: FieldOperation) {
       return {
-        [op.alias]: {
+        [op.alias!]: {
           [aggName]: {
-            field: op.argument,
+            field: op.argument.field,
           },
         },
       };
@@ -212,10 +233,10 @@ function buildAggregations(query: Query, esQuery: any) {
  * Convert the specified query into an Elasticsearch query that has no aggregations
  */
 function buildRaw(query: Query, esQuery: any) {
-  const cols = query.select as Column[];
+  const cols = query.select as ColumnOperation[];
   return {
     ...esQuery,
-    docvalue_fields: cols.map(({ argument }) => ({ field: argument })),
+    docvalue_fields: cols.map(({ argument: { field } }) => ({ field })),
   };
 }
 

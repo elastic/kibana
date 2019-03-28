@@ -10,10 +10,10 @@ import { toTable } from './to_table';
 describe('viz-editor/query/to_table', () => {
   test('tabularizes raw docs', () => {
     const query: Query = {
-      datsourceId: 'a',
+      datasourceRef: 'a',
       select: [
-        { operation: 'col', alias: 'total_price', argument: 'price' },
-        { operation: 'col', argument: 'discount' },
+        { operation: 'column', alias: 'total_price', argument: { field: 'price' } },
+        { operation: 'column', argument: { field: 'discount' } },
       ],
     };
     const result: any = {
@@ -42,11 +42,11 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes root aggregations', () => {
     const query: Query = {
-      datsourceId: 'a',
+      datasourceRef: 'a',
       select: [
-        { operation: 'sum', alias: 'total_price', argument: 'price' },
+        { operation: 'sum', alias: 'total_price', argument: { field: 'price' } },
         { operation: 'count', alias: 'num_recs' },
-        { operation: 'avg', alias: 'avg_price', argument: 'price' },
+        { operation: 'avg', alias: 'avg_price', argument: { field: 'price' } },
       ],
     };
     const result: any = {
@@ -73,12 +73,12 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes a group by', () => {
     const query: Query = {
-      datsourceId: 'a',
+      datasourceRef: 'a',
       select: [
-        { operation: 'col', alias: 'airport', argument: 'air_port' },
-        { operation: 'col', alias: 'destination', argument: 'dest' },
+        { operation: 'column', alias: 'airport', argument: { field: 'air_port' } },
+        { operation: 'column', alias: 'destination', argument: { field: 'dest' } },
         { operation: 'count', alias: 'num_recs' },
-        { operation: 'avg', alias: 'avg_price', argument: 'price' },
+        { operation: 'avg', alias: 'avg_price', argument: { field: 'price' } },
       ],
     };
     const result: any = {
@@ -131,7 +131,7 @@ describe('viz-editor/query/to_table', () => {
 
   test('tabularizes a date_histogram', () => {
     const query: Query = {
-      datsourceId: 'a',
+      datasourceRef: 'a',
       select: [
         {
           operation: 'date_histogram',
@@ -139,7 +139,7 @@ describe('viz-editor/query/to_table', () => {
           argument: { field: 'timestamp', interval: 'month' },
         },
         { operation: 'count', alias: 'num_recs' },
-        { operation: 'avg', alias: 'avg_price', argument: 'price' },
+        { operation: 'avg', alias: 'avg_price', argument: { field: 'price' } },
       ],
     };
     const result: any = {

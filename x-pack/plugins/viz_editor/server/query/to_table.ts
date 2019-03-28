@@ -11,7 +11,7 @@
 import {
   chunkBy,
   ChunkResult,
-  Column,
+  ColumnOperation,
   first,
   flatten,
   isEmpty,
@@ -29,7 +29,7 @@ function groupByToTable(
   result: any
 ) {
   return result.groupby.buckets.map((bucket: any) => {
-    const table = (ops as Column[]).reduce((acc: any, op: Column) => {
+    const table = (ops as ColumnOperation[]).reduce((acc: any, op: ColumnOperation) => {
       const name = op.alias!;
       acc[name] = bucket.key[name];
       return acc;
@@ -104,7 +104,7 @@ function unnestResult(groups: Array<ChunkResult<SelectOperation>>, result: any) 
  */
 function selectionCategory(op: SelectOperation): 'groupby' | 'dateHistogram' | 'agg' {
   switch (op.operation) {
-    case 'col':
+    case 'column':
       return 'groupby';
     case 'date_histogram':
       return 'dateHistogram';
@@ -119,7 +119,7 @@ function selectionCategory(op: SelectOperation): 'groupby' | 'dateHistogram' | '
 function rawToTable(select: SelectOperation[], result: any) {
   const hits = result.hits.hits || [];
   return hits.map(({ fields }: any) => {
-    return (select as Column[]).reduce((acc: any, op: Column) => {
+    return (select as ColumnOperation[]).reduce((acc: any, op: ColumnOperation) => {
       const name = op.alias!;
       acc[name] = first(fields[name]);
       return acc;
