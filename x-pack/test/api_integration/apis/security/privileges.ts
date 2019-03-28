@@ -505,6 +505,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                   'ui:apm/show',
+                  'allHack:',
                 ],
                 read: [
                   'login:',
@@ -519,7 +520,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                   'saved_object:config/find',
                   'ui:savedObjectsManagement/config/read',
                   'ui:apm/show',
-                  'allHack:',
                 ],
               },
               maps: {
