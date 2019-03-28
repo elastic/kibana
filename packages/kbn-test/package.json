@@ -10,9 +10,9 @@
     "kbn:watch": "yarn build --watch"
   },
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
     "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "@babel/cli": "^7.2.3"
+    "@kbn/dev-utils": "1.0.0"
   },
   "dependencies": {
     "chalk": "^2.4.1",
