@@ -32,6 +32,7 @@ exports[`props exportedFieldsUrl 1`] = `
         href="exported_fields_url"
         iconSide="left"
         rel="noopener noreferrer"
+        size="m"
         target="_blank"
         type="button"
       >
