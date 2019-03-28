@@ -33,7 +33,12 @@ import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constan
  * @param withinDayRange
  * @return {ReportingUsageStats}
  */
-async function getReportingUsageWithinRange(callCluster, server, reportingAvailable, withinDayRange) {
+async function getReportingUsageWithinRange(
+  callCluster,
+  server,
+  reportingAvailable,
+  withinDayRange
+) {
   const xpackInfo = server.plugins.xpack_main.info;
   const config = server.config();
 
@@ -51,10 +56,15 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
     { key: JOB_TYPES_KEY, size: exportTypesHandler.getNumExportTypes(), name: 'jobtype' },
     { key: OBJECT_TYPES_KEY, size: 3, name: 'meta.objectType.keyword' },
     { key: LAYOUT_TYPES_KEY, size: 3, name: 'meta.layout.keyword' },
-    { key: STATUS_TYPES_KEY, size: 4, name: 'status'  },
+    { key: STATUS_TYPES_KEY, size: 4, name: 'status' },
   ];
 
-  const fieldTotals = await getReportCountsByParameter(callCluster, config, fieldsAndSizes, withinDayRange);
+  const fieldTotals = await getReportCountsByParameter(
+    callCluster,
+    config,
+    fieldsAndSizes,
+    withinDayRange
+  );
 
   // 2. combine types with jobs seen in the reporting data
   const { total, counts: jobTypeCounts } = fieldTotals[JOB_TYPES_KEY];
@@ -69,7 +79,8 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
     let jobTotal; // if this remains undefined, the key/value gets removed in serialization
     if (jobTotalFromData || jobTotalFromData === 0) {
       jobTotal = jobTotalFromData;
-    } else if (reportingAvailable) { // jobtype is not in the agg result because it has never been used
+    } else if (reportingAvailable) {
+      // jobtype is not in the agg result because it has never been used
       jobTotal = 0;
     }
 
@@ -78,7 +89,7 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
       [key]: {
         available: availabilityFromData ? availabilityFromData : false,
         total: jobTotal,
-      }
+      },
     };
   }, {});
 
@@ -90,23 +101,23 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
     // If a customer has pdf reporting enabled but has never created a report of a given type, or on a given
     // app, it won't be returned. Hence we check for each value explicitly and track 0 if it doesn't exist.
     jobTypes.printable_pdf.app = {
-      'visualization': appCounts.visualization || 0,
-      'dashboard': appCounts.dashboard || 0,
+      visualization: appCounts.visualization || 0,
+      dashboard: appCounts.dashboard || 0,
     };
     jobTypes.printable_pdf.layout = {
-      'print': layoutCounts.print || 0,
-      'preserve_layout': layoutCounts.preserve_layout || 0,
+      print: layoutCounts.print || 0,
+      preserve_layout: layoutCounts.preserve_layout || 0,
     };
   }
 
   const { counts: statusCounts } = fieldTotals[STATUS_TYPES_KEY];
 
   return {
-    _all: (total || total === 0) ? total : undefined,
+    _all: total || total === 0 ? total : undefined,
     ...jobTypes,
-    'status': {
-      ...statusCounts
-    }
+    status: {
+      ...statusCounts,
+    },
   };
 }
 
@@ -126,9 +137,23 @@ export function getReportingUsageCollector(server) {
       const enabled = config.get('xpack.reporting.enabled'); // follow ES behavior: if its not available then its not enabled
       const reportingAvailable = available && enabled;
 
-      const statsOverAllTime = await getReportingUsageWithinRange(callCluster, server, reportingAvailable);
-      const statsOverLast1Day = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 1);
-      const statsOverLast7Days = await getReportingUsageWithinRange(callCluster, server, reportingAvailable, 7);
+      const statsOverAllTime = await getReportingUsageWithinRange(
+        callCluster,
+        server,
+        reportingAvailable
+      );
+      const statsOverLast1Day = await getReportingUsageWithinRange(
+        callCluster,
+        server,
+        reportingAvailable,
+        1
+      );
+      const statsOverLast7Days = await getReportingUsageWithinRange(
+        callCluster,
+        server,
+        reportingAvailable,
+        7
+      );
 
       let browserType;
       if (enabled) {
@@ -143,11 +168,11 @@ export function getReportingUsageCollector(server) {
         browser_type: browserType,
         ...statsOverAllTime,
         lastDay: {
-          ...statsOverLast1Day
+          ...statsOverLast1Day,
         },
         last7Days: {
-          ...statsOverLast7Days
-        }
+          ...statsOverLast7Days,
+        },
       };
     },
 
@@ -162,11 +187,11 @@ export function getReportingUsageCollector(server) {
         payload: {
           usage: {
             xpack: {
-              reporting: result
-            }
-          }
-        }
+              reporting: result,
+            },
+          },
+        },
       };
-    }
+    },
   });
 }

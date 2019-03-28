@@ -17,21 +17,21 @@ function getServerMock(customization) {
   const defaultServerMock = {
     plugins: {
       security: {
-        isAuthenticated: sinon.stub().returns(true)
+        isAuthenticated: sinon.stub().returns(true),
       },
       xpack_main: {
         info: {
           isAvailable: sinon.stub().returns(true),
           feature: () => ({
-            getLicenseCheckResults
+            getLicenseCheckResults,
           }),
           license: {
             isOneOf: sinon.stub().returns(false),
             getType: sinon.stub().returns('platinum'),
           },
-          toJSON: () => ({ b: 1 })
-        }
-      }
+          toJSON: () => ({ b: 1 }),
+        },
+      },
     },
     expose: () => {},
     log: () => {},
@@ -42,15 +42,15 @@ function getServerMock(customization) {
         } else if (key === 'xpack.reporting.index') {
           return '.reporting-index';
         }
-      }
+      },
     }),
     usage: {
       collectorSet: {
         makeUsageCollector: options => {
           return new MockUsageCollector(this, options);
-        }
-      }
-    }
+        },
+      },
+    },
   };
   return Object.assign(defaultServerMock, customization);
 }
@@ -74,7 +74,9 @@ describe('with a basic license', async () => {
   let usageStats;
   beforeAll(async () => {
     const serverWithBasicLicenseMock = getServerMock();
-    serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('basic');
+    serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = sinon
+      .stub()
+      .returns('basic');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
     const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithBasicLicenseMock);
     usageStats = await getReportingUsage(callClusterMock);
@@ -120,7 +122,9 @@ describe('with platinum license', async () => {
   let usageStats;
   beforeAll(async () => {
     const serverWithPlatinumLicenseMock = getServerMock();
-    serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon.stub().returns('platinum');
+    serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = sinon
+      .stub()
+      .returns('platinum');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
     const { fetch: getReportingUsage } = getReportingUsageCollector(serverWithPlatinumLicenseMock);
     usageStats = await getReportingUsage(callClusterMock);
