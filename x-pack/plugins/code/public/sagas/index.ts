@@ -34,7 +34,12 @@ import {
   watchIndexRepo,
   watchInitRepoCmd,
 } from './repository';
-import { watchDocumentSearch, watchRepositorySearch, watchSearchRouteChange } from './search';
+import {
+  watchDocumentSearch,
+  watchRepoScopeSearch,
+  watchRepositorySearch,
+  watchSearchRouteChange,
+} from './search';
 import { watchRootRoute } from './setup';
 import { watchRepoCloneSuccess, watchRepoDeleteFinished } from './status';
 import { watchLoadStructure } from './structure';
@@ -77,4 +82,5 @@ export function* rootSaga() {
   yield fork(watchRepoDeleteStatusPolling);
   yield fork(watchRepoIndexStatusPolling);
   yield fork(watchRepoCloneStatusPolling);
+  yield fork(watchRepoScopeSearch);
 }
