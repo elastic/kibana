@@ -17,61 +17,49 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
-import { TimelionRequestHandlerProvider } from 'plugins/timelion/vis/timelion_request_handler';
-
-
+import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import chrome from 'ui/chrome';
 
-export const timelionVis = () => ({
-  name: 'timelion_vis',
+export const vislib = () => ({
+  name: 'vislib',
   type: 'render',
   context: {
     types: [
-      'kibana_context',
-      'null',
+      'kibana_datatable'
     ],
   },
-  help: i18n.translate('interpreter.functions.timelion.help', {
-    defaultMessage: 'Timelion visualization'
+  help: i18n.translate('kbnVislibVisTypes.functions.vislib.help', {
+    defaultMessage: 'Vislib visualization'
   }),
   args: {
-    expression: {
-      types: ['string'],
-      aliases: ['_'],
-      default: '".es(*)"',
-    },
-    interval: {
+    visConfig: {
       types: ['string', 'null'],
-      default: 'auto',
-    }
+      default: '"{}"',
+    },
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const timelionRequestHandler = Private(TimelionRequestHandlerProvider).handler;
+    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
+    const visConfigParams = JSON.parse(args.visConfig);
 
-    const visParams = { expression: args.expression, interval: args.interval };
-
-    const response = await timelionRequestHandler({
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
-      forceFetch: true,
-      visParams: visParams,
-    });
-
-    response.visType = 'timelion';
+    const convertedData = await responseHandler(context, visConfigParams.dimensions);
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visParams,
-        visType: 'timelion',
-        visData: response,
+        visData: convertedData,
+        visType: args.type,
+        visConfig: visConfigParams,
+        params: {
+          listenOnChange: true,
+        }
       },
     };
   },
 });
+
+functionsRegistry.register(vislib);

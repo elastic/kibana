@@ -17,46 +17,35 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { regionmap } from './regionmap';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { inputControlVis } from './input_control_fn';
 
-describe('interpreter/functions#regionmap', () => {
-  const fn = functionWrapper(regionmap);
-  const context = {
-    type: 'kibana_datatable',
-    rows: [{ 'col-0-1': 0 }],
-    columns: [{ id: 'col-0-1', name: 'Count' }],
-  };
+describe('interpreter/functions#input_control_vis', () => {
+  const fn = functionWrapper(inputControlVis);
   const visConfig = {
-    legendPosition: 'bottomright',
-    addTooltip: true,
-    colorSchema: 'Yellow to Red',
-    emsHotLink: '',
-    selectedJoinField: null,
-    isDisplayWarning: true,
-    wms: {
-      enabled: false,
-      options: {
-        format: 'image/png',
-        transparent: true
-      }
-    },
-    mapZoom: 2,
-    mapCenter: [0, 0],
-    outlineWeight: 1,
-    showAllShapes: true,
-    metric: {
-      accessor: 0,
-      format: {
-        id: 'number'
+    controls: [
+      {
+        id: '123',
+        fieldName: 'geo.src',
+        label: 'Source Country',
+        type: 'list',
+        options: {
+          type: 'terms',
+          multiselect: true,
+          size: 100,
+          order: 'desc'
+        },
+        parent: '',
+        indexPatternRefName: 'control_0_index_pattern'
       },
-      params: {},
-      aggType: 'count'
-    }
+    ],
+    updateFiltersOnChange: false,
+    useTimeFilter: false,
+    pinFilters: false,
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });
