@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
 import { LICENSE_STATUS_INVALID, LICENSE_STATUS_VALID } from '../../../../../common/constants';
 

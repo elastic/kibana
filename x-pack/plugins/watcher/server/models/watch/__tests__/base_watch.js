@@ -5,7 +5,7 @@
  */
 
 import proxyquire from 'proxyquire';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 const actionFromUpstreamJSONMock = sinon.stub();

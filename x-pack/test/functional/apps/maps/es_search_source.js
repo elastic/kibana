@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
@@ -73,12 +73,37 @@ export default function ({ getPageObjects, getService }) {
         expect(beforeQueryRefreshTimestamp).not.to.equal(afterQueryRefreshTimestamp);
       });
 
-      it('should apply query to fit to bounds', async () => {
+      it.skip('should apply query to fit to bounds', async () => {
         // Set view to other side of world so no matching results
         await PageObjects.maps.setView(-15, -100, 6);
         await PageObjects.maps.clickFitToBounds('logstash');
         const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(Math.round(lat)).to.equal(41);
+        expect(Math.round(lon)).to.equal(-102);
+        expect(Math.round(zoom)).to.equal(5);
+      });
+    });
+
+    describe('layer query', () => {
+      before(async () => {
+        await PageObjects.maps.setLayerQuery('logstash', 'machine.os.raw : "ios"');
+      });
+
+      it('should apply layer query to search request', async () => {
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestStats = await inspector.getTableData();
+        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        await inspector.close();
+        expect(hits).to.equal('2');
+      });
+
+      it.skip('should apply layer query to fit to bounds', async () => {
+        // Set view to other side of world so no matching results
+        await PageObjects.maps.setView(-15, -100, 6);
+        await PageObjects.maps.clickFitToBounds('logstash');
+        const { lat, lon, zoom } = await PageObjects.maps.getView();
+        expect(Math.round(lat)).to.equal(42);
         expect(Math.round(lon)).to.equal(-102);
         expect(Math.round(zoom)).to.equal(5);
       });

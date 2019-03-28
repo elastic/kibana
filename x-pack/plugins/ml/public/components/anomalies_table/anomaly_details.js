@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
-import { EntityCell } from './entity_cell';
+import { EntityCell } from '../entity_cell';
 import {
   getMultiBucketImpactLabel,
   getSeverity,
