@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -68,6 +68,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
             name: 'My favorite global object',
           },
           references: [],
+          updated_at: '2017-09-21T18:59:16.270Z',
         },
       ],
     });
@@ -100,7 +101,17 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
           attributes: {
             title: 'Count of requests',
           },
-          references: [],
+          migrationVersion: {
+            visualization: '7.0.0',
+          },
+          references: [
+            {
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+            },
+          ],
+          updated_at: '2017-09-21T18:51:23.794Z',
         },
       ],
     });

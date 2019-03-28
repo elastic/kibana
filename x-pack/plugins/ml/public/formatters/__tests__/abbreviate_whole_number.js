@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { abbreviateWholeNumber } from '../abbreviate_whole_number';
 
 describe('ML - abbreviateWholeNumber formatter', () => {
