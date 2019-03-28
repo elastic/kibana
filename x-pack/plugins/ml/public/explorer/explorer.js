@@ -810,7 +810,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       this.setState(stateUpdate);
 
-      if (selectedCells !== null || influencersFilterQuery !== undefined) {
+      if (selectedCells !== null) {
         this.updateCharts(
           stateUpdate.anomalyChartRecords, timerange.earliestMs, timerange.latestMs
         );
@@ -926,7 +926,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       }
     }
 
-    applyFilterFromTable = (fieldName, fieldValue, action) => {
+    applyFilter = (fieldName, fieldValue, action) => {
       let newQueryString = '';
       const { queryString } = this.state;
       const operator = 'and ';
@@ -1107,7 +1107,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   defaultMessage="Top Influencers"
                 />
               </span>
-              <InfluencersList influencers={influencers} />
+              <InfluencersList
+                influencers={influencers}
+                influencerFilter={this.applyFilter}
+              />
             </div>
           )}
 
@@ -1274,7 +1277,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
                   <SelectInterval />
                 </EuiFormRow>
               </EuiFlexItem>
-              {anomalyChartRecords.length > 0 && (
+              {(anomalyChartRecords.length > 0 && selectedCells !== null) && (
                 <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                   <EuiFormRow label="&#8203;">
                     <CheckboxShowCharts />
@@ -1292,7 +1295,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
             <AnomaliesTable
               tableData={tableData}
               timefilter={timefilter}
-              influencerFilter={this.applyFilterFromTable}
+              influencerFilter={this.applyFilter}
             />
           </div>
         </div>

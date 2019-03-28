@@ -9,7 +9,7 @@ import { BASE_PATH } from '../../../common/constants';
 
 export const listBreadcrumb = {
   text: i18n.translate('xpack.crossClusterReplication.homeBreadcrumbTitle', {
-    defaultMessage: 'Cross Cluster Replication',
+    defaultMessage: 'Cross-Cluster Replication',
   }),
   href: `#${BASE_PATH}`,
 };

@@ -17,7 +17,7 @@ module.exports = (_baseConfig, _env, config) => {
       include: /\.storybook/,
       loaders: 'babel-loader',
       options: {
-        presets: [require.resolve('babel-preset-react')],
+        presets: [require.resolve('@babel/preset-react')],
       },
     },
   );
