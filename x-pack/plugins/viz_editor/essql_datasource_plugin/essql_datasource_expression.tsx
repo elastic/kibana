@@ -8,6 +8,7 @@
 
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
+import { kfetch } from 'ui/kfetch';
 
 // This simply registers a pipeline function and a pipeline renderer to the global pipeline
 // context. It will be used by the editor config which is shipped in the same plugin, but
@@ -29,12 +30,12 @@ function filterRows(keep: string[], rows: Array<{ [id: string]: any }>) {
   });
 }
 
-function literalTableFunction() {
+function essqlFunction() {
   return {
-    name: 'literal_table',
+    name: 'client_essql',
     type: 'datatable',
     args: {
-      lines: {
+      query: {
         types: ['string'],
       },
       keep: {
@@ -42,34 +43,20 @@ function literalTableFunction() {
       },
     },
     context: { types: [] },
-    fn(context: any, args: any) {
-      const text = JSON.parse(args.lines) as string[];
-      const keepColumns: string[] = JSON.parse(args.keep);
-
-      const rows = text.map(row => row.split(','));
-      const headerRow = rows.shift() as string[];
-      const firstRow = rows[0];
-
-      const columns: Array<{ id: string; type: string }> = headerRow.map(
-        (columnHeader: string, index: number) => ({
-          id: columnHeader,
-          type: /\d+/.test(firstRow[index]) ? 'number' : 'string',
-        })
-      );
-
-      const parsedRows = rows.map(row => {
-        const parsedRow = {} as any;
-        row.forEach((val, index) => {
-          const currentColumn = columns[index];
-          parsedRow[currentColumn.id] = currentColumn.type === 'string' ? val : Number(val);
-        });
-        return parsedRow;
+    async fn(context: any, args: any) {
+      const result: any = await kfetch({
+        pathname: '/api/viz_editor/sql',
+        method: 'POST',
+        body: JSON.stringify({
+          sql: args.query,
+        }),
       });
+      const keepColumns: string[] = JSON.parse(args.keep);
 
       return {
         type: 'datatable',
-        rows: filterRows(keepColumns, parsedRows),
-        columns: filterColumns(keepColumns, columns),
+        rows: filterRows(keepColumns, result.rows),
+        columns: filterColumns(keepColumns, result.columns),
       };
     },
   };
@@ -77,20 +64,10 @@ function literalTableFunction() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [literalTableFunction],
+    browserFunctions: [essqlFunction],
   });
 };
 
-/*
-Working example:
-col-1,count
-1,1
-2,5
-3,4
-4,0
-5,2
-6,2
-7,8
-8,8
-9,4
+/* Working version (with sample data loaded)
+SELECT HISTOGRAM(bytes, 100) AS bytes_bucket, COUNT(*) AS count FROM kibana_sample_data_logs GROUP BY bytes_bucket
 */

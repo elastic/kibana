@@ -9,7 +9,8 @@
 // ------------------------------------------------------------------------------------------
 
 import { Legacy } from 'kibana';
-import { API_PREFIX, Query } from '../../common';
+import { zipObject } from 'lodash';
+import { API_PREFIX } from '../../common';
 
 /**
  * Expose a RESTful endpoint that runs an Elasticsearch query based on our
@@ -50,7 +51,14 @@ export function route(server: Legacy.Server) {
         },
       });
 
-      return result;
+      const columns = result.columns.map((column: any) => ({ id: column.name, type: column.type }));
+      const columnIds = columns.map((column: any) => column.id);
+      const rows = result.rows.map((row: any) => zipObject(columnIds, row));
+
+      return {
+        columns,
+        rows,
+      };
     },
   });
 }

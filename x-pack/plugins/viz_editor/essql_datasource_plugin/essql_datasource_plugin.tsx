@@ -61,7 +61,7 @@ function toExpression(viewState: VisModel) {
   const firstQuery = Object.values(viewState.queries)[0];
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
-  return `essql keep='${
+  return `client_essql keep='${
     viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
   }' query='${viewState.datasource ? viewState.datasource.meta.sql : ''}'`;
 }

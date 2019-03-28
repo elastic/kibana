@@ -26,6 +26,9 @@ async function runAndRender(
         /* this is just here for compatibility with legacy kibana renderers */
       },
     });
+  } else {
+    // tslint:disable-next-line:no-console
+    console.log('Unexpected result of expression', response);
   }
 }
 
