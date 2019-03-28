@@ -9,7 +9,7 @@ import { connectAdvanced } from 'react-redux';
 import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
 import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
-import { getState, getValue, getError } from '../../lib/resolved_arg';
+import { getState, getValue } from '../../lib/resolved_arg';
 import { ElementWrapper as Component } from './element_wrapper';
 import { createHandlers as createHandlersWithDispatch } from './lib/handlers';
 
@@ -30,7 +30,6 @@ function selectorFactory(dispatch) {
       // state and state-derived props
       selectedPage,
       state: getState(resolvedArg),
-      error: getError(resolvedArg),
       renderable: getValue(resolvedArg),
       // pass along the handlers creation function
       createHandlers,
@@ -39,6 +38,7 @@ function selectorFactory(dispatch) {
       width,
       height,
       // pass along only the useful parts of the element object
+      // so handlers object can be created
       element: {
         id: element.id,
         filter: element.filter,
@@ -69,7 +69,7 @@ export const ElementWrapper = compose(
   mapProps(props => {
     // remove elements and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
-    const { element, createHandlers, ...restProps } = props;
+    const { element, createHandlers, selectedPage, ...restProps } = props;
     return restProps;
   })
 )(Component);
