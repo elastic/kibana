@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Brand } from '../../../../core/public/chrome';
+import { Brand } from '../../../../core/public/';
 import { SavedObjectsClient } from '../saved_objects';
 import { BreadcrumbsApi } from './api/breadcrumbs';
 import { HelpExtensionApi } from './api/help_extension';

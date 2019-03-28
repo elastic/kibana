@@ -20,7 +20,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { Breadcrumb } from '../../../../../../../core/public/';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {

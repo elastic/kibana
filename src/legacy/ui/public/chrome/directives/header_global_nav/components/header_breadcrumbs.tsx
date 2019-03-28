@@ -26,7 +26,7 @@ import {
   EuiHeaderBreadcrumbs,
 } from '@elastic/eui';
 
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { Breadcrumb } from '../../../../../../../core/public/';
 
 interface Props {
   appTitle?: string;

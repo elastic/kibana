@@ -19,7 +19,7 @@
 
 import { IRootScopeService } from 'angular';
 import { fatalError } from 'ui/notify/fatal_error';
-import { Breadcrumb, ChromeSetup } from '../../../../../core/public/chrome';
+import { Breadcrumb, ChromeSetup } from '../../../../../core/public';
 export { Breadcrumb };
 
 export type BreadcrumbsApi = ReturnType<typeof createBreadcrumbsApi>['breadcrumbs'];

@@ -18,13 +18,13 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
+import { Brand, Breadcrumb, ChromeSetup, HelpExtension } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { UiSettingsSetup } from './ui_settings';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
 export { CoreSystem } from './core_system';
 
@@ -38,3 +38,24 @@ export interface CoreSetup {
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
 }
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  // TODO add Chrome
+  ChromeSetup,
+  Brand,
+  Breadcrumb,
+  HelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};
