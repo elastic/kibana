@@ -57,23 +57,29 @@ export class LspIncrementalIndexer extends LspIndexer {
 
     switch (kind) {
       case DiffKind.ADDED: {
-        this.log.debug(`Index ADDED file`);
+        this.log.info(`Index ADDED file`);
         await this.handleAddedRequest(request, stats);
+        break;
       }
       case DiffKind.DELETED: {
-        this.log.debug(`Index DELETED file`);
-        // TODO: implement delete. We need the encode document id for delete now.
+        this.log.info(`Index DELETED file`);
+        await this.handleDeletedRequest(request, stats);
+        break;
       }
       case DiffKind.MODIFIED: {
-        this.log.debug(`Index MODIFYED file`);
-        // TODO: implement modified
+        this.log.info(`Index MODIFYED file`);
+        await this.handleModifiedRequest(request, stats);
+        break;
       }
       case DiffKind.RENAMED: {
-        this.log.debug(`Index RENAMED file`);
-        // TODO: implement renamed
+        this.log.info(`Index RENAMED file`);
+        await this.handleRenamedRequest(request, stats);
+        break;
       }
       default: {
-        this.log.debug(`Unsupported diff kind ${kind} for incremental indexing.`);
+        this.log.debug(
+          `Unsupported diff kind ${kind} for incremental indexing. Skip this request.`
+        );
       }
     }
 
@@ -178,5 +184,63 @@ export class LspIncrementalIndexer extends LspIndexer {
     };
     await this.batchIndexHelper.index(DocumentIndexName(repoUri), body);
     stats.set(IndexStatsKey.File, 1);
+  }
+
+  private async handleDeletedRequest(request: LspIncIndexRequest, stats: IndexStats) {
+    const { revision, filePath, repoUri } = request;
+
+    // Delete the document with the exact file path. TODO: add stats
+    const docRes = await this.client.deleteByQuery({
+      index: DocumentIndexName(repoUri),
+      body: {
+        query: {
+          term: {
+            'path.hierarchy': filePath,
+          },
+        },
+      },
+    });
+    stats.set(IndexStatsKey.FileDeleted, docRes.deleted);
+
+    const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
+
+    // Delete all symbols within this file
+    const symbolRes = await this.client.deleteByQuery({
+      index: SymbolIndexName(repoUri),
+      body: {
+        query: {
+          term: {
+            'symbolInformation.location.uri': lspDocUri,
+          },
+        },
+      },
+    });
+    stats.set(IndexStatsKey.SymbolDeleted, symbolRes.deleted);
+
+    // TODO: When references is enabled. Clean up the references as well.
+  }
+
+  private async handleModifiedRequest(request: LspIncIndexRequest, stats: IndexStats) {
+    const { kind, originRevision, originPath, repoUri, localRepoPath } = request;
+
+    // 1. first delete all related indexed data
+    await this.handleDeletedRequest(
+      {
+        repoUri,
+        localRepoPath,
+        revision: originRevision,
+        filePath: originPath ? originPath : '',
+        kind,
+        originRevision,
+      },
+      stats
+    );
+    // 2. index data with modified version
+    await this.handleAddedRequest(request, stats);
+  }
+
+  private async handleRenamedRequest(request: LspIncIndexRequest, stats: IndexStats) {
+    // Do the same as modified file
+    await this.handleModifiedRequest(request, stats);
   }
 }

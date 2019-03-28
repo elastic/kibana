@@ -39,9 +39,8 @@ export const SymbolSchema = {
       location: {
         properties: {
           uri: {
-            type: 'text',
-            index: false,
-            norms: false,
+            // Indexed now for symbols batch deleting in incremental indexing
+            type: 'keyword',
           },
         },
       },

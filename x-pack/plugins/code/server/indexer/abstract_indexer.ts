@@ -72,6 +72,7 @@ export abstract class AbstractIndexer implements Indexer {
 
       // If checkpoint is not undefined and not empty
       if (checkpointReq) {
+        // TODO(mengwei): move this checkpoint matching process to an abstract function
         // Assume for the same revision, everything we iterate the repository,
         // the order of the files is definite.
         // @ts-ignore

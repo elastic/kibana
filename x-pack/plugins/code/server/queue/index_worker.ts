@@ -137,7 +137,7 @@ export class IndexWorker extends AbstractWorker {
 
   public async updateProgress(job: Job, progress: number) {
     const { uri } = job.payload;
-    const p: any = {
+    let p: any = {
       uri,
       progress,
       timestamp: new Date(),
