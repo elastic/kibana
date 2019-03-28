@@ -133,7 +133,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     const parentFieldName = field.name.split('.').slice(0, -1).join('.');
     const parentFieldCaps = kibanaFormattedCaps.find(caps => caps.name === parentFieldName);
 
-    if (!['object', 'nested'].includes(parentFieldCaps.type)) {
+    if (parentFieldCaps && !['object', 'nested'].includes(parentFieldCaps.type)) {
       field.parent = parentFieldName;
       field.subType = 'multi';
     }
