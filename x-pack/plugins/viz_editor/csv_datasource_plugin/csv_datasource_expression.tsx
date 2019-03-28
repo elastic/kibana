@@ -13,6 +13,22 @@ import { register } from '@kbn/interpreter/common';
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
+function filterColumns(keep: string[], columns: Array<{ id: string; type: string }>) {
+  return keep.map(columnId => {
+    return columns.find(column => column.id === columnId);
+  });
+}
+
+function filterRows(keep: string[], rows: Array<{ [id: string]: any }>) {
+  return rows.map(row => {
+    const newRow = {} as any;
+    keep.forEach(columnId => {
+      newRow[columnId] = row[columnId];
+    });
+    return newRow;
+  });
+}
+
 function literalTableFunction() {
   return {
     name: 'literal_table',
@@ -21,10 +37,14 @@ function literalTableFunction() {
       lines: {
         types: ['string'],
       },
+      keep: {
+        types: ['string'],
+      },
     },
     context: { types: [] },
     fn(context: any, args: any) {
       const text = JSON.parse(args.lines) as string[];
+      const keepColumns: string[] = JSON.parse(args.keep);
 
       const rows = text.map(row => row.split(','));
       const headerRow = rows.shift() as string[];
@@ -48,8 +68,8 @@ function literalTableFunction() {
 
       return {
         type: 'datatable',
-        rows: parsedRows,
-        columns,
+        rows: filterRows(keepColumns, parsedRows),
+        columns: filterColumns(keepColumns, columns),
       };
     },
   };

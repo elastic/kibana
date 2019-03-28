@@ -5,3 +5,4 @@
  */
 
 export { config } from './essql_datasource_plugin';
+export { registerPipeline } from './essql_datasource_expression';

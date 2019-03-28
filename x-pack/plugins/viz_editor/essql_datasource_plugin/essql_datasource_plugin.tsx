@@ -55,9 +55,15 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
 }
 
 function toExpression(viewState: VisModel) {
+  if (Object.keys(viewState.queries).length === 0) {
+    return '';
+  }
+  const firstQuery = Object.values(viewState.queries)[0];
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
-  return `essql query='${viewState.datasource ? viewState.datasource.meta.sql : ''}'`;
+  return `essql keep='${
+    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
+  }' query='${viewState.datasource ? viewState.datasource.meta.sql : ''}'`;
 }
 
 export const config: DatasourcePlugin<VisModel> = {

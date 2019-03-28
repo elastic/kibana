@@ -56,9 +56,15 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
 }
 
 function toExpression(viewState: VisModel) {
+  if (Object.keys(viewState.queries).length === 0) {
+    return '';
+  }
+  const firstQuery = Object.values(viewState.queries)[0];
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
-  return `literal_table lines='${
+  return `literal_table keep='${
+    viewState.datasource ? JSON.stringify(firstQuery.select.map(column => column.alias)) : '[]'
+  }' lines='${
     viewState.datasource ? JSON.stringify(viewState.datasource.meta.text.split('\n')) : '[]'
   }'`;
 }

@@ -35,4 +35,22 @@ export function route(server: Legacy.Server) {
       return result.columns;
     },
   });
+
+  server.route({
+    path: `${API_PREFIX}/sql`,
+    method: 'POST',
+    async handler(req) {
+      const payload = req.payload as any;
+      const result = await callWithRequest(req, 'transport.request', {
+        path: '/_sql?format=json',
+        method: 'POST',
+        body: {
+          query: payload.sql,
+          fetch_size: 500,
+        },
+      });
+
+      return result;
+    },
+  });
 }

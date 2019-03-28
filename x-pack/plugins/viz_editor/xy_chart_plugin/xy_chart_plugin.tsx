@@ -176,7 +176,7 @@ function getSuggestionsForField(indexPatternName: string, field: Field, visModel
     queries: {
       q1: {
         datasourceRef: indexPatternName,
-        select: [firstOperation, { operation: 'count' }],
+        select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
       },
     },
     private: {
