@@ -22,11 +22,11 @@ import { cloneDeep } from 'lodash';
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-
 export async function BrowserProvider({ getService }) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   class BrowserService {
+
     /**
      * Keyboard events
      */
@@ -126,8 +126,8 @@ export async function BrowserProvider({ getService }) {
     async dragAndDrop(from, to) {
       let _from;
       let _to;
-      const _fromOffset = from.offset ? { x: from.offset.x || 0, y: from.offset.y || 0 } : { x: 0, y: 0 };
-      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
+      const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
+      const _toOffset = (to.offset) ? { x: to.offset.x || 0,  y: to.offset.y || 0 } : { x: 0, y: 0 };
 
       const convertPointW3C = async (point, offset) => {
         if (point.location instanceof WebElementWrapper) {
@@ -387,5 +387,5 @@ export async function BrowserProvider({ getService }) {
     }
   }
 
-  return new BrowserService();
+  return  new BrowserService();
 }

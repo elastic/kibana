@@ -120,9 +120,7 @@ describe('ml_telemetry', () => {
               }
               return {
                 attributes: {
-                  telemetry: {
-                    enabled: telemetryEnabled,
-                  },
+                  enabled: telemetryEnabled,
                 },
               };
             case 'ml-telemetry':

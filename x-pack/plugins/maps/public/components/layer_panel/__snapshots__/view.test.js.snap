@@ -103,6 +103,7 @@ exports[`LayerPanel is rendered 1`] = `
           "getImmutableSourceProperties": [Function],
           "getLayerTypeIconName": [Function],
           "isJoinable": [Function],
+          "supportsElasticsearchFilters": [Function],
         }
       }
     />
