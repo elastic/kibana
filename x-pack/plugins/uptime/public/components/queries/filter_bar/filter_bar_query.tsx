@@ -23,12 +23,13 @@ interface FilterBarProps {
 
 type Props = FilterBarProps & UptimeCommonProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
 
-export const makeFilterBarQuery = ({ currentQuery, data, loading, updateQuery }: Props) => {
-  if (loading || !data || !data.filterBar) {
-    return <FilterBarLoading />;
+export const makeFilterBarQuery = ({ currentQuery, data, updateQuery }: Props) => {
+  if (data && data.filterBar) {
+    return (
+      <FilterBar currentQuery={currentQuery} filterBar={data.filterBar} updateQuery={updateQuery} />
+    );
   }
-  const { filterBar } = data;
-  return <FilterBar currentQuery={currentQuery} filterBar={filterBar} updateQuery={updateQuery} />;
+  return <FilterBarLoading />;
 };
 
 export const FilterBarQuery = withUptimeGraphQL<FilterBarQueryResult, FilterBarProps>(
