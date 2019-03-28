@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Git from '@elastic/nodegit';
 import fs from 'fs';
 import path from 'path';
 
@@ -18,9 +17,6 @@ import { WorkspaceHandler } from './workspace_handler';
 const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_test'));
 const workspaceDir = path.join(baseDir, 'workspace');
 const repoDir = path.join(baseDir, 'repo');
-
-// @ts-ignore
-Git.enableThreadSafety();
 
 function handleResponseUri(wh: WorkspaceHandler, uri: string) {
   const dummyRequest: LspRequest = {
@@ -44,9 +40,9 @@ function handleResponseUri(wh: WorkspaceHandler, uri: string) {
 
 function makeAFile(
   workspacePath: string = workspaceDir,
-  file = 'src/controllers/user.ts',
   repo = 'github.com/Microsoft/TypeScript-Node-Starter',
-  revision = 'master'
+  revision = 'master',
+  file = 'src/controllers/user.ts'
 ) {
   const fullPath = path.join(workspacePath, repo, '__randomString', revision, file);
   mkdirp.sync(path.dirname(fullPath));
@@ -114,58 +110,6 @@ test('should throw a error if url is invalid', async () => {
   const invalidDir = path.join(baseDir, 'invalid_dir');
   const { uri } = makeAFile(invalidDir);
   expect(() => handleResponseUri(workspaceHandler, uri)).toThrow();
-});
-
-async function prepareProject(repoPath: string) {
-  mkdirp.sync(repoPath);
-  const repo = await Git.Repository.init(repoPath, 0);
-  const content = 'console.log("test")';
-  const subFolder = 'src';
-  fs.mkdirSync(path.join(repo.workdir(), subFolder));
-  fs.writeFileSync(path.join(repo.workdir(), 'src/app.ts'), content, 'utf8');
-
-  const index = await repo.refreshIndex();
-  await index.addByPath('src/app.ts');
-  index.write();
-  const treeId = await index.writeTree();
-  const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
-  const commit = await repo.createCommit(
-    'HEAD',
-    committer,
-    committer,
-    'commit for test',
-    treeId,
-    []
-  );
-  return { repo, commit };
-}
-
-test('should throw a error if file path is external', async () => {
-  const workspaceHandler = new WorkspaceHandler(
-    repoDir,
-    workspaceDir,
-    // @ts-ignore
-    null,
-    new ConsoleLoggerFactory()
-  );
-  const repoUri = 'github.com/microsoft/typescript-node-starter';
-  await prepareProject(path.join(repoDir, repoUri));
-  const externalFile = 'node_modules/abbrev/abbrev.js';
-  const request: LspRequest = {
-    method: 'textDocument/hover',
-    params: {
-      position: {
-        line: 8,
-        character: 23,
-      },
-      textDocument: {
-        uri: `git://${repoUri}/blob/master/${externalFile}`,
-      },
-    },
-  };
-  await expect(workspaceHandler.handleRequest(request)).rejects.toEqual(
-    new Error('invalid fle path in requests.')
-  );
 });
 
 beforeAll(() => {

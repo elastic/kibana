@@ -30,26 +30,17 @@ export default function exploreRepositoryFunctonalTests({
 
         // Prepare a git repository for the test
         await PageObjects.code.fillImportRepositoryUrlInputBox(
-          'https://github.com/Microsoft/TypeScript-Node-Starter'
+          'https://github.com/elastic/TypeScript-Node-Starter'
         );
         // Click the import repository button.
         await PageObjects.code.clickImportRepositoryButton();
 
-        await retry.tryForTime(300000, async () => {
+        await retry.tryForTime(10000, async () => {
           const repositoryItems = await testSubjects.findAll(repositoryListSelector);
           expect(repositoryItems).to.have.length(1);
           expect(await repositoryItems[0].getVisibleText()).to.equal(
-            'Microsoft/TypeScript-Node-Starter'
+            'elastic/TypeScript-Node-Starter'
           );
-
-          // Wait for the index to start.
-          await retry.try(async () => {
-            expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
-          });
-          // Wait for the index to end.
-          await retry.try(async () => {
-            expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
-          });
         });
       });
 
@@ -77,6 +68,16 @@ export default function exploreRepositoryFunctonalTests({
         await testSubjects.click(repositoryListSelector);
       });
 
+      it('tree should be loaded', async () => {
+        await retry.tryForTime(5000, async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src-doc')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-test')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-views')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-File-package.json')).ok();
+        });
+      });
+
       it('Click file/directory on the file tree', async () => {
         log.debug('Click a file in the source tree');
         // Wait the file tree to be rendered and click the 'src' folder on the file tree.
@@ -85,6 +86,15 @@ export default function exploreRepositoryFunctonalTests({
         });
 
         await testSubjects.click('codeFileTreeNode-Directory-src');
+
+        await retry.tryForTime(1000, async () => {
+          // should only open one folder at this time
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
+        log.info('src folder opened');
         await retry.try(async () => {
           expect(await testSubjects.exists('codeFileTreeNode-Directory-src/models')).to.be(true);
         });
@@ -100,6 +110,26 @@ export default function exploreRepositoryFunctonalTests({
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
+        // open another folder
+        await testSubjects.click('codeFileTreeNode-Directory-src-doc');
+        await retry.tryForTime(5000, async () => {
+          // now we should opened two folders
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+        });
+        log.info('src-doc folder opened');
+
+        // click src again to close this folder
+        await testSubjects.click('codeFileTreeNode-Directory-src');
+
+        await retry.tryForTime(5000, async () => {
+          // should only close src folder
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
+        log.info('src folder closed');
       });
 
       it('Click file/directory on the right panel', async () => {
