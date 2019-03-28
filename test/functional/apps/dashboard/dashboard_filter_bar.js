@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }) {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.header.waitUntilLoadingHasFinished();
       });
 
       it('uses default index pattern on an empty dashboard', async () => {
