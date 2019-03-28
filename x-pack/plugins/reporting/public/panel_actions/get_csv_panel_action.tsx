@@ -44,15 +44,14 @@ class GetCsvReportPanelAction extends ContextMenuAction {
   }
 
   // @TODO: Clean this up once we update SavedSearch's interface
-  // and location in the file-system
+  // and location in the file-system. `viewMode` also has an enum
+  // buried inside of the dashboard folder we could use vs a bare string
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
-    const { embeddable } = panelActionAPI;
+    const { embeddable, containerState } = panelActionAPI;
 
-    if (embeddable && embeddable.hasOwnProperty('savedSearch')) {
-      return true;
-    }
-
-    return false;
+    return (
+      containerState.viewMode !== 'edit' && !!embeddable && embeddable.hasOwnProperty('savedSearch')
+    );
   };
 
   // TODO: Need to expose some of the interface here from SavedSearch
