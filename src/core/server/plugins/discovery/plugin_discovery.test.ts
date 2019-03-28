@@ -115,11 +115,13 @@ test('properly iterates through plugin search locations', async () => {
 
   const env = Env.createDefault(
     getEnvOptions({
-      cliArgs: { envName: 'development', pluginPath: [TEST_EXTRA_PLUGIN_PATH] },
+      cliArgs: { envName: 'development' },
     })
   );
   const configService = new ConfigService(
-    new BehaviorSubject<Config>(new ObjectToConfigAdapter({})),
+    new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({ plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } })
+    ),
     env,
     logger
   );

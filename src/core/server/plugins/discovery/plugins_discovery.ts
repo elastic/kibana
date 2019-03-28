@@ -46,16 +46,16 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  if (config.knownPluginPaths.length) {
+  if (config.additionalPluginPaths.length) {
     log.warn(
       `Explicit plugin paths ${JSON.stringify(
-        config.knownPluginPaths
+        config.additionalPluginPaths
       )} are only supported in development. Relative imports will not work in production.`
     );
   }
 
   const discoveryResults$ = merge(
-    from(config.knownPluginPaths),
+    from(config.additionalPluginPaths),
     processPluginSearchPaths$(config.pluginSearchPaths, log)
   ).pipe(
     mergeMap(pluginPathOrError => {

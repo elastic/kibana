@@ -223,7 +223,6 @@ export default function (program) {
           repl: !!opts.repl,
           basePath: !!opts.basePath,
           optimize: !!opts.optimize,
-          pluginPath: opts.pluginPath,
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,

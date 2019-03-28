@@ -55,7 +55,6 @@ export interface CliArgs {
   basePath: boolean;
   optimize: boolean;
   open: boolean;
-  pluginPath?: string[];
 }
 
 export class Env {

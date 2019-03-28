@@ -22,6 +22,12 @@ import { Env } from '../config';
 
 const pluginsSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
+
+  /**
+   * Defines an array of directories where another plugin should be loaded from.
+   * Should only be used in a development environment.
+   */
+  paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
 type PluginsConfigType = TypeOf<typeof pluginsSchema>;
@@ -43,13 +49,12 @@ export class PluginsConfig {
   /**
    * Defines directories where a known plugin exists.
    */
-  public readonly knownPluginPaths: ReadonlyArray<string>;
+  public readonly additionalPluginPaths: ReadonlyArray<string>;
 
   constructor(config: PluginsConfigType, env: Env) {
     this.initialize = config.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
-    // Only allow custom pluginPaths in dev.
-    this.knownPluginPaths =
-      env.cliArgs.envName === 'development' ? env.cliArgs.pluginPath || [] : [];
+    // Only allow custom plugin paths in dev.
+    this.additionalPluginPaths = env.mode.dev ? config.paths : [];
   }
 }
