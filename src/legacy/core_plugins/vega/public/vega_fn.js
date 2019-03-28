@@ -17,16 +17,14 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { MetricsRequestHandlerProvider } from 'plugins/metrics/kbn_vis_types/request_handler';
-import { PersistedState } from 'ui/persisted_state';
-
 import chrome from 'ui/chrome';
+import { VegaRequestHandlerProvider } from './vega_request_handler';
 
-
-export const tsvb = () => ({
-  name: 'tsvb',
+export const vega = () => ({
+  name: 'vega',
   type: 'render',
   context: {
     types: [
@@ -34,47 +32,40 @@ export const tsvb = () => ({
       'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.tsvb.help', {
-    defaultMessage: 'TSVB visualization'
+  help: i18n.translate('vega.function.help', {
+    defaultMessage: 'Vega visualization'
   }),
   args: {
-    params: {
+    spec: {
       types: ['string'],
-      default: '"{}"',
+      default: '',
     },
-    uiState: {
-      types: ['string'],
-      default: '"{}"',
-    }
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
+    const vegaRequestHandler = Private(VegaRequestHandlerProvider).handler;
 
-    const params = JSON.parse(args.params);
-    const uiStateParams = JSON.parse(args.uiState);
-    const uiState = new PersistedState(uiStateParams);
-
-    const response = await metricsRequestHandler({
+    const response = await vegaRequestHandler({
       timeRange: get(context, 'timeRange', null),
       query: get(context, 'query', null),
       filters: get(context, 'filters', null),
-      visParams: params,
-      uiState: uiState,
+      visParams: { spec: args.spec },
+      forceFetch: true
     });
-
-    response.visType = 'metrics';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visType: 'metrics',
-        visConfig: params,
-        uiState: uiState,
         visData: response,
-      },
+        visType: 'vega',
+        visConfig: {
+          spec: args.spec
+        },
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(vega);

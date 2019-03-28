@@ -17,39 +17,37 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
 import { i18n } from '@kbn/i18n';
 
-export const regionmap = () => ({
-  name: 'regionmap',
+export const kibanaMarkdown = () => ({
+  name: 'kibana_markdown',
   type: 'render',
   context: {
-    types: [
-      'kibana_datatable'
-    ],
+    types: [],
   },
-  help: i18n.translate('interpreter.functions.regionmap.help', {
-    defaultMessage: 'Regionmap visualization'
+  help: i18n.translate('markdownVis.function.help', {
+    defaultMessage: 'Markdown visualization'
   }),
   args: {
     visConfig: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: '"{}"',
-    },
+    }
   },
   fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
-
+    const params = JSON.parse(args.visConfig);
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: context,
-        visType: 'region_map',
-        visConfig,
-        params: {
-          listenOnChange: true,
-        }
-      },
+        visType: 'markdown',
+        visConfig: {
+          ...params,
+        },
+      }
     };
-  },
+  }
 });
+
+functionsRegistry.register(kibanaMarkdown);

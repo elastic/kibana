@@ -17,46 +17,67 @@
  * under the License.
  */
 
+import { functionsRegistry } from 'plugins/interpreter/registries';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
+import { MetricsRequestHandlerProvider } from './kbn_vis_types/request_handler';
+import { PersistedState } from 'ui/persisted_state';
+
 import chrome from 'ui/chrome';
 
-export const vislib = () => ({
-  name: 'vislib',
+
+export const tsvb = () => ({
+  name: 'tsvb',
   type: 'render',
   context: {
     types: [
-      'kibana_datatable'
+      'kibana_context',
+      'null',
     ],
   },
-  help: i18n.translate('interpreter.functions.vislib.help', {
-    defaultMessage: 'Vislib visualization'
+  help: i18n.translate('tsvb.function.help', {
+    defaultMessage: 'TSVB visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string', 'null'],
+    params: {
+      types: ['string'],
       default: '"{}"',
     },
+    uiState: {
+      types: ['string'],
+      default: '"{}"',
+    }
   },
   async fn(context, args) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private = $injector.get('Private');
-    const responseHandler = Private(VislibSeriesResponseHandlerProvider).handler;
-    const visConfigParams = JSON.parse(args.visConfig);
+    const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
 
-    const convertedData = await responseHandler(context, visConfigParams.dimensions);
+    const params = JSON.parse(args.params);
+    const uiStateParams = JSON.parse(args.uiState);
+    const uiState = new PersistedState(uiStateParams);
+
+    const response = await metricsRequestHandler({
+      timeRange: get(context, 'timeRange', null),
+      query: get(context, 'query', null),
+      filters: get(context, 'filters', null),
+      visParams: params,
+      uiState: uiState,
+    });
+
+    response.visType = 'metrics';
 
     return {
       type: 'render',
       as: 'visualization',
       value: {
-        visData: convertedData,
-        visType: args.type,
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        }
+        visType: 'metrics',
+        visConfig: params,
+        uiState: uiState,
+        visData: response,
       },
     };
   },
 });
+
+functionsRegistry.register(tsvb);

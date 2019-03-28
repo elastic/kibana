@@ -17,35 +17,34 @@
  * under the License.
  */
 
-import { functionWrapper } from '../../test_helpers';
-import { inputControlVis } from './input_control';
+import { functionWrapper } from '../../interpreter/test_helpers';
+import { tagcloud } from './tag_cloud_fn';
 
-describe('interpreter/functions#input_control_vis', () => {
-  const fn = functionWrapper(inputControlVis);
+describe('interpreter/functions#tagcloud', () => {
+  const fn = functionWrapper(tagcloud);
+  const context = {
+    type: 'kibana_datatable',
+    rows: [{ 'col-0-1': 0 }],
+    columns: [{ id: 'col-0-1', name: 'Count' }],
+  };
   const visConfig = {
-    controls: [
-      {
-        id: '123',
-        fieldName: 'geo.src',
-        label: 'Source Country',
-        type: 'list',
-        options: {
-          type: 'terms',
-          multiselect: true,
-          size: 100,
-          order: 'desc'
-        },
-        parent: '',
-        indexPatternRefName: 'control_0_index_pattern'
+    scale: 'linear',
+    orientation: 'single',
+    minFontSize: 18,
+    maxFontSize: 72,
+    showLabel: true,
+    metric: {
+      accessor: 0,
+      format: {
+        id: 'number',
       },
-    ],
-    updateFiltersOnChange: false,
-    useTimeFilter: false,
-    pinFilters: false,
+      params: {},
+      aggType: 'count',
+    },
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });
