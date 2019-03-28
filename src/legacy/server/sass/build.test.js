@@ -49,8 +49,8 @@ it('builds light themed SASS', async () => {
     .toMatchInlineSnapshot(`
 "h1, h2, h3, h4, h5, h6, p {
   font-family: inherit;
-  font-weight: 400;
-  font-size: 16px; }
+  font-weight: inherit;
+  font-size: inherit; }
 
 foo bar {
   display: -webkit-box;
@@ -79,8 +79,8 @@ it('builds dark themed SASS', async () => {
     .toMatchInlineSnapshot(`
 "h1, h2, h3, h4, h5, h6, p {
   font-family: inherit;
-  font-weight: 400;
-  font-size: 16px; }
+  font-weight: inherit;
+  font-size: inherit; }
 
 foo bar {
   display: -webkit-box;
@@ -113,8 +113,8 @@ it('rewrites url imports', async () => {
     .toMatchInlineSnapshot(`
 "h1, h2, h3, h4, h5, h6, p {
   font-family: inherit;
-  font-weight: 400;
-  font-size: 16px; }
+  font-weight: inherit;
+  font-size: inherit; }
 
 foo bar {
   display: -webkit-box;

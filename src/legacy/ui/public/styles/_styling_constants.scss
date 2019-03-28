@@ -12,8 +12,8 @@
 // Resets non EuiText headers font styles
 h1, h2, h3, h4, h5, h6, p {
   font-family: inherit;
-  font-weight: $euiFontWeightRegular;
-  font-size: $euiFontSize;
+  font-weight: inherit;
+  font-size: inherit;
 }
 
 @import './mixins';
