@@ -36,7 +36,7 @@ export const tagcloud = () => ({
       types: ['string'],
       default: 'linear',
       options: ['linear', 'log', 'square root'],
-      help: i18n.translate('tagcloud.function.scale.help', {
+      help: i18n.translate('tagCloud.function.scale.help', {
         defaultMessage: 'Scale to determine font size of a word'
       }),
     },
@@ -44,7 +44,7 @@ export const tagcloud = () => ({
       types: ['string'],
       default: 'single',
       options: ['single', 'right angled', 'multiple'],
-      help: i18n.translate('tagcloud.function.orientation.help', {
+      help: i18n.translate('tagCloud.function.orientation.help', {
         defaultMessage: 'Orientation of words inside tagcloud'
       }),
     },
@@ -62,13 +62,13 @@ export const tagcloud = () => ({
     },
     metric: {
       types: ['string', 'number'],
-      help: i18n.translate('tagcloud.function.metric.help', {
+      help: i18n.translate('tagCloud.function.metric.help', {
         defaultMessage: 'Column in your dataset to use as a metric (either column index or column name)'
       }),
     },
     bucket: {
       types: ['string', 'number'],
-      help: i18n.translate('tagcloud.function.bucket.help', {
+      help: i18n.translate('tagCloud.function.bucket.help', {
         defaultMessage: 'Column in your dataset to use as a bucket (either column index or column name)'
       }),
     },
@@ -86,7 +86,7 @@ export const tagcloud = () => ({
       args.metric :
       context.columns.find(c => c.id === args.metric);
     if (metricAccessor === undefined) {
-      throw new Error(i18n.translate('tagcloud.function.error.metric', {
+      throw new Error(i18n.translate('tagCloud.function.error.metric', {
         defaultMessage: 'Column name provided for metric is invalid'
       }));
     }
@@ -108,7 +108,7 @@ export const tagcloud = () => ({
         args.bucket :
         context.columns.find(c => c.id === args.bucket);
       if (bucketAccessor === undefined) {
-        throw new Error(i18n.translate('tagcloud.function.error.metric', {
+        throw new Error(i18n.translate('tagCloud.function.error.metric', {
           defaultMessage: 'Column name provided for bucket is invalid'
         }));
       }
