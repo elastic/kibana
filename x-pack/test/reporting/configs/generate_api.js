@@ -4,23 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import path from 'path';
+import { getApiIntegrationConfig } from '../../api_integration/config';
+import { getReportingApiConfig } from './api';
 
-// tslint:disable:no-default-export
 export default async function ({ readConfigFile }) {
-  const integrationConfig = await readConfigFile(require.resolve('../../api_integration/config'));
+  const apiTestConfig = await getApiIntegrationConfig({ readConfigFile });
+  const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
+
   return {
-    testFiles: [require.resolve('../api/generate')],
-    services: integrationConfig.get('services'),
-    pageObjects: integrationConfig.get('pageObjects'),
-    servers: integrationConfig.get('servers'),
-    esTestCluster: integrationConfig.get('esTestCluster'),
-    apps: integrationConfig.get('apps'),
-    esArchiver: { directory: path.resolve(__dirname, '../../../test/functional/es_archives') },
+    ...reportingApiConfig,
     junit: { reportName: 'X-Pack Reporting Generate API Integration Tests' },
-    kbnTestServer: {
-      ...integrationConfig.get('kbnTestServer'),
-      serverArgs: integrationConfig.get('kbnTestServer.serverArgs'),
+    testFiles: [require.resolve('../api/generate')],
+    services: {
+      ...apiTestConfig.services,
+      ...reportingApiConfig.services,
     },
+    kbnTestServer: apiTestConfig.kbnTestServer,
+    esArchiver: apiTestConfig.esArchiver,
   };
 }

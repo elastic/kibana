@@ -12,8 +12,7 @@ import {
   InfraOpsGraphQLProvider
 } from './services';
 
-export default async function ({ readConfigFile }) {
-
+export async function getApiIntegrationConfig({ readConfigFile }) {
   const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
   const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
   const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
@@ -47,3 +46,5 @@ export default async function ({ readConfigFile }) {
     esTestCluster: xPackFunctionalTestsConfig.get('esTestCluster'),
   };
 }
+
+export default getApiIntegrationConfig;
