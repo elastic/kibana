@@ -372,7 +372,7 @@ describe('Authenticator', () => {
       session.clear.resolves();
 
       cluster.callWithRequest
-        .withArgs(request).rejects({ body: { error: { reason: 'token expired' } } });
+        .withArgs(request).rejects({ statusCode: 401 });
 
       cluster.callWithInternalUser.withArgs('shield.getAccessToken').rejects(
         Boom.badRequest('refresh token expired')
