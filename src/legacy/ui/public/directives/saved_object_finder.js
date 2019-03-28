@@ -28,7 +28,7 @@ import './paginate';
 
 const module = uiModules.get('kibana');
 
-module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Private, config) {
+module.directive('savedObjectFinder', function ($location, kbnUrl, Private, config) {
 
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
 
