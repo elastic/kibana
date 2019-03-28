@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { find } from 'lodash';
+import { Root } from 'joi';
+import { Legacy } from 'kibana';
 import fetch from 'node-fetch';
-import { resolve } from 'path';
 import url from 'url';
 import mappings from './mappings.json';
 // import './types.d';
@@ -16,28 +16,18 @@ export const actionsService = (kibana: any) => {
     id: 'actions_service',
     require: ['kibana', 'elasticsearch', 'xpack_main', 'SecretService'],
     configPrefix: 'xpack.actions_service',
-    publicDir: resolve(__dirname, 'public'),
     uiExports: {
       mappings,
-      savedObjectSchemas: {
-        'server-action': {},
-      },
-      app: {
-        title: 'Actions manager',
-        description: 'An awesome actions manager',
-        main: 'plugins/actions_service/app',
-      },
-      styleSheetPaths: require('path').resolve(__dirname, 'public/app.scss'),
     },
 
-    config(Joi: any) {
+    config(Joi: Root) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         secret: Joi.string().default(undefined),
       }).default();
     },
 
-    init(server: any) {
+    init(server: Legacy.Server) {
       const registrar: Map<string, ActionType> = new Map();
       const handlers: Map<string, ActionHandler> = new Map();
       const info = (message: string) => server.log(['actions_service', 'info'], message);
@@ -62,7 +52,7 @@ export const actionsService = (kibana: any) => {
       const instance = async <T>(instDef: ActionInstance<T>) => {
         const { name, actionType, handlerType, params, handlerParams } = instDef;
         const saved = await so.create(
-          'actionConfiguration',
+          'server-actions',
           {
             name,
             actionType,
@@ -167,7 +157,7 @@ export const actionsService = (kibana: any) => {
         params: {
           destination: '<slack url>',
         },
-        handler: 'slack',
+        handlerType: 'slack',
         handlerParams: {
           channel: '#bot-playground',
         },
