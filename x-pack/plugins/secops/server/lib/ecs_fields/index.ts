@@ -222,4 +222,5 @@ export const eventFieldsMap: Readonly<Record<string, string>> = {
   ...{ ...httpFieldsMap },
   ...{ ...userFieldsMap },
   ...{ ...processFieldsMap },
+  message: 'message',
 };

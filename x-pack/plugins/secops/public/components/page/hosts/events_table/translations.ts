@@ -18,6 +18,10 @@ export const EVENT_ACTION = i18n.translate('xpack.secops.eventsTable.eventTypeAc
   defaultMessage: 'Event Action',
 });
 
+export const EVENT_CATEGORY = i18n.translate('xpack.secops.eventsTable.eventCategoryTitle', {
+  defaultMessage: 'Event Category',
+});
+
 export const EVENT_TYPE = i18n.translate('xpack.secops.eventsTable.eventTypeTitle', {
   defaultMessage: 'Event type',
 });
@@ -30,8 +34,16 @@ export const DESTINATION = i18n.translate('xpack.secops.eventsTable.destinationT
   defaultMessage: 'Destination',
 });
 
-export const LOCATION = i18n.translate('xpack.secops.eventsTable.locationTitle', {
-  defaultMessage: 'Location',
+export const MESSAGE = i18n.translate('xpack.secops.eventsTable.messageTitle', {
+  defaultMessage: 'Message',
+});
+
+export const EVENT_MODULE_DATASET = i18n.translate('xpack.secops.eventsTable.moduleDatasetTitle', {
+  defaultMessage: 'Module/Dataset',
+});
+
+export const USER = i18n.translate('xpack.secops.eventsTable.userTitle', {
+  defaultMessage: 'User',
 });
 
 export const ROWS_5 = i18n.translate('xpack.secops.eventsTable.rows', {

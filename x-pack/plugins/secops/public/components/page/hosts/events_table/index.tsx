@@ -161,11 +161,41 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     },
   },
   {
+    name: i18n.EVENT_MODULE_DATASET,
+    sortable: true,
+    truncateText: true,
+    hideForMobile: true,
+    render: ({ node }) => (
+      <>
+        {getOrEmptyTag('event.module', node)}/{getOrEmptyTag('event.dataset', node)}
+      </>
+    ),
+  },
+  {
+    name: i18n.EVENT_CATEGORY,
+    sortable: true,
+    truncateText: true,
+    hideForMobile: true,
+    render: ({ node }) => getOrEmptyTag('event.category', node),
+  },
+  {
     name: i18n.EVENT_ACTION,
     sortable: true,
     truncateText: true,
     hideForMobile: true,
     render: ({ node }) => getOrEmptyTag('event.action', node),
+  },
+  {
+    name: i18n.USER,
+    sortable: true,
+    truncateText: true,
+    render: ({ node }) => getOrEmptyTag('user.name', node),
+  },
+  {
+    name: i18n.MESSAGE,
+    sortable: false,
+    truncateText: true,
+    render: ({ node }) => getOrEmptyTag('message', node),
   },
   {
     name: i18n.SOURCE,
@@ -183,16 +213,6 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     render: ({ node }) => (
       <>
         {formatIpSafely('destination.ip', node)}:{getOrEmptyTag('destination.port', node)}
-      </>
-    ),
-  },
-  {
-    name: i18n.LOCATION,
-    sortable: true,
-    truncateText: true,
-    render: ({ node }) => (
-      <>
-        {getOrEmptyTag('geo.region_name', node)} : {getOrEmptyTag('geo.country_iso_code', node)}
       </>
     ),
   },
