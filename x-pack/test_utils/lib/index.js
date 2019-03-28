@@ -6,3 +6,4 @@
 
 
 export { getRandomString } from './strings';
+export { nextTick } from './utils';

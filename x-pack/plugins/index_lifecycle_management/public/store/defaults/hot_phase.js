@@ -12,7 +12,7 @@ import {
   PHASE_ROLLOVER_MAX_DOCUMENTS,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_INDEX_PRIORITY
-} from '../constants';
+} from '../../constants';
 
 export const defaultHotPhase = {
   [PHASE_ENABLED]: true,

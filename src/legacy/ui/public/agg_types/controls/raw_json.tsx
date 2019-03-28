@@ -16,19 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import React from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AggParamRequiredEditorProps } from '../../vis/editors/default';
+import { AggParamEditorProps } from '../../vis/editors/default';
+import { isValidJson } from '../utils';
 
 function RawJsonParamEditor({
   agg,
   value,
   setValue,
   isInvalid,
-}: AggParamRequiredEditorProps<string>) {
+  setValidity,
+}: AggParamEditorProps<string>) {
   const label = (
     <>
       <FormattedMessage id="common.ui.aggTypes.jsonInputLabel" defaultMessage="JSON input" />{' '}
@@ -43,6 +46,14 @@ function RawJsonParamEditor({
     </>
   );
 
+  const onChange = (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textValue = ev.target.value;
+    setValue(textValue);
+    setValidity(isValidJson(textValue));
+  };
+
+  setValidity(isValidJson(value));
+
   return (
     <EuiFormRow
       label={label}
@@ -54,7 +65,7 @@ function RawJsonParamEditor({
         id={`visEditorRawJson${agg.id}`}
         isInvalid={isInvalid}
         value={value || ''}
-        onChange={ev => setValue(ev.target.value)}
+        onChange={onChange}
         rows={2}
         fullWidth={true}
       />

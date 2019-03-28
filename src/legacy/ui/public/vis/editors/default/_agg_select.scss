@@ -20,3 +20,7 @@
 .visEditorAggSelect__helpLink {
   @include euiFontSizeXS;
 }
+
+.visEditorAggSelect__formRow {
+  margin-bottom: $euiSizeS;
+}

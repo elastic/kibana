@@ -30,6 +30,7 @@ uiModules
     ['aggParam', { watchDepth: 'reference' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
+    ['setValidity', { watchDepth: 'reference' }],
     'value',
     'isInvalid'
   ]))
@@ -57,6 +58,7 @@ uiModules
             on-change="onChange"
             value="paramValue"
             is-invalid="isInvalid"
+            set-validity="setValidity"
           ></vis-agg-param-react-wrapper>`;
         }
 
@@ -102,14 +104,12 @@ uiModules
             }
           };
 
-          if(ngModelCtrl && $scope.aggParam.name === 'json') {
-            ngModelCtrl.$validators.jsonInput = (value) => {
-              const isJsonValid = isValidJson(value);
-              $scope.isInvalid = !isJsonValid;
-
-              return isJsonValid;
-            };
-          }
+          $scope.setValidity = (isValid) => {
+            if(ngModelCtrl) {
+              $scope.isInvalid = !isValid;
+              ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
+            }
+          };
         }
       }
     };
