@@ -27,7 +27,7 @@ export class Breadcrumb extends React.PureComponent<Props> {
       breadcrumbs.push({
         text: p,
         href,
-        className: 'code-no-min-width',
+        className: 'codeNoMinWidth',
       });
     });
     return <EuiBreadcrumbs max={Number.MAX_VALUE} breadcrumbs={breadcrumbs} />;
