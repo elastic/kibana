@@ -16,6 +16,7 @@ exports[`TOCEntry is rendered 1`] = `
       grow={false}
     >
       <LayerTocActions
+        cloneLayer={[Function]}
         displayName="layer 1"
         fitToBounds={[Function]}
         layer={
@@ -90,8 +91,10 @@ exports[`TOCEntry props isReadOnly 1`] = `
       grow={false}
     >
       <LayerTocActions
+        cloneLayer={[Function]}
         displayName="layer 1"
         fitToBounds={[Function]}
+        isReadOnly={true}
         layer={
           Object {
             "getDisplayName": [Function],
