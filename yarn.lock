@@ -841,10 +841,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.7.0":
-  version "9.7.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.7.0.tgz#6da25d665936fba713d24bfec3beba8c20a4272b"
-  integrity sha512-2cXEvAxYEfS1i5ZwhSl63rGT6jMQOQHed4RLFnuf0xmZyUjIO9he8EVY9YAH2eFfrRvEVggQltLLEI+JXhiqSA==
+"@elastic/eui@9.7.1":
+  version "9.7.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.7.1.tgz#817b5018303a2c6160011e201a8d21fca2f3e47b"
+  integrity sha512-yYTnW1jqv586M8dD4TxTa/9wkj84gJuHeDh9F13z7XGeZ/clUN0XP43Y5Jzv80Q3M80VlEuTpABYMGpPqBAw8w==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
