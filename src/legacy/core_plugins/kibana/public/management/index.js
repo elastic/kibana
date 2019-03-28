@@ -33,7 +33,6 @@ import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
-import 'ui/kbn_top_nav';
 
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
