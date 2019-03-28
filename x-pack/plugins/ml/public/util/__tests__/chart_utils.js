@@ -12,11 +12,13 @@ import expect from '@kbn/expect';
 import {
   chartLimits,
   filterAxisLabels,
+  getChartType,
   numTicks,
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../chart_utils';
-import { MULTI_BUCKET_IMPACT } from 'plugins/ml/../common/constants/multi_bucket_impact';
+import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
+import { CHART_TYPE } from '../../explorer/explorer_constants';
 
 describe('ML - chart utils', () => {
 
@@ -135,6 +137,82 @@ describe('ML - chart utils', () => {
 
       // clean up
       $('#filterAxisLabels').remove();
+    });
+
+  });
+
+  describe('getChartType', () => {
+
+    const singleMetricConfig = {
+      metricFunction: 'avg',
+      functionDescription: 'mean',
+      fieldName: 'responsetime',
+      entityFields: [],
+    };
+
+    const multiMetricConfig = {
+      metricFunction: 'avg',
+      functionDescription: 'mean',
+      fieldName: 'responsetime',
+      entityFields: [
+        {
+          fieldName: 'airline',
+          fieldValue: 'AAL',
+          fieldType: 'partition',
+        }
+      ],
+    };
+
+    const populationConfig = {
+      metricFunction: 'avg',
+      functionDescription: 'mean',
+      fieldName: 'http.response.body.bytes',
+      entityFields: [
+        {
+          fieldName: 'source.ip',
+          fieldValue: '10.11.12.13',
+          fieldType: 'over',
+        }
+      ],
+    };
+
+    const rareConfig = {
+      metricFunction: 'count',
+      functionDescription: 'rare',
+      entityFields: [
+        {
+          fieldName: 'http.response.status_code',
+          fieldValue: '404',
+          fieldType: 'by',
+        }
+      ],
+    };
+
+    const varpModelPlotConfig = {
+      metricFunction: null,
+      functionDescription: 'varp',
+      fieldName: 'NetworkOut',
+      entityFields: [
+        {
+          fieldName: 'instance',
+          fieldValue: 'i-ef74d410',
+          fieldType: 'over',
+        }
+      ],
+    };
+
+    it('returns single metric chart type as expected for configs', () => {
+      expect(getChartType(singleMetricConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
+      expect(getChartType(multiMetricConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
+      expect(getChartType(varpModelPlotConfig)).to.be(CHART_TYPE.SINGLE_METRIC);
+    });
+
+    it('returns event distribution chart type as expected for configs', () => {
+      expect(getChartType(rareConfig)).to.be(CHART_TYPE.EVENT_DISTRIBUTION);
+    });
+
+    it('returns population distribution chart type as expected for configs', () => {
+      expect(getChartType(populationConfig)).to.be(CHART_TYPE.POPULATION_DISTRIBUTION);
     });
 
   });
