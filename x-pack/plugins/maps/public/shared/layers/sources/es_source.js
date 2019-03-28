@@ -15,7 +15,8 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
-
+import uuid from 'uuid/v4';
+import { copyPersistentState } from '../../../store/util';
 
 export class AbstractESSource extends AbstractVectorSource {
 
@@ -43,6 +44,13 @@ export class AbstractESSource extends AbstractVectorSource {
 
   destroy() {
     this._inspectorAdapters.requests.resetRequest(this._descriptor.id);
+  }
+
+  cloneDescriptor() {
+    const clonedDescriptor = copyPersistentState(this._descriptor);
+    // id used as uuid to track requests in inspector
+    clonedDescriptor.id = uuid();
+    return clonedDescriptor;
   }
 
   _getValidMetrics() {
