@@ -7,7 +7,7 @@
 import { uiModules } from 'ui/modules';
 import template from './check_box.html';
 
-const app = uiModules.get('kibana');
+const app = uiModules.get('xpack/watcher');
 
 app.directive('checkBox', function () {
   return {
