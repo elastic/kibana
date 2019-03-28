@@ -46,6 +46,7 @@ interface Props {
   suggestionProviders: SuggestionsProvider[];
   repositorySearch: (p: { query: string }) => void;
   saveSearchOptions: (searchOptions: ISearchOptions) => void;
+  enableSubmitWhenOptionsChanged: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
   repoSearchResults: any[];
   searchLoading: boolean;
@@ -372,6 +373,15 @@ export class CodeQueryBar extends Component<Props, State> {
   public componentDidUpdate(prevProps: Props) {
     if (prevProps.query !== this.props.query) {
       this.updateSuggestions();
+    }
+
+    // When search options (e.g. repository scopes) change,
+    // submit the search query again to refresh the search result.
+    if (
+      this.props.enableSubmitWhenOptionsChanged &&
+      !_.isEqual(prevProps.searchOptions, this.props.searchOptions)
+    ) {
+      this.onSubmit();
     }
   }
 
