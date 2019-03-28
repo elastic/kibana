@@ -14,8 +14,8 @@ To get the URL for triggering a report generation during a given time period:
 
 . Load the saved object.
 . Use the time-picker to specify a relative or absolute time period.
-. Click *Reporting* in the Kibana toolbar.
-. Copy the displayed **Generation URL**.
+. Click *Share* in the Kibana toolbar.
+. Copy the displayed **Copy Post URL.**.
 
 NOTE: The response from this request with be JSON, and will contain a `path` property
 with a URL to use to download the generated report. When requesting that path,
