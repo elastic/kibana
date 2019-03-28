@@ -1,5 +1,5 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
-@import 'ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 // ML needs EUI card styling till it fully adopts React components
 @import '@elastic/eui/src/components/panel/variables';
@@ -31,6 +31,7 @@
   @import 'components/controls/index';
   @import 'components/data_recognizer/index';
   @import 'components/documentation_help_link/index';
+  @import 'components/entity_cell/index';
   @import 'components/field_data_card/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/field_title_bar/index';
   @import 'components/field_type_icon/index';

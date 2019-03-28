@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { VegaParser } from '../vega_parser';
 import { bypassExternalUrlCheck } from '../../vega_view/vega_base_view';
 
@@ -110,16 +110,19 @@ describe('VegaParser._parseSchema', () => {
     };
   }
 
-  it('no schema', () => {
+  it('should warn on no vega version specified', () => {
     const vp = new VegaParser({});
     expect(vp._parseSchema()).to.be(false);
     expect(vp.spec).to.eql({ $schema: 'https://vega.github.io/schema/vega/v3.0.json' });
     expect(vp.warnings).to.have.length(1);
   });
-  it('vega', test('https://vega.github.io/schema/vega/v3.0.json', false, 0));
-  it('vega old', test('https://vega.github.io/schema/vega/v4.0.json', false, 1));
-  it('vega-lite', test('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0));
-  it('vega-lite old', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
+
+  it('should not warn on current vega version', test('https://vega.github.io/schema/vega/v4.0.json', false, 0));
+  it('should not warn on older vega version', test('https://vega.github.io/schema/vega/v3.0.json', false, 0));
+  it('should warn on vega version too new to be supported', test('https://vega.github.io/schema/vega/v5.0.json', false, 1));
+
+  it('should not warn on current vega-lite version', test('https://vega.github.io/schema/vega-lite/v2.0.json', true, 0));
+  it('should warn on vega-lite version too new to be supported', test('https://vega.github.io/schema/vega-lite/v3.0.json', true, 1));
 });
 
 describe('VegaParser._parseTooltips', () => {

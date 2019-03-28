@@ -16,7 +16,9 @@ export class LayerTOC extends React.Component {
   }
 
   componentDidMount() {
-    this._attachSortHandler();
+    if (!this.props.isReadOnly) {
+      this._attachSortHandler();
+    }
   }
 
   _attachSortHandler() {

@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { migrateFilter } from './migrate_filter';
+import { filterMatchesIndex } from './filter_matches_index';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -58,10 +59,11 @@ const cleanFilter = function (filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 
-export function buildQueryFromFilters(filters, indexPattern) {
+export function buildQueryFromFilters(filters = [], indexPattern, ignoreFilterIfFieldNotInIndex) {
   return {
-    must: (filters || [])
+    must: filters
       .filter(filterNegate(false))
+      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
       .map(filter => {
@@ -69,8 +71,9 @@ export function buildQueryFromFilters(filters, indexPattern) {
       }),
     filter: [],
     should: [],
-    must_not: (filters || [])
+    must_not: filters
       .filter(filterNegate(true))
+      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
       .map(translateToQuery)
       .map(cleanFilter)
       .map(filter => {

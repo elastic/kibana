@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import aero from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const Positionable = ({ children, transformMatrix, width, height }) => {
   // Throw if there is more than one child
@@ -19,7 +19,7 @@ export const Positionable = ({ children, transformMatrix, width, height }) => {
       marginLeft: -width / 2,
       marginTop: -height / 2,
       position: 'absolute',
-      transform: aero.dom.matrixToCSS(transformMatrix.map((n, i) => (i < 12 ? n : Math.round(n)))),
+      transform: matrixToCSS(transformMatrix.map((n, i) => (i < 12 ? n : Math.round(n)))),
     };
 
     const stepChild = React.cloneElement(child, { size: { width, height } });

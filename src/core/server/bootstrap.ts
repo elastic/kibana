@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
+import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 
 interface KibanaFeatures {
@@ -47,6 +47,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ * @interal
+ *
+ * @param options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -78,7 +83,7 @@ export async function bootstrap({
   }
 
   try {
-    await root.start();
+    await root.setup();
   } catch (err) {
     await shutdown(err);
   }

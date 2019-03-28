@@ -21,7 +21,7 @@ import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { AssetManager as Component } from './asset_manager';
 
 const mapStateToProps = state => ({
-  assets: Object.values(getAssets(state)), // pull values out of assets object
+  assets: getAssets(state),
   selectedPage: getSelectedPage(state),
 });
 
@@ -60,19 +60,22 @@ const mapDispatchToProps = dispatch => ({
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
-  const { assets } = stateProps;
+  const { assets, selectedPage } = stateProps;
   const { onAssetAdd } = dispatchProps;
+  const assetValues = Object.values(assets); // pull values out of assets object
+
   return {
     ...ownProps,
-    ...stateProps,
     ...dispatchProps,
+    selectedPage,
+    assetValues,
     addImageElement: dispatchProps.addImageElement(stateProps.selectedPage),
     onAssetAdd: file => {
       const [type, subtype] = get(file, 'type', '').split('/');
       if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
         return encode(file).then(dataurl => {
           const type = 'dataurl';
-          const existingId = findExistingAsset(type, dataurl, assets);
+          const existingId = findExistingAsset(type, dataurl, assetValues);
           if (existingId) {
             return existingId;
           }

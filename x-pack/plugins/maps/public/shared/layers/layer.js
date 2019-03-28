@@ -7,6 +7,7 @@ import _ from 'lodash';
 import turf from 'turf';
 import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;
@@ -17,8 +18,8 @@ export class AbstractLayer {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
     this._style = style;
-    if (this._descriptor.dataRequests) {
-      this._dataRequests = this._descriptor.dataRequests.map(dataRequest => new DataRequest(dataRequest));
+    if (this._descriptor.__dataRequests) {
+      this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
       this._dataRequests = [];
     }
@@ -32,14 +33,13 @@ export class AbstractLayer {
   static createDescriptor(options = {}) {
     const layerDescriptor = { ...options };
 
-    layerDescriptor.dataRequests = _.get(options, 'dataRequests', []);
+    layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', Math.random().toString(36).substr(2, 5));
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
     layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.temporary = _.get(options, 'temporary', false);
     layerDescriptor.style = _.get(options, 'style',  {});
     return layerDescriptor;
   }
@@ -51,7 +51,15 @@ export class AbstractLayer {
   }
 
   isJoinable() {
-    return false;
+    return this._source.isJoinable();
+  }
+
+  supportsElasticsearchFilters() {
+    return this._source.supportsElasticsearchFilters();
+  }
+
+  async supportsFitToBounds() {
+    return await this._source.supportsFitToBounds();
   }
 
   async getDisplayName() {
@@ -114,15 +122,15 @@ export class AbstractLayer {
     return this._descriptor.alpha;
   }
 
+  getQuery() {
+    return this._descriptor.query;
+  }
+
   getZoomConfig() {
     return {
       minZoom: this._descriptor.minZoom,
       maxZoom: this._descriptor.maxZoom,
     };
-  }
-
-  isTemporary() {
-    return this._descriptor.temporary;
   }
 
   getSupportedStyles() {
@@ -142,7 +150,7 @@ export class AbstractLayer {
   };
 
   getSourceDataRequest() {
-    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === 'source');
+    return this._dataRequests.find(dataRequest => dataRequest.getDataId() === SOURCE_DATA_ID_ORIGIN);
   }
 
   isLayerLoading() {
@@ -150,11 +158,11 @@ export class AbstractLayer {
   }
 
   hasErrors() {
-    return _.get(this._descriptor, 'isInErrorState', false);
+    return _.get(this._descriptor, '__isInErrorState', false);
   }
 
   getErrors() {
-    return this.hasErrors() ? this._descriptor.errorMessage : '';
+    return this.hasErrors() ? this._descriptor.__errorMessage : '';
   }
 
   toLayerDescriptor() {
@@ -162,6 +170,18 @@ export class AbstractLayer {
   }
 
   async syncData() {
+    //no-op by default
+  }
+
+  getMbLayerIds() {
+    throw new Error('Should implement AbstractLayer#getMbLayerIds');
+  }
+
+  canShowTooltip() {
+    return false;
+  }
+
+  syncLayerWithMb() {
     //no-op by default
   }
 
@@ -222,6 +242,10 @@ export class AbstractLayer {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  async getOrdinalFields() {
+    return [];
   }
 
 }

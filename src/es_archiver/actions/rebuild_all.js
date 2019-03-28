@@ -34,7 +34,7 @@ import { fromNode } from 'bluebird';
 
 import {
   createPromiseFromStreams
-} from '../../utils';
+} from '../../legacy/utils';
 
 import {
   prioritizeMappings,

@@ -20,7 +20,7 @@
 }
 
 .mapLayerPanel__header {
-  box-shadow: 0 $euiSize $euiSize (-$euiSize / 2) $euiColorLightestShade;
+  @include euiOverflowShadowBottom;
 }
 
 .mapLayerPanel__sourceDetails {
@@ -32,6 +32,6 @@
 }
 
 .mapLayerPanel__footer {
+  @include euiOverflowShadowTop;
   border-top: $euiBorderThin;
-  box-shadow: 0 ($euiSize *-1) $euiSize (-$euiSize / 2) $euiColorLightestShade;
 }

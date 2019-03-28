@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function InspectorProvider({ getService }) {
   const log = getService('log');
@@ -94,13 +94,20 @@ export function InspectorProvider({ getService }) {
       // TODO: we should use datat-test-subj=inspectorTable as soon as EUI supports it
       const inspectorPanel = await testSubjects.find('inspectorPanel');
       const tableBody = await retry.try(async () => inspectorPanel.findByTagName('tbody'));
-      // Convert the data into a nested array format:
-      // [ [cell1_in_row1, cell2_in_row1], [cell1_in_row2, cell2_in_row2] ]
-      const rows = await tableBody.findAllByTagName('tr');
-      return await Promise.all(rows.map(async row => {
-        const cells = await row.findAllByTagName('td');
-        return await Promise.all(cells.map(async cell => await cell.getVisibleText()));
-      }));
+      const $ = await tableBody.parseDomContent();
+      return $('tr').toArray().map(tr => {
+        return $(tr).find('td').toArray().map(cell => {
+          // if this is an EUI table, filter down to the specific cell content
+          // otherwise this will include mobile-specific header information
+          const euiTableCellContent = $(cell).find('.euiTableCellContent');
+
+          if (euiTableCellContent.length > 0) {
+            return $(cell).find('.euiTableCellContent').text().trim();
+          } else {
+            return $(cell).text().trim();
+          }
+        });
+      });
     }
 
     async getTableHeaders() {
@@ -110,11 +117,9 @@ export function InspectorProvider({ getService }) {
         const inspectorPanel = await testSubjects.find('inspectorPanel');
         return await inspectorPanel.findByTagName('thead');
       });
-      const cells = await dataTableHeader.findAllByTagName('th');
-      return await Promise.all(cells.map(async (cell) => {
-        const untrimmed = await cell.getVisibleText();
-        return untrimmed.trim();
-      }));
+      const $ = await dataTableHeader.parseDomContent();
+      return $('th span.euiTableCellContent__text').toArray()
+        .map(cell => $(cell).text().trim());
     }
 
     async expectTableHeaders(expected) {
@@ -144,6 +149,30 @@ export function InspectorProvider({ getService }) {
         await filterBtn.click();
       });
       await renderable.waitForRender();
+    }
+
+    async openInspectorView(viewId) {
+      log.debug(`Open Inspector view ${viewId}`);
+      await testSubjects.click('inspectorViewChooser');
+      await testSubjects.click(viewId);
+    }
+
+    async openInspectorRequestsView() {
+      await this.openInspectorView('inspectorViewChooserRequests');
+    }
+
+    async getRequestNames() {
+      await this.openInspectorRequestsView();
+      const requestChooserExists = await testSubjects.exists('inspectorRequestChooser');
+      if (requestChooserExists) {
+        await testSubjects.click('inspectorRequestChooser');
+        const menu = await testSubjects.find('inspectorRequestChooserMenuPanel');
+        const requestNames = await menu.getVisibleText();
+        return requestNames.trim().split('\n').join(',');
+      }
+
+      const singleRequest = await testSubjects.find('inspectorRequestName');
+      return await singleRequest.getVisibleText();
     }
   };
 }

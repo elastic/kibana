@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { createLegacyClass } from 'ui/utils/legacy_class';
-import { SavedObjectProvider } from 'ui/courier';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {
   getTimeFilters,
   getMapZoom,
@@ -18,6 +18,9 @@ import {
   getQuery,
 } from '../../selectors/map_selectors';
 import { convertMapExtentToPolygon } from '../../elasticsearch_geo_utils';
+import { copyPersistentState } from '../../store/util';
+import { extractReferences, injectReferences } from '../../../common/migrations/references';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 const module = uiModules.get('app/maps');
 
@@ -29,6 +32,24 @@ module.factory('SavedGisMap', function (Private) {
       type: SavedGisMap.type,
       mapping: SavedGisMap.mapping,
       searchSource: SavedGisMap.searchsource,
+      extractReferences,
+      injectReferences: (savedObject, references) => {
+        const { attributes } = injectReferences({
+          attributes: { layerListJSON: savedObject.layerListJSON },
+          references
+        });
+
+        savedObject.layerListJSON = attributes.layerListJSON;
+
+        const indexPatternIds = references
+          .filter(reference => {
+            return reference.type === 'index-pattern';
+          })
+          .map(reference => {
+            return reference.id;
+          });
+        savedObject.indexPatternIds = _.uniq(indexPatternIds);
+      },
 
       // if this is null/undefined then the SavedObject will be assigned the defaults
       id: id,
@@ -43,7 +64,7 @@ module.factory('SavedGisMap', function (Private) {
     this.showInRecentlyAccessed = true;
   }
 
-  SavedGisMap.type = 'map';
+  SavedGisMap.type = MAP_SAVED_OBJECT_TYPE;
 
   // Mappings are used to place object properties into saved object _source
   SavedGisMap.mapping = {
@@ -67,12 +88,7 @@ module.factory('SavedGisMap', function (Private) {
 
   SavedGisMap.prototype.syncWithStore = function (state) {
     const layerList = getLayerListRaw(state);
-    // Layer list from store contains requested data.
-    // We do not want to store this in the saved object so it is getting removed
-    const layerListConfigOnly = layerList.map(layer => {
-      delete layer.dataRequests;
-      return layer;
-    });
+    const layerListConfigOnly = copyPersistentState(layerList);
     this.layerListJSON = JSON.stringify(layerListConfigOnly);
 
     this.mapStateJSON = JSON.stringify({
@@ -90,3 +106,4 @@ module.factory('SavedGisMap', function (Private) {
 
   return SavedGisMap;
 });
+

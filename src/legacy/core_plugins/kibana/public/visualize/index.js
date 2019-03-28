@@ -18,13 +18,11 @@
  */
 
 import './editor/editor';
-import './wizard/wizard';
 import 'ui/draggable/draggable_container';
 import 'ui/draggable/draggable_item';
 import 'ui/draggable/draggable_handle';
 import './saved_visualizations/_saved_vis';
 import './saved_visualizations/saved_visualizations';
-import 'ui/directives/scroll_bottom';
 import 'ui/filters/sort_prefix_first';
 import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';

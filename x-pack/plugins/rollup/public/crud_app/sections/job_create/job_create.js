@@ -192,9 +192,18 @@ export class JobCreateUi extends Component {
         )];
       }
 
-      const formattedNumericFields = formatFields(numericFields, 'numeric');
-      const formattedKeywordFields = formatFields(keywordFields, 'keyword');
-      const formattedDateFields = formatFields(indexPatternDateFields, 'date');
+      const formattedNumericFields = formatFields(
+        numericFields,
+        i18n.translate('xpack.rollupJobs.create.numericTypeField', { defaultMessage: 'numeric' })
+      );
+      const formattedKeywordFields = formatFields(
+        keywordFields,
+        i18n.translate('xpack.rollupJobs.create.keywordTypeField', { defaultMessage: 'keyword' })
+      );
+      const formattedDateFields = formatFields(
+        indexPatternDateFields,
+        i18n.translate('xpack.rollupJobs.create.dateTypeField', { defaultMessage: 'date' })
+      );
 
       function sortFields(a, b) {
         const nameA = a.name.toUpperCase();
@@ -292,6 +301,7 @@ export class JobCreateUi extends Component {
         !this.canGoToStep(stepId)
         || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
       ),
+      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
     }));
   }
 

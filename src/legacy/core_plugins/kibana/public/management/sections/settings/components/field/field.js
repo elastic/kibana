@@ -397,7 +397,7 @@ class FieldUI extends PureComponent {
               editorProps={{
                 $blockScrolling: Infinity
               }}
-
+              showGutter={false}
             />
           </div>
         );
@@ -721,6 +721,7 @@ class FieldUI extends PureComponent {
               label={this.renderLabel(setting)}
               helpText={this.renderHelpText(setting)}
               describedByIds={[`${setting.name}-aria`]}
+              className="mgtAdvancedSettings__fieldRow"
             >
               {this.renderField(setting)}
             </EuiFormRow>

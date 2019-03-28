@@ -6,7 +6,8 @@
 
 import { resolve } from 'path';
 import { PLUGIN } from './common/constants';
-import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from "./server/routes/api/license/";
+import { registerLicenseRoute, registerStartTrialRoutes, registerStartBasicRoute } from './server/routes/api/license/';
+import { createRouter } from '../../server/lib/create_router';
 
 export function licenseManagement(kibana)  {
   return new kibana.Plugin({
@@ -21,9 +22,11 @@ export function licenseManagement(kibana)  {
       ]
     },
     init: (server) => {
-      registerLicenseRoute(server);
-      registerStartTrialRoutes(server);
-      registerStartBasicRoute(server);
+      const xpackInfo = server.plugins.xpack_main.info;
+      const router = createRouter(server, PLUGIN.ID, '/api/license');
+      registerLicenseRoute(router, xpackInfo);
+      registerStartTrialRoutes(router, xpackInfo);
+      registerStartBasicRoute(router, xpackInfo);
     }
   });
 }

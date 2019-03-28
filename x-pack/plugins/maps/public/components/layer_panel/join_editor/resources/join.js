@@ -6,13 +6,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 
@@ -74,7 +73,10 @@ export class Join extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${indexPatternId}`
+          loadError: i18n.translate('xpack.maps.layerPanel.join.noIndexPatternErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {indexPatternId}`,
+            values: { indexPatternId }
+          })
         });
       }
       return;
@@ -178,36 +180,42 @@ export class Join extends Component {
     }
 
     return (
-      <EuiFlexGroup className="mapJoinItem" responsive={false} wrap={true} gutterSize="s">
+      <div className="mapJoinItem">
+        <EuiFlexGroup className="mapJoinItem__inner" responsive={false} wrap={true} gutterSize="s">
 
-        <EuiFlexItem grow={false}>
-          <JoinExpression
-            leftSourceName={leftSourceName}
-            leftValue={join.leftField}
-            leftFields={leftFields}
-            onLeftFieldChange={this._onLeftFieldChange}
+          <EuiFlexItem grow={false}>
+            <JoinExpression
+              leftSourceName={leftSourceName}
+              leftValue={join.leftField}
+              leftFields={leftFields}
+              onLeftFieldChange={this._onLeftFieldChange}
 
-            rightSourceIndexPatternId={right.indexPatternId}
-            rightSourceName={rightSourceName}
-            onRightSourceChange={this._onRightSourceChange}
+              rightSourceIndexPatternId={right.indexPatternId}
+              rightSourceName={rightSourceName}
+              onRightSourceChange={this._onRightSourceChange}
 
-            rightValue={right.term}
-            rightFields={rightFields}
-            onRightFieldChange={this._onRightFieldChange}
+              rightValue={right.term}
+              rightFields={rightFields}
+              onRightFieldChange={this._onRightFieldChange}
+            />
+          </EuiFlexItem>
+
+          {metricsExpression}
+
+          <EuiButtonIcon
+            className="mapJoinItem__delete"
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join'
+            })}
+            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+              defaultMessage: 'Delete join'
+            })}
+            onClick={onRemove}
           />
-        </EuiFlexItem>
-
-        {metricsExpression}
-
-        <EuiButtonIcon
-          className="mapJoinItem__delete"
-          iconType="trash"
-          color="danger"
-          aria-label="Delete join"
-          title="Delete join"
-          onClick={onRemove}
-        />
-      </EuiFlexGroup>
+        </EuiFlexGroup>
+      </div>
     );
   }
 }

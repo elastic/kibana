@@ -20,7 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import 'ui/render_directive';
 import '../views/table';
@@ -117,7 +117,7 @@ describe('docViews', function () {
 
     describe('filtering', function () {
       it('should apply a filter when clicking filterable fields', function () {
-        const cell = $elem.find('td[title="bytes"]').next();
+        const cell = $elem.find('td[title="bytes"]').prev();
 
         cell.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(true);
@@ -128,7 +128,7 @@ describe('docViews', function () {
       });
 
       it('should NOT apply a filter when clicking non-filterable fields', function () {
-        const cell = $elem.find('td[title="area"]').next();
+        const cell = $elem.find('td[title="area"]').prev();
 
         cell.find('.fa-search-plus').first().click();
         expect($scope.filter.calledOnce).to.be(false);

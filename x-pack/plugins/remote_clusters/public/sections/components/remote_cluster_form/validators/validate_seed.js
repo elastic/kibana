@@ -24,8 +24,8 @@ export function validateSeed(seed) {
     errors.push(i18n.translate(
       'xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage',
       {
-        defaultMessage: `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400.
-          Hosts can only consist of letters, numbers, and dashes.`,
+        defaultMessage: 'Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. ' +
+          'Hosts can only consist of letters, numbers, and dashes.',
       },
     ));
   }

@@ -74,7 +74,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     });
 
     const getApmCard = () =>  (
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiCard
           className="homAddData__card"
           icon={<EuiIcon className="homAddData__icon" type="apmApp" />}
@@ -96,11 +96,11 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
     );
 
     return (
-      <EuiFlexGroup wrap gutterSize="none">
+      <EuiFlexGroup className="homeAddData__flexGroup" wrap={apmUiEnabled} gutterSize="l" justifyContent="spaceAround" responsive={false}>
 
         {apmUiEnabled !== false && getApmCard()}
 
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon  className="homAddData__icon" type="loggingApp" />}
@@ -120,7 +120,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon className="homAddData__icon" type="monitoringApp" />}
@@ -140,7 +140,7 @@ const AddDataUi = ({ apmUiEnabled, isNewKibanaInstance, intl, mlEnabled }) => {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCard
             className="homAddData__card"
             icon={<EuiIcon className="homAddData__icon" type="securityApp" />}

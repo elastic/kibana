@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -86,13 +86,13 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async hasSavedSearch(searchName) {
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       return searchLink.isDisplayed();
     }
 
     async loadSavedSearch(searchName) {
       await this.openLoadSavedSearchPanel();
-      const searchLink = await find.byPartialLinkText(searchName);
+      const searchLink = await find.byButtonText(searchName);
       await searchLink.click();
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -117,8 +117,8 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     async brushHistogram(from, to) {
       const bars = await find.allByCssSelector('.series.histogram rect');
       await browser.dragAndDrop(
-        { element: bars[from], xOffset: 0, yOffset: -5 },
-        { element: bars[to], xOffset: 0, yOffset: -5 }
+        { location: bars[from], offset: { x: 0, y: -5 } },
+        { location: bars[to], offset: { x: 0, y: -5 } }
       );
     }
 
@@ -127,8 +127,9 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async getBarChartXTicks() {
-      const elements = await find.allByCssSelector('.x.axis.CategoryAxis-1 > .tick > text');
-      return await Promise.all(elements.map(async el => el.getVisibleText()));
+      const xAxis = await find.byCssSelector('.x.axis.CategoryAxis-1');
+      const $ = await xAxis.parseDomContent();
+      return $('.tick > text').toArray().map(tick => $(tick).text().trim());
     }
 
     async getBarChartData() {
@@ -139,17 +140,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       const yLabel = await y.getVisibleText();
       yAxisLabel = yLabel.replace(',', '');
       log.debug('yAxisLabel = ' + yAxisLabel);
-      // 2). find and save the y-axis pixel size (the chart height)
-      const chartAreaObj = await find.byCssSelector('rect.background');
-      const yAxisHeight = await chartAreaObj.getAttribute('height');
-      log.debug('theHeight = ' + yAxisHeight);
-      // 3). get the visWrapper__chart elements
       // #kibana-body > div.content > div > div > div > div.visEditor__canvas > visualize > div.visChart > div > div.visWrapper__column > div.visWrapper__chart > div > svg > g > g.series.\30 > rect:nth-child(1)
-      const chartTypes = await find.allByCssSelector('svg > g > g.series > rect');
-      const bars = await Promise.all(chartTypes.map(async (chart) => {
-        const barHeight = await chart.getAttribute('height');
+      const svg = await find.byCssSelector('div.chart > svg');
+      const $ = await svg.parseDomContent();
+      const yAxisHeight = $('rect.background').attr('height');
+      log.debug('theHeight = ' + yAxisHeight);
+      const bars = $('g > g.series > rect').toArray().map(chart => {
+        const barHeight = $(chart).attr('height');
         return Math.round(barHeight / yAxisHeight * yAxisLabel);
-      }));
+      });
 
       return bars;
     }

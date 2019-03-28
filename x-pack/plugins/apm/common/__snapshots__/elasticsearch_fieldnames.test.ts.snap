@@ -6,21 +6,13 @@ exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Error ERROR_EXC_MESSAGE 1`] = `undefined`;
 
-exports[`Error ERROR_EXC_STACKTRACE 1`] = `undefined`;
-
 exports[`Error ERROR_GROUP_ID 1`] = `"grouping key"`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Error ERROR_LOG_STACKTRACE 1`] = `undefined`;
-
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Error METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
-
-exports[`Error METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
 exports[`Error METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
@@ -30,17 +22,17 @@ exports[`Error METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Error OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
-exports[`Error PROCESSOR_NAME 1`] = `"error"`;
-
-exports[`Error SERVICE_AGENT_NAME 1`] = `"agent name"`;
-
-exports[`Error SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Error SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Error SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Error SPAN_ACTION 1`] = `undefined`;
 
 exports[`Error SPAN_DURATION 1`] = `undefined`;
 
@@ -48,9 +40,7 @@ exports[`Error SPAN_ID 1`] = `undefined`;
 
 exports[`Error SPAN_NAME 1`] = `undefined`;
 
-exports[`Error SPAN_SQL 1`] = `undefined`;
-
-exports[`Error SPAN_START 1`] = `undefined`;
+exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
@@ -66,7 +56,7 @@ exports[`Error TRANSACTION_RESULT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_SAMPLED 1`] = `undefined`;
 
-exports[`Error TRANSACTION_TYPE 1`] = `undefined`;
+exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
 exports[`Error URL_FULL 1`] = `undefined`;
 
@@ -78,21 +68,13 @@ exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_MESSAGE 1`] = `undefined`;
 
-exports[`Span ERROR_EXC_STACKTRACE 1`] = `undefined`;
-
 exports[`Span ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Span ERROR_LOG_STACKTRACE 1`] = `undefined`;
-
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Span METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
-
-exports[`Span METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
 exports[`Span METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
@@ -102,17 +84,17 @@ exports[`Span METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Span OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
-exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
-
-exports[`Span SERVICE_AGENT_NAME 1`] = `"agent name"`;
-
-exports[`Span SERVICE_LANGUAGE_NAME 1`] = `undefined`;
+exports[`Span SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Span SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Span SPAN_ACTION 1`] = `"my action"`;
 
 exports[`Span SPAN_DURATION 1`] = `1337`;
 
@@ -120,9 +102,7 @@ exports[`Span SPAN_ID 1`] = `"span id"`;
 
 exports[`Span SPAN_NAME 1`] = `"span name"`;
 
-exports[`Span SPAN_SQL 1`] = `"db statement"`;
-
-exports[`Span SPAN_START 1`] = `undefined`;
+exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
@@ -150,21 +130,13 @@ exports[`Transaction ERROR_EXC_HANDLED 1`] = `undefined`;
 
 exports[`Transaction ERROR_EXC_MESSAGE 1`] = `undefined`;
 
-exports[`Transaction ERROR_EXC_STACKTRACE 1`] = `undefined`;
-
 exports[`Transaction ERROR_GROUP_ID 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
-exports[`Transaction ERROR_LOG_STACKTRACE 1`] = `undefined`;
-
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction METRIC_PROCESS_CPU_PERCENT 1`] = `undefined`;
-
-exports[`Transaction METRIC_PROCESS_MEMORY_RSS 1`] = `undefined`;
-
-exports[`Transaction METRIC_PROCESS_MEMORY_SIZE 1`] = `undefined`;
 
 exports[`Transaction METRIC_SYSTEM_CPU_PERCENT 1`] = `undefined`;
 
@@ -174,17 +146,17 @@ exports[`Transaction METRIC_SYSTEM_TOTAL_MEMORY 1`] = `undefined`;
 
 exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 
+exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `undefined`;
+
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
-exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
-
-exports[`Transaction SERVICE_AGENT_NAME 1`] = `"agent name"`;
-
-exports[`Transaction SERVICE_LANGUAGE_NAME 1`] = `"nodejs"`;
+exports[`Transaction SERVICE_AGENT_NAME 1`] = `"java"`;
 
 exports[`Transaction SERVICE_NAME 1`] = `"service name"`;
+
+exports[`Transaction SPAN_ACTION 1`] = `undefined`;
 
 exports[`Transaction SPAN_DURATION 1`] = `undefined`;
 
@@ -192,9 +164,7 @@ exports[`Transaction SPAN_ID 1`] = `undefined`;
 
 exports[`Transaction SPAN_NAME 1`] = `undefined`;
 
-exports[`Transaction SPAN_SQL 1`] = `undefined`;
-
-exports[`Transaction SPAN_START 1`] = `undefined`;
+exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 

@@ -13,7 +13,7 @@ import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/Ki
 import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { ManagedTable } from '../../../shared/ManagedTable';
+import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
   items: IServiceListItem[];
@@ -39,7 +39,7 @@ const AppLink = styled(KibanaLink)`
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS = [
+export const SERVICE_COLUMNS: Array<ITableColumn<IServiceListItem>> = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {

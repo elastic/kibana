@@ -40,6 +40,9 @@ import {
 } from '../sample_data_client';
 
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+
+const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
 export class SampleDataSetCards extends React.Component {
 
@@ -181,9 +184,13 @@ export class SampleDataSetCards extends React.Component {
     });
   }
 
+  lightOrDarkImage = (sampleDataSet) => {
+    return IS_DARK_THEME && sampleDataSet.darkPreviewImagePath ? sampleDataSet.darkPreviewImagePath : sampleDataSet.previewImagePath;
+  }
+
   render() {
     return (
-      <EuiFlexGrid columns={4}>
+      <EuiFlexGrid columns={3} className="homSampleDataSetCards">
         {
           this.state.sampleDataSets.map(sampleDataSet => {
             return (
@@ -192,11 +199,12 @@ export class SampleDataSetCards extends React.Component {
                   id={sampleDataSet.id}
                   description={sampleDataSet.description}
                   name={sampleDataSet.name}
-                  launchUrl={this.props.addBasePath(`/app/kibana#/dashboard/${sampleDataSet.overviewDashboard}`)}
+                  overviewDashboard={sampleDataSet.overviewDashboard}
+                  appLinks={sampleDataSet.appLinks}
                   status={sampleDataSet.status}
                   isProcessing={_.get(this.state.processingStatus, sampleDataSet.id, false)}
                   statusMsg={sampleDataSet.statusMsg}
-                  previewUrl={this.props.addBasePath(sampleDataSet.previewImagePath)}
+                  previewUrl={this.props.addBasePath(this.lightOrDarkImage(sampleDataSet))}
                   onInstall={this.install}
                   onUninstall={this.uninstall}
                 />

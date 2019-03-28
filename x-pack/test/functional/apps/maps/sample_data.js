@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
       past.setMonth(past.getMonth() - 6);
       const future = new Date();
       future.setMonth(future.getMonth() + 6);
-      await PageObjects.timePicker.setAbsoluteRange(
+      await PageObjects.maps.setAbsoluteRange(
         PageObjects.timePicker.formatDateToAbsoluteTimeString(past),
         PageObjects.timePicker.formatDateToAbsoluteTimeString(future)
       );
@@ -40,7 +40,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('United States');
         await PageObjects.maps.toggleLayerVisibility('World Countries');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 
@@ -65,7 +64,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
         await PageObjects.maps.toggleLayerVisibility('road_map');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 
@@ -92,7 +90,6 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
         await PageObjects.maps.toggleLayerVisibility('road_map');
         await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
         await setTimerangeToCoverAllSampleData();
-        await PageObjects.maps.waitForLayersToLoad();
         await PageObjects.maps.enterFullScreen();
       });
 

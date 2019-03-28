@@ -18,11 +18,16 @@ export class AbstractSource {
     throw new Error('Must implement Source.renderDropdownDisplayOption');
   }
 
-  constructor(descriptor) {
+  constructor(descriptor, inspectorAdapters) {
     this._descriptor = descriptor;
+    this._inspectorAdapters = inspectorAdapters;
   }
 
   destroy() {}
+
+  async supportsFitToBounds() {
+    return true;
+  }
 
   /**
    * return list of immutable source properties.
@@ -30,6 +35,10 @@ export class AbstractSource {
    */
   async getImmutableProperties() {
     return [];
+  }
+
+  getInspectorAdapters() {
+    return this._inspectorAdapters;
   }
 
   _createDefaultLayerDescriptor() {
@@ -88,6 +97,14 @@ export class AbstractSource {
 
   getGeoGridPrecision() {
     return 0;
+  }
+
+  isJoinable() {
+    return false;
+  }
+
+  supportsElasticsearchFilters() {
+    return false;
   }
 }
 

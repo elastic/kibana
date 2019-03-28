@@ -2,12 +2,6 @@
   "type": "index",
   "value": {
     "index": ".kibana",
-    "settings": {
-      "index": {
-        "number_of_shards": "1",
-        "number_of_replicas": "0"
-      }
-    },
     "mappings": {
       "dynamic": "strict",
       "properties": {
@@ -21,16 +15,16 @@
               "type": "date"
             },
             "id": {
-              "type": "text",
-              "index": false
+              "index": false,
+              "type": "text"
             },
             "name": {
-              "type": "text",
               "fields": {
                 "keyword": {
                   "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -41,13 +35,13 @@
               "type": "keyword"
             },
             "defaultIndex": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -96,32 +90,6 @@
             },
             "timeTo": {
               "type": "keyword"
-            },
-            "title": {
-              "type": "text"
-            },
-            "uiStateJSON": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
-        "map": {
-          "properties": {
-            "bounds": {
-              "type": "geo_shape",
-              "tree": "quadtree"
-            },
-            "description": {
-              "type": "text"
-            },
-            "layerListJSON": {
-              "type": "text"
-            },
-            "mapStateJSON": {
-              "type": "text"
             },
             "title": {
               "type": "text"
@@ -204,22 +172,62 @@
             }
           }
         },
+        "map": {
+          "properties": {
+            "bounds": {
+              "tree": "quadtree",
+              "type": "geo_shape"
+            },
+            "description": {
+              "type": "text"
+            },
+            "layerListJSON": {
+              "type": "text"
+            },
+            "mapStateJSON": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
         "migrationVersion": {
           "dynamic": "true",
           "properties": {
             "index-pattern": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 256
+                  "ignore_above": 256,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
         "namespace": {
           "type": "keyword"
+        },
+        "references": {
+          "type": "nested",
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            }
+          }
         },
         "search": {
           "properties": {
@@ -272,13 +280,13 @@
               "type": "keyword"
             },
             "name": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -348,13 +356,13 @@
               "type": "date"
             },
             "url": {
-              "type": "text",
               "fields": {
                 "keyword": {
-                  "type": "keyword",
-                  "ignore_above": 2048
+                  "ignore_above": 2048,
+                  "type": "keyword"
                 }
-              }
+              },
+              "type": "text"
             }
           }
         },
@@ -387,6 +395,12 @@
             }
           }
         }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
       }
     }
   }

@@ -25,7 +25,7 @@ import mkdirp from 'mkdirp';
 import rimraf from 'rimraf';
 
 import { safeDump } from 'js-yaml';
-import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../utils/streams';
+import { createMapStream, createSplitStream, createPromiseFromStreams } from '../../../legacy/utils/streams';
 import { getConfigFromFiles } from '../../../core/server/config/read_config';
 
 const testConfigFile = follow('__fixtures__/reload_logging_config/kibana.test.yml');
@@ -83,7 +83,7 @@ describe('Server logging configuration', function () {
     it('should be reloadable via SIGHUP process signaling', async function () {
       expect.assertions(3);
 
-      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile], {
+      child = spawn(process.execPath, [kibanaPath, '--config', testConfigFile, '--oss'], {
         stdio: 'pipe'
       });
 
@@ -174,6 +174,7 @@ describe('Server logging configuration', function () {
 
       child = spawn(process.execPath, [
         kibanaPath,
+        '--oss',
         '--config', testConfigFile,
         '--logging.dest', logPath,
         '--plugins.initialize', 'false',

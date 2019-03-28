@@ -85,6 +85,12 @@ export class AutocompleteField extends React.Component<
     );
   }
 
+  public componentDidMount() {
+    if (this.inputElement) {
+      this.inputElement.focus();
+    }
+  }
+
   public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
     const hasNewValue = prevProps.value !== this.props.value;
     const hasNewSuggestions = prevProps.suggestions !== this.props.suggestions;
@@ -302,4 +308,5 @@ const SuggestionsPanel = styled(EuiPanel).attrs({
   width: 100%;
   margin-top: 2px;
   overflow: hidden;
+  z-index: ${props => props.theme.eui.euiZLevel1};
 `;

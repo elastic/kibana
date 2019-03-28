@@ -9,12 +9,11 @@ import _ from 'lodash';
 import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { TileStyle } from '../layers/styles/tile_style';
-
-const TMS_LOAD_TIMEOUT = 32000;
+import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 
 export class TileLayer extends AbstractLayer {
 
-  static type = "TILE";
+  static type = 'TILE';
 
   constructor({ layerDescriptor, source, style }) {
     super({ layerDescriptor, source, style });
@@ -32,98 +31,74 @@ export class TileLayer extends AbstractLayer {
     return tileLayerDescriptor;
   }
 
-  _tileLoadErrorTracker(map, url) {
-    let tileLoad;
-    map.on('dataloading', ({ tile }) => {
-      if (tile && tile.request) {
-        // If at least one tile loads, endpoint/resource is valid
-        tile.request.onloadend = ({ loaded }) => {
-          if (loaded) {
-            tileLoad = true;
-          }
-        };
-      }
-    });
-
-    return new Promise((resolve, reject) => {
-      let tileLoadTimer = null;
-
-      const clearChecks = () => {
-        clearTimeout(tileLoadTimer);
-        map.off('dataloading');
-      };
-
-      tileLoadTimer = setTimeout(() => {
-        if (!tileLoad) {
-          reject(new Error(`Tiles from "${url}" could not be loaded`));
-        } else {
-          resolve();
-        }
-        clearChecks();
-      }, TMS_LOAD_TIMEOUT);
-    });
-  }
-
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
-    const sourceDataId = 'source';
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (sourceDataRequest) {//data is immmutable
+      return;
+    }
     const requestToken = Symbol(`layer-source-refresh:${ this.getId()} - source`);
-    startLoading(sourceDataId, requestToken, dataFilters);
+    startLoading(SOURCE_DATA_ID_ORIGIN, requestToken, dataFilters);
     try {
       const url = await this._source.getUrlTemplate();
-      stopLoading(sourceDataId, requestToken, url, {});
+      stopLoading(SOURCE_DATA_ID_ORIGIN, requestToken, url, {});
     } catch(error) {
-      onLoadError(sourceDataId, requestToken, error.message);
+      onLoadError(SOURCE_DATA_ID_ORIGIN, requestToken, error.message);
     }
   }
 
-  async syncLayerWithMB(mbMap) {
+  _getMbLayerId() {
+    return this.getId() + '_raster';
+  }
+
+  getMbLayerIds() {
+    return [this._getMbLayerId()];
+  }
+
+  syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
-    const mbLayerId = this.getId() + '_raster';
+    const mbLayerId = this._getMbLayerId();
 
-    if (source) {
-      // If source exists, just sync style
-      this._setTileLayerProperties(mbMap, mbLayerId);
-      return;
+    if (!source) {
+      const sourceDataRequest = this.getSourceDataRequest();
+      if (!sourceDataRequest) {
+        //this is possible if the layer was invisible at startup.
+        //the actions will not perform any data=syncing as an optimization when a layer is invisible
+        //when turning the layer back into visible, it's possible the url has not been resovled yet.
+        return;
+      }
+      const url = sourceDataRequest.getData();
+      if (!url) {
+        return;
+      }
+
+      const sourceId = this.getId();
+      mbMap.addSource(sourceId, {
+        type: 'raster',
+        tiles: [url],
+        tileSize: 256,
+        scheme: 'xyz',
+      });
+
+      mbMap.addLayer({
+        id: mbLayerId,
+        type: 'raster',
+        source: sourceId,
+        minzoom: this._descriptor.minZoom,
+        maxzoom: this._descriptor.maxZoom,
+      });
     }
 
-    const sourceDataRquest = this.getSourceDataRequest();
-    const url = sourceDataRquest.getData();
-    if (!url) {
-      return;
-    }
-
-    const sourceId = this.getId();
-    mbMap.addSource(sourceId, {
-      type: 'raster',
-      tiles: [url],
-      tileSize: 256,
-      scheme: 'xyz',
-    });
-
-    mbMap.addLayer({
-      id: mbLayerId,
-      type: 'raster',
-      source: sourceId,
-      minzoom: this._descriptor.minZoom,
-      maxzoom: this._descriptor.maxZoom,
-    });
     this._setTileLayerProperties(mbMap, mbLayerId);
-
-    await this._tileLoadErrorTracker(mbMap, url);
   }
 
   _setTileLayerProperties(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
-    this._style && this._style.setMBPaintProperties({
-      alpha: this.getAlpha(),
-      mbMap,
-      layerId: mbLayerId,
-    });
+    mbMap.setPaintProperty(mbLayerId, 'raster-opacity', this.getAlpha());
   }
 
   getLayerTypeIconName() {

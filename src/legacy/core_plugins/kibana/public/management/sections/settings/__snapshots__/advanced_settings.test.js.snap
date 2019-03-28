@@ -3,24 +3,12 @@
 exports[`AdvancedSettings should render normally 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
     gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <advanced_settings_page_title />
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <Search
         categories={
           Array [
@@ -35,6 +23,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "_clauses": Array [],
               "_indexedClauses": Object {
                 "field": Object {},
+                "group": Array [],
                 "is": Object {},
                 "term": Array [],
               },
@@ -42,6 +31,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "syntax": Object {
               "parse": [Function],
               "print": [Function],
+              "printClause": [Function],
             },
             "text": "",
           }
@@ -324,6 +314,7 @@ exports[`AdvancedSettings should render normally 1`] = `
           "_clauses": Array [],
           "_indexedClauses": Object {
             "field": Object {},
+            "group": Array [],
             "is": Object {},
             "term": Array [],
           },
@@ -331,6 +322,7 @@ exports[`AdvancedSettings should render normally 1`] = `
         "syntax": Object {
           "parse": [Function],
           "print": [Function],
+          "printClause": [Function],
         },
         "text": "",
       }
@@ -342,24 +334,12 @@ exports[`AdvancedSettings should render normally 1`] = `
 exports[`AdvancedSettings should render specific setting if given setting key 1`] = `
 <div>
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
     gutterSize="none"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <advanced_settings_page_title />
     </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
+    <EuiFlexItem>
       <Search
         categories={
           Array [
@@ -392,6 +372,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
                     },
                   ],
                 },
+                "group": Array [],
                 "is": Object {},
                 "term": Array [],
               },
@@ -399,6 +380,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "syntax": Object {
               "parse": [Function],
               "print": [Function],
+              "printClause": [Function],
             },
             "text": "ariaName:\\"test string setting\\"",
           }
@@ -481,6 +463,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
                 },
               ],
             },
+            "group": Array [],
             "is": Object {},
             "term": Array [],
           },
@@ -488,6 +471,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
         "syntax": Object {
           "parse": [Function],
           "print": [Function],
+          "printClause": [Function],
         },
         "text": "ariaName:\\"test string setting\\"",
       }

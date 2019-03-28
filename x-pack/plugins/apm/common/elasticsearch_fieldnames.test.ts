@@ -5,16 +5,18 @@
  */
 
 import { get } from 'lodash';
-import { APMError } from '../typings/es_schemas/Error';
-import { Span } from '../typings/es_schemas/Span';
-import { Transaction } from '../typings/es_schemas/Transaction';
+import { APMError } from '../typings/es_schemas/ui/APMError';
+import { Span } from '../typings/es_schemas/ui/Span';
+import { Transaction } from '../typings/es_schemas/ui/Transaction';
 import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
   const transaction: Transaction = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     http: {
@@ -58,8 +60,10 @@ describe('Transaction', () => {
 describe('Span', () => {
   const span: Span = {
     '@timestamp': new Date().toString(),
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     processor: {
@@ -75,11 +79,6 @@ describe('Span', () => {
     service: {
       name: 'service name'
     },
-    context: {
-      db: {
-        statement: 'db statement'
-      }
-    },
     parent: {
       id: 'parentId'
     },
@@ -90,7 +89,10 @@ describe('Span', () => {
       name: 'span name',
       subtype: 'my subtype',
       sync: false,
-      type: 'span type'
+      type: 'span type',
+      db: {
+        statement: 'db statement'
+      }
     },
     transaction: {
       id: 'transaction id'
@@ -102,8 +104,10 @@ describe('Span', () => {
 
 describe('Error', () => {
   const errorDoc: APMError = {
+    '@metadata': 'whatever',
+    observer: 'whatever',
     agent: {
-      name: 'agent name',
+      name: 'java',
       version: 'agent version'
     },
     error: {
@@ -140,12 +144,12 @@ describe('Error', () => {
         version: 'v1337'
       }
     },
-    context: {},
     parent: {
       id: 'parentId'
     },
     transaction: {
-      id: 'transaction id'
+      id: 'transaction id',
+      type: 'request'
     }
   };
 

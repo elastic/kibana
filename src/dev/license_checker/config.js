@@ -74,7 +74,6 @@ export const DEV_ONLY_LICENSE_WHITELIST = [
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
-  'scriptjs@2.5.8': ['MIT'], // license header appended in the dist
   'react-lib-adler32@1.0.1': ['BSD'], // adler32 extracted from react source,
   'cycle@1.0.3': ['CC0-1.0'], // conversion to a public-domain like license
   'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], //cf. https://github.com/bjornharrtell/jsts
@@ -106,5 +105,5 @@ export const LICENSE_OVERRIDES = {
   'walk@2.3.9': ['MIT'],
 
   // TODO remove this once we upgrade past or equal to v1.0.2
-  'babel-plugin-mock-imports@0.0.5': ['MIT']
+  'babel-plugin-mock-imports@1.0.1': ['MIT']
 };

@@ -4,21 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { TransactionDetailsRequest } from '../../../store/reactReduxRequest/transactionDetails';
 import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
 import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
 import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
 import { IUrlParams } from '../../../store/urlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
-// @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
-import { Distribution } from './Distribution';
+import { FilterBar } from '../../shared/FilterBar';
+import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
@@ -36,7 +33,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <KueryBar />
+      <FilterBar />
 
       <EuiSpacer size="s" />
 
@@ -53,25 +50,27 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
 
       <EuiSpacer />
 
-      <TransactionDistributionRequest
-        urlParams={urlParams}
-        render={({ data }) => (
-          <Distribution
-            distribution={data}
-            urlParams={urlParams}
-            location={location}
-          />
-        )}
-      />
+      <EuiPanel>
+        <TransactionDistributionRequest
+          urlParams={urlParams}
+          render={({ data }) => (
+            <TransactionDistribution
+              distribution={data}
+              urlParams={urlParams}
+              location={location}
+            />
+          )}
+        />
+      </EuiPanel>
 
       <EuiSpacer size="l" />
-
-      <TransactionDetailsRequest
+      <WaterfallRequest
         urlParams={urlParams}
-        render={({ data }) => {
-          const transaction = idx(data, _ => _.transaction);
-          const errorCount = idx(data, _ => _.errorCount);
-
+        traceId={urlParams.traceId}
+        render={({ data: waterfall }) => {
+          const transaction = waterfall.getTransactionById(
+            urlParams.transactionId
+          );
           if (!transaction) {
             return (
               <EmptyMessage
@@ -93,20 +92,11 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
           }
 
           return (
-            <WaterfallRequest
-              urlParams={urlParams}
+            <Transaction
+              location={location}
               transaction={transaction}
-              render={({ data: waterfall }) => {
-                return (
-                  <Transaction
-                    location={location}
-                    transaction={transaction}
-                    urlParams={urlParams}
-                    waterfall={waterfall}
-                    errorCount={errorCount}
-                  />
-                );
-              }}
+              urlParams={urlParams}
+              waterfall={waterfall}
             />
           );
         }}

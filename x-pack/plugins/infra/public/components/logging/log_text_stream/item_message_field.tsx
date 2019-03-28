@@ -82,6 +82,7 @@ const hoveredFieldStyle = css`
 const wrappedFieldStyle = css`
   overflow: visible;
   white-space: pre-wrap;
+  word-break: break-all;
 `;
 
 const unwrappedFieldStyle = css`

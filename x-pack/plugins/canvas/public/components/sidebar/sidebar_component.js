@@ -121,7 +121,7 @@ export const SidebarComponent = ({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
         </div>
       )}
     </div>

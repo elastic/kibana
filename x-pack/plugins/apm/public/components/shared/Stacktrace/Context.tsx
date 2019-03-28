@@ -6,6 +6,7 @@
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { size } from 'lodash';
+import { tint } from 'polished';
 import React from 'react';
 // TODO add dependency for @types/react-syntax-highlighter
 // @ts-ignore
@@ -15,21 +16,15 @@ import python from 'react-syntax-highlighter/dist/languages/python';
 // @ts-ignore
 import ruby from 'react-syntax-highlighter/dist/languages/ruby';
 // @ts-ignore
-import { registerLanguage } from 'react-syntax-highlighter/dist/light';
-// @ts-ignore
 import SyntaxHighlighter from 'react-syntax-highlighter/dist/light';
+// @ts-ignore
+import { registerLanguage } from 'react-syntax-highlighter/dist/light';
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
 import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
-import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import {
-  borderRadius,
-  colors,
-  px,
-  unit,
-  units
-} from '../../../style/variables';
+import { IStackframeWithLineContext } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import { borderRadius, px, unit, units } from '../../../style/variables';
 
 registerLanguage('javascript', javascript);
 registerLanguage('python', python);
@@ -47,7 +42,7 @@ const LineHighlight = styled.div<{ lineNumber: number }>`
   height: ${px(units.eighth * 9)};
   top: ${props => px(props.lineNumber * LINE_HEIGHT)};
   pointer-events: none;
-  background-color: ${colors.yellow};
+  background-color: ${tint(0.1, theme.euiColorWarning)};
 `;
 
 const LineNumberContainer = styled.div<{ isLibraryFrame: boolean }>`
@@ -70,7 +65,8 @@ const LineNumber = styled.div<{ highlight: boolean }>`
   line-height: ${px(unit + units.eighth)};
   text-align: right;
   border-right: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props => (props.highlight ? colors.yellow : null)};
+  background-color: ${props =>
+    props.highlight ? tint(0.1, theme.euiColorWarning) : null};
 
   &:last-of-type {
     border-radius: 0 0 0 ${borderRadius};

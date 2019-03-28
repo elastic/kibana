@@ -21,8 +21,8 @@ import _ from 'lodash';
 import { statSync, lstatSync, realpathSync } from 'fs';
 import { resolve } from 'path';
 
-import { fromRoot } from '../../utils';
-import { getConfig } from '../../server/path';
+import { fromRoot } from '../../legacy/utils';
+import { getConfig } from '../../legacy/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 

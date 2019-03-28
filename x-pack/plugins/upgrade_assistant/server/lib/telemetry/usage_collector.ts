@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import { SavedObjectsRepository } from 'src/server/saved_objects/service/lib/repository';
+import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib/repository';
 import {
   UPGRADE_ASSISTANT_DOC_ID,
   UPGRADE_ASSISTANT_TYPE,

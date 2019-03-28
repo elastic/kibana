@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';
@@ -78,7 +78,6 @@ module.controller('MlNewJob',
     $location,
     $modal,
     Private,
-    mlDatafeedService,
     mlConfirmModalService,
     i18n) {
 
@@ -520,6 +519,7 @@ module.controller('MlNewJob',
                 values: { jobId: $scope.job.job_id }
               });
               changeTab({ index: 0 });
+              $scope.$applyAsync();
             } else {
               checkInfluencers();
             }
@@ -622,7 +622,8 @@ module.controller('MlNewJob',
                       if (datafeedConfig) {
                         // open job successful, create a new datafeed
                         mlJobService.saveNewDatafeed(datafeedConfig, jobId)
-                          .then(() => {
+                          .then((resp) => {
+                            datafeedConfig.datafeed_id = resp.datafeed_id;
                             $scope.saveLock = false;
                           })
                           .catch((resp) => {
@@ -813,10 +814,10 @@ module.controller('MlNewJob',
             $scope.ui.cardinalityValidator.message = i18n(
               'xpack.ml.newJob.advanced.recommendationForUsingModelPlotWithCardinalityDescription',
               {
-                defaultMessage: 'Creating model plots is resource intensive and not recommended' +
-                  'where the cardinality of the selected fields is greater than 100. Estimated cardinality' +
-                  'for this job is {highCardinality}.' +
-                  'If you enable model plot with this configuration' +
+                defaultMessage: 'Creating model plots is resource intensive and not recommended ' +
+                  'where the cardinality of the selected fields is greater than 100. Estimated cardinality ' +
+                  'for this job is {highCardinality}. ' +
+                  'If you enable model plot with this configuration ' +
                   'we recommend you select a dedicated results index on the Job Details tab.',
                 values: { highCardinality: validationResult.highCardinality }
               }
@@ -830,9 +831,10 @@ module.controller('MlNewJob',
           $scope.ui.cardinalityValidator.message = i18n(
             'xpack.ml.newJob.advanced.cardinalityNotValidErrorMessage',
             {
-              defaultMessage: 'An error occurred validating the configuration' +
-                'for running the job with model plot enabled.' +
-                'Creating model plots can be resource intensive and not recommended where the cardinality of the selected fields is high.' +
+              defaultMessage: 'An error occurred validating the configuration ' +
+                'for running the job with model plot enabled. ' +
+                'Creating model plots can be resource intensive and not recommended ' +
+                'where the cardinality of the selected fields is high. ' +
                 'You may want to select a dedicated results index on the Job Details tab.'
             }
           );
@@ -1375,7 +1377,7 @@ module.controller('MlNewJob',
             return {
               pscope: $scope,
               openDatafeed: function () {
-                mlDatafeedService.openJobTimepickerWindow($scope.job);
+                mlJobService.currentJob = $scope.job;
               }
             };
           }

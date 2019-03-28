@@ -94,7 +94,7 @@ export const FieldsConfigurationPanel = ({
           id="xpack.infra.sourceConfiguration.containerFieldDescription"
           defaultMessage="Field used to identify Docker containers. The recommended value is {defaultValue}."
           values={{
-            defaultValue: <EuiCode>docker.container.id</EuiCode>,
+            defaultValue: <EuiCode>container.id</EuiCode>,
           }}
         />
       }

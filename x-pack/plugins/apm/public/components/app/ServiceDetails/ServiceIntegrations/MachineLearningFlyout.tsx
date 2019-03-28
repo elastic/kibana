@@ -23,12 +23,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
+import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
 import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
 import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
-import {
-  getMlPrefix,
-  startMLJob
-} from 'x-pack/plugins/apm/public/services/rest/ml';
+import { startMLJob } from 'x-pack/plugins/apm/public/services/rest/ml';
 import { getAPMIndexPattern } from 'x-pack/plugins/apm/public/services/rest/savedObjects';
 import { MLJobsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/machineLearningJobs';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
@@ -56,12 +54,20 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     hasMLJob: false,
     selectedTransactionType: this.props.urlParams.transactionType
   };
+  public willUnmount = false;
+
+  public componentWillUnmount() {
+    this.willUnmount = true;
+  }
 
   public async componentDidMount() {
     const indexPattern = await getAPMIndexPattern();
-    this.setState({ hasIndexPattern: !!indexPattern });
+    if (!this.willUnmount) {
+      this.setState({ hasIndexPattern: !!indexPattern });
+    }
   }
 
+  // TODO: This should use `getDerivedStateFromProps`
   public componentDidUpdate(prevProps: FlyoutProps) {
     if (
       prevProps.urlParams.transactionType !==
@@ -77,14 +83,17 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
     this.setState({ isLoading: true });
     try {
       const { serviceName, transactionType } = this.props.urlParams;
-      if (serviceName) {
-        const res = await startMLJob({ serviceName, transactionType });
-        const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
-        if (!didSucceed) {
-          throw new Error('Creating ML job failed');
-        }
-        this.addSuccessToast();
+      if (!serviceName || !transactionType) {
+        throw new Error(
+          'Service name and transaction type are required to create this ML job'
+        );
       }
+      const res = await startMLJob({ serviceName, transactionType });
+      const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
+      if (!didSucceed) {
+        throw new Error('Creating ML job failed');
+      }
+      this.addSuccessToast();
     } catch (e) {
       this.addErrorToast();
     }
@@ -95,7 +104,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
   public addErrorToast = () => {
     const { urlParams } = this.props;
-    const { serviceName = 'unknown' } = urlParams;
+    const { serviceName } = urlParams;
 
     if (!serviceName) {
       return;
@@ -124,7 +133,11 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
   public addSuccessToast = () => {
     const { location, urlParams } = this.props;
-    const { serviceName = 'unknown', transactionType } = urlParams;
+    const { serviceName, transactionType } = urlParams;
+
+    if (!serviceName) {
+      return;
+    }
 
     toastNotifications.addSuccess({
       title: i18n.translate(
@@ -182,10 +195,7 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
 
           const hasMLJob = data.jobs.some(
             job =>
-              job.jobId &&
-              job.jobId.startsWith(
-                getMlPrefix(serviceName, selectedTransactionType)
-              )
+              job.job_id === getMlJobId(serviceName, selectedTransactionType)
           );
 
           return (
@@ -342,7 +352,8 @@ export class MachineLearningFlyout extends Component<FlyoutProps, FlyoutState> {
                   <EuiFlexItem>
                     {this.props.serviceTransactionTypes.length > 1 ? (
                       <TransactionSelect
-                        types={this.props.serviceTransactionTypes}
+                        serviceName={serviceName}
+                        transactionTypes={this.props.serviceTransactionTypes}
                         selected={this.state.selectedTransactionType}
                         existingJobs={data.jobs}
                         onChange={value =>

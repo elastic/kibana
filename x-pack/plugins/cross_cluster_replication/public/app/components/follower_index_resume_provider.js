@@ -7,7 +7,8 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiConfirmModal,
   EuiLink,
@@ -18,7 +19,7 @@ import routing from '../services/routing';
 import { resumeFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 
-class Provider extends PureComponent {
+class FollowerIndexResumeProviderUi extends PureComponent {
   static propTypes = {
     onConfirm: PropTypes.func,
   }
@@ -51,18 +52,22 @@ class Provider extends PureComponent {
   };
 
   renderModal = () => {
-    const { intl } = this.props;
     const { ids } = this.state;
     const isSingle = ids.length === 1;
     const title = isSingle
-      ? intl.formatMessage({
-        id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
-        defaultMessage: 'Resume replication to follower index \'{name}\'?',
-      }, { name: ids[0] })
-      : intl.formatMessage({
-        id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
-        defaultMessage: 'Resume replication to {count} follower indices?',
-      }, { count: ids.length });
+      ? i18n.translate(
+        'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeSingleTitle',
+        {
+          defaultMessage: `Resume replication to follower index '{name}'?`,
+          values: { name: ids[0] }
+        }
+      ) : i18n.translate(
+        'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.resumeMultipleTitle',
+        {
+          defaultMessage: `Resume replication to {count} follower indices?`,
+          values: { count: ids.length }
+        }
+      );
 
     return (
       <EuiOverlayMask>
@@ -72,19 +77,24 @@ class Provider extends PureComponent {
           onCancel={this.closeConfirmModal}
           onConfirm={this.onConfirm}
           cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
-              defaultMessage: 'Cancel',
-            })
+            i18n.translate(
+              'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.cancelButtonText',
+              {
+                defaultMessage: 'Cancel'
+              }
+            )
           }
           buttonColor="primary"
           confirmButtonText={
-            intl.formatMessage({
-              id: 'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
-              defaultMessage: 'Resume replication',
-            })
+            i18n.translate(
+              'xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.confirmButtonText',
+              {
+                defaultMessage: 'Resume replication'
+              }
+            )
           }
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="ccrFollowerIndexResumeReplicationConfirmationModal"
         >
           {isSingle ? (
             <p>
@@ -94,7 +104,10 @@ class Provider extends PureComponent {
                   custom advanced settings, {editLink}."
                 values={{
                   editLink: (
-                    <EuiLink href={routing.getFollowerIndexPath(ids[0])}>
+                    <EuiLink
+                      href={routing.getFollowerIndexPath(ids[0])}
+                      data-test-subj="ccrFollowerIndexConfirmResumeModalEditLink"
+                    >
                       <FormattedMessage
                         id="xpack.crossClusterReplication.resumeFollowerIndex.confirmModal.singleResumeEditLink"
                         defaultMessage="edit the follower index"
@@ -150,5 +163,5 @@ const mapDispatchToProps = (dispatch) => ({
 export const FollowerIndexResumeProvider = connect(
   undefined,
   mapDispatchToProps
-)(injectI18n(Provider));
+)(FollowerIndexResumeProviderUi);
 

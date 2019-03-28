@@ -34,6 +34,7 @@ import {
   updateDescription,
   updateHidePanelTitles,
   updateTimeRange,
+  updateRefreshConfig,
   clearStagedFilters,
   updateFilters,
   updateQuery,
@@ -151,6 +152,13 @@ export class DashboardStateManager {
     }));
   }
 
+  handleRefreshConfigChange({ pause, value }) {
+    store.dispatch(updateRefreshConfig({
+      isPaused: pause,
+      interval: value,
+    }));
+  }
+
   /**
    * Changes made to app state outside of direct calls to this class will need to be propagated to the store.
    * @private
@@ -238,9 +246,9 @@ export class DashboardStateManager {
 
     _.forEach(getEmbeddables(store.getState()), (embeddable, panelId) => {
       if (embeddable.initialized && !this.panelIndexPatternMapping.hasOwnProperty(panelId)) {
-        const indexPattern = getEmbeddableMetadata(store.getState(), panelId).indexPattern;
-        if (indexPattern) {
-          this.panelIndexPatternMapping[panelId] = indexPattern;
+        const embeddableMetadata = getEmbeddableMetadata(store.getState(), panelId);
+        if (embeddableMetadata.indexPatterns) {
+          this.panelIndexPatternMapping[panelId] = _.compact(embeddableMetadata.indexPatterns);
           this.dirty = true;
         }
       }
@@ -274,7 +282,8 @@ export class DashboardStateManager {
   }
 
   getPanelIndexPatterns() {
-    return _.uniq(Object.values(this.panelIndexPatternMapping));
+    const indexPatterns = _.flatten(Object.values(this.panelIndexPatternMapping));
+    return _.uniq(indexPatterns, 'id');
   }
 
   /**

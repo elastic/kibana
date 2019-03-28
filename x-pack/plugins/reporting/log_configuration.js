@@ -9,14 +9,14 @@ import { promisify } from 'util';
 
 const getos = promisify(getosSync);
 
-export async function logConfiguration(config, log) {
+export async function logConfiguration(config, logger) {
   const browserType = config.get('xpack.reporting.capture.browser.type');
-  log(`Browser type: ${browserType}`);
+  logger.debug(`Browser type: ${browserType}`);
 
   if (browserType === 'chromium') {
-    log(`Chromium sandbox disabled: ${config.get('xpack.reporting.capture.browser.chromium.disableSandbox')}`);
+    logger.debug(`Chromium sandbox disabled: ${config.get('xpack.reporting.capture.browser.chromium.disableSandbox')}`);
   }
 
   const os = await getos();
-  log(`Running on os "${os.os}", distribution "${os.dist}", release "${os.release}"`);
+  logger.debug(`Running on os "${os.os}", distribution "${os.dist}", release "${os.release}"`);
 }

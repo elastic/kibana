@@ -44,7 +44,7 @@ export function rabbitmqMetricsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: 'AV4YobKIge1VCbKU_qVo',
+          id: 'AV4YobKIge1VCbKU_qVo-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.rabbitmqMetrics.artifacts.dashboards.linkLabel', {
             defaultMessage: 'RabbitMQ metrics dashboard',
           }),

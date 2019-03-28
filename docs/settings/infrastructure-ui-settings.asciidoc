@@ -1,14 +1,14 @@
 [role="xpack"]
 [[infrastructure-ui-settings-kb]]
-=== Infrastructure UI Settings in Kibana
+=== Infrastructure UI settings in Kibana
 ++++
-<titleabbrev>Infrastructure UI Settings</titleabbrev>
+<titleabbrev>Infrastructure UI settings</titleabbrev>
 ++++
 
 You do not need to configure any settings to use the Infrastructure UI. It is enabled by default.
 
 [float]
 [[general-infra-ui-settings-kb]]
-==== General Infrastructure UI Settings
+==== General Infrastructure UI settings
 
 include::general-infra-logs-ui-settings.asciidoc[]

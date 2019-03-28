@@ -7,7 +7,8 @@
 import { EuiLink } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
-import { getKibanaHref } from './url_helpers';
+import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
+import { getRisonHref } from './rison_helpers';
 
 interface Props {
   serviceName: string;
@@ -23,13 +24,12 @@ export const MLJobLink: React.SFC<Props> = ({
 }) => {
   const pathname = '/app/ml';
   const hash = '/timeseriesexplorer';
-  const maybeTransactionType = transactionType ? transactionType + '-' : '';
-  const jobId = `${serviceName}-${maybeTransactionType}high_mean_response_time`;
+  const jobId = getMlJobId(serviceName, transactionType);
   const query = {
     _g: { ml: { jobIds: [jobId] } }
   };
 
-  const href = getKibanaHref({
+  const href = getRisonHref({
     location,
     pathname,
     hash,

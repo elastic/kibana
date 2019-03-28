@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 
-import { ES_INDEX_NAME, ES_TYPE_NAME } from './constants';
+import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,7 +39,6 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -63,7 +62,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -83,7 +81,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `beat:${beatId}`,
       });
 
@@ -112,7 +109,6 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${expiredEnrollmentToken}`,
         body: {
           type: 'enrollment_token',
@@ -145,7 +141,6 @@ export default function ({ getService }) {
 
       const esResponse = await es.get({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         ignore: [404],
       });
@@ -163,7 +158,6 @@ export default function ({ getService }) {
 
       await es.index({
         index: ES_INDEX_NAME,
-        type: ES_TYPE_NAME,
         id: `enrollment_token:${validEnrollmentToken}`,
         body: {
           type: 'enrollment_token',

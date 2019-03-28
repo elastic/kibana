@@ -8,7 +8,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -19,44 +18,24 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import styled from 'styled-components';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
 import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-import { IWaterfall } from '../waterfall_helpers/waterfall_helpers';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
   location: Location;
   urlParams: IUrlParams;
-  waterfall: IWaterfall;
+  errorCount: number;
+  traceRootDuration?: number;
 }
-
-const ResponsiveFlyout = styled(EuiFlyout)`
-  width: 100%;
-
-  @media (min-width: 800px) {
-    width: 90%;
-  }
-
-  @media (min-width: 1000px) {
-    width: 70%;
-  }
-
-  @media (min-width: 1400px) {
-    width: 50%;
-  }
-
-  @media (min-width: 2000px) {
-    width: 35%;
-  }
-`;
 
 function DroppedSpansWarning({
   transactionDoc
@@ -98,7 +77,8 @@ export function TransactionFlyout({
   onClose,
   location,
   urlParams,
-  waterfall
+  errorCount,
+  traceRootDuration
 }: Props) {
   if (!transactionDoc) {
     return null;
@@ -134,8 +114,9 @@ export function TransactionFlyout({
           <FlyoutTopLevelProperties transaction={transactionDoc} />
           <EuiHorizontalRule />
           <StickyTransactionProperties
+            errorCount={errorCount}
             transaction={transactionDoc}
-            totalDuration={waterfall.traceRootDuration}
+            totalDuration={traceRootDuration}
           />
           <EuiHorizontalRule />
           <DroppedSpansWarning transactionDoc={transactionDoc} />

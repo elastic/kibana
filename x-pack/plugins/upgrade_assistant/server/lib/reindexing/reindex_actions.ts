@@ -10,7 +10,7 @@ import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import {
   FindResponse,
   SavedObjectsClient,
-} from 'src/server/saved_objects/service/saved_objects_client';
+} from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
@@ -19,7 +19,7 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
-import { parseIndexName } from './index_settings';
+import { generateNewIndexName } from './index_settings';
 import { FlatSettings } from './types';
 
 // TODO: base on elasticsearch.requestTimeout?
@@ -157,7 +157,7 @@ export const reindexActionsFactory = (
     async createReindexOp(indexName: string) {
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: parseIndexName(indexName).newIndexName,
+        newIndexName: generateNewIndexName(indexName),
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,

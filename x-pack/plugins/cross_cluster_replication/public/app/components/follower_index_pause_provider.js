@@ -7,7 +7,8 @@
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiConfirmModal,
   EuiOverlayMask,
@@ -17,7 +18,7 @@ import { pauseFollowerIndex } from '../store/actions';
 import { arrify } from '../../../common/services/utils';
 import { areAllSettingsDefault } from '../services/follower_index_default_settings';
 
-class Provider extends PureComponent {
+class FollowerIndexPauseProviderUi extends PureComponent {
   static propTypes = {
     onConfirm: PropTypes.func,
   }
@@ -50,18 +51,17 @@ class Provider extends PureComponent {
   };
 
   renderModal = () => {
-    const { intl } = this.props;
     const { indices } = this.state;
     const isSingle = indices.length === 1;
     const title = isSingle
-      ? intl.formatMessage({
-        id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle',
-        defaultMessage: 'Pause replication to follower index \'{name}\'?',
-      }, { name: indices[0].name })
-      : intl.formatMessage({
-        id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle',
+      ? i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseSingleTitle', {
+        defaultMessage: `Pause replication to follower index '{name}'?`,
+        values: { name: indices[0].name },
+      })
+      : i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.pauseMultipleTitle', {
         defaultMessage: 'Pause replication to {count} follower indices?',
-      }, { count: indices.length });
+        values: { count: indices.length },
+      });
     const hasCustomSettings = indices.some(index => !areAllSettingsDefault(index));
 
     return (
@@ -72,17 +72,16 @@ class Provider extends PureComponent {
           onCancel={this.closeConfirmModal}
           onConfirm={this.onConfirm}
           cancelButtonText={
-            intl.formatMessage({
-              id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText',
+            i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText', {
               defaultMessage: 'Cancel',
             })
           }
           buttonColor={hasCustomSettings ? 'danger' : 'primary'}
-          confirmButtonText={intl.formatMessage({
-            id: 'xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText',
+          confirmButtonText={i18n.translate('xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText', {
             defaultMessage: 'Pause replication',
           })}
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="ccrFollowerIndexPauseReplicationConfirmationModal"
         >
           {hasCustomSettings && (
             <p>
@@ -141,5 +140,5 @@ const mapDispatchToProps = (dispatch) => ({
 export const FollowerIndexPauseProvider = connect(
   undefined,
   mapDispatchToProps
-)(injectI18n(Provider));
+)(FollowerIndexPauseProviderUi);
 

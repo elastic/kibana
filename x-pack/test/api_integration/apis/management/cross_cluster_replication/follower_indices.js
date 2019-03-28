@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../../plugins/cross_cluster_replication/common/constants';
 import { API_BASE_PATH } from './constants';
@@ -35,23 +35,39 @@ export default function ({ getService }) {
       .send({ ...payload, name });
   };
 
-  const deleteFollowerIndexRequest = (name) => (
-    supertest
-      .put(`${FOLLOWER_INDICES_API_BASE_PATH}/${name}/unfollow`)
+  const deleteFollowerIndicesCreated = () => {
+    const ids = followerIndicesCreated.map(_id => encodeURIComponent(_id)).join(',');
+    return supertest
+      .put(`${FOLLOWER_INDICES_API_BASE_PATH}/${ids}/unfollow`)
       .set('kbn-xsrf', 'xxx')
-  );
+      .then(() => supertest.get(FOLLOWER_INDICES_API_BASE_PATH))
+      .then(({ body }) => {
+        if (body.indices.length) {
+          // There are still some index left to delete. Call recursively
+          // until all follower indices are removed.
+          followerIndicesCreated = body.indices.map(i => i.name);
+          return deleteFollowerIndicesCreated();
+        }
+
+        followerIndicesCreated = [];
+      });
+  };
 
   const cleanUp = () => (
     Promise.all([
       deleteAllClusters(),
       deleteAllIndices(),
-      ...followerIndicesCreated.map(deleteFollowerIndexRequest)
-    ]).then(() => { followerIndicesCreated = []; })
+      deleteFollowerIndicesCreated()
+    ]).catch(err => {
+      console.log('ERROR cleaning up...');
+      console.log(err);
+    })
   );
 
   // Flaky tests; possible race condition with ES.
-  describe.skip('follower indices', () => {
-    afterEach(() => cleanUp());
+  describe('follower indices', () => {
+    before(() => addCluster());
+    after(() => cleanUp());
 
     describe('list()', () => {
       it('should return an empty array when there are no follower indices', async () => {
@@ -64,14 +80,8 @@ export default function ({ getService }) {
     });
 
     describe('create()', () => {
-      let payload;
-
-      beforeEach(async () => {
-        await addCluster();
-        payload = getFollowerIndexPayload();
-      });
-
       it('should throw a 404 error when cluster is unknown', async () => {
+        const payload = getFollowerIndexPayload();
         payload.remoteCluster = 'unknown-cluster';
 
         const { body } = await createFollowerIndexRequest(undefined, payload).expect(404);
@@ -79,6 +89,7 @@ export default function ({ getService }) {
       });
 
       it('should throw a 404 error trying to follow an unknown index', async () => {
+        const payload = getFollowerIndexPayload();
         const { body } = await createFollowerIndexRequest(undefined, payload).expect(404);
         expect(body.cause[0]).to.contain('no such index');
       });
@@ -90,17 +101,14 @@ export default function ({ getService }) {
         const payload = getFollowerIndexPayload(leaderIndex);
         const { body } = await createFollowerIndexRequest(undefined, payload).expect(200);
 
-        expect(body).to.eql({
-          follow_index_created: true,
-          follow_index_shards_acked: true,
-          index_following_started: true
-        });
+        // There is a race condition in which Elasticsearch can respond without acknowledging,
+        // i.e. `body .follow_index_shards_acked` is sometimes true and sometimes false.
+        // By only asserting that `follow_index_created` is true, we eliminate this flakiness.
+        expect(body.follow_index_created).to.eql(true);
       });
     });
 
     describe('get()', () => {
-      beforeEach(async () => addCluster());
-
       it('should return a 404 when the follower index does not exist', async () => {
         const name = getRandomString();
         const { body } = await supertest
@@ -127,8 +135,6 @@ export default function ({ getService }) {
     });
 
     describe('Advanced settings', () => {
-      beforeEach(() => addCluster());
-
       it('hard-coded values should match Elasticsearch default values', async () => {
         /**
            * To make sure that the hard-coded values in the client match the default
@@ -144,9 +150,16 @@ export default function ({ getService }) {
 
         const { body } = await supertest.get(`${FOLLOWER_INDICES_API_BASE_PATH}/${name}`);
 
-        Object.entries(FOLLOWER_INDEX_ADVANCED_SETTINGS).forEach(([key, value]) => {
-          expect(value).to.eql(body[key]);
-        });
+        // We "only" check the settings if the follower index is in "active" state.
+        // It can happen that a race condition returns the index as "paused". In this case
+        // no advanced settings value is returned by ES.
+        if (body.status === 'active') {
+          Object.entries(FOLLOWER_INDEX_ADVANCED_SETTINGS).forEach(([key, value]) => {
+            expect(value).to.eql(body[key]);
+          });
+        } else {
+          expect(true).eql(true);
+        }
       });
     });
   });

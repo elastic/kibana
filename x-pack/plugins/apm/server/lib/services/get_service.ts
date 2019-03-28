@@ -8,10 +8,12 @@ import { BucketAgg } from 'elasticsearch';
 import { ESFilter } from 'elasticsearch';
 import { idx } from 'x-pack/plugins/apm/common/idx';
 import {
+  PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
 export interface ServiceAPIResponse {
@@ -28,15 +30,8 @@ export async function getService(
 
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
-    {
-      range: {
-        '@timestamp': {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis'
-        }
-      }
-    }
+    { terms: { [PROCESSOR_EVENT]: ['error', 'transaction'] } },
+    { range: rangeFilter(start, end) }
   ];
 
   if (esFilterQuery) {

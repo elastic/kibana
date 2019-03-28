@@ -15,7 +15,6 @@ import _ from 'lodash';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { buildConfigFromDetector } from '../../util/chart_config_builder';
-import { mlEscape } from '../../util/string_utils';
 import { mlJobService } from '../../services/job_service';
 
 // Builds the chart configuration for the provided anomaly record, returning
@@ -78,7 +77,7 @@ export function buildConfig(record) {
   // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
   let functionLabel = config.metricFunction;
   if (config.metricFieldName !== undefined) {
-    functionLabel += ` ${mlEscape(config.metricFieldName)}`;
+    functionLabel += ` ${config.metricFieldName}`;
   }
 
   config.infoTooltip = {
@@ -86,8 +85,8 @@ export function buildConfig(record) {
     aggregationInterval: config.interval,
     chartFunction: functionLabel,
     entityFields: config.entityFields.map((f) => ({
-      fieldName: mlEscape(f.fieldName),
-      fieldValue: mlEscape(f.fieldValue),
+      fieldName: f.fieldName,
+      fieldValue: f.fieldValue,
     }))
   };
 

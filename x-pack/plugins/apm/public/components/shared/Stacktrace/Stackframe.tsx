@@ -10,8 +10,12 @@ import styled from 'styled-components';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from 'x-pack/plugins/apm/typings/es_schemas/fields/Stackframe';
-import { borderRadius, fontFamilyCode } from '../../../style/variables';
+} from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import {
+  borderRadius,
+  fontFamilyCode,
+  fontSize
+} from '../../../style/variables';
 import { FrameHeading } from '../Stacktrace/FrameHeading';
 import { Context } from './Context';
 import { Variables } from './Variables';
@@ -24,6 +28,7 @@ const CodeHeader = styled.div`
 const Container = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
   border: 1px solid ${theme.euiColorLightShade};
   border-radius: ${borderRadius};
   background: ${props =>
@@ -69,5 +74,5 @@ export function Stackframe({
 function hasLineContext(
   stackframe: IStackframe
 ): stackframe is IStackframeWithLineContext {
-  return stackframe.line.context != null;
+  return stackframe.line.hasOwnProperty('context');
 }

@@ -20,7 +20,7 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
-import { fromRoot } from '../utils';
+import { fromRoot } from '../legacy/utils';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -68,6 +68,7 @@ export default async (kbnServer, server, config) => {
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
+    workers: config.get('optimize.workers'),
   });
 
   server.log(

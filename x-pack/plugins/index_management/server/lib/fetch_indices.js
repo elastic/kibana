@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { wrapEsError, wrapUnknownError } from './error_wrappers';
 import { fetchAliases } from './fetch_aliases';
 import { getIndexManagementDataEnrichers } from '../../index_management_data';
 
@@ -31,8 +29,8 @@ function formatHits(hits, aliases) {
       uuid: hit.uuid,
       primary: hit.pri,
       replica: hit.rep,
-      documents: hit["docs.count"],
-      size: hit["store.size"],
+      documents: hit['docs.count'],
+      size: hit['store.size'],
       isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
       aliases: aliases.hasOwnProperty(hit.index) ? aliases[hit.index] : 'none',
     };
@@ -51,18 +49,10 @@ async function fetchIndicesCall(callWithRequest, indexNames) {
   return await callWithRequest('cat.indices', params);
 }
 
-export const fetchIndices = async (callWithRequest, isEsError, indexNames) => {
-  try {
-    const aliases = await fetchAliases(callWithRequest);
-    const hits = await fetchIndicesCall(callWithRequest, indexNames);
-    let response = formatHits(hits, aliases);
-    response = await enrichResponse(response, callWithRequest);
-    return response;
-  } catch (err) {
-    if (isEsError(err)) {
-      throw wrapEsError(err);
-    }
-
-    throw wrapUnknownError(err);
-  }
+export const fetchIndices = async (callWithRequest, indexNames) => {
+  const aliases = await fetchAliases(callWithRequest);
+  const hits = await fetchIndicesCall(callWithRequest, indexNames);
+  let response = formatHits(hits, aliases);
+  response = await enrichResponse(response, callWithRequest);
+  return response;
 };

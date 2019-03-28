@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'visualize', 'timePicker']);
   const defaultSettings = {
-    'dateFormat:tz': 'UTC',
     defaultIndex: 'logstash-*',
   };
 

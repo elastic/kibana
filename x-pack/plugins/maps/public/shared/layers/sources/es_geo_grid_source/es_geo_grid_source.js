@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
@@ -20,8 +19,11 @@ import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION } from '../../grid_resolution';
+import { SOURCE_DATA_ID_ORIGIN, ES_GEO_GRID } from '../../../../../common/constants';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
-const COUNT_PROP_LABEL = 'Count';
+const COUNT_PROP_LABEL = 'count';
 const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -49,9 +51,13 @@ const aggSchemas = new Schemas([
 
 export class ESGeoGridSource extends AbstractESSource {
 
-  static type = 'ES_GEO_GRID';
-  static title = 'Elasticsearch grid aggregation';
-  static description = 'Geospatial data grouped in grids with metrics for each gridded cell';
+  static type = ES_GEO_GRID;
+  static title = i18n.translate('xpack.maps.source.esGridTitle', {
+    defaultMessage: 'Grid aggregation'
+  });
+  static description = i18n.translate('xpack.maps.source.esGridDescription', {
+    defaultMessage: 'Geospatial data grouped in grids with metrics for each gridded cell'
+  });
 
   static createDescriptor({ indexPatternId, geoField, requestType, resolution }) {
     return {
@@ -64,10 +70,15 @@ export class ESGeoGridSource extends AbstractESSource {
     };
   }
 
-  static renderEditor({ onPreviewSource }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters }) {
     const onSelect = (sourceConfig) => {
+      if (!sourceConfig) {
+        onPreviewSource(null);
+        return;
+      }
+
       const sourceDescriptor = ESGeoGridSource.createDescriptor(sourceConfig);
-      const source = new ESGeoGridSource(sourceDescriptor);
+      const source = new ESGeoGridSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
@@ -96,10 +107,27 @@ export class ESGeoGridSource extends AbstractESSource {
     }
 
     return [
-      { label: 'Data source', value: ESGeoGridSource.title },
-      { label: 'Index pattern', value: indexPatternTitle },
-      { label: 'Geospatial field', value: this._descriptor.geoField },
-      { label: 'Show as', value: this._descriptor.requestType },
+      {
+        label: getDataSourceLabel(),
+        value: ESGeoGridSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
+          defaultMessage: 'Index pattern'
+        }),
+        value: indexPatternTitle },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
+          defaultMessage: 'Geospatial field'
+        }),
+        value: this._descriptor.geoField
+      },
+      {
+        label: i18n.translate('xpack.maps.source.esGrid.showasFieldLabel', {
+          defaultMessage: 'Show as'
+        }),
+        value: this._descriptor.requestType
+      },
     ];
   }
 
@@ -111,6 +139,10 @@ export class ESGeoGridSource extends AbstractESSource {
 
   isGeoGridPrecisionAware() {
     return true;
+  }
+
+  isJoinable() {
+    return false;
   }
 
   getGridResolution() {
@@ -135,17 +167,17 @@ export class ESGeoGridSource extends AbstractESSource {
       return 4;
     }
 
-    throw new Error(`Grid resolution param not recognized: ${this._descriptor.resolution}`);
+    throw new Error(i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
+      defaultMessage: `Grid resolution param not recognized: {resolution}`,
+      values: {
+        resolution: this._descriptor.resolution
+      }
+    }));
   }
 
-  async getGeoJsonWithMeta({ layerName }, searchFilters) {
+  async getGeoJsonWithMeta(layerName, searchFilters) {
 
-    const featureCollection = await this.getGeoJsonPoints({ layerName }, {
-      geogridPrecision: searchFilters.geogridPrecision,
-      buffer: searchFilters.buffer,
-      timeFilters: searchFilters.timeFilters,
-      query: searchFilters.query,
-    });
+    const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
 
     return {
       data: featureCollection,
@@ -161,13 +193,14 @@ export class ESGeoGridSource extends AbstractESSource {
     });
   }
 
-  async getGeoJsonPoints({ layerName }, { geogridPrecision, buffer, timeFilters, query }) {
-
+  async getGeoJsonPoints(layerName, searchFilters) {
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource({ buffer, timeFilters, query }, 0);
-    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(geogridPrecision), aggSchemas.all);
+    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(layerName, searchSource, 'Elasticsearch geohash_grid aggregation request');
+    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+      defaultMessage: 'Elasticsearch geo grid aggregation request'
+    }));
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -182,31 +215,13 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
-      }
 
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
+  _formatMetricKey(metric) {
+    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
   }
 
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      return {
-        ...metric,
-        propertyKey: metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME,
-        propertyLabel: metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL,
-      };
-    });
+  _formatMetricLabel(metric) {
+    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
   }
 
   _makeAggConfigs(precision) {
@@ -259,7 +274,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           color: 'Blues'
         }
@@ -270,7 +285,7 @@ export class ESGeoGridSource extends AbstractESSource {
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
-            origin: 'source'
+            origin: SOURCE_DATA_ID_ORIGIN
           },
           minSize: 4,
           maxSize: 32,
@@ -301,14 +316,7 @@ export class ESGeoGridSource extends AbstractESSource {
     return true;
   }
 
-  async filterAndFormatProperties(properties) {
-    properties = await super.filterAndFormatProperties(properties);
-    const allProps = {};
-    for  (const key in properties) {
-      if (key !== 'geohash_meta') {
-        allProps[key] = properties[key];
-      }
-    }
-    return allProps;
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }

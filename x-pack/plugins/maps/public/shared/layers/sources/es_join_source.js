@@ -6,16 +6,15 @@
 
 import _ from 'lodash';
 
-import { AbstractSource } from './source';
+import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import {
   fetchSearchSourceAndRecordWithInspector,
-  inspectorAdapters,
-  indexPatternService,
   SearchSource,
 } from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { timefilter } from 'ui/timefilter/timefilter';
+import { i18n } from '@kbn/i18n';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -41,9 +40,9 @@ const aggSchemas = new Schemas([
   }
 ]);
 
-export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
+export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
   const propertiesMap = new Map();
-  _.get(resp, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
+  _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []).forEach(termBucket => {
     const properties = {};
     if (countPropertyName) {
       properties[countPropertyName] = termBucket.doc_count;
@@ -58,12 +57,13 @@ export function extractPropertiesMap(resp, propertyNames, countPropertyName) {
   return propertiesMap;
 }
 
-export class ESJoinSource extends AbstractSource {
+export class ESJoinSource extends AbstractESSource {
 
   static type = 'ES_JOIN_SOURCE';
 
 
   static renderEditor({}) {
+    //no need to localize. this editor is never rendered.
     return `<div>editor details</div>`;
   }
 
@@ -75,12 +75,18 @@ export class ESJoinSource extends AbstractSource {
     return false;
   }
 
-  destroy() {
-    inspectorAdapters.requests.resetRequest(this._descriptor.id);
-  }
-
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
+  }
+
+  _formatMetricKey(metric) {
+    const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
+    return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+  }
+
+  _formatMetricLabel(metric) {
+    const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
+    return `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`;
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName) {
@@ -95,7 +101,7 @@ export class ESJoinSource extends AbstractSource {
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
 
-    let resp;
+    let rawEsData;
     try {
       const searchSource = new SearchSource();
       searchSource.setField('index', indexPattern);
@@ -111,14 +117,20 @@ export class ESJoinSource extends AbstractSource {
 
       const dsl = aggConfigs.toDsl();
       searchSource.setField('aggs', dsl);
-      resp = await fetchSearchSourceAndRecordWithInspector({
+      rawEsData = await fetchSearchSourceAndRecordWithInspector({
+        inspectorAdapters: this._inspectorAdapters,
         searchSource,
         requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
         requestId: this._descriptor.id,
         requestDesc: this.getJoinDescription(leftSourceName, leftFieldName),
       });
     } catch (error) {
-      throw new Error(`Elasticsearch search request failed, error: ${error.message}`);
+      throw new Error(i18n.translate('xpack.maps.source.esJoin.errorMessage', {
+        defaultMessage: `Elasticsearch search request failed, error: {message}`,
+        values: {
+          message: error.message
+        }
+      }));
     }
 
     const metricPropertyNames = configStates
@@ -132,41 +144,13 @@ export class ESJoinSource extends AbstractSource {
       return configState.type === 'count';
     });
     const countPropertyName = _.get(countConfigState, 'id');
-
     return {
-      rawData: resp,
-      propertiesMap: extractPropertiesMap(resp, metricPropertyNames, countPropertyName),
+      propertiesMap: extractPropertiesMap(rawEsData, metricPropertyNames, countPropertyName),
     };
   }
 
-  async _getIndexPattern() {
-    let indexPattern;
-    try {
-      indexPattern = await indexPatternService.get(this._descriptor.indexPatternId);
-    } catch (error) {
-      throw new Error(`Unable to find Index pattern ${this._descriptor.indexPatternId}`);
-    }
-    return indexPattern;
-  }
-
-
-  async isTimeAware() {
-    const indexPattern = await this._getIndexPattern();
-    const timeField = indexPattern.timeFieldName;
-    return !!timeField;
-  }
-
   isFilterByMapBounds() {
-    // TODO
     return false;
-  }
-
-  isRefreshTimerAware() {
-    return true;
-  }
-
-  isQueryAware() {
-    return true;
   }
 
   getJoinDescription(leftSourceName, leftFieldName) {
@@ -174,38 +158,20 @@ export class ESJoinSource extends AbstractSource {
       return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
     });
     const joinStatement = [];
-    joinStatement.push(`Join ${leftSourceName}:${leftFieldName} with`);
+    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
+      defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
+      values: { leftSourceName, leftFieldName }
+    }));
     joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
-    joinStatement.push(`for metrics ${metrics.join(',')}`);
-    return `Elasticsearch terms aggregation request for ${joinStatement.join(' ')}`;
-  }
-
-  _getValidMetrics() {
-    const metrics = _.get(this._descriptor, 'metrics', []).filter(({ type, field }) => {
-      if (type === 'count') {
-        return true;
+    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
+      defaultMessage: `for metrics {metrics}`,
+      values: { metrics: metrics.join(',') }
+    }));
+    return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
+      defaultMessage: `Elasticsearch terms aggregation request for {description}`,
+      values: {
+        description: joinStatement.join(' ')
       }
-
-      if (field) {
-        return true;
-      }
-      return false;
-    });
-    if (metrics.length === 0) {
-      metrics.push({ type: 'count' });
-    }
-    return metrics;
-  }
-
-  getMetricFields() {
-    return this._getValidMetrics().map(metric => {
-      const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
-      const metricLabel = metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
-      return {
-        ...metric,
-        propertyKey: `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        propertyLabel: `${metricLabel} of ${this._descriptor.indexPatternTitle}:${this._descriptor.term}`,
-      };
     });
   }
 
@@ -240,6 +206,11 @@ export class ESJoinSource extends AbstractSource {
   }
 
   async getDisplayName() {
+    //no need to localize. this is never rendered.
     return `es_table ${this._descriptor.indexPatternId}`;
+  }
+
+  async filterAndFormatPropertiesToHtml(properties) {
+    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }

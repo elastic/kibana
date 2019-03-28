@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { SPAN_ID } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
+import { Span } from 'x-pack/plugins/apm/typings/es_schemas/ui/Span';
 import { DiscoverLink } from './DiscoverLink';
 
 function getDiscoverQuery(span: Span) {

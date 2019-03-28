@@ -1,8 +1,8 @@
 [role="xpack"]
 [[dev-settings-kb]]
-=== Development Tools Settings in Kibana
+=== Development tools settings in Kibana
 ++++
-<titleabbrev>Development Tools Settings</titleabbrev>
+<titleabbrev>Development tools settings</titleabbrev>
 ++++
 
 You do not need to configure any settings to use the development tools in {kib}.
@@ -10,7 +10,7 @@ They are enabled by default.
 
 [float]
 [[grok-settings]]
-==== Grok Debugger Settings
+==== Grok Debugger settings
 
 `xpack.grokdebugger.enabled`::
 Set to `true` (default) to enable the <<xpack-grokdebugger,Grok Debugger>>.

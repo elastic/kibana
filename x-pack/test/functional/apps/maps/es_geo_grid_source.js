@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
 
   const PageObjects = getPageObjects(['maps']);
-  const queryBar = getService('queryBar');
   const inspector = getService('inspector');
   const DOC_COUNT_PROP_NAME = 'doc_count';
 
@@ -21,7 +20,8 @@ export default function ({ getPageObjects, getService }) {
     const DATA_CENTER_LAT = 38;
 
     async function getRequestTimestamp() {
-      await PageObjects.maps.openInspectorRequestsView();
+      await inspector.open();
+      await inspector.openInspectorRequestsView();
       const requestStats = await inspector.getTableData();
       const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
       await inspector.close();
@@ -114,18 +114,17 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
-          await queryBar.setQuery('machine.os.raw : "win 8"');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           await PageObjects.maps.setView(0, 0, 0);
         });
 
         after(async () => {
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('');
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
@@ -139,7 +138,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');
@@ -189,18 +189,17 @@ export default function ({ getPageObjects, getService }) {
 
       describe('query bar', () => {
         before(async () => {
+          await PageObjects.maps.setAndSubmitQuery('machine.os.raw : "win 8"');
           await PageObjects.maps.setView(0, 0, 0);
-          await queryBar.setQuery('machine.os.raw : "win 8"');
-          await queryBar.submitQuery();
         });
 
         after(async () => {
-          await queryBar.setQuery('');
-          await queryBar.submitQuery();
+          await PageObjects.maps.setAndSubmitQuery('');
         });
 
         it('should apply query to geotile_grid aggregation request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           await inspector.close();
@@ -214,7 +213,8 @@ export default function ({ getPageObjects, getService }) {
         });
 
         it('should contain geotile_grid aggregation elasticsearch request', async () => {
-          await PageObjects.maps.openInspectorRequestsView();
+          await inspector.open();
+          await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
           const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
           expect(totalHits).to.equal('6');

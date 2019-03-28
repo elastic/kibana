@@ -3,23 +3,12 @@
 exports[`Breadcrumbs /:serviceName 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName",
-          "url": "/opbeans-node",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
 ]
 `;
@@ -27,26 +16,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName",
-          "url": "/opbeans-node",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/errors?_g=myG&kuery=myKuery",
+    "href": "#/opbeans-node/errors?kuery=myKuery",
     "text": "Errors",
   },
 ]
@@ -55,43 +33,20 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors/:groupId 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName",
-          "url": "/opbeans-node",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/errors?_g=myG&kuery=myKuery",
+    "href": "#/opbeans-node/errors?kuery=myKuery",
     "text": "Errors",
   },
   Object {
-    "href": "#/opbeans-node/errors/myGroupId?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "groupId": "myGroupId",
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName/errors/:groupId",
-          "url": "/opbeans-node/errors/myGroupId",
-        }
-      }
-    />,
+    "href": "#/opbeans-node/errors/myGroupId?kuery=myKuery",
+    "text": "myGroupId",
   },
 ]
 `;
@@ -99,26 +54,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName",
-          "url": "/opbeans-node",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/transactions?_g=myG&kuery=myKuery",
+    "href": "#/opbeans-node/transactions?kuery=myKuery",
     "text": "Transactions",
   },
 ]
@@ -127,26 +71,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": "opbeans-node",
-          },
-          "path": "/:serviceName",
-          "url": "/opbeans-node",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/transactions?_g=myG&kuery=myKuery",
+    "href": "#/opbeans-node/transactions?kuery=myKuery",
     "text": "Transactions",
   },
 ]
@@ -155,44 +88,20 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType/:transactionName 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/:serviceName?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": ":serviceName",
-          },
-          "path": "/:serviceName",
-          "url": "/:serviceName",
-        }
-      }
-    />,
+    "href": "#/opbeans-node?kuery=myKuery",
+    "text": "opbeans-node",
   },
   Object {
-    "href": "#/:serviceName/transactions?_g=myG&kuery=myKuery",
+    "href": "#/opbeans-node/transactions?kuery=myKuery",
     "text": "Transactions",
   },
   Object {
-    "href": "#/:serviceName/transactions/request/my-transaction-name?_g=myG&kuery=myKuery",
-    "text": <breadcrumb
-      match={
-        Object {
-          "isExact": true,
-          "params": Object {
-            "serviceName": ":serviceName",
-            "transactionName": "my-transaction-name",
-            "transactionType": "request",
-          },
-          "path": "/:serviceName/transactions/:transactionType/:transactionName",
-          "url": "/:serviceName/transactions/request/my-transaction-name",
-        }
-      }
-    />,
+    "href": "#/opbeans-node/transactions/request/my-transaction-name?kuery=myKuery",
+    "text": "my-transaction-name",
   },
 ]
 `;
@@ -200,7 +109,7 @@ Array [
 exports[`Breadcrumbs Homepage 1`] = `
 Array [
   Object {
-    "href": "#/?_g=myG&kuery=myKuery",
+    "href": "#/?kuery=myKuery",
     "text": "APM",
   },
 ]

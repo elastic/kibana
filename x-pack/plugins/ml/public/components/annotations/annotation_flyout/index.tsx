@@ -106,7 +106,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
 
     this.closeDeleteModal();
     annotation$.next(null);
-    annotationsRefresh$.next();
+    annotationsRefresh$.next(true);
   };
 
   public closeDeleteModal = () => {
@@ -125,7 +125,7 @@ class AnnotationFlyoutIntl extends Component<CommonProps & Props & InjectedIntlP
     ml.annotations
       .indexAnnotation(annotation)
       .then(() => {
-        annotationsRefresh$.next();
+        annotationsRefresh$.next(true);
         if (typeof annotation._id === 'undefined') {
           toastNotifications.addSuccess(
             intl.formatMessage(

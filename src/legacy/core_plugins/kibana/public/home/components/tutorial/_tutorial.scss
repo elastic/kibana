@@ -2,3 +2,7 @@
   background: $euiColorEmptyShade;
   padding: $euiSizeL;
 }
+
+.homTutorial__instruction {
+  flex-shrink: 0;
+}

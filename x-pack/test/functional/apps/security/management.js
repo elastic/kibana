@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   USERS_PATH,
   EDIT_USERS_PATH,
@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }) {
       // await PageObjects.security.login('elastic', 'changeme');
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
       await PageObjects.settings.navigateTo();

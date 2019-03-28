@@ -16,12 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import { Transaction as ITransaction } from '../../../../../typings/es_schemas/Transaction';
+import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { TransactionLink } from '../../../shared/Links/TransactionLink';
 import { TransactionActionMenu } from '../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from './StickyTransactionProperties';
-import { TransactionPropertiesTable } from './TransactionPropertiesTable';
+import { TransactionTabs } from './TransactionTabs';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 function MaybeViewTraceLink({
@@ -97,15 +97,13 @@ interface Props {
   urlParams: IUrlParams;
   location: Location;
   waterfall: IWaterfall;
-  errorCount?: number;
 }
 
 export const Transaction: React.SFC<Props> = ({
   transaction,
   urlParams,
   location,
-  waterfall,
-  errorCount
+  waterfall
 }) => {
   return (
     <EuiPanel paddingSize="m">
@@ -142,14 +140,16 @@ export const Transaction: React.SFC<Props> = ({
       <EuiSpacer />
 
       <StickyTransactionProperties
-        errorCount={errorCount}
+        errorCount={
+          waterfall.errorCountByTransactionId[transaction.transaction.id]
+        }
         transaction={transaction}
         totalDuration={waterfall.traceRootDuration}
       />
 
       <EuiSpacer />
 
-      <TransactionPropertiesTable
+      <TransactionTabs
         transaction={transaction}
         location={location}
         urlParams={urlParams}

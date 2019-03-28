@@ -19,9 +19,7 @@ import {
 import {
   PHASE_DELETE,
   PHASE_ENABLED,
-  PHASE_ROLLOVER_MINIMUM_AGE,
-  PHASE_ROLLOVER_MINIMUM_AGE_UNITS,
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { ActiveBadge, PhaseErrorMessage } from '../../../components';
 
 export class DeletePhase extends PureComponent {
@@ -29,14 +27,6 @@ export class DeletePhase extends PureComponent {
     setPhaseData: PropTypes.func.isRequired,
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
-    phaseData: PropTypes.shape({
-      [PHASE_ENABLED]: PropTypes.bool.isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE]: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string
-      ]).isRequired,
-      [PHASE_ROLLOVER_MINIMUM_AGE_UNITS]: PropTypes.string.isRequired
-    }).isRequired
   };
 
   render() {
@@ -85,8 +75,8 @@ export class DeletePhase extends PureComponent {
                 }
                 id={`${PHASE_DELETE}-${PHASE_ENABLED}`}
                 checked={phaseData[PHASE_ENABLED]}
-                onChange={async e => {
-                  await setPhaseData(PHASE_ENABLED, e.target.checked);
+                onChange={e => {
+                  setPhaseData(PHASE_ENABLED, e.target.checked);
                 }}
                 aria-controls="deletePhaseContent"
               />

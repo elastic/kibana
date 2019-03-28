@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiIconTip
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 function flattenPanelTree(tree, array = []) {
   array.push(tree);
@@ -41,8 +42,25 @@ function cleanDisplayName(displayName) {
 export class LayerTocActions extends Component {
 
   state = {
-    isPopoverOpen: false
+    isPopoverOpen: false,
+    supportsFitToBounds: false,
   };
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadSupportsFitToBounds();
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _loadSupportsFitToBounds() {
+    const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
+    if (this._isMounted) {
+      this.setState({ supportsFitToBounds });
+    }
+  }
 
   _onClick = () => {
     this.setState(prevState => ({
@@ -86,7 +104,7 @@ export class LayerTocActions extends Component {
     if (layer.hasErrors()) {
       smallLegendIcon = (
         <EuiIconTip
-          aria-label="Load warning"
+          aria-label={i18n.translate('xpack.maps.layerTocActions.loadWarningAriaLabel', { defaultMessage: 'Load warning' })}
           size="m"
           type="alert"
           color="warning"
@@ -101,8 +119,12 @@ export class LayerTocActions extends Component {
       smallLegendIcon = (
         <EuiToolTip
           position="top"
-          content={`Map is at zoom level ${zoom}.
-          This layer is only visible between zoom levels ${minZoom} to ${maxZoom}.`}
+          content={
+            i18n.translate('xpack.maps.layerTocActions.zoomFeedbackTooltip', {
+              defaultMessage: `Map is at zoom level {zoom}.
+          This layer is only visible between zoom levels {minZoom} to {maxZoom}.`,
+              values: { minZoom, maxZoom, zoom }
+            })}
         >
           {icon}
         </EuiToolTip>
@@ -118,23 +140,36 @@ export class LayerTocActions extends Component {
     const visibilityToggle = this._getVisbilityIcon();
     const panelTree = {
       id: 0,
-      title: 'Layer actions',
+      title: i18n.translate('xpack.maps.layerTocActions.layerActionsTitle', {
+        defaultMessage: 'Layer actions',
+      }),
       items: [
         {
-          name: 'Fit to data',
+          name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
+            defaultMessage: 'Fit to data',
+          }),
           icon: (
             <EuiIcon
               type="search"
               size="m"
             />
           ),
+          'data-test-subj': 'fitToBoundsButton',
+          toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
+            defaultMessage: 'Layer does not support fit to data',
+          }),
+          disabled: !this.state.supportsFitToBounds,
           onClick: () => {
             this._closePopover();
             this.props.fitToBounds();
           },
         },
         {
-          name: this.props.layer.isVisible() ? 'Hide layer' : 'Show layer',
+          name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
+            defaultMessage: 'Hide layer',
+          }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
+            defaultMessage: 'Show layer',
+          }),
           icon: visibilityToggle,
           'data-test-subj': 'layerVisibilityToggleButton',
           onClick: () => {

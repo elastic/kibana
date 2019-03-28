@@ -23,6 +23,7 @@ import { get } from 'lodash';
 import moment from 'moment';
 import React, { Fragment } from 'react';
 import { Ping, PingResults } from '../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
 
 interface PingListProps {
   loading: boolean;
@@ -60,14 +61,12 @@ export const PingList = ({
               })}
         </EuiHealth>
       ),
-      sortable: true,
     },
     {
       field: 'timestamp',
       name: i18n.translate('xpack.uptime.pingList.timestampColumnLabel', {
         defaultMessage: 'Timestamp',
       }),
-      sortable: true,
       render: (timestamp: string) => moment(timestamp).fromNow(),
     },
     {
@@ -90,8 +89,7 @@ export const PingList = ({
         defaultMessage: 'Duration ms',
         description: 'The "ms" in the default message is an abbreviation for milliseconds',
       }),
-      render: (duration: number) => duration / 1000,
-      sortable: true,
+      render: (duration: number) => microsToMillis(duration),
     },
     {
       field: 'error.type',
@@ -182,7 +180,6 @@ export const PingList = ({
           columns={columns}
           items={pings}
           pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 100] }}
-          sorting={true}
         />
       </EuiPanel>
     </Fragment>

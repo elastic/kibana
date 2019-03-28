@@ -10,13 +10,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
 import { StringMap } from '../../../../typings/common';
-import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
-
-export type KeySorter = (data: StringMap, parentKey?: string) => string[];
+import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
+import { sortKeysByConfig } from './tabConfig';
 
 const Table = styled.table`
   font-family: ${fontFamilyCode};
-  font-size: ${fontSizes.small};
+  font-size: ${fontSize};
   width: 100%;
 `;
 
@@ -41,7 +40,7 @@ const Cell = styled.td`
   }
 
   &:first-child {
-    width: ${px(units.unit * 20)};
+    width: ${px(units.unit * 12)};
     font-weight: bold;
   }
 `;
@@ -79,21 +78,19 @@ export function FormattedValue({ value }: { value: any }): JSX.Element {
 export function NestedValue({
   parentKey,
   value,
-  depth,
-  keySorter
+  depth
 }: {
-  value: StringMap;
+  value: unknown;
   depth: number;
   parentKey?: string;
-  keySorter?: KeySorter;
 }): JSX.Element {
-  if (depth > 0 && isObject(value)) {
+  const MAX_LEVEL = 3;
+  if (depth < MAX_LEVEL && isObject(value)) {
     return (
       <NestedKeyValueTable
-        data={value}
+        data={value as StringMap}
         parentKey={parentKey}
-        keySorter={keySorter}
-        depth={depth - 1}
+        depth={depth + 1}
       />
     );
   }
@@ -104,29 +101,22 @@ export function NestedValue({
 export function NestedKeyValueTable({
   data,
   parentKey,
-  keySorter = Object.keys,
-  depth = 0
+  depth
 }: {
-  data: StringMap<any>;
+  data: StringMap;
   parentKey?: string;
-  keySorter?: KeySorter;
-  depth?: number;
+  depth: number;
 }): JSX.Element {
   return (
     <Table>
       <tbody>
-        {keySorter(data, parentKey).map(key => (
+        {sortKeysByConfig(data, parentKey).map(key => (
           <Row key={key}>
             <Cell>
               <FormattedKey k={key} value={data[key]} />
             </Cell>
             <Cell>
-              <NestedValue
-                parentKey={key}
-                value={data[key]}
-                keySorter={keySorter}
-                depth={depth}
-              />
+              <NestedValue parentKey={key} value={data[key]} depth={depth} />
             </Cell>
           </Row>
         ))}

@@ -27,8 +27,8 @@ import { first, mapTo, filter, map, take } from 'rxjs/operators';
 
 import Log from '../log';
 import Worker from './worker';
-import { Config } from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
+import { Config } from '../../legacy/server/config/config';
+import { transformDeprecations } from '../../legacy/server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -160,17 +160,17 @@ export default class ClusterManager {
 
   setupWatching(extraPaths, extraIgnores) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../utils');
+    const { fromRoot } = require('../../legacy/utils');
 
     const watchPaths = [
+      fromRoot('src/core'),
       fromRoot('src/legacy/core_plugins'),
-      fromRoot('src/server'),
-      fromRoot('src/ui'),
-      fromRoot('src/utils'),
+      fromRoot('src/legacy/server'),
+      fromRoot('src/legacy/ui'),
+      fromRoot('src/legacy/utils'),
       fromRoot('x-pack/common'),
       fromRoot('x-pack/plugins'),
       fromRoot('x-pack/server'),
-      fromRoot('x-pack/webpackShims'),
       fromRoot('config'),
       ...extraPaths,
     ].map(path => resolve(path));

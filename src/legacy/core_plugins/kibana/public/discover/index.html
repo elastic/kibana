@@ -38,6 +38,12 @@
           index-patterns="[indexPattern]"
           filters="filters"
           on-filters-updated="onFiltersUpdated"
+          show-date-picker="enableTimeRangeSelector"
+          date-range-from="time.from"
+          date-range-to="time.to"
+          is-refresh-paused="refreshInterval.pause"
+          refresh-interval="refreshInterval.value"
+          on-refresh-change="onRefreshChange"
           watch-depth="reference"
         ></search-bar>
       </div>
@@ -88,14 +94,13 @@
               ng-hide="fetchError"
               class="dscOverlay"
             >
-              <div class="euiTitle">
-                <h2
-                  i18n-id="kbn.discover.searchingTitle"
-                  i18n-default-message="Searching"
-                ></h2>
-              </div>
+              <h2
+                i18n-id="kbn.discover.searchingTitle"
+                i18n-default-message="Searching"
+                class="euiTitle euiTitle--small"
+              ></h2>
               <div class="euiSpacer euiSpacer--m"></div>
-              <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
+              <div class="euiLoadingSpinner euiLoadingSpinner--large"></div>
             </div>
           </div>
 

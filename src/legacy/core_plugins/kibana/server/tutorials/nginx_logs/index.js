@@ -23,8 +23,6 @@ import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '
 
 export function nginxLogsSpecProvider(server, context) {
   const moduleName = 'nginx';
-  const geoipRequired = true;
-  const uaRequired = true;
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {
     id: 'nginxLogs',
@@ -46,7 +44,7 @@ export function nginxLogsSpecProvider(server, context) {
     artifacts: {
       dashboards: [
         {
-          id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519',
+          id: '55a9e6e0-a29e-11e7-928f-5dbe6f6f5519-ecs',
           linkLabel: i18n.translate('kbn.server.tutorials.nginxLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'Nginx logs dashboard',
           }),
@@ -59,7 +57,7 @@ export function nginxLogsSpecProvider(server, context) {
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/nginx_logs/screenshot.png',
-    onPrem: onPremInstructions(moduleName, platforms, geoipRequired, uaRequired, context),
+    onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
   };

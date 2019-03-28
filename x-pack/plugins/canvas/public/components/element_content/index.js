@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { renderFunctionsRegistry } from 'plugins/interpreter/render_functions_registry';
+import { registries } from 'plugins/interpreter/registries';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
@@ -19,7 +19,7 @@ const mapStateToProps = state => ({
 export const ElementContent = compose(
   connect(mapStateToProps),
   withProps(({ renderable }) => ({
-    renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
+    renderFunction: registries.renderers.get(get(renderable, 'as')),
   }))
 )(Component);
 

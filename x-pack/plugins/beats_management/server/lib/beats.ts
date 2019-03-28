@@ -96,7 +96,6 @@ export class CMBeatsDomain {
     beat: Partial<CMBeat>
   ): Promise<{ status: string; accessToken?: string }> {
     const { token, expires_on } = await this.tokens.getEnrollmentToken(enrollmentToken);
-
     if (expires_on && moment(expires_on).isBefore(moment())) {
       return { status: BeatEnrollmentStatus.ExpiredEnrollmentToken };
     }

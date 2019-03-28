@@ -5,7 +5,7 @@
  */
 
 import { interpretAst } from 'plugins/interpreter/interpreter';
-import { typesRegistry } from 'plugins/interpreter/types_registry';
+import { registries } from 'plugins/interpreter/registries';
 import { fromExpression } from '@kbn/interpreter/common';
 import { getState } from '../state/store';
 import { getGlobalFilterExpression } from '../state/selectors/workpad';
@@ -24,7 +24,7 @@ export const filters = () => ({
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
-      const filterType = typesRegistry.get('filter');
+      const filterType = registries.types.get('filter');
       return filterType.from(null);
     }
   },
