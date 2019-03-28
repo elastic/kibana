@@ -25,7 +25,7 @@
   "devDependencies": {
     "@elastic/eslint-config-kibana": "link:../../packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "link:../../packages/kbn-eslint-import-resolver-kibana",
-    "@kbn/expect": "1.0.0",
+    "@kbn/expect": "link:../../packages/kbn-expect",
     "@kbn/plugin-helpers": "link:../../packages/kbn-plugin-helpers",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.14.1",
