@@ -41,9 +41,6 @@ working on big documents. Set this property to `false` to disable highlighting.
 `doc_table:hideTimeColumn`:: Hide the 'Time' column in Discover and in all Saved Searches on Dashboards.
 `search:includeFrozen`:: Will include {ref}/frozen-indices.html[frozen indices] in results if enabled. Searching through frozen indices
 might increase the search time.
-`courier:maxSegmentCount`:: Kibana splits requests in the Discover app into segments to limit the size of requests sent to
-the Elasticsearch cluster. This setting constrains the length of the segment list. Long segment lists can significantly
-increase request processing time.
 `courier:ignoreFilterIfFieldNotInIndex`:: Set this property to `true` to skip filters that apply to fields that don't exist in a visualization's index. Useful when dashboards consist of visualizations from multiple index patterns.
 `courier:maxConcurrentShardRequests`:: Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests] setting used for _msearch requests sent by Kibana. Set to 0 to disable this config and use the Elasticsearch default.
 `fields:popularLimit`:: This setting governs how many of the top most popular fields are shown.

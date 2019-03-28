@@ -83,7 +83,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
     }
 
-    public async getMarkdownText(): Promise<string> {
+    public async getMarkdownText() {
       const el = await find.byCssSelector('.tvbEditorVisualization');
       const text = await el.getVisibleText();
       return text;
@@ -154,34 +154,6 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async markdownSwitchSubTab(subTab: 'data' | 'options' | 'markdown') {
       const element = await testSubjects.find(`${subTab}-subtab`);
       await element.click();
-    }
-
-    /**
-     * setting label for markdown visualization
-     *
-     * @param {string} variableName
-     * @param type
-     * @memberof VisualBuilderPage
-     */
-    public async setMarkdownDataVariable(variableName: string, type: 'variable' | 'label') {
-      const SELECTOR = type === 'label' ? '[placeholder="Label"]' : '[placeholder="Variable name"]';
-      const prevRenderingCount = await PageObjects.visualize.getVisualizationRenderingCount();
-      if (variableName) {
-        await find.setValue(SELECTOR, variableName);
-      } else {
-        const input = await find.byCssSelector(SELECTOR);
-        if (process.platform === 'darwin') {
-          // Mac workaround
-          for (let i = 0; i <= type.length; i++) {
-            await input.pressKeys(browser.keys.BACK_SPACE);
-          }
-        } else {
-          await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
-          await input.pressKeys(browser.keys.NULL); // Release modifier keys
-          await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
-        }
-      }
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async clickSeriesOption(nth = 0) {
