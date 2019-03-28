@@ -43,6 +43,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
   }
 
+  // @TODO: Clean this up once we update SavedSearch's interface
+  // and location in the file-system
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
     const { embeddable } = panelActionAPI;
 
@@ -53,6 +55,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     return false;
   };
 
+  // TODO: Need to expose some of the interface here from SavedSearch
+  // as well as pass things like columns into the API call
   public onClick = async (panelActionAPI: PanelActionAPI) => {
     const { embeddable } = panelActionAPI as any;
     const {
