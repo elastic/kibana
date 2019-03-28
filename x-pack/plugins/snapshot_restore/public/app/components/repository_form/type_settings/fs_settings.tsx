@@ -63,7 +63,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({ repository, onSetti
             />
             <EuiSpacer size="m" />
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlFilePathDescription"
+              id="xpack.snapshotRestore.repositoryFor.typeFS.urlFilePathDescription"
               defaultMessage="This location (or one of its parent directories) must be registered in the {settingKey} setting on all master and data nodes."
               values={{
                 settingKey: <EuiCode>path.repo</EuiCode>,
