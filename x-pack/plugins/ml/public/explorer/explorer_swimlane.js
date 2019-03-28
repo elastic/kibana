@@ -508,7 +508,7 @@ export const ExplorerSwimlane = injectI18n(class ExplorerSwimlane extends React.
       this.highlightSelection(cellsToSelect, selectedLanes, selectedTimes);
     } else if (filterActive === true) {
       if (selectedTimes) {
-        this.highlightOverall(selectedTimes); // are the selected times the same?
+        this.highlightOverall(selectedTimes);
       }
       this.maskIrrelevantSwimlanes(maskAll);
     } else {

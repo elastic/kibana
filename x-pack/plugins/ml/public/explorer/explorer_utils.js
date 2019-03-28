@@ -291,7 +291,7 @@ export function getViewBySwimlaneOptions({
 
   // filter View by options to relevant filter fields
   // If it's an AND filter only show job Id view by as the rest will have no results
-  if (filterActive === true && isAndOperator === true) {
+  if (filterActive === true && isAndOperator === true && selectedCells === null) {
     viewBySwimlaneOptions = [VIEW_BY_JOB_LABEL];
   } else if (filterActive === true && Array.isArray(viewBySwimlaneOptions) && Array.isArray(filteredFields)) {
     const filteredOptions = viewBySwimlaneOptions.filter(option => {

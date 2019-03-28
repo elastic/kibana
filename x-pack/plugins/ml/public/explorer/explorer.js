@@ -974,6 +974,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
 
       if (influencersFilterQuery.match_all && Object.keys(influencersFilterQuery.match_all).length === 0) {
         this.props.appStateHandler(APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS);
+        this.props.appStateHandler(APP_STATE_ACTION.CLEAR_SELECTION);
         const stateUpdate = {
           filterActive: false,
           filteredFields: [],
@@ -996,8 +997,10 @@ export const Explorer = injectI18n(injectObservablesAsProps(
           );
         } else {
         // Set View by dropdown to first relevant fieldName based on incoming filter if there's no cell selection already
+        // or if selected cell is from overall swimlane as this won't include an additional influencer filter
           for (let i = 0; i < filteredFields.length; i++) {
-            if (viewBySwimlaneOptions.includes(filteredFields[i]) && (selectedCells === null)) {
+            if (viewBySwimlaneOptions.includes(filteredFields[i]) &&
+                ((selectedCells === null || (selectedCells && selectedCells.type === 'overall')))) {
               selectedViewByFieldName = filteredFields[i];
               this.props.appStateHandler(
                 APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME,
