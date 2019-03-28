@@ -19,6 +19,8 @@ import 'ui/agg_types';
 
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
+import 'ui/kbn_top_nav';
+import 'ui/query_bar/directive';
 import { uiModules } from 'ui/modules';
 import { DocTitleProvider } from 'ui/doc_title';
 import 'ui/autoload/styles';

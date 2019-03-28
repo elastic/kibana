@@ -378,7 +378,7 @@ export class JobTableUi extends Component {
         <EuiSpacer size="m" />
 
         {jobs.length > 0 ? (
-          <EuiTable>
+          <EuiTable data-test-subj="rollupJobsListTable">
             <EuiTableHeader>
               <EuiTableHeaderCellCheckbox>
                 <EuiCheckbox

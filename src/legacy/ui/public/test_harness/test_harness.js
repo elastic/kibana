@@ -18,8 +18,6 @@
  */
 
 // chrome expects to be loaded first, let it get its way
-import $ from 'jquery';
-import bindJqueryToFindTestSubject from 'ui/jquery/find_test_subject';
 import chrome from '../chrome';
 
 import { parse as parseUrl } from 'url';
@@ -31,8 +29,6 @@ import { UiSettingsClient } from '../../../../core/public/';
 import './test_harness.css';
 import 'ng_mock';
 import { setupTestSharding } from './test_sharding';
-
-bindJqueryToFindTestSubject($);
 
 const { query } = parseUrl(window.location.href, true);
 if (query && query.mocha) {
