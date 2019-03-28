@@ -36,11 +36,7 @@ function assignNodeProperties(workpadState, pageId, nodeId, props) {
     return workpadState;
   }
 
-  // remove any AST value from the element caused by https://github.com/elastic/kibana-canvas/issues/260
-  // TODO: remove this after a bit of time
-  const cleanWorkpadState = del(workpadState, nodesPath.concat([nodeIndex, 'ast']));
-
-  return assign(cleanWorkpadState, nodesPath.concat(nodeIndex), props);
+  return assign(workpadState, nodesPath.concat(nodeIndex), props);
 }
 
 function moveNodeLayer(workpadState, pageId, nodeId, movement, location) {

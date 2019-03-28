@@ -25,6 +25,7 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
+import 'ui/listen';
 import 'ui/search_bar';
 import 'ui/apply_filters';
 

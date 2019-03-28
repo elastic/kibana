@@ -192,6 +192,7 @@ exports[`it renders without crashing 1`] = `
     iconSide="left"
     iconType="plusInCircleFilled"
     onClick={[Function]}
+    size="m"
     type="button"
   >
     <FormattedMessage

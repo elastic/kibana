@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { removeFilterFromQueryString, getQueryPattern } from '../utils';
 
 describe('ML - KqlFilterBar utils', () => {

@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { PINGS_DATE_RANGE_START, PINGS_DATE_RANGE_END } from './constants';
 
 export default function ({ getService }) {

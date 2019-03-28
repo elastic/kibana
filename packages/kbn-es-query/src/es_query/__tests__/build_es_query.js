@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { buildEsQuery } from '../build_es_query';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';

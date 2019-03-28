@@ -16,7 +16,7 @@ import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
-  items: IServiceListItem[];
+  items?: IServiceListItem[];
   noItemsMessage?: React.ReactNode;
 }
 

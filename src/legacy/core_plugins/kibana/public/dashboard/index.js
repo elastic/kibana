@@ -22,6 +22,7 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import 'ui/filter_bar';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 

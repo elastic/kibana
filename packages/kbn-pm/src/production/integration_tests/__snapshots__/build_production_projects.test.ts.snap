@@ -20,14 +20,15 @@ Array [
 exports[`kbn-pm production builds and copies projects for production: packages/bar/package.json 1`] = `
 Object {
   "devDependencies": Object {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
   },
   "main": "./target/index.js",
   "name": "@elastic/bar",
   "private": true,
   "scripts": Object {
-    "build": "babel --presets env --out-dir target src",
+    "build": "babel --presets=@babel/preset-env --out-dir target src",
   },
   "version": "1.0.0",
 }
@@ -47,15 +48,16 @@ Object {
     "@elastic/bar": "link:../bar",
   },
   "devDependencies": Object {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
     "moment": "2.20.1",
   },
   "main": "./target/index.js",
   "name": "@elastic/foo",
   "private": true,
   "scripts": Object {
-    "build": "babel --presets env --out-dir target src",
+    "build": "babel --presets=@babel/preset-env --out-dir target src",
   },
   "version": "1.0.0",
 }

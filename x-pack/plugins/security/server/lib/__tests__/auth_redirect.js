@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { hFixture } from './__fixtures__/h';

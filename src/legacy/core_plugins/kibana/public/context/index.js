@@ -20,6 +20,7 @@
 import _ from 'lodash';
 
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import 'ui/listen';
 import uiRoutes from 'ui/routes';
 import { i18n } from '@kbn/i18n';
 
