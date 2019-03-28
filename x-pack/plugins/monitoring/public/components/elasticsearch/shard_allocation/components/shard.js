@@ -20,7 +20,18 @@ function getColor(classes) {
   }
 
   if (classList.includes('unassigned')) {
+    if (classList.includes('replica')) {
+      return 'warning';
+    }
     return 'danger';
+  }
+
+  if (classList.includes('relocating')) {
+    return 'accent';
+  }
+
+  if (classList.includes('initializing')) {
+    return 'default';
   }
 
   if (classList.includes('primary')) {
@@ -29,14 +40,6 @@ function getColor(classes) {
 
   if (classList.includes('replica')) {
     return 'secondary';
-  }
-
-  if (classList.includes('relocation')) {
-    return 'accent';
-  }
-
-  if (classList.includes('initializing')) {
-    return 'default';
   }
 }
 

@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import { Shard } from './shard';
 
 describe('Shard', () => {
-  it('should show UNASSIGNED primary shards', () => {
+  it('should show unassigned primary shards', () => {
     const props = {
       shard: {
         state: 'UNASSIGNED',
@@ -25,7 +25,7 @@ describe('Shard', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should show UNASSIGNED non-primary shards', () => {
+  it('should show unassigned replica shards', () => {
     const props = {
       shard: {
         state: 'UNASSIGNED',
@@ -34,6 +34,70 @@ describe('Shard', () => {
         tooltip_message: 'Unassigned',
         type: 'shard',
         master: false
+      }
+    };
+
+    const component = shallow(<Shard {...props}/>);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show for assigned primary shards', () => {
+    const props = {
+      shard: {
+        state: 'STARTED',
+        primary: true,
+        shard: 0,
+        tooltip_message: 'Started',
+        type: 'shard',
+        master: true
+      }
+    };
+
+    const component = shallow(<Shard {...props}/>);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show for assigned replica shards', () => {
+    const props = {
+      shard: {
+        state: 'STARTED',
+        primary: false,
+        shard: 0,
+        tooltip_message: 'Started',
+        type: 'shard',
+        master: true
+      }
+    };
+
+    const component = shallow(<Shard {...props}/>);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show for relocating shards', () => {
+    const props = {
+      shard: {
+        state: 'RELOCATING',
+        primary: true,
+        shard: 0,
+        tooltip_message: 'Relocating',
+        type: 'shard',
+        master: true
+      }
+    };
+
+    const component = shallow(<Shard {...props}/>);
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show for initializing shards', () => {
+    const props = {
+      shard: {
+        state: 'INITIALIZING',
+        primary: true,
+        shard: 0,
+        tooltip_message: 'Initializing',
+        type: 'shard',
+        master: true
       }
     };
 
