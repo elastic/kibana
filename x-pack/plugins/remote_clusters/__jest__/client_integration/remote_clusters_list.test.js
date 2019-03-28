@@ -16,11 +16,6 @@ jest.mock('ui/chrome', () => ({
   breadcrumbs: { set: () => {} },
 }));
 
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
 const testBedOptions = {
   memoryRouter: {
     onRouter: (router) => registerRouter(router)

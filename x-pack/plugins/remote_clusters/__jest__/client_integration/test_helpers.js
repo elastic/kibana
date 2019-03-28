@@ -111,14 +111,6 @@ export const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
-  // const setLoadAutoFollowPatternsResponse = (response) => {
-  //   const defaultResponse = { patterns: [] };
-
-  //   server.respondWith('GET', 'api/cross_cluster_replication/auto_follow_patterns',
-  //     mockResponse(defaultResponse, response)
-  //   );
-  // };
-
   const setDeleteRemoteClusterResponse = (response) => {
     const defaultResponse = { success: true };
 
@@ -126,24 +118,6 @@ export const registerHttpRequestMockHelpers = server => {
       mockResponse(defaultResponse, response)
     );
   };
-
-  // const setAutoFollowStatsResponse = (response) => {
-  //   const defaultResponse = {
-  //     numberOfFailedFollowIndices: 0,
-  //     numberOfFailedRemoteClusterStateRequests: 0,
-  //     numberOfSuccessfulFollowIndices: 0,
-  //     recentAutoFollowErrors: [],
-  //     autoFollowedClusters: [{
-  //       clusterName: 'new-york',
-  //       timeSinceLastCheckMillis: 13746,
-  //       lastSeenMetadataVersion: 22
-  //     }]
-  //   };
-
-  //   server.respondWith('GET', 'api/cross_cluster_replication/stats/auto_follow',
-  //     mockResponse(defaultResponse, response)
-  //   );
-  // };
 
   return {
     setLoadRemoteClustersResponse,
