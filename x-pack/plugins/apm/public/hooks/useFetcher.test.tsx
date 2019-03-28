@@ -21,41 +21,87 @@ afterAll(() => {
 });
 
 describe('useFetcher', () => {
-  let output: ReturnType<typeof renderHook>;
-  beforeEach(() => {
-    jest.useFakeTimers();
-    async function fn() {
-      await delay(500);
-      return 'response from hook';
-    }
-    output = renderHook(() => useFetcher(() => fn(), []));
-  });
+  describe('when resolving after 500ms', () => {
+    let output: ReturnType<typeof renderHook>;
+    beforeEach(() => {
+      jest.useFakeTimers();
+      async function fn() {
+        await delay(500);
+        return 'response from hook';
+      }
+      output = renderHook(() => useFetcher(() => fn(), []));
+    });
 
-  it('should initially be empty', async () => {
-    expect(output.result.current).toEqual({
-      data: undefined,
-      error: undefined,
-      status: undefined
+    it('should initially be empty', async () => {
+      expect(output.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        status: undefined
+      });
+    });
+
+    it('should show loading spinner after 100ms', async () => {
+      jest.advanceTimersByTime(100);
+      await output.waitForNextUpdate();
+
+      expect(output.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        status: 'loading'
+      });
+    });
+
+    it('should show success after 1 second', async () => {
+      jest.advanceTimersByTime(1000);
+      await output.waitForNextUpdate();
+
+      expect(output.result.current).toEqual({
+        data: 'response from hook',
+        error: undefined,
+        status: 'success'
+      });
     });
   });
 
-  it('should show loading spinner', async () => {
-    await output.waitForNextUpdate();
-    expect(output.result.current).toEqual({
-      data: undefined,
-      error: undefined,
-      status: 'loading'
+  describe('when throwing after 500ms', () => {
+    let output: ReturnType<typeof renderHook>;
+    beforeEach(() => {
+      jest.useFakeTimers();
+      async function fn() {
+        await delay(500);
+        throw new Error('Something went wrong');
+      }
+      output = renderHook(() => useFetcher(() => fn(), []));
     });
-  });
 
-  it('should show success after 1 second', async () => {
-    jest.advanceTimersByTime(1000);
-    await output.waitForNextUpdate();
+    it('should initially be empty', async () => {
+      expect(output.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        status: undefined
+      });
+    });
 
-    expect(output.result.current).toEqual({
-      data: 'response from hook',
-      error: undefined,
-      status: 'success'
+    it('should show loading spinner after 100ms', async () => {
+      jest.advanceTimersByTime(100);
+      await output.waitForNextUpdate();
+
+      expect(output.result.current).toEqual({
+        data: undefined,
+        error: undefined,
+        status: 'loading'
+      });
+    });
+
+    it('should show error after 1 second', async () => {
+      jest.advanceTimersByTime(1000);
+      await output.waitForNextUpdate();
+
+      expect(output.result.current).toEqual({
+        data: undefined,
+        error: expect.any(Error),
+        status: 'failure'
+      });
     });
   });
 });
