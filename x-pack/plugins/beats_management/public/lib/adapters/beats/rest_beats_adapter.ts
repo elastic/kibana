@@ -5,19 +5,20 @@
  */
 
 import { CMBeat } from '../../../../common/domain_types';
-import { RestAPIAdapter } from '../rest_api/adapter_types';
 import {
-  BeatsRemovalReturn,
-  BeatsTagAssignment,
-  CMAssignmentReturn,
-  CMBeatsAdapter,
-} from './adapter_types';
+  ReturnTypeBulkAction,
+  ReturnTypeGet,
+  ReturnTypeList,
+  ReturnTypeUpdate,
+} from '../../../../common/return_types';
+import { RestAPIAdapter } from '../rest_api/adapter_types';
+import { BeatsTagAssignment, CMBeatsAdapter } from './adapter_types';
 export class RestBeatsAdapter implements CMBeatsAdapter {
   constructor(private readonly REST: RestAPIAdapter) {}
 
   public async get(id: string): Promise<CMBeat | null> {
     try {
-      return await this.REST.get<CMBeat>(`/api/beats/agent/${id}`);
+      return (await this.REST.get<ReturnTypeGet<CMBeat>>(`/api/beats/agent/${id}`)).item;
     } catch (e) {
       return null;
     }
@@ -25,7 +26,9 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
 
   public async getBeatWithToken(enrollmentToken: string): Promise<CMBeat | null> {
     try {
-      return await this.REST.get<CMBeat>(`/api/beats/agent/unknown/${enrollmentToken}`);
+      return (await this.REST.get<ReturnTypeGet<CMBeat>>(
+        `/api/beats/agent/unknown/${enrollmentToken}`
+      )).item;
     } catch (e) {
       return null;
     }
@@ -33,7 +36,8 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
 
   public async getAll(ESQuery?: string): Promise<CMBeat[]> {
     try {
-      return (await this.REST.get<{ beats: CMBeat[] }>('/api/beats/agents/all', { ESQuery })).beats;
+      return (await this.REST.get<ReturnTypeList<CMBeat>>('/api/beats/agents/all', { ESQuery }))
+        .list;
     } catch (e) {
       return [];
     }
@@ -41,32 +45,30 @@ export class RestBeatsAdapter implements CMBeatsAdapter {
 
   public async getBeatsWithTag(tagId: string): Promise<CMBeat[]> {
     try {
-      return (await this.REST.get<{ beats: CMBeat[] }>(`/api/beats/agents/tag/${tagId}`)).beats;
+      return (await this.REST.get<ReturnTypeList<CMBeat>>(`/api/beats/agents/tag/${tagId}`)).list;
     } catch (e) {
       return [];
     }
   }
 
   public async update(id: string, beatData: Partial<CMBeat>): Promise<boolean> {
-    await this.REST.put<{ success: true }>(`/api/beats/agent/${id}`, beatData);
+    await this.REST.put<ReturnTypeUpdate<CMBeat>>(`/api/beats/agent/${id}`, beatData);
     return true;
   }
 
-  public async removeTagsFromBeats(removals: BeatsTagAssignment[]): Promise<BeatsRemovalReturn[]> {
-    return (await this.REST.post<{ removals: BeatsRemovalReturn[] }>(
-      `/api/beats/agents_tags/removals`,
-      {
-        removals,
-      }
-    )).removals;
+  public async removeTagsFromBeats(
+    removals: BeatsTagAssignment[]
+  ): Promise<ReturnTypeBulkAction['results']> {
+    return (await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/removals`, {
+      removals,
+    })).results;
   }
 
-  public async assignTagsToBeats(assignments: BeatsTagAssignment[]): Promise<CMAssignmentReturn[]> {
-    return (await this.REST.post<{ assignments: CMAssignmentReturn[] }>(
-      `/api/beats/agents_tags/assignments`,
-      {
-        assignments,
-      }
-    )).assignments;
+  public async assignTagsToBeats(
+    assignments: BeatsTagAssignment[]
+  ): Promise<ReturnTypeBulkAction['results']> {
+    return (await this.REST.post<ReturnTypeBulkAction>(`/api/beats/agents_tags/assignments`, {
+      assignments,
+    })).results;
   }
 }
