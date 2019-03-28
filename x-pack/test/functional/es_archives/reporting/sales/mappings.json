@@ -304,8 +304,6 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
     "index": "sales",
     "mappings": {
       "properties": {
