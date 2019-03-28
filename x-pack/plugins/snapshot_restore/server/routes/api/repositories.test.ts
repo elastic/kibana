@@ -221,7 +221,10 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
     });
 
     it('should throw if ES error', async () => {
-      const callWithRequest = jest.fn().mockRejectedValueOnce(new Error());
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce({})
+        .mockRejectedValueOnce(new Error());
       await expect(
         createHandler(mockCreateRequest, callWithRequest, mockResponseToolkit)
       ).rejects.toThrow();
