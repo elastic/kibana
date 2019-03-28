@@ -10,8 +10,6 @@ export default function ({ loadTestFile, getService }) {
   const browser = getService('browser');
 
   describe('maps app', function () {
-    this.tags('ciGroup3');
-
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('maps/data');
@@ -29,12 +27,21 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    loadTestFile(require.resolve('./sample_data'));
-    loadTestFile(require.resolve('./es_search_source'));
-    loadTestFile(require.resolve('./es_geo_grid_source'));
-    loadTestFile(require.resolve('./joins'));
-    loadTestFile(require.resolve('./add_layer_panel'));
-    loadTestFile(require.resolve('./layer_errors'));
-    loadTestFile(require.resolve('./embeddable/dashboard'));
+    describe('', function () {
+      this.tags('ciGroup7');
+      loadTestFile(require.resolve('./saved_object_management'));
+      loadTestFile(require.resolve('./sample_data'));
+    });
+
+    describe('', function () {
+      this.tags('ciGroup3');
+      loadTestFile(require.resolve('./es_search_source'));
+      loadTestFile(require.resolve('./es_geo_grid_source'));
+      loadTestFile(require.resolve('./joins'));
+      loadTestFile(require.resolve('./add_layer_panel'));
+      loadTestFile(require.resolve('./layer_errors'));
+      loadTestFile(require.resolve('./embeddable/dashboard'));
+      loadTestFile(require.resolve('./embeddable/embeddable_state'));
+    });
   });
 }
