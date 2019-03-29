@@ -365,7 +365,7 @@ describe('ElasticsearchPingsAdapter class', () => {
               filter: [{ range: { '@timestamp': { gte: 'now-1h', lte: 'now' } } }],
             },
           },
-          sort: [{ '@timestamp': { order: 'asc' } }],
+          sort: [{ '@timestamp': { order: 'desc' } }],
           size: 12,
         },
       };
@@ -394,8 +394,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('creates appropriate sort and size parameters', async () => {
       database.search = getAllSearchMock;
-
       await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'asc', 12);
+      set(expectedGetAllParams, 'body.sort[0]', { '@timestamp': { order: 'asc' } });
 
       expect(database.search).toHaveBeenCalledTimes(1);
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
@@ -404,7 +404,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('omits the sort param when no sort passed', async () => {
       database.search = getAllSearchMock;
       await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, undefined, 12);
-      delete expectedGetAllParams.body.sort;
+
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
@@ -413,6 +413,7 @@ describe('ElasticsearchPingsAdapter class', () => {
       await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, undefined, 'desc');
       delete expectedGetAllParams.body.size;
       set(expectedGetAllParams, 'body.sort[0].@timestamp.order', 'desc');
+
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
@@ -420,8 +421,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       database.search = getAllSearchMock;
       await adapter.getAll(serverRequest, 'now-1h', 'now', 'testmonitorid');
       delete expectedGetAllParams.body.size;
-      delete expectedGetAllParams.body.sort;
       expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.id': 'testmonitorid' } });
+
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
 
@@ -429,8 +430,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       database.search = getAllSearchMock;
       await adapter.getAll(serverRequest, 'now-1h', 'now', undefined, 'down');
       delete expectedGetAllParams.body.size;
-      delete expectedGetAllParams.body.sort;
       expectedGetAllParams.body.query.bool.filter.push({ term: { 'monitor.status': 'down' } });
+
       expect(database.search).toHaveBeenCalledWith(serverRequest, expectedGetAllParams);
     });
   });
