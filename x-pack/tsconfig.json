@@ -9,7 +9,8 @@
   ],
   "exclude": [
     "test/**/*",
-    "**/typespec_tests.ts"
+    "**/typespec_tests.ts",
+    "plugins/code/**/__tests__/**/*"
   ],
   "compilerOptions": {
     "outDir": ".",

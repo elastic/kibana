@@ -48,7 +48,6 @@ function cleanWorkspace() {
 }
 
 describe('clone_worker_tests', () => {
-  // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
       rimraf(serverOptions.repoPath, resolve);
@@ -56,14 +55,13 @@ describe('clone_worker_tests', () => {
   });
 
   beforeEach(async function() {
-    // @ts-ignore
     this.timeout(200000);
     await prepareProject(
       'https://github.com/Microsoft/TypeScript-Node-Starter.git',
       path.join(serverOptions.repoPath, 'github.com/Microsoft/TypeScript-Node-Starter')
     );
   });
-  // @ts-ignore
+
   after(() => {
     return cleanWorkspace();
   });

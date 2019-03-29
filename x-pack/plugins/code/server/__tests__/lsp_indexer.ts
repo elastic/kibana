@@ -124,8 +124,8 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
     })
   );
 }
+
 describe('lsp_indexer unit tests', () => {
-  // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
       rimraf(serverOptions.repoPath, resolve);
@@ -133,14 +133,13 @@ describe('lsp_indexer unit tests', () => {
   });
 
   beforeEach(async function() {
-    // @ts-ignore
     this.timeout(200000);
     return await prepareProject(
       'https://github.com/Microsoft/TypeScript-Node-Starter.git',
       path.join(serverOptions.repoPath, repoUri)
     );
   });
-  // @ts-ignore
+
   after(() => {
     return cleanWorkspace();
   });
@@ -297,7 +296,5 @@ describe('lsp_indexer unit tests', () => {
     // single batch index.
     assert.ok(bulkSpy.calledOnce);
     assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
-    // @ts-ignore
   }).timeout(20000);
-  // @ts-ignore
 }).timeout(20000);

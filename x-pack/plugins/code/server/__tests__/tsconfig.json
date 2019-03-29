@@ -1,0 +1,17 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "compilerOptions": {
+    // TODO why we have to have this
+    "resolveJsonModule": true,
+    "types": [
+      "mocha",
+      "node"
+    ]
+  },
+  "include": [
+    // TODO why we have to have this
+    "../../../../../src/legacy/server/kbn_server.d.ts",
+    "**/*"
+  ],
+  "exclude": [],
+}

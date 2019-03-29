@@ -1,7 +1,7 @@
 {
   "serverTestPatterns": [
     "server/**/__tests__/**/*.js",
-    "plugins/**/__tests__/**/*.js",
+    "plugins/**/__tests__/**/*",
     "!plugins/**/server/**/__tests__/**/*"
   ],
   "buildSourcePatterns": [

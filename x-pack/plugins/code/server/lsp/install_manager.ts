@@ -114,7 +114,6 @@ export class InstallManager {
     let downloaded = 0;
     return await new Promise<string>((resolve, reject) => {
       res
-        // @ts-ignore
         .body!.pipe(stream)
         .on('error', (error: any) => {
           reject(error);
