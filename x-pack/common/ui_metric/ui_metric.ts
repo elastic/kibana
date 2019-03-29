@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { fetchUserActions } from './fetch_user_actions';
+import chrome from 'ui/chrome';
+
+export function createUiMetricUri(appName: string, actionType: string): string {
+  return chrome.addBasePath(`/api/ui_metric/${appName}/${actionType}`);
+}

@@ -22,23 +22,23 @@ import { Server } from 'hapi';
 
 export const registerUserActionRoute = (server: Server) => {
   /*
-   * Increment a count on an object representing a specific user action.
+   * Increment a count on an object representing a specific interaction with the UI.
    */
   server.route({
-    path: '/api/user_action/{appName}/{actionTypes}',
+    path: '/api/ui_metric/{appName}/{metricTypes}',
     method: 'POST',
     handler: async (request: any) => {
-      const { appName, actionTypes } = request.params;
+      const { appName, metricTypes } = request.params;
 
       try {
         const { getSavedObjectsRepository } = server.savedObjects;
         const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
         const internalRepository = getSavedObjectsRepository(callWithInternalUser);
 
-        const incrementRequests = actionTypes.split(',').map((actionType: string) => {
-          const savedObjectId = `${appName}:${actionType}`;
+        const incrementRequests = metricTypes.split(',').map((metricType: string) => {
+          const savedObjectId = `${appName}:${metricType}`;
           // This object is created if it doesn't already exist.
-          return internalRepository.incrementCounter('user-action', savedObjectId, 'count');
+          return internalRepository.incrementCounter('ui-metric', savedObjectId, 'count');
         });
 
         await Promise.all(incrementRequests);

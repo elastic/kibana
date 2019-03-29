@@ -5,10 +5,10 @@
  */
 
 import {
-  UA_CONFIG_COLD_PHASE,
-  UA_CONFIG_WARM_PHASE,
-  UA_CONFIG_SET_PRIORITY,
-  UA_CONFIG_FREEZE_INDEX,
+  UIM_CONFIG_COLD_PHASE,
+  UIM_CONFIG_WARM_PHASE,
+  UIM_CONFIG_SET_PRIORITY,
+  UIM_CONFIG_FREEZE_INDEX,
 } from '../../common/constants';
 
 import {
@@ -20,11 +20,11 @@ import {
   PHASE_INDEX_PRIORITY,
 } from '../constants';
 
-import { getUserActionsForPhases } from './user_action';
+import { getUiMetricsForPhases } from './ui_metric';
 
-describe('getUserActionsForPhases', () => {
+describe('getUiMetricsForPhases', () => {
   test('gets cold phase', () => {
-    expect(getUserActionsForPhases({
+    expect(getUiMetricsForPhases({
       cold: {
         actions: {
           set_priority: {
@@ -32,11 +32,11 @@ describe('getUserActionsForPhases', () => {
           },
         },
       },
-    })).toEqual([UA_CONFIG_COLD_PHASE]);
+    })).toEqual([UIM_CONFIG_COLD_PHASE]);
   });
 
   test('gets warm phase', () => {
-    expect(getUserActionsForPhases({
+    expect(getUiMetricsForPhases({
       warm: {
         actions: {
           set_priority: {
@@ -44,11 +44,11 @@ describe('getUserActionsForPhases', () => {
           },
         },
       },
-    })).toEqual([UA_CONFIG_WARM_PHASE]);
+    })).toEqual([UIM_CONFIG_WARM_PHASE]);
   });
 
   test(`gets index priority if it's different than the default value`, () => {
-    expect(getUserActionsForPhases({
+    expect(getUiMetricsForPhases({
       warm: {
         actions: {
           set_priority: {
@@ -56,11 +56,11 @@ describe('getUserActionsForPhases', () => {
           },
         },
       },
-    })).toEqual([UA_CONFIG_WARM_PHASE, UA_CONFIG_SET_PRIORITY]);
+    })).toEqual([UIM_CONFIG_WARM_PHASE, UIM_CONFIG_SET_PRIORITY]);
   });
 
   test('gets freeze index', () => {
-    expect(getUserActionsForPhases({
+    expect(getUiMetricsForPhases({
       cold: {
         actions: {
           freeze: {},
@@ -69,6 +69,6 @@ describe('getUserActionsForPhases', () => {
           },
         },
       },
-    })).toEqual([UA_CONFIG_COLD_PHASE, UA_CONFIG_FREEZE_INDEX]);
+    })).toEqual([UIM_CONFIG_COLD_PHASE, UIM_CONFIG_FREEZE_INDEX]);
   });
 });
