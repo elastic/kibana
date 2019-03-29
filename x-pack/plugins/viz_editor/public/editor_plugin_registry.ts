@@ -5,7 +5,8 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { DatasourceField, UnknownVisModel, VisModel } from '../public/common/lib';
+import { DatasourceField } from '../common';
+import { UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
 import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';

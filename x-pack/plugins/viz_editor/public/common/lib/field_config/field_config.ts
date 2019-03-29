@@ -15,11 +15,14 @@ export function getOperationsForField(field: DatasourceField): SelectOperator[] 
   if (field.type === 'date') {
     return ['date_histogram'];
   }
+
   if (field.type === 'number') {
-    return ['count', 'avg', 'sum'];
+    return ['column', 'avg', 'sum'];
   }
+
   if (field.type === 'string') {
-    return ['terms'];
+    return ['terms', 'count'];
   }
+
   return ['count'];
 }
