@@ -2,6 +2,7 @@
   "serverTestPatterns": [
     "server/**/__tests__/**/*.js",
     "plugins/**/__tests__/**/*.js",
+    "plugins/**/__tests__/**/*.ts",
     "!plugins/**/server/**/__tests__/**/*"
   ],
   "buildSourcePatterns": [

@@ -69,7 +69,6 @@ describe('git_operations', () => {
     return repo;
   }
 
-  // @ts-ignore
   before(async () => {
     await prepareProject(path.join(serverOptions.repoPath, repoUri));
   });

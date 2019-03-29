@@ -70,7 +70,6 @@ describe('lsp_service tests', () => {
 
   const repoUri = 'github.com/test/test_repo';
 
-  // @ts-ignore
   before(async () => {
     await prepareProject(path.join(serverOptions.repoPath, repoUri));
   });
@@ -140,7 +139,6 @@ describe('lsp_service tests', () => {
     } finally {
       await lspservice.shutdown();
     }
-    // @ts-ignore
   }).timeout(10000);
 
   it('unload a workspace', async () => {

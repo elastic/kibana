@@ -70,12 +70,10 @@ describe('code in multiple nodes', () => {
     nonCodeNode = createRootWithCorePlugins(setting);
     await nonCodeNode.setup();
   }
-  // @ts-ignore
+
   before(startServers);
 
-  // @ts-ignore
   after(async function() {
-    // @ts-ignore
     this.timeout(10000);
     await nonCodeNode.shutdown();
     await servers.stop();
@@ -101,7 +99,6 @@ describe('code in multiple nodes', () => {
     await codeNode.setup();
     await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
-    // @ts-ignore
   }).timeout(20000);
 
   it('cluster uuid should equals Code node uuid', async () => {
