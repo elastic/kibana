@@ -9,7 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import renderer from 'react-test-renderer';
 import { mockFunction } from '../../../utils/test_utils';
 import { CodeSymbolTree } from '../code_symbol_tree';
-import { props } from './props';
+import { props } from './__fixtures__/props';
 
 test('render symbol tree correctly', () => {
   const tree = renderer

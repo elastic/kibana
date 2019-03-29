@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 import sinon from 'sinon';
 
-import props from '../props.json';
+import props from '../__fixtures__/props.json';
 import { SuggestionComponent } from './suggestion_component';
 
 test('render file item', () => {

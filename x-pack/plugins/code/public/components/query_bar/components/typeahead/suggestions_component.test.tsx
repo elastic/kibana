@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 
-import props from '../props.json';
+import props from '../__fixtures__/props.json';
 import { SuggestionsComponent } from './suggestions_component';
 
 test('render empty suggestions component', () => {
