@@ -8,6 +8,8 @@ import {
   EuiButton,
   // @ts-ignore
   EuiCard,
+  EuiFlexGrid,
+  EuiFlexItem,
   EuiIcon,
   EuiModal,
   EuiModalBody,
@@ -42,15 +44,19 @@ export function VisualizationModal({
           </EuiModalHeader>
 
           <EuiModalBody>
-            {suggestions.map(suggestion => (
-              <EuiCard
-                key={suggestion.title}
-                onClick={() => onSelect(suggestion.visModel)}
-                icon={<EuiIcon size="xl" type={suggestion.iconType} />}
-                title={suggestion.title}
-                description=""
-              />
-            ))}
+            <EuiFlexGrid columns={3}>
+              {suggestions.map(suggestion => (
+                <EuiFlexItem key={suggestion.title}>
+                  <EuiCard
+                    key={suggestion.title}
+                    onClick={() => onSelect(suggestion.visModel)}
+                    icon={<EuiIcon size="xl" type={suggestion.iconType} />}
+                    title={suggestion.title}
+                    description=""
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGrid>
           </EuiModalBody>
 
           <EuiModalFooter>

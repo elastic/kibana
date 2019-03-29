@@ -16,8 +16,8 @@ import {
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { DatasourceField } from '../../../../common';
 import { PanelComponentProps, Suggestion } from '../../../editor_plugin_registry';
-import { DatasourceField } from '../../lib';
 import { VisualizationModal } from '../visualization_modal';
 
 interface State {

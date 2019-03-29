@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiSuperSelect } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiSuperSelect,
+  IconType,
+} from '@elastic/eui';
 import React from 'react';
 import { DatasourceField, fieldToOperation } from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
@@ -17,6 +20,7 @@ import {
   updatePrivateState,
   VisModel,
 } from '../../common/lib';
+import { operationToName } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
 import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
@@ -144,37 +148,42 @@ function getSuggestionsForField(
     return [];
   }
 
-  const firstOperation = fieldToOperation(field, operationNames[0]);
+  return operationNames.map(operationName => {
+    const firstOperation = fieldToOperation(field, operationName);
+    const formattedNameSlice = operationToName(operationName);
+    const formattedNameSize = operationToName('count');
 
-  // Replaces the whole query and both axes. Good for first field, not for 2+
-  const prefilledVisModel: PieChartVisModel = {
-    ...visModel,
-    editorPlugin: PLUGIN_NAME,
-    queries: {
-      q1: {
-        datasourceRef,
-        select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
+    // Replaces the whole query and both axes. Good for first field, not for 2+
+    const prefilledVisModel: PieChartVisModel = {
+      ...visModel,
+      editorPlugin: PLUGIN_NAME,
+      queries: {
+        q1: {
+          datasourceRef,
+          select: [
+            { ...firstOperation, alias: field.name },
+            { operation: 'count', alias: 'count' },
+          ],
+        },
       },
-    },
-    private: {
-      ...visModel.private,
-      pieChart: {
-        sliceAxis: { title: 'Slice By', columns: ['q1_0'] },
-        angleAxis: { title: 'Size By', columns: ['q1_1'] },
+      private: {
+        ...visModel.private,
+        pieChart: {
+          sliceAxis: { title: 'Slice By', columns: ['q1_0'] },
+          angleAxis: { title: 'Size By', columns: ['q1_1'] },
+        },
       },
-    },
-  };
+    };
 
-  return [
-    {
+    return {
       previewExpression: toExpression(prefilledVisModel),
       score: 0.5,
       visModel: prefilledVisModel,
-      title: 'Basic Pie Chart',
-      iconType: 'visPie',
+      title: `Pie Chart: ${formattedNameSlice} of ${field.name} vs ${formattedNameSize}`,
+      iconType: 'visPie' as IconType,
       pluginName: PLUGIN_NAME,
-    },
-  ];
+    };
+  });
 }
 
 export const config: EditorPlugin<PieChartVisModel> = {

@@ -32,13 +32,13 @@ export function XyChart({ config }) {
     <Chart renderer="canvas" className={'story-chart'}>
       <Axis
         id={getAxisId('bottom')}
-        title={'timestamp per 1 minute'}
+        title={config.xAxisName}
         position={Position.Bottom}
         showOverlappingTicks={true}
       />
       <Axis
         id={getAxisId('left')}
-        title={config.title}
+        title={config.yAxisName}
         position={Position.Left}
         tickFormat={d => Number(d).toFixed(2)}
       />
