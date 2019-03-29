@@ -35,7 +35,7 @@ function sampleVisFunction() {
         types: ['string'],
       },
     },
-    context: { types: ['datatable'] },
+    context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
       // normally this would prepare the data, but in this case the kibana_pie function takes care of it
       // TODO swirtch over to elastic-charts pie as soon as they are ready

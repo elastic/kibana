@@ -32,16 +32,26 @@ import chrome from 'ui/chrome';
 const courierRequestHandlerProvider = CourierRequestHandlerProvider;
 const courierRequestHandler = courierRequestHandlerProvider().handler;
 
+function inferColumnType(agg) {
+  // TODO there is a lot missing here
+  if (agg.type === 'metric') {
+    return 'number';
+  } else if (agg.fieldIsTimeField()) {
+    return 'date';
+  } else {
+    return 'string';
+  }
+}
+
 export const esaggs = () => ({
   name: 'esaggs',
   type: 'kibana_datatable',
   context: {
-    types: [
-      'kibana_context',
-      'null',
-    ],
+    types: ['kibana_context', 'null'],
   },
-  help: i18n.translate('interpreter.functions.esaggs.help', { defaultMessage: 'Run AggConfig aggregation' }),
+  help: i18n.translate('interpreter.functions.esaggs.help', {
+    defaultMessage: 'Run AggConfig aggregation',
+  }),
   args: {
     index: {
       types: ['string', 'null'],
@@ -79,9 +89,10 @@ export const esaggs = () => ({
     const response = await courierRequestHandler({
       searchSource: searchSource,
       aggs: aggs,
-      timeRange: get(context, 'timeRange', null),
-      query: get(context, 'query', null),
-      filters: get(context, 'filters', null),
+      // TODO specify sensible defaults for this args
+      timeRange: get(context, 'timeRange', { from: 'now-1M', to: 'now' }),
+      query: get(context, 'query', [{ query: '', language: 'kuery' }]),
+      filters: get(context, 'filters', []),
       forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
@@ -92,9 +103,10 @@ export const esaggs = () => ({
     return {
       type: 'kibana_datatable',
       rows: response.rows,
-      columns: response.columns.map(column => ({
+      columns: response.columns.map((column, index) => ({
         id: column.id,
         name: column.name,
+        type: inferColumnType(aggs[index])
       })),
     };
   },

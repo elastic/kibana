@@ -8,7 +8,14 @@
 // Select clause
 // ----------------------------------------
 
-export type SelectOperator = 'column' | 'count' | 'date_histogram' | 'sum' | 'avg' | 'terms';
+export type SelectOperator =
+  | 'column'
+  | 'count'
+  | 'cardinality'
+  | 'date_histogram'
+  | 'sum'
+  | 'avg'
+  | 'terms';
 
 export interface Aliasable {
   operation: SelectOperator;
@@ -46,6 +53,10 @@ export interface AvgOperation extends FieldOperation {
   operation: 'avg';
   argument: Field;
 }
+export interface CardinalityOperation extends FieldOperation {
+  operation: 'cardinality';
+  argument: Field;
+}
 
 export interface CountOperation extends Aliasable {
   operation: 'count';
@@ -64,6 +75,7 @@ export type SelectOperation =
   | SumOperation
   | CountOperation
   | AvgOperation
+  | CardinalityOperation
   | TermsOperation;
 
 // ----------------------------------------

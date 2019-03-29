@@ -10,6 +10,7 @@ import { FieldListPanel } from '../../common/components/field_list_panel';
 import { Datasource, VisModel } from '../../common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 import { getIndexPatterns } from './index_patterns';
+import { toExpression } from './to_expression';
 
 interface DataPanelState {
   indexPatterns: Datasource[];
@@ -59,14 +60,6 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
       <FieldListPanel {...props} />
     </>
   );
-}
-
-function toExpression(viewState: VisModel) {
-  // TODO prob. do this on an AST object and stringify afterwards
-  // return `sample_data`;
-  return `fancy_query queries='${JSON.stringify(viewState.queries)}' indexpattern='${
-    viewState.datasource ? viewState.datasource.title : ''
-  }'`;
 }
 
 export const config: DatasourcePlugin<VisModel> = {

@@ -12,6 +12,7 @@ const operationTemplate: OperationTemplate = {
   count: { operation: 'count' },
   terms: { operation: 'terms', argument: { field: '', size: 5 } },
   avg: { operation: 'avg', argument: { field: '' } },
+  cardinality: { operation: 'cardinality', argument: { field: '' } },
   sum: { operation: 'sum', argument: { field: '' } },
   column: { operation: 'column', argument: { field: '' } },
   date_histogram: {
