@@ -22,6 +22,7 @@ import { Extractor, IExtractorConfig } from '@microsoft/api-extractor';
 import chalk from 'chalk';
 import dedent from 'dedent';
 import execa from 'execa';
+import fs from 'fs';
 import getopts from 'getopts';
 
 const apiExtractorConfig = (folder: string): IExtractorConfig => {
@@ -68,6 +69,13 @@ const runApiDocumenter = async (folder: string) => {
 
 const isApiChangedWarning = (warning: string) => {
   return warning.startsWith('You have changed the public API signature for this project.');
+};
+
+const renameExtractedApiPackageName = async (folder: string) => {
+  const json = JSON.parse(await fs.readFileSync(`build/${folder}/kibana.api.json`).toString());
+  json.canonicalReference = `kibana-plugin-${folder}`;
+  json.name = `kibana-plugin-${folder}`;
+  await fs.writeFileSync(`build/${folder}/kibana.api.json`, JSON.stringify(json, null, 2));
 };
 
 const runApiExtractor = (folder: string, acceptChanges: boolean = false) => {
@@ -175,6 +183,8 @@ async function run(folder: string): Promise<boolean> {
   });
 
   const { apiChanged, warnings, errors } = runApiExtractor(folder, opts.accept);
+  await renameExtractedApiPackageName(folder);
+
   const apiReviewFilePath =
     apiExtractorConfig(folder)!.apiReviewFile!.apiReviewFolder + 'kibana.api.md';
 
