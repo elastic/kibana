@@ -18,8 +18,7 @@ export interface UptimeGraphQLQueryProps<T> {
 
 interface UptimeGraphQLProps {
   implementsCustomErrorState?: boolean;
-  registerWatch: (handler: () => void) => void;
-  removeWatch: (handler: () => void) => void;
+  lastRefresh?: number;
   variables: OperationVariables;
 }
 
@@ -39,22 +38,21 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState<T | undefined>(undefined);
     const [errors, setErrors] = useState<GraphQLError[] | undefined>(undefined);
-    const { client, implementsCustomErrorState, variables } = props;
-    useEffect(() => {
-      const fetch = () => {
-        setLoading(true);
-        client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(result => {
-          setData(result.data);
-          setLoading(result.loading);
-          setErrors(result.errors);
-        });
-      };
-      props.registerWatch(fetch);
-      fetch();
-      return function cleanup() {
-        props.removeWatch(fetch);
-      };
-    }, []);
+    const { client, implementsCustomErrorState, variables, lastRefresh } = props;
+    const fetch = () => {
+      setLoading(true);
+      client.query<T>({ fetchPolicy: 'network-only', query, variables }).then(result => {
+        setData(result.data);
+        setLoading(result.loading);
+        setErrors(result.errors);
+      });
+    };
+    useEffect(
+      () => {
+        fetch();
+      },
+      [variables, lastRefresh]
+    );
     if (!implementsCustomErrorState && errors && errors.length > 0) {
       return <Fragment>{formatUptimeGraphQLErrorList(errors)}</Fragment>;
     }
