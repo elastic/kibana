@@ -152,6 +152,8 @@ export default function (kibana) {
             visualize: {
               show: true,
               createShortUrl: true,
+              edit: true,
+              delete: true,
               save: true,
             },
             dashboard: {

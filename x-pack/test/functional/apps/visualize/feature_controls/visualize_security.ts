@@ -155,10 +155,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(navLinks).to.eql(['Visualize', 'Management']);
       });
 
-      it(`landing page doesn't show "Create new Visualization" button`, async () => {
+      it(`landing page shows "Create new Visualization" button`, async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await testSubjects.existOrFail('visualizeLandingPage', 10000);
-        await testSubjects.missingOrFail('newItemButton');
+        await testSubjects.existOrFail('newItemButton');
       });
 
       it(`can view existing Visualization`, async () => {
