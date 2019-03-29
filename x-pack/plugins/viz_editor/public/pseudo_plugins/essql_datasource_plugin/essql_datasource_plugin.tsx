@@ -7,9 +7,9 @@
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
-import { FieldListPanel } from '../public/common/components/field_list_panel';
-import { Datasource, VisModel } from '../public/common/lib';
-import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
+import { FieldListPanel } from '../../common/components/field_list_panel';
+import { Datasource, VisModel } from '../../common/lib';
+import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 
 function DataPanel(props: PanelComponentProps<VisModel>) {
   const { visModel, onChangeVisModel } = props;

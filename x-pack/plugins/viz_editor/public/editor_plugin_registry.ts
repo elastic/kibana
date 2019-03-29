@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternField, UnknownVisModel, VisModel } from '../public/common/lib';
+import { Field, UnknownVisModel, VisModel } from '../public/common/lib';
 
-import { config as pieChartConfig } from '../pie_chart_plugin';
-import { config as vegaChartConfig } from '../vega_chart_plugin';
-import { config as xyChartConfig } from '../xy_chart_plugin';
+import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
+import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';
+import { config as xyChartConfig } from './pseudo_plugins/xy_chart_plugin';
 
 export interface Suggestion<S extends VisModel = VisModel> {
   pluginName: string;
@@ -21,7 +21,7 @@ export interface Suggestion<S extends VisModel = VisModel> {
 
 export type GetSuggestionsType<S extends VisModel> = (
   indexPatternName: string,
-  field: IndexPatternField,
+  field: Field,
   visModel: S
 ) => Array<Suggestion<S>>;
 

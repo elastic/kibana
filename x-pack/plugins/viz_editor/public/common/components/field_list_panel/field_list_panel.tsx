@@ -17,7 +17,7 @@ import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { PanelComponentProps } from '../../../editor_plugin_registry';
-import { Datasource, Field } from '../../lib';
+import { Field } from '../../lib';
 
 interface State {
   fieldsFilter: string;

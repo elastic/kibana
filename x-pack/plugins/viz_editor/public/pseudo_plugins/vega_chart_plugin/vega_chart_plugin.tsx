@@ -6,8 +6,8 @@
 
 import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
-import { UnknownVisModel, updatePrivateState, VisModel } from '../public/common/lib';
-import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
+import { UnknownVisModel, updatePrivateState, VisModel } from '../../common/lib';
+import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
 
 interface VegaChartPrivateState {
   spec: string;

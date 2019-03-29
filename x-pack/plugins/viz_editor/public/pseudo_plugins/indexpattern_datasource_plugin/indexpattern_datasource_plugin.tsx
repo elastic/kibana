@@ -9,9 +9,9 @@ import { EuiSuperSelect } from '@elastic/eui';
 import zipObject from 'lodash-es/zipObject';
 import React, { useEffect, useState } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
-import { FieldListPanel } from '../public/common/components/field_list_panel';
-import { VisModel } from '../public/common/lib';
-import { DatasourcePlugin, PanelComponentProps } from '../public/datasource_plugin_registry';
+import { FieldListPanel } from '../../common/components/field_list_panel';
+import { VisModel } from '../../common/lib';
+import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 import { getIndexPatterns } from './index_patterns';
 
 function DataPanel(props: PanelComponentProps<VisModel>) {
