@@ -18,6 +18,7 @@
  */
 
 import { uiModules } from 'ui/modules';
+import 'ui/directives/inequality';
 import metricVisParamsTemplate from './metric_vis_params.html';
 import _ from 'lodash';
 const module = uiModules.get('kibana');
@@ -54,7 +55,7 @@ module.directive('metricVisParams', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return 0;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.metric.colorsRange[index - 1].to;
       };
 
