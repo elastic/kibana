@@ -26,15 +26,15 @@ import {
   EuiHeaderBreadcrumbs,
 } from '@elastic/eui';
 
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
 }
 
 interface State {
-  breadcrumbs: Breadcrumb[];
+  breadcrumbs: ChromeBreadcrumb[];
 }
 
 export class HeaderBreadcrumbs extends Component<Props, State> {
