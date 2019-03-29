@@ -14,15 +14,21 @@ import { kfetch } from 'ui/kfetch';
 // context. It will be used by the editor config which is shipped in the same plugin, but
 // it could also be used from somewhere else.
 
-function fancyQueryFunction() {
+function esDocsFunction() {
   return {
-    name: 'fancy_query',
+    name: 'client_esdocs',
     type: 'datatable',
     args: {
-      queries: {
+      index: {
         types: ['string'],
       },
-      indexpattern: {
+      fields: {
+        types: ['string'],
+      },
+      filter: {
+        types: ['string'],
+      },
+      timeRange: {
         types: ['string'],
       },
     },
@@ -49,6 +55,6 @@ function fancyQueryFunction() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [fancyQueryFunction],
+    browserFunctions: [esDocsFunction],
   });
 };
