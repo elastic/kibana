@@ -38,8 +38,8 @@ const TEST_ES_SNAPSHOT_VERSION = process.env.TEST_ES_SNAPSHOT_VERSION
   : 'latest';
 
 function getChecksumType(checksumUrl) {
-  if (checksumUrl.endsWith('.sha500')) {
-    return 'sha500';
+  if (checksumUrl.endsWith('.sha512')) {
+    return 'sha512';
   }
 
   throw new Error(`unable to determine checksum type: ${checksumUrl}`);
