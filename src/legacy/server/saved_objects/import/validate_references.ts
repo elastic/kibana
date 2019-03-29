@@ -18,7 +18,7 @@
  */
 
 import { SavedObject, SavedObjectsClient } from '../service';
-import { ImportError } from './types';
+import { ImportError, MissingReferencesError } from './types';
 
 const ENFORCED_TYPES = ['index-pattern', 'search'];
 
@@ -55,7 +55,7 @@ export async function validateReferences(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClient
 ) {
-  const errors: ImportError[] = [];
+  const errorMap: { [key: string]: ImportError } = {};
 
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
@@ -63,7 +63,7 @@ export async function validateReferences(
   );
 
   // Filter out objects with missing references, add to error object
-  const filteredObjects = savedObjects.filter(savedObject => {
+  let filteredObjects = savedObjects.filter(savedObject => {
     const missingReferences = [];
     for (const { type: refType, id: refId } of savedObject.references || []) {
       if (!ENFORCED_TYPES.includes(refType)) {
@@ -74,20 +74,48 @@ export async function validateReferences(
       }
     }
     if (missingReferences.length) {
-      errors.push({
+      errorMap[`${savedObject.type}:${savedObject.id}`] = {
         id: savedObject.id,
         type: savedObject.type,
+        title: savedObject.attributes.title,
         error: {
           type: 'missing_references',
           references: missingReferences,
         },
-      });
+      };
     }
     return missingReferences.length === 0;
   });
 
+  // Filter out objects that reference objects within the import but are missing_references
+  // For example: visualization referencing a search that is missing an index pattern needs to be filtered out
+  filteredObjects = filteredObjects.filter(savedObject => {
+    const referenceErrors = [];
+    for (const { type: refType, id: refId } of savedObject.references || []) {
+      if (!errorMap[`${refType}:${refId}`]) {
+        continue;
+      }
+      if (errorMap[`${refType}:${refId}`].error.type === 'missing_references') {
+        const error = errorMap[`${refType}:${refId}`].error as MissingReferencesError;
+        referenceErrors.push(...error.references);
+      }
+    }
+    if (referenceErrors.length) {
+      errorMap[`${savedObject.type}:${savedObject.id}`] = {
+        id: savedObject.id,
+        type: savedObject.type,
+        title: savedObject.attributes.title,
+        error: {
+          type: 'references_missing_references',
+          references: referenceErrors,
+        },
+      };
+    }
+    return referenceErrors.length === 0;
+  });
+
   return {
-    errors,
+    errors: Object.values(errorMap),
     filteredObjects,
   };
 }

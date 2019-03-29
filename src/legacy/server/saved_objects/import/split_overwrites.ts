@@ -17,46 +17,21 @@
  * under the License.
  */
 
-export interface Retry {
-  type: string;
-  id: string;
-  overwrite: boolean;
-  replaceReferences: Array<{
-    type: string;
-    from: string;
-    to: string;
-  }>;
-}
+import { SavedObject } from '../service';
+import { Retry } from './types';
 
-export interface ConflictError {
-  type: 'conflict';
-}
-
-export interface UnknownError {
-  type: 'unknown';
-  message: string;
-  statusCode: number;
-}
-
-export interface MissingReferencesError {
-  type: 'missing_references';
-  references: Array<{
-    type: string;
-    id: string;
-  }>;
-}
-
-export interface ReferencesMissingReferencesError {
-  type: 'references_missing_references';
-  references: Array<{
-    type: string;
-    id: string;
-  }>;
-}
-
-export interface ImportError {
-  id: string;
-  type: string;
-  title?: string;
-  error: ConflictError | MissingReferencesError | ReferencesMissingReferencesError | UnknownError;
+export function splitOverwrites(savedObjects: SavedObject[], retries: Retry[]) {
+  const objectsToOverwrite: SavedObject[] = [];
+  const objectsToNotOverwrite: SavedObject[] = [];
+  const overwrites = retries
+    .filter(retry => retry.overwrite)
+    .map(retry => `${retry.type}:${retry.id}`);
+  for (const savedObject of savedObjects) {
+    if (overwrites.includes(`${savedObject.type}:${savedObject.id}`)) {
+      objectsToOverwrite.push(savedObject);
+    } else {
+      objectsToNotOverwrite.push(savedObject);
+    }
+  }
+  return { objectsToOverwrite, objectsToNotOverwrite };
 }

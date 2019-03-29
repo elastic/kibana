@@ -22,25 +22,15 @@ import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
-import { ImportError } from './types';
+import { splitOverwrites } from './split_overwrites';
+import { ImportError, Retry } from './types';
+import { validateReferences } from './validate_references';
 
 interface ResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
   savedObjectsClient: SavedObjectsClient;
-  overwrites: Array<{
-    type: string;
-    id: string;
-  }>;
-  replaceReferences: Array<{
-    type: string;
-    from: string;
-    to: string;
-  }>;
-  skips: Array<{
-    type: string;
-    id: string;
-  }>;
+  retries: Retry[];
 }
 
 interface ImportResponse {
@@ -52,33 +42,55 @@ interface ImportResponse {
 export async function resolveImportErrors({
   readStream,
   objectLimit,
-  skips,
-  overwrites,
+  retries,
   savedObjectsClient,
-  replaceReferences,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let errors: ImportError[] = [];
-  const filter = createObjectsFilter(skips, overwrites, replaceReferences);
+  const filter = createObjectsFilter(retries);
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
-  // Replace references
-  const refReplacementsMap: Record<string, string> = {};
-  for (const { type, to, from } of replaceReferences) {
-    refReplacementsMap[`${type}:${from}`] = to;
+  const retriesReferencesMap = new Map<string, { [key: string]: string }>();
+  for (const retry of retries) {
+    const map: { [key: string]: string } = {};
+    for (const { type, from, to } of retry.replaceReferences) {
+      map[`${type}:${from}`] = to;
+    }
+    retriesReferencesMap.set(`${retry.type}:${retry.id}`, map);
   }
+
+  // Replace references
   for (const savedObject of objectsToResolve) {
+    const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
+    if (!refMap) {
+      continue;
+    }
     for (const reference of savedObject.references || []) {
-      if (refReplacementsMap[`${reference.type}:${reference.id}`]) {
-        reference.id = refReplacementsMap[`${reference.type}:${reference.id}`];
+      // Replace with refMap if defined
+      if (refMap[`${reference.type}:${reference.id}`]) {
+        reference.id = refMap[`${reference.type}:${reference.id}`];
       }
     }
   }
 
-  if (objectsToResolve.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToResolve, {
+  // Validate the references
+  const { filteredObjects, errors: validationErrors } = await validateReferences(
+    objectsToResolve,
+    savedObjectsClient
+  );
+  errors = errors.concat(validationErrors);
+
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
+
+  if (objectsToOverwrite.length) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
     });
-    errors = extractErrors(bulkCreateResult.saved_objects);
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));
+  }
+
+  if (objectsToNotOverwrite.length) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));
   }
 
   return {

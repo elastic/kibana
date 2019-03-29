@@ -79,7 +79,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
-  test('resolves conflicts for an index pattern and dashboard but skips the index pattern', async () => {
+  test('resolves conflicts for dashboard but skips the index pattern', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',
@@ -92,13 +92,9 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
         '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}',
         '--EXAMPLE',
-        'Content-Disposition: form-data; name="skips"',
+        'Content-Disposition: form-data; name="retries"',
         '',
-        '[{"type":"index-pattern","id":"my-pattern"}]',
-        '--EXAMPLE',
-        'Content-Disposition: form-data; name="overwrites"',
-        '',
-        '[{"type":"dashboard","id":"my-dashboard"}]',
+        '[{"type":"dashboard","id":"my-dashboard","overwrite":true}]',
         '--EXAMPLE--',
       ].join('\r\n'),
       headers: {
@@ -161,9 +157,9 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         '{"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}',
         '{"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}',
         '--EXAMPLE',
-        'Content-Disposition: form-data; name="replaceReferences"',
+        'Content-Disposition: form-data; name="retries"',
         '',
-        '[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]',
+        '[{"type":"dashboard","id":"my-dashboard","replaceReferences":[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]}]',
         '--EXAMPLE--',
       ].join('\r\n'),
       headers: {
@@ -212,9 +208,6 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
           "type": "dashboard",
         },
       ],
-      Object {
-        "overwrite": true,
-      },
     ],
   ],
   "results": Array [

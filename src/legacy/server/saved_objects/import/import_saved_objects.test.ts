@@ -266,4 +266,87 @@ Object {
 }
 `);
   });
+
+  test('validates references', async () => {
+    const readStream = new Readable({
+      read() {
+        this.push(
+          JSON.stringify({
+            id: '1',
+            type: 'search',
+            attributes: {
+              title: 'My Search',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'index-pattern',
+                id: '2',
+              },
+            ],
+          }) + '\n'
+        );
+        this.push(
+          JSON.stringify({
+            id: '3',
+            type: 'visualization',
+            attributes: {
+              title: 'My Visualization',
+            },
+            references: [
+              {
+                name: 'ref_0',
+                type: 'search',
+                id: '1',
+              },
+            ],
+          }) + '\n'
+        );
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({ saved_objects: [] });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 4,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "references": Array [
+          Object {
+            "id": "2",
+            "type": "index-pattern",
+          },
+        ],
+        "type": "missing_references",
+      },
+      "id": "1",
+      "title": "My Search",
+      "type": "search",
+    },
+    Object {
+      "error": Object {
+        "references": Array [
+          Object {
+            "id": "2",
+            "type": "index-pattern",
+          },
+        ],
+        "type": "references_missing_references",
+      },
+      "id": "3",
+      "title": "My Visualization",
+      "type": "visualization",
+    },
+  ],
+  "success": false,
+  "successCount": 0,
+}
+`);
+  });
 });

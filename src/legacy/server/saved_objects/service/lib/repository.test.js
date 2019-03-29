@@ -754,6 +754,7 @@ describe('SavedObjectsRepository', () => {
         saved_objects: [
           {
             id: 'one',
+            title: 'Test One',
             type: 'config',
             error: { message: 'type[config] missing' },
           },

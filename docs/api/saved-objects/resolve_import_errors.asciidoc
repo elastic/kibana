@@ -16,16 +16,10 @@ Note: You cannot access this endpoint via the Console in Kibana.
 The request body must be of type multipart/form-data.
 
 `file`::
-  (ndjson) The same new line delimited JSON objects given to the import API.
+  The same new line delimited JSON objects given to the import API.
 
-`overwrites` (optional)::
-  (array) A list of `type` and `id` objects allowed to be overwritten on import.
-
-`replaceReferences` (optional)::
-  (array) A list of `type`, `from` and `to` used to change imported saved object references to.
-
-`skips` (optional)::
-  (array) A list of `type` and `id` objects to skip importing.
+`retries` (optional)::
+  (array) A list of `type`, `id`, `replaceReferences` and `overwrite` objects to retry importing. The property `replaceReferences` is a list of `type`, `from` and `to` used to change the object's references.
 
 ==== Response body
 
@@ -49,13 +43,9 @@ Content-Type: application/ndjson
 {"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"}}
 --EXAMPLE
-Content-Disposition: form-data; name="skips"
+Content-Disposition: form-data; name="retries"
 
-[{"type":"index-pattern","id":"my-pattern"}]
---EXAMPLE
-Content-Disposition: form-data; name="overwrites"
-
-[{"type":"dashboard","id":"my-dashboard"}]
+[{"type":"dashboard","id":"my-dashboard","overwrite":true}]
 --EXAMPLE--
 --------------------------------------------------
 // KIBANA
@@ -85,9 +75,9 @@ Content-Type: application/ndjson
 {"type":"visualization","id":"my-vis","attributes":{"title":"Look at my visualization"}}
 {"type":"dashboard","id":"my-dashboard","attributes":{"title":"Look at my dashboard"},"references":[{"name":"panel_0","type":"visualization","id":"my-vis"}]}
 --EXAMPLE
-Content-Disposition: form-data; name="replaceReferences"
+Content-Disposition: form-data; name="retries"
 
-[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]
+[{"type":"dashboard","id":"my-dashboard","replaceReferences":[{"type":"visualization","from":"my-vis","to":"my-vis-2"}]}]
 --EXAMPLE--
 --------------------------------------------------
 // KIBANA

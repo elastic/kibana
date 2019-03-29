@@ -209,12 +209,14 @@ export class SavedObjectsRepository {
             return {
               id,
               type,
+              title: attributes.title,
               error: { statusCode: 409, message: 'version conflict, document already exists' },
             };
           }
           return {
             id,
             type,
+            title: attributes.title,
             error: {
               message: error.reason || JSON.stringify(error),
             },

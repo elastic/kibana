@@ -116,11 +116,12 @@ export function resolveImportErrorsTestSuiteFactory(
           .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
           .auth(user.username, user.password)
           .field(
-            'overwrites',
+            'retries',
             JSON.stringify([
               {
                 type: 'dashboard',
                 id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                overwrite: true,
               },
             ])
           )
@@ -147,15 +148,17 @@ export function resolveImportErrorsTestSuiteFactory(
             .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors`)
             .auth(user.username, user.password)
             .field(
-              'overwrites',
+              'retries',
               JSON.stringify([
                 {
                   type: 'wigwags',
                   id: '1',
+                  overwrite: true,
                 },
                 {
                   type: 'dashboard',
                   id: `${getIdPrefix(spaceId)}a01b2f57-fcfd-4864-b735-09e28f0d815e`,
+                  overwrite: true,
                 },
               ])
             )

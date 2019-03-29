@@ -299,7 +299,9 @@ Object {
       {
         id: '2',
         type: 'visualization',
-        attributes: {},
+        attributes: {
+          title: 'My Visualization 2',
+        },
         references: [
           {
             name: 'ref_0',
@@ -311,7 +313,9 @@ Object {
       {
         id: '4',
         type: 'visualization',
-        attributes: {},
+        attributes: {
+          title: 'My Visualization 4',
+        },
         references: [
           {
             name: 'ref_0',
@@ -351,6 +355,7 @@ Object {
         "type": "missing_references",
       },
       "id": "2",
+      "title": "My Visualization 2",
       "type": "visualization",
     },
     Object {
@@ -372,6 +377,7 @@ Object {
         "type": "missing_references",
       },
       "id": "4",
+      "title": "My Visualization 4",
       "type": "visualization",
     },
   ],
