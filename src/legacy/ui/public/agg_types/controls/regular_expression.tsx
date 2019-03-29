@@ -20,17 +20,14 @@ import { isFunction } from 'lodash';
 import React from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
 function RegexParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
-  const label = (
-    <FormattedMessage
-      id="common.ui.aggTypes.paramNamePatternLabel"
-      defaultMessage="{aggParamName} Pattern"
-      values={{ aggParamName: aggParam.displayName || aggParam.name }}
-    />
-  );
+  const label = i18n.translate('common.ui.aggTypes.paramNamePatternLabel', {
+    defaultMessage: '{aggParamName} pattern',
+    values: { aggParamName: aggParam.displayName || aggParam.name },
+  });
 
   if (isFunction(aggParam.disabled) && aggParam.disabled(agg)) {
     return null;

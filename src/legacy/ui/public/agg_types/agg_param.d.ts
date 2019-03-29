@@ -23,7 +23,7 @@ interface AggParam {
   type: string;
   name: string;
   displayName?: string;
-  disabled?: (agg: AggConfig) => boolean;
+  disabled?(agg: AggConfig): boolean;
 }
 
 export { AggParam };
