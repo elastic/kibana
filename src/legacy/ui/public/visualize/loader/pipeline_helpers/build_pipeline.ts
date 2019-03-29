@@ -28,10 +28,17 @@ interface SchemaFormat {
   params?: any;
 }
 
+interface SchemaConfigParams {
+  isDate: boolean;
+  isNumeric: boolean;
+  precision?: number;
+  useGeocentroid?: boolean;
+}
+
 interface SchemaConfig {
   accessor: number;
   format: SchemaFormat | {};
-  params: any;
+  params: SchemaConfigParams;
   aggType: string;
 }
 
@@ -104,43 +111,42 @@ export const getSchemas = (vis: Vis, timeRange?: any): Schemas => {
   };
 
   const createSchemaConfig = (accessor: number, agg: AggConfig): SchemaConfig => {
-    const schema = {
-      accessor,
-      format: {},
-      params: {},
-      aggType: agg.type.name,
-    };
-
     if (agg.type.name === 'date_histogram') {
       agg.params.timeRange = timeRange;
       setBounds(agg, true);
     }
+
+    const hasSubAgg = [
+      'derivative',
+      'moving_avg',
+      'serial_diff',
+      'cumulative_sum',
+      'sum_bucket',
+      'avg_bucket',
+      'min_bucket',
+      'max_bucket',
+    ].includes(agg.type.name);
+
+    const format = createFormat(
+      hasSubAgg ? agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg] : agg
+    );
+
+    const params: SchemaConfigParams = {
+      isDate: format.id === 'date',
+      isNumeric: format.id === 'number',
+    };
+
     if (agg.type.name === 'geohash_grid') {
-      schema.params = {
-        precision: agg.params.precision,
-        useGeocentroid: agg.params.useGeocentroid,
-      };
+      params.precision = agg.params.precision;
+      params.useGeocentroid = agg.params.useGeocentroid;
     }
 
-    if (
-      [
-        'derivative',
-        'moving_avg',
-        'serial_diff',
-        'cumulative_sum',
-        'sum_bucket',
-        'avg_bucket',
-        'min_bucket',
-        'max_bucket',
-      ].includes(agg.type.name)
-    ) {
-      const subAgg = agg.params.customMetric || agg.aggConfigs.byId[agg.params.metricAgg];
-      schema.format = createFormat(subAgg);
-    } else {
-      schema.format = createFormat(agg);
-    }
-
-    return schema;
+    return {
+      accessor,
+      format,
+      params,
+      aggType: agg.type.name,
+    };
   };
 
   let cnt = 0;
