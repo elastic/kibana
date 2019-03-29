@@ -38,18 +38,18 @@ interface CoreSetup {
 }
 
 const runtimeContext = {
-  start: {
+  setup: {
     core: null as CoreSetup | null,
     plugins: {},
   },
 };
 
 export function __newPlatformInit__(core: CoreSetup) {
-  if (runtimeContext.start.core) {
+  if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already initialized');
   }
 
-  runtimeContext.start.core = core;
+  runtimeContext.setup.core = core;
 }
 
 export function getNewPlatform() {

@@ -59,14 +59,12 @@ describe('MonitorCharts component', () => {
     const component = shallowWithIntl(
       <MonitorCharts
         checkDomainLimits={[0, 75]}
-        crosshairLocation={150}
         danger="dangerColor"
         durationDomainLimits={[0, 75]}
         monitorChartsData={chartResponse.monitorChartsData}
         mean="mean"
         range="range"
         success="success"
-        updateCrosshairLocation={jest.fn()}
       />
     );
     expect(component).toMatchSnapshot();

@@ -21,59 +21,40 @@ interface MonitorChartsProps {
   monitorId: string;
 }
 
-interface MonitorChartsState {
-  crosshairLocation: number;
-}
-
 type Props = MonitorChartsProps &
   UptimeCommonProps &
   UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
 
-export class Query extends React.Component<Props, MonitorChartsState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { crosshairLocation: 0 };
-  }
-
-  public render() {
+const makeMonitorCharts = ({ colors: { success, range, mean, danger }, data }: Props) => {
+  if (data && data.monitorChartsData) {
     const {
-      colors: { range, mean, danger, success },
-      data,
-    } = this.props;
-    if (data && data.monitorChartsData) {
-      const {
-        monitorChartsData,
-        monitorChartsData: { durationMaxValue, statusMaxCount },
-      } = data;
+      monitorChartsData,
+      monitorChartsData: { durationMaxValue, statusMaxCount },
+    } = data;
 
-      const durationMax = microsToMillis(durationMaxValue);
-      // These limits provide domain sizes for the charts
-      const checkDomainLimits = [0, statusMaxCount];
-      const durationDomainLimits = [0, durationMax ? durationMax : 0];
+    const durationMax = microsToMillis(durationMaxValue);
+    // These limits provide domain sizes for the charts
+    const checkDomainLimits = [0, statusMaxCount];
+    const durationDomainLimits = [0, durationMax ? durationMax : 0];
 
-      return (
-        <MonitorCharts
-          checkDomainLimits={checkDomainLimits}
-          crosshairLocation={this.state.crosshairLocation}
-          danger={danger}
-          durationDomainLimits={durationDomainLimits}
-          mean={mean}
-          monitorChartsData={monitorChartsData}
-          range={range}
-          success={success}
-          updateCrosshairLocation={this.updateCrosshairLocation}
-        />
-      );
-    }
-    return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
-      defaultMessage: 'Loading…',
-    });
+    return (
+      <MonitorCharts
+        checkDomainLimits={checkDomainLimits}
+        danger={danger}
+        durationDomainLimits={durationDomainLimits}
+        mean={mean}
+        monitorChartsData={monitorChartsData}
+        range={range}
+        success={success}
+      />
+    );
   }
-  private updateCrosshairLocation = (crosshairLocation: number) =>
-    this.setState({ crosshairLocation });
-}
+  return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+    defaultMessage: 'Loading…',
+  });
+};
 
 export const MonitorChartsQuery = withUptimeGraphQL<MonitorChartsQueryResult, MonitorChartsProps>(
-  Query,
+  makeMonitorCharts,
   getMonitorChartsQuery
 );

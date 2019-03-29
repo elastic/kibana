@@ -29,26 +29,22 @@ import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/h
 
 interface MonitorChartsProps {
   checkDomainLimits: number[];
-  crosshairLocation: number;
   danger: string;
   durationDomainLimits: number[];
   monitorChartsData: MonitorChart;
   mean: string;
   range: string;
   success: string;
-  updateCrosshairLocation: (crosshairLocation: number) => void;
 }
 
 export const MonitorCharts = ({
   checkDomainLimits,
-  crosshairLocation,
   danger,
   durationDomainLimits,
   monitorChartsData: { durationArea, durationLine, status },
   mean,
   range,
   success,
-  updateCrosshairLocation,
 }: MonitorChartsProps) => (
   <Fragment>
     <EuiFlexGroup gutterSize="s">
@@ -69,8 +65,6 @@ export const MonitorCharts = ({
             xType={EuiSeriesChartUtils.SCALE.TIME}
             xCrosshairFormat="YYYY-MM-DD hh:mmZ"
             yDomain={durationDomainLimits}
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
             animateData={false}
           >
             <EuiAreaSeries

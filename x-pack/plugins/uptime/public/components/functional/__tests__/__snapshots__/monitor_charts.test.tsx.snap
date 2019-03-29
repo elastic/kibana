@@ -31,7 +31,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
         </EuiTitle>
         <FlexibleEuiSeriesChart
           animateData={false}
-          crosshairValue={150}
           height={200}
           margins={
             Object {
@@ -41,7 +40,6 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               "top": 16,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
           yDomain={
