@@ -32,6 +32,7 @@ export default function ({ getService }) {
       it('should return 200 and import nothing when empty parameters are passed in', async () => {
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .field('retries', '[]')
           .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
           .expect(200)
           .then((resp) => {
@@ -94,6 +95,7 @@ export default function ({ getService }) {
         }
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
+          .field('retries', '[]')
           .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
           .expect(400)
           .then((resp) => {
