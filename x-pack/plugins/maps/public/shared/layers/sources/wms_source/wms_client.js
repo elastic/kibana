@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { parseString } from 'xml2js';
 import fetch from 'node-fetch';
+import { parse, format } from 'url';
 
 export class WmsClient {
   constructor({ serviceUrl }) {
@@ -17,8 +18,27 @@ export class WmsClient {
     return fetch(url);
   }
 
+  /**
+   * Extend any query parameters supplied in the URL but override with required defaults
+   * (ex. service must be WMS)
+   */
   async _fetchCapabilities() {
-    const resp = await this._fetch(`${this._serviceUrl}?version=1.1.1&request=GetCapabilities&service=WMS`);
+    const getCapabilitiesUrl = parse(this._serviceUrl, true);
+    const queryParams = {
+      ...getCapabilitiesUrl.query,
+      ...{
+        version: '1.1.1',
+        request: 'GetCapabilities',
+        service: 'WMS'
+      }
+    };
+    const resp = await this._fetch(format({
+      protocol: getCapabilitiesUrl.protocol,
+      hostname: getCapabilitiesUrl.hostname,
+      port: getCapabilitiesUrl.port,
+      pathname: getCapabilitiesUrl.pathname,
+      query: queryParams
+    }));
     if (resp.status >= 400) {
       throw new Error(`Unable to access ${this.state.serviceUrl}`);
     }
