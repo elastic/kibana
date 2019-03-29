@@ -15,7 +15,7 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
-import { ESAggMetricTooltipProperty } from '../util/tooltip_property';
+import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../../store/util';

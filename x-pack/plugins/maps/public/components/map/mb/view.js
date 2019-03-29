@@ -261,8 +261,6 @@ export class MBMapContainer extends React.Component {
       return layer.getId() === this.props.tooltipState.layerId;
     });
     const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
-
-
     const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
     this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }

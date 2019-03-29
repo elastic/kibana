@@ -10,7 +10,7 @@ import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
-import { ESTooltipProperty } from '../util/tooltip_property';
+import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 
 const TERMS_AGG_NAME = 'join';
 

@@ -6,7 +6,7 @@
 
 
 import { VectorLayer } from '../vector_layer';
-import { TooltipProperty } from '../util/tooltip_property';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 import { VectorStyle } from '../styles/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
@@ -108,7 +108,6 @@ export class AbstractVectorSource extends AbstractSource {
       props[key] = _.escape(properties[key]);
       tooltipProperties.push(new TooltipProperty(key, properties[key]));
     }
-    // return props;
     return tooltipProperties;
   }
 

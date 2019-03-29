@@ -15,7 +15,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
-import { ESTooltipProperty } from '../../util/tooltip_property';
+import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
 
 const DEFAULT_LIMIT = 2048;
 

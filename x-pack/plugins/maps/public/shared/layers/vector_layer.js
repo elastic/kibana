@@ -10,7 +10,7 @@ import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
-import { JoinTooltipProperty } from './util/tooltip_property';
+import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
