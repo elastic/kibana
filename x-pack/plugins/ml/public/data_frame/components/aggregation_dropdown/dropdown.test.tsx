@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/*
 import { mount } from 'enzyme';
 
 import React from 'react';
@@ -17,3 +18,4 @@ describe('DropDown', () => {
     }).not.toThrow();
   });
 });
+*/

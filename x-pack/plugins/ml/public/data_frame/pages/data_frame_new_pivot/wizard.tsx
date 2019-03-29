@@ -86,7 +86,9 @@ export const Wizard: SFC<Props> = ({ indexPattern }) => {
 
   function scrollToRef() {
     if (definePivotRef !== null && definePivotRef.current !== null) {
-      window.scrollTo(0, definePivotRef.current.offsetTop);
+      // TODO Fix types
+      const dummy = definePivotRef as any;
+      window.scrollTo(0, dummy.current.offsetTop);
     }
   }
 

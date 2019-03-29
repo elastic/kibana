@@ -24,7 +24,7 @@ module.directive('mlNewDataFrame', ($route: any, Private: any) => {
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
       const createSearchItems = Private(SearchItemsProvider);
-      const { indexPattern, savedSearch, combinedQuery } = createSearchItems();
+      const { indexPattern } = createSearchItems();
 
       const props = {
         indexPattern,
