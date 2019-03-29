@@ -30,7 +30,7 @@ comprehensive overview of the upgrade process.
 ==== Upgrading from 6.6 or earlier
 {es} can read indices created in the previous major version. If you have indices 
 created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
-See {ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack] 
+See {stack-ov}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading from 6.6 or earlier] 
 for more information.
 
 Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
