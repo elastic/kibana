@@ -5,7 +5,6 @@
  */
 
 import { Request } from 'hapi';
-// @ts-ignore
 import { AnyObject, EsClient } from '../lib/esqueue';
 import { EsIndexClient } from './es_index_client';
 import { WithRequest } from './with_request';

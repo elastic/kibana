@@ -6,7 +6,6 @@
 
 import hapi from 'hapi';
 import url from 'url';
-// @ts-ignore
 import wreck from 'wreck';
 import { Logger } from '../log';
 

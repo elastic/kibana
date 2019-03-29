@@ -85,8 +85,8 @@ class CodeImportProject extends React.PureComponent<
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {/* 
-  // @ts-ignore */}
+            {/*
+            // @ts-ignore */}
             <ImportButton
               onClick={this.submitImportProject}
               data-test-subj="importRepositoryButton"
