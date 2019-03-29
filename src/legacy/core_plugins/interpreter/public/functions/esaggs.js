@@ -89,6 +89,7 @@ export const esaggs = () => ({
     const response = await courierRequestHandler({
       searchSource: searchSource,
       aggs: aggs,
+      // TODO specify sensible defaults for this args
       timeRange: get(context, 'timeRange', { from: 'now-1M', to: 'now' }),
       query: get(context, 'query', [{ query: '', language: 'kuery' }]),
       filters: get(context, 'filters', []),
