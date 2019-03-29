@@ -26,3 +26,41 @@ export function getDataFrameBreadcrumbs() {
     },
   ];
 }
+
+const DATA_FRAME_HOME = {
+  text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
+    defaultMessage: 'Data Frame',
+  }),
+  href: '#/data_frame',
+};
+
+export function getDataFrameCreateBreadcrumbs() {
+  return [
+    ML_BREADCRUMB,
+    DATA_FRAME_HOME,
+    {
+      text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameCreateLabel', {
+        defaultMessage: 'Create data frame',
+      }),
+      href: '',
+    },
+  ];
+}
+
+export function getDataFrameIndexOrSearchBreadcrumbs() {
+  return [
+    ML_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
+        defaultMessage: 'Data Frame',
+      }),
+      href: '#/data_frame',
+    },
+    {
+      text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.selectIndexOrSearchLabel', {
+        defaultMessage: 'Select index or search',
+      }),
+      href: '',
+    },
+  ];
+}
