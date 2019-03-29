@@ -24,7 +24,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiSpacer, EuiFieldText } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const SplitByTermsUi = props => {
@@ -144,6 +144,33 @@ const SplitByTermsUi = props => {
               onChange={handleSelectChange('terms_direction')}
               singleSelection={{ asPlainText: true }}
             />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('include')}
+            label={(<FormattedMessage
+              id="tsvb.splits.terms.include"
+              defaultMessage="Include"
+            />)}
+          >
+            <EuiFieldText onChange={handleTextChange('terms_include')} />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            id={htmlId('exclude')}
+            label={(<FormattedMessage
+              id="tsvb.splits.terms.exclude"
+              defaultMessage="Exclude"
+            />)}
+          >
+            <EuiFieldText onChange={handleTextChange('terms_exclude')} />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
