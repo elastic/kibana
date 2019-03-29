@@ -25,6 +25,8 @@ import { AggParamEditorProps } from '../../vis/editors/default';
 
 function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
   if (isFunction(aggParam.disabled) && aggParam.disabled(agg)) {
+    // reset model value
+    setValue();
     return null;
   }
 
