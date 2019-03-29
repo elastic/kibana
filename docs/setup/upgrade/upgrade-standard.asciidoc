@@ -43,7 +43,7 @@ otherwise {kib} will fail to start.
   don't overwrite the `config` or `data` directories. +
 +
 --
-IMPORTANT: If you use {monitoring}, you must re-use the data directory when you
+IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you
 upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
 and becomes a new instance in the monitoring data.
 
