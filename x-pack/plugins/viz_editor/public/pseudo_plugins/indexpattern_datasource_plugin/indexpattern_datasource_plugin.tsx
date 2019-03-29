@@ -4,47 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiSuperSelect } from '@elastic/eui';
-import zipObject from 'lodash-es/zipObject';
+import { EuiComboBox } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { IndexPattern } from 'ui/index_patterns';
 import { FieldListPanel } from '../../common/components/field_list_panel';
-import { VisModel } from '../../common/lib';
+import { Datasource, VisModel } from '../../common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
 import { getIndexPatterns } from './index_patterns';
 
+interface DataPanelState {
+  indexPatterns: Datasource[];
+}
+
 function DataPanel(props: PanelComponentProps<VisModel>) {
   const { visModel, onChangeVisModel } = props;
-  const [indexPatterns, setIndexPatterns] = useState({} as { [id: string]: IndexPattern });
-  const selectedIndexPattern = visModel.datasource;
+
+  const [state, setState] = useState({ indexPatterns: [] } as DataPanelState);
+
   useEffect(() => {
     getIndexPatterns().then(loadedIndexPatterns => {
       if (!loadedIndexPatterns) {
         return;
       }
 
-      setIndexPatterns(zipObject(loadedIndexPatterns.map(({ id }) => id), loadedIndexPatterns));
+      setState({ indexPatterns: loadedIndexPatterns });
+
+      onChangeVisModel({
+        ...visModel,
+        // TODO: There is a default index pattern preference that is being ignored here
+        datasource: loadedIndexPatterns.length ? loadedIndexPatterns[0] : null,
+      });
     });
   }, []);
 
-  const indexPatternNames = Object.values(indexPatterns).map(({ id, title }) => ({
-    text: title,
-    value: id,
-    inputDisplay: title,
+  const indexPatternsAsSelections = state.indexPatterns.map(({ title }) => ({
+    label: title,
   }));
 
   return (
     <>
-      <EuiSuperSelect
-        options={indexPatternNames}
-        valueOfSelected={selectedIndexPattern ? selectedIndexPattern.id : ''}
-        onChange={(value: string) => {
+      <EuiComboBox
+        options={indexPatternsAsSelections}
+        singleSelection={{ asPlainText: true }}
+        selectedOptions={indexPatternsAsSelections.filter(
+          ({ label }) => visModel.datasource && label === visModel.datasource.title
+        )}
+        isClearable={false}
+        onChange={([{ label }]) =>
           onChangeVisModel({
             ...visModel,
-            datasource: indexPatterns[value],
-          });
-        }}
+            datasource: state.indexPatterns.find(({ title }) => title === label) || null,
+          })
+        }
       />
       <FieldListPanel {...props} />
     </>
