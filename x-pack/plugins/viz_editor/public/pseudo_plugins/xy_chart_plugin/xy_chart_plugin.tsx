@@ -10,11 +10,10 @@ import {
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import { SelectOperation, TermsOperation } from '../../../common';
+import { DatasourceField, fieldToOperation } from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
-  Field,
   getColumnIdByIndex,
   selectColumn,
   UnknownVisModel,
@@ -146,12 +145,12 @@ function getSuggestion(
     title,
     iconType: displayTypeIcon[displayType],
     pluginName: 'xy_chart',
-  };
+  } as Suggestion;
 }
 
 function getSuggestionsForField(
-  indexPatternName: string,
-  field: Field,
+  datasourceName: string,
+  field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
   const operationNames = getOperationsForField(field);
@@ -160,33 +159,14 @@ function getSuggestionsForField(
     return [] as Suggestion[];
   }
 
-  let firstOperation: SelectOperation;
-
-  if (operationNames[0] === 'terms') {
-    firstOperation = {
-      operation: 'column',
-      argument: { field: field.name, size: 5 },
-    };
-  } else if (operationNames[0] === 'date_histogram') {
-    firstOperation = {
-      operation: 'date_histogram',
-      argument: { field: field.name, interval: '1d' },
-    };
-  } else if (operationNames[0] === 'count') {
-    firstOperation = { operation: 'count' };
-  } else {
-    firstOperation = {
-      operation: operationNames[0],
-      argument: { field: field.name },
-    } as Exclude<SelectOperation, TermsOperation>;
-  }
+  const firstOperation = fieldToOperation(field, operationNames[0]);
 
   // Replaces the whole query and both axes. Good for first field, not for 2+
   const prefilledVisModel: XyChartVisModel = {
     ...visModel,
     queries: {
       q1: {
-        datasourceRef: indexPatternName,
+        datasourceRef: datasourceName,
         select: [{ ...firstOperation, alias: field.name }, { operation: 'count', alias: 'count' }],
       },
     },
@@ -206,6 +186,14 @@ function getSuggestionsForField(
       visModel: prefilledVisModel,
       title: 'Basic Line Chart',
       iconType: displayTypeIcon.line,
+      pluginName: 'xy_chart',
+    },
+    {
+      previewExpression: toExpression(prefilledVisModel),
+      score: 0.5,
+      visModel: prefilledVisModel,
+      title: 'Basic Area Chart',
+      iconType: displayTypeIcon.area,
       pluginName: 'xy_chart',
     },
   ];
