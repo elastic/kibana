@@ -20,7 +20,7 @@
 import { isFunction } from 'lodash';
 import React, { useEffect } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionProps, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get } from 'lodash';
