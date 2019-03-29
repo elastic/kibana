@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { EuiSuperSelect } from '@elastic/eui';
+import {
+  // @ts-ignore
+  EuiSuperSelect,
+  IconType,
+} from '@elastic/eui';
 import React from 'react';
 import { SelectOperation, TermsOperation } from '../../../common';
 import { columnSummary } from '../../common/components/config_panel';
@@ -19,7 +22,7 @@ import {
   VisModel,
 } from '../../common/lib';
 import { getOperationsForField } from '../../common/lib/field_config';
-import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
+import { EditorPlugin, PanelComponentProps, Suggestion } from '../../editor_plugin_registry';
 
 interface XyChartPrivateState {
   xAxis: Axis;
@@ -122,12 +125,16 @@ function prefillPrivateState(visModel: UnknownVisModel, displayType?: 'line' | '
   }
 }
 
-const displayTypeIcon = {
+const displayTypeIcon: { [type: string]: IconType } = {
   line: 'visLine',
   area: 'visArea',
 };
 
-function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', title: string) {
+function getSuggestion(
+  visModel: XyChartVisModel,
+  displayType: 'line' | 'area',
+  title: string
+): Suggestion {
   const prefilledVisModel = prefillPrivateState(
     visModel as UnknownVisModel,
     displayType
@@ -142,11 +149,15 @@ function getSuggestion(visModel: XyChartVisModel, displayType: 'line' | 'area', 
   };
 }
 
-function getSuggestionsForField(indexPatternName: string, field: Field, visModel: XyChartVisModel) {
+function getSuggestionsForField(
+  indexPatternName: string,
+  field: Field,
+  visModel: XyChartVisModel
+): Suggestion[] {
   const operationNames = getOperationsForField(field);
 
   if (operationNames.length === 0) {
-    return [];
+    return [] as Suggestion[];
   }
 
   let firstOperation: SelectOperation;

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IconType } from '@elastic/eui';
+
 import { Field, UnknownVisModel, VisModel } from '../public/common/lib';
 
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
@@ -16,7 +18,7 @@ export interface Suggestion<S extends VisModel = VisModel> {
   score: number;
   visModel: S;
   title: string;
-  iconType: string;
+  iconType: IconType;
 }
 
 export type GetSuggestionsType<S extends VisModel> = (
