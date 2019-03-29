@@ -42,14 +42,15 @@ class VisualizeListingTableUi extends Component {
     const { intl } = this.props;
     return (
       <TableListView
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
         createItem={this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={this.props.deleteItems}
-        editItem={this.props.editItem}
+        deleteItems={uiCapabilities.visualize.delete ? this.props.deleteItems : null}
+        editItem={uiCapabilities.visualize.edit ? this.props.editItem : null}
         tableColumns={this.getTableColumns()}
         listingLimit={100}
         initialFilter={''}
-        hideWriteControls={!uiCapabilities.visualize.save}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
           intl.formatMessage({
