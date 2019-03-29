@@ -57,6 +57,22 @@ function queryToEsAggsConfigs(query: Query): any {
     switch (selectOperation.operation) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
+      case 'avg':
+        return {
+          enabled: true,
+          id: String(index),
+          params: { field: selectOperation.argument.field },
+          schema: 'metric',
+          type: 'avg',
+        };
+      case 'sum':
+        return {
+          enabled: true,
+          id: String(index),
+          params: { field: selectOperation.argument.field },
+          schema: 'metric',
+          type: 'sum',
+        };
       case 'terms':
         return {
           id: String(index),
