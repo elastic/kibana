@@ -88,9 +88,12 @@ export function removeFilterFromQueryString(currentQueryString, fieldName, field
   // match 'and' or 'or' at the start/end of the string
   const endPattern = /\s(and|or)\s*$/ig;
   const startPattern = /^\s*(and|or)\s/ig;
+  // If string has a double 'and' operator (e.g. tag:thing and and tag:other) remove as it is illegal kuery syntax
+  const invalidOperatorsPattern = /\s+(and)\s+(and)\s+/ig;
   // If string starts/ends with 'and' or 'or' remove that as that is illegal kuery syntax
   newQueryString = newQueryString.replace(endPattern, '');
   newQueryString = newQueryString.replace(startPattern, '');
+  newQueryString = newQueryString.replace(invalidOperatorsPattern, ' and ');
 
   return newQueryString;
 }
