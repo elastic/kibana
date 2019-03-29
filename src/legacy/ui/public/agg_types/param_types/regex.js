@@ -29,7 +29,6 @@ function RegexParamType(config) {
 }
 
 RegexParamType.prototype.editorComponent = RegexParamEditor;
-RegexParamType.prototype.subModel = 'pattern';
 
 /**
  * Disabled state of the agg param
@@ -55,15 +54,11 @@ RegexParamType.prototype.write = function (aggConfig, output) {
   const paramType = aggConfig.type.params.byName[this.name];
 
   // clear aggParam if pattern is not set or is disabled
-  if (!param || !param.pattern || !param.pattern.length || paramType.disabled(aggConfig)) {
+  if (!param || !param.length || paramType.disabled(aggConfig)) {
     return;
   }
 
-  const obj = {
-    pattern: param.pattern
-  };
-
-  output.params[this.name] = obj;
+  output.params[this.name] = param;
 };
 
 export { RegexParamType };

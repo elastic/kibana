@@ -81,8 +81,7 @@ uiModules
           };
 
           if (attr.editorComponent) {
-            const subModel = $scope.aggParam.subModel ? `.${$scope.aggParam.subModel}` : '';
-            $scope.$watch(`agg.params[aggParam.name]${subModel}`, (value) => {
+            $scope.$watch(`agg.params[aggParam.name]`, (value) => {
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
@@ -96,7 +95,7 @@ uiModules
           $scope.onChange = (value) => {
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, $scope.aggParam.subModel, value);
+            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
 
             if(ngModelCtrl) {
               ngModelCtrl.$setDirty();
