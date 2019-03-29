@@ -22,6 +22,14 @@ function queryToEsAggsConfigs(query: Query): any {
           id: String(index),
           params: { field: selectOperation.argument.field },
           schema: 'metric',
+          type: 'cardinality',
+        };
+      case 'avg':
+        return {
+          enabled: true,
+          id: String(index),
+          params: { field: selectOperation.argument.field },
+          schema: 'metric',
           type: 'avg',
         };
       case 'sum':
