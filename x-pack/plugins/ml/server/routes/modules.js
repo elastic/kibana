@@ -83,19 +83,6 @@ export function dataRecognizer(server, commonRouteConfig) {
   });
 
   server.route({
-    method: 'GET',
-    path: '/api/ml/modules/list_modules',
-    handler(request) {
-      const callWithRequest = callWithRequestFactory(server, request);
-      return getModule(callWithRequest)
-        .catch(resp => wrapError(resp));
-    },
-    config: {
-      ...commonRouteConfig
-    }
-  });
-
-  server.route({
     method: 'POST',
     path: '/api/ml/modules/setup/{moduleId}',
     handler(request) {
