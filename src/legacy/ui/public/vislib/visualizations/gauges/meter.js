@@ -241,37 +241,9 @@ export function MeterGaugeProvider() {
       const smallContainer = svg.node().getBBox().height < 70;
       let hiddenLabels = smallContainer;
 
-      if (this.gaugeConfig.labels.show) {
-        svg
-          .append('text')
-          .attr('class', 'chart-label')
-          .text(data.label)
-          .attr('y', -30)
-          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > maxRadius;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return smallContainer || textTooLong ? 'none' : 'initial';
-          });
-
-        svg
-          .append('text')
-          .attr('class', 'chart-label')
-          .text(this.gaugeConfig.style.subText)
-          .attr('y', 20)
-          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > maxRadius;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return smallContainer || textTooLong ? 'none' : 'initial';
-          });
-      }
+      // If the value label is hidden we later want to hide also all other labels
+      // since they don't make sense as long as the actual value is hidden.
+      let valueLabelHidden = false;
 
       gauges
         .append('text')
@@ -292,9 +264,42 @@ export function MeterGaugeProvider() {
           const textTooLong = textLength > maxRadius;
           if (textTooLong) {
             hiddenLabels = true;
+            valueLabelHidden = true;
           }
           return textTooLong ? 'none' : 'initial';
         });
+
+      if (this.gaugeConfig.labels.show) {
+        svg
+          .append('text')
+          .attr('class', 'chart-label')
+          .text(data.label)
+          .attr('y', -30)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            const textTooLong = textLength > maxRadius;
+            if (textTooLong) {
+              hiddenLabels = true;
+            }
+            return valueLabelHidden || smallContainer || textTooLong ? 'none' : 'initial';
+          });
+
+        svg
+          .append('text')
+          .attr('class', 'chart-label')
+          .text(this.gaugeConfig.style.subText)
+          .attr('y', 20)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .style('display', function () {
+            const textLength = this.getBBox().width;
+            const textTooLong = textLength > maxRadius;
+            if (textTooLong) {
+              hiddenLabels = true;
+            }
+            return valueLabelHidden || smallContainer || textTooLong ? 'none' : 'initial';
+          });
+      }
 
       if (this.gaugeConfig.scale.show) {
         this.drawScale(svg, radius(1), angle);
