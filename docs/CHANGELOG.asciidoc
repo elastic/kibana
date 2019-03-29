@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.7.1>>
 * <<release-notes-6.7.0>>
 * <<release-notes-6.6.2>>
 * <<release-notes-6.6.1>>
@@ -83,6 +84,11 @@ This section summarizes the changes in each release.
 //[float]
 //=== Known Issues
 ////
+
+[[release-notes-6.7.1]]
+== {kib} 6.7.1
+
+coming[6.7.1]
 
 [[release-notes-6.7.0]]
 == {kib} 6.7.0
