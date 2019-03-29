@@ -31,7 +31,7 @@ function TransactionLink({ error, transaction }: Props) {
     return <Fragment>{NOT_AVAILABLE_LABEL}</Fragment>;
   }
 
-  const isSampled = error.transaction.sampled;
+  const isSampled = transaction.transaction.sampled;
   if (!isSampled) {
     return <Fragment>{transaction.transaction.id}</Fragment>;
   }
