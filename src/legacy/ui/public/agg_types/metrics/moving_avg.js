@@ -48,14 +48,14 @@ export const movingAvgMetricAgg = new MetricAggType({
   getValue(agg, bucket) {
     /**
      * The previous implementation using `moving_avg` did not
-     * return any bucket in case there are no documents. The `moving_fn`
-     * aggregation returns buckets with the value 0. Since our
-     * generic MetricAggType.getValue implementation would return
-     * the value 0 for null buckets, we need a specific implementation
-     * here, that preserves the null value, to be closer aligned with
-     * the previous implementation.
+     * return any bucket in case there are no documents or empty window.
+     * The `moving_fn` aggregation returns buckets with the value null if the
+     * window is empty or doesn't return any value if the sibiling metric
+     * is null. Since our generic MetricAggType.getValue implementation
+     * would return the value 0 for null buckets, we need a specific
+     * implementation here, that preserves the null value.
      */
-    return bucket[agg.id] ? bucket[agg.id].value : 0;
+    return bucket[agg.id] ? bucket[agg.id].value : null;
   },
   getFormat: parentPipelineAggHelper.getFormat
 });
