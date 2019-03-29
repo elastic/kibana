@@ -257,7 +257,7 @@ exports.Artifact = class Artifact {
    * @return {Promise<void>}
    */
   async _verifyChecksum(artifactResp) {
-    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getUrl()));
+    this._log.info('downloading artifact checksum from %s', chalk.bold(this.getChecksumUrl()));
 
     const abc = new AbortController();
     const resp = await fetch(this.getChecksumUrl(), {
