@@ -499,9 +499,7 @@ app.directive('dashboardApp', function ($injector) {
         showShareContextMenu({
           anchorElement,
           allowEmbed: true,
-          // allowShortUrl is always set to true at the moment, because the share
-          // menu isn't visible when in "read-only" mode
-          allowShortUrl: true,
+          allowShortUrl: !dashboardConfig.getHideWriteControls(),
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',
