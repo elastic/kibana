@@ -17,12 +17,17 @@
  * under the License.
  */
 
+import { isFunction } from 'lodash';
 import React from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { AggParamEditorProps } from '../../vis/editors/default';
 
 function StringParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<string>) {
+  if (isFunction(aggParam.disabled) && aggParam.disabled(agg)) {
+    return null;
+  }
+
   return (
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
