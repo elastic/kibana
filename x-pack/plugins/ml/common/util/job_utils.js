@@ -108,7 +108,7 @@ export function isModelPlotChartableForDetector(job, detectorIndex) {
     // plus varp and info_content functions.
     isModelPlotChartable = (mlFunctionToESAggregation(functionName) !== null) ||
       (['varp', 'high_varp', 'low_varp', 'info_content',
-        'high_info_content', 'low_info_content'].indexOf(functionName) > -1);
+        'high_info_content', 'low_info_content'].includes(functionName) === true);
   }
 
   return isModelPlotChartable;

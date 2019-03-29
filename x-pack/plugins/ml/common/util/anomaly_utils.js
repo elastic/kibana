@@ -177,7 +177,7 @@ export function getEntityFieldValue(record) {
 // of objects in the form { fieldName: airline, fieldValue: AAL, fieldType: partition }
 export function getEntityFieldList(record) {
   const entityFields = [];
-  if (_.get(record, 'partition_field_name') !== undefined) {
+  if (record.partition_field_name !== undefined) {
     entityFields.push({
       fieldName: record.partition_field_name,
       fieldValue: record.partition_field_value,
@@ -185,7 +185,7 @@ export function getEntityFieldList(record) {
     });
   }
 
-  if (_.get(record, 'over_field_name') !== undefined) {
+  if (record.over_field_name !== undefined) {
     entityFields.push({
       fieldName: record.over_field_name,
       fieldValue: record.over_field_value,
@@ -196,7 +196,7 @@ export function getEntityFieldList(record) {
   // For jobs with by and over fields, don't add the 'by' field as this
   // field will only be added to the top-level fields for record type results
   // if it also an influencer over the bucket.
-  if (_.get(record, 'by_field_name') && !(_.get(record, 'over_field_name'))) {
+  if (record.by_field_name !== undefined && record.over_field_name === undefined) {
     entityFields.push({
       fieldName: record.by_field_name,
       fieldValue: record.by_field_value,
