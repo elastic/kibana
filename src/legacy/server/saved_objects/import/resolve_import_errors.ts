@@ -47,8 +47,12 @@ export async function resolveImportErrors({
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
   let errors: ImportError[] = [];
   const filter = createObjectsFilter(retries);
+
+  // Get the objects to resolve errors
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
+  // Create a map of references to replace for each object to avoid iterating through
+  // retries for every object to resolve
   const retriesReferencesMap = new Map<string, { [key: string]: string }>();
   for (const retry of retries) {
     const map: { [key: string]: string } = {};
@@ -65,29 +69,27 @@ export async function resolveImportErrors({
       continue;
     }
     for (const reference of savedObject.references || []) {
-      // Replace with refMap if defined
       if (refMap[`${reference.type}:${reference.id}`]) {
         reference.id = refMap[`${reference.type}:${reference.id}`];
       }
     }
   }
 
-  // Validate the references
+  // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsToResolve,
     savedObjectsClient
   );
   errors = errors.concat(validationErrors);
 
+  // Bulk create in two batches, overwrites and non-overwrites
   const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
-
   if (objectsToOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
     });
     errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));
   }
-
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
     errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));

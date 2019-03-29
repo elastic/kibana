@@ -66,6 +66,10 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
         'Content-Type: application/ndjson',
         '',
         '',
+        '--BOUNDARY',
+        'Content-Disposition: form-data; name="retries"',
+        '',
+        '[]',
         '--BOUNDARY--',
       ].join('\r\n'),
       headers: {
@@ -79,7 +83,7 @@ describe('POST /api/saved_objects/_resolve_import_errors', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
-  test('resolves conflicts for dashboard but skips the index pattern', async () => {
+  test('resolves conflicts for dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {
       method: 'POST',

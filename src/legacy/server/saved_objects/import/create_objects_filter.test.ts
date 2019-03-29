@@ -25,7 +25,7 @@ describe('createObjectsFilter()', () => {
     expect(fn({ type: 'a', id: '1', attributes: {}, references: [] })).toEqual(false);
   });
 
-  test('filter should return true for any "type" and "id" pair passed in parameters', () => {
+  test('filter should return true for objects that are being retried', () => {
     const fn = createObjectsFilter([
       {
         type: 'a',
@@ -42,6 +42,17 @@ describe('createObjectsFilter()', () => {
         references: [],
       })
     ).toEqual(true);
+  });
+
+  test(`filter should return false for objects that aren't being retried`, () => {
+    const fn = createObjectsFilter([
+      {
+        type: 'a',
+        id: '1',
+        overwrite: false,
+        replaceReferences: [],
+      },
+    ]);
     expect(
       fn({
         type: 'b',

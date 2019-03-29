@@ -81,7 +81,7 @@ export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: H
                 .default([]),
             })
           )
-          .default([]),
+          .required(),
       }).default(),
     },
   },
@@ -89,9 +89,11 @@ export const createResolveImportErrorsRoute = (prereqs: Prerequisites, server: H
     const { savedObjectsClient } = request.pre;
     const { filename } = request.payload.file.hapi;
     const fileExtension = extname(filename).toLowerCase();
+
     if (fileExtension !== '.ndjson') {
       return Boom.badRequest(`Invalid file extension ${fileExtension}`);
     }
+
     return await resolveImportErrors({
       savedObjectsClient,
       readStream: request.payload.file,

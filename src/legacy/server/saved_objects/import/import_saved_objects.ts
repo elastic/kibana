@@ -43,13 +43,14 @@ export async function importSavedObjects({
   overwrite,
   savedObjectsClient,
 }: ImportSavedObjectsOptions): Promise<ImportResponse> {
+  // Get the objects to import
   const objectsFromStream = await collectSavedObjects(readStream, objectLimit);
-
+  // Validate references
   const { filteredObjects, errors: validationErrors } = await validateReferences(
     objectsFromStream,
     savedObjectsClient
   );
-
+  // Exit early if no objects to import
   if (filteredObjects.length === 0) {
     return {
       success: validationErrors.length === 0,
@@ -57,7 +58,7 @@ export async function importSavedObjects({
       ...(validationErrors.length ? { errors: validationErrors } : {}),
     };
   }
-
+  // Create objects in bulk
   const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
   });

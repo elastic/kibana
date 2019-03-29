@@ -22,31 +22,37 @@ import { ImportError, MissingReferencesError } from './types';
 
 const ENFORCED_TYPES = ['index-pattern', 'search'];
 
+function filterEnforcedTypes({ type }: { type: string }) {
+  return ENFORCED_TYPES.includes(type);
+}
+
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClient
 ) {
   const collector = new Map();
+  // Collect all references within objects
   for (const savedObject of savedObjects) {
-    for (const { type, id } of savedObject.references || []) {
-      if (!ENFORCED_TYPES.includes(type)) {
-        continue;
-      }
+    const filteredReferences = (savedObject.references || []).filter(filterEnforcedTypes);
+    for (const { type, id } of filteredReferences) {
       collector.set(`${type}:${id}`, { type, id });
     }
   }
+  // Remove objects that could be references
   for (const savedObject of savedObjects) {
     collector.delete(`${savedObject.type}:${savedObject.id}`);
   }
-  if (collector.size) {
-    const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
-    const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts);
-    for (const savedObject of bulkGetResponse.saved_objects) {
-      if (savedObject.error) {
-        continue;
-      }
-      collector.delete(`${savedObject.type}:${savedObject.id}`);
+  if (collector.size === 0) {
+    return [];
+  }
+  // Fetch references to see if they exist
+  const bulkGetOpts = Array.from(collector.values()).map(obj => ({ ...obj, fields: ['id'] }));
+  const bulkGetResponse = await savedObjectsClient.bulkGet(bulkGetOpts);
+  for (const savedObject of bulkGetResponse.saved_objects) {
+    if (savedObject.error) {
+      continue;
     }
+    collector.delete(`${savedObject.type}:${savedObject.id}`);
   }
   return [...collector.keys()];
 }
@@ -56,7 +62,6 @@ export async function validateReferences(
   savedObjectsClient: SavedObjectsClient
 ) {
   const errorMap: { [key: string]: ImportError } = {};
-
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
     savedObjectsClient
@@ -65,53 +70,53 @@ export async function validateReferences(
   // Filter out objects with missing references, add to error object
   let filteredObjects = savedObjects.filter(savedObject => {
     const missingReferences = [];
-    for (const { type: refType, id: refId } of savedObject.references || []) {
-      if (!ENFORCED_TYPES.includes(refType)) {
-        continue;
-      }
+    const enforcedTypeReferences = (savedObject.references || []).filter(filterEnforcedTypes);
+    for (const { type: refType, id: refId } of enforcedTypeReferences) {
       if (nonExistingReferenceKeys.includes(`${refType}:${refId}`)) {
         missingReferences.push({ type: refType, id: refId });
       }
     }
-    if (missingReferences.length) {
-      errorMap[`${savedObject.type}:${savedObject.id}`] = {
-        id: savedObject.id,
-        type: savedObject.type,
-        title: savedObject.attributes.title,
-        error: {
-          type: 'missing_references',
-          references: missingReferences,
-        },
-      };
+    if (missingReferences.length === 0) {
+      return true;
     }
-    return missingReferences.length === 0;
+    errorMap[`${savedObject.type}:${savedObject.id}`] = {
+      id: savedObject.id,
+      type: savedObject.type,
+      title: savedObject.attributes.title,
+      error: {
+        type: 'missing_references',
+        references: missingReferences,
+      },
+    };
+    return false;
   });
 
   // Filter out objects that reference objects within the import but are missing_references
   // For example: visualization referencing a search that is missing an index pattern needs to be filtered out
   filteredObjects = filteredObjects.filter(savedObject => {
-    const referenceErrors = [];
-    for (const { type: refType, id: refId } of savedObject.references || []) {
-      if (!errorMap[`${refType}:${refId}`]) {
-        continue;
-      }
-      if (errorMap[`${refType}:${refId}`].error.type === 'missing_references') {
-        const error = errorMap[`${refType}:${refId}`].error as MissingReferencesError;
-        referenceErrors.push(...error.references);
-      }
+    let referenceErrors: MissingReferencesError['references'] = [];
+    const filteredReferences = (savedObject.references || []).filter(
+      ref =>
+        errorMap[`${ref.type}:${ref.id}`] &&
+        errorMap[`${ref.type}:${ref.id}`].error.type === 'missing_references'
+    );
+    for (const { type: refType, id: refId } of filteredReferences) {
+      const error = errorMap[`${refType}:${refId}`].error as MissingReferencesError;
+      referenceErrors = referenceErrors.concat(error.references);
     }
-    if (referenceErrors.length) {
-      errorMap[`${savedObject.type}:${savedObject.id}`] = {
-        id: savedObject.id,
-        type: savedObject.type,
-        title: savedObject.attributes.title,
-        error: {
-          type: 'references_missing_references',
-          references: referenceErrors,
-        },
-      };
+    if (referenceErrors.length === 0) {
+      return true;
     }
-    return referenceErrors.length === 0;
+    errorMap[`${savedObject.type}:${savedObject.id}`] = {
+      id: savedObject.id,
+      type: savedObject.type,
+      title: savedObject.attributes.title,
+      error: {
+        type: 'references_missing_references',
+        references: referenceErrors,
+      },
+    };
+    return false;
   });
 
   return {

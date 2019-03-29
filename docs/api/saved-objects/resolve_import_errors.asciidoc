@@ -3,7 +3,7 @@
 
 experimental[This functionality is *experimental* and may be changed or removed completely in a future release.]
 
-The resolve import errors API enables you to resolve errors given by the import API by either overwriting specific saved objects or changing references to a newly created object.
+The resolve import errors API enables you to resolve errors given by the import API by either retrying certain saved objects, overwriting specific saved objects or changing references to different saved objects.
 
 Note: You cannot access this endpoint via the Console in Kibana.
 
@@ -16,21 +16,20 @@ Note: You cannot access this endpoint via the Console in Kibana.
 The request body must be of type multipart/form-data.
 
 `file`::
-  The same new line delimited JSON objects given to the import API.
+  The same file given to the import API.
 
-`retries` (optional)::
+`retries`::
   (array) A list of `type`, `id`, `replaceReferences` and `overwrite` objects to retry importing. The property `replaceReferences` is a list of `type`, `from` and `to` used to change the object's references.
 
 ==== Response body
 
 The response body will have a top level `success` property that indicates
-if the import was successful or not as well as a `successCount` indicating how many records are successfully resolved.
-In the scenario the import wasn't successful a top level `errors` array will contain the objects that failed to import.
+if resolving errors was successful or not as well as a `successCount` indicating how many records are successfully resolved.
+In the scenario resolving errors wasn't successful, a top level `errors` array will contain the objects that failed to be resolved.
 
 ==== Examples
 
-The following example resolves errors for an index pattern and dashboard but indicates to skip the index pattern.
-This will cause the index pattern to not be in the system and the dashboard to overwrite the existing saved object.
+The following example resolves errors for a dashboard. This will cause the dashboard to overwrite the existing saved object.
 
 [source,js]
 --------------------------------------------------
@@ -61,8 +60,7 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example resolves errors for a visualization and dashboard but indicates
-to replace the dashboard references to another visualization.
+The following example resolves errors for a dashboard by replacing the references to another visualization.
 
 [source,js]
 --------------------------------------------------

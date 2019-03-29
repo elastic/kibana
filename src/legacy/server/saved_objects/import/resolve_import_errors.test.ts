@@ -274,6 +274,72 @@ Object {
 `);
   });
 
+  test('extracts errors for conflicts', async () => {
+    const readStream = new Readable({
+      read() {
+        savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
+        this.push(null);
+      },
+    });
+    savedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: savedObjects.map(savedObject => ({
+        type: savedObject.type,
+        id: savedObject.id,
+        error: {
+          statusCode: 409,
+          message: 'conflict',
+        },
+      })),
+    });
+    const result = await resolveImportErrors({
+      readStream,
+      objectLimit: 4,
+      retries: savedObjects.map(obj => ({
+        type: obj.type,
+        id: obj.id,
+        overwrite: false,
+        replaceReferences: [],
+      })),
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "type": "conflict",
+      },
+      "id": "1",
+      "type": "index-pattern",
+    },
+    Object {
+      "error": Object {
+        "type": "conflict",
+      },
+      "id": "2",
+      "type": "search",
+    },
+    Object {
+      "error": Object {
+        "type": "conflict",
+      },
+      "id": "3",
+      "type": "visualization",
+    },
+    Object {
+      "error": Object {
+        "type": "conflict",
+      },
+      "id": "4",
+      "type": "dashboard",
+    },
+  ],
+  "success": false,
+  "successCount": 0,
+}
+`);
+  });
+
   test('validates references', async () => {
     const readStream = new Readable({
       read() {

@@ -69,6 +69,26 @@ describe('importSavedObjects()', () => {
     savedObjectsClient.update.mockReset();
   });
 
+  test('returns early when no objects exist', async () => {
+    const readStream = new Readable({
+      read() {
+        this.push(null);
+      },
+    });
+    const result = await importSavedObjects({
+      readStream,
+      objectLimit: 1,
+      overwrite: false,
+      savedObjectsClient,
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "success": true,
+  "successCount": 0,
+}
+`);
+  });
+
   test('calls bulkCreate without overwrite', async () => {
     const readStream = new Readable({
       read() {
@@ -205,7 +225,7 @@ Object {
 `);
   });
 
-  test('extracts errors', async () => {
+  test('extracts errors for conflicts', async () => {
     const readStream = new Readable({
       read() {
         savedObjects.forEach(obj => this.push(JSON.stringify(obj) + '\n'));
