@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
+import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { LoginAttempt } from '../login_attempt';
 
 /**
  * Utility class that knows how to decorate request with proper Basic authentication headers.
@@ -15,13 +18,13 @@ export class BasicCredentials {
   /**
    * Takes provided `username` and `password`, transforms them into proper `Basic ***` authorization
    * header and decorates passed request with it.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {string} username User name.
-   * @param {string} password User password.
-   * @returns {Hapi.Request} HapiJS request instance decorated with the proper header.
+   * @param request HapiJS request instance.
+   * @param username User name.
+   * @param password User password.
    */
-  static decorateRequest(request, username, password) {
-    if (!request || typeof request !== 'object') {
+  public static decorateRequest<T extends Request>(request: T, username: string, password: string) {
+    const typeOfRequest = typeof request;
+    if (!request || typeOfRequest !== 'object') {
       throw new Error('Request should be a valid object.');
     }
 
@@ -39,63 +42,59 @@ export class BasicCredentials {
   }
 }
 
-/**
- * Object that represents available provider options.
- * @typedef {{
- *  protocol: string,
- *  hostname: string,
- *  port: string,
- *  basePath: string,
- *  client: Client,
- *  log: Function
- * }} ProviderOptions
- */
+type RequestWithLoginAttempt = Request & {
+  loginAttempt: () => LoginAttempt;
+};
 
 /**
- * Object that represents return value of internal header auth
- * @typedef {{
- *  authenticationResult: AuthenticationResult,
- *  headerNotRecognized?: boolean
- * }} HeaderAuthAttempt
+ * Represents available provider options.
  */
+interface ProviderOptions {
+  basePath: string;
+  client: Cluster;
+  log: (tags: string[], message: string) => void;
+}
+
+/**
+ * The state supported by the provider.
+ */
+interface ProviderState {
+  /**
+   * Content of the HTTP authorization header (`Basic base-64-of-username:password`) that is based
+   * on user credentials used at login time and that should be provided with every request to the
+   * Elasticsearch on behalf of the authenticated user.
+   */
+  authorization?: string;
+}
 
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
+// tslint:disable-next-line: max-classes-per-file
 export class BasicAuthenticationProvider {
   /**
-   * Server options that may be needed by authentication provider.
-   * @type {?ProviderOptions}
-   * @protected
-   */
-  _options = null;
-
-  /**
    * Instantiates BasicAuthenticationProvider.
-   * @param {ProviderOptions} options Provider options object.
+   * @param options Provider options object.
    */
-  constructor(options) {
-    this._options = options;
-  }
+  constructor(private readonly options: ProviderOptions) {}
 
   /**
    * Performs request authentication using Basic HTTP Authentication.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {Object} [state] Optional state object associated with the provider.
-   * @returns {Promise.<AuthenticationResult>}
+   * @param request HapiJS request instance.
+   * @param [state] Optional state object associated with the provider.
    */
-  async authenticate(request, state) {
-    this._options.log(['debug', 'security', 'basic'], `Trying to authenticate user request to ${request.url.path}.`);
+  public async authenticate(request: RequestWithLoginAttempt, state?: ProviderState | null) {
+    this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     // first try from login payload
-    let authenticationResult = await this._authenticateViaLoginAttempt(request);
+    let authenticationResult = await this.authenticateViaLoginAttempt(request);
 
     // if there isn't a payload, try header-based auth
     if (authenticationResult.notHandled()) {
       const {
         authenticationResult: headerAuthResult,
         headerNotRecognized,
-      } = await this._authenticateViaHeader(request);
+      } = await this.authenticateViaHeader(request);
       if (headerNotRecognized) {
         return headerAuthResult;
       }
@@ -103,12 +102,12 @@ export class BasicAuthenticationProvider {
     }
 
     if (authenticationResult.notHandled() && state) {
-      authenticationResult = await this._authenticateViaState(request, state);
+      authenticationResult = await this.authenticateViaState(request, state);
     } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
       // If we couldn't handle authentication let's redirect user to the login page.
       const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
       authenticationResult = AuthenticationResult.redirectTo(
-        `${this._options.basePath}/login?next=${nextURL}`
+        `${this.options.basePath}/login?next=${nextURL}`
       );
     }
 
@@ -117,39 +116,38 @@ export class BasicAuthenticationProvider {
 
   /**
    * Redirects user to the login page preserving query string parameters.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<DeauthenticationResult>}
+   * @param request HapiJS request instance.
    */
-  async deauthenticate(request) {
+  public async deauthenticate(request: Request) {
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     return DeauthenticationResult.redirectTo(
-      `${this._options.basePath}/login${request.url.search || ''}`
+      `${this.options.basePath}/login${request.url.search || ''}`
     );
   }
 
   /**
    * Validates whether request contains a login payload and authenticates the
    * user if necessary.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<AuthenticationResult>}
-   * @private
+   * @param HapiJS request instance.
    */
-  async _authenticateViaLoginAttempt(request) {
-    this._options.log(['debug', 'security', 'basic'], 'Trying to authenticate via login attempt.');
-    const credentials = request.loginAttempt(request).getCredentials();
+  private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
+    this.debug('Trying to authenticate via login attempt.');
+
+    const credentials = request.loginAttempt().getCredentials();
     if (!credentials) {
-      this._options.log(['debug', 'security', 'basic'], 'Username and password not found in payload.');
+      this.debug('Username and password not found in payload.');
       return AuthenticationResult.notHandled();
     }
+
     try {
       const { username, password } = credentials;
       BasicCredentials.decorateRequest(request, username, password);
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
-      this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via login attempt.');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
+      this.debug('Request has been authenticated via login attempt.');
       return AuthenticationResult.succeeded(user, { authorization: request.headers.authorization });
-    } catch(err) {
-      this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via login attempt: ${err.message}`);
+    } catch (err) {
+      this.debug(`Failed to authenticate request via login attempt: ${err.message}`);
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
       // We can't just set `authorization` to `undefined` or `null`, we should remove this property
@@ -163,72 +161,62 @@ export class BasicAuthenticationProvider {
   /**
    * Validates whether request contains `Basic ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<HeaderAuthAttempt>}
-   * @private
+   * @param request HapiJS request instance.
    */
-  async _authenticateViaHeader(request) {
-    this._options.log(['debug', 'security', 'basic'], 'Trying to authenticate via header.');
+  private async authenticateViaHeader(request: Request) {
+    this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
     if (!authorization) {
-      this._options.log(['debug', 'security', 'basic'], 'Authorization header is not presented.');
-      return {
-        authenticationResult: AuthenticationResult.notHandled()
-      };
+      this.debug('Authorization header is not presented.');
+      return { authenticationResult: AuthenticationResult.notHandled() };
     }
 
     const authenticationSchema = authorization.split(/\s+/)[0];
     if (authenticationSchema.toLowerCase() !== 'basic') {
-      this._options.log(['debug', 'security', 'basic'], `Unsupported authentication schema: ${authenticationSchema}`);
+      this.debug(`Unsupported authentication schema: ${authenticationSchema}`);
       return {
         authenticationResult: AuthenticationResult.notHandled(),
-        headerNotRecognized: true
+        headerNotRecognized: true,
       };
     }
 
     try {
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
-      this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via header.');
+      this.debug('Request has been authenticated via header.');
 
-      return {
-        authenticationResult: AuthenticationResult.succeeded(user)
-      };
-    } catch(err) {
-      this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via header: ${err.message}`);
-      return {
-        authenticationResult: AuthenticationResult.failed(err)
-      };
+      return { authenticationResult: AuthenticationResult.succeeded(user) };
+    } catch (err) {
+      this.debug(`Failed to authenticate request via header: ${err.message}`);
+      return { authenticationResult: AuthenticationResult.failed(err) };
     }
   }
 
   /**
    * Tries to extract authorization header from the state and adds it to the request before
    * it's forwarded to Elasticsearch backend.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {Object} state State value previously stored by the provider.
-   * @returns {Promise.<AuthenticationResult>}
-   * @private
+   * @param request HapiJS request instance.
+   * @param state State value previously stored by the provider.
    */
-  async _authenticateViaState(request, { authorization }) {
-    this._options.log(['debug', 'security', 'basic'], 'Trying to authenticate via state.');
+  private async authenticateViaState(request: Request, { authorization }: ProviderState) {
+    this.debug('Trying to authenticate via state.');
 
     if (!authorization) {
-      this._options.log(['debug', 'security', 'basic'], 'Access token is not found in state.');
+      this.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
     request.headers.authorization = authorization;
 
     try {
-      const user = await this._options.client.callWithRequest(request, 'shield.authenticate');
+      const user = await this.options.client.callWithRequest(request, 'shield.authenticate');
 
-      this._options.log(['debug', 'security', 'basic'], 'Request has been authenticated via state.');
+      this.debug('Request has been authenticated via state.');
 
       return AuthenticationResult.succeeded(user);
-    } catch(err) {
-      this._options.log(['debug', 'security', 'basic'], `Failed to authenticate request via state: ${err.message}`);
+    } catch (err) {
+      this.debug(`Failed to authenticate request via state: ${err.message}`);
 
       // Reset `Authorization` header we've just set. We know for sure that it hasn't been defined before,
       // otherwise it would have been used or completely rejected by the `authenticateViaHeader`.
@@ -239,5 +227,13 @@ export class BasicAuthenticationProvider {
 
       return AuthenticationResult.failed(err);
     }
+  }
+
+  /**
+   * Logs message with `debug` level and saml/security related tags.
+   * @param message Message to log.
+   */
+  private debug(message: string) {
+    this.options.log(['debug', 'security', 'basic'], message);
   }
 }

@@ -4,30 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { requestFixture } from '../../../__tests__/__fixtures__/request';
-import { LoginAttempt } from '../../login_attempt';
-import { BasicAuthenticationProvider, BasicCredentials } from '../basic';
+import { requestFixture } from '../../__tests__/__fixtures__/request';
+import { LoginAttempt } from '../login_attempt';
+import { BasicAuthenticationProvider, BasicCredentials } from './basic';
 
-function generateAuthorizationHeader(username, password) {
-  const { headers: { authorization } } = BasicCredentials.decorateRequest(
-    requestFixture(), username, password
-  );
+function generateAuthorizationHeader(username: string, password: string) {
+  const {
+    headers: { authorization },
+  } = BasicCredentials.decorateRequest(requestFixture(), username, password);
 
   return authorization;
 }
 
 describe('BasicAuthenticationProvider', () => {
   describe('`authenticate` method', () => {
-    let provider;
-    let callWithRequest;
+    let provider: BasicAuthenticationProvider;
+    let callWithRequest: sinon.SinonStub;
     beforeEach(() => {
       callWithRequest = sinon.stub();
       provider = new BasicAuthenticationProvider({
-        client: { callWithRequest },
-        log() {},
-        basePath: '/base-path'
+        client: { callWithRequest } as any,
+        log() {
+          // no-op
+        },
+        basePath: '/base-path',
       });
     });
 
@@ -39,30 +40,28 @@ describe('BasicAuthenticationProvider', () => {
         null
       );
 
-      expect(authenticationResult.notHandled()).to.be(true);
+      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('redirects non-AJAX requests that can not be authenticated to the login page.', async () => {
       const authenticationResult = await provider.authenticate(
-        requestFixture({ path: '/some-path # that needs to be encoded', basePath: '/s/foo' }),
+        requestFixture({
+          path: '/some-path # that needs to be encoded',
+          basePath: '/s/foo',
+        }),
         null
       );
 
-      expect(authenticationResult.redirected()).to.be(true);
-      expect(authenticationResult.redirectURL).to.be(
+      expect(authenticationResult.redirected()).toBe(true);
+      expect(authenticationResult.redirectURL).toBe(
         '/base-path/login?next=%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
       );
     });
 
-    it('does not handle authentication if state exists, but authorization property is missing.',
-      async () => {
-        const authenticationResult = await provider.authenticate(
-          requestFixture(),
-          {}
-        );
-
-        expect(authenticationResult.notHandled()).to.be(true);
-      });
+    it('does not handle authentication if state exists, but authorization property is missing.', async () => {
+      const authenticationResult = await provider.authenticate(requestFixture(), {});
+      expect(authenticationResult.notHandled()).toBe(true);
+    });
 
     it('succeeds with valid login attempt and stores in session', async () => {
       const user = { username: 'user' };
@@ -70,17 +69,15 @@ describe('BasicAuthenticationProvider', () => {
       const request = requestFixture();
       const loginAttempt = new LoginAttempt();
       loginAttempt.setCredentials('user', 'password');
-      request.loginAttempt.returns(loginAttempt);
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
 
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(user);
-      expect(authenticationResult.state).to.be.eql({ authorization });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.state).toEqual({ authorization });
       sinon.assert.calledOnce(callWithRequest);
     });
 
@@ -88,14 +85,12 @@ describe('BasicAuthenticationProvider', () => {
       const request = BasicCredentials.decorateRequest(requestFixture(), 'user', 'password');
       const user = { username: 'user' };
 
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(user);
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
       sinon.assert.calledOnce(callWithRequest);
     });
 
@@ -103,13 +98,13 @@ describe('BasicAuthenticationProvider', () => {
       const request = BasicCredentials.decorateRequest(requestFixture(), 'user', 'password');
       const user = { username: 'user' };
 
-      callWithRequest
-        .withArgs(request, 'shield.authenticate')
-        .returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request);
 
-      expect(authenticationResult.state).not.to.eql({ authorization: request.headers.authorization });
+      expect(authenticationResult.state).not.toEqual({
+        authorization: request.headers.authorization,
+      });
     });
 
     it('succeeds if only state is available.', async () => {
@@ -119,13 +114,13 @@ describe('BasicAuthenticationProvider', () => {
 
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
-        .returns(Promise.resolve(user));
+        .resolves(user);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
 
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(user);
-      expect(authenticationResult.state).to.be.eql(undefined);
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.state).toBeUndefined();
       sinon.assert.calledOnce(callWithRequest);
     });
 
@@ -136,8 +131,8 @@ describe('BasicAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, { authorization });
 
       sinon.assert.notCalled(callWithRequest);
-      expect(request.headers.authorization).to.be('Bearer ***');
-      expect(authenticationResult.notHandled()).to.be(true);
+      expect(request.headers.authorization).toBe('Bearer ***');
+      expect(authenticationResult.notHandled()).toBe(true);
     });
 
     it('fails if state contains invalid credentials.', async () => {
@@ -147,15 +142,15 @@ describe('BasicAuthenticationProvider', () => {
       const authenticationError = new Error('Forbidden');
       callWithRequest
         .withArgs(sinon.match({ headers: { authorization } }), 'shield.authenticate')
-        .returns(Promise.reject(authenticationError));
+        .rejects(authenticationError);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
 
-      expect(request.headers).to.not.have.property('authorization');
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(undefined);
-      expect(authenticationResult.state).to.be.eql(undefined);
-      expect(authenticationResult.error).to.be.eql(authenticationError);
+      expect(request.headers).not.toHaveProperty('authorization');
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.state).toBeUndefined();
+      expect(authenticationResult.error).toBe(authenticationError);
       sinon.assert.calledOnce(callWithRequest);
     });
 
@@ -165,55 +160,68 @@ describe('BasicAuthenticationProvider', () => {
       const authorization = generateAuthorizationHeader('user1', 'password2');
 
       // GetUser will be called with request's `authorization` header.
-      callWithRequest.withArgs(request, 'shield.authenticate').returns(Promise.resolve(user));
+      callWithRequest.withArgs(request, 'shield.authenticate').resolves(user);
 
       const authenticationResult = await provider.authenticate(request, { authorization });
 
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql(user);
-      expect(authenticationResult.state).not.to.eql({ authorization: request.headers.authorization });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual(user);
+      expect(authenticationResult.state).not.toEqual({
+        authorization: request.headers.authorization,
+      });
       sinon.assert.calledOnce(callWithRequest);
     });
   });
 
   describe('`deauthenticate` method', () => {
-    let provider;
+    let provider: BasicAuthenticationProvider;
     beforeEach(() => {
       provider = new BasicAuthenticationProvider({
-        client: { callWithRequest: sinon.stub() },
-        basePath: '/base-path'
+        client: { callWithRequest: sinon.stub() } as any,
+        log() {
+          // no-op
+        },
+        basePath: '/base-path',
       });
     });
 
     it('always redirects to the login page.', async () => {
       const request = requestFixture();
       const deauthenticateResult = await provider.deauthenticate(request);
-      expect(deauthenticateResult.redirected()).to.be(true);
-      expect(deauthenticateResult.redirectURL).to.be('/base-path/login');
+      expect(deauthenticateResult.redirected()).toBe(true);
+      expect(deauthenticateResult.redirectURL).toBe('/base-path/login');
     });
 
     it('passes query string parameters to the login page.', async () => {
       const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
       const deauthenticateResult = await provider.deauthenticate(request);
-      expect(deauthenticateResult.redirected()).to.be(true);
-      expect(deauthenticateResult.redirectURL).to.be('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED');
+      expect(deauthenticateResult.redirected()).toBe(true);
+      expect(deauthenticateResult.redirectURL).toBe(
+        '/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
+      );
     });
   });
 
   describe('BasicCredentials', () => {
     it('`decorateRequest` fails if username or password is not provided.', () => {
-      expect(() => BasicCredentials.decorateRequest()).to
-        .throwError(/Request should be a valid object/);
-      expect(() => BasicCredentials.decorateRequest({})).to
-        .throwError(/Username should be a valid non-empty string/);
-      expect(() => BasicCredentials.decorateRequest({}, '')).to
-        .throwError(/Username should be a valid non-empty string/);
-      expect(() => BasicCredentials.decorateRequest({}, '', '')).to
-        .throwError(/Username should be a valid non-empty string/);
-      expect(() => BasicCredentials.decorateRequest({}, 'username', '')).to
-        .throwError(/Password should be a valid non-empty string/);
-      expect(() => BasicCredentials.decorateRequest({}, '', 'password')).to
-        .throwError(/Username should be a valid non-empty string/);
+      expect(() =>
+        BasicCredentials.decorateRequest(undefined as any, undefined as any, undefined as any)
+      ).toThrowError('Request should be a valid object');
+      expect(() =>
+        BasicCredentials.decorateRequest({} as any, undefined as any, undefined as any)
+      ).toThrowError('Username should be a valid non-empty string');
+      expect(() => BasicCredentials.decorateRequest({} as any, '', undefined as any)).toThrowError(
+        'Username should be a valid non-empty string'
+      );
+      expect(() => BasicCredentials.decorateRequest({} as any, '', '')).toThrowError(
+        'Username should be a valid non-empty string'
+      );
+      expect(() => BasicCredentials.decorateRequest({} as any, 'username', '')).toThrowError(
+        'Password should be a valid non-empty string'
+      );
+      expect(() => BasicCredentials.decorateRequest({} as any, '', 'password')).toThrowError(
+        'Username should be a valid non-empty string'
+      );
     });
 
     it('`decorateRequest` correctly sets authorization header.', () => {
@@ -223,8 +231,10 @@ describe('BasicAuthenticationProvider', () => {
       BasicCredentials.decorateRequest(oneRequest, 'one-user', 'one-password');
       BasicCredentials.decorateRequest(anotherRequest, 'another-user', 'another-password');
 
-      expect(oneRequest.headers.authorization).to.be('Basic b25lLXVzZXI6b25lLXBhc3N3b3Jk');
-      expect(anotherRequest.headers.authorization).to.be('Basic YW5vdGhlci11c2VyOmFub3RoZXItcGFzc3dvcmQ=');
+      expect(oneRequest.headers.authorization).toBe('Basic b25lLXVzZXI6b25lLXBhc3N3b3Jk');
+      expect(anotherRequest.headers.authorization).toBe(
+        'Basic YW5vdGhlci11c2VyOmFub3RoZXItcGFzc3dvcmQ='
+      );
     });
   });
 });

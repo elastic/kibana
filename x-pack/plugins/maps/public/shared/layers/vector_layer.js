@@ -230,7 +230,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToPrecisionChange;
   }
 
-  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
@@ -271,7 +271,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
     return await Promise.all(joinSyncs);
   }

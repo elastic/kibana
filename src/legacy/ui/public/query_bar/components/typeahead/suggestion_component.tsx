@@ -67,14 +67,7 @@ export const SuggestionComponent: SFC<Props> = props => {
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
         <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
-        <div
-          className="kbnSuggestionItem__description"
-          // Description currently always comes from us and we escape any potential user input
-          // at the time we're generating the description text
-          // eslint-disable-next-line react/no-danger
-          // @ts-ignore
-          dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
-        />
+        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
       </div>
     </div>
   );

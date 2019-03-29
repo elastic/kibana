@@ -39,5 +39,5 @@ export function requestFixture({
     query: search ? url.parse(search, true /* parseQueryString */).query : {},
     payload,
     state: { user: 'these are the contents of the user client cookie' },
-  } as any) as Request;
+  } as any) as Request & { loginAttempt: () => LoginAttempt; getBasePath: () => string };
 }
