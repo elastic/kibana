@@ -3,12 +3,16 @@
 
 This tutorial requires three data sets:
 
-* The complete works of William Shakespeare, suitably parsed into fields. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/shakespeare_6.0.json[`shakespeare.json`].
-* A set of fictitious accounts with randomly generated data. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/accounts.zip[`accounts.zip`].
-* A set of randomly generated log files. Download
-  https://download.elastic.co/demos/kibana/gettingstarted/logs.jsonl.gz[`logs.jsonl.gz`].
+* The complete works of William Shakespeare, suitably parsed into fields
+* A set of fictitious accounts with randomly generated data
+* A set of randomly generated log files
+
+Create a new working directory where you want to download the files. From that directory, run the following commands:
+
+[source,shell]
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/shakespeare.json
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/accounts.zip
+curl -O https://download.elastic.co/demos/kibana/gettingstarted/8.x/logs.jsonl.gz
 
 Two of the data sets are compressed. To extract the files, use these commands:
 
@@ -73,16 +77,14 @@ In Kibana *Dev Tools > Console*, set up a mapping for the Shakespeare data set:
 [source,js]
 PUT /shakespeare
 {
- "mappings": {
-  "doc": {
-   "properties": {
+  "mappings": {
+    "properties": {
     "speaker": {"type": "keyword"},
     "play_name": {"type": "keyword"},
     "line_id": {"type": "integer"},
     "speech_number": {"type": "integer"}
-   }
+    }
   }
- }
 }
 
 //CONSOLE
@@ -100,13 +102,11 @@ as geographic locations by applying the `geo_point` type.
 PUT /logstash-2015.05.18
 {
   "mappings": {
-    "log": {
-      "properties": {
-        "geo": {
-          "properties": {
-            "coordinates": {
-              "type": "geo_point"
-            }
+    "properties": {
+      "geo": {
+        "properties": {
+          "coordinates": {
+            "type": "geo_point"
           }
         }
       }
@@ -120,13 +120,11 @@ PUT /logstash-2015.05.18
 PUT /logstash-2015.05.19
 {
   "mappings": {
-    "log": {
-      "properties": {
-        "geo": {
-          "properties": {
-            "coordinates": {
-              "type": "geo_point"
-            }
+    "properties": {
+      "geo": {
+        "properties": {
+          "coordinates": {
+            "type": "geo_point"
           }
         }
       }
@@ -140,13 +138,11 @@ PUT /logstash-2015.05.19
 PUT /logstash-2015.05.20
 {
   "mappings": {
-    "log": {
-      "properties": {
-        "geo": {
-          "properties": {
-            "coordinates": {
-              "type": "geo_point"
-            }
+    "properties": {
+      "geo": {
+        "properties": {
+          "coordinates": {
+            "type": "geo_point"
           }
         }
       }
@@ -165,13 +161,13 @@ API to load the data sets:
 
 [source,shell]
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
-curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
+curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/_bulk?pretty' --data-binary @shakespeare.json
 curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 Or for Windows users, in Powershell:
 [source,shell]
 Invoke-RestMethod "http://localhost:9200/bank/account/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "accounts.json"
-Invoke-RestMethod "http://localhost:9200/shakespeare/doc/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare_6.0.json"
+Invoke-RestMethod "http://localhost:9200/shakespeare/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare.json"
 Invoke-RestMethod "http://localhost:9200/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "logs.jsonl"
 
 These commands might take some time to execute, depending on the available computing resources.
@@ -187,8 +183,8 @@ Your output should look similar to this:
 
 [source,shell]
 health status index               pri rep docs.count docs.deleted store.size pri.store.size
-yellow open   bank                  5   1       1000            0    418.2kb        418.2kb
-yellow open   shakespeare           5   1     111396            0     17.6mb         17.6mb
-yellow open   logstash-2015.05.18   5   1       4631            0     15.6mb         15.6mb
-yellow open   logstash-2015.05.19   5   1       4624            0     15.7mb         15.7mb
-yellow open   logstash-2015.05.20   5   1       4750            0     16.4mb         16.4mb
+yellow open   bank                  1   1       1000            0    418.2kb        418.2kb
+yellow open   shakespeare           1   1     111396            0     17.6mb         17.6mb
+yellow open   logstash-2015.05.18   1   1       4631            0     15.6mb         15.6mb
+yellow open   logstash-2015.05.19   1   1       4624            0     15.7mb         15.7mb
+yellow open   logstash-2015.05.20   1   1       4750            0     16.4mb         16.4mb
