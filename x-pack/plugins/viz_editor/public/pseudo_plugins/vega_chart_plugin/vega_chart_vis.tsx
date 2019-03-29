@@ -24,7 +24,7 @@ function sampleVisFunction() {
       from: { types: ['string'] },
       to: { types: ['string'] },
     },
-    context: { types: ['datatable'] },
+    context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
       const specWithData = (args.spec as string).replace(
         'EXPRESSION_DATA_HERE',

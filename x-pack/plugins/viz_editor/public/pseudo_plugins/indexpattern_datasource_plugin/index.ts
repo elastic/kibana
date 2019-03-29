@@ -5,4 +5,3 @@
  */
 
 export { config } from './indexpattern_datasource_plugin';
-export { registerPipeline } from './indexpattern_datasource_expression';

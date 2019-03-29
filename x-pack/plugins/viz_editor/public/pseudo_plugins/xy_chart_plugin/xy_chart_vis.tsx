@@ -35,7 +35,7 @@ function sampleVisFunction() {
         types: ['string'],
       },
     },
-    context: { types: ['datatable'] },
+    context: { types: ['kibana_datatable'] },
     fn(context: any, args: any) {
       const xColumn = context.columns[0].id;
       const xColumnType = context.columns[0].type;
@@ -106,7 +106,13 @@ function sampleVisRenderer() {
           ) : (
             <AreaSeries
               id={getSpecId('area')}
-              xScaleType={ScaleType.Time}
+              xScaleType={
+                config.xAxisType === 'ordinal'
+                  ? ScaleType.Ordinal
+                  : config.xAxisType === 'linear'
+                  ? ScaleType.Linear
+                  : ScaleType.Time
+              }
               yScaleType={ScaleType.Linear}
               xAccessor={0}
               yAccessors={[1]}

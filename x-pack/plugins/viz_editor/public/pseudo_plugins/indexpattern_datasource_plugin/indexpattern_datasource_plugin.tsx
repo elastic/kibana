@@ -9,6 +9,7 @@ import { EuiSuperSelect } from '@elastic/eui';
 import zipObject from 'lodash-es/zipObject';
 import React, { useEffect, useState } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
+import { Query } from '../../../common';
 import { FieldListPanel } from '../../common/components/field_list_panel';
 import { VisModel } from '../../common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
@@ -51,11 +52,46 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
   );
 }
 
+function queryToEsAggsConfigs(query: Query): any {
+  return query.select.reverse().map((selectOperation, index) => {
+    switch (selectOperation.operation) {
+      case 'count':
+        return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
+      case 'terms':
+        return {
+          id: String(index),
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: {
+            field: selectOperation.argument.field,
+            size: selectOperation.argument.size,
+          },
+        };
+      case 'date_histogram':
+        return {
+          id: String(index),
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: {
+            field: selectOperation.argument.field,
+            interval: 'd',
+          },
+        };
+    }
+  });
+}
+
 function toExpression(viewState: VisModel) {
+  if (Object.keys(viewState.queries).length === 0) {
+    return '';
+  }
+  const firstQuery = Object.values(viewState.queries)[0];
   // TODO prob. do this on an AST object and stringify afterwards
   // return `sample_data`;
-  return `fancy_query queries='${JSON.stringify(viewState.queries)}' indexpattern='${
-    viewState.datasource ? viewState.datasource.title : ''
+  return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${
+    viewState.datasource ? viewState.datasource.id : ''
   }'`;
 }
 

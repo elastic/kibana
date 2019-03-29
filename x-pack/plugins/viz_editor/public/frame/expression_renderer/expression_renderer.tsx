@@ -7,6 +7,7 @@
 // @ts-ignore
 import { fromExpression } from '@kbn/interpreter/common';
 import React, { useEffect, useRef } from 'react';
+import { DataAdapter, RequestAdapter } from 'ui/inspector/adapters';
 
 async function runAndRender(
   expression: any,
@@ -19,7 +20,17 @@ async function runAndRender(
   }
   const ast = fromExpression(expression);
   const { interpreter } = await getInterpreter();
-  const response = await interpreter.interpretAst(ast, {}, { getInitialContext: () => ({}) });
+  const response = await interpreter.interpretAst(
+    ast,
+    { type: 'null' },
+    {
+      getInitialContext: () => ({}),
+      inspectorAdapters: {
+        requests: new RequestAdapter(),
+        data: new DataAdapter(),
+      },
+    }
+  );
   if (response.type === 'render') {
     renderersRegistry.get(response.as).render(domElement, response.value, {
       onDestroy: (fn: () => never) => {

@@ -9,7 +9,6 @@ import { Legacy } from 'kibana';
 import { resolve } from 'path';
 import { PLUGIN_ID } from './common';
 import { route as routeSql } from './server/essql';
-import { route as routeQuery } from './server/query';
 
 export function vizEditor(kibana: any) {
   return new kibana.Plugin({
@@ -43,7 +42,6 @@ export function vizEditor(kibana: any) {
         return await (server as any).getInjectedUiAppVars('kibana');
       });
 
-      routeQuery(server);
       routeSql(server);
     },
   });
