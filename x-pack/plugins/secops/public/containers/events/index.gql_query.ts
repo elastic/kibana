@@ -39,11 +39,9 @@ export const eventsQuery = gql`
               action
               severity
               module
-              dataset
               category
               id
             }
-            message
             host {
               name
               ip
@@ -57,6 +55,10 @@ export const eventsQuery = gql`
               ip
               port
             }
+            geo {
+              region_name
+              country_iso_code
+            }
             suricata {
               eve {
                 proto
@@ -69,9 +71,6 @@ export const eventsQuery = gql`
             }
             zeek {
               session_id
-            }
-            user {
-              name
             }
           }
         }
