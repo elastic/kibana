@@ -24,11 +24,12 @@ type Props = MonitorPageTitleProps &
   UptimeCommonProps &
   UptimeGraphQLQueryProps<MonitorPageTitleQueryResult>;
 
-export const makeMonitorPageTitleQuery = ({ loading, data }: Props) => {
-  if (loading || !data || !data.monitorPageTitle) {
-    return <EuiLoadingSpinner size="xl" />;
+export const makeMonitorPageTitleQuery = ({ data }: Props) => {
+  if (data && data.monitorPageTitle) {
+    const { monitorPageTitle } = data;
+    return <MonitorPageTitle pageTitle={monitorPageTitle} />;
   }
-  return <MonitorPageTitle pageTitle={data.monitorPageTitle} />;
+  return <EuiLoadingSpinner size="xl" />;
 };
 
 export const MonitorPageTitleQuery = withUptimeGraphQL<

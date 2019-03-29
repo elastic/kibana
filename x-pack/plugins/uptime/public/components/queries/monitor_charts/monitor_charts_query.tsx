@@ -39,37 +39,35 @@ export class Query extends React.Component<Props, MonitorChartsState> {
     const {
       colors: { range, mean, danger, success },
       data,
-      loading,
     } = this.props;
-    if (loading || !data || !data.monitorChartsData) {
-      return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
-        defaultMessage: 'Loading…',
-      });
+    if (data && data.monitorChartsData) {
+      const {
+        monitorChartsData,
+        monitorChartsData: { durationMaxValue, statusMaxCount },
+      } = data;
+
+      const durationMax = microsToMillis(durationMaxValue);
+      // These limits provide domain sizes for the charts
+      const checkDomainLimits = [0, statusMaxCount];
+      const durationDomainLimits = [0, durationMax ? durationMax : 0];
+
+      return (
+        <MonitorCharts
+          checkDomainLimits={checkDomainLimits}
+          crosshairLocation={this.state.crosshairLocation}
+          danger={danger}
+          durationDomainLimits={durationDomainLimits}
+          mean={mean}
+          monitorChartsData={monitorChartsData}
+          range={range}
+          success={success}
+          updateCrosshairLocation={this.updateCrosshairLocation}
+        />
+      );
     }
-
-    const {
-      monitorChartsData,
-      monitorChartsData: { durationMaxValue, statusMaxCount },
-    } = data;
-
-    const durationMax = microsToMillis(durationMaxValue);
-    // These limits provide domain sizes for the charts
-    const checkDomainLimits = [0, statusMaxCount];
-    const durationDomainLimits = [0, durationMax ? durationMax : 0];
-
-    return (
-      <MonitorCharts
-        checkDomainLimits={checkDomainLimits}
-        crosshairLocation={this.state.crosshairLocation}
-        danger={danger}
-        durationDomainLimits={durationDomainLimits}
-        mean={mean}
-        monitorChartsData={monitorChartsData}
-        range={range}
-        success={success}
-        updateCrosshairLocation={this.updateCrosshairLocation}
-      />
-    );
+    return i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+      defaultMessage: 'Loading…',
+    });
   }
   private updateCrosshairLocation = (crosshairLocation: number) =>
     this.setState({ crosshairLocation });
