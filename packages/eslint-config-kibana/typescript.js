@@ -2,12 +2,6 @@
 // in order to lint typescript files with eslint.
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
-//
-// As a matter of example in IntelliJ IDEA this would be fixed on 2019.1 release to be launched soon.
-// In order to have it working for now, we should add the extensions `ts,tsx` to the option
-// `eslint.additional.file.extensions` that can be found on Help > Find Action > Registry
-// To read bore about it please visit
-// https://intellij-support.jetbrains.com/hc/en-us/community/posts/115000225170-ESLint-and-ts-Typescript-files
 
 const semver = require('semver');
 const PKG = require('../../package.json');
