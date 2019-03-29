@@ -95,7 +95,7 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-The following example imports a visualization and dashboard but the index pattern the visualization references doesn't exist.
+The following example imports a visualization and dashboard but the index pattern for the visualization reference doesn't exist.
 
 [source,js]
 --------------------------------------------------
