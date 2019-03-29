@@ -17,10 +17,10 @@ export function getOperationsForField(field: Field): SelectOperator[] {
     return ['date_histogram'];
   }
   if (field.type === 'number') {
-    return ['avg', 'sum'];
+    return ['count', 'avg', 'sum'];
   }
   if (field.type === 'string') {
     return ['terms'];
   }
-  return ['column'];
+  return ['count'];
 }

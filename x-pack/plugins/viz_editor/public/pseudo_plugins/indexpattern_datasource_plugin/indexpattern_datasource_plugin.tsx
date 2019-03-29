@@ -6,7 +6,6 @@
 
 import { EuiComboBox } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-// import { IndexPattern } from 'ui/index_patterns';
 import { FieldListPanel } from '../../common/components/field_list_panel';
 import { Datasource, VisModel } from '../../common/lib';
 import { DatasourcePlugin, PanelComponentProps } from '../../datasource_plugin_registry';
@@ -14,33 +13,12 @@ import { getIndexPatterns } from './index_patterns';
 
 interface DataPanelState {
   indexPatterns: Datasource[];
-  selectionTitle: string;
-}
-
-function getSelectedIndexPattern({
-  indexPatterns,
-  selectionTitle,
-}: DataPanelState): Datasource | null {
-  const selected = indexPatterns.find(({ title }) => title === selectionTitle);
-  return selected || null;
 }
 
 function DataPanel(props: PanelComponentProps<VisModel>) {
   const { visModel, onChangeVisModel } = props;
 
-  const [state, setState] = useState({
-    indexPatterns: [],
-    selectionTitle: '',
-  } as DataPanelState);
-
-  function updateSelection(newState: DataPanelState) {
-    setState(newState);
-
-    onChangeVisModel({
-      ...visModel,
-      datasource: getSelectedIndexPattern(newState),
-    });
-  }
+  const [state, setState] = useState({ indexPatterns: [] } as DataPanelState);
 
   useEffect(() => {
     getIndexPatterns().then(loadedIndexPatterns => {
@@ -48,9 +26,12 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
         return;
       }
 
-      updateSelection({
-        indexPatterns: loadedIndexPatterns as Datasource[],
-        selectionTitle: loadedIndexPatterns.length ? loadedIndexPatterns[0].title : '',
+      setState({ indexPatterns: loadedIndexPatterns });
+
+      onChangeVisModel({
+        ...visModel,
+        // TODO: There is a default index pattern preference that is being ignored here
+        datasource: loadedIndexPatterns.length ? loadedIndexPatterns[0] : null,
       });
     });
   }, []);
@@ -65,13 +46,13 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
         options={indexPatternsAsSelections}
         singleSelection={{ asPlainText: true }}
         selectedOptions={indexPatternsAsSelections.filter(
-          ({ label }) => label === state.selectionTitle
+          ({ label }) => visModel.datasource && label === visModel.datasource.title
         )}
         isClearable={false}
         onChange={([{ label }]) =>
-          updateSelection({
-            ...state,
-            selectionTitle: label as string,
+          onChangeVisModel({
+            ...visModel,
+            datasource: state.indexPatterns.find(({ title }) => title === label) || null,
           })
         }
       />
