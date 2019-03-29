@@ -175,7 +175,6 @@ export class AdvancedSettings extends Component {
         <AdvancedSettingsVoiceAnnouncement
           queryText={query.text}
           settings={filteredSettings}
-          totalCounts={this.categoryCounts}
         />
 
         <Form
