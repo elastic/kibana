@@ -24,6 +24,7 @@ import { parse as parseUrl } from 'url';
 import sinon from 'sinon';
 import { Notifier } from '../notify';
 import { metadata } from '../metadata';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
 import './test_harness.css';
