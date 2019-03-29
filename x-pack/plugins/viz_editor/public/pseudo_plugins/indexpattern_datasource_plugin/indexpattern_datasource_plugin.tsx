@@ -53,7 +53,7 @@ function DataPanel(props: PanelComponentProps<VisModel>) {
 }
 
 function queryToEsAggsConfigs(query: Query): any {
-  return query.select.reverse().map((selectOperation, index) => {
+  return [...query.select].reverse().map((selectOperation, index) => {
     switch (selectOperation.operation) {
       case 'count':
         return { enabled: true, id: String(index), params: {}, schema: 'metric', type: 'count' };
