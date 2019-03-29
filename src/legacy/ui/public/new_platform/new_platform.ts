@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup } from '../../../../core/public/';
+import { CoreSetup } from '../../../../core/public';
 
 const runtimeContext = {
   setup: {

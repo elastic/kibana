@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { ChromeSetup } from '../../../../../core/public/';
+import { ChromeSetup } from '../../../../../core/public';
 
 let newPlatformChrome: ChromeSetup;
 

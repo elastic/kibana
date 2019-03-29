@@ -19,7 +19,7 @@
 
 import * as Rx from 'rxjs';
 
-import { ChromeBrand, ChromeSetup } from '../../../../../core/public/';
+import { ChromeBrand, ChromeSetup } from '../../../../../core/public';
 
 let newPlatformChrome: ChromeSetup;
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Toast, ToastInput, ToastsSetup } from '../../../../../core/public/';
+import { Toast, ToastInput, ToastsSetup } from '../../../../../core/public';
 
 export { Toast, ToastInput };
 

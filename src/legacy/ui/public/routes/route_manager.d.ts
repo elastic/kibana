@@ -21,7 +21,7 @@
  * WARNING: these types are incomplete
  */
 
-import { ChromeBreadcrumb } from '../../../../core/public/';
+import { ChromeBreadcrumb } from '../../../../core/public';
 
 interface RouteConfiguration {
   controller?: string | ((...args: any[]) => void);

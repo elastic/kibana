@@ -19,7 +19,7 @@
 
 import { IRootScopeService } from 'angular';
 
-import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public/';
+import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public';
 
 let newPlatformChrome: ChromeSetup;
 export function __newPlatformInit__(instance: ChromeSetup) {
