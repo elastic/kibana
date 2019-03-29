@@ -17,7 +17,7 @@ import { MarkedString } from 'vscode-languageserver-types';
 const Text = styled(EuiText)`
   p {
     color: #8c8c8c;
-    font-size: ${theme.euiFontSizeXs};
+    font-size: ${theme.euiFontSizeXS};
   }
 `;
 

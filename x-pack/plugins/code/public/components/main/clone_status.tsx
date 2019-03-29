@@ -50,7 +50,7 @@ export const CloneStatus = (props: Props) => {
       <EuiSpacer size="xxl" />
       <EuiSpacer size="xxl" />
       <EuiFlexItem grow={false}>
-        <EuiText style={{ fontSize: theme.euiSizeXxl, color: '#1A1A1A' }}>
+        <EuiText style={{ fontSize: theme.euiSizeXXL, color: '#1A1A1A' }}>
           {repoName} is cloning
         </EuiText>
       </EuiFlexItem>
