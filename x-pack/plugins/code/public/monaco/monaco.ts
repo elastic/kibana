@@ -99,25 +99,6 @@ import chrome from 'ui/chrome';
 
 const IS_DARK_THEME = chrome.getUiSettingsClient().get('theme:darkMode');
 
-// @ts-ignore
-/*self.MonacoEnvironment = {
-  getWorkerUrl(moduleId: string, label: string) {
-    // if (label === 'json') {
-    // 	return './json.worker.bundle.js';
-    // }
-    // if (label === 'css') {
-    // 	return './css.worker.bundle.js';
-    // }
-    // if (label === 'html') {
-    // 	return './html.worker.bundle.js';
-    // }
-    // if (label === 'typescript' || label === 'javascript') {
-    // 	return './ts.worker.bundle.js';
-    // }
-    return './editor.worker.bundle.js';
-  },
-};*/
-
 const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
 
 const syntaxTheme = {

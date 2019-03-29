@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { editor } from 'monaco-editor';
 import React from 'react';
 import { MonacoDiffEditor } from '../../monaco/monaco_diff_editor';
 
@@ -34,8 +35,7 @@ export class DiffEditor extends React.Component<Props> {
   }
 
   public updateLayout(renderSideBySide: boolean) {
-    // @ts-ignore
-    this.diffEditor!.diffEditor!.updateOptions({ renderSideBySide });
+    this.diffEditor!.diffEditor!.updateOptions({ renderSideBySide } as editor.IDiffEditorOptions);
   }
 
   public render() {

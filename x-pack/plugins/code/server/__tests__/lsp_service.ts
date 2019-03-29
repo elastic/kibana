@@ -3,23 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* tslint:disable */
 
-import fs from 'fs';
 import Git from '@elastic/nodegit';
+import fs from 'fs';
+import mkdirp from 'mkdirp';
+import path from 'path';
 // import rimraf from 'rimraf';
 import sinon from 'sinon';
-import path from 'path';
-import mkdirp from 'mkdirp';
 
-import { LspService } from "../lsp/lsp_service";
-import { ConsoleLoggerFactory } from "../utils/console_logger_factory";
-import { RepositoryGitStatusReservedField, RepositoryConfigReservedField } from '../indexer/schema';
-import { InstallManager } from "../lsp/install_manager";
 import assert from 'assert';
+import { Server } from 'hapi';
+import { RepositoryConfigReservedField, RepositoryGitStatusReservedField } from '../indexer/schema';
+import { InstallManager } from '../lsp/install_manager';
+import { LspService } from '../lsp/lsp_service';
 import { RepositoryConfigController } from '../repository_config_controller';
 import { createTestServerOption } from '../test_utils';
-import { Server } from 'hapi';
+import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 const filename = 'hello.ts';
 describe('lsp_service tests', () => {
@@ -32,9 +31,16 @@ describe('lsp_service tests', () => {
     await index.addByPath(filename);
     index.write();
     const treeId = await index.writeTree();
-    const committer = Git.Signature.create("tester",
-      "test@test.com", Date.now() / 1000, 60);
-    const commit = await repo.createCommit("HEAD", committer, committer, "commit for test", treeId, []);
+    const committer = Git.Signature.create('tester', 'test@test.com', Date.now() / 1000, 60);
+    const commit = await repo.createCommit(
+      'HEAD',
+      committer,
+      committer,
+      'commit for test',
+      treeId,
+      []
+    );
+    // tslint:disable-next-line:no-console
     console.log(`created commit ${commit.tostrS()}`);
     return repo;
   }
@@ -44,19 +50,19 @@ describe('lsp_service tests', () => {
 
   function mockEsClient(): any {
     const api = {
-      get: function (params: any) {
+      get(params: any) {
         return {
           _source: {
             [RepositoryGitStatusReservedField]: {
               cloneProgress: {
-                isCloned: true
-              }
-            } ,
+                isCloned: true,
+              },
+            },
             [RepositoryConfigReservedField]: {
-              disableTypescript: false
-            }
-          }
-        }
+              disableTypescript: false,
+            },
+          },
+        };
       },
     };
     return api;
@@ -66,11 +72,8 @@ describe('lsp_service tests', () => {
 
   // @ts-ignore
   before(async () => {
-    await prepareProject(
-      path.join(serverOptions.repoPath, repoUri)
-    );
+    await prepareProject(path.join(serverOptions.repoPath, repoUri));
   });
-
 
   function comparePath(pathA: string, pathB: string) {
     const pa = fs.realpathSync(pathA);
@@ -79,11 +82,17 @@ describe('lsp_service tests', () => {
   }
 
   it('process a hover request', async () => {
-
-    let esClient = mockEsClient();
+    const esClient = mockEsClient();
     const revision = 'master';
 
-    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory(), new RepositoryConfigController(esClient));
+    const lspservice = new LspService(
+      '127.0.0.1',
+      serverOptions,
+      esClient,
+      installManager,
+      new ConsoleLoggerFactory(),
+      new RepositoryConfigController(esClient)
+    );
     try {
       const params = {
         textDocument: {
@@ -92,44 +101,59 @@ describe('lsp_service tests', () => {
         position: {
           line: 0,
           character: 1,
-        }
+        },
       };
       const workspaceHandler = lspservice.workspaceHandler;
       const wsSpy = sinon.spy(workspaceHandler, 'handleRequest');
       const controller = lspservice.controller;
       const ctrlSpy = sinon.spy(controller, 'handleRequest');
 
-      let method = 'textDocument/hover';
+      const method = 'textDocument/hover';
 
       const response = await lspservice.sendRequest(method, params);
       assert.ok(response);
       assert.ok(response.result.contents);
 
-
       wsSpy.restore();
       ctrlSpy.restore();
 
-      const workspaceFolderExists = fs.existsSync(path.join(serverOptions.workspacePath, repoUri, revision));
+      const workspaceFolderExists = fs.existsSync(
+        path.join(serverOptions.workspacePath, repoUri, revision)
+      );
       // workspace is opened
       assert.ok(workspaceFolderExists);
 
-      const workspacePath = fs.realpathSync(path.resolve(serverOptions.workspacePath, repoUri, revision));
+      const workspacePath = fs.realpathSync(
+        path.resolve(serverOptions.workspacePath, repoUri, revision)
+      );
       // workspace handler is working, filled workspacePath
-      sinon.assert.calledWith(ctrlSpy, sinon.match.has("workspacePath", sinon.match((value) => comparePath(value, workspacePath))));
+      sinon.assert.calledWith(
+        ctrlSpy,
+        sinon.match.has('workspacePath', sinon.match(value => comparePath(value, workspacePath)))
+      );
       // uri is changed by workspace handler
-      sinon.assert.calledWith(ctrlSpy, sinon.match.hasNested("params.textDocument.uri", `file://${workspacePath}/${filename}`));
+      sinon.assert.calledWith(
+        ctrlSpy,
+        sinon.match.hasNested('params.textDocument.uri', `file://${workspacePath}/${filename}`)
+      );
       return;
-
     } finally {
-      await lspservice.shutdown()
+      await lspservice.shutdown();
     }
     // @ts-ignore
   }).timeout(10000);
 
-  it("unload a workspace", async () => {
-    let esClient = mockEsClient();
+  it('unload a workspace', async () => {
+    const esClient = mockEsClient();
     const revision = 'master';
-    const lspservice = new LspService('127.0.0.1', serverOptions, esClient, installManager, new ConsoleLoggerFactory(), new RepositoryConfigController(esClient));
+    const lspservice = new LspService(
+      '127.0.0.1',
+      serverOptions,
+      esClient,
+      installManager,
+      new ConsoleLoggerFactory(),
+      new RepositoryConfigController(esClient)
+    );
     try {
       const params = {
         textDocument: {
@@ -138,10 +162,10 @@ describe('lsp_service tests', () => {
         position: {
           line: 0,
           character: 1,
-        }
+        },
       };
 
-      let method = 'textDocument/hover';
+      const method = 'textDocument/hover';
       // send a dummy request to open a workspace;
       const response = await lspservice.sendRequest(method, params);
       assert.ok(response);
@@ -151,7 +175,7 @@ describe('lsp_service tests', () => {
       assert.ok(workspaceFolderExists);
       const controller = lspservice.controller;
       // @ts-ignore
-      const languageServer = controller.languageServerMap['typescript'];
+      const languageServer = controller.languageServerMap.typescript;
       const realWorkspacePath = fs.realpathSync(workspacePath);
 
       // @ts-ignore
@@ -172,9 +196,8 @@ describe('lsp_service tests', () => {
       assert.strictEqual(exists, false);
       return;
     } finally {
-      await lspservice.shutdown()
+      await lspservice.shutdown();
     }
     // @ts-ignore
   }).timeout(10000);
-
 });

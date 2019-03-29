@@ -5,9 +5,7 @@
  */
 
 import {
-  // @ts-ignore
   EuiFacetButton,
-  // @ts-ignore
   EuiFacetGroup,
   EuiFlexGroup,
   EuiFlexItem,

@@ -6,7 +6,6 @@
 
 import hapi from 'hapi';
 import url from 'url';
-// @ts-ignore
 import wreck from 'wreck';
 import { Logger } from '../log';
 
@@ -17,7 +16,7 @@ export async function mainNodeBaseUrl(redirectUrl: string) {
   const res = await wreck.request('HEAD', '/', {
     baseUrl: `${u.protocol}//${u.host}`,
   });
-  if (res.statusCode === 302) {
+  if (res.statusCode === 302 && res.headers.location) {
     return res.headers.location;
   } else {
     // no base url?
