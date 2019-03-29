@@ -33,7 +33,7 @@ if [ -z "$geckodriverPkgVersion" ]; then
   exit 1
 fi
 mkdir ".geckodriver"
-cp "node_modules/geckodriver/geckodriver.tar.gz" > .geckodriver/geckodriver.tar.gz
+cp "node_modules/geckodriver/geckodriver.tar.gz" .geckodriver/geckodriver.tar.gz
 echo "$geckodriverPkgVersion" > .geckodriver/pkgVersion
 
 # archive cacheable directories
