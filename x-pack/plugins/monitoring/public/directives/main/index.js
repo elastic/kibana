@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
+import 'ui/directives/kbn_href';
 
 /*
  * Manage data and provide helper methods for the "main" directive's template

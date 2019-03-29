@@ -78,7 +78,7 @@
               type="number"
               class="form-control"
               name="range.from"
-              greater-or-equal-than="{{getGreaterThan($index)}}"
+              greater-or-equal-than="getGreaterThan($index)"
               required
               step="any" />
           </td>
@@ -89,7 +89,7 @@
               type="number"
               class="form-control"
               name="range.to"
-              greater-or-equal-than="{{range.from}}"
+              greater-or-equal-than="range.from"
               required
               step="any" />
           </td>
