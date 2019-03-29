@@ -59,7 +59,12 @@ export const PingList = ({
                 })}
           </EuiHealth>
           <EuiText size="xs" color="subdued">
-            Latest was {moment(item.timestamp).fromNow()}
+            {i18n.translate('xpack.uptime.pingList.recencyMessage', {
+              values: { fromNow: moment(item.timestamp).fromNow() },
+              defaultMessage: 'Checked {fromNow}',
+              description:
+                'A string used to inform our users how long ago Heartbeat pinged the selected host.',
+            })}
           </EuiText>
         </div>
       ),
