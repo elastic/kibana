@@ -62,7 +62,10 @@ export async function importSavedObjects({
   const bulkCreateResult = await savedObjectsClient.bulkCreate(filteredObjects, {
     overwrite,
   });
-  const errors = [...validationErrors, ...extractErrors(bulkCreateResult.saved_objects)];
+  const errors = [
+    ...validationErrors,
+    ...extractErrors(bulkCreateResult.saved_objects, filteredObjects),
+  ];
 
   return {
     success: errors.length === 0,

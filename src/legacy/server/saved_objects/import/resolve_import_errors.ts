@@ -88,11 +88,11 @@ export async function resolveImportErrors({
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
     });
-    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite));
   }
   if (objectsToNotOverwrite.length) {
     const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
-    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects));
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite));
   }
 
   return {

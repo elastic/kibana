@@ -82,7 +82,7 @@ export async function validateReferences(
     errorMap[`${savedObject.type}:${savedObject.id}`] = {
       id: savedObject.id,
       type: savedObject.type,
-      title: savedObject.attributes.title,
+      title: savedObject.attributes && savedObject.attributes.title,
       error: {
         type: 'missing_references',
         references: missingReferences,
@@ -110,7 +110,7 @@ export async function validateReferences(
     errorMap[`${savedObject.type}:${savedObject.id}`] = {
       id: savedObject.id,
       type: savedObject.type,
-      title: savedObject.attributes.title,
+      title: savedObject.attributes && savedObject.attributes.title,
       error: {
         type: 'references_missing_references',
         references: referenceErrors,

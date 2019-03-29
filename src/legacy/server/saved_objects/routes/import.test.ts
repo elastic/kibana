@@ -180,6 +180,7 @@ describe('POST /api/saved_objects/_import', () => {
         {
           id: 'my-pattern',
           type: 'index-pattern',
+          title: 'my-pattern-*',
           error: {
             type: 'conflict',
           },

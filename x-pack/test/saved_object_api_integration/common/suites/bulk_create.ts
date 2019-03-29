@@ -75,7 +75,6 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
         {
           type: 'visualization',
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
-          title: 'An existing visualization',
           error: {
             message: 'version conflict, document already exists',
             statusCode: 409,

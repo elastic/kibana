@@ -26,25 +26,33 @@ describe('resolveImportErrors()', () => {
     {
       id: '1',
       type: 'index-pattern',
-      attributes: {},
+      attributes: {
+        title: 'My Index Pattern',
+      },
       references: [],
     },
     {
       id: '2',
       type: 'search',
-      attributes: {},
+      attributes: {
+        title: 'My Search',
+      },
       references: [],
     },
     {
       id: '3',
       type: 'visualization',
-      attributes: {},
+      attributes: {
+        title: 'My Visualization',
+      },
       references: [],
     },
     {
       id: '4',
       type: 'dashboard',
-      attributes: {},
+      attributes: {
+        title: 'My Dashboard',
+      },
       references: [
         {
           name: 'panel_0',
@@ -135,7 +143,9 @@ Object {
     Array [
       Array [
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Visualization",
+          },
           "id": "3",
           "references": Array [],
           "type": "visualization",
@@ -188,7 +198,9 @@ Object {
     Array [
       Array [
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Index Pattern",
+          },
           "id": "1",
           "references": Array [],
           "type": "index-pattern",
@@ -250,7 +262,9 @@ Object {
     Array [
       Array [
         Object {
-          "attributes": Object {},
+          "attributes": Object {
+            "title": "My Dashboard",
+          },
           "id": "4",
           "references": Array [
             Object {
@@ -310,6 +324,7 @@ Object {
         "type": "conflict",
       },
       "id": "1",
+      "title": "My Index Pattern",
       "type": "index-pattern",
     },
     Object {
@@ -317,6 +332,7 @@ Object {
         "type": "conflict",
       },
       "id": "2",
+      "title": "My Search",
       "type": "search",
     },
     Object {
@@ -324,6 +340,7 @@ Object {
         "type": "conflict",
       },
       "id": "3",
+      "title": "My Visualization",
       "type": "visualization",
     },
     Object {
@@ -331,6 +348,7 @@ Object {
         "type": "conflict",
       },
       "id": "4",
+      "title": "My Dashboard",
       "type": "dashboard",
     },
   ],
