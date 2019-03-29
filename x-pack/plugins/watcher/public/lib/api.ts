@@ -7,6 +7,8 @@ import { Watch } from 'plugins/watcher/models/watch';
 import { __await } from 'tslib';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
+import { BaseWatch, ExecutedWatchDetails } from '../../common/types/watch_types';
+
 let httpClient: ng.IHttpService;
 export const setHttpClient = (anHttpClient: ng.IHttpService) => {
   httpClient = anHttpClient;
@@ -62,4 +64,15 @@ export const fetchFields = async (indexes: string[]) => {
     data: { fields },
   } = await getHttpClient().post(`${basePath}/fields`, { indexes });
   return fields;
+};
+export const createWatch = async (watch: BaseWatch) => {
+  const { data } = await getHttpClient().put(`${basePath}/watch/${watch.id}`, watch.upstreamJson);
+  return data;
+};
+export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, watch: BaseWatch) => {
+  const { data } = await getHttpClient().put(`${basePath}/watch/execute`, {
+    executeDetails: executeWatchDetails.upstreamJson,
+    watch: watch.upstreamJson,
+  });
+  return data;
 };

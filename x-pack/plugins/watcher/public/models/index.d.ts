@@ -9,3 +9,20 @@ declare module 'plugins/watcher/models/watch' {
 declare module 'plugins/watcher/models/watch/threshold_watch' {
   export const ThresholdWatch: any;
 }
+declare module 'plugins/watcher/models/watch/json_watch' {
+  export const JsonWatch: any;
+}
+
+declare module 'plugins/watcher/models/execute_details/execute_details' {
+  export const ExecuteDetails: any;
+}
+
+declare module 'plugins/watcher/models/watch_history_item' {
+  export const WatchHistoryItem: any;
+}
+
+// TODO: Remove once typescript definitions are in EUI
+declare module '@elastic/eui' {
+  export const EuiCodeEditor: React.SFC<any>;
+  export const EuiDescribedFormGroup: React.SFC<any>;
+}
