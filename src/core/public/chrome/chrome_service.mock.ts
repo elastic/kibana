@@ -17,10 +17,10 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { Brand, Breadcrumb, ChromeService, ChromeStart } from './chrome_service';
+import { Brand, Breadcrumb, ChromeService, ChromeSetup } from './chrome_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<ChromeStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<ChromeSetup> = {
     setBrand: jest.fn(),
     getBrand$: jest.fn(),
     setIsVisible: jest.fn(),
@@ -35,26 +35,26 @@ const createStartContractMock = () => {
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
   };
-  startContract.getBrand$.mockReturnValue(new BehaviorSubject({} as Brand));
-  startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
-  startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as Breadcrumb]));
-  startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
-  return startContract;
+  setupContract.getBrand$.mockReturnValue(new BehaviorSubject({} as Brand));
+  setupContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
+  setupContract.getIsCollapsed$.mockReturnValue(new BehaviorSubject(false));
+  setupContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
+  setupContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as Breadcrumb]));
+  setupContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
+  return setupContract;
 };
 
 type ChromeServiceContract = PublicMethodsOf<ChromeService>;
 const createMock = () => {
   const mocked: jest.Mocked<ChromeServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const chromeServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

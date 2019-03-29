@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logs error if already started 1`] = `
+exports[`logs error if already set up 1`] = `
 Object {
   "debug": Array [],
   "error": Array [],
@@ -32,7 +32,7 @@ Object {
 }
 `;
 
-exports[`throws if registering route handler after http server is started 1`] = `
+exports[`throws if registering route handler after http server is set up 1`] = `
 Object {
   "debug": Array [],
   "error": Array [

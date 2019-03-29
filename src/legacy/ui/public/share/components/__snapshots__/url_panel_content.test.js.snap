@@ -54,8 +54,7 @@ exports[`render 1`] = `
                   aria-label="Info"
                   content={
                     <FormattedMessage
-                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
-            Edits to the saved {objectType} won't be visible via this URL."
+                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
                       id="common.ui.share.urlPanel.snapshotDescription"
                       values={
                         Object {
@@ -140,10 +139,7 @@ exports[`render 1`] = `
           aria-label="Info"
           content={
             <FormattedMessage
-              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
-        Internet Explorer has URL length restrictions,
-        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-        but the short URL should work great."
+              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
               id="common.ui.share.urlPanel.shortUrlHelpText"
               values={Object {}}
             />
@@ -207,8 +203,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
                   aria-label="Info"
                   content={
                     <FormattedMessage
-                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
-            Edits to the saved {objectType} won't be visible via this URL."
+                      defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself. Edits to the saved {objectType} won't be visible via this URL."
                       id="common.ui.share.urlPanel.snapshotDescription"
                       values={
                         Object {
@@ -293,10 +288,7 @@ exports[`should enable saved object export option when objectId is provided 1`] 
           aria-label="Info"
           content={
             <FormattedMessage
-              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
-        Internet Explorer has URL length restrictions,
-        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
-        but the short URL should work great."
+              defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility. Internet Explorer has URL length restrictions, and some wiki and markup parsers don't do well with the full-length version of the snapshot URL, but the short URL should work great."
               id="common.ui.share.urlPanel.shortUrlHelpText"
               values={Object {}}
             />

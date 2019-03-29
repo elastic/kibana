@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { SubUrlRouteFilterProvider } from '../sub_url_route_filter';
 
