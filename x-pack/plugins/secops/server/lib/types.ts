@@ -50,7 +50,7 @@ export interface SecOpsContext {
   req: FrameworkRequest;
 }
 
-interface TotalValue {
+export interface TotalValue {
   value: number;
   relation: string;
 }

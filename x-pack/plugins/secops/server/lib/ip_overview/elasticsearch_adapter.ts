@@ -34,7 +34,7 @@ export class ElasticsearchIpOverviewAdapter implements IpOverviewAdapter {
   }
 }
 
-const getIpOverviewAgg = (
+export const getIpOverviewAgg = (
   type: string,
   response: DatabaseSearchResponse<IpOverviewHit, TermAggregation>
 ) => {

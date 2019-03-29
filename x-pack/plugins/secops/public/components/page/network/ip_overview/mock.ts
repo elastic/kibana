@@ -6,7 +6,7 @@
 
 import { IpOverviewData } from '../../../../graphql/types';
 
-export const mockData: { [key: string]: IpOverviewData } = {
+export const mockData: Readonly<Record<string, IpOverviewData>> = {
   complete: {
     source: {
       firstSeen: '2019-02-07T17:19:41.636Z',

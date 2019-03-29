@@ -83,7 +83,7 @@ class IpOverviewComponent extends React.PureComponent<IpOverviewProps> {
           ),
         },
         {
-          title: i18n.ASN,
+          title: i18n.AUTONOMOUS_SYSTEM,
           description: typeData
             ? autonomousSystemRenderer(typeData.autonomousSystem, flowType)
             : getEmptyTagValue(),
