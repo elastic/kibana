@@ -119,7 +119,6 @@
     "common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText": "已接受日期格式",
     "common.ui.aggTypes.dateRanges.addRangeButtonLabel": "添加范围",
     "common.ui.aggTypes.dateRanges.fromColumnLabel": "从",
-    "common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription": "“{indexPatternTitle}” 索引模式不包含任何以下字段类型：",
     "common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel": "移除此范围",
     "common.ui.aggTypes.dateRanges.requiredDateRangeDescription": "必须至少指定一个日期范围。",
     "common.ui.aggTypes.dateRanges.requiredDateRangeLabel": "必需：",
