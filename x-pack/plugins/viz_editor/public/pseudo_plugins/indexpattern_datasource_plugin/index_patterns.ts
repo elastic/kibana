@@ -5,7 +5,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { Datasource } from '../public/common/lib';
+import { Datasource } from '../../common/lib';
 
 export const getIndexPatterns = () => {
   const savedObjectsClient = chrome.getSavedObjectsClient();

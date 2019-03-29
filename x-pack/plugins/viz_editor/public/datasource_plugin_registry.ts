@@ -6,9 +6,9 @@
 
 import { VisModel } from './common/lib';
 
-import { config as csvPlugin } from '../csv_datasource_plugin';
-import { config as essqlPlugin } from '../essql_datasource_plugin';
-import { config as indexpatternPlugin } from '../indexpattern_datasource_plugin';
+import { config as csvPlugin } from './pseudo_plugins/csv_datasource_plugin';
+import { config as essqlPlugin } from './pseudo_plugins/essql_datasource_plugin';
+import { config as indexpatternPlugin } from './pseudo_plugins/indexpattern_datasource_plugin';
 
 export interface PanelComponentProps<S extends VisModel = VisModel> {
   visModel: S;

@@ -34,7 +34,7 @@ describe('viz-editor/query/to_table', () => {
         ],
       },
     };
-    expect(toTable(query, result)).toMatchObject([
+    expect(toTable(query, result).rows).toMatchObject([
       { total_price: 22.22, discount: 0 },
       { total_price: 33.33, discount: 11.11 },
     ]);
@@ -62,7 +62,7 @@ describe('viz-editor/query/to_table', () => {
         },
       },
     };
-    expect(toTable(query, result)).toMatchObject([
+    expect(toTable(query, result).rows).toMatchObject([
       {
         total_price: 350884.12890625,
         num_recs: 4675,
@@ -113,7 +113,7 @@ describe('viz-editor/query/to_table', () => {
         },
       },
     };
-    expect(toTable(query, result)).toMatchObject([
+    expect(toTable(query, result).rows).toMatchObject([
       {
         airport: 'gvl',
         destination: 'atl',
@@ -168,7 +168,7 @@ describe('viz-editor/query/to_table', () => {
         },
       },
     };
-    expect(toTable(query, result)).toMatchObject([
+    expect(toTable(query, result).rows).toMatchObject([
       {
         order_month: '2019-01-01',
         num_recs: 2,
@@ -178,6 +178,40 @@ describe('viz-editor/query/to_table', () => {
         order_month: '2019-02-01',
         num_recs: 77,
         avg_price: 88,
+      },
+    ]);
+  });
+
+  // TODO fix table mapping for terms and enable this test
+  test.skip('tabularizes a terms agg', () => {
+    const query: Query = {
+      datasourceRef: 'a',
+      select: [
+        { operation: 'terms', argument: { field: 'geo', size: 5 }, alias: 'geo' },
+        { operation: 'count', alias: 'count' },
+      ],
+    };
+
+    const result: any = {
+      aggregations: {
+        geo: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 7004,
+          buckets: [
+            { key: 'CN', doc_count: 2643, count: { value: 2643 } },
+            { key: 'IN', doc_count: 2269, count: { value: 2269 } },
+          ],
+        },
+      },
+    };
+    expect(toTable(query, result).rows).toMatchObject([
+      {
+        geo: 'CN',
+        count: 2643,
+      },
+      {
+        geo: 'IN',
+        count: 2269,
       },
     ]);
   });

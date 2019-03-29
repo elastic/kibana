@@ -7,7 +7,7 @@
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { columnSummary } from '../public/common/components/config_panel';
+import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
   getColumnIdByIndex,
@@ -15,8 +15,8 @@ import {
   UnknownVisModel,
   updatePrivateState,
   VisModel,
-} from '../public/common/lib';
-import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
+} from '../../common/lib';
+import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
 
 interface PieChartPrivateState {
   sliceAxis: Axis;

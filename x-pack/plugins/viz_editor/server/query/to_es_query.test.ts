@@ -119,7 +119,7 @@ describe('viz-editor/query/to_es_query', () => {
         datasourceRef: 'a',
         select: [
           { operation: 'column', alias: 'dc', argument: { field: 'datacenter' } },
-          { operation: 'terms', argument: { field: 'dc', count: 5 } },
+          { operation: 'terms', argument: { field: 'dc', size: 5 } },
           { operation: 'count' },
         ],
         size: 123,
@@ -137,7 +137,7 @@ describe('viz-editor/query/to_es_query', () => {
             dc: {
               terms: {
                 field: 'dc',
-                count: 5,
+                size: 5,
               },
               aggregations: {
                 count: {

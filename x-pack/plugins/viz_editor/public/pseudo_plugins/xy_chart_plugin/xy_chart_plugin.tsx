@@ -7,8 +7,8 @@
 // @ts-ignore
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { SelectOperation, TermsOperation } from '../common';
-import { columnSummary } from '../public/common/components/config_panel';
+import { SelectOperation, TermsOperation } from '../../../common';
+import { columnSummary } from '../../common/components/config_panel';
 import {
   Axis,
   Field,
@@ -17,9 +17,9 @@ import {
   UnknownVisModel,
   updatePrivateState,
   VisModel,
-} from '../public/common/lib';
-import { getOperationsForField } from '../public/common/lib/field_config';
-import { EditorPlugin, PanelComponentProps } from '../public/editor_plugin_registry';
+} from '../../common/lib';
+import { getOperationsForField } from '../../common/lib/field_config';
+import { EditorPlugin, PanelComponentProps } from '../../editor_plugin_registry';
 
 interface XyChartPrivateState {
   xAxis: Axis;

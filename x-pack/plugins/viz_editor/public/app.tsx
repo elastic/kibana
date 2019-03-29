@@ -33,12 +33,12 @@ import { fromExpression } from '@kbn/interpreter/common';
 import { getInterpreter } from 'plugins/interpreter/interpreter';
 // @ts-ignore
 import { registries, renderersRegistry } from 'plugins/interpreter/registries';
-import { registerPipeline as registerCSVPipeline } from '../csv_datasource_plugin';
-import { registerPipeline as registerESSQLPipeline } from '../essql_datasource_plugin';
-import { registerPipeline as registerIndexpatternPipeline } from '../indexpattern_datasource_plugin';
-import { registerPipeline as registerPiePipeline } from '../pie_chart_plugin';
-import { registerPipeline as registerVegaPipeline } from '../vega_chart_plugin';
-import { registerPipeline as registerXYPipeline } from '../xy_chart_plugin';
+import { registerPipeline as registerCSVPipeline } from './pseudo_plugins/csv_datasource_plugin';
+import { registerPipeline as registerESSQLPipeline } from './pseudo_plugins/essql_datasource_plugin';
+import { registerPipeline as registerIndexpatternPipeline } from './pseudo_plugins/indexpattern_datasource_plugin';
+import { registerPipeline as registerPiePipeline } from './pseudo_plugins/pie_chart_plugin';
+import { registerPipeline as registerVegaPipeline } from './pseudo_plugins/vega_chart_plugin';
+import { registerPipeline as registerXYPipeline } from './pseudo_plugins/xy_chart_plugin';
 
 // TODO: Convert this to the "new platform" way of doing UI
 function App($scope: any, $element: Element[]) {
@@ -58,7 +58,7 @@ chrome.setRootController('vizEditor', App);
 
 registerFunctions(registries);
 
-// TODO this is just a workaround for now because the xychart doesn't have it's own plugin yet.
+// TODO this is just a workaround for now because the charts and datasources doesn't have it's own plugin yet.
 // As soon as it has, the entrypoint of this plugin should take care of this
 registerXYPipeline(registries);
 registerPiePipeline(registries);
