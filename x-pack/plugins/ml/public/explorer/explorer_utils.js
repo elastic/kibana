@@ -11,7 +11,8 @@
 import { chain, each, get, union, uniq } from 'lodash';
 import { parseInterval } from 'ui/utils/parse_interval';
 
-import { isTimeSeriesViewDetector } from '../../common/util/job_utils';
+import { getEntityFieldList } from '../../common/util/anomaly_utils';
+import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../common/util/job_utils';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
 import { mlResultsService } from 'plugins/ml/services/results_service';
@@ -495,7 +496,17 @@ export async function loadAnomaliesTableData(
 
         // Add properties used for building the links menu.
         // TODO - when job_service is moved server_side, move this to server endpoint.
-        anomaly.isTimeSeriesViewDetector = isTimeSeriesViewDetector(mlJobService.getJob(jobId), anomaly.detectorIndex);
+        const job = mlJobService.getJob(jobId);
+        let isChartable = isSourceDataChartableForDetector(job, anomaly.detectorIndex);
+        if (isChartable === false) {
+          // Check if model plot is enabled for this job.
+          // Need to check the entity fields for the record in case the model plot config has a terms list.
+          // If terms is specified, model plot is only stored if both the partition and by fields appear in the list.
+          const entityFields = getEntityFieldList(anomaly.source);
+          isChartable = isModelPlotEnabled(job, anomaly.detectorIndex, entityFields);
+        }
+        anomaly.isTimeSeriesViewRecord = isChartable;
+
         if (mlJobService.customUrlsByJob[jobId] !== undefined) {
           anomaly.customUrls = mlJobService.customUrlsByJob[jobId];
         }
