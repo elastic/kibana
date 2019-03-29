@@ -55,30 +55,16 @@ function FieldParamEditor({
   const errors = [];
 
   if (!indexedFields.length) {
+    setTouched();
     errors.push(
-      <>
-        <FormattedMessage
-          id="common.ui.aggTypes.dateRanges.noCompatibleFieldsLabel"
-          defaultMessage="No compatible fields"
-          values={{
-            indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
-            fieldTypes: getFieldTypesString(agg),
-          }}
-        />{' '}
-        <EuiIconTip
-          position="right"
-          type="alert"
-          color="danger"
-          content={i18n.translate('common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription', {
-            defaultMessage:
-              'The {indexPatternTitle} index pattern does not contain any of the following field types: {fieldTypes}',
-            values: {
-              indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
-              fieldTypes: getFieldTypesString(agg),
-            },
-          })}
-        />
-      </>
+      i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
+        defaultMessage:
+          'The {indexPatternTitle} index pattern does not contain any of the following compatible field types: {fieldTypes}',
+        values: {
+          indexPatternTitle: agg.getIndexPattern && agg.getIndexPattern().title,
+          fieldTypes: getFieldTypesString(agg),
+        },
+      })
     );
   }
 
