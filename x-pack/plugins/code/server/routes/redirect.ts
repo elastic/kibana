@@ -17,7 +17,7 @@ export async function mainNodeBaseUrl(redirectUrl: string) {
   const res = await wreck.request('HEAD', '/', {
     baseUrl: `${u.protocol}//${u.host}`,
   });
-  if (res.statusCode === 302) {
+  if (res.statusCode === 302 && res.headers.location) {
     return res.headers.location;
   } else {
     // no base url?
