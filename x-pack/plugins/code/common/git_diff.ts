@@ -28,8 +28,8 @@ export interface FileDiff {
 }
 
 export enum DiffKind {
-  ADDED,
-  DELETED,
-  MODIFIED,
-  RENAMED,
+  ADDED = 'ADDED',
+  DELETED = 'DELETED',
+  MODIFIED = 'MODIFIED',
+  RENAMED = 'RENAMED',
 }

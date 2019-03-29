@@ -58,6 +58,23 @@ export class LspIndexer extends AbstractIndexer {
     super.cancel();
   }
 
+  // If the current checkpoint is valid
+  protected validateCheckpoint(checkpointReq?: LspIndexRequest): boolean {
+    return checkpointReq !== undefined && checkpointReq.revision === this.revision;
+  }
+
+  // If it's necessary to refresh (create and reset) all the related indices
+  protected needRefreshIndices(checkpointReq?: LspIndexRequest): boolean {
+    // If it's not resumed from a checkpoint, then try to refresh all the indices.
+    return !this.validateCheckpoint(checkpointReq);
+  }
+
+  protected ifCheckpointMet(req: LspIndexRequest, checkpointReq: LspIndexRequest): boolean {
+    // Assume for the same revision, the order of the files we iterate the repository is definite
+    // everytime.
+    return req.filePath === checkpointReq.filePath && req.revision === checkpointReq.revision;
+  }
+
   protected async prepareIndexCreationRequests() {
     return [
       getDocumentIndexCreationRequest(this.repoUri),

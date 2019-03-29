@@ -122,7 +122,8 @@ describe('git_operations', () => {
     );
 
     const g = new GitOperations(serverOptions.repoPath);
-    const d = await g.getDiff('github.com/Microsoft/TypeScript-Node-Starter', '6206f6431e75b0e98506a356fb2ded08ab0f0c89', '4779cb7e182cf41d5c62289bb80d2850e0265b71');
+    // TODO: finish up this unit test
+    await g.getDiff('github.com/Microsoft/TypeScript-Node-Starter', '6206f6431e75b0e98506a356fb2ded08ab0f0c89', '4779cb7e182cf41d5c62289bb80d2850e0265b71');
   // @ts-ignore
   }).timeout(100000);
 });

@@ -35,11 +35,11 @@ export const code = (kibana: any) =>
         // 1 hour by default.
         queueTimeout: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which update scheduler executes. 5 minutes by default.
-        updateFrequencyMs: Joi.number().default(moment.duration(10, 'second').asMilliseconds()),
+        updateFrequencyMs: Joi.number().default(moment.duration(5, 'minute').asMilliseconds()),
         // The frequency which index scheduler executes. 1 day by default.
         indexFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         // The frequency which each repo tries to update. 1 hour by default.
-        updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'minute').asMilliseconds()),
+        updateRepoFrequencyMs: Joi.number().default(moment.duration(1, 'hour').asMilliseconds()),
         // The frequency which each repo tries to index. 1 day by default.
         indexRepoFrequencyMs: Joi.number().default(moment.duration(1, 'day').asMilliseconds()),
         lsp: Joi.object({
@@ -69,7 +69,7 @@ export const code = (kibana: any) =>
             .default(['https', 'git']),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
-        disableScheduler: Joi.boolean().default(false), // Temp option to disable all schedulers.
+        disableScheduler: Joi.boolean().default(true), // Temp option to disable all schedulers.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
         codeNode: Joi.boolean().default(false),
       }).default();

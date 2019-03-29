@@ -43,6 +43,31 @@ export class LspIncrementalIndexer extends LspIndexer {
     super(repoUri, revision, lspService, options, client, log);
   }
 
+  // If the current checkpoint is valid. Otherwise, ignore the checkpoint
+  protected validateCheckpoint(checkpointReq?: LspIncIndexRequest): boolean {
+    return (
+      checkpointReq !== undefined &&
+      checkpointReq.revision === this.revision &&
+      checkpointReq.originRevision === this.originRevision
+    );
+  }
+
+  // If it's necessary to refresh (create and reset) all the related indices
+  protected needRefreshIndices(_: LspIncIndexRequest): boolean {
+    return false;
+  }
+
+  protected ifCheckpointMet(req: LspIncIndexRequest, checkpointReq: LspIncIndexRequest): boolean {
+    // Assume for the same revision pair, the order of the files we iterate the diff is definite
+    // everytime.
+    return (
+      req.filePath === checkpointReq.filePath &&
+      req.revision === checkpointReq.revision &&
+      req.originRevision === checkpointReq.originRevision &&
+      req.kind === checkpointReq.kind
+    );
+  }
+
   protected async prepareIndexCreationRequests() {
     // We don't need to create new indices for incremental indexing.
     return [];
@@ -55,24 +80,21 @@ export class LspIncrementalIndexer extends LspIndexer {
       .set(IndexStatsKey.File, 0);
     const { kind } = request;
 
+    this.log.info(`Index ${kind} request ${JSON.stringify(request, null, 2)}`);
     switch (kind) {
       case DiffKind.ADDED: {
-        this.log.info(`Index ADDED file`);
         await this.handleAddedRequest(request, stats);
         break;
       }
       case DiffKind.DELETED: {
-        this.log.info(`Index DELETED file`);
         await this.handleDeletedRequest(request, stats);
         break;
       }
       case DiffKind.MODIFIED: {
-        this.log.info(`Index MODIFYED file`);
         await this.handleModifiedRequest(request, stats);
         break;
       }
       case DiffKind.RENAMED: {
-        this.log.info(`Index RENAMED file`);
         await this.handleRenamedRequest(request, stats);
         break;
       }
