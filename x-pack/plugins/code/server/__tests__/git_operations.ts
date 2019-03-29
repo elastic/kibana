@@ -101,7 +101,7 @@ describe('git_operations', () => {
     assert.strictEqual(totalFiles, 3, 'this repo should contains exactly 2 files');
   });
 
-  it('get any diff', async () => {
+  it('get diff between arbitrary 2 revisions', async () => {
     function cloneProject(url: string, p: string) {
       return new Promise(resolve => {
         if (!fs.existsSync(p)) {
@@ -122,8 +122,14 @@ describe('git_operations', () => {
     );
 
     const g = new GitOperations(serverOptions.repoPath);
-    // TODO: finish up this unit test
-    await g.getDiff('github.com/Microsoft/TypeScript-Node-Starter', '6206f6431e75b0e98506a356fb2ded08ab0f0c89', '4779cb7e182cf41d5c62289bb80d2850e0265b71');
-  // @ts-ignore
+    const d = await g.getDiff(
+      'github.com/Microsoft/TypeScript-Node-Starter',
+      '6206f643',
+      '4779cb7e'
+    );
+    assert.equal(d.additions, 2);
+    assert.equal(d.deletions, 4);
+    assert.equal(d.files.length, 3);
+    // @ts-ignore
   }).timeout(100000);
 });

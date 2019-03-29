@@ -7,6 +7,7 @@
 import fs from 'fs';
 import util from 'util';
 
+import { ProgressReporter } from '.';
 import { Diff, DiffKind } from '../../common/git_diff';
 import { toCanonicalUrl } from '../../common/uri_util';
 import {
@@ -43,6 +44,10 @@ export class LspIncrementalIndexer extends LspIndexer {
     super(repoUri, revision, lspService, options, client, log);
   }
 
+  public async start(progressReporter?: ProgressReporter, checkpointReq?: LspIncIndexRequest) {
+    return await super.start(progressReporter, checkpointReq);
+  }
+
   // If the current checkpoint is valid. Otherwise, ignore the checkpoint
   protected validateCheckpoint(checkpointReq?: LspIncIndexRequest): boolean {
     return (
@@ -77,10 +82,18 @@ export class LspIncrementalIndexer extends LspIndexer {
     const stats: IndexStats = new Map<IndexStatsKey, number>()
       .set(IndexStatsKey.Symbol, 0)
       .set(IndexStatsKey.Reference, 0)
-      .set(IndexStatsKey.File, 0);
+      .set(IndexStatsKey.File, 0)
+      .set(IndexStatsKey.SymbolDeleted, 0)
+      .set(IndexStatsKey.ReferenceDeleted, 0)
+      .set(IndexStatsKey.FileDeleted, 0);
+    if (this.isCancelled()) {
+      this.log.debug(`Incremental indexer is cancelled. Skip.`);
+      return stats;
+    }
+
     const { kind } = request;
 
-    this.log.info(`Index ${kind} request ${JSON.stringify(request, null, 2)}`);
+    this.log.debug(`Index ${kind} request ${JSON.stringify(request, null, 2)}`);
     switch (kind) {
       case DiffKind.ADDED: {
         await this.handleAddedRequest(request, stats);
@@ -110,10 +123,10 @@ export class LspIncrementalIndexer extends LspIndexer {
 
   protected async *getIndexRequestIterator(): AsyncIterableIterator<LspIncIndexRequest> {
     try {
-      const {
-        workspaceRepo,
-        workspaceRevision,
-      } = await this.lspService.workspaceHandler.openWorkspace(this.repoUri, 'head');
+      const { workspaceRepo } = await this.lspService.workspaceHandler.openWorkspace(
+        this.repoUri,
+        'head'
+      );
       const workspaceDir = workspaceRepo.workdir();
       if (this.diff) {
         for (const f of this.diff.files) {
@@ -122,7 +135,7 @@ export class LspIncrementalIndexer extends LspIndexer {
             localRepoPath: workspaceDir,
             filePath: f.path,
             originPath: f.originPath,
-            revision: workspaceRevision,
+            revision: this.revision,
             kind: f.kind,
             originRevision: this.originRevision,
           };
@@ -222,7 +235,9 @@ export class LspIncrementalIndexer extends LspIndexer {
         },
       },
     });
-    stats.set(IndexStatsKey.FileDeleted, docRes.deleted);
+    if (docRes) {
+      stats.set(IndexStatsKey.FileDeleted, docRes.deleted);
+    }
 
     const lspDocUri = toCanonicalUrl({ repoUri, revision, file: filePath, schema: 'git:' });
 
@@ -237,7 +252,9 @@ export class LspIncrementalIndexer extends LspIndexer {
         },
       },
     });
-    stats.set(IndexStatsKey.SymbolDeleted, symbolRes.deleted);
+    if (symbolRes) {
+      stats.set(IndexStatsKey.SymbolDeleted, symbolRes.deleted);
+    }
 
     // TODO: When references is enabled. Clean up the references as well.
   }

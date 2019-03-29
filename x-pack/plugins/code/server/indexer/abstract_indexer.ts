@@ -33,11 +33,9 @@ export abstract class AbstractIndexer implements Indexer {
     this.log.info(
       `Indexer ${this.type} started for repo ${this.repoUri} with revision ${this.revision}`
     );
-    this.cancelled = false;
-
     const isCheckpointValid = this.validateCheckpoint(checkpointReq);
 
-    if (this.needRefreshIndices()) {
+    if (this.needRefreshIndices(checkpointReq)) {
       // Prepare the ES index
       const res = await this.prepareIndex();
       if (!res) {
@@ -78,6 +76,8 @@ export abstract class AbstractIndexer implements Indexer {
         if (!meetCheckpoint) {
           // If the checkpoint has not been met yet, skip current request.
           continue;
+        } else {
+          this.log.info(`Checkpoint met. Continue with indexing.`);
         }
       }
 

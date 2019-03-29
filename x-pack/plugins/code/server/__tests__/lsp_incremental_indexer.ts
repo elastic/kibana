@@ -11,8 +11,9 @@ import path from 'path';
 import rimraf from 'rimraf';
 import sinon from 'sinon';
 
+import { DiffKind } from '../../common/git_diff';
 import { WorkerReservedProgress } from '../../model';
-import { LspIndexer } from '../indexer/lsp_indexer';
+import { LspIncrementalIndexer } from '../indexer/lsp_incremental_indexer';
 import { RepositoryGitStatusReservedField } from '../indexer/schema';
 import { EsClient } from '../lib/esqueue';
 import { Logger } from '../log';
@@ -124,7 +125,8 @@ function setupLsServiceSendRequestSpy(): sinon.SinonSpy {
     })
   );
 }
-describe('lsp_indexer unit tests', () => {
+
+describe('lsp_incremental_indexer unit tests', () => {
   // @ts-ignore
   before(async () => {
     return new Promise(resolve => {
@@ -170,9 +172,10 @@ describe('lsp_indexer unit tests', () => {
 
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
-    const indexer = new LspIndexer(
+    const indexer = new LspIncrementalIndexer(
       'github.com/Microsoft/TypeScript-Node-Starter',
-      'master',
+      '4779cb7e',
+      '6206f643',
       lspservice,
       serverOptions,
       esClient as EsClient,
@@ -180,20 +183,20 @@ describe('lsp_indexer unit tests', () => {
     );
     await indexer.start();
 
-    // Expect EsClient deleteByQuery called 3 times for repository cleaning before
-    // the index for document, symbol and reference, respectively.
-    assert.strictEqual(deleteByQuerySpy.callCount, 3);
+    // Index and alias creation are not necessary for incremental indexing
+    assert.strictEqual(existsAliasSpy.callCount, 0);
+    assert.strictEqual(createSpy.callCount, 0);
+    assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // Ditto for index and alias creation
-    assert.strictEqual(existsAliasSpy.callCount, 3);
-    assert.strictEqual(createSpy.callCount, 3);
-    assert.strictEqual(putAliasSpy.callCount, 3);
+    // DeletebyQuery is called 6 times (1 file + 1 symbol reuqests per diff item)
+    // for 3 MODIFIED items
+    assert.strictEqual(deleteByQuerySpy.callCount, 6);
 
-    // There are 22 files in the repo. 1 file + 1 symbol + 1 reference = 3 objects to
-    // index for each file. Total doc indexed should be 3 * 22 = 66, which can be
+    // There are 3 MODIFIED items. 1 file + 1 symbol + 1 reference = 3 objects to
+    // index for each item. Total doc indexed should be 3 * 3 = 9, which can be
     // fitted into a single batch index.
     assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 66 * 2);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 9 * 2);
     // @ts-ignore
   }).timeout(20000);
 
@@ -218,9 +221,10 @@ describe('lsp_indexer unit tests', () => {
 
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
-    const indexer = new LspIndexer(
+    const indexer = new LspIncrementalIndexer(
       'github.com/Microsoft/TypeScript-Node-Starter',
-      'master',
+      '4779cb7e',
+      '6206f643',
       lspservice,
       serverOptions,
       esClient as EsClient,
@@ -230,18 +234,15 @@ describe('lsp_indexer unit tests', () => {
     indexer.cancel();
     await indexer.start();
 
-    // Expect EsClient deleteByQuery called 3 times for repository cleaning before
-    // the index for document, symbol and reference, respectively.
-    assert.strictEqual(deleteByQuerySpy.callCount, 3);
-
-    // Ditto for index and alias creation
-    assert.strictEqual(existsAliasSpy.callCount, 3);
-    assert.strictEqual(createSpy.callCount, 3);
-    assert.strictEqual(putAliasSpy.callCount, 3);
+    // Index and alias creation are not necessary for incremental indexing.
+    assert.strictEqual(existsAliasSpy.callCount, 0);
+    assert.strictEqual(createSpy.callCount, 0);
+    assert.strictEqual(putAliasSpy.callCount, 0);
 
     // Because the indexer is cancelled already in the begining. 0 doc should be
-    // indexed and thus bulk won't be called.
+    // indexed and thus bulk and deleteByQuery won't be called.
     assert.ok(bulkSpy.notCalled);
+    assert.ok(deleteByQuerySpy.notCalled);
   });
 
   it('Index continues from a checkpoint', async () => {
@@ -265,9 +266,10 @@ describe('lsp_indexer unit tests', () => {
 
     lspservice.sendRequest = setupLsServiceSendRequestSpy();
 
-    const indexer = new LspIndexer(
+    const indexer = new LspIncrementalIndexer(
       'github.com/Microsoft/TypeScript-Node-Starter',
-      '46971a8',
+      '46971a84',
+      '6206f643',
       lspservice,
       serverOptions,
       esClient as EsClient,
@@ -277,26 +279,24 @@ describe('lsp_indexer unit tests', () => {
     // Apply a checkpoint in here.
     await indexer.start(undefined, {
       repoUri: '',
-      filePath: 'src/public/js/main.ts',
-      revision: '46971a8',
+      filePath: 'package.json',
+      revision: '46971a84',
+      originRevision: '6206f643',
       localRepoPath: '',
+      kind: DiffKind.MODIFIED,
     });
 
-    // Expect EsClient deleteByQuery called 0 times for repository cleaning while
-    // dealing with repository checkpoint.
-    assert.strictEqual(deleteByQuerySpy.callCount, 0);
-
-    // Ditto for index and alias creation
+    // Index and alias creation are not necessary for incremental indexing.
     assert.strictEqual(existsAliasSpy.callCount, 0);
     assert.strictEqual(createSpy.callCount, 0);
     assert.strictEqual(putAliasSpy.callCount, 0);
 
-    // There are 22 files in the repo, but only 11 files after the checkpoint.
-    // 1 file + 1 symbol + 1 reference = 3 objects to index for each file.
-    // Total doc indexed should be 3 * 11 = 33, which can be fitted into a
-    // single batch index.
+    // There are 3 MODIFIED items, but 1 item after the checkpoint. 1 file
+    // + 1 symbol + 1 ref = 3 objects to be indexed for each item. Total doc
+    // indexed should be 3 * 2 = 2, which can be fitted into a single batch index.
     assert.ok(bulkSpy.calledOnce);
-    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 33 * 2);
+    assert.strictEqual(bulkSpy.getCall(0).args[0].body.length, 3 * 2);
+    assert.strictEqual(deleteByQuerySpy.callCount, 2);
     // @ts-ignore
   }).timeout(20000);
   // @ts-ignore

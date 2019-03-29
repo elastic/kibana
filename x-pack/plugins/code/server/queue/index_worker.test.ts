@@ -380,8 +380,10 @@ test('On index job completed.', async () => {
     },
     {
       uri: 'github.com/elastic/kibana',
+      revision: 'master',
+      stats: new Map(),
     }
   );
 
-  expect(updateSpy.calledOnce).toBeTruthy();
+  expect(updateSpy.calledTwice).toBeTruthy();
 });
