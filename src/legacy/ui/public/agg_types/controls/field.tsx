@@ -81,12 +81,6 @@ function FieldParamEditor({
       isInvalid={isInvalid}
       fullWidth={true}
       error={errors}
-      helpText={
-        <FormattedMessage
-          id="inputControl.editor.listControl.parentDescription"
-          defaultMessage="Options are based on the index pattern."
-        />
-      }
       className="visEditorSidebar__aggParamFormRow"
     >
       <EuiComboBox
