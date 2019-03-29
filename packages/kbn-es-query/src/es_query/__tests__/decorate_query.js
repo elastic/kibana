@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { decorateQuery } from '../decorate_query';
 
 describe('Query decorator', function () {

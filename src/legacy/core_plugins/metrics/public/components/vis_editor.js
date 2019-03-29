@@ -118,15 +118,11 @@ class VisEditor extends Component {
             appState={this.appState}
             savedObj={this.props.savedObj}
             timeRange={this.props.timeRange}
-            onUiState={this.handleUiState}
             uiState={this.uiState}
-            onBrush={this.onBrush}
             onCommit={this.handleCommit}
             onToggleAutoApply={this.handleAutoApplyToggle}
-            onChange={this.handleChange}
             title={this.props.vis.title}
             description={this.props.vis.description}
-            dateFormat={this.props.config.get('dateFormat')}
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">

@@ -34,6 +34,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           iconType="trash"
           isDisabled={true}
           onClick={[Function]}
+          size="m"
           title="Unable to delete search, index-pattern"
           type="button"
         >
@@ -50,6 +51,7 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
           iconType="exportAction"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -176,6 +178,7 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -191,6 +194,7 @@ exports[`Table should render normally 1`] = `
           iconType="exportAction"
           isDisabled={false}
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -44,6 +44,7 @@ export default {
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
   ],
   moduleNameMapper: {
+    '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
@@ -59,11 +60,6 @@ export default {
   coverageReporters: [
     'html',
   ],
-  globals: {
-    'ts-jest': {
-      skipBabel: true,
-    },
-  },
   moduleFileExtensions: [
     'js',
     'json',
@@ -83,8 +79,7 @@ export default {
     'integration_tests/'
   ],
   transform: {
-    '^.+\\.js$': '<rootDir>/src/dev/jest/babel_transform.js',
-    '^.+\\.tsx?$': '<rootDir>/src/dev/jest/ts_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/src/dev/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

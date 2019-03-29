@@ -6,17 +6,16 @@
 
 // all documents types extend APMBaseDoc and inherit all properties
 export interface APMBaseDoc {
-  '@metadata': unknown;
   '@timestamp': string;
   agent: {
     name: string;
     version: string;
   };
-  observer: unknown;
   timestamp: { us: number };
   parent?: { id: string }; // parent ID is not available on root transactions
   trace?: { id: string };
   labels?: {
     [key: string]: string | number | boolean;
   };
+  [key: string]: unknown;
 }

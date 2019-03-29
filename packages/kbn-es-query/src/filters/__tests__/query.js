@@ -19,7 +19,7 @@
 
 import { buildQueryFilter } from '../query';
 import { cloneDeep } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import filterSkeleton from '../../__fixtures__/filter_skeleton';
 

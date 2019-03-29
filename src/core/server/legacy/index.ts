@@ -17,19 +17,7 @@
  * under the License.
  */
 
-import { CoreContext } from '../core_context';
-import { LegacyService } from './legacy_service';
-
 /** @internal */
 export { LegacyObjectToConfigAdapter } from './config/legacy_object_to_config_adapter';
 /** @internal */
 export { LegacyService } from './legacy_service';
-
-/** @internal */
-export class LegacyCompatModule {
-  public readonly service: LegacyService;
-
-  constructor(coreContext: CoreContext) {
-    this.service = new LegacyService(coreContext);
-  }
-}

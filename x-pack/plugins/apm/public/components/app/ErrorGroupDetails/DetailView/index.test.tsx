@@ -7,8 +7,6 @@
 import { shallow } from 'enzyme';
 import { Location } from 'history';
 import React from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
-import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
 import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
 import { mockMoment } from '../../../../utils/testHelpers';
 import { DetailView } from './index';
@@ -31,21 +29,17 @@ describe('DetailView', () => {
   });
 
   it('should render Discover button', () => {
-    const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
-      status: 'SUCCESS',
-      data: {
-        occurrencesCount: 10,
-        error: ({
-          '@timestamp': 'myTimestamp',
-          http: { request: { method: 'GET' } },
-          url: { full: 'myUrl' },
-          service: { name: 'myService' },
-          user: { id: 'myUserId' },
-          error: { exception: { handled: true } },
-          transaction: { id: 'myTransactionId', sampled: true }
-        } as unknown) as APMError
-      }
+    const errorGroup = {
+      occurrencesCount: 10,
+      error: ({
+        '@timestamp': 'myTimestamp',
+        http: { request: { method: 'GET' } },
+        url: { full: 'myUrl' },
+        service: { name: 'myService' },
+        user: { id: 'myUserId' },
+        error: { exception: { handled: true } },
+        transaction: { id: 'myTransactionId', sampled: true }
+      } as unknown) as APMError
     };
     const wrapper = shallow(
       <DetailView
@@ -60,13 +54,9 @@ describe('DetailView', () => {
   });
 
   it('should render StickyProperties', () => {
-    const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
-      status: 'SUCCESS',
-      data: {
-        occurrencesCount: 10,
-        error: {} as APMError
-      }
+    const errorGroup = {
+      occurrencesCount: 10,
+      error: {} as APMError
     };
     const wrapper = shallow(
       <DetailView
@@ -80,17 +70,13 @@ describe('DetailView', () => {
   });
 
   it('should render tabs', () => {
-    const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
-      status: 'SUCCESS',
-      data: {
-        occurrencesCount: 10,
-        error: ({
-          '@timestamp': 'myTimestamp',
-          service: {},
-          user: {}
-        } as unknown) as APMError
-      }
+    const errorGroup = {
+      occurrencesCount: 10,
+      error: ({
+        '@timestamp': 'myTimestamp',
+        service: {},
+        user: {}
+      } as unknown) as APMError
     };
     const wrapper = shallow(
       <DetailView
@@ -105,16 +91,12 @@ describe('DetailView', () => {
   });
 
   it('should render TabContent', () => {
-    const errorGroup: RRRRenderResponse<ErrorGroupAPIResponse> = {
-      args: [],
-      status: 'SUCCESS',
-      data: {
-        occurrencesCount: 10,
-        error: ({
-          '@timestamp': 'myTimestamp',
-          context: {}
-        } as unknown) as APMError
-      }
+    const errorGroup = {
+      occurrencesCount: 10,
+      error: ({
+        '@timestamp': 'myTimestamp',
+        context: {}
+      } as unknown) as APMError
     };
     const wrapper = shallow(
       <DetailView

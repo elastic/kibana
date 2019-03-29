@@ -27,6 +27,7 @@ import 'ui/query_bar';
 import { uiCapabilities } from 'ui/capabilities';
 import 'ui/search_bar';
 import 'ui/apply_filters';
+import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';

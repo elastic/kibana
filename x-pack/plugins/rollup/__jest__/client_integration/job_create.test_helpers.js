@@ -103,7 +103,7 @@ export const initTestBed = () => {
   };
 };
 
-export const nextTick = async () => new Promise((resolve) => setTimeout(resolve));
+export { nextTick } from '../../../../test_utils';
 
 export const mockServerResponses = server => {
   const mockIndexPatternValidityResponse = (response) => {

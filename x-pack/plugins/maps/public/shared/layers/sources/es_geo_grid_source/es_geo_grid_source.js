@@ -194,7 +194,6 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonPoints(layerName, searchFilters) {
-
     const indexPattern = await this._getIndexPattern();
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);

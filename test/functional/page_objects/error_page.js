@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function ErrorPageProvider({ getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
