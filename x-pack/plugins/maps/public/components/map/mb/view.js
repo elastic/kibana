@@ -267,8 +267,10 @@ export class MBMapContainer extends React.Component {
 
   _syncTooltipState() {
     if (this.props.tooltipState) {
+      this._mbMap.getCanvas().style.cursor = 'pointer';
       this._showTooltip();
     } else {
+      this._mbMap.getCanvas().style.cursor = '';
       this._hideTooltip();
     }
   }
