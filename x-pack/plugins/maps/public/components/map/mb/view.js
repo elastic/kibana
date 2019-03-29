@@ -244,7 +244,7 @@ export class MBMapContainer extends React.Component {
       <FeatureTooltip
         properties={content}
         closeTooltip={this._onTooltipClose}
-        isReadOnly={this.props.isReadOnly}
+        isFilterable={this.props.isFilterable && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED}
       />
     ), this._tooltipContainer);
 

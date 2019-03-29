@@ -16,12 +16,12 @@ import {
   setTooltipState
 } from '../../../actions/store_actions';
 import { getTooltipState, getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
-import { getIsReadOnly } from '../../../store/ui';
+import { getIsFilterable } from '../../../store/ui';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
-    isReadOnly: getIsReadOnly(state),
+    isFilterable: getIsFilterable(state),
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
     goto: getGoto(state),

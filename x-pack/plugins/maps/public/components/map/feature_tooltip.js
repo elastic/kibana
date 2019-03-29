@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 export class FeatureTooltip extends React.Component {
 
   _renderFilterButton(tooltipProperty, hasFilters) {
-    if (!this.props.isReadOnly || !hasFilters)  {
+    if (!this.props.isFilterable || !hasFilters)  {
       return null;
     }
 
