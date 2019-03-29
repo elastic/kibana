@@ -16,7 +16,8 @@ import {
 } from '../../../../lib/api';
 
 import { i18n } from '@kbn/i18n';
-import { WATCH_STATES } from '../../../../../common/constants';
+
+import { WatchActionStatus } from './watch_action_status';
 
 import {
   EuiButton,
@@ -25,7 +26,6 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -35,15 +35,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DeleteWatchesModal } from 'x-pack/plugins/watcher/public/components/delete_watches_modal';
-
-// TODO: remove duplication, [pcs]
-const stateToIcon: { [key: string]: JSX.Element } = {
-  [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
-  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="grey" />,
-  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="primary" />,
-  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
-  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
-};
 
 const WatchHistoryUI = ({
   intl,
@@ -65,7 +56,7 @@ const WatchHistoryUI = ({
     watchId?: string;
     watchStatus?: { actionStatuses?: any };
   }>({});
-  const [executionDetail, setExecutionDetail] = useState<string>(null);
+  const [executionDetail, setExecutionDetail] = useState<string>('');
 
   const kbnUrlService = urlService;
 
@@ -117,7 +108,9 @@ const WatchHistoryUI = ({
       render: (state: string) => {
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{stateToIcon[state]}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WatchActionStatus watchState={state} />
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="watchState__message">
               <EuiText>{state}</EuiText>
             </EuiFlexItem>
@@ -217,7 +210,6 @@ const WatchHistoryUI = ({
         </EuiFlyoutHeader>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem>
-            {/* TODO[pcs] this `as any` kind of casting is a bit of a hack */}
             <EuiInMemoryTable
               items={(itemDetail.watchStatus as any).actionStatuses}
               itemId="id"

@@ -7,30 +7,21 @@
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useEffect, useState } from 'react';
 
-import { WATCH_STATES } from '../../../../../common/constants';
 import { fetchWatchDetail } from '../../../../lib/api';
+
+import { WatchActionStatus } from './watch_action_status';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiPageContent,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
-// TODO: remove duplication, [pcs]
-const stateToIcon: { [key: string]: JSX.Element } = {
-  [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
-  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="grey" />,
-  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="primary" />,
-  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
-  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="red" />,
-};
 
 const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isWatchesLoading, setIsWatchesLoading] = useState<boolean>(true);
@@ -63,7 +54,9 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
       render: (state: string) => {
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{stateToIcon[state]}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <WatchActionStatus watchState={state} />
+            </EuiFlexItem>
             <EuiFlexItem grow={false} className="watchState__message">
               <EuiText>{state}</EuiText>
             </EuiFlexItem>
