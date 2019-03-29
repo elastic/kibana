@@ -1,5 +1,5 @@
 {
-  "user-action": {
+  "ui-metric": {
     "properties": {
       "count": {
         "type": "integer"
