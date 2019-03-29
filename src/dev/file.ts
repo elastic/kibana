@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import minimatch from 'minimatch';
 import { dirname, extname, join, relative, resolve, sep } from 'path';
 
 import { REPO_ROOT } from './constants';
-
-const IGNORED_TS_PATHS = ['common/core_api_review/kibana.api.ts'];
 
 export class File {
   private path: string;
@@ -48,10 +45,7 @@ export class File {
   }
 
   public isTypescript() {
-    return (
-      (this.ext === '.ts' || this.ext === '.tsx') &&
-      !IGNORED_TS_PATHS.some(glob => minimatch(this.getRelativePath(), glob, { dot: true }))
-    );
+    return this.ext === '.ts' || this.ext === '.tsx';
   }
 
   public isTypescriptAmbient() {
